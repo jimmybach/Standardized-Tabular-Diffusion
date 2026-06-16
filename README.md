@@ -1,285 +1,188 @@
-# (ICLR 2024 Oral) Mixed-Type Tabular Data Synthesis with Score-based Diffusion in Latent Space 
+# Standardized Tabular Diffusion Benchmark
 
-<p align="center">
-  <!-- <a href="https://github.com/hengruizhang98/tabsyn/blob/main/LICENSE">
-    <img alt="GitHub License" src="https://img.shields.io/github/license/hengruizhang98/tabsyn">
-  </a> -->
-  <a href="https://github.com/hengruizhang98/tabsyn/blob/main/LICENSE">
-    <img alt="GitHub License" src="https://img.shields.io/badge/license-Apache 2.0-green">
-  </a>
-  <a href="https://openreview.net/forum?id=4Ay23yeuz0">
-    <img alt="Openreview" src="https://img.shields.io/badge/review-OpenReview-red">
-  </a>
-  <a href="https://arxiv.org/abs/2310.09656">
-    <img alt="Paper URL" src="https://img.shields.io/badge/arxiv-2310.09656-blue">
-  </a>
-</p>
+This repository now includes a shared benchmarking layer on top of the upstream model code in:
 
-This repository contains the implementation of the paper:
-> **Mixed-Type Tabular Data Synthesis with Score-based Diffusion in Latent Space**  <br>
-> The Twelfth International Conference on Learning Representations (ICLR 2024, Oral Presentation)<br>
-> Hengrui Zhang, Jiani Zhang, Balasubramaniam Srinivasan, Zhengyuan Shen, Xiao Qin, Christos Faloutsos, Huzefa Rangwala, George Karypis <br>
+- `TabDiff-main`
+- `TabSyn-main`
+- `TabDDPM-main`
 
-## Latest Update
-- [2024-06-20]: Disable loading irrelvent packages when training individual models; update the instruction for DCR experiements; fix minor bugs in TabSyn's training script.
-- [2024-05-14]: Add demo code for missing value imputation for the target column with a well trained TabSyn.
+The goal is to keep the original implementations intact while giving every diffusion-based model the same external contract for:
 
-## Introduction
+- training
+- sample generation
+- evaluation
+- result comparison
 
-<div align="center">
-  <img src="images/tabsyn_model.jpg" alt="Model Logo" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-  <br>
-  <br>
-</div>
-TabSyn is a deep generative model for the synthesis of mixed-type tabular data (i.e., continuous/numerical and discrete/categorical). Tabsyn consists of two parts: 1) A Variational AutoEncoder (VAE) that encodes mixed-type of tabular data into the continuous latent space. 2) A score-based diffusion model for learning the densities of the latent embeddings.
+The standardized layer is designed to be the integration boundary for a future single-repository benchmark setup, while the upstream projects remain close to their original research code.
 
-###### TabSyn achieves SOTA performance in recovering the ground-truth distribution of tabular data (under five distinct metrics), and has a significantly faster sampling speed than previous diffusion-based methods.
-<div style="display:flex; justify-content:center;">
-    <img src="images/radar.jpg" style="width:350px; margin-right:50px;">
-    <img src="images/nfe1.jpg" style="width:300px;">
-</div>
+## Shared Layout
 
-###### Visualizations of density estimation for signle column and pair-wise correlation.
-<div align="center">
-  <img src="images/density.jpg" alt="OLMo Logo" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-  <br>
-  <br>
-</div>
-<div align="center">
-  <img src="images/heat_map.jpg" alt="OLMo Logo" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-  <br>
-  <br>
-</div>
+The new root package is `standardized_tabular_diffusion/`.
 
-<!-- <div align="center">
-  <img src="images/radar.jpg" alt="OLMo Logo" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-  <br>
-  <br>
-</div> -->
+- `interfaces.py`: common run and artifact schemas
+- `models/`: adapters for each upstream model family
+- `evaluation/`: TabStruct-aligned metric definitions and normalization
+- `comparison.py`: run aggregation utilities
+- `cli.py`: a single entrypoint for listing models, describing metrics, running evaluations, and building comparisons
 
+This organization is meant to make eventual migration into a single GitHub repository much easier: the upstream projects remain vendor-like sources, while the root package acts as the stable integration boundary.
 
+## Standardized Interface
 
+Every adapter exposes the same high-level operations:
 
-## Installing Dependencies
+- `train(spec)`
+- `sample(spec)`
+- `evaluate(spec)`
 
-Python version: 3.10
+Each operation accepts a shared `RunSpec` object and returns standardized artifact metadata. Model-specific arguments still exist, but they are isolated inside `spec.extra`.
 
-Create environment
+The currently supported adapters are:
 
-```
-conda create -n tabsyn python=3.10
-conda activate tabsyn
-```
+- `tabdiff`
+- `tabsyn`
+- `tabddpm`
 
-Install pytorch
-```
-pip install torch torchvision torchaudio
-```
+Each standardized run writes canonical metadata such as:
 
-or via conda
-```
-conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.7 -c pytorch -c nvidia
-```
+- `artifacts.json`
+- `pipeline_result.json`
+- `standardized_summary.json` when evaluation is enabled
 
-Install other dependencies
+## Evaluation Protocol
 
-```
-pip install -r requirements.txt
-```
+The normalized evaluation schema is `tabstruct-aligned-v1`.
 
-Install dependencies for GOGGLE
+It aligns outputs to the evaluation dimensions emphasized by the TabStruct paper:
 
-```
-pip install  dgl -f https://data.dgl.ai/wheels/cu117/repo.html
+- density fidelity
+- ML efficacy
+- distinguishability / detection
+- privacy
+- structural fidelity
 
-pip install torch_geometric
-pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.0.1+cu117.html
-```
+Where this repo already has exact implementations, the benchmark layer records normalized values directly. Where an upstream project does not yet expose the full TabStruct dimension, the summary records that gap explicitly instead of silently inventing a score.
 
-Create another environment for the quality metric (package "synthcity")
+The main normalized summary file is:
 
-```
-conda create -n synthcity python=3.10
-conda activate synthcity
+- `standardized_summary.json`
 
-pip install synthcity
-pip install category_encoders
+It is designed to be the only file a future benchmark table needs to read.
+
+## Benchmark Policy
+
+The benchmark layer now makes a few explicit policy choices so results are easier to compare and reproduce:
+
+- Dataset-level inputs are resolved through a canonical dataset registry in `standardized_tabular_diffusion/datasets.py`.
+- Materialized datasets override raw upstream paths when available.
+- `TabDiff` and `TabSyn` use a shared normalized evaluator.
+- `TabDDPM` is normalized from the metrics already emitted by its upstream evaluation stack.
+- Structural fidelity defaults to a reproducible local predictor set of `XGB + KNN`.
+- `TabPFN` is disabled by default and only enabled when `STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN=1` is set.
+- When `TabPFN` is enabled, it is still treated as optional if it is unavailable because of gated-model access, unsupported class counts, or missing dependencies.
+
+## Reproducibility
+
+The standardized evaluation path now uses a benchmark-oriented deterministic configuration:
+
+- fixed benchmark seeds in the MLE evaluator and structural-fidelity layer
+- deterministic train/validation splitting in the upstream MLE path
+- seeded row ordering for feature construction
+- single-threaded XGBoost for the normalized MLE benchmark path
+- stable structural-fidelity predictor policy emitted into the summary metadata
+
+For the current smoke benchmark setup, repeated standardized evaluation runs now produce identical summary hashes.
+
+## Dataset Materialization
+
+For datasets that need a shared canonical processed layout, use:
+
+```bash
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult
 ```
 
-## Preparing Datasets
+Check the resolved materialization state with:
 
-### Using the datasets adopted in the paper
-
-Download raw dataset:
-
-```
-python download_dataset.py
+```bash
+python -m standardized_tabular_diffusion.cli materialization-status --dataset adult
 ```
 
-Process dataset:
+This is especially important for `TabDiff` and `TabSyn`, which are standardized around a shared processed dataset layout.
 
-```
-python process_dataset.py
-```
+## CLI
 
-### Using your own dataset
+List available models:
 
-First, create a directory for you dataset [NAME_OF_DATASET] in ./data:
-```
-cd data
-mkdir [NAME_OF_DATASET]
+```bash
+python -m standardized_tabular_diffusion.cli list-models
 ```
 
-Put the tabular data in .csv format in this directory ([NAME_OF_DATASET].csv). **The first row should be the header** indicating the name of each column, and the remaining rows are records.
+Describe the shared metric schema:
 
-Then, write a .json file ([NAME_OF_DATASET].json) recording the metadata of the tabular, covering the following information:
-```
-{
-    "name": "[NAME_OF_DATASET]",
-    "task_type": "[NAME_OF_TASK]", # binclass or regression
-    "header": "infer",
-    "column_names": null,
-    "num_col_idx": [LIST],  # list of indices of numerical columns
-    "cat_col_idx": [LIST],  # list of indices of categorical columns
-    "target_col_idx": [list], # list of indices of the target columns (for MLE)
-    "file_type": "csv",
-    "data_path": "data/[NAME_OF_DATASET]/[NAME_OF_DATASET].csv"
-    "test_path": null,
-}
-```
-Put this .json file in the .Info directory.
-
-Finally, run the following command to process the UDF dataset:
+```bash
+python -m standardized_tabular_diffusion.cli describe-metrics
 ```
 
+Print the shared config schema:
+
+```bash
+python -m standardized_tabular_diffusion.cli describe-config
 ```
 
-## Training Models
+Generate an example config:
 
-For baseline methods, use the following command for training:
-
-```
-python main.py --dataname [NAME_OF_DATASET] --method [NAME_OF_BASELINE_METHODS] --mode train
-```
-
-Options of [NAME_OF_DATASET]: adult, default, shoppers, magic, beijing, news
-Options of [NAME_OF_BASELINE_METHODS]: smote, goggle, great, stasy, codi, tabddpm
-
-For Tabsyn, use the following command for training:
-
-```
-# train VAE first
-python main.py --dataname [NAME_OF_DATASET] --method vae --mode train
-
-# after the VAE is trained, train the diffusion model
-python main.py --dataname [NAME_OF_DATASET] --method tabsyn --mode train
+```bash
+python -m standardized_tabular_diffusion.cli example-config \
+  --model tabsyn \
+  --dataset adult \
+  --output-dir artifacts/tabsyn/adult/run-001
 ```
 
-## Tabular Data Synthesis
+Resolve a config into the canonical run context:
 
-For baseline methods, use the following command for synthesis:
-
-```
-python main.py --dataname [NAME_OF_DATASET] --method [NAME_OF_BASELINE_METHODS] --mode sample --save_path [PATH_TO_SAVE]
+```bash
+python -m standardized_tabular_diffusion.cli build-context --config tmp/example.json
 ```
 
-For Tabsyn, use the following command for synthesis:
+Run one standardized action:
 
-```
-python main.py --dataname [NAME_OF_DATASET] --method tabsyn --mode sample --save_path [PATH_TO_SAVE]
-
-```
-
-The default save path is "synthetic/[NAME_OF_DATASET]/[METHOD_NAME].csv"
-
-## Evaluation
-We evaluate the quality of synthetic data using metrics from various aspects.
-
-#### Density estimation of single column and pair-wise correlation ([link](https://docs.sdv.dev/sdmetrics/reports/quality-report/whats-included))
-
-```
-python eval/eval_density.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
+```bash
+python -m standardized_tabular_diffusion.cli run-action \
+  --config tmp/example.json \
+  --action evaluate
 ```
 
+Run the full standardized pipeline:
 
-#### Alpha Precision and Beta Recall ([paper link](https://arxiv.org/abs/2102.08921))
-- $\alpha$-preicison: the fidelity of synthetic data
-- $\beta$-recall: the diversity of synthetic data
-
-```
-python eval/eval_quality.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
+```bash
+python -m standardized_tabular_diffusion.cli run --config tmp/example.json
 ```
 
-#### Machine Learning Efficiency
+Compare previously normalized run summaries:
 
-```
-python eval/eval_mle.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
-```
-
-#### Pricavy protection: Distance to Closest Record (DCR)
-
-```
-python eval/eval_dcr.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
+```bash
+python -m standardized_tabular_diffusion.cli compare \
+  --summary artifacts/tabdiff/adult/run-1/standardized_summary.json \
+  --summary artifacts/tabsyn/adult/run-1/standardized_summary.json
 ```
 
-Note: the optimal DCR score depends on the ratio between #Train and #Holdout (# Test). Ideally, DCR sore should be #Train / (#Train + #Holdout). To let the optimal score be $50\%$, you have to let the training and testing set have the same size. 
+## Tests
 
-#### Detection: Classifier Two Sample Tests (C2ST)
+The standardized layer now has lightweight regression coverage for:
 
-```
-python eval/eval_detection.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
-```
+- reproducibility of dataset splitting and normalized summary generation
+- adapter-level contracts for `tabdiff` and `tabddpm`
 
-#### Missing Value Imputation for the Target Column
+Run the current standardized test set with:
 
-```
-python impute.py --dataname [NAME_OF_DATASET]
-```
-The imputed tale will be saved at impute/[NAME_OF_DATASET]
-
-To evaluate the imputed target column regarding the classification task, use the following command:
-
- ```
-python eval_impute.py --dataname adult
+```bash
+pytest tests/test_reproducibility.py tests/test_adapters.py
 ```
 
-Currently, TabSyn only supports imputing multiple numerical columns and/or a single categorical column. The demo code only imputes the target column given a dataset, as indicated by the 'target_col_idx' in the dataset metadata JSON file. Below is a basic introduction to our imputation strategy:
+## Notes
 
-- For numerical columns, missing values are replaced with the average values of the corresponding columns in the training set.
-
-- For the categorical column, in each imputation trial, we randomly select from all possible categories with uniform probabilities.
-
-- Next, the masked data is fed into the VAE model to obtain their embeddings.
-
-- When applying the diffusion inpainting method, we remask the corresponding dimensions of the embeddings according to the relative positions of the embeddings and the raw input. For example, if the masked column index for the raw data is 0, and the token dimension is 4, we mask dimensions [0, 1, 2, 3] in their embeddings. Then, we apply the inpainting method illustrated in Eq. 39 to perform diffusion inpainting, and finally, we obtain the imputation result for one trial.
-
-- Since diffusion inpainting is stochastic (and for the categorical column, we sample the category randomly), we need to repeat the imputation algorithm several times (e.g., 50), and take the averaged imputation result as the final result.
-
-
-## Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## License
-
-This project is licensed under the Apache-2.0 License.
-
-
-## Reference
-We appreciate your citations if you find this repository useful to your research!
-```
-@inproceedings{tabsyn,
-  title={Mixed-Type Tabular Data Synthesis with Score-based Diffusion in Latent Space},
-  author={Zhang, Hengrui and Zhang, Jiani and Srinivasan, Balasubramaniam and Shen, Zhengyuan and Qin, Xiao and Faloutsos, Christos and Rangwala, Huzefa and Karypis, George},
-  booktitle={The twelfth International Conference on Learning Representations},
-  year={2024}
-}
-```
-```
-@article{zhang2023mixed,
-  title={Mixed-Type Tabular Data Synthesis with Score-based Diffusion in Latent Space},
-  author={Zhang, Hengrui and Zhang, Jiani and Srinivasan, Balasubramaniam and Shen, Zhengyuan and Qin, Xiao and Faloutsos, Christos and Rangwala, Huzefa and Karypis, George},
-  journal={arXiv preprint arXiv:2310.09656},
-  year={2023}
-}
-```
+- `TabDiff` and `TabSyn` can share the same normalized evaluator because both repos use the same `info.json`-style tabular metadata.
+- `TabDDPM` currently has a partially different evaluation stack, so the adapter normalizes the metrics that are already available and marks unavailable TabStruct dimensions explicitly.
+- `TabSyn` required a few upstream entrypoint fixes so the standardized runner can execute train/sample stages reliably.
+- Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
+- This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
