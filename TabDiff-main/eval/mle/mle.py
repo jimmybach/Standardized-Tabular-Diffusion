@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 CATEGORICAL = "categorical"
 CONTINUOUS = "continuous"
+DEFAULT_BENCHMARK_SEED = 42
 
 _MODELS = {
     'binclass': [ # 184
@@ -70,8 +71,9 @@ _MODELS = {
                  'max_depth': [5, 10, 20],
                  'gamma': [0.0, 1.0],
                  'objective': ['binary:logistic'],
-                 'nthread': [-1],
-                 'tree_method': ['gpu_hist']
+                 'nthread': [1],
+                 'tree_method': ['hist'],
+                 'random_state': [DEFAULT_BENCHMARK_SEED]
             },
         }
 
@@ -111,9 +113,9 @@ _MODELS = {
                  'min_child_weight': [1, 10], 
                  'max_depth': [5, 10, 20],
                  'gamma': [0.0, 1.0],
-                 'objective': ['binary:logistic'],
-                 'nthread': [-1],
-                 'tree_method': ['gpu_hist']
+                 'nthread': [1],
+                 'tree_method': ['hist'],
+                 'random_state': [DEFAULT_BENCHMARK_SEED]
             }
         }
 
@@ -137,9 +139,10 @@ _MODELS = {
                  'min_child_weight': [1, 10], 
                  'max_depth': [5, 10, 20],
                  'gamma': [0.0, 1.0],
-                 'objective': ['reg:linear'],
-                 'nthread': [-1],
-                 'tree_method': ['gpu_hist']
+                 'objective': ['reg:squarederror'],
+                 'nthread': [1],
+                 'tree_method': ['hist'],
+                 'random_state': [DEFAULT_BENCHMARK_SEED]
             }
         },
         # {
@@ -215,7 +218,7 @@ def feat_transform(data, info, label_encoder = None, encoders = None, cmax = Non
     return features, labels, label_encoder, encoders, cmax, cmin
 
 
-def prepare_ml_problem(train, test, info, val=None):
+def prepare_ml_problem(train, test, info, val=None, seed=DEFAULT_BENCHMARK_SEED):
     # test_X, test_y, label_encoder, encoders = feat_transform(test, info)
     # train_X, train_y, _, _ = feat_transform(train, info, label_encoder, encoders)
     
@@ -229,7 +232,8 @@ def prepare_ml_problem(train, test, info, val=None):
         val_num = int(total_train_num / 9)
 
         total_train_idx = np.arange(total_train_num)
-        np.random.shuffle(total_train_idx)
+        rng = np.random.default_rng(seed)
+        rng.shuffle(total_train_idx)
         train_idx = total_train_idx[val_num:]
         val_idx = total_train_idx[:val_num]
 
@@ -253,16 +257,18 @@ def prepare_ml_problem(train, test, info, val=None):
 
 class FeatureMaker:
 
-    def __init__(self, metadata, label_column='label', label_type='int', sample=50000):
+    def __init__(self, metadata, label_column='label', label_type='int', sample=50000, random_state=DEFAULT_BENCHMARK_SEED):
         self.columns = metadata['columns']
         self.label_column = label_column
         self.label_type = label_type
         self.sample = sample
         self.encoders = dict()
+        self.random_state = random_state
 
     def make_features(self, data):
         data = data.copy()
-        np.random.shuffle(data)
+        rng = np.random.default_rng(self.random_state)
+        rng.shuffle(data)
         data = data[:self.sample]
 
         features = []
@@ -309,8 +315,8 @@ class FeatureMaker:
         return features, labels
 
 
-def _prepare_ml_problem(train, val, test, metadata, eval): 
-    fm = FeatureMaker(metadata)
+def _prepare_ml_problem(train, val, test, metadata, eval, seed=DEFAULT_BENCHMARK_SEED): 
+    fm = FeatureMaker(metadata, random_state=seed)
     x_trains, y_trains = [], []
 
     for i in train:
@@ -330,11 +336,43 @@ def _prepare_ml_problem(train, val, test, metadata, eval):
 
 
 def _weighted_f1(y_test, pred):
-    report = classification_report(y_test, pred, output_dict=True)
+    report = classification_report(y_test, pred, output_dict=True, zero_division=0)
     classes = list(report.keys())[:-3]
+    if len(classes) <= 1:
+        if not classes:
+            return 0.0
+        return float(report[classes[0]]['f1-score'])
     proportion = [  report[i]['support'] / len(y_test) for i in classes]
     weighted_f1 = np.sum(list(map(lambda i, prop: report[i]['f1-score']* (1-prop)/(len(classes)-1), classes, proportion)))
     return weighted_f1 
+
+
+def _safe_binary_roc_auc(y_true, pred_prob, unique_labels):
+    if len(np.unique(y_true)) < 2:
+        return 0.5
+    size = 2
+    rest_label = set(range(size)) - set(unique_labels)
+    tmp = []
+    j = 0
+    for i in range(size):
+        if i in rest_label:
+            tmp.append(np.array([0] * y_true.shape[0])[:, np.newaxis])
+        else:
+            try:
+                tmp.append(pred_prob[:, [j]])
+            except Exception:
+                tmp.append(pred_prob[:, np.newaxis])
+            j += 1
+    return float(roc_auc_score(np.eye(size)[y_true], np.hstack(tmp)))
+
+
+def _fit_model(model, x_train, y_train):
+    try:
+        model.fit(x_train, y_train)
+    except Exception as exc:
+        logging.warning("Skipping %s due to fit failure: %s", type(model).__name__, exc)
+        return False
+    return True
 
 
 @ignore_warnings(category=ConvergenceWarning)
@@ -362,11 +400,8 @@ def _evaluate_multi_classification(train, test, info, val=None):
         results = []
         for param in tqdm(param_set):
             model = model_class(**param)
-
-            try:
-                model.fit(x_trains, y_trains)
-            except:
-                pass 
+            if not _fit_model(model, x_trains, y_trains):
+                continue
 
             if len(unique_labels) != len(np.unique(y_valid)):
                 pred = [unique_labels[0]] * len(x_valid)
@@ -375,7 +410,7 @@ def _evaluate_multi_classification(train, test, info, val=None):
                 pred = model.predict(x_valid)
                 pred_prob = model.predict_proba(x_valid)
 
-            macro_f1 = f1_score(y_valid, pred, average='macro')
+            macro_f1 = f1_score(y_valid, pred, average='macro', zero_division=0)
             weighted_f1 = _weighted_f1(y_valid, pred)
             acc = accuracy_score(y_valid, pred)
 
@@ -408,6 +443,8 @@ def _evaluate_multi_classification(train, test, info, val=None):
                 }
             )
 
+        if not results:
+            raise RuntimeError(f"All parameter settings failed for {model_repr}.")
         results = pd.DataFrame(results)
         results['avg'] = results.loc[:, ['macro_f1', 'weighted_f1', 'roc_auc']].mean(axis=1)        
         best_f1_param = results.param[results.macro_f1.idxmax()]
@@ -426,11 +463,8 @@ def _evaluate_multi_classification(train, test, info, val=None):
             
             x_train = x_trains
             y_train = y_trains
-            
-            try:
-                best_model.fit(x_train, y_train)
-            except:
-                pass 
+            if not _fit_model(best_model, x_train, y_train):
+                raise RuntimeError(f"Best-model refit failed for {model_repr}.")
 
             if len(unique_labels) != len(np.unique(y_test)):
                 pred = [unique_labels[0]] * len(x_test)
@@ -439,7 +473,7 @@ def _evaluate_multi_classification(train, test, info, val=None):
                 pred = best_model.predict(x_test)
                 pred_prob = best_model.predict_proba(x_test)
 
-            macro_f1 = f1_score(y_test, pred, average='macro')
+            macro_f1 = f1_score(y_test, pred, average='macro', zero_division=0)
             weighted_f1 = _weighted_f1(y_test, pred)
             acc = accuracy_score(y_test, pred)
 
@@ -512,11 +546,8 @@ def _evaluate_binary_classification(train, test, info, val=None):
         results = []
         for param in tqdm(param_set):
             model = model_class(**param)
-
-            try:
-                model.fit(x_trains, y_trains)
-            except ValueError:
-                pass
+            if not _fit_model(model, x_trains, y_trains):
+                continue
 
             if len(unique_labels) == 1:
                 pred = [unique_labels[0]] * len(x_valid)
@@ -525,28 +556,14 @@ def _evaluate_binary_classification(train, test, info, val=None):
                 pred = model.predict(x_valid)
                 pred_prob = model.predict_proba(x_valid)
 
-            binary_f1 = f1_score(y_valid, pred, average='binary')
+            binary_f1 = f1_score(y_valid, pred, average='binary', zero_division=0)
             weighted_f1 = _weighted_f1(y_valid, pred)
             acc = accuracy_score(y_valid, pred)
-            precision = precision_score(y_valid, pred, average='binary')
+            precision = precision_score(y_valid, pred, average='binary', zero_division=0)
             recall = recall_score(y_valid, pred, average='binary')
-            macro_f1 = f1_score(y_valid, pred, average='macro')
+            macro_f1 = f1_score(y_valid, pred, average='macro', zero_division=0)
 
-            # auroc
-            size = 2
-            rest_label = set(range(size)) - set(unique_labels)
-            tmp = []
-            j = 0
-            for i in range(size):
-                if i in rest_label:
-                    tmp.append(np.array([0] * y_valid.shape[0])[:,np.newaxis])
-                else:
-                    try:
-                        tmp.append(pred_prob[:,[j]])
-                    except:
-                        tmp.append(pred_prob[:, np.newaxis])
-                    j += 1
-            roc_auc = roc_auc_score(np.eye(size)[y_valid], np.hstack(tmp))
+            roc_auc = _safe_binary_roc_auc(y_valid, pred_prob, unique_labels)
 
             results.append(
                 {   
@@ -564,6 +581,8 @@ def _evaluate_binary_classification(train, test, info, val=None):
 
 
         # test the best model
+        if not results:
+            raise RuntimeError(f"All parameter settings failed for {model_repr}.")
         results = pd.DataFrame(results)
         results['avg'] = results.loc[:, ['binary_f1', 'weighted_f1', 'roc_auc']].mean(axis=1)        
         best_f1_param = results.param[results.binary_f1.idxmax()]
@@ -576,7 +595,8 @@ def _evaluate_binary_classification(train, test, info, val=None):
         def _calc(best_model):
             best_scores = []
 
-            best_model.fit(x_trains, y_trains)
+            if not _fit_model(best_model, x_trains, y_trains):
+                raise RuntimeError(f"Best-model refit failed for {model_repr}.")
 
             if len(unique_labels) == 1:
                 pred = [unique_labels[0]] * len(x_test)
@@ -585,32 +605,14 @@ def _evaluate_binary_classification(train, test, info, val=None):
                 pred = best_model.predict(x_test)
                 pred_prob = best_model.predict_proba(x_test)
 
-            binary_f1 = f1_score(y_test, pred, average='binary')
+            binary_f1 = f1_score(y_test, pred, average='binary', zero_division=0)
             weighted_f1 = _weighted_f1(y_test, pred)
             acc = accuracy_score(y_test, pred)
-            precision = precision_score(y_test, pred, average='binary')
+            precision = precision_score(y_test, pred, average='binary', zero_division=0)
             recall = recall_score(y_test, pred, average='binary')
-            macro_f1 = f1_score(y_test, pred, average='macro')
+            macro_f1 = f1_score(y_test, pred, average='macro', zero_division=0)
 
-            # auroc
-            size = 2
-            rest_label = set(range(size)) - set(unique_labels)
-            tmp = []
-            j = 0
-            for i in range(size):
-                if i in rest_label:
-                    tmp.append(np.array([0] * y_test.shape[0])[:,np.newaxis])
-                else:
-                    try:
-                        tmp.append(pred_prob[:,[j]])
-                    except:
-                        tmp.append(pred_prob[:, np.newaxis])
-                    j += 1
-            try:
-                roc_auc = roc_auc_score(np.eye(size)[y_test], np.hstack(tmp))
-            except ValueError:
-                tmp[1] = tmp[1].reshape(20000, 1)
-                roc_auc = roc_auc_score(np.eye(size)[y_test], np.hstack(tmp))
+            roc_auc = _safe_binary_roc_auc(y_test, pred_prob, unique_labels)
 
             best_scores.append(
                 {   
@@ -669,7 +671,8 @@ def _evaluate_regression(train, test, info, val=None):
         results = []
         for param in tqdm(param_set):
             model = model_class(**param)
-            model.fit(x_trains, y_trains)
+            if not _fit_model(model, x_trains, y_trains):
+                continue
             pred = model.predict(x_valid)
 
             r2 = r2_score(y_valid, pred)
@@ -690,6 +693,8 @@ def _evaluate_regression(train, test, info, val=None):
                 }
             )
 
+        if not results:
+            raise RuntimeError(f"All parameter settings failed for {model_repr}.")
         results = pd.DataFrame(results)
         # results['avg'] = results.loc[:, ['r2', 'rmse']].mean(axis=1)        
         best_r2_param = results.param[results.r2.idxmax()]
@@ -701,8 +706,8 @@ def _evaluate_regression(train, test, info, val=None):
         def _calc(best_model):
             best_scores = []
             x_train, y_train = x_trains, y_trains
-            
-            best_model.fit(x_train, y_train)
+            if not _fit_model(best_model, x_train, y_train):
+                raise RuntimeError(f"Best-model refit failed for {model_repr}.")
             pred = best_model.predict(x_test)
 
             r2 = r2_score(y_test, pred)
@@ -778,4 +783,3 @@ def compute_scores(train, test, synthesized_data, metadata, eval):
         return a.mean(axis=0), a.std(axis=0), a[['name','param']]
     else:
         return a.mean(axis=0), a.std(axis=0)
-

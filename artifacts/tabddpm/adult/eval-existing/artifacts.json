@@ -1,0 +1,12 @@
+{
+  "model": "tabddpm",
+  "dataset": "adult",
+  "output_dir": "artifacts/tabddpm/adult/eval-existing",
+  "upstream_workdir": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDDPM-main",
+  "generated_sample_path": null,
+  "upstream_metrics_path": "TabDDPM-main/exp/adult/ddpm_cb_best/eval_catboost.json",
+  "standardized_summary_path": "artifacts/tabddpm/adult/eval-existing/standardized_summary.json",
+  "notes": [
+    "TabDDPM normalization is limited to metrics already emitted by the upstream evaluation stack."
+  ]
+}

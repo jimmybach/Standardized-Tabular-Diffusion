@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "protocol_name": "tabstruct-aligned-v1",
+  "model": "tabsyn",
+  "dataset": "adult",
+  "sample_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/artifacts/tabsyn/adult/sample-smoke/samples.csv",
+  "metrics": {
+    "density": {
+      "shape_score": 0.3813113871848223,
+      "trend_score": 0.062474848427980116,
+      "overall_score": 0.22189311780640122,
+      "status": "computed",
+      "error": null
+    },
+    "ml_efficacy": {
+      "primary_metric_name": "xgb_auroc",
+      "primary_metric_value": 0.5857258681179576,
+      "task_type": "classification",
+      "details": {
+        "best_f1_scores": {
+          "XGBClassifier": {
+            "binary_f1": 0.3821732001788642,
+            "roc_auc": 0.5857258681179576,
+            "weighted_f1": 0.29189384830318627,
+            "accuracy": 0.23622627602727106
+          }
+        },
+        "best_weighted_scores": {
+          "XGBClassifier": {
+            "binary_f1": 0.3821732001788642,
+            "roc_auc": 0.5857258681179576,
+            "weighted_f1": 0.29189384830318627,
+            "accuracy": 0.23622627602727106
+          }
+        },
+        "best_auroc_scores": {
+          "XGBClassifier": {
+            "binary_f1": 0.3821732001788642,
+            "roc_auc": 0.5857258681179576,
+            "weighted_f1": 0.29189384830318627,
+            "accuracy": 0.23622627602727106
+          }
+        },
+        "best_acc_scores": {
+          "XGBClassifier": {
+            "binary_f1": 0.3821732001788642,
+            "roc_auc": 0.5857258681179576,
+            "weighted_f1": 0.29189384830318627,
+            "accuracy": 0.23622627602727106
+          }
+        },
+        "best_avg_scores": {
+          "XGBClassifier": {
+            "binary_f1": 0.3821732001788642,
+            "roc_auc": 0.5857258681179576,
+            "weighted_f1": 0.29189384830318627,
+            "accuracy": 0.23622627602727106
+          }
+        }
+      },
+      "status": "computed",
+      "error": null
+    },
+    "detection": {
+      "logistic_detection": 0.0,
+      "status": "computed",
+      "error": null
+    },
+    "privacy": {
+      "dcr_score": null,
+      "status": "not_requested"
+    },
+    "structural_fidelity": {
+      "global_utility": 15.582443098946348,
+      "local_utility": 0.7083973575547264,
+      "status": "computed",
+      "implementation": {
+        "upstream_metric": "tabeval.metrics.eval_structure.UtilityPerFeature",
+        "upstream_timestamp": "2025-08-09",
+        "predictor_ensemble": "tiny-default-opt-in-tabpfn",
+        "predictors": [
+          "XGB",
+          "KNN"
+        ],
+        "predictor_policy": {
+          "tabpfn_enabled": false,
+          "tabpfn_default": "disabled",
+          "tabpfn_enable_env_var": "STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN",
+          "tabpfn_optional_when_unavailable": true,
+          "tabpfn_unavailability_reasons": [
+            "unsupported_class_count",
+            "gated_huggingface_model",
+            "missing_dependency"
+          ],
+          "benchmark_runtime_mode": "quiet_local"
+        },
+        "autogluon_presets": "medium_quality",
+        "fit_weighted_ensemble": false,
+        "time_limit_total_seconds": 900,
+        "time_limit_per_feature_seconds": 60
+      },
+      "utility_per_feature": {
+        "reference": {
+          "balanced_accuracy": {
+            "age": 0.04063453331496858,
+            "workclass": 0.1947310958157002,
+            "education": 0.5417929664962977,
+            "education.num": 0.5347803058834293,
+            "marital.status": 0.3038932961914437,
+            "occupation": 0.19124314131230258,
+            "relationship": 0.43066669167301885,
+            "race": 0.30182824664734614,
+            "sex": 0.7130270581664715,
+            "capital.gain": 0.010691144644533074,
+            "capital.loss": 0.012195121951219884,
+            "hours.per.week": 0.013201519271403117,
+            "native.country": 0.05283939509959851,
+            "income": 0.7058185560233023
+          },
+          "negative_RMSE": {
+            "fnlwgt": -108318.43950566584
+          },
+          "RMSE": {
+            "fnlwgt": -108318.43950566584
+          }
+        },
+        "synthetic": {
+          "balanced_accuracy": {
+            "workclass": 0.11130415419073472,
+            "education": 0.3333333333333333,
+            "marital.status": 1.0,
+            "occupation": 0.06672884582830821,
+            "relationship": 1.0,
+            "race": 0.3333333333333333,
+            "sex": 1.0,
+            "capital.gain": 1.0,
+            "capital.loss": 1.0,
+            "native.country": 0.024390243902439088,
+            "income": 0.5
+          },
+          "negative_RMSE": {
+            "age": -14.77733555274562,
+            "fnlwgt": -172270.32861771982,
+            "education.num": -3.193059033297413,
+            "hours.per.week": -12.963009226563365
+          },
+          "RMSE": {
+            "age": -14.77733555274562,
+            "fnlwgt": -172270.32861771982,
+            "education.num": -3.193059033297413,
+            "hours.per.week": -12.963009226563365
+          }
+        },
+        "relative": {
+          "workclass": 0.5715787390015848,
+          "fnlwgt": 0.6287701450087334,
+          "education": 0.6152411602700477,
+          "marital.status": 3.2906286928094324,
+          "occupation": 0.3489215109646161,
+          "relationship": 2.3219812893244227,
+          "race": 1.1043808425352497,
+          "sex": 1.4024713207539012,
+          "capital.gain": 93.53535409432055,
+          "capital.loss": 81.9999999999975,
+          "native.country": 0.46159203481541017,
+          "income": 0.7083973575547264
+        },
+        "feature_types": {
+          "workclass": "classification",
+          "fnlwgt": "regression",
+          "education": "classification",
+          "marital.status": "classification",
+          "occupation": "classification",
+          "relationship": "classification",
+          "race": "classification",
+          "sex": "classification",
+          "capital.gain": "classification",
+          "capital.loss": "classification",
+          "native.country": "classification",
+          "income": "classification"
+        }
+      },
+      "column_groups": {
+        "numerical": [
+          "age",
+          "fnlwgt",
+          "education.num",
+          "capital.gain",
+          "capital.loss",
+          "hours.per.week"
+        ],
+        "categorical": [
+          "workclass",
+          "education",
+          "marital.status",
+          "occupation",
+          "relationship",
+          "race",
+          "sex",
+          "native.country",
+          "income"
+        ],
+        "target": "income"
+      }
+    }
+  },
+  "evaluation_failures": {},
+  "tabstruct_alignment": {
+    "density_fidelity": "exact current implementation",
+    "ml_efficacy": "exact current implementation",
+    "detection": "exact current implementation",
+    "privacy": "available through DCR path but not run in this summary",
+    "structural_fidelity": "implemented with TabStruct UtilityPerFeature and per-variable relative utility aggregation"
+  }
+}

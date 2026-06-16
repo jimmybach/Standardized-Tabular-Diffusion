@@ -1,0 +1,10 @@
+{
+  "model": "tabsyn",
+  "dataset": "adult",
+  "output_dir": "artifacts/tabsyn/adult/eval-smoke",
+  "upstream_workdir": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main",
+  "generated_sample_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/artifacts/tabsyn/adult/sample-smoke/samples.csv",
+  "upstream_metrics_path": null,
+  "standardized_summary_path": "artifacts/tabsyn/adult/eval-smoke/standardized_summary.json",
+  "notes": []
+}

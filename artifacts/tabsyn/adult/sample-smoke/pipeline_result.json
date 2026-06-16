@@ -1,0 +1,322 @@
+{
+  "context": {
+    "config": {
+      "model": "tabsyn",
+      "dataset": "adult",
+      "output_dir": "artifacts/tabsyn/adult/sample-smoke",
+      "train": {
+        "enabled": false,
+        "seed": 0,
+        "device": "cpu",
+        "extra": {}
+      },
+      "sample": {
+        "enabled": true,
+        "num_samples": 512,
+        "checkpoint_path": null,
+        "extra": {
+          "steps": 50
+        }
+      },
+      "evaluation": {
+        "enabled": false,
+        "total_time_limit_seconds": 900,
+        "compute_density": true,
+        "compute_ml_efficacy": true,
+        "compute_detection": true,
+        "compute_privacy": true,
+        "compute_structural_fidelity": true,
+        "extra": {}
+      },
+      "upstream_config_path": null,
+      "tags": [],
+      "notes": null
+    },
+    "dataset_spec": {
+      "name": "adult",
+      "task_type": "classification",
+      "column_names": [
+        "age",
+        "workclass",
+        "fnlwgt",
+        "education",
+        "education.num",
+        "marital.status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "capital.gain",
+        "capital.loss",
+        "hours.per.week",
+        "native.country",
+        "income"
+      ],
+      "numerical_columns": [
+        "age",
+        "fnlwgt",
+        "education.num",
+        "capital.gain",
+        "capital.loss",
+        "hours.per.week"
+      ],
+      "categorical_columns": [
+        "workclass",
+        "education",
+        "marital.status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native.country"
+      ],
+      "target_columns": [
+        "income"
+      ],
+      "metadata_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/info.json",
+      "train_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/train.csv",
+      "val_data_path": null,
+      "test_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/test.csv",
+      "provenance": [
+        "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/Info/adult.json",
+        "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/data/Info/adult.json",
+        "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/materialized_datasets/adult/manifest.json"
+      ],
+      "extra": {
+        "header": null,
+        "file_type": "csv",
+        "column_info": {
+          "age": "float",
+          "workclass": "str",
+          "fnlwgt": "float",
+          "education": "str",
+          "education.num": "float",
+          "marital.status": "str",
+          "occupation": "str",
+          "relationship": "str",
+          "race": "str",
+          "sex": "str",
+          "capital.gain": "float",
+          "capital.loss": "float",
+          "hours.per.week": "float",
+          "native.country": "str",
+          "income": "str"
+        },
+        "train_num": 32561,
+        "test_num": 16281,
+        "materialized_manifest_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/materialized_datasets/adult/manifest.json",
+        "synthetic_real_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/adult/real.csv",
+        "synthetic_val_path": null,
+        "synthetic_test_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/adult/test.csv"
+      }
+    },
+    "dataset_validation": {
+      "name": "adult",
+      "task_type": "classification",
+      "paths": {
+        "metadata_path": {
+          "path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/info.json",
+          "exists": true
+        },
+        "train_data_path": {
+          "path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/train.csv",
+          "exists": true
+        },
+        "val_data_path": {
+          "path": null,
+          "exists": null
+        },
+        "test_data_path": {
+          "path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/test.csv",
+          "exists": true
+        }
+      }
+    },
+    "action_readiness": {
+      "train": {
+        "action": "train",
+        "ready": true,
+        "checked": {
+          "metadata_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/info.json",
+          "train_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/train.csv",
+          "test_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/test.csv",
+          "tabsyn_stage_model": "vae_then_diffusion"
+        },
+        "missing": []
+      },
+      "sample": {
+        "action": "sample",
+        "ready": true,
+        "checked": {
+          "metadata_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/info.json",
+          "train_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/train.csv",
+          "test_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/test.csv",
+          "tabsyn_train_z": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/tabsyn/vae/ckpt/adult/train_z.npy",
+          "tabsyn_decoder": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/tabsyn/vae/ckpt/adult/decoder.pt",
+          "tabsyn_diffusion_model": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/tabsyn/ckpt/adult/model.pt"
+        },
+        "missing": []
+      },
+      "evaluate": {
+        "action": "evaluate",
+        "ready": false,
+        "checked": {
+          "sample_path": null
+        },
+        "missing": [
+          "sample_path missing: None"
+        ]
+      }
+    },
+    "run_spec": {
+      "model": "tabsyn",
+      "dataset": "adult",
+      "output_dir": "artifacts/tabsyn/adult/sample-smoke",
+      "device": "cpu",
+      "seed": 0,
+      "num_samples": 512,
+      "checkpoint_path": null,
+      "upstream_config_path": null,
+      "extra": {
+        "evaluation": {
+          "enabled": false,
+          "total_time_limit_seconds": 900,
+          "compute_density": true,
+          "compute_ml_efficacy": true,
+          "compute_detection": true,
+          "compute_privacy": true,
+          "compute_structural_fidelity": true,
+          "extra": {}
+        },
+        "tags": [],
+        "steps": 50,
+        "dataset_spec": {
+          "name": "adult",
+          "task_type": "classification",
+          "column_names": [
+            "age",
+            "workclass",
+            "fnlwgt",
+            "education",
+            "education.num",
+            "marital.status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "capital.gain",
+            "capital.loss",
+            "hours.per.week",
+            "native.country",
+            "income"
+          ],
+          "numerical_columns": [
+            "age",
+            "fnlwgt",
+            "education.num",
+            "capital.gain",
+            "capital.loss",
+            "hours.per.week"
+          ],
+          "categorical_columns": [
+            "workclass",
+            "education",
+            "marital.status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "native.country"
+          ],
+          "target_columns": [
+            "income"
+          ],
+          "metadata_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/info.json",
+          "train_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/train.csv",
+          "val_data_path": null,
+          "test_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/adult/test.csv",
+          "provenance": [
+            "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/Info/adult.json",
+            "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/data/Info/adult.json",
+            "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/materialized_datasets/adult/manifest.json"
+          ],
+          "extra": {
+            "header": null,
+            "file_type": "csv",
+            "column_info": {
+              "age": "float",
+              "workclass": "str",
+              "fnlwgt": "float",
+              "education": "str",
+              "education.num": "float",
+              "marital.status": "str",
+              "occupation": "str",
+              "relationship": "str",
+              "race": "str",
+              "sex": "str",
+              "capital.gain": "float",
+              "capital.loss": "float",
+              "hours.per.week": "float",
+              "native.country": "str",
+              "income": "str"
+            },
+            "train_num": 32561,
+            "test_num": 16281,
+            "materialized_manifest_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/materialized_datasets/adult/manifest.json",
+            "synthetic_real_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/adult/real.csv",
+            "synthetic_val_path": null,
+            "synthetic_test_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/adult/test.csv"
+          }
+        },
+        "config": {
+          "model": "tabsyn",
+          "dataset": "adult",
+          "output_dir": "artifacts/tabsyn/adult/sample-smoke",
+          "train": {
+            "enabled": false,
+            "seed": 0,
+            "device": "cpu",
+            "extra": {}
+          },
+          "sample": {
+            "enabled": true,
+            "num_samples": 512,
+            "checkpoint_path": null,
+            "extra": {
+              "steps": 50
+            }
+          },
+          "evaluation": {
+            "enabled": false,
+            "total_time_limit_seconds": 900,
+            "compute_density": true,
+            "compute_ml_efficacy": true,
+            "compute_detection": true,
+            "compute_privacy": true,
+            "compute_structural_fidelity": true,
+            "extra": {}
+          },
+          "upstream_config_path": null,
+          "tags": [],
+          "notes": null
+        }
+      }
+    },
+    "adapter": {
+      "model_name": "tabsyn",
+      "upstream_root": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main"
+    }
+  },
+  "phases": {
+    "sample": {
+      "model": "tabsyn",
+      "dataset": "adult",
+      "output_dir": "artifacts/tabsyn/adult/sample-smoke",
+      "upstream_workdir": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main",
+      "generated_sample_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/artifacts/tabsyn/adult/sample-smoke/samples.csv",
+      "upstream_metrics_path": null,
+      "standardized_summary_path": null,
+      "notes": []
+    }
+  }
+}

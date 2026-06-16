@@ -1,0 +1,34 @@
+{
+  "model": "tabsyn",
+  "dataset": "adult",
+  "output_dir": "artifacts/tabsyn/adult/train-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "vae_num_epochs": 2,
+      "diffusion_num_epochs": 2,
+      "skip_vae_if_present": false
+    }
+  },
+  "sample": {
+    "enabled": false,
+    "num_samples": null,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [],
+  "notes": null
+}
