@@ -166,6 +166,48 @@ python -m standardized_tabular_diffusion.cli compare \
   --summary artifacts/tabsyn/adult/run-1/standardized_summary.json
 ```
 
+## Test One Model
+
+To test one model on one dataset, the typical workflow is:
+
+1. Materialize the dataset if the model depends on the shared processed layout.
+2. Generate an example config.
+3. Save the example config JSON to a file and edit it for the phases you want to run.
+4. Run the standardized pipeline from that config.
+
+Example for `tabsyn` on `adult`:
+
+```bash
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult
+python -m standardized_tabular_diffusion.cli example-config \
+  --model tabsyn \
+  --dataset adult \
+  --output-dir artifacts/tabsyn/adult/run-001
+```
+
+Save the emitted JSON to a file such as `tmp/tabsyn-adult.json`, then run:
+
+```bash
+python -m standardized_tabular_diffusion.cli run --config tmp/tabsyn-adult.json
+```
+
+If you only want one phase instead of the full pipeline:
+
+```bash
+python -m standardized_tabular_diffusion.cli run-action \
+  --config tmp/tabsyn-adult.json \
+  --action train
+```
+
+The main files to inspect afterward are:
+
+- `run_context.json`
+- `pipeline_result.json`
+- `artifacts.json`
+- `standardized_summary.json` when evaluation is enabled
+
+For `tabddpm`, also set `upstream_config_path` in the experiment config so the standardized adapter can call the upstream TOML-based pipeline.
+
 ## Tests
 
 The standardized layer now has lightweight regression coverage for:
