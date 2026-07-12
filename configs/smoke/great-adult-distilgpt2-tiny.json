@@ -1,0 +1,58 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-distilgpt2-tiny",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "llm": "distilgpt2",
+      "epochs": 1,
+      "batch_size": 2,
+      "logging_steps": 1,
+      "save_steps": 1000,
+      "max_train_rows": 32,
+      "report_to": "none"
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 4,
+    "checkpoint_path": null,
+    "extra": {
+      "k": 8,
+      "max_length": 192,
+      "max_length_schedule": [
+        192,
+        256,
+        384
+      ],
+      "temperature": 0.5,
+      "temperature_schedule": [
+        0.5,
+        0.4,
+        0.3
+      ],
+      "max_tries": 10
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "great",
+    "distilgpt2",
+    "tiny"
+  ],
+  "notes": "Stronger-base GReaT smoke preset using distilgpt2 to separate tiny-model weakness from adapter behavior."
+}

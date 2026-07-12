@@ -1,0 +1,43 @@
+{
+  "model": "tabebm",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/tabebm-gated-sample",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "sgld_steps": 10,
+      "sgld_step_size": 0.1,
+      "sgld_noise_std": 0.01,
+      "starting_point_noise_std": 0.01,
+      "distance_negative_class": 5.0
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 8,
+    "checkpoint_path": null,
+    "extra": {
+      "sgld_steps": 10,
+      "allow_gated_model": true
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "tabebm",
+    "gated-sample"
+  ],
+  "notes": "Opt-in TabEBM sample preset. Requires accepted Prior Labs TabPFN gated-model terms and working Hugging Face authentication."
+}

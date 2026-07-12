@@ -1,0 +1,41 @@
+{
+  "model": "nrgboost",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/nrgboost-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "num_trees": 5,
+      "num_model_samples": 256,
+      "num_chains": 4,
+      "burn_in": 10,
+      "max_leaves": 32
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {
+      "num_steps": 10
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "nrgboost"
+  ],
+  "notes": "Fast CPU smoke preset for NRGBoost on adult."
+}

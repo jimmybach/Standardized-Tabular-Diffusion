@@ -1,0 +1,44 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-distilgpt2-diagnostic",
+  "train": {
+    "enabled": false,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {}
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 4,
+    "checkpoint_path": "artifacts/test/great-distilgpt2-strong/great_model",
+    "extra": {
+      "k": 8,
+      "max_length": 224,
+      "max_length_schedule": [
+        224
+      ],
+      "temperature": 0.4,
+      "temperature_schedule": [
+        0.4
+      ],
+      "max_tries": 2
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "great",
+    "diagnostic"
+  ],
+  "notes": "Short GReaT diagnostic run to capture raw generated text from a stronger distilgpt2 checkpoint."
+}

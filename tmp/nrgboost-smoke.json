@@ -1,0 +1,28 @@
+{
+  "model": "nrgboost",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/nrgboost-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "num_trees": 5,
+      "num_model_samples": 256,
+      "num_chains": 4,
+      "burn_in": 10,
+      "max_leaves": 32
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "extra": {
+      "num_steps": 10
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "extra": {}
+  }
+}

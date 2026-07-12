@@ -1,0 +1,39 @@
+{
+  "model": "nflow",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/nflow-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 2,
+      "batch_size": 128,
+      "num_layers": 2,
+      "hidden_features": 32,
+      "learning_rate": 0.001
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "nflow"
+  ],
+  "notes": "Tiny CPU smoke preset for the normalizing-flow baseline on adult."
+}

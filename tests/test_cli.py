@@ -15,6 +15,52 @@ from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentCo
 from standardized_tabular_diffusion.interfaces import ArtifactBundle
 
 
+def test_cli_list_model_inventory_filters_by_benchmark(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--benchmark", "tabstruct-2026"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    names = {entry["name"] for entry in payload["models"]}
+
+    assert "tabddpm" in names
+    assert "smote" in names
+    assert "ctab-gan-plus" not in names
+
+
+def test_cli_show_model_inventory_prints_expected_entry(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "realtabformer"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "realtabformer"
+    assert payload["family"] == "llm"
+    assert payload["runnable_recommendation"] == "yes"
+
+
+def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-models"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert "ctgan" in payload["models"]
+    assert "tvae" in payload["models"]
+    assert "smote" in payload["models"]
+    assert "ctab-gan-plus" in payload["models"]
+    assert "realtabformer" in payload["models"]
+    assert "nrgboost" in payload["models"]
+    assert "bn" in payload["models"]
+    assert "nflow" in payload["models"]
+    assert "goggle" in payload["models"]
+    assert "great" in payload["models"]
+    assert "arf" in payload["models"]
+    assert "tabebm" in payload["models"]
+
+
 def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, monkeypatch, capsys) -> None:
     config_path = tmp_path / "config.json"
     output_dir = tmp_path / "artifacts" / "run"

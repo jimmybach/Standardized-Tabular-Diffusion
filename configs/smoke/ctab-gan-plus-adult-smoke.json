@@ -1,0 +1,36 @@
+{
+  "model": "ctab-gan-plus",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/ctabgan-plus-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 64
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "ctab-gan-plus"
+  ],
+  "notes": "Small CPU smoke preset for the vendored CTAB-GAN+ adapter on adult."
+}

@@ -1,0 +1,59 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-distilgpt2-strong",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "llm": "distilgpt2",
+      "epochs": 5,
+      "batch_size": 8,
+      "logging_steps": 10,
+      "save_steps": 1000,
+      "max_train_rows": 256,
+      "report_to": "none",
+      "preserve_column_order": true
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 8,
+    "checkpoint_path": null,
+    "extra": {
+      "k": 16,
+      "max_length": 224,
+      "max_length_schedule": [
+        224,
+        320,
+        448
+      ],
+      "temperature": 0.4,
+      "temperature_schedule": [
+        0.4,
+        0.3,
+        0.2
+      ],
+      "max_tries": 16
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "great",
+    "distilgpt2",
+    "strong"
+  ],
+  "notes": "Stronger GReaT validation preset using distilgpt2 plus a larger training subset and longer fine-tuning to test whether sampling becomes parseable."
+}

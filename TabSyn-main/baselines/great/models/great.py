@@ -19,7 +19,12 @@ from baselines.great.models.great_start import GReaTStart, CategoricalStart, Con
 from baselines.great.models.great_trainer import GReaTTrainer
 from baselines.great.models.great_utils import _array_to_dataframe, _get_column_distribution, _convert_tokens_to_text, \
 _convert_text_to_tabular_data, bcolors
-from peft import LoraConfig, get_peft_model, prepare_model_for_int8_training, TaskType
+from peft import LoraConfig, TaskType, get_peft_model
+
+try:
+    from peft import prepare_model_for_int8_training
+except ImportError:  # peft>=0.10 renamed the helper
+    from peft import prepare_model_for_kbit_training as prepare_model_for_int8_training
 
 class GReaT:
     """ GReaT Class
@@ -135,7 +140,8 @@ class GReaT:
 
     def sample(self, n_samples: int,
                start_col: tp.Optional[str] = "", start_col_dist: tp.Optional[tp.Union[dict, list]] = None,
-               temperature: float = 0.7, k: int = 100, max_length: int = 500, device: str = "cuda") -> pd.DataFrame:
+               temperature: float = 0.7, k: int = 100, max_length: int = 500, device: str = "cuda",
+               max_tries: int = 100, debug_text_path: tp.Optional[str] = None) -> pd.DataFrame:
         """ Generate synthetic tabular data samples
 
         Args:
@@ -164,43 +170,50 @@ class GReaT:
 
         # Init empty DataFrame for the generated samples
         df_gen = pd.DataFrame(columns=self.columns)
+        last_text_data = []
 
         # Start generation process
-        with tqdm(total=n_samples) as pbar:
-            already_generated = 0
-            _cnt = 0
-            # try:
-            while n_samples > df_gen.shape[0]:
-                start_tokens = great_start.get_start_tokens(k)
-                start_tokens = torch.tensor(start_tokens).to(device)
+        try:
+            with tqdm(total=n_samples) as pbar:
+                already_generated = 0
+                _cnt = 0
+                while n_samples > df_gen.shape[0]:
+                    _cnt += 1
+                    if _cnt > max_tries:
+                        raise RuntimeError(
+                            "GReaT sampling exceeded max_tries without generating enough valid rows. "
+                            "Try training longer, increasing max_length, or using a stronger base checkpoint."
+                        )
+                    start_tokens = great_start.get_start_tokens(k)
+                    start_tokens = torch.tensor(start_tokens).to(device)
 
-                # Generate tokens
-                tokens = self.model.generate(input_ids=start_tokens, max_length=max_length,
-                                                do_sample=True, temperature=temperature, pad_token_id=50256)
+                    # Generate tokens
+                    tokens = self.model.generate(input_ids=start_tokens, max_length=max_length,
+                                                    do_sample=True, temperature=temperature, pad_token_id=50256)
 
-                # Convert tokens back to tabular data
-                text_data = _convert_tokens_to_text(tokens, self.tokenizer)
-                df_gen = _convert_text_to_tabular_data(text_data, df_gen)
+                    # Convert tokens back to tabular data
+                    text_data = _convert_tokens_to_text(tokens, self.tokenizer)
+                    last_text_data = text_data
+                    df_gen = _convert_text_to_tabular_data(text_data, df_gen)
 
-                # print(len(text_data[0]))
-                # print(text_data[0])
-                # print(df_gen.iloc[0])
+                    # Remove rows with flawed numerical values
+                    for i_num_cols in self.num_cols:
+                        df_gen = df_gen[pd.to_numeric(
+                            df_gen[i_num_cols], errors='coerce').notnull()]
 
-                # Remove rows with flawed numerical values
-                for i_num_cols in self.num_cols:
-                    df_gen = df_gen[pd.to_numeric(
-                        df_gen[i_num_cols], errors='coerce').notnull()]
+                    df_gen[self.num_cols] = df_gen[self.num_cols].astype(float)
 
-                df_gen[self.num_cols] = df_gen[self.num_cols].astype(float)
+                    # Remove rows with missing values
+                    df_gen = df_gen.drop(
+                        df_gen[df_gen.isna().any(axis=1)].index)
+                    # Update process bar
 
-                # Remove rows with missing values
-                df_gen = df_gen.drop(
-                    df_gen[df_gen.isna().any(axis=1)].index)
-                # Update process bar
-
-                pbar.update(df_gen.shape[0] - already_generated)
-                already_generated = df_gen.shape[0]
-                print("already generated = ", already_generated )
+                    pbar.update(df_gen.shape[0] - already_generated)
+                    already_generated = df_gen.shape[0]
+        finally:
+            if debug_text_path:
+                with open(debug_text_path, "w") as handle:
+                    json.dump(last_text_data, handle, indent=2)
                 # Check if we actually generating synth samples and if not break everything 
                 # _cnt += 1
                 # if _cnt > 13 and already_generated == 0:  # (:

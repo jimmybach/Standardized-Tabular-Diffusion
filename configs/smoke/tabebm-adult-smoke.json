@@ -1,0 +1,42 @@
+{
+  "model": "tabebm",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/tabebm-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "sgld_steps": 10,
+      "sgld_step_size": 0.1,
+      "sgld_noise_std": 0.01,
+      "starting_point_noise_std": 0.01,
+      "distance_negative_class": 5.0
+    }
+  },
+  "sample": {
+    "enabled": false,
+    "num_samples": 8,
+    "checkpoint_path": null,
+    "extra": {
+      "sgld_steps": 10
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "tabebm",
+    "train-only"
+  ],
+  "notes": "Classification-only TabEBM train smoke preset. Sample is intentionally disabled by default because TabPFN model access is gated."
+}

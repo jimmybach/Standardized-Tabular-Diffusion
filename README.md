@@ -39,9 +39,23 @@ Each operation accepts a shared `RunSpec` object and returns standardized artifa
 
 The currently supported adapters are:
 
+- `arf`
+- `bn`
+- `ctab-gan-plus`
+- `ctgan`
+- `goggle`
+- `great`
+- `nflow`
+- `nrgboost`
+- `realtabformer`
+- `smote`
+- `tabebm`
 - `tabdiff`
-- `tabsyn`
 - `tabddpm`
+- `tabsyn`
+- `tvae`
+
+The repo now also includes a structured baseline inventory for the broader tabular-generation landscape, including the remaining TabStruct baselines and additional models from the TabuLa benchmark paper.
 
 Each standardized run writes canonical metadata such as:
 
@@ -93,6 +107,31 @@ The standardized evaluation path now uses a benchmark-oriented deterministic con
 
 For the current smoke benchmark setup, repeated standardized evaluation runs now produce identical summary hashes.
 
+## Environment
+
+The repo now spans several dependency families that do not all evolve in lockstep:
+
+- diffusion / CTGAN-style baselines
+- Hugging Face transformer baselines
+- DGL / graph baselines
+- TabPFN-backed energy-based baselines
+
+The current known-good reference stack is pinned in:
+
+- `requirements-benchmark-stack.txt`
+
+Important current caveats:
+
+- `torch==2.13.0` is the active runtime because `tabebm` depends on a newer TabPFN stack.
+- `transformers==4.46.3` is intentionally pinned because the vendored `great` code is more compatible there than on the newer 4.57 line.
+- `realtabformer` currently relies on an adapter-side import shim that disables torchvision-backed transformer imports we do not need for tabular generation.
+- `goggle` remains sensitive to DGL / torch-geometric binary compatibility and cache-directory permissions.
+- `tabebm` sample generation is intentionally opt-in and requires accepted Prior Labs TabPFN model terms plus authentication before it can run.
+
+For the operational status of each baseline, see:
+
+- `docs/runtime_status.md`
+
 ## Dataset Materialization
 
 For datasets that need a shared canonical processed layout, use:
@@ -121,6 +160,24 @@ Describe the shared metric schema:
 
 ```bash
 python -m standardized_tabular_diffusion.cli describe-metrics
+```
+
+List the researched baseline inventory:
+
+```bash
+python -m standardized_tabular_diffusion.cli list-model-inventory
+```
+
+Filter the inventory to one benchmark paper:
+
+```bash
+python -m standardized_tabular_diffusion.cli list-model-inventory --benchmark tabstruct-2026
+```
+
+Inspect one model entry:
+
+```bash
+python -m standardized_tabular_diffusion.cli show-model-inventory --model ctab-gan-plus
 ```
 
 Print the shared config schema:
@@ -165,6 +222,20 @@ python -m standardized_tabular_diffusion.cli compare \
   --summary artifacts/tabdiff/adult/run-1/standardized_summary.json \
   --summary artifacts/tabsyn/adult/run-1/standardized_summary.json
 ```
+
+Smoke presets for newly added baseline families live in:
+
+- `configs/smoke/nrgboost-adult-smoke.json`
+- `configs/smoke/ctab-gan-plus-adult-smoke.json`
+- `configs/smoke/realtabformer-adult-tiny.json`
+- `configs/smoke/arf-adult-smoke.json`
+- `configs/smoke/great-adult-train-smoke.json`
+- `configs/smoke/great-adult-tiny.json`
+- `configs/smoke/great-adult-distilgpt2-strong.json`
+- `configs/smoke/tabebm-adult-smoke.json`
+- `configs/smoke/tabebm-adult-gated-sample.json`
+
+Additional usage notes are in `docs/smoke_presets.md`.
 
 ## Test One Model
 
@@ -228,3 +299,4 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 - `TabSyn` required a few upstream entrypoint fixes so the standardized runner can execute train/sample stages reliably.
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
+- The broader baseline roadmap and literature map now live in `docs/tabular_generation_landscape.md`.
