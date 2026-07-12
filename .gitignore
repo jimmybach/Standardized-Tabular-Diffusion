@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Benchmark/runtime outputs
+artifacts/test/
+wandb/
+mlflow.db
+rtf_checkpoints/

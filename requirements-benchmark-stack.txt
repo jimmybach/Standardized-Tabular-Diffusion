@@ -1,0 +1,18 @@
+# Known-good benchmark stack for the standardized baseline adapters.
+# This file is meant as a reproducibility reference for the current repo state,
+# not as a minimal dependency set.
+
+torch==2.13.0
+transformers==4.46.3
+tokenizers==0.20.3
+torchdata==0.7.1
+
+realtabformer==0.2.4
+nrgboost==0.0.3
+tabebm==2025.8.19
+arfpy==0.1.1
+pgmpy==0.1.26
+nflows==0.14
+dgl==2.2.0
+torch-geometric==2.8.0
+dython==0.7.12

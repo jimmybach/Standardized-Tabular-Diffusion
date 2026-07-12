@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 import sys
+import types
 from pathlib import Path
+
+import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -10,9 +13,30 @@ if str(REPO_ROOT) not in sys.path:
 
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
 from standardized_tabular_diffusion.interfaces import DatasetSpec
+from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
+from standardized_tabular_diffusion.models.next_wave_baselines import CTABGANPlusAdapter, NRGBoostAdapter, REaLTabFormerAdapter
+from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
+from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
+
+
+class PickleableFakeSynth:
+    def fit(self, train_data, discrete_columns=()):
+        self.train_shape = train_data.shape
+        self.discrete_columns = list(discrete_columns)
+
+    def sample(self, samples):
+        return pd.DataFrame({"x": [10] * samples, "y": [1] * samples})
+
+
+class PickleableFakeCTABGAN:
+    def fit(self):
+        return None
+
+    def generate_samples(self, samples, seed=0):
+        return pd.DataFrame({"0": [10] * samples, "y": [1] * samples})
 
 
 def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command(
@@ -240,3 +264,516 @@ def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: P
     assert ready_tabdiff["ready"] is True
     assert ready_tabddpm["ready"] is True
     assert ready_tabddpm_train["ready"] is True
+
+
+def test_ctgan_train_and_sample_use_local_pickle_checkpoint(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabDDPM-main").mkdir(parents=True)
+    adapter = CTGANAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
+
+    monkeypatch.setattr(adapter, "_build_synthesizer", lambda spec: PickleableFakeSynth())
+
+    train_config = ExperimentConfig(
+        model="ctgan",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "ctgan"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="ctgan",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "ctgan"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=3),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    assert (Path(train_config.output_dir) / "model.pkl").exists()
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (3, 2)
+
+
+def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabSyn-main").mkdir(parents=True)
+    adapter = SMOTEAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,0\n3,0\n10,1\n11,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n4,0\n")
+
+    class FakeSMOTE:
+        def __init__(self, random_state=None, k_neighbors=5):
+            self.random_state = random_state
+            self.k_neighbors = k_neighbors
+
+        def fit_resample(self, x_train, y_train):
+            x_df = pd.DataFrame(x_train).reset_index(drop=True)
+            y_series = pd.Series(y_train).reset_index(drop=True)
+            return pd.concat([x_df, x_df.iloc[[0]]], ignore_index=True), pd.concat([y_series, y_series.iloc[[0]]], ignore_index=True)
+
+    fake_imblearn = types.ModuleType("imblearn")
+    fake_over_sampling = types.ModuleType("imblearn.over_sampling")
+    fake_over_sampling.SMOTE = FakeSMOTE
+    fake_imblearn.over_sampling = fake_over_sampling
+    monkeypatch.setitem(sys.modules, "imblearn", fake_imblearn)
+    monkeypatch.setitem(sys.modules, "imblearn.over_sampling", fake_over_sampling)
+
+    config = ExperimentConfig(
+        model="smote",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "smote"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=4, extra={"k_neighbors": 1}),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
+
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (4, 2)
+
+
+def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabDDPM-main" / "CTAB-GAN-Plus").mkdir(parents=True, exist_ok=True)
+    (repo_root / "TabDDPM-main").mkdir(parents=True, exist_ok=True)
+    columns_path = repo_root / "TabDDPM-main" / "CTAB-GAN-Plus" / "columns.json"
+    columns_path.write_text(
+        json.dumps(
+            {
+                "adult": {
+                    "categorical_columns": ["y"],
+                    "mixed_columns": {},
+                    "integer_columns": ["0"],
+                    "general_columns": [],
+                    "problem_type": {"Classification": "y"},
+                }
+            }
+        )
+    )
+    adapter = CTABGANPlusAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "target"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["target"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,target\n1,0\n2,1\n")
+    dataset_spec.test_data_path.write_text("x,target\n3,1\n")
+
+    monkeypatch.setattr(adapter, "_load_training_frame", lambda dataset_spec: pd.DataFrame({"0": [1, 2], "y": [0, 1]}))
+    monkeypatch.setattr(adapter, "_build_model", lambda train_df, spec: PickleableFakeCTABGAN())
+
+    train_config = ExperimentConfig(
+        model="ctab-gan-plus",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "ctab-gan-plus"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="ctab-gan-plus",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "ctab-gan-plus"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=3),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    assert (Path(train_config.output_dir) / "ctabgan_plus.pkl").exists()
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (3, 2)
+
+
+def test_realtabformer_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabSyn-main").mkdir(parents=True)
+    adapter = REaLTabFormerAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
+
+    class FakeRTF:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def fit(self, df, **kwargs):
+            self.df = df
+            self.fit_kwargs = kwargs
+
+        def save(self, path):
+            model_dir = Path(path) / "id0001"
+            model_dir.mkdir(parents=True, exist_ok=True)
+            (model_dir / "marker.txt").write_text("ok")
+
+        def sample(self, n_samples, **kwargs):
+            return pd.DataFrame({"x": [10] * n_samples, "y": [1] * n_samples})
+
+        @classmethod
+        def load_from_dir(cls, path):
+            return cls(loaded_from=path)
+
+    fake_module = types.ModuleType("realtabformer")
+    fake_module.REaLTabFormer = FakeRTF
+    monkeypatch.setitem(sys.modules, "realtabformer", fake_module)
+
+    train_config = ExperimentConfig(
+        model="realtabformer",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "realtabformer"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="realtabformer",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "realtabformer"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=2),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (2, 2)
+
+
+def test_realtabformer_can_limit_training_rows_for_tiny_smoke_runs(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabSyn-main").mkdir(parents=True)
+    adapter = REaLTabFormerAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n3,0\n4,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n5,1\n")
+
+    observed: dict[str, object] = {}
+
+    class FakeRTF:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def fit(self, df, **kwargs):
+            observed["fit_rows"] = len(df)
+
+        def save(self, path):
+            model_dir = Path(path) / "id0001"
+            model_dir.mkdir(parents=True, exist_ok=True)
+
+    fake_module = types.ModuleType("realtabformer")
+    fake_module.REaLTabFormer = FakeRTF
+    monkeypatch.setitem(sys.modules, "realtabformer", fake_module)
+
+    train_config = ExperimentConfig(
+        model="realtabformer",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "realtabformer-tiny"),
+        train=TrainConfig(enabled=True, extra={"max_train_rows": 2, "n_critic": 0, "num_bootstrap": 0}),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+
+    assert observed["fit_rows"] == 2
+
+
+def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path
+    (repo_root / "TabSyn-main").mkdir(parents=True)
+    adapter = NRGBoostAdapter(repo_root)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
+
+    class FakeDataset:
+        def __init__(self, df):
+            self.df = df
+
+    class FakeBoosterInstance:
+        def save(self, path):
+            Path(path).write_text("saved")
+
+        def sample(self, n_samples, num_steps=100):
+            return pd.DataFrame({"x": [10] * n_samples, "y": [1] * n_samples})
+
+    class FakeBooster:
+        @staticmethod
+        def fit(dataset, params, seed=0):
+            return FakeBoosterInstance()
+
+        @staticmethod
+        def load(path):
+            return FakeBoosterInstance()
+
+    fake_module = types.ModuleType("nrgboost")
+    fake_module.Dataset = FakeDataset
+    fake_module.NRGBooster = FakeBooster
+    monkeypatch.setitem(sys.modules, "nrgboost", fake_module)
+
+    train_config = ExperimentConfig(
+        model="nrgboost",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "nrgboost"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="nrgboost",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "nrgboost"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=2),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    assert (Path(train_config.output_dir) / "model.nrgboost").exists()
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (2, 2)
+
+
+def test_bn_and_nflow_use_default_pickle_checkpoint_names(tmp_path: Path) -> None:
+    bn_adapter = BNAdapter(tmp_path)
+    nflow_adapter = NFlowAdapter(tmp_path)
+
+    bn_spec = ExperimentConfig(
+        model="bn",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "bn"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+    nflow_spec = ExperimentConfig(
+        model="nflow",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "nflow"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+
+    assert bn_adapter._resolve_checkpoint_path(bn_spec).name == "model.pkl"
+    assert nflow_adapter._resolve_checkpoint_path(nflow_spec).name == "model.pkl"
+
+
+def test_goggle_uses_model_pt_checkpoint_name(tmp_path: Path) -> None:
+    adapter = GoggleAdapter(tmp_path)
+    spec = ExperimentConfig(
+        model="goggle",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "goggle"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+
+    assert adapter._resolve_checkpoint_path(spec).name == "model.pt"
+
+
+def test_great_arf_and_tabebm_checkpoint_conventions(tmp_path: Path) -> None:
+    great_adapter = GReaTAdapter(tmp_path)
+    arf_adapter = ARFAdapter(tmp_path)
+    tabebm_adapter = TabEBMAdapter(tmp_path)
+
+    great_spec = ExperimentConfig(
+        model="great",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "great"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+    arf_spec = ExperimentConfig(
+        model="arf",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "arf"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+    tabebm_spec = ExperimentConfig(
+        model="tabebm",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabebm"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+
+    assert great_adapter._model_root(great_spec).name == "great_model"
+    assert arf_adapter._resolve_checkpoint_path(arf_spec).name == "model.pkl"
+    assert tabebm_adapter._resolve_checkpoint_path(tabebm_spec).name == "model.pkl"
+    assert great_adapter._metadata_path(great_adapter._model_root(great_spec)).name == "adapter_metadata.json"
+
+
+def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_path: Path) -> None:
+    dataset_spec = type(
+        "Spec",
+        (),
+        {
+            "name": "adult",
+            "task_type": "classification",
+            "metadata_path": tmp_path / "info.json",
+            "train_data_path": tmp_path / "train.csv",
+            "val_data_path": None,
+            "test_data_path": tmp_path / "test.csv",
+        },
+    )()
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x\n1\n")
+    dataset_spec.test_data_path.write_text("x\n1\n")
+
+    for model_name, checkpoint_name in [
+        ("bn", "model.pkl"),
+        ("nflow", "model.pkl"),
+        ("goggle", "model.pt"),
+        ("great", "great_model"),
+        ("arf", "model.pkl"),
+    ]:
+        checkpoint = tmp_path / checkpoint_name
+        if checkpoint_name.endswith(".pkl") or checkpoint_name.endswith(".pt"):
+            checkpoint.write_text("stub")
+        else:
+            checkpoint.mkdir(exist_ok=True)
+        config = ExperimentConfig(
+            model=model_name,
+            dataset="adult",
+            output_dir=str(tmp_path),
+            train=TrainConfig(enabled=False),
+            sample=SampleConfig(enabled=True, checkpoint_path=str(checkpoint)),
+            evaluation=EvaluationConfig(enabled=False),
+        )
+        ready = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)
+        assert ready["ready"] is True
+
+    tabebm_checkpoint = tmp_path / "model.pkl"
+    tabebm_checkpoint.write_text("stub")
+    tabebm_config = ExperimentConfig(
+        model="tabebm",
+        dataset="adult",
+        output_dir=str(tmp_path),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, checkpoint_path=str(tabebm_checkpoint), extra={"allow_gated_model": True}),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    ready = validate_action_inputs(tabebm_config, "sample", dataset_spec=dataset_spec)
+    assert ready["ready"] is True
+
+
+def test_validate_action_inputs_rejects_tabebm_sample_without_opt_in(tmp_path: Path) -> None:
+    dataset_spec = type(
+        "Spec",
+        (),
+        {
+            "name": "adult",
+            "task_type": "classification",
+            "metadata_path": tmp_path / "info.json",
+            "train_data_path": tmp_path / "train.csv",
+            "val_data_path": None,
+            "test_data_path": tmp_path / "test.csv",
+        },
+    )()
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x\n1\n")
+    dataset_spec.test_data_path.write_text("x\n1\n")
+    checkpoint = tmp_path / "model.pkl"
+    checkpoint.write_text("stub")
+
+    config = ExperimentConfig(
+        model="tabebm",
+        dataset="adult",
+        output_dir=str(tmp_path),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, checkpoint_path=str(checkpoint)),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    ready = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)
+
+    assert ready["ready"] is False
+    assert "allow_gated_model" in " ".join(ready["missing"])

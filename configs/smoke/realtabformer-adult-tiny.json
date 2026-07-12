@@ -1,0 +1,43 @@
+{
+  "model": "realtabformer",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/realtabformer-tiny",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 2,
+      "gradient_accumulation_steps": 1,
+      "logging_steps": 1,
+      "num_bootstrap": 0,
+      "n_critic": 0,
+      "report_to": "none",
+      "max_train_rows": 128
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 4,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "realtabformer",
+    "tiny"
+  ],
+  "notes": "Tiny local REaLTabFormer preset that samples 128 training rows to keep the first validation run practical."
+}

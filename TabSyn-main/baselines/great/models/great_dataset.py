@@ -1,3 +1,4 @@
+import os
 import random
 import typing as tp
 
@@ -31,7 +32,9 @@ class GReaTDataset(Dataset):
         row = self._data.fast_slice(key, 1)
 
         shuffle_idx = list(range(row.num_columns))
-        random.shuffle(shuffle_idx)
+        preserve_order = os.environ.get("STANDARDIZED_GREAT_PRESERVE_ORDER", "").strip().lower() in {"1", "true", "yes"}
+        if not preserve_order:
+            random.shuffle(shuffle_idx)
 
         shuffled_text = ", ".join(
             ["%s is %s" % (row.column_names[i], str(row.columns[i].to_pylist()[0]).strip()) for i in shuffle_idx]

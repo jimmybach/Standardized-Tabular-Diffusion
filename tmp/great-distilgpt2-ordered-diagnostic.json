@@ -1,0 +1,53 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-distilgpt2-ordered-diagnostic",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "llm": "distilgpt2",
+      "epochs": 3,
+      "batch_size": 8,
+      "logging_steps": 10,
+      "save_steps": 1000,
+      "max_train_rows": 256,
+      "report_to": "none",
+      "preserve_column_order": true
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 4,
+    "checkpoint_path": null,
+    "extra": {
+      "k": 8,
+      "max_length": 224,
+      "max_length_schedule": [
+        224
+      ],
+      "temperature": 0.3,
+      "temperature_schedule": [
+        0.3
+      ],
+      "max_tries": 4
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "great",
+    "ordered-diagnostic"
+  ],
+  "notes": "Ordered-column GReaT diagnostic to test whether disabling row-field shuffling improves sample parseability."
+}

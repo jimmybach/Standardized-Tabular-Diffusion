@@ -1,0 +1,37 @@
+{
+  "model": "bn",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/bn-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "num_bins": 8,
+      "max_indegree": 2,
+      "max_iter": 25
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "bn"
+  ],
+  "notes": "Small CPU smoke preset for the Bayesian-network baseline on adult."
+}

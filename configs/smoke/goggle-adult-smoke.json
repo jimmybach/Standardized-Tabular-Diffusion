@@ -1,0 +1,42 @@
+{
+  "model": "goggle",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/goggle-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 256,
+      "encoder_dim": 64,
+      "decoder_dim": 64,
+      "encoder_l": 1,
+      "decoder_l": 1,
+      "learning_rate": 0.01,
+      "threshold": 0.1
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "goggle"
+  ],
+  "notes": "Small CPU smoke preset for the vendored GOGGLE baseline on adult."
+}

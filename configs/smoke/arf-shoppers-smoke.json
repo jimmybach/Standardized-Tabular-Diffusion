@@ -1,0 +1,39 @@
+{
+  "model": "arf",
+  "dataset": "shoppers",
+  "output_dir": "artifacts/test/arf-shoppers-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "num_trees": 10,
+      "max_iters": 2,
+      "min_node_size": 10,
+      "verbose": false
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "arf",
+    "shoppers"
+  ],
+  "notes": "Second-dataset CPU smoke preset for ARF on shoppers."
+}

@@ -9,6 +9,7 @@ from standardized_tabular_diffusion.config import build_example_config, load_exp
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.tabstruct import METRIC_DEFINITIONS
 from standardized_tabular_diffusion.materialization import materialization_status, materialize_dataset
+from standardized_tabular_diffusion.model_inventory import get_inventory_entry, list_inventory
 from standardized_tabular_diffusion.registry import list_datasets, list_models
 from standardized_tabular_diffusion.runner import (
     build_run_context,
@@ -24,9 +25,19 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("list-models", help="List standardized model adapters")
+    inventory_parser = subparsers.add_parser("list-model-inventory", help="List researched baseline models and their integration status")
+    inventory_parser.add_argument(
+        "--benchmark",
+        choices=["tabstruct-2026", "tabula-2025"],
+        default=None,
+        help="Optionally filter the inventory by benchmark paper",
+    )
     subparsers.add_parser("list-datasets", help="List canonical datasets from the root registry")
     subparsers.add_parser("describe-metrics", help="Print the shared TabStruct-aligned metric schema")
     subparsers.add_parser("describe-config", help="Print the shared experiment config schema as an example JSON")
+
+    model_parser = subparsers.add_parser("show-model-inventory", help="Show one researched baseline model entry")
+    model_parser.add_argument("--model", required=True, help="Model name")
 
     dataset_parser = subparsers.add_parser("show-dataset", help="Show one canonical dataset spec")
     dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
@@ -67,6 +78,11 @@ def main() -> None:
         print(json.dumps({"models": list_models()}, indent=2))
         return
 
+    if args.command == "list-model-inventory":
+        entries = [entry.to_dict() for entry in list_inventory(benchmark=args.benchmark)]
+        print(json.dumps({"models": entries}, indent=2))
+        return
+
     if args.command == "list-datasets":
         print(json.dumps({"datasets": list_datasets()}, indent=2))
         return
@@ -90,6 +106,10 @@ def main() -> None:
 
     if args.command == "show-dataset":
         print(json.dumps(get_dataset_spec(args.dataset).to_dict(), indent=2))
+        return
+
+    if args.command == "show-model-inventory":
+        print(json.dumps(get_inventory_entry(args.model).to_dict(), indent=2))
         return
 
     if args.command == "example-config":

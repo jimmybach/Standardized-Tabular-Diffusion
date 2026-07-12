@@ -42,6 +42,22 @@ class BaseModelAdapter(ABC):
         subprocess.run(command, cwd=cwd, check=True)
 
     def resolve_dataset_spec(self, spec: RunSpec) -> DatasetSpec:
+        embedded_spec = spec.extra.get("dataset_spec")
+        if embedded_spec:
+            return DatasetSpec(
+                name=embedded_spec["name"],
+                task_type=embedded_spec["task_type"],
+                column_names=list(embedded_spec["column_names"]),
+                numerical_columns=list(embedded_spec["numerical_columns"]),
+                categorical_columns=list(embedded_spec["categorical_columns"]),
+                target_columns=list(embedded_spec["target_columns"]),
+                metadata_path=Path(embedded_spec["metadata_path"]),
+                train_data_path=None if embedded_spec.get("train_data_path") is None else Path(embedded_spec["train_data_path"]),
+                val_data_path=None if embedded_spec.get("val_data_path") is None else Path(embedded_spec["val_data_path"]),
+                test_data_path=None if embedded_spec.get("test_data_path") is None else Path(embedded_spec["test_data_path"]),
+                provenance=list(embedded_spec.get("provenance", [])),
+                extra=dict(embedded_spec.get("extra", {})),
+            )
         return get_dataset_spec(spec.dataset, repo_root=self.repo_root)
 
     def build_run_spec(self, config: ExperimentConfig, dataset_spec: DatasetSpec | None = None) -> RunSpec:

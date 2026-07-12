@@ -1,0 +1,42 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-train-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "llm": "sshleifer/tiny-gpt2",
+      "epochs": 1,
+      "batch_size": 2,
+      "logging_steps": 1,
+      "save_steps": 1000,
+      "max_train_rows": 32,
+      "report_to": "none"
+    }
+  },
+  "sample": {
+    "enabled": false,
+    "num_samples": 4,
+    "checkpoint_path": null,
+    "extra": {}
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "great",
+    "train-only"
+  ],
+  "notes": "Train-only GReaT smoke preset for deterministic adapter validation when tiny sample quality is too weak to parse reliably."
+}

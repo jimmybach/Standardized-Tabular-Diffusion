@@ -157,7 +157,7 @@ def validate_action_inputs(
     missing: list[str] = []
     checked: dict[str, Any] = {}
 
-    if action in {"train", "sample"} and config.model in {"tabdiff", "tabsyn"}:
+    if action in {"train", "sample"} and config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm"}:
         checked["metadata_path"] = str(dataset_spec.metadata_path)
         if not dataset_spec.metadata_path.exists():
             missing.append(f"metadata_path missing: {dataset_spec.metadata_path}")
@@ -167,6 +167,43 @@ def validate_action_inputs(
         checked["test_data_path"] = None if dataset_spec.test_data_path is None else str(dataset_spec.test_data_path)
         if dataset_spec.test_data_path is not None and not dataset_spec.test_data_path.exists():
             missing.append(f"test_data_path missing: {dataset_spec.test_data_path}")
+
+    if config.model in {"smote", "tabebm"}:
+        checked["task_type"] = dataset_spec.task_type
+        if dataset_spec.task_type != "classification":
+            missing.append(f"{config.model} only supports classification datasets, got: {dataset_spec.task_type}")
+
+    if action == "sample" and config.model in {"ctgan", "tvae", "ctab-gan-plus", "nrgboost", "bn", "nflow", "goggle", "arf", "tabebm"}:
+        checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pkl")
+        if config.model == "ctab-gan-plus":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "ctabgan_plus.pkl")
+        if config.model == "nrgboost":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nrgboost")
+        if config.model == "goggle":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pt")
+        checked["checkpoint_path"] = checkpoint_path
+        if not Path(checkpoint_path).exists():
+            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+
+    if action == "sample" and config.model == "tabebm":
+        allow_gated_model = bool(config.sample.extra.get("allow_gated_model", False))
+        checked["allow_gated_model"] = allow_gated_model
+        if not allow_gated_model:
+            missing.append(
+                "sample.extra.allow_gated_model must be true for tabebm sample because TabPFN access is gated"
+            )
+
+    if action == "sample" and config.model == "great":
+        checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "great_model")
+        checked["checkpoint_path"] = checkpoint_path
+        if not Path(checkpoint_path).exists():
+            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+
+    if action == "sample" and config.model == "realtabformer":
+        checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "realtabformer_model")
+        checked["checkpoint_path"] = checkpoint_path
+        if not Path(checkpoint_path).exists():
+            missing.append(f"checkpoint_path missing: {checkpoint_path}")
 
     if config.model == "tabsyn":
         method = config.sample.extra.get("method") or config.train.extra.get("method") or "tabsyn"
@@ -204,7 +241,7 @@ def validate_action_inputs(
                 missing.append(f"upstream_config_path missing: {config.upstream_config_path}")
 
     if action == "evaluate":
-        if config.model in {"tabdiff", "tabsyn"}:
+        if config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm"}:
             sample_path = config.evaluation.extra.get("sample_path")
             checked["sample_path"] = sample_path
             if sample_path is None or not Path(sample_path).exists():
