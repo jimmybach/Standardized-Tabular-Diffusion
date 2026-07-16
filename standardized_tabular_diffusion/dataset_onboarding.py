@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from pandas import CategoricalDtype
 
 from standardized_tabular_diffusion.materialization import _build_manifest, _sync_processed_dataset, manifest_path
 
@@ -64,7 +66,21 @@ def _infer_column_partitions(
     for column in frame.columns:
         if column == target_column:
             continue
-        if pd.api.types.is_bool_dtype(frame[column]) or pd.api.types.is_object_dtype(frame[column]) or pd.api.types.is_categorical_dtype(frame[column]):
+        series = frame[column]
+        if isinstance(series.dtype, CategoricalDtype):
+            inferred_categorical.append(column)
+            continue
+        if pd.api.types.is_object_dtype(series) or pd.api.types.is_string_dtype(series):
+            normalized = series.replace({"?": np.nan, " ?": np.nan, "": np.nan, " ": np.nan})
+            coerced = pd.to_numeric(normalized, errors="coerce")
+            if normalized.notna().sum() > 0 and coerced.notna().sum() == normalized.notna().sum():
+                inferred_numerical.append(column)
+                continue
+        if (
+            pd.api.types.is_bool_dtype(series)
+            or pd.api.types.is_object_dtype(series)
+            or pd.api.types.is_string_dtype(series)
+        ):
             inferred_categorical.append(column)
         else:
             inferred_numerical.append(column)
@@ -86,6 +102,41 @@ def _build_column_info(
         info[column] = "str"
     info[target_column] = "float" if task_type == "regression" else "str"
     return info
+
+
+def _sanitize_local_frame(
+    frame: pd.DataFrame,
+    *,
+    numerical_columns: list[str],
+    categorical_columns: list[str],
+    target_column: str,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    cleaned = frame.copy()
+    missing_markers = {"?": np.nan, " ?": np.nan, "": np.nan, " ": np.nan}
+    categorical_missing_token = "__missing__"
+    cleaned = cleaned.replace(missing_markers)
+
+    for column in numerical_columns:
+        cleaned[column] = pd.to_numeric(cleaned[column], errors="coerce")
+
+    dropped_target_rows = int(cleaned[target_column].isna().sum())
+    if dropped_target_rows:
+        cleaned = cleaned.loc[~cleaned[target_column].isna()].copy()
+
+    dropped_numeric_rows = int(cleaned[numerical_columns].isna().any(axis=1).sum()) if numerical_columns else 0
+    if dropped_numeric_rows:
+        cleaned = cleaned.loc[~cleaned[numerical_columns].isna().any(axis=1)].copy()
+
+    for column in categorical_columns:
+        cleaned[column] = cleaned[column].fillna(categorical_missing_token).astype(str)
+
+    report = {
+        "input_rows": int(len(frame)),
+        "output_rows": int(len(cleaned)),
+        "dropped_missing_target_rows": dropped_target_rows,
+        "dropped_missing_numerical_rows": dropped_numeric_rows,
+    }
+    return cleaned, report
 
 
 def _run_python(args: list[str], cwd: Path) -> None:
@@ -139,7 +190,13 @@ def register_dataset(
     upload_copy_path = uploaded_dir / source_path.name
     shutil.copy2(source_path, upload_copy_path)
     raw_copy_path = tabdiff_data_dir / "raw.csv"
-    shutil.copy2(source_path, raw_copy_path)
+    cleaned_frame, cleaning_report = _sanitize_local_frame(
+        frame,
+        numerical_columns=numerical_columns,
+        categorical_columns=categorical_columns,
+        target_column=target_column,
+    )
+    cleaned_frame.to_csv(raw_copy_path, index=False)
 
     normalized_task_type = _normalize_task_type_for_info(task_type)
     info_payload = {
@@ -176,6 +233,7 @@ def register_dataset(
         "numerical_columns": numerical_columns,
         "categorical_columns": categorical_columns,
         "target_column": target_column,
+        "cleaning_report": cleaning_report,
     }
 
 

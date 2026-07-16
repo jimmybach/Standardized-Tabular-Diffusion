@@ -54,6 +54,30 @@ def test_register_dataset_writes_registry_files_and_copies_raw_csv(tmp_path: Pat
     assert saved_info["data_path"] == "data/customer_churn/raw.csv"
 
 
+def test_register_dataset_infers_pandas_string_dtype_as_categorical(tmp_path: Path) -> None:
+    _init_repo_layout(tmp_path)
+    raw_csv_path = tmp_path / "stringy.csv"
+    frame = pd.DataFrame(
+        {
+            "age": pd.Series([22, 35, 48], dtype="int64"),
+            "state": pd.Series(["NY", "CA", "NY"], dtype="string"),
+            "churned": pd.Series([0, 1, 0], dtype="int64"),
+        }
+    )
+    frame.to_csv(raw_csv_path, index=False)
+
+    payload = register_dataset(
+        dataset_name="stringy",
+        raw_csv_path=raw_csv_path,
+        task_type="classification",
+        target_column="churned",
+        repo_root=tmp_path,
+    )
+
+    assert payload["numerical_columns"] == ["age"]
+    assert payload["categorical_columns"] == ["state"]
+
+
 def test_process_registered_dataset_builds_manifest_and_syncs_tabsyn(tmp_path: Path, monkeypatch) -> None:
     _init_repo_layout(tmp_path)
     raw_csv_path = tmp_path / "housing.csv"
@@ -111,3 +135,33 @@ def test_process_registered_dataset_builds_manifest_and_syncs_tabsyn(tmp_path: P
     dataset_spec = get_dataset_spec("housing", repo_root=tmp_path)
     assert dataset_spec.train_data_path == tmp_path / "TabDiff-main" / "data" / "housing" / "train.csv"
     assert dataset_spec.test_data_path == tmp_path / "TabDiff-main" / "data" / "housing" / "test.csv"
+
+
+def test_register_dataset_sanitizes_missing_numeric_markers(tmp_path: Path) -> None:
+    _init_repo_layout(tmp_path)
+    raw_csv_path = tmp_path / "sick_like.csv"
+    pd.DataFrame(
+        {
+            "age": ["21", "?", "42"],
+            "sex": ["F", "M", None],
+            "TSH": ["1.2", " ?", "3.4"],
+            "Class": ["negative", "negative", "positive"],
+        }
+    ).to_csv(raw_csv_path, index=False)
+
+    payload = register_dataset(
+        dataset_name="sick_like",
+        raw_csv_path=raw_csv_path,
+        task_type="classification",
+        target_column="Class",
+        repo_root=tmp_path,
+    )
+
+    cleaned_frame = pd.read_csv(tmp_path / "TabDiff-main" / "data" / "sick_like" / "raw.csv")
+
+    assert payload["cleaning_report"]["input_rows"] == 3
+    assert payload["cleaning_report"]["output_rows"] == 2
+    assert payload["cleaning_report"]["dropped_missing_numerical_rows"] == 1
+    assert cleaned_frame.shape[0] == 2
+    assert cleaned_frame["TSH"].dtype.kind in {"f", "i"}
+    assert "__missing__" in set(cleaned_frame["sex"].astype(str))

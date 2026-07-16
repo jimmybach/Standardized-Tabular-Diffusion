@@ -1,8 +1,11 @@
 # Known-good benchmark stack for the standardized baseline adapters.
-# This file is meant as a reproducibility reference for the current repo state,
-# not as a minimal dependency set.
+# This file is meant as a practical shared install surface for the standardized
+# adapters and the vendored upstream runtimes, not as a minimal dependency set.
+# The `zero` helper used by TabSyn/TabDDPM is now vendored locally, so no extra
+# `zero`/`libzero` install should be needed.
 
-torch==2.13.0
+torch==2.3.0
+numpy==1.26.4
 transformers==4.46.3
 tokenizers==0.20.3
 torchdata==0.7.1
@@ -15,4 +18,23 @@ pgmpy==0.1.26
 nflows==0.14
 dgl==2.2.0
 torch-geometric==2.8.0
-dython==0.7.12
+dython==0.5.1
+icecream==2.1.3
+xlrd==2.0.1
+tomli==2.0.1
+tomli-w==1.0.0
+category-encoders==2.6.3
+imbalanced-learn==0.12.3
+datasets==3.1.0
+peft==0.9.0
+ml_collections==0.1.1
+sdmetrics==0.11.1
+prdc==0.2
+rdt==1.13.0
+openpyxl==3.1.5
+xgboost==2.1.1
+wandb==0.17.3
+kaleido==0.2.1
+tqdm==4.66.5
+catboost==1.2.5
+skorch==0.15.0

@@ -1,0 +1,26 @@
+{
+  "dataset": "sick",
+  "materialized_by": "local-registration",
+  "metadata_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/sick/info.json",
+  "train_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/sick/train.csv",
+  "val_data_path": null,
+  "test_data_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/data/sick/test.csv",
+  "synthetic_real_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/sick/real.csv",
+  "synthetic_val_path": null,
+  "synthetic_test_path": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabDiff-main/synthetic/sick/test.csv",
+  "exists": {
+    "metadata_path": true,
+    "train_data_path": true,
+    "val_data_path": false,
+    "test_data_path": true,
+    "synthetic_real_path": true,
+    "synthetic_val_path": false,
+    "synthetic_test_path": true
+  },
+  "synced_roots": {
+    "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main": {
+      "data_dir": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/data/sick",
+      "synthetic_dir": "/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/TabSyn-main/synthetic/sick"
+    }
+  }
+}
