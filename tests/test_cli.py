@@ -61,6 +61,36 @@ def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys)
     assert "tabebm" in payload["models"]
 
 
+def test_cli_example_config_can_save_to_file(tmp_path: Path, monkeypatch, capsys) -> None:
+    config_path = tmp_path / "generated-config.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "example-config",
+            "--model",
+            "tabsyn",
+            "--dataset",
+            "adult",
+            "--output-dir",
+            str(tmp_path / "artifacts" / "tabsyn"),
+            "--save-config",
+            str(config_path),
+        ],
+    )
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    saved_payload = json.loads(config_path.read_text())
+
+    assert config_path.exists()
+    assert payload == saved_payload
+    assert saved_payload["model"] == "tabsyn"
+    assert saved_payload["dataset"] == "adult"
+
+
 def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, monkeypatch, capsys) -> None:
     config_path = tmp_path / "config.json"
     output_dir = tmp_path / "artifacts" / "run"

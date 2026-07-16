@@ -148,6 +148,37 @@ python -m standardized_tabular_diffusion.cli materialization-status --dataset ad
 
 This is especially important for `TabDiff` and `TabSyn`, which are standardized around a shared processed dataset layout.
 
+## Register A Local Dataset
+
+For a brand new local dataset, first place the CSV anywhere on disk, then register it into the repo's canonical layout:
+
+```bash
+python -m standardized_tabular_diffusion.cli register-dataset \
+  --dataset my_dataset \
+  --raw-csv data/uploads/my_dataset/raw.csv \
+  --task-type classification \
+  --target-column label \
+  --numerical-column age \
+  --categorical-column state
+```
+
+This writes the dataset metadata into `TabDiff-main/data/Info/`, copies the raw CSV into the canonical data roots, and makes the dataset visible to `list-datasets`.
+
+Then process it into the shared train/test layout:
+
+```bash
+python -m standardized_tabular_diffusion.cli process-dataset --dataset my_dataset
+```
+
+After that, the dataset can be used with the normal standardized model workflow:
+
+```bash
+python -m standardized_tabular_diffusion.cli example-config \
+  --model tabsyn \
+  --dataset my_dataset \
+  --output-dir artifacts/tabsyn/my_dataset/run-001
+```
+
 ## CLI
 
 List available models:
