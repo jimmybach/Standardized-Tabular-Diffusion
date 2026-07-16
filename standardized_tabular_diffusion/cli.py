@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from standardized_tabular_diffusion.comparison import compare_summaries
-from standardized_tabular_diffusion.config import build_example_config, load_experiment_config
+from standardized_tabular_diffusion.config import build_example_config, load_experiment_config, save_experiment_config
+from standardized_tabular_diffusion.dataset_onboarding import process_registered_dataset, register_dataset
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.tabstruct import METRIC_DEFINITIONS
 from standardized_tabular_diffusion.materialization import materialization_status, materialize_dataset
@@ -46,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
     example_parser.add_argument("--model", required=True, help="Model name")
     example_parser.add_argument("--dataset", required=True, help="Dataset name")
     example_parser.add_argument("--output-dir", required=True, help="Output directory for artifacts")
+    example_parser.add_argument(
+        "--save-config",
+        default=None,
+        help="Optional path to save the generated config JSON",
+    )
 
     context_parser = subparsers.add_parser("build-context", help="Resolve a config into canonical dataset and run context")
     context_parser.add_argument("--config", required=True, help="Path to experiment config JSON")
@@ -62,6 +68,40 @@ def build_parser() -> argparse.ArgumentParser:
 
     materialize_status_parser = subparsers.add_parser("materialization-status", help="Show materialization status for one dataset")
     materialize_status_parser.add_argument("--dataset", required=True, help="Dataset name")
+
+    register_dataset_parser = subparsers.add_parser("register-dataset", help="Register a local CSV as a new canonical dataset")
+    register_dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
+    register_dataset_parser.add_argument("--raw-csv", required=True, help="Path to the local CSV file")
+    register_dataset_parser.add_argument(
+        "--task-type",
+        required=True,
+        choices=["classification", "regression", "binclass", "multiclass"],
+        help="Task type for the target column",
+    )
+    register_dataset_parser.add_argument("--target-column", required=True, help="Name of the target column")
+    register_dataset_parser.add_argument(
+        "--numerical-column",
+        dest="numerical_columns",
+        action="append",
+        default=None,
+        help="Name of a numerical feature column; repeat to provide more than one",
+    )
+    register_dataset_parser.add_argument(
+        "--categorical-column",
+        dest="categorical_columns",
+        action="append",
+        default=None,
+        help="Name of a categorical feature column; repeat to provide more than one",
+    )
+    register_dataset_parser.add_argument(
+        "--has-header",
+        choices=["true", "false"],
+        default="true",
+        help="Whether the CSV includes a header row",
+    )
+
+    process_dataset_parser = subparsers.add_parser("process-dataset", help="Process a registered dataset into the canonical materialized layout")
+    process_dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
 
     compare_parser = subparsers.add_parser("compare", help="Aggregate standardized summaries")
     compare_parser.add_argument("--summary", dest="summaries", action="append", required=True, help="Path to a standardized_summary.json file")
@@ -118,7 +158,10 @@ def main() -> None:
             dataset=args.dataset,
             output_dir=args.output_dir,
         )
-        print(json.dumps(config.to_dict(), indent=2))
+        payload = config.to_dict()
+        if args.save_config:
+            save_experiment_config(config, args.save_config)
+        print(json.dumps(payload, indent=2))
         return
 
     if args.command == "build-context":
@@ -150,6 +193,24 @@ def main() -> None:
 
     if args.command == "materialization-status":
         print(json.dumps(materialization_status(args.dataset), indent=2))
+        return
+
+    if args.command == "register-dataset":
+        payload = register_dataset(
+            dataset_name=args.dataset,
+            raw_csv_path=args.raw_csv,
+            task_type=args.task_type,
+            target_column=args.target_column,
+            numerical_columns=args.numerical_columns,
+            categorical_columns=args.categorical_columns,
+            has_header=args.has_header == "true",
+        )
+        print(json.dumps(payload, indent=2))
+        return
+
+    if args.command == "process-dataset":
+        manifest = process_registered_dataset(args.dataset)
+        print(json.dumps(manifest, indent=2))
         return
 
     if args.command == "compare":
