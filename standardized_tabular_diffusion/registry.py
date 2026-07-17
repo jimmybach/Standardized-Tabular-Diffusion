@@ -6,19 +6,23 @@ from standardized_tabular_diffusion.datasets import discover_dataset_specs
 from standardized_tabular_diffusion.models import (
     ARFAdapter,
     BNAdapter,
+    CTABGANAdapter,
     CTABGANPlusAdapter,
     CTGANAdapter,
+    CoDiAdapter,
     GoggleAdapter,
     GReaTAdapter,
     NRGBoostAdapter,
     NFlowAdapter,
     REaLTabFormerAdapter,
     SMOTEAdapter,
+    STaSyAdapter,
     TabEBMAdapter,
     TVAEAdapter,
     TabDDPMAdapter,
     TabDiffAdapter,
     TabSynAdapter,
+    TabulaAdapter,
 )
 
 
@@ -26,6 +30,8 @@ def _registry(repo_root: Path):
     return {
         "arf": ARFAdapter(repo_root),
         "bn": BNAdapter(repo_root),
+        "codi": CoDiAdapter(repo_root),
+        "ctab-gan": CTABGANAdapter(repo_root),
         "ctab-gan-plus": CTABGANPlusAdapter(repo_root),
         "ctgan": CTGANAdapter(repo_root),
         "goggle": GoggleAdapter(repo_root),
@@ -34,9 +40,11 @@ def _registry(repo_root: Path):
         "nflow": NFlowAdapter(repo_root),
         "realtabformer": REaLTabFormerAdapter(repo_root),
         "smote": SMOTEAdapter(repo_root),
+        "stasy": STaSyAdapter(repo_root),
         "tabebm": TabEBMAdapter(repo_root),
         "tabdiff": TabDiffAdapter(repo_root),
         "tabsyn": TabSynAdapter(repo_root),
+        "tabula": TabulaAdapter(repo_root),
         "tabddpm": TabDDPMAdapter(repo_root),
         "tvae": TVAEAdapter(repo_root),
     }
@@ -51,6 +59,8 @@ def list_models() -> list[str]:
     return [
         "arf",
         "bn",
+        "codi",
+        "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
         "goggle",
@@ -59,9 +69,11 @@ def list_models() -> list[str]:
         "nrgboost",
         "realtabformer",
         "smote",
+        "stasy",
         "tabebm",
         "tabdiff",
         "tabddpm",
+        "tabula",
         "tabsyn",
         "tvae",
     ]

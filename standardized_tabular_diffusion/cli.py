@@ -33,6 +33,18 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optionally filter the inventory by benchmark paper",
     )
+    inventory_parser.add_argument(
+        "--family",
+        choices=["diffusion", "llm", "foundation", "traditional", "vae", "gan", "graph", "flow", "tree", "energy-based"],
+        default=None,
+        help="Optionally filter the inventory by model family",
+    )
+    inventory_parser.add_argument(
+        "--status",
+        choices=["implemented", "not implemented"],
+        default=None,
+        help="Optionally filter the inventory by standardized integration status",
+    )
     subparsers.add_parser("list-datasets", help="List canonical datasets from the root registry")
     subparsers.add_parser("describe-metrics", help="Print the shared TabStruct-aligned metric schema")
     subparsers.add_parser("describe-config", help="Print the shared experiment config schema as an example JSON")
@@ -119,7 +131,14 @@ def main() -> None:
         return
 
     if args.command == "list-model-inventory":
-        entries = [entry.to_dict() for entry in list_inventory(benchmark=args.benchmark)]
+        entries = [
+            entry.to_dict()
+            for entry in list_inventory(
+                benchmark=args.benchmark,
+                family=args.family,
+                standardized_status=args.status,
+            )
+        ]
         print(json.dumps({"models": entries}, indent=2))
         return
 

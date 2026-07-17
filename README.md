@@ -52,10 +52,11 @@ The currently supported adapters are:
 - `tabebm`
 - `tabdiff`
 - `tabddpm`
+- `tabula`
 - `tabsyn`
 - `tvae`
 
-The repo now also includes a structured baseline inventory for the broader tabular-generation landscape, including the remaining TabStruct baselines and additional models from the TabuLa benchmark paper.
+The repo now also includes a structured baseline inventory for the broader tabular-generation landscape, including both standardized adapters and known high-value methods that are not yet integrated.
 
 Each standardized run writes canonical metadata such as:
 
@@ -122,9 +123,10 @@ The current known-good reference stack is pinned in:
 
 Important current caveats:
 
-- `torch==2.13.0` is the active runtime because `tabebm` depends on a newer TabPFN stack.
+- `torch==2.3.0` is the current pinned benchmark runtime.
 - `transformers==4.46.3` is intentionally pinned because the vendored `great` code is more compatible there than on the newer 4.57 line.
 - `realtabformer` currently relies on an adapter-side import shim that disables torchvision-backed transformer imports we do not need for tabular generation.
+- `tabula` uses a local Transformers-based compatibility adapter rather than the original notebook-driven upstream workflow.
 - `goggle` remains sensitive to DGL / torch-geometric binary compatibility and cache-directory permissions.
 - `tabebm` sample generation is intentionally opt-in and requires accepted Prior Labs TabPFN model terms plus authentication before it can run.
 
