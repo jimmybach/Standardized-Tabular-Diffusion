@@ -4,6 +4,79 @@ Last reviewed: July 16, 2026
 
 This document summarizes whether each model exposed by the standardized adapter registry appears to have a reliable, high-quality implementation that can be reasonably reproduced and run, along with the corresponding source repository and important usability notes.
 
+## Model Categories
+
+The current registry spans several distinct model groups. A practical categorization for benchmark reporting is:
+
+### Traditional Generation
+
+Statistical / classical:
+
+- `smote`
+- `bn`
+- `arf`
+
+VAE-based:
+
+- `tvae`
+
+GAN-based:
+
+- `ctgan`
+- `ctab-gan`
+- `ctab-gan-plus`
+
+Flow-based:
+
+- `nflow`
+
+Graph-based:
+
+- `goggle`
+
+### Diffusion Models
+
+- `tabddpm`
+- `tabsyn`
+- `stasy`
+- `codi`
+- `tabdiff`
+
+### LLM-Based Models
+
+- `great`
+- `realtabformer`
+- `tabula`
+
+### Energy-Based Models
+
+- `nrgboost`
+- `tabebm`
+
+## Registry-to-Category Map
+
+| Model | Category | Subcategory / paradigm |
+| --- | --- | --- |
+| `arf` | Traditional generation | Tree-based / adversarial random forest |
+| `bn` | Traditional generation | Statistical / Bayesian network |
+| `codi` | Diffusion models | Conditional diffusion |
+| `ctab-gan` | Traditional generation | GAN |
+| `ctab-gan-plus` | Traditional generation | GAN |
+| `ctgan` | Traditional generation | GAN |
+| `goggle` | Traditional generation | Graph generative model |
+| `great` | LLM-based models | Autoregressive transformer |
+| `nflow` | Traditional generation | Normalizing flow |
+| `nrgboost` | Energy-based models | Energy-based boosted trees |
+| `realtabformer` | LLM-based models | Autoregressive / seq2seq transformer |
+| `smote` | Traditional generation | Interpolation / oversampling baseline |
+| `tabddpm` | Diffusion models | Score / denoising diffusion |
+| `tabdiff` | Diffusion models | Multimodal diffusion |
+| `tabebm` | Energy-based models | Class-conditional energy-based model |
+| `tabula` | LLM-based models | Autoregressive language-model-based synthesis |
+| `stasy` | Diffusion models | Score-based diffusion |
+| `tabsyn` | Diffusion models | Latent diffusion |
+| `tvae` | Traditional generation | VAE |
+
 ## Summary Table
 
 | Model | Reliable runnable implementation? | Source repository | Important notes |
@@ -19,9 +92,13 @@ This document summarizes whether each model exposed by the standardized adapter 
 | `arf` | Partial / yes via the Python wrapper path | [bips-hb/arf](https://github.com/bips-hb/arf) | Official implementation is R-first. In this repository, practical usability comes from the Python `arfpy` path instead of the original workflow. |
 | `great` | Yes, but higher-maintenance | [tabularis-ai/be_great](https://github.com/tabularis-ai/be_great) | Maintained modern GReaT implementation. Better packaged than many paper repos, but still inherits HF/LLM runtime cost and sampling sensitivity. |
 | `realtabformer` | Yes | [worldbank/REaLTabFormer](https://github.com/worldbank/REaLTabFormer) | Good engineering quality: tests, docs, packaging, and recent releases. Reproducible, but heavier than non-transformer baselines. |
+| `tabula` | Partial / adapterized compatibility path | [zhao-zilong/Tabula](https://github.com/zhao-zilong/Tabula) | Official code exists, but the upstream is notebook-oriented. This repository now provides a local Transformers-based compatibility adapter instead of a direct wrapper around the original training flow, so reproduction should be treated as approximate rather than bit-for-bit. |
 | `nrgboost` | Yes, but relatively young | [Ajoo/nrgboost](https://github.com/Ajoo/nrgboost) | Official code and pip package exist. Runnable, but less battle-tested than CTGAN, TabDDPM, or imbalanced-learn style baselines. |
+| `ctab-gan` | Partial / usable research code | [Team-TUD/CTAB-GAN](https://github.com/Team-TUD/CTAB-GAN) | Credible baseline and still common in comparisons, but the codebase is older and less ergonomic than the SDV stack. |
 | `ctab-gan-plus` | Partial / usable research code | [Team-TUD/CTAB-GAN-Plus](https://github.com/Team-TUD/CTAB-GAN-Plus) | Official repo exists, but ergonomics are rougher than CTGAN/TVAE. Notebook-centric and still tied to legacy dependency assumptions. |
 | `goggle` | Partial | No standalone upstream repo verified; this repo vendors the implementation via [amazon-science/tabsyn](https://github.com/amazon-science/tabsyn) | Runnable here, but operationally fragile because it depends on `dgl`, `torch-geometric`, and version-sensitive graph extensions. |
+| `stasy` | Partial / vendored baseline path | No standalone upstream repo verified in this pass; this repo vendors the implementation via [amazon-science/tabsyn](https://github.com/amazon-science/tabsyn) | Integrated into the shared CLI, but not yet smoke-validated end to end in this environment. Expect older research-code assumptions. |
+| `codi` | Partial / vendored baseline path | No standalone upstream repo verified in this pass; this repo vendors the implementation via [amazon-science/tabsyn](https://github.com/amazon-science/tabsyn) | Integrated into the shared CLI, but not yet smoke-validated end to end in this environment. Expect older research-code assumptions and checkpoint-layout sensitivity. |
 | `tabebm` | Partial | Source linked by the paper/package: [andreimargeloiu/TabEBM](https://github.com/andreimargeloiu/TabEBM), package on [PyPI](https://pypi.org/project/tabebm/) | Credible method with a real package, but operationally gated by the modern TabPFN / Prior Labs ecosystem and external model access constraints. |
 
 ## Recommended Interpretation
@@ -39,14 +116,18 @@ Reasonably strong but higher-maintenance baselines:
 
 - `realtabformer`
 - `great`
+- `tabula`
 - `bn`
 - `nflow`
 - `nrgboost`
+- `ctab-gan`
 
 Real implementations, but less reproduction-friendly:
 
 - `ctab-gan-plus`
 - `goggle`
+- `stasy`
+- `codi`
 - `tabebm`
 - `arf` if strict parity with the original R-first path is required
 

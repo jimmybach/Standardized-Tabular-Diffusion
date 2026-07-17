@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import pickle
 import sys
 import types
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -19,6 +22,8 @@ from standardized_tabular_diffusion.models.structured_baselines import BNAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
+from standardized_tabular_diffusion.models.tabula import TabulaAdapter
+from standardized_tabular_diffusion.models.vendored_baselines import CTABGANAdapter, CoDiAdapter, STaSyAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
@@ -37,6 +42,104 @@ class PickleableFakeCTABGAN:
 
     def generate_samples(self, samples, seed=0):
         return pd.DataFrame({"0": [10] * samples, "y": [1] * samples})
+
+
+class FakeTabulaTokenizer:
+    generated_text = "age=42<|col|>city=Boston<|col|>label=1<|endrow|>"
+
+    def __init__(self):
+        self.pad_token = None
+        self.eos_token = "<eos>"
+        self.pad_token_id = 0
+
+    @classmethod
+    def from_pretrained(cls, path):
+        return cls()
+
+    def add_special_tokens(self, payload):
+        self.special_tokens = payload
+        return len(payload.get("additional_special_tokens", []))
+
+    def save_pretrained(self, path):
+        Path(path).mkdir(parents=True, exist_ok=True)
+        (Path(path) / "tokenizer.json").write_text("{}")
+
+    def __len__(self):
+        return 32
+
+    def __call__(self, texts, truncation=False, padding=False, max_length=None, return_tensors=None):
+        if isinstance(texts, str):
+            return {"input_ids": [1, 2, 3]}
+        seq_len = max_length or 8
+        rows = len(texts)
+        input_ids = torch.ones((rows, seq_len), dtype=torch.long)
+        attention_mask = torch.ones((rows, seq_len), dtype=torch.long)
+        return {"input_ids": input_ids, "attention_mask": attention_mask}
+
+    def decode(self, ids, skip_special_tokens=False):
+        return self.generated_text
+
+    def convert_tokens_to_ids(self, token):
+        return 7
+
+
+class FakeTabulaConfig:
+    n_layer = 2
+    n_head = 2
+    n_embd = 32
+    n_positions = 64
+
+    @classmethod
+    def from_pretrained(cls, path):
+        return cls()
+
+
+class FakeTabulaModel:
+    def __init__(self):
+        self.device = torch.device("cpu")
+
+    @classmethod
+    def from_pretrained(cls, path):
+        return cls()
+
+    @classmethod
+    def from_config(cls, config):
+        model = cls()
+        model.config = config
+        return model
+
+    def resize_token_embeddings(self, size):
+        self.embedding_size = size
+
+    def save_pretrained(self, path):
+        Path(path).mkdir(parents=True, exist_ok=True)
+        (Path(path) / "model.bin").write_text("stub")
+
+    def to(self, device):
+        self.device = torch.device(device)
+        return self
+
+    def eval(self):
+        return None
+
+    def generate(self, **kwargs):
+        return torch.tensor([[999]], dtype=torch.long)
+
+
+class FakeTrainingArguments:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+
+class FakeTrainer:
+    def __init__(self, model, args, train_dataset, data_collator):
+        self.model = model
+        self.args = args
+        self.train_dataset = train_dataset
+        self.data_collator = data_collator
+
+    def train(self):
+        return None
 
 
 def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command(
@@ -546,6 +649,84 @@ def test_realtabformer_can_limit_training_rows_for_tiny_smoke_runs(tmp_path: Pat
     assert observed["fit_rows"] == 2
 
 
+def test_tabula_train_and_sample_with_stubbed_transformers(tmp_path: Path, monkeypatch) -> None:
+    adapter = TabulaAdapter(tmp_path)
+    imports = types.SimpleNamespace(
+        AutoConfig=FakeTabulaConfig,
+        AutoModelForCausalLM=FakeTabulaModel,
+        AutoTokenizer=FakeTabulaTokenizer,
+        Trainer=FakeTrainer,
+        TrainingArguments=FakeTrainingArguments,
+        default_data_collator=object(),
+    )
+    monkeypatch.setattr(adapter, "_import_transformer_bits", lambda: imports)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["age", "city", "label"],
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["label"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    pd.DataFrame(
+        {
+            "age": [21, 35, 42],
+            "city": ["Austin", "Boston", "Chicago"],
+            "label": [0, 1, 0],
+        }
+    ).to_csv(dataset_spec.train_data_path, index=False)
+    pd.DataFrame({"age": [30], "city": ["Austin"], "label": [0]}).to_csv(dataset_spec.test_data_path, index=False)
+
+    train_config = ExperimentConfig(
+        model="tabula",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabula"),
+        train=TrainConfig(enabled=True, extra={"epochs": 1, "max_length": 16}),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="tabula",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabula"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=2, extra={"max_tries": 4}),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    model_root = Path(train_config.output_dir) / "tabula_model"
+    assert train_bundle.output_dir == Path(train_config.output_dir)
+    assert model_root.exists()
+    assert (model_root / "adapter_metadata.json").exists()
+    assert sample_bundle.generated_sample_path is not None
+    sampled = pd.read_csv(sample_bundle.generated_sample_path)
+    assert list(sampled.columns) == ["age", "city", "label"]
+    assert len(sampled) == 2
+
+
+def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
+    adapter = TabulaAdapter(tmp_path)
+    spec = ExperimentConfig(
+        model="tabula",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabula"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec()
+
+    assert adapter._model_root(spec).name == "tabula_model"
+    assert adapter._metadata_path(adapter._model_root(spec)).name == "adapter_metadata.json"
+
+
 def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
     (repo_root / "TabSyn-main").mkdir(parents=True)
@@ -691,7 +872,125 @@ def test_great_arf_and_tabebm_checkpoint_conventions(tmp_path: Path) -> None:
     assert great_adapter._metadata_path(great_adapter._model_root(great_spec)).name == "adapter_metadata.json"
 
 
-def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_path: Path) -> None:
+def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, monkeypatch) -> None:
+    stasy_adapter = STaSyAdapter(tmp_path)
+    codi_adapter = CoDiAdapter(tmp_path)
+    commands: list[tuple[list[str], Path]] = []
+
+    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
+        assert not module
+        commands.append((args, cwd))
+
+    monkeypatch.setattr(stasy_adapter, "_run_python", fake_run_python)
+    monkeypatch.setattr(codi_adapter, "_run_python", fake_run_python)
+
+    train_config = ExperimentConfig(
+        model="stasy",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "stasy"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="codi",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "codi"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=32, extra={"steps": 25}),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n")
+    dataset_spec.test_data_path.write_text("x,y\n1,0\n")
+
+    stasy_adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = codi_adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    assert commands == [
+        (
+            ["main.py", "--method", "stasy", "--mode", "train", "--dataname", "adult", "--gpu", "0"],
+            tmp_path / "TabSyn-main",
+        ),
+        (
+            [
+                "main.py",
+                "--method",
+                "codi",
+                "--mode",
+                "sample",
+                "--dataname",
+                "adult",
+                "--gpu",
+                "0",
+                "--steps",
+                "25",
+                "--save_path",
+                str((Path(sample_config.output_dir) / "samples.csv").resolve()),
+                "--num-samples",
+                "32",
+            ],
+            tmp_path / "TabSyn-main",
+        ),
+    ]
+    assert bundle.generated_sample_path == (Path(sample_config.output_dir) / "samples.csv").resolve()
+
+
+def test_ctabgan_sample_restores_column_names(tmp_path: Path) -> None:
+    adapter = CTABGANAdapter(tmp_path)
+    checkpoint_path = tmp_path / "artifacts" / "ctab-gan" / "ctabgan.pkl"
+    checkpoint_path.parent.mkdir(parents=True)
+    with checkpoint_path.open("wb") as handle:
+        pickleable = PickleableFakeCTABGAN()
+        pickle.dump(pickleable, handle)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_dir = dataset_spec.train_data_path.parent
+    dataset_dir.mkdir(parents=True, exist_ok=True)
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n")
+    dataset_spec.test_data_path.write_text("x,y\n1,0\n")
+    np.save(dataset_dir / "X_num_train.npy", np.array([[1.0]], dtype=np.float32))
+    np.save(dataset_dir / "y_train.npy", np.array([[0]], dtype=np.int64))
+
+    config = ExperimentConfig(
+        model="ctab-gan",
+        dataset="adult",
+        output_dir=str(checkpoint_path.parent),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, checkpoint_path=str(checkpoint_path), num_samples=3),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
+
+    assert bundle.generated_sample_path is not None
+    assert list(pd.read_csv(bundle.generated_sample_path).columns) == ["x", "y"]
+
+
+def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_path: Path, monkeypatch) -> None:
     dataset_spec = type(
         "Spec",
         (),
@@ -710,9 +1009,11 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
 
     for model_name, checkpoint_name in [
         ("bn", "model.pkl"),
+        ("ctab-gan", "ctabgan.pkl"),
         ("nflow", "model.pkl"),
         ("goggle", "model.pt"),
         ("great", "great_model"),
+        ("tabula", "tabula_model"),
         ("arf", "model.pkl"),
     ]:
         checkpoint = tmp_path / checkpoint_name
@@ -726,6 +1027,31 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
             output_dir=str(tmp_path),
             train=TrainConfig(enabled=False),
             sample=SampleConfig(enabled=True, checkpoint_path=str(checkpoint)),
+            evaluation=EvaluationConfig(enabled=False),
+        )
+        ready = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)
+        assert ready["ready"] is True
+
+    fake_runner_path = tmp_path / "standardized_tabular_diffusion" / "runner.py"
+    fake_runner_path.parent.mkdir(parents=True, exist_ok=True)
+    fake_runner_path.write_text("# test shim\n")
+    monkeypatch.setattr("standardized_tabular_diffusion.runner.__file__", str(fake_runner_path))
+    repo_root = tmp_path
+    stasy_ckpt = repo_root / "TabSyn-main" / "baselines" / "stasy" / "ckpt" / "adult"
+    codi_ckpt = repo_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / "adult"
+    stasy_ckpt.mkdir(parents=True, exist_ok=True)
+    codi_ckpt.mkdir(parents=True, exist_ok=True)
+    (stasy_ckpt / "model.pth").write_text("stub")
+    (codi_ckpt / "model_con.pt").write_text("stub")
+    (codi_ckpt / "model_dis.pt").write_text("stub")
+
+    for model_name in ["stasy", "codi"]:
+        config = ExperimentConfig(
+            model=model_name,
+            dataset="adult",
+            output_dir=str(tmp_path),
+            train=TrainConfig(enabled=False),
+            sample=SampleConfig(enabled=True),
             evaluation=EvaluationConfig(enabled=False),
         )
         ready = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)

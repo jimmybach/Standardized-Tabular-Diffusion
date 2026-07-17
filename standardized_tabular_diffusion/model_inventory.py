@@ -78,6 +78,187 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "Tiny CPU smoke checkpoints still struggle to generate enough parseable rows for reliable sample validation.",
         ],
     ),
+    "tabicl": ModelInventoryEntry(
+        name="tabicl",
+        family="foundation",
+        paradigm="in-context tabular foundation model",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/soda-inria/tabicl",
+        notes=[
+            "Official open-source implementation exists and appears well maintained.",
+            "Not yet wired into this repository.",
+            "Upstream focuses on predictive in-context learning rather than direct tabular generation, so integrating it here would require a benchmark-specific generative adaptation path rather than a simple train/sample wrapper.",
+        ],
+    ),
+    "tabiclv2": ModelInventoryEntry(
+        name="tabiclv2",
+        family="foundation",
+        paradigm="scaled in-context tabular foundation model",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/soda-inria/tabicl",
+        notes=[
+            "Current flagship TabICL release is exposed through the official TabICL repository and documentation.",
+            "Represents the stronger modern TabICL checkpoint family rather than the original ICML 2025 release alone.",
+            "Still a predictive in-context learner rather than a native synthetic row generator, so it would need a benchmark-specific adaptation path here.",
+        ],
+    ),
+    "tabpfn": ModelInventoryEntry(
+        name="tabpfn",
+        family="foundation",
+        paradigm="prior-data fitted network",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/PriorLabs/TabPFN",
+        notes=[
+            "Official open-source TabPFN repository is actively maintained and exposes current model versions through a Python package.",
+            "Important baseline in the tabular foundation-model landscape and the parent lineage behind later real-data continued-pretraining variants.",
+            "Primary upstream use case is zero-shot prediction rather than synthetic row generation, so it does not slot directly into this repository's generative adapter contract.",
+        ],
+    ),
+    "realtabpfn": ModelInventoryEntry(
+        name="realtabpfn",
+        family="foundation",
+        paradigm="continued-pretrained prior-data fitted network",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="partial",
+        implementation_quality="high",
+        repository_url="https://github.com/PriorLabs/TabPFN",
+        notes=[
+            "Official TabPFN repository exposes real-data-finetuned TabPFN-2.5 checkpoints alongside the synthetic-only variants.",
+            "Strong predictive foundation-model baseline, but not a native tabular generator in the same train/sample sense as the other adapters here.",
+            "Practical usage may require gated model access, authentication, and acceptance of non-commercial terms for some real-data checkpoints.",
+        ],
+    ),
+    "tabdpt": ModelInventoryEntry(
+        name="tabdpt",
+        family="foundation",
+        paradigm="in-context tabular foundation model trained on real data",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/layer6ai-labs/TabDPT",
+        notes=[
+            "Official open-source implementation exists, with a maintained PyPI package and Hugging Face model card.",
+            "Designed for zero-shot classification and regression on unseen tables rather than direct synthetic row generation.",
+            "Likely feasible to benchmark as a predictive foundation-model reference, but not a drop-in fit for this repository's generative train/sample/evaluate contract.",
+        ],
+    ),
+    "tabfm": ModelInventoryEntry(
+        name="tabfm",
+        family="foundation",
+        paradigm="hybrid row-column attention plus in-context tabular foundation model",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/google-research/tabfm",
+        notes=[
+            "Official open-source repository from Google Research is available.",
+            "Supports zero-shot classification and regression with scikit-learn-compatible wrappers and downloadable pretrained weights.",
+            "Method is a predictive foundation model rather than a native synthetic tabular generator, so it does not map directly onto this repository's generative train/sample contract.",
+        ],
+    ),
+    "mothernet": ModelInventoryEntry(
+        name="mothernet",
+        family="foundation",
+        paradigm="hypernetwork tabular foundation model",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/microsoft/ticl",
+        notes=[
+            "Official implementation is available through Microsoft's Tabular In-Context Learning repository.",
+            "MotherNet is presented there as a foundational hypernetwork for tabular classification with sklearn-style prediction wrappers.",
+            "Relevant as a predictive foundation-model reference, but not a native tabular generator for this repository's current train/sample benchmark contract.",
+        ],
+    ),
+    "gamformer": ModelInventoryEntry(
+        name="gamformer",
+        family="foundation",
+        paradigm="interpretable in-context tabular foundation model",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/microsoft/ticl",
+        notes=[
+            "Official implementation is listed in Microsoft's Tabular In-Context Learning repository.",
+            "Positioned as an interpretable additive-model-style in-context learner rather than a generative synthesizer.",
+            "Useful as a foundation-model reference, but outside this repository's direct generative adapter shape.",
+        ],
+    ),
+    "causalfm": ModelInventoryEntry(
+        name="causalfm",
+        family="foundation",
+        paradigm="prior-data fitted network for causal inference",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/yccm/CausalFM",
+        notes=[
+            "Official implementation is available for CausalFM and its associated toolkit.",
+            "The method is a PFN-style foundation model specialized for causal inference settings such as CATE, IV, and front-door adjustment.",
+            "Relevant as a foundation-model reference, but it is outside this repository's synthetic tabular generation contract and benchmark focus.",
+        ],
+    ),
+    "tabflex": ModelInventoryEntry(
+        name="tabflex",
+        family="foundation",
+        paradigm="linear-attention extension of tabular in-context learning",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/microsoft/ticl",
+        notes=[
+            "Official implementation is listed in Microsoft's Tabular In-Context Learning repository.",
+            "Described there as a TabPFN extension using linear attention to scale to more features, models, and classes.",
+            "Important predictive foundation-model reference, but not a synthetic-row generator in the sense expected by this repository.",
+        ],
+    ),
+    "tabula": ModelInventoryEntry(
+        name="tabula",
+        family="llm",
+        paradigm="language-model-based tabular synthesis",
+        covered_by_papers=["tabula-2025"],
+        standardized_status="implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/zhao-zilong/Tabula",
+        notes=[
+            "Official repository exists for the generative model TabuLa: Harnessing Language Models for Tabular Data Synthesis.",
+            "Method is directly relevant to this repository's generative benchmark scope.",
+            "This repository now exposes a local standardized TabuLa-compatible adapter built on top of Transformers rather than depending on the upstream notebook flow directly.",
+            "The standardized path is practical but should be treated as a compatibility implementation inspired by the paper's training recipe rather than a bit-for-bit wrapper of the original repository.",
+        ],
+    ),
+    "transtab": ModelInventoryEntry(
+        name="transtab",
+        family="foundation",
+        paradigm="transferable tabular transformer across variable-column tables",
+        covered_by_papers=[],
+        standardized_status="not implemented",
+        runnable_recommendation="yes",
+        implementation_quality="high",
+        repository_url="https://github.com/RyanWangZf/transtab",
+        notes=[
+            "Official repository and PyPI package exist for TransTab.",
+            "Relevant as a cross-table pretraining and transfer baseline for tabular foundation-model discussions.",
+            "Primary upstream use cases are prediction, transfer learning, and representation learning across tables rather than synthetic row generation.",
+        ],
+    ),
     "smote": ModelInventoryEntry(
         name="smote",
         family="traditional",
@@ -93,6 +274,21 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "Best integrated as a lightweight adapter with explicit caveats in benchmark tables.",
         ],
     ),
+    "stasy": ModelInventoryEntry(
+        name="stasy",
+        family="diffusion",
+        paradigm="score-based SDE diffusion",
+        covered_by_papers=[],
+        standardized_status="implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/amazon-science/tabsyn",
+        notes=[
+            "Integrated through the vendored TabSyn baseline implementation.",
+            "Uses the upstream STaSy training and sampling flow via TabSyn's shared baseline dispatcher.",
+            "Wired into the standardized train/sample/evaluate contract, but not yet smoke-validated in this repository.",
+        ],
+    ),
     "bn": ModelInventoryEntry(
         name="bn",
         family="traditional",
@@ -106,6 +302,36 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "Integrated as a direct pgmpy-backed Bayesian-network adapter rather than through Synthcity.",
             "End-to-end adult smoke validation now passes through the shared CLI.",
             "Sampling can drop low-variance variables in the learned graph, so the adapter restores missing columns with fitted fallback states.",
+        ],
+    ),
+    "codi": ModelInventoryEntry(
+        name="codi",
+        family="diffusion",
+        paradigm="co-evolving continuous/discrete diffusion",
+        covered_by_papers=[],
+        standardized_status="implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/amazon-science/tabsyn",
+        notes=[
+            "Integrated through the vendored TabSyn baseline implementation.",
+            "Uses TabSyn's shared baseline dispatcher rather than a standalone upstream package.",
+            "Wired into the standardized train/sample/evaluate contract, but not yet smoke-validated in this repository.",
+        ],
+    ),
+    "ctab-gan": ModelInventoryEntry(
+        name="ctab-gan",
+        family="gan",
+        paradigm="conditional tabular GAN with tailored preprocessing",
+        covered_by_papers=[],
+        standardized_status="implemented",
+        runnable_recommendation="partial",
+        implementation_quality="medium",
+        repository_url="https://github.com/Team-TUD/CTAB-GAN",
+        notes=[
+            "Integrated against the vendored CTAB-GAN implementation already present in this repository.",
+            "Legacy research-code ergonomics and dependency assumptions are similar to CTAB-GAN+.",
+            "Wired into the standardized train/sample/evaluate contract, but not yet smoke-validated in this repository.",
         ],
     ),
     "tvae": ModelInventoryEntry(
@@ -251,12 +477,33 @@ def get_inventory_entry(model_name: str) -> ModelInventoryEntry:
     return MODEL_INVENTORY[model_name]
 
 
-def list_inventory(*, benchmark: str | None = None) -> list[ModelInventoryEntry]:
+def list_inventory(
+    *,
+    benchmark: str | None = None,
+    family: str | None = None,
+    standardized_status: str | None = None,
+) -> list[ModelInventoryEntry]:
     entries = sorted(MODEL_INVENTORY.values(), key=lambda entry: entry.name)
-    if benchmark is None:
-        return entries
-    return [entry for entry in entries if benchmark in entry.covered_by_papers]
+    if benchmark is not None:
+        entries = [entry for entry in entries if benchmark in entry.covered_by_papers]
+    if family is not None:
+        entries = [entry for entry in entries if entry.family == family]
+    if standardized_status is not None:
+        entries = [entry for entry in entries if entry.standardized_status == standardized_status]
+    return entries
 
 
-def list_inventory_names(*, benchmark: str | None = None) -> list[str]:
-    return [entry.name for entry in list_inventory(benchmark=benchmark)]
+def list_inventory_names(
+    *,
+    benchmark: str | None = None,
+    family: str | None = None,
+    standardized_status: str | None = None,
+) -> list[str]:
+    return [
+        entry.name
+        for entry in list_inventory(
+            benchmark=benchmark,
+            family=family,
+            standardized_status=standardized_status,
+        )
+    ]

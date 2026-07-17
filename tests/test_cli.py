@@ -28,6 +28,44 @@ def test_cli_list_model_inventory_filters_by_benchmark(monkeypatch, capsys) -> N
     assert "ctab-gan-plus" not in names
 
 
+def test_cli_list_model_inventory_filters_tabula_benchmark(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--benchmark", "tabula-2025"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    names = {entry["name"] for entry in payload["models"]}
+
+    assert "tabula" in names
+    assert "tabicl" not in names
+
+
+def test_cli_list_model_inventory_filters_foundation_family(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--family", "foundation"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    names = {entry["name"] for entry in payload["models"]}
+
+    assert "tabpfn" in names
+    assert "tabfm" in names
+    assert "ctgan" not in names
+
+
+def test_cli_list_model_inventory_filters_not_implemented_status(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--status", "not implemented"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    names = {entry["name"] for entry in payload["models"]}
+
+    assert "tabpfn" in names
+    assert "tabula" not in names
+    assert "ctgan" not in names
+
+
 def test_cli_show_model_inventory_prints_expected_entry(monkeypatch, capsys) -> None:
     monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "realtabformer"])
 
@@ -40,6 +78,150 @@ def test_cli_show_model_inventory_prints_expected_entry(monkeypatch, capsys) -> 
     assert payload["runnable_recommendation"] == "yes"
 
 
+def test_cli_show_model_inventory_can_describe_not_yet_integrated_method(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabicl"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabicl"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabiclv2(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabiclv2"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabiclv2"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabpfn(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabpfn"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabpfn"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabula(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabula"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabula"
+    assert payload["standardized_status"] == "implemented"
+    assert payload["family"] == "llm"
+
+
+def test_cli_show_model_inventory_can_describe_tabdpt(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabdpt"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabdpt"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_realtabpfn(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "realtabpfn"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "realtabpfn"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabfm(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabfm"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabfm"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_mothernet(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "mothernet"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "mothernet"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_gamformer(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "gamformer"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "gamformer"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_causalfm(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "causalfm"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "causalfm"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabflex(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabflex"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabflex"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_transtab(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "transtab"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "transtab"
+    assert payload["standardized_status"] == "not implemented"
+    assert payload["family"] == "foundation"
+
+
 def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys) -> None:
     monkeypatch.setattr(sys, "argv", ["std-cli", "list-models"])
 
@@ -50,13 +232,17 @@ def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys)
     assert "ctgan" in payload["models"]
     assert "tvae" in payload["models"]
     assert "smote" in payload["models"]
+    assert "ctab-gan" in payload["models"]
+    assert "codi" in payload["models"]
     assert "ctab-gan-plus" in payload["models"]
     assert "realtabformer" in payload["models"]
     assert "nrgboost" in payload["models"]
     assert "bn" in payload["models"]
     assert "nflow" in payload["models"]
+    assert "stasy" in payload["models"]
     assert "goggle" in payload["models"]
     assert "great" in payload["models"]
+    assert "tabula" in payload["models"]
     assert "arf" in payload["models"]
     assert "tabebm" in payload["models"]
 

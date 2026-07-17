@@ -23,11 +23,19 @@ These models have a standardized adapter and at least one successful local smoke
 
 - `goggle`
 - `realtabformer`
+- `tabula`
+- `ctab-gan`
+- `stasy`
+- `codi`
 
 These are integrated and runnable, but they depend on more brittle stacks:
 
 - `goggle`: DGL, torch-geometric, and binary extension compatibility.
 - `realtabformer`: Hugging Face imports that currently need the adapter-side torchvision disable shim.
+- `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
+- `ctab-gan`: legacy research-code path with weaker packaging than `ctgan` or `tvae`.
+- `stasy`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
+- `codi`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
 
 ## Train-Validated, Sampling-Guarded
 
@@ -43,13 +51,14 @@ These are integrated and runnable, but they depend on more brittle stacks:
 
 ## Current Environment Caveats
 
-- `torch==2.13.0` is now the active runtime because `tabebm` pulled a newer TabPFN-compatible stack.
+- `torch==2.3.0` is the current pinned runtime in the benchmark stack requirements.
 - `transformers==4.46.3` and `tokenizers==0.20.3` are pinned because the vendored `great` code is happier on that surface than on the newer 4.57 series.
 - `dgl` still wants a writable home/cache path; the adapter works around this by redirecting cache-related environment variables.
 - `torch-scatter` and `torch-sparse` currently emit load warnings under this torch stack, but the `goggle` smoke path still completes in this environment.
+- Some vendored baselines expect legacy helper modules; this repository now vendors a minimal local `zero` compatibility shim for the `TabSyn-main` and `TabDDPM-main` paths to avoid pulling the wrong PyPI package.
 
 ## Recommended Interpretation
 
 - Use `arf`, `ctgan`, `tvae`, `smote`, `bn`, `nflow`, `nrgboost`, and the diffusion models for the least surprising benchmark runs.
-- Treat `goggle`, `great`, `realtabformer`, and `tabebm` as integrated but higher-maintenance baselines.
+- Treat `goggle`, `great`, `realtabformer`, `tabula`, `ctab-gan`, `stasy`, `codi`, and `tabebm` as integrated but higher-maintenance baselines.
 - Use the train-only `tabebm` smoke preset for routine integration checks and the gated-sample preset only on machines that already have TabPFN access configured.

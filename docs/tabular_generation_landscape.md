@@ -9,12 +9,15 @@ This document captures the current integration roadmap for the benchmarking repo
 - `tabddpm`
 - `tabsyn`
 - `tabdiff`
+- `stasy`
+- `codi`
 - `great`
 - `smote`
 - `bn`
 - `tvae`
 - `goggle`
 - `ctgan`
+- `ctab-gan`
 - `nflow`
 - `arf`
 - `tabebm`
@@ -46,6 +49,9 @@ These all have a credible path to a reproducible wrapper with a consistent `trai
 - `goggle`
 - `nflow`
 - `great`
+- `ctab-gan`
+- `stasy`
+- `codi`
 
 These are practical to standardize, but they carry more environment complexity than the first wave.
 
@@ -68,6 +74,7 @@ These methods predate the recent deep-generation wave. They remain useful becaus
 
 - `tvae`
 - `ctgan`
+- `ctab-gan`
 - `ctab-gan-plus`
 
 This family defined the first widely adopted deep-learning baselines for tabular generation. Most later papers still compare against them because they established the default benchmark stack.
@@ -89,6 +96,8 @@ This line is important because tabular learning has always had a strong tree-mod
 - `tabddpm`
 - `tabsyn`
 - `tabdiff`
+- `stasy`
+- `codi`
 
 Diffusion models became the dominant modern research direction once the field moved beyond GAN-first baselines, largely because they improved robustness on heterogeneous mixed-type tables.
 
@@ -124,7 +133,7 @@ The first major deep-learning wave adapted image-style generative modeling to mi
 
 ### Phase 3: Diffusion becomes the new default
 
-`TabDDPM`, then later `TabSyn` and `TabDiff`, marked the shift toward diffusion as the strongest general-purpose paradigm. This phase focused on mixed continuous/categorical generation, better mode coverage, and more stable training than GAN-based baselines.
+`TabDDPM`, then later `TabSyn`, `STaSy`, `CoDi`, and `TabDiff`, marked the shift toward diffusion as the strongest general-purpose paradigm. This phase focused on mixed continuous/categorical generation, better mode coverage, and more stable training than GAN-based baselines.
 
 ### Phase 4: Autoregressive language-model framing
 
