@@ -19,6 +19,8 @@ These presets are small, reproducible configs for quickly validating newly integ
 - [configs/smoke/tabebm-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/tabebm-adult-smoke.json)
 - [configs/smoke/tabebm-adult-gated-sample.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/tabebm-adult-gated-sample.json)
 
+At the moment there is no dedicated smoke preset checked in for `tabula`, `ctab-gan`, `stasy`, or `codi`, even though those adapters are now integrated into the shared registry.
+
 ## Usage
 
 Run a preset with:
@@ -76,3 +78,4 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 - `realtabformer-adult-tiny.json` is intentionally more conservative than the other presets:
   it disables sensitivity analysis, disables external reporting, and samples a small training subset with `max_train_rows`.
 - The `realtabformer` tiny preset is meant for local integration checks, not meaningful benchmark numbers.
+- `tabula` is integrated in code, but it does not yet have a committed smoke preset; use `example-config --model tabula` as the starting point for local validation runs.
