@@ -23,6 +23,8 @@ These models have a standardized adapter and at least one successful local smoke
 
 - `goggle`
 - `realtabformer`
+- `tabsds`
+- `tabularargn`
 - `tabula`
 - `ctab-gan`
 - `stasy`
@@ -32,6 +34,8 @@ These are integrated and runnable, but they depend on more brittle stacks:
 
 - `goggle`: DGL, torch-geometric, and binary extension compatibility.
 - `realtabformer`: Hugging Face imports that currently need the adapter-side torchvision disable shim.
+- `tabsds`: local lightweight compatibility implementation inspired by the TabSDS method, not yet smoke-validated against the official upstream code.
+- `tabularargn`: optional-package adapter around `mostlyai-engine`; integrated in code, but not yet smoke-validated in this repository.
 - `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
 - `ctab-gan`: legacy research-code path with weaker packaging than `ctgan` or `tvae`.
 - `stasy`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
@@ -60,5 +64,5 @@ These are integrated and runnable, but they depend on more brittle stacks:
 ## Recommended Interpretation
 
 - Use `arf`, `ctgan`, `tvae`, `smote`, `bn`, `nflow`, `nrgboost`, and the diffusion models for the least surprising benchmark runs.
-- Treat `goggle`, `great`, `realtabformer`, `tabula`, `ctab-gan`, `stasy`, `codi`, and `tabebm` as integrated but higher-maintenance baselines.
+- Treat `goggle`, `great`, `realtabformer`, `tabsds`, `tabularargn`, `tabula`, `ctab-gan`, `stasy`, `codi`, and `tabebm` as integrated but higher-maintenance baselines.
 - Use the train-only `tabebm` smoke preset for routine integration checks and the gated-sample preset only on machines that already have TabPFN access configured.

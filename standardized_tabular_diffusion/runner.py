@@ -157,7 +157,7 @@ def validate_action_inputs(
     missing: list[str] = []
     checked: dict[str, Any] = {}
 
-    if action in {"train", "sample"} and config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm", "stasy", "codi", "tabula"}:
+    if action in {"train", "sample"} and config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm", "stasy", "codi", "tabula", "tabsds", "tabularargn"}:
         checked["metadata_path"] = str(dataset_spec.metadata_path)
         if not dataset_spec.metadata_path.exists():
             missing.append(f"metadata_path missing: {dataset_spec.metadata_path}")
@@ -173,7 +173,7 @@ def validate_action_inputs(
         if dataset_spec.task_type != "classification":
             missing.append(f"{config.model} only supports classification datasets, got: {dataset_spec.task_type}")
 
-    if action == "sample" and config.model in {"ctgan", "tvae", "ctab-gan", "ctab-gan-plus", "nrgboost", "bn", "nflow", "goggle", "arf", "tabebm"}:
+    if action == "sample" and config.model in {"ctgan", "tvae", "ctab-gan", "ctab-gan-plus", "nrgboost", "bn", "nflow", "goggle", "arf", "tabebm", "tabsds", "tabularargn"}:
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pkl")
         if config.model == "ctab-gan-plus":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "ctabgan_plus.pkl")
@@ -183,6 +183,10 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nrgboost")
         if config.model == "goggle":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pt")
+        if config.model == "tabsds":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
+        if config.model == "tabularargn":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn.pkl")
         checked["checkpoint_path"] = checkpoint_path
         if not Path(checkpoint_path).exists():
             missing.append(f"checkpoint_path missing: {checkpoint_path}")

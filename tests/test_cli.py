@@ -40,6 +40,20 @@ def test_cli_list_model_inventory_filters_tabula_benchmark(monkeypatch, capsys) 
     assert "tabicl" not in names
 
 
+def test_cli_list_model_inventory_filters_tabforge_benchmark(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--benchmark", "tabforge-2026"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    names = {entry["name"] for entry in payload["models"]}
+
+    assert "tabsds" in names
+    assert "cdtd" in names
+    assert "tabularargn" in names
+    assert "tabula" not in names
+
+
 def test_cli_list_model_inventory_filters_foundation_family(monkeypatch, capsys) -> None:
     monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--family", "foundation"])
 
@@ -136,6 +150,30 @@ def test_cli_show_model_inventory_can_describe_tabdpt(monkeypatch, capsys) -> No
     assert payload["name"] == "tabdpt"
     assert payload["standardized_status"] == "not implemented"
     assert payload["family"] == "foundation"
+
+
+def test_cli_show_model_inventory_can_describe_tabsds(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabsds"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabsds"
+    assert payload["standardized_status"] == "implemented"
+    assert payload["family"] == "traditional"
+
+
+def test_cli_show_model_inventory_can_describe_tabularargn(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "show-model-inventory", "--model", "tabularargn"])
+
+    cli.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert payload["name"] == "tabularargn"
+    assert payload["standardized_status"] == "implemented"
+    assert payload["family"] == "autoregressive"
 
 
 def test_cli_show_model_inventory_can_describe_realtabpfn(monkeypatch, capsys) -> None:
@@ -240,6 +278,8 @@ def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys)
     assert "bn" in payload["models"]
     assert "nflow" in payload["models"]
     assert "stasy" in payload["models"]
+    assert "tabsds" in payload["models"]
+    assert "tabularargn" in payload["models"]
     assert "goggle" in payload["models"]
     assert "great" in payload["models"]
     assert "tabula" in payload["models"]

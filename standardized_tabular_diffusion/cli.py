@@ -29,13 +29,13 @@ def build_parser() -> argparse.ArgumentParser:
     inventory_parser = subparsers.add_parser("list-model-inventory", help="List researched baseline models and their integration status")
     inventory_parser.add_argument(
         "--benchmark",
-        choices=["tabstruct-2026", "tabula-2025"],
+        choices=["tabstruct-2026", "tabula-2025", "tabforge-2026"],
         default=None,
         help="Optionally filter the inventory by benchmark paper",
     )
     inventory_parser.add_argument(
         "--family",
-        choices=["diffusion", "llm", "foundation", "traditional", "vae", "gan", "graph", "flow", "tree", "energy-based"],
+        choices=["diffusion", "llm", "foundation", "traditional", "vae", "gan", "graph", "flow", "tree", "energy-based", "autoregressive"],
         default=None,
         help="Optionally filter the inventory by model family",
     )
