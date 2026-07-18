@@ -30,59 +30,7 @@ This document captures the current integration roadmap for the benchmarking repo
 
 - `tabebm` is standardized in code, but its runtime still depends on authenticated access to Prior Labs' gated TabPFN model.
 
-## Repository Status Tiers
-
-The repository is no longer in an early “what should we integrate next?” phase, so the most useful operational framing is by current status rather than by historical integration waves.
-
-### Fully Smoke-Validated
-
-- `tabddpm`
-- `tabsyn`
-- `tabdiff`
-- `ctgan`
-- `tvae`
-- `smote`
-- `ctab-gan-plus`
-- `nrgboost`
-- `bn`
-- `nflow`
-- `goggle`
-- `arf`
-
-These models have both a standardized adapter and at least one successful local smoke path through the shared CLI.
-
-### Integrated, but Higher-Maintenance
-
-- `great`
-- `realtabformer`
-- `tabula`
-- `ctab-gan`
-- `stasy`
-- `codi`
-
-These models are integrated into the shared interface, but they are more brittle operationally because of upstream research-code assumptions, heavier transformer stacks, or weaker smoke-validation coverage.
-
-### Integrated, but Runtime-Gated
-
-- `tabebm`
-
-`tabebm` is standardized in code, but sampling still depends on gated TabPFN access and explicit runtime opt-in. It is best understood as scientifically relevant but operationally constrained.
-
-### Inventory-Only Foundation References
-
-- `tabpfn`
-- `realtabpfn`
-- `tabicl`
-- `tabiclv2`
-- `tabdpt`
-- `tabfm`
-- `transtab`
-- `mothernet`
-- `gamformer`
-- `tabflex`
-- `causalfm`
-
-These are intentionally tracked in the model inventory as relevant foundation-model references, but they are not forced into the runnable generator registry because they are primarily predictive or causal models rather than native synthetic-row generators.
+The current operational status of these models lives in [runtime_status.md](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/docs/runtime_status.md). This document focuses on benchmark scope, taxonomy, and the broader evolution of the literature rather than per-model execution readiness.
 
 ## Taxonomy
 

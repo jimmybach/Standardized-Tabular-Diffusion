@@ -55,6 +55,8 @@ The currently supported adapters are:
 - `tabebm`
 - `tabdiff`
 - `tabddpm`
+- `tabsds`
+- `tabularargn`
 - `tabula`
 - `tabsyn`
 - `tvae`

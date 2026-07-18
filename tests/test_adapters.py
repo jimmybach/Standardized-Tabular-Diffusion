@@ -18,6 +18,7 @@ from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentCo
 from standardized_tabular_diffusion.interfaces import DatasetSpec
 from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
 from standardized_tabular_diffusion.models.next_wave_baselines import CTABGANPlusAdapter, NRGBoostAdapter, REaLTabFormerAdapter
+from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
@@ -140,6 +141,17 @@ class FakeTrainer:
 
     def train(self):
         return None
+
+
+class FakeTabularARGN:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def fit(self, df):
+        self.train_df = df.copy()
+
+    def sample(self, n_samples):
+        return pd.DataFrame({"x": [11] * n_samples, "y": [1] * n_samples})
 
 
 def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command(
@@ -727,6 +739,106 @@ def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
     assert adapter._metadata_path(adapter._model_root(spec)).name == "adapter_metadata.json"
 
 
+def test_tabsds_train_and_sample_round_trip(tmp_path: Path) -> None:
+    adapter = TabSDSAdapter(tmp_path)
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["age", "city", "label"],
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["label"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    pd.DataFrame(
+        {
+            "age": [21, 35, 42, 28],
+            "city": ["Austin", "Boston", "Chicago", "Austin"],
+            "label": [0, 1, 0, 1],
+        }
+    ).to_csv(dataset_spec.train_data_path, index=False)
+    pd.DataFrame({"age": [30], "city": ["Austin"], "label": [0]}).to_csv(dataset_spec.test_data_path, index=False)
+
+    train_config = ExperimentConfig(
+        model="tabsds",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabsds"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="tabsds",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabsds"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=3),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    checkpoint_path = Path(train_config.output_dir) / "tabsds.pkl"
+    assert train_bundle.output_dir == Path(train_config.output_dir)
+    assert checkpoint_path.exists()
+    assert sample_bundle.generated_sample_path is not None
+    sampled = pd.read_csv(sample_bundle.generated_sample_path)
+    assert list(sampled.columns) == ["age", "city", "label"]
+    assert len(sampled) == 3
+
+
+def test_tabularargn_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
+    adapter = TabularARGNAdapter(tmp_path)
+    fake_engine = types.ModuleType("mostlyai.engine")
+    fake_engine.TabularARGN = FakeTabularARGN
+    monkeypatch.setitem(sys.modules, "mostlyai.engine", fake_engine)
+
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
+    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
+
+    train_config = ExperimentConfig(
+        model="tabularargn",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabularargn"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    sample_config = ExperimentConfig(
+        model="tabularargn",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "tabularargn"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=2),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
+
+    checkpoint_path = Path(train_config.output_dir) / "tabularargn.pkl"
+    assert train_bundle.output_dir == Path(train_config.output_dir)
+    assert checkpoint_path.exists()
+    assert sample_bundle.generated_sample_path is not None
+    assert pd.read_csv(sample_bundle.generated_sample_path).shape == (2, 2)
+
+
 def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
     (repo_root / "TabSyn-main").mkdir(parents=True)
@@ -1013,6 +1125,8 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         ("nflow", "model.pkl"),
         ("goggle", "model.pt"),
         ("great", "great_model"),
+        ("tabsds", "tabsds.pkl"),
+        ("tabularargn", "tabularargn.pkl"),
         ("tabula", "tabula_model"),
         ("arf", "model.pkl"),
     ]:

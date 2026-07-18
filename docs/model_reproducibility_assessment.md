@@ -15,6 +15,7 @@ Statistical / classical:
 - `smote`
 - `bn`
 - `arf`
+- `tabsds`
 
 VAE-based:
 
@@ -48,6 +49,10 @@ Graph-based:
 - `realtabformer`
 - `tabula`
 
+### Autoregressive Specialized Models
+
+- `tabularargn`
+
 ### Energy-Based Models
 
 - `nrgboost`
@@ -72,7 +77,9 @@ Graph-based:
 | `tabddpm` | Diffusion models | Score / denoising diffusion |
 | `tabdiff` | Diffusion models | Multimodal diffusion |
 | `tabebm` | Energy-based models | Class-conditional energy-based model |
+| `tabularargn` | Autoregressive specialized models | Tabular autoregressive network |
 | `tabula` | LLM-based models | Autoregressive language-model-based synthesis |
+| `tabsds` | Traditional generation | Non-parametric rank-and-shuffle synthesis |
 | `stasy` | Diffusion models | Score-based diffusion |
 | `tabsyn` | Diffusion models | Latent diffusion |
 | `tvae` | Traditional generation | VAE |
@@ -93,6 +100,8 @@ Graph-based:
 | `great` | Yes, but higher-maintenance | [tabularis-ai/be_great](https://github.com/tabularis-ai/be_great) | Maintained modern GReaT implementation. Better packaged than many paper repos, but still inherits HF/LLM runtime cost and sampling sensitivity. |
 | `realtabformer` | Yes | [worldbank/REaLTabFormer](https://github.com/worldbank/REaLTabFormer) | Good engineering quality: tests, docs, packaging, and recent releases. Reproducible, but heavier than non-transformer baselines. |
 | `tabula` | Partial / adapterized compatibility path | [zhao-zilong/Tabula](https://github.com/zhao-zilong/Tabula) | Official code exists, but the upstream is notebook-oriented. This repository now provides a local Transformers-based compatibility adapter instead of a direct wrapper around the original training flow, so reproduction should be treated as approximate rather than bit-for-bit. |
+| `tabsds` | Partial / adapterized compatibility path | [echaibub/TabSDS](https://github.com/echaibub/TabSDS) | Official code exists and the method is lightweight, but this repository currently uses a local compatibility implementation inspired by the paper rather than the upstream code directly. |
+| `tabularargn` | Yes, but optional-package dependent | [mostly-ai/mostlyai-engine](https://github.com/mostly-ai/mostlyai-engine) | Strong maintained implementation exists and the repository now exposes an adapter around it, but users must install `mostlyai-engine` separately and the path has not yet been smoke-validated here. |
 | `nrgboost` | Yes, but relatively young | [Ajoo/nrgboost](https://github.com/Ajoo/nrgboost) | Official code and pip package exist. Runnable, but less battle-tested than CTGAN, TabDDPM, or imbalanced-learn style baselines. |
 | `ctab-gan` | Partial / usable research code | [Team-TUD/CTAB-GAN](https://github.com/Team-TUD/CTAB-GAN) | Credible baseline and still common in comparisons, but the codebase is older and less ergonomic than the SDV stack. |
 | `ctab-gan-plus` | Partial / usable research code | [Team-TUD/CTAB-GAN-Plus](https://github.com/Team-TUD/CTAB-GAN-Plus) | Official repo exists, but ergonomics are rougher than CTGAN/TVAE. Notebook-centric and still tied to legacy dependency assumptions. |
@@ -117,6 +126,8 @@ Reasonably strong but higher-maintenance baselines:
 - `realtabformer`
 - `great`
 - `tabula`
+- `tabsds`
+- `tabularargn`
 - `bn`
 - `nflow`
 - `nrgboost`

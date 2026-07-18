@@ -5,6 +5,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
     NRGBoostAdapter,
     REaLTabFormerAdapter,
 )
+from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
@@ -28,6 +29,8 @@ __all__ = [
     "REaLTabFormerAdapter",
     "SMOTEAdapter",
     "STaSyAdapter",
+    "TabSDSAdapter",
+    "TabularARGNAdapter",
     "TabEBMAdapter",
     "TVAEAdapter",
     "TabDDPMAdapter",
