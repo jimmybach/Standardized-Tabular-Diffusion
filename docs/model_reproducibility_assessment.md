@@ -1,6 +1,6 @@
 # Model Reproducibility Assessment
 
-Last reviewed: July 16, 2026
+Last reviewed: July 18, 2026
 
 This document summarizes whether each model exposed by the standardized adapter registry appears to have a reliable, high-quality implementation that can be reasonably reproduced and run, along with the corresponding source repository and important usability notes.
 
@@ -136,7 +136,7 @@ Real implementations, but less reproduction-friendly:
 - The local adapter inventory and runtime notes are in:
   - [../standardized_tabular_diffusion/model_inventory.py](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/standardized_tabular_diffusion/model_inventory.py)
   - [runtime_status.md](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/docs/runtime_status.md)
-- This assessment also checked current upstream repositories and package pages as of July 16, 2026.
+- This assessment also checked current upstream repositories and package pages as of July 18, 2026.
 - Example date-specific signals from upstream:
   - CTGAN latest release observed: February 13, 2026
   - REaLTabFormer latest release observed: January 4, 2026

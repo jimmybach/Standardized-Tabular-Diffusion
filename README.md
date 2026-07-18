@@ -6,7 +6,7 @@ This repository now includes a shared benchmarking layer on top of the upstream 
 - `TabSyn-main`
 - `TabDDPM-main`
 
-The goal is to keep the original implementations intact while giving every diffusion-based model the same external contract for:
+The goal is to keep the original implementations intact while giving every supported baseline the same external contract for:
 
 - training
 - sample generation
@@ -41,6 +41,8 @@ The currently supported adapters are:
 
 - `arf`
 - `bn`
+- `codi`
+- `ctab-gan`
 - `ctab-gan-plus`
 - `ctgan`
 - `goggle`
@@ -49,6 +51,7 @@ The currently supported adapters are:
 - `nrgboost`
 - `realtabformer`
 - `smote`
+- `stasy`
 - `tabebm`
 - `tabdiff`
 - `tabddpm`
@@ -57,6 +60,8 @@ The currently supported adapters are:
 - `tvae`
 
 The repo now also includes a structured baseline inventory for the broader tabular-generation landscape, including both standardized adapters and known high-value methods that are not yet integrated.
+
+The inventory also tracks non-generative foundation-model references separately from the runnable generator registry. Those entries are intentionally documented through the inventory/CLI without being forced into the `train / sample / evaluate` execution path.
 
 Each standardized run writes canonical metadata such as:
 
@@ -205,6 +210,12 @@ Filter the inventory to one benchmark paper:
 
 ```bash
 python -m standardized_tabular_diffusion.cli list-model-inventory --benchmark tabstruct-2026
+```
+
+Filter the inventory to foundation-model references that are not yet integrated into the runnable generator registry:
+
+```bash
+python -m standardized_tabular_diffusion.cli list-model-inventory --family foundation --status "not implemented"
 ```
 
 Inspect one model entry:

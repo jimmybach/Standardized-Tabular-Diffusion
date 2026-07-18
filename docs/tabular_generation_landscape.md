@@ -24,42 +24,65 @@ This document captures the current integration roadmap for the benchmarking repo
 - `nrgboost`
 - `ctab-gan-plus`
 - `realtabformer`
+- `tabula`
 
 ### Remaining caveat
 
 - `tabebm` is standardized in code, but its runtime still depends on authenticated access to Prior Labs' gated TabPFN model.
 
-## Recommended Integration Waves
+## Repository Status Tiers
 
-### Wave 1: High-confidence, Python-native, benchmark-stable
+The repository is no longer in an early “what should we integrate next?” phase, so the most useful operational framing is by current status rather than by historical integration waves.
 
-- `smote`
+### Fully Smoke-Validated
+
+- `tabddpm`
+- `tabsyn`
+- `tabdiff`
 - `ctgan`
 - `tvae`
+- `smote`
 - `ctab-gan-plus`
-- `realtabformer`
 - `nrgboost`
+- `bn`
+- `nflow`
+- `goggle`
 - `arf`
 
-These all have a credible path to a reproducible wrapper with a consistent `train / sample / evaluate` contract.
+These models have both a standardized adapter and at least one successful local smoke path through the shared CLI.
 
-### Wave 2: Runnable, but with heavier dependency or design ambiguity
+### Integrated, but Higher-Maintenance
 
-- `bn`
-- `goggle`
-- `nflow`
 - `great`
+- `realtabformer`
+- `tabula`
 - `ctab-gan`
 - `stasy`
 - `codi`
 
-These are practical to standardize, but they carry more environment complexity than the first wave.
+These models are integrated into the shared interface, but they are more brittle operationally because of upstream research-code assumptions, heavier transformer stacks, or weaker smoke-validation coverage.
 
-### Wave 3: Scientifically valuable, but operationally awkward
+### Integrated, but Runtime-Gated
 
 - `tabebm`
 
-`tabebm` is scientifically relevant, but its runtime remains awkward because it depends on a gated TabPFN foundation model and class-conditional generation semantics.
+`tabebm` is standardized in code, but sampling still depends on gated TabPFN access and explicit runtime opt-in. It is best understood as scientifically relevant but operationally constrained.
+
+### Inventory-Only Foundation References
+
+- `tabpfn`
+- `realtabpfn`
+- `tabicl`
+- `tabiclv2`
+- `tabdpt`
+- `tabfm`
+- `transtab`
+- `mothernet`
+- `gamformer`
+- `tabflex`
+- `causalfm`
+
+These are intentionally tracked in the model inventory as relevant foundation-model references, but they are not forced into the runnable generator registry because they are primarily predictive or causal models rather than native synthetic-row generators.
 
 ## Taxonomy
 
@@ -105,8 +128,9 @@ Diffusion models became the dominant modern research direction once the field mo
 
 - `great`
 - `realtabformer`
+- `tabula`
 
-This branch emerged when researchers started treating rows as text sequences. It brought flexible conditioning and support for high-cardinality categories, at the cost of much heavier training and tokenization complexity.
+This branch emerged when researchers started treating rows as text sequences. It brought flexible conditioning and support for high-cardinality categories, at the cost of much heavier training and tokenization complexity. In this repository, `GReaT`, `REaLTabFormer`, and a local `TabuLa`-compatible adapter are now all exposed through the shared CLI.
 
 ### Graph-based
 
