@@ -34,6 +34,8 @@ The workflow installs:
 
 The last step is intentional. `rtdl==0.0.9` declares `torch<2`, while the limited API used by the pinned TabDDPM code is exercised here against the supported PyTorch 2.3 environment. This is an environment compatibility decision, not a source patch. Official libzero source is vendored for the same legacy-metadata reason.
 
+The official entrypoint is a script under `scripts/`, while `lib` and `zero` are sibling packages at the upstream repository root. The adapter therefore prepends that root to `PYTHONPATH`; the native comparison command uses the identical environment. This is an invocation-only adaptation and does not modify upstream source or runtime semantics.
+
 Equivalent local installation commands are:
 
 ```bash
