@@ -1,0 +1,68 @@
+{
+  "registry_collection_schema_version": "1.0.0",
+  "common": {
+    "registry_schema_version": "1.0.0",
+    "metric_version": "0.0.0-legacy",
+    "definition_origin": "benchmark-derived",
+    "planned_leaderboard_role": "legacy-diagnostic",
+    "owner": "repository-maintainers",
+    "lifecycle_status": "registered",
+    "review_record": {"registered_by": "p1-legacy-migration", "registered_at": "2026-08-03T00:00:00Z", "reviews": []},
+    "source": {
+      "method_references": ["TabStruct paper and pre-P1 repository behavior"],
+      "upstream": "repository pre-P1 evaluation/tabstruct.py",
+      "revision": "unversioned-pre-p1",
+      "implementation_symbol": "standardized_tabular_diffusion.evaluation.tabstruct",
+      "source_authority": "local",
+      "implementation_mode": "local-reimplementation",
+      "retrieved_date": "2026-08-03",
+      "integrity_hash": null,
+      "license": "pending repository license review",
+      "attribution": ["Original repository contributor history must be preserved"],
+      "known_deviations": ["This pre-P1 path has not passed definition review, source parity, or protocol freeze."]
+    },
+    "semantics": {
+      "supported_table_types": ["decoded single table"],
+      "supported_column_types": ["continuous", "integer", "categorical", "boolean"],
+      "required_dataset_profile_metadata": [],
+      "input_view": "legacy reordered table",
+      "fitted_on": "train",
+      "output": {"shape": "scalar", "unit": "score"},
+      "raw_range": {"minimum": 0.0, "maximum": 1.0},
+      "raw_direction": "maximize",
+      "target_value": null,
+      "undefined_conditions": ["Pre-P1 implementation did not define a complete structured-state contract."],
+      "minimum_support": {},
+      "randomness": {"legacy_default_seed": 42},
+      "default_parameters": {},
+      "allowed_overrides": [],
+      "normalization": {"function": "legacy-unknown-or-identity", "version": "0.0.0-legacy"},
+      "aggregation": {"rule": "legacy summary field", "version": "0.0.0-legacy"},
+      "uncertainty": {"procedure": "none"},
+      "failure_contribution_policy": {
+        "computed": "report diagnostic only",
+        "mathematically_undefined": "exclude and report coverage",
+        "insufficient_support": "exclude and report coverage",
+        "not_applicable": "exclude and report coverage",
+        "implementation_failure": "exclude and report failure",
+        "resource_failure": "exclude and report failure"
+      }
+    },
+    "validation": {
+      "unit_test_evidence": [], "boundary_test_evidence": [], "source_parity_evidence": [], "numerical_tolerance": {}, "reference_fixtures": [],
+      "supported_environment": {"status": "not frozen"}, "unresolved_limitations": ["Legacy behavior is retained only for migration and regression comparison."], "release_decision": "diagnostic-only"
+    },
+    "lifecycle_evidence": {"definition_review": null, "implementation": null, "unit_validation": null, "source_parity": null, "protocol_freeze": null, "release_approval": null},
+    "admission": {"official_results_allowed": false, "compatibility_version": "legacy-tabstruct-aligned-v1", "reason": "Pre-P1 implementation is not source-parity validated or protocol frozen."}
+  },
+  "records": [
+    {"metric_id": "legacy-tabstruct-density-shape", "display_name": "Legacy Density Shape", "dimension": "fidelity", "subdimension": "column-shape", "description": "Pre-P1 SDMetrics column-shape summary on reordered real and synthetic tables.", "source": {"method_references": ["SDMetrics Column Shapes report", "TabStruct paper"], "upstream": "sdmetrics 0.11.1 through pre-P1 wrapper", "known_deviations": ["Only a summary score was retained; per-column Atomic Results and parity evidence were absent."]}},
+    {"metric_id": "legacy-tabstruct-density-trend", "display_name": "Legacy Density Trend", "dimension": "fidelity", "subdimension": "column-pair-trend", "description": "Pre-P1 SDMetrics column-pair trend summary on reordered real and synthetic tables.", "source": {"method_references": ["SDMetrics Column Pair Trends report", "TabStruct paper"], "upstream": "sdmetrics 0.11.1 through pre-P1 wrapper", "known_deviations": ["Only a summary score was retained; per-pair Atomic Results and discretization parity evidence were absent."]}},
+    {"metric_id": "legacy-tabstruct-density-overall", "display_name": "Legacy Density Overall", "dimension": "fidelity", "subdimension": "legacy-aggregate", "description": "Arithmetic mean of the pre-P1 shape and trend summary fields.", "source": {"method_references": ["Pre-P1 repository aggregation"], "known_deviations": ["This local aggregate is not an upstream metric and must not be presented as one."]}},
+    {"metric_id": "legacy-tabstruct-ml-efficacy", "display_name": "Legacy ML Efficacy", "dimension": "local-utility", "subdimension": "primary-task", "description": "Primary downstream efficacy value emitted by the pre-P1 evaluator.", "source": {"method_references": ["Pre-P1 repository evaluator"], "known_deviations": ["Predictor identity, raw baseline values, normalization, and denominator policy were not fully captured."]}},
+    {"metric_id": "legacy-tabstruct-logistic-detection", "display_name": "Legacy Logistic Detection", "dimension": "fidelity", "subdimension": "detection", "description": "Logistic detection summary emitted by the pre-P1 evaluator when available.", "source": {"method_references": ["Pre-P1 repository evaluator"], "known_deviations": ["Score semantics and direction require definition review before any official use."]}, "semantics": {"raw_direction": "descriptive", "raw_range": null}},
+    {"metric_id": "legacy-tabstruct-dcr", "display_name": "Legacy DCR", "dimension": "privacy-risk", "subdimension": "distance-to-closest-record", "description": "Distance-to-closest-record style summary emitted by the pre-P1 evaluator when available.", "source": {"method_references": ["Pre-P1 repository evaluator"], "known_deviations": ["Distance definition, calibration reference, aggregation, and direction were not frozen."]}, "semantics": {"raw_direction": "distributional", "raw_range": null, "output": {"shape": "scalar", "unit": "legacy score"}}},
+    {"metric_id": "legacy-tabstruct-global-utility", "display_name": "Legacy Global Utility", "dimension": "global-utility", "subdimension": "all-targets", "description": "Mean relative per-variable utility calculated by the pre-P1 structural-fidelity path.", "source": {"method_references": ["TabStruct paper", "pre-P1 UtilityPerFeature path"], "known_deviations": ["Predictor profiles, target exclusions, denominator failures, and source parity were not governed by the approved contract."]}},
+    {"metric_id": "legacy-tabstruct-utility-per-feature", "display_name": "Legacy Utility Per Feature", "dimension": "global-utility", "subdimension": "per-target", "description": "Per-variable utility values produced by the pre-P1 tiny-default predictor ensemble.", "source": {"method_references": ["TabStruct paper", "pre-P1 UtilityPerFeature path"], "known_deviations": ["The old summary was not represented as one Atomic Result per target and has not passed source parity."]}}
+  ]
+}

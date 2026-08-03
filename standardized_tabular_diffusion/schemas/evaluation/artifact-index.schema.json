@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/artifact-index/1.0.0",
+  "title": "Artifact Index",
+  "type": "object", "additionalProperties": false,
+  "required": ["artifact_index_schema_version", "artifacts"],
+  "properties": {
+    "artifact_index_schema_version": {"const": "1.0.0"},
+    "artifacts": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["artifact_id", "role", "media_type", "path", "external_uri", "byte_size", "sha256", "producer_stage", "retention_class", "publication_class", "rights_classification", "access_requirements"], "properties": {"artifact_id": {"$ref": "#/$defs/id"}, "role": {"type": "string"}, "media_type": {"type": "string"}, "path": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/path"}]}, "external_uri": {"type": ["string", "null"]}, "byte_size": {"type": ["integer", "null"], "minimum": 0}, "sha256": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]}, "producer_stage": {"type": ["string", "null"]}, "retention_class": {"type": "string"}, "publication_class": {"type": "string"}, "rights_classification": {"type": "string"}, "access_requirements": {"type": "object"}}, "oneOf": [{"required": ["path"], "properties": {"path": {"$ref": "#/$defs/path"}}}, {"required": ["external_uri"], "properties": {"external_uri": {"type": "string", "minLength": 1}}}]}}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "path": {"type": "string", "pattern": "^(?!/)(?!.*[<>:|?*])(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"}}
+}

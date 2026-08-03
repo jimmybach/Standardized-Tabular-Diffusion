@@ -1,0 +1,16 @@
+{
+  "profile_schema_version": "1.0.0",
+  "protocol_id": "development-p1",
+  "protocol_version": "0.1.0",
+  "display_name": "P1 contracts and identity development profile",
+  "status": "draft",
+  "official_results_allowed": false,
+  "comparison_tracks": ["native", "standardized-tuning"],
+  "metric_selections": [],
+  "dataset_suites": ["diagnostic"],
+  "result_schema_versions": {"atomic_result": "1.0.0", "manifest": "1.0.0", "metadata": "1.0.0", "summary": "1.0.0", "stage_record": "1.0.0", "artifact_index": "1.0.0"},
+  "policies": {"admission": "development-only", "finalization": "P1 bundles remain incomplete", "overall_score": "prohibited"},
+  "owners": ["repository-maintainers"],
+  "review_record": {"status": "draft", "scope": "contracts and identity only"},
+  "change_log": [{"version": "0.1.0", "change": "Initial P1 development profile."}]
+}

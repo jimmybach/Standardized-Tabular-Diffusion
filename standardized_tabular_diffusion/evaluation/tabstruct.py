@@ -15,9 +15,14 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, read_json
 
+# Backward-compatible display map only. Canonical lifecycle and semantics live
+# in the versioned, non-official Metric Registry records under resources/.
 METRIC_DEFINITIONS = {
     "protocol_name": "tabstruct-aligned-v1",
+    "status": "deprecated-legacy-diagnostic",
+    "registry_command": "std-tabular-diffusion list-metrics",
     "source": {
         "paper": "TabStruct: Measuring Structural Fidelity of Tabular Data",
         "dimensions": [
@@ -188,8 +193,8 @@ else:
 
 
 def _write_summary(payload: dict[str, Any], output_path: Path) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(payload, indent=2, default=_json_default))
+    serialized = (json.dumps(payload, indent=2, default=_json_default) + "\n").encode("utf-8")
+    atomic_write_bytes(output_path, serialized)
 
 
 def _build_column_groups(info: dict[str, Any], columns: list[str]) -> tuple[list[str], list[str]]:
@@ -433,7 +438,7 @@ def normalize_tabdiff_or_tabsyn_summary(
     if not val_path.exists():
         val_path = None
 
-    info = json.loads(info_path.read_text())
+    info = read_json(info_path)
     syn_df = pd.read_csv(sample_path)
     raw_metrics: dict[str, Any] = {}
     raw_details: dict[str, Any] = {}
@@ -515,7 +520,7 @@ def normalize_tabddpm_summary(
     def load_json(path: Path | None) -> dict[str, Any] | None:
         if path is None or not path.exists():
             return None
-        return json.loads(path.read_text())
+        return read_json(path)
 
     catboost = load_json(metrics_paths.get("catboost"))
     mlp = load_json(metrics_paths.get("mlp"))

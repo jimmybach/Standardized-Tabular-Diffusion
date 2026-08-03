@@ -8,6 +8,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
+
+pytestmark = [pytest.mark.evaluation, pytest.mark.legacy]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -19,10 +22,11 @@ TABDIFF_ROOT = REPO_ROOT / "TabDiff-main"
 if str(TABDIFF_ROOT) not in sys.path:
     sys.path.insert(0, str(TABDIFF_ROOT))
 
-mle = import_module("eval.mle.mle")
-
 
 def test_prepare_ml_problem_uses_deterministic_split() -> None:
+    pytest.importorskip("xgboost", reason="the legacy upstream MLE test requires xgboost")
+    mle = import_module("eval.mle.mle")
+
     train = np.array(
         [
             [0.0, "a", 0],
