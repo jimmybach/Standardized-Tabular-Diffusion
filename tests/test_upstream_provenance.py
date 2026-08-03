@@ -45,12 +45,32 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
-    for model_id in ("tabddpm", "tabdiff", "tabsyn"):
+    for model_id in ("tabdiff", "tabsyn"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.benchmark_track == "experimental"
         assert spec.support_level == "unsupported"
         assert "native-parity-validated" not in spec.validation_level.value
+
+    tabddpm = get_adapter_spec("tabddpm")
+    assert tabddpm.validation_level.value == "native-parity-validated"
+    assert tabddpm.modification_status == "adapter-only"
+    assert tabddpm.benchmark_track == "experimental"
+    assert tabddpm.support_level == "unsupported"
+    assert "docs/evidence/tabddpm/native-parity-run-30863212268.json" in tabddpm.evidence_records
+
+
+def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> None:
+    payload = _load_source_lock()
+    tabddpm = payload["components"]["tabddpm"]
+    assert isinstance(tabddpm, dict)
+    validation = tabddpm["validation"]
+
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30863212268
+    assert validation["result_summary"]["seed_cases_passed"] == 3
+    assert tabddpm["official_eligibility"] == "pending-separate-official-track-review"
 
 
 def test_removed_unverified_checkpoints_are_recorded_and_absent() -> None:

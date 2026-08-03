@@ -355,6 +355,8 @@ The main files to inspect afterward are:
 
 For `tabddpm`, also set `upstream_config_path` in the experiment config so the standardized adapter can call the upstream TOML-based pipeline.
 
+TabDDPM's adapter is `native-parity-validated` on Linux/Python 3.11 against the pinned author implementation. The protocol, three-seed exact comparisons, environment lock, workflow link, and permanent evidence are documented in `docs/TABDDPM_VALIDATION.md`. This validation does not yet make TabDDPM eligible for the Official Results track or release-supported.
+
 ## Tests
 
 The standardized layer now has lightweight regression coverage for:
