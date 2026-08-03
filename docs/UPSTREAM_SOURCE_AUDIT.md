@@ -26,18 +26,19 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 
 | Component | Pinned upstream revision | Snapshot relation | Local source treatment | Current official eligibility |
 |---|---|---|---|---|
-| TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The imported core matched all 58 compared upstream blobs. | Local `zero` compatibility substitute; no generative-algorithm source change found. | Blocked pending shim removal or approval plus native-parity validation. |
+| TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The initial import had 58 exact scoped files but omitted all six official `lib/` files. The missing files have now been restored; all 64 scoped files match the integrity manifest after declared text normalization. | Adapter-only. The former local `zero` shim was removed and replaced by the seven byte-exact modules from the official `libzero==0.0.8` wheel. | Blocked pending execution of the predeclared native-parity protocol. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | The initial non-data snapshot matched all 30 compared upstream blobs. | `eval/mle/mle.py` was changed later and is a semantic evaluator patch; the generative core remains upstream-exact within the audited scope. | Patched upstream evaluator is excluded from official metrics; central reviewed evaluation must be used. |
 | TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five already carried local changes at import. | Entrypoint/device/configuration and dependency-API compatibility patches. | Blocked pending patch isolation, approval, and native-parity validation. |
 
 ## Patch Classification
 
-### `tabddpm-libzero-compat-v1`
+### Resolved TabDDPM import and dependency defects
 
-- Classification: compatibility-patched.
-- Files: `TabDDPM-main/zero/__init__.py`, `hardware.py`, and `random.py`.
-- Reason: substitutes locally for the upstream `libzero` dependency.
-- Decision: unapproved and unvalidated. It cannot support a native-parity claim until behavior is compared with the upstream dependency or the shim is removed.
+- The initial repository import omitted `lib/__init__.py`, `data.py`, `deep.py`, `env.py`, `metrics.py`, and `util.py`, so the real upstream pipeline could not import `lib`.
+- Those six files are now restored from the pinned TabDDPM checkout and covered by the 64-file integrity manifest.
+- `tabddpm-libzero-compat-v1` was removed because its `improve_reproducibility` implementation used the same seed for Python, NumPy, and PyTorch, whereas official `libzero==0.0.8` deliberately uses offset seeds. It therefore was not behaviorally equivalent.
+- `TabDDPM-main/zero/` now contains the seven byte-exact Python modules from the official `libzero==0.0.8` wheel, along with its MIT license. Vendoring avoids the wheel's legacy `torch<2` dependency metadata while retaining official runtime behavior in the supported Python 3.11 / PyTorch 2.3 validation environment.
+- This source repair changes the treatment from `compatibility-patched` to `adapter-only`; it does not itself establish native parity. The real protocol in `.github/workflows/tabddpm-validation.yml` remains mandatory.
 
 ### `tabdiff-mle-evaluator-v1`
 
@@ -68,7 +69,7 @@ Legacy Adult data directories contained duplicated raw archives, processed table
 
 ## License Notes
 
-- The TabDDPM snapshot carries its upstream MIT license.
+- The TabDDPM snapshot carries its upstream MIT license; the vendored official `libzero==0.0.8` modules carry their separate upstream MIT license.
 - The TabDiff license file is byte-for-byte identical to the pinned upstream file. Its malformed quote characters are therefore an upstream defect, not local corruption; the original attribution is preserved.
 - The TabSyn snapshot carries Apache-2.0 license and NOTICE files. Its bundled baseline directories require their own source, license, and patch audit.
 
