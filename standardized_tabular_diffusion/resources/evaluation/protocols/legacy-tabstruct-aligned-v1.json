@@ -1,0 +1,25 @@
+{
+  "profile_schema_version": "1.0.0",
+  "protocol_id": "legacy-tabstruct-aligned",
+  "protocol_version": "1.0.0-legacy",
+  "display_name": "Legacy tabstruct-aligned-v1 compatibility profile",
+  "status": "legacy",
+  "official_results_allowed": false,
+  "comparison_tracks": ["native", "standardized-tuning"],
+  "metric_selections": [
+    {"metric_id": "legacy-tabstruct-density-shape", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-density-trend", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-density-overall", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-ml-efficacy", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-logistic-detection", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-dcr", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-global-utility", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"},
+    {"metric_id": "legacy-tabstruct-utility-per-feature", "metric_version": "0.0.0-legacy", "required": false, "role": "legacy-diagnostic"}
+  ],
+  "dataset_suites": ["diagnostic"],
+  "result_schema_versions": {"atomic_result": "1.0.0", "manifest": "1.0.0", "metadata": "1.0.0", "summary": "1.0.0", "stage_record": "1.0.0", "artifact_index": "1.0.0"},
+  "policies": {"admission": "legacy-diagnostic-only", "missing_values": "must not reach model input", "overall_score": "prohibited"},
+  "owners": ["repository-maintainers"],
+  "review_record": {"status": "not-scientifically-reviewed", "migration": "p1"},
+  "change_log": [{"version": "1.0.0-legacy", "change": "Converted static descriptions to non-official registry references."}]
+}

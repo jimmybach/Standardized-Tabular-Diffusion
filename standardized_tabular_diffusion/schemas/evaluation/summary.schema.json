@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/summary/1.0.0",
+  "title": "Run Result Summary",
+  "type": "object", "additionalProperties": false,
+  "required": ["summary_schema_version", "identity", "terminal_status", "validity", "dimensions", "local_utility", "global_utility", "privacy_risk", "efficiency", "metric_state_counts", "denominator_counts", "warnings", "failures", "atomic_result_refs", "aggregation", "dataset_aggregation_eligible"],
+  "properties": {
+    "summary_schema_version": {"const": "1.0.0"}, "identity": {"type": "object"}, "terminal_status": {"enum": ["pending", "success", "partial", "failed", "cancelled", "invalidated"]},
+    "validity": {"type": "object"}, "dimensions": {"type": "object"}, "local_utility": {"type": "object"}, "global_utility": {"type": "object"}, "privacy_risk": {"type": "object"}, "efficiency": {"type": "object"},
+    "metric_state_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}}, "denominator_counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}}, "warnings": {"type": "array", "items": {"type": "string"}}, "failures": {"type": "array", "items": {"type": "object"}}, "atomic_result_refs": {"type": "array", "items": {"type": "string"}},
+    "aggregation": {"type": "object", "additionalProperties": false, "required": ["implementation", "version", "reproducible_from_atomic_results"], "properties": {"implementation": {"type": "string"}, "version": {"type": "string"}, "reproducible_from_atomic_results": {"type": "boolean"}}}, "dataset_aggregation_eligible": {"type": "boolean"}
+  }
+}

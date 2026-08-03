@@ -1,13 +1,17 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pandas as pd
 
+from standardized_tabular_diffusion.evaluation.serialization import read_json
+
 
 def load_summary(path: Path) -> dict:
-    return json.loads(path.read_text())
+    payload = read_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Summary must be a JSON object: {path}")
+    return payload
 
 
 def summary_to_row(summary: dict) -> dict:

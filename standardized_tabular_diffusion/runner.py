@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
 from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.datasets import get_dataset_spec
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
 from standardized_tabular_diffusion.interfaces import DatasetSpec
-from standardized_tabular_diffusion.registry import get_adapter
+from standardized_tabular_diffusion.registry import get_adapter, get_adapter_spec
 
 
 def validate_dataset_spec(dataset_spec: DatasetSpec) -> dict[str, Any]:
@@ -45,9 +45,9 @@ def build_run_context(config: ExperimentConfig, repo_root: Path | None = None) -
         "dataset_spec": dataset_spec.to_dict(),
         "dataset_validation": validate_dataset_spec(dataset_spec),
         "action_readiness": {
-            "train": validate_action_inputs(config, "train", dataset_spec=dataset_spec),
-            "sample": validate_action_inputs(config, "sample", dataset_spec=dataset_spec),
-            "evaluate": validate_action_inputs(config, "evaluate", dataset_spec=dataset_spec),
+            "train": validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=repo_root),
+            "sample": validate_action_inputs(config, "sample", dataset_spec=dataset_spec, repo_root=repo_root),
+            "evaluate": validate_action_inputs(config, "evaluate", dataset_spec=dataset_spec, repo_root=repo_root),
         },
         "run_spec": run_spec.to_dict(),
         "adapter": {
@@ -61,7 +61,7 @@ def save_run_context(context: dict[str, Any], output_dir: str | Path) -> Path:
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / "run_context.json"
-    path.write_text(json.dumps(context, indent=2))
+    atomic_write_json(path, context)
     return path
 
 
@@ -72,7 +72,7 @@ def run_action(
 ):
     adapter = get_adapter(config.model, repo_root=repo_root)
     dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
-    readiness = validate_action_inputs(config, action, dataset_spec=dataset_spec)
+    readiness = validate_action_inputs(config, action, dataset_spec=dataset_spec, repo_root=repo_root)
     if not readiness["ready"]:
         raise FileNotFoundError(
             f"Cannot run {action} for model={config.model}, dataset={config.dataset}. Missing inputs: "
@@ -102,7 +102,7 @@ def run_pipeline(
     sample_path: str | None = config.evaluation.extra.get("sample_path")
 
     if config.train.enabled:
-        readiness = validate_action_inputs(config, "train", dataset_spec=dataset_spec)
+        readiness = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
                 f"Cannot run train for model={config.model}, dataset={config.dataset}. Missing inputs: "
@@ -112,7 +112,7 @@ def run_pipeline(
         phase_results["phases"]["train"] = bundle.to_dict()
 
     if config.sample.enabled:
-        readiness = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)
+        readiness = validate_action_inputs(config, "sample", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
                 f"Cannot run sample for model={config.model}, dataset={config.dataset}. Missing inputs: "
@@ -128,7 +128,7 @@ def run_pipeline(
         if sample_path is not None:
             eval_config.evaluation.extra["sample_path"] = sample_path
             eval_config.sample.extra["sample_path"] = sample_path
-        readiness = validate_action_inputs(eval_config, "evaluate", dataset_spec=dataset_spec)
+        readiness = validate_action_inputs(eval_config, "evaluate", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
                 f"Cannot run evaluate for model={config.model}, dataset={config.dataset}. Missing inputs: "
@@ -144,7 +144,7 @@ def save_pipeline_result(result: dict[str, Any], output_dir: str | Path) -> Path
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / "pipeline_result.json"
-    path.write_text(json.dumps(result, indent=2))
+    atomic_write_json(path, result)
     return path
 
 
@@ -152,12 +152,37 @@ def validate_action_inputs(
     config: ExperimentConfig,
     action: str,
     dataset_spec: DatasetSpec | None = None,
+    repo_root: Path | None = None,
 ) -> dict[str, Any]:
-    dataset_spec = dataset_spec or get_dataset_spec(config.dataset)
+    if action not in {"train", "sample", "evaluate"}:
+        raise ValueError(f"Unsupported action: {action}")
+    resolved_root = repo_root or Path(__file__).resolve().parents[1]
+    dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=resolved_root)
+    adapter_spec = get_adapter_spec(config.model)
     missing: list[str] = []
     checked: dict[str, Any] = {}
 
-    if action in {"train", "sample"} and config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm", "stasy", "codi", "tabula", "tabsds", "tabularargn"}:
+    def record_user_checkpoint(checkpoint_path: str) -> None:
+        checked["checkpoint_path"] = checkpoint_path
+        path = Path(checkpoint_path)
+        if not path.exists():
+            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+            return
+        resolved_checkpoint = path.resolve()
+        output_root = Path(config.output_dir).resolve()
+        allow_external = bool(config.sample.extra.get("allow_unsafe_external_checkpoint", False))
+        checked["allow_unsafe_external_checkpoint"] = allow_external
+        if not resolved_checkpoint.is_relative_to(output_root) and not allow_external:
+            missing.append(
+                "external checkpoint loading is blocked for code-executing model formats; "
+                "move the checkpoint under output_dir or explicitly set "
+                "sample.extra.allow_unsafe_external_checkpoint=true after provenance review"
+            )
+
+    if action not in adapter_spec.actions:
+        missing.append(f"action {action!r} is not supported by adapter {config.model!r}")
+
+    if action in {"train", "sample"} and adapter_spec.requires_dataset_paths:
         checked["metadata_path"] = str(dataset_spec.metadata_path)
         if not dataset_spec.metadata_path.exists():
             missing.append(f"metadata_path missing: {dataset_spec.metadata_path}")
@@ -168,12 +193,26 @@ def validate_action_inputs(
         if dataset_spec.test_data_path is not None and not dataset_spec.test_data_path.exists():
             missing.append(f"test_data_path missing: {dataset_spec.test_data_path}")
 
-    if config.model in {"smote", "tabebm"}:
+    if dataset_spec.task_type not in adapter_spec.task_types:
         checked["task_type"] = dataset_spec.task_type
-        if dataset_spec.task_type != "classification":
-            missing.append(f"{config.model} only supports classification datasets, got: {dataset_spec.task_type}")
+        missing.append(
+            f"{config.model} supports task types {list(adapter_spec.task_types)}, got: {dataset_spec.task_type}"
+        )
 
-    if action == "sample" and config.model in {"ctgan", "tvae", "ctab-gan", "ctab-gan-plus", "nrgboost", "bn", "nflow", "goggle", "arf", "tabebm", "tabsds", "tabularargn"}:
+    if action == "sample" and config.model in {
+        "ctgan",
+        "tvae",
+        "ctab-gan",
+        "ctab-gan-plus",
+        "nrgboost",
+        "bn",
+        "nflow",
+        "goggle",
+        "arf",
+        "tabebm",
+        "tabsds",
+        "tabularargn",
+    }:
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pkl")
         if config.model == "ctab-gan-plus":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "ctabgan_plus.pkl")
@@ -187,20 +226,23 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
         if config.model == "tabularargn":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn.pkl")
-        checked["checkpoint_path"] = checkpoint_path
-        if not Path(checkpoint_path).exists():
-            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+        record_user_checkpoint(checkpoint_path)
 
     if action == "sample" and config.model in {"stasy", "codi"}:
-        repo_root = Path(__file__).resolve().parents[1]
         if config.model == "stasy":
-            checkpoint_path = repo_root / "TabSyn-main" / "baselines" / "stasy" / "ckpt" / config.dataset / "model.pth"
-            checked["checkpoint_path"] = str(checkpoint_path)
-            if not checkpoint_path.exists():
-                missing.append(f"checkpoint_path missing: {checkpoint_path}")
+            stasy_checkpoint_path = (
+                resolved_root / "TabSyn-main" / "baselines" / "stasy" / "ckpt" / config.dataset / "model.pth"
+            )
+            checked["checkpoint_path"] = str(stasy_checkpoint_path)
+            if not stasy_checkpoint_path.exists():
+                missing.append(f"checkpoint_path missing: {stasy_checkpoint_path}")
         if config.model == "codi":
-            checkpoint_con = repo_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_con.pt"
-            checkpoint_dis = repo_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_dis.pt"
+            checkpoint_con = (
+                resolved_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_con.pt"
+            )
+            checkpoint_dis = (
+                resolved_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_dis.pt"
+            )
             checked["checkpoint_con_path"] = str(checkpoint_con)
             checked["checkpoint_dis_path"] = str(checkpoint_dis)
             if not checkpoint_con.exists():
@@ -218,27 +260,20 @@ def validate_action_inputs(
 
     if action == "sample" and config.model == "great":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "great_model")
-        checked["checkpoint_path"] = checkpoint_path
-        if not Path(checkpoint_path).exists():
-            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+        record_user_checkpoint(checkpoint_path)
 
     if action == "sample" and config.model == "tabula":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabula_model")
-        checked["checkpoint_path"] = checkpoint_path
-        if not Path(checkpoint_path).exists():
-            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+        record_user_checkpoint(checkpoint_path)
 
     if action == "sample" and config.model == "realtabformer":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "realtabformer_model")
-        checked["checkpoint_path"] = checkpoint_path
-        if not Path(checkpoint_path).exists():
-            missing.append(f"checkpoint_path missing: {checkpoint_path}")
+        record_user_checkpoint(checkpoint_path)
 
     if config.model == "tabsyn":
         method = config.sample.extra.get("method") or config.train.extra.get("method") or "tabsyn"
-        repo_root = Path(__file__).resolve().parents[1]
-        vae_ckpt_dir = repo_root / "TabSyn-main" / "tabsyn" / "vae" / "ckpt" / config.dataset
-        diffusion_ckpt_dir = repo_root / "TabSyn-main" / "tabsyn" / "ckpt" / config.dataset
+        vae_ckpt_dir = resolved_root / "TabSyn-main" / "tabsyn" / "vae" / "ckpt" / config.dataset
+        diffusion_ckpt_dir = resolved_root / "TabSyn-main" / "tabsyn" / "ckpt" / config.dataset
         if method == "tabsyn":
             if action == "train":
                 checked["tabsyn_stage_model"] = "vae_then_diffusion"
@@ -270,12 +305,12 @@ def validate_action_inputs(
                 missing.append(f"upstream_config_path missing: {config.upstream_config_path}")
 
     if action == "evaluate":
-        if config.model in {"tabdiff", "tabsyn", "ctgan", "tvae", "smote", "ctab-gan", "ctab-gan-plus", "realtabformer", "nrgboost", "bn", "nflow", "goggle", "great", "arf", "tabebm", "stasy", "codi"}:
+        if adapter_spec.evaluation_input == "sample-file":
             sample_path = config.evaluation.extra.get("sample_path")
             checked["sample_path"] = sample_path
             if sample_path is None or not Path(sample_path).exists():
                 missing.append(f"sample_path missing: {sample_path}")
-        elif config.model == "tabddpm":
+        elif adapter_spec.evaluation_input == "upstream-artifacts":
             required_any = [
                 "results_catboost_path",
                 "results_mlp_path",

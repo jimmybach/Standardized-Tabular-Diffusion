@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/metadata/1.0.0",
+  "title": "Run Result Metadata",
+  "type": "object", "additionalProperties": false,
+  "required": ["metadata_schema_version", "identity", "protocol", "dataset", "model", "implementation", "comparison_track", "seeds", "evaluator", "execution", "coverage", "provenance", "review", "status"],
+  "properties": {
+    "metadata_schema_version": {"const": "1.0.0"},
+    "identity": {"type": "object", "additionalProperties": false, "required": ["run_id", "request_fingerprint"], "properties": {"run_id": {"$ref": "#/$defs/id"}, "request_fingerprint": {"$ref": "#/$defs/sha256"}}},
+    "protocol": {"type": "object"}, "dataset": {"type": "object"}, "model": {"type": "object"}, "implementation": {"type": "object"}, "comparison_track": {"enum": ["native", "standardized-tuning"]}, "seeds": {"type": "object"}, "evaluator": {"type": "object"},
+    "execution": {"type": "object", "additionalProperties": false, "required": ["requested_action", "started_at", "ended_at", "terminal_phase", "run_status", "requested_synthetic_rows", "actual_synthetic_rows", "resource_limits", "interrupted", "resume_ancestry", "warning_codes", "failure_category", "failure_reason_code", "artifact_refs"], "properties": {"requested_action": {"type": "string"}, "started_at": {"oneOf": [{"type": "null"}, {"type": "string", "format": "date-time"}]}, "ended_at": {"oneOf": [{"type": "null"}, {"type": "string", "format": "date-time"}]}, "terminal_phase": {"type": ["string", "null"]}, "run_status": {"enum": ["success", "partial", "failed", "cancelled", "invalidated", "pending"]}, "requested_synthetic_rows": {"type": ["integer", "null"], "minimum": 0}, "actual_synthetic_rows": {"type": ["integer", "null"], "minimum": 0}, "resource_limits": {"type": "object"}, "interrupted": {"type": "boolean"}, "resume_ancestry": {"type": "array", "items": {"$ref": "#/$defs/id"}}, "warning_codes": {"type": "array", "items": {"type": "string"}}, "failure_category": {"type": ["string", "null"]}, "failure_reason_code": {"type": ["string", "null"]}, "artifact_refs": {"type": "array", "items": {"type": "string"}}}},
+    "coverage": {"type": "object"}, "provenance": {"type": "object"}, "review": {"type": "object"}, "status": {"enum": ["incomplete", "finalized", "invalidated", "withdrawn"]}
+  },
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}
