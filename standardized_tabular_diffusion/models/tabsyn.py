@@ -28,7 +28,7 @@ class TabSynAdapter(BaseModelAdapter):
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         gpu = str(spec.extra.get("gpu", 0))
-        skip_vae_if_present = spec.extra.get("skip_vae_if_present", True)
+        skip_vae_if_present = spec.extra.get("skip_vae_if_present", False)
 
         if not (skip_vae_if_present and self._has_vae_artifacts(spec.dataset)):
             vae_args = [
@@ -59,8 +59,9 @@ class TabSynAdapter(BaseModelAdapter):
             "--gpu",
             gpu,
         ]
-        if spec.extra.get("diffusion_num_epochs") is not None:
-            args.extend(["--num_epochs", str(spec.extra["diffusion_num_epochs"])])
+        # The shared patched parser defaults to 1,000 epochs for other baselines,
+        # while the authoritative TabSyn diffusion default is 10,001.
+        args.extend(["--num_epochs", str(spec.extra.get("diffusion_num_epochs", 10001))])
         self._run_python(args, self.upstream_root)
         bundle = ArtifactBundle(
             model=self.model_name,

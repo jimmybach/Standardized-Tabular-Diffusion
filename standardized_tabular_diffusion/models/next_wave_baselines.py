@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import importlib
-import json
 import pickle
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
+from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.final_wave_baselines import _disable_torchvision_for_transformers
@@ -19,9 +18,7 @@ def _import_or_raise(module_name: str, install_hint: str):
     try:
         return importlib.import_module(module_name)
     except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            f"{module_name} is required for this adapter. Install it with `{install_hint}`."
-        ) from exc
+        raise RuntimeError(f"{module_name} is required for this adapter. Install it with `{install_hint}`.") from exc
 
 
 class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
@@ -40,27 +37,18 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return dataset_spec.train_data_path.parent
 
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
-        dataset_dir = self._dataset_dir(dataset_spec)
-        y_train = np.load(dataset_dir / "y_train.npy", allow_pickle=True)
-        x_num_path = dataset_dir / "X_num_train.npy"
-        x_cat_path = dataset_dir / "X_cat_train.npy"
-        x_num_train = np.load(x_num_path, allow_pickle=True) if x_num_path.exists() else None
-        x_cat_train = np.load(x_cat_path, allow_pickle=True) if x_cat_path.exists() else None
-
-        parts: list[pd.DataFrame] = []
-        if x_num_train is not None:
-            parts.append(pd.DataFrame(x_num_train, columns=list(range(x_num_train.shape[1]))))
-        if x_cat_train is not None:
-            offset = 0 if x_num_train is None else x_num_train.shape[1]
-            parts.append(pd.DataFrame(x_cat_train, columns=list(range(offset, offset + x_cat_train.shape[1]))))
-        parts.append(pd.DataFrame(y_train, columns=["y"]))
-        frame = pd.concat(parts, axis=1)
-        frame.columns = [str(column) for column in frame.columns]
+        if dataset_spec.train_data_path is None:
+            raise FileNotFoundError("ctab-gan-plus requires dataset_spec.train_data_path")
+        if len(dataset_spec.target_columns) != 1:
+            raise ValueError("ctab-gan-plus requires exactly one target column")
+        ordered_features = [*dataset_spec.numerical_columns, *dataset_spec.categorical_columns]
+        frame = pd.read_csv(dataset_spec.train_data_path)[[*ordered_features, *dataset_spec.target_columns]].copy()
+        frame.columns = [*[str(index) for index in range(len(ordered_features))], "y"]
         return frame
 
     def _load_ctabgan_params(self, dataset_name: str) -> dict[str, Any]:
         columns_path = self.repo_root / "TabDDPM-main" / "CTAB-GAN-Plus" / "columns.json"
-        payload = json.loads(columns_path.read_text())
+        payload = read_json(columns_path)
         if dataset_name not in payload:
             raise KeyError(f"Missing CTAB-GAN-Plus column config for dataset {dataset_name}")
         return dict(payload[dataset_name])
@@ -111,7 +99,8 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             model = pickle.load(handle)
         train_df = self._load_training_frame(dataset_spec)
         num_samples = spec.num_samples or len(train_df)
@@ -122,7 +111,7 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sample_df = sample_df[[str(idx) for idx in range(len(dataset_spec.column_names))]].copy()
         sample_df.columns = dataset_spec.column_names
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -208,7 +197,13 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         train_df = self._load_training_frame(dataset_spec)
         REaLTabFormer = self._import_model_cls()
         model_dir = self._resolve_saved_model_dir(self._model_root(spec))
-        model = REaLTabFormer.load_from_dir(path=str(model_dir))
+        trusted_model_dir = self._validate_trusted_executable_artifact(
+            spec,
+            model_dir,
+            format_name="REaLTabFormer model directory",
+            allow_directory=True,
+        )
+        model = REaLTabFormer.load_from_dir(path=str(trusted_model_dir))
         num_samples = spec.num_samples or len(train_df)
         sample_kwargs: dict[str, Any] = {}
         if spec.extra.get("gen_batch") is not None:
@@ -216,7 +211,7 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sample_df = model.sample(n_samples=num_samples, **sample_kwargs)
         sample_df = sample_df[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -244,7 +239,9 @@ class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         if dataset_spec.train_data_path is None:
             raise FileNotFoundError("nrgboost requires dataset_spec.train_data_path")
         frame = pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
-        for column in dataset_spec.categorical_columns + (dataset_spec.target_columns if dataset_spec.task_type == "classification" else []):
+        for column in dataset_spec.categorical_columns + (
+            dataset_spec.target_columns if dataset_spec.task_type == "classification" else []
+        ):
             if column in frame.columns:
                 frame[column] = frame[column].astype("category")
         return frame
@@ -291,12 +288,18 @@ class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
-        model = NRGBooster.load(str(checkpoint_path))
+        trusted_checkpoint = self._validate_trusted_executable_artifact(
+            spec,
+            checkpoint_path,
+            format_name="NRGBoost model",
+            allow_directory=True,
+        )
+        model = NRGBooster.load(str(trusted_checkpoint))
         num_samples = spec.num_samples or len(train_df)
         sample_df = model.sample(num_samples, num_steps=int(spec.extra.get("num_steps", 100)))
         sample_df = sample_df[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
