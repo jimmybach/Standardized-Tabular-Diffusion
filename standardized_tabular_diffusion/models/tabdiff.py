@@ -23,7 +23,13 @@ class TabDiffAdapter(BaseModelAdapter):
 
     def _infer_sample_path(self, checkpoint_path: Path) -> Path:
         epoch = int(checkpoint_path.stem.split("_")[-1])
-        result_dir = Path(str(checkpoint_path.parent).replace("/ckpt/", "/result/"))
+        parent_parts = list(checkpoint_path.parent.parts)
+        try:
+            checkpoint_index = len(parent_parts) - 1 - parent_parts[::-1].index("ckpt")
+        except ValueError as exc:
+            raise ValueError(f"TabDiff checkpoint is not under a ckpt directory: {checkpoint_path}") from exc
+        parent_parts[checkpoint_index] = "result"
+        result_dir = Path(*parent_parts)
         return result_dir / str(epoch) / "samples.csv"
 
     def train(self, spec: RunSpec) -> ArtifactBundle:

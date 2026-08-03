@@ -1,22 +1,20 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
-import torch
-from torch.utils.data import Dataset
 
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.final_wave_baselines import _disable_torchvision_for_transformers
 from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin
 
 
-class _TokenizedTextDataset(Dataset):
+class _TokenizedTextDataset:
     def __init__(self, tokenizer, texts: list[str], max_length: int) -> None:
         tokenized = tokenizer(
             texts,
@@ -31,7 +29,7 @@ class _TokenizedTextDataset(Dataset):
     def __len__(self) -> int:
         return int(self.input_ids.shape[0])
 
-    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
+    def __getitem__(self, idx: int) -> dict[str, Any]:
         input_ids = self.input_ids[idx]
         return {
             "input_ids": input_ids,
@@ -109,7 +107,9 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         cells = [f"{column}={self._normalize_cell(row[column])}" for column in column_order]
         return column_sep.join(cells) + row_end
 
-    def _build_training_texts(self, train_df: pd.DataFrame, dataset_spec: DatasetSpec, *, column_sep: str, row_end: str) -> list[str]:
+    def _build_training_texts(
+        self, train_df: pd.DataFrame, dataset_spec: DatasetSpec, *, column_sep: str, row_end: str
+    ) -> list[str]:
         return [
             self._row_to_text(row, dataset_spec.column_names, column_sep=column_sep, row_end=row_end)
             for _, row in train_df.iterrows()
@@ -199,7 +199,7 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         metadata_path = model_root / "adapter_metadata.json"
         if not metadata_path.exists():
             return {}
-        return json.loads(metadata_path.read_text())
+        return read_json(metadata_path)
 
     @staticmethod
     def _coerce_value(column: str, value: str, metadata: dict[str, Any]) -> Any:
@@ -274,7 +274,7 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         model.save_pretrained(str(model_root))
         tokenizer.save_pretrained(str(model_root))
         metadata = self._build_training_metadata(train_df, dataset_spec, tokenizer, texts, spec)
-        self._metadata_path(model_root).write_text(json.dumps(metadata, indent=2))
+        atomic_write_json(self._metadata_path(model_root), metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -288,14 +288,22 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        import torch
+
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
         imports = self._import_transformer_bits()
         model_root = self._model_root(spec)
         metadata = self._load_training_metadata(model_root)
-        tokenizer = imports.AutoTokenizer.from_pretrained(str(model_root))
-        model = imports.AutoModelForCausalLM.from_pretrained(str(model_root))
+        trusted_model_root = self._validate_trusted_executable_artifact(
+            spec,
+            model_root,
+            format_name="TabuLa model directory",
+            allow_directory=True,
+        )
+        tokenizer = imports.AutoTokenizer.from_pretrained(str(trusted_model_root))
+        model = imports.AutoModelForCausalLM.from_pretrained(str(trusted_model_root))
         if spec.device != "cpu" and torch.cuda.is_available():
             model = model.to(spec.device)
         model.eval()
@@ -330,7 +338,9 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                     top_p=top_p,
                     max_new_tokens=max_new_tokens,
                     pad_token_id=tokenizer.pad_token_id,
-                    eos_token_id=tokenizer.convert_tokens_to_ids(row_end) if hasattr(tokenizer, "convert_tokens_to_ids") else None,
+                    eos_token_id=tokenizer.convert_tokens_to_ids(row_end)
+                    if hasattr(tokenizer, "convert_tokens_to_ids")
+                    else None,
                 )
             text = tokenizer.decode(generated[0], skip_special_tokens=False)
             parsed = self._parse_generated_row(text, metadata)
@@ -346,7 +356,7 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
         sample_df = pd.DataFrame(rows, columns=dataset_spec.column_names)
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         notes.append(
             f"TabuLa sampling succeeded with start_col={start_col}, temperature={temperature}, top_p={top_p}, max_new_tokens={max_new_tokens}, attempts={attempts}."
         )

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import json
 import os
 import pickle
 import tempfile
@@ -11,9 +10,9 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, StandardScaler
 
+from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
@@ -209,7 +208,8 @@ class BNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             payload = pickle.load(handle)
         model = payload["model"]
         preprocessor: BNPreprocessor = payload["preprocessor"]
@@ -220,7 +220,7 @@ class BNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sampled = sampler.forward_sample(size=num_samples, seed=spec.seed, show_progress=False)
         sample_df = preprocessor.inverse_transform(sampled, seed=spec.seed)
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -268,6 +268,8 @@ class NFlowAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return Flow(transform, StandardNormal([num_features]))
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        import torch
+
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
@@ -303,10 +305,13 @@ class NFlowAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        import torch
+
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             payload = pickle.load(handle)
         flow = payload["flow"]
         preprocessor: NFlowPreprocessor = payload["preprocessor"]
@@ -317,7 +322,7 @@ class NFlowAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             samples = flow.sample(num_samples).cpu().numpy()
         sample_df = preprocessor.inverse_transform(samples)
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -353,13 +358,13 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         with _temporary_env(self._cache_env()):
             with _temporary_sys_path(compat_root):
                 with _temporary_sys_path(self.upstream_root):
-                    from utils_train import preprocess  # pylint: disable=import-error
                     from baselines.goggle.GoggleModel import GoggleModel  # pylint: disable=import-error
+                    from utils_train import preprocess  # pylint: disable=import-error
 
                     return preprocess, GoggleModel
 
     def _load_info(self, dataset_spec: DatasetSpec) -> dict[str, Any]:
-        return json.loads(dataset_spec.metadata_path.read_text())
+        return read_json(dataset_spec.metadata_path)
 
     def _recover_data(self, syn_num: np.ndarray, syn_cat: np.ndarray, info: dict[str, Any]) -> pd.DataFrame:
         num_col_idx = info["num_col_idx"]
@@ -388,6 +393,8 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return syn_df
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        import torch
+
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         preprocess, GoggleModel = self._import_bits()
@@ -429,6 +436,8 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        import torch
+
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         preprocess, GoggleModel = self._import_bits()
@@ -456,7 +465,12 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                 epochs=int(spec.extra.get("epochs", 10)),
                 batch_size=int(spec.extra.get("batch_size", 512)),
             )
-            model.model.load_state_dict(torch.load(self._resolve_checkpoint_path(spec), map_location=spec.device))
+            checkpoint_path = self._validate_trusted_executable_artifact(
+                spec,
+                self._resolve_checkpoint_path(spec),
+                format_name="PyTorch",
+            )
+            model.model.load_state_dict(torch.load(checkpoint_path, map_location=spec.device, weights_only=True))
 
             num_samples = spec.num_samples or len(x_train)
             x_ref = x_train[:num_samples]
@@ -474,7 +488,7 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             syn_df = self._recover_data(syn_num, syn_cat, info)
 
         sample_path = spec.output_dir / "samples.csv"
-        syn_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(syn_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

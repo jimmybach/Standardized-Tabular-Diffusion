@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib
-import json
 import pickle
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +9,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin
@@ -19,9 +19,7 @@ def _import_or_raise(module_name: str, install_hint: str):
     try:
         return importlib.import_module(module_name)
     except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            f"{module_name} is required for this adapter. Install it with `{install_hint}`."
-        ) from exc
+        raise RuntimeError(f"{module_name} is required for this adapter. Install it with `{install_hint}`.") from exc
 
 
 @dataclass
@@ -101,7 +99,8 @@ class TabSDSAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             state: TabSDSState = pickle.load(handle)
 
         train_df = state.train_df[state.column_names].copy()
@@ -127,7 +126,7 @@ class TabSDSAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         for column in state.numerical_columns:
             sample_df[column] = pd.to_numeric(sample_df[column], errors="coerce")
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -184,7 +183,7 @@ class TabularARGNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             "column_names": list(dataset_spec.column_names),
             "checkpoint_path": str(checkpoint_path),
         }
-        (spec.output_dir / "tabularargn_metadata.json").write_text(json.dumps(metadata, indent=2))
+        atomic_write_json(spec.output_dir / "tabularargn_metadata.json", metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -200,14 +199,15 @@ class TabularARGNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             model = pickle.load(handle)
         train_df = self._load_training_frame(dataset_spec)
         n_samples = spec.num_samples or len(train_df)
         sample_df = model.sample(n_samples=n_samples)
         sample_df = pd.DataFrame(sample_df)[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

@@ -145,8 +145,8 @@ Real implementations, but less reproduction-friendly:
 ## Notes on Current Evidence
 
 - The local adapter inventory and runtime notes are in:
-  - [../standardized_tabular_diffusion/model_inventory.py](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/standardized_tabular_diffusion/model_inventory.py)
-  - [runtime_status.md](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/docs/runtime_status.md)
+  - [../standardized_tabular_diffusion/model_inventory.py](../standardized_tabular_diffusion/model_inventory.py)
+  - [runtime_status.md](runtime_status.md)
 - This assessment also checked current upstream repositories and package pages as of July 18, 2026.
 - Example date-specific signals from upstream:
   - CTGAN latest release observed: February 13, 2026

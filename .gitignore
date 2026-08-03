@@ -217,8 +217,36 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Benchmark/runtime outputs
-artifacts/test/
+# Benchmark/runtime outputs and local dataset ingestion
+/artifacts/
+/data/uploads/
+/materialized_datasets/*/
+/tmp/
+/TabDiff-main/data/adult/
+/TabDiff-main/synthetic/adult/
+/TabDiff-main/data/sick/
+/TabDiff-main/synthetic/sick/
+/TabSyn-main/data/adult/
+/TabSyn-main/synthetic/adult/
+/TabSyn-main/data/sick/
+/TabSyn-main/synthetic/sick/
 wandb/
 mlflow.db
 rtf_checkpoints/
+
+# Local research references may contain third-party papers, source trees, and data.
+/research_inputs/*
+!/research_inputs/README.md
+
+# Upstream model checkpoints and generated run state
+TabDiff-main/tabdiff/ckpt/
+TabDiff-main/tabdiff/result/
+TabSyn-main/**/ckpt/
+TabSyn-main/**/result/
+TabDDPM-main/exp/
+
+# OS and language-specific local state
+.DS_Store
+Thumbs.db
+.Rhistory
+.RData

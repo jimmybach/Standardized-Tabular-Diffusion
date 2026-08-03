@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import importlib
-import json
 import pickle
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
+from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
@@ -122,27 +121,18 @@ class CTABGANAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return dataset_spec.train_data_path.parent
 
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
-        dataset_dir = self._dataset_dir(dataset_spec)
-        y_train = np.load(dataset_dir / "y_train.npy", allow_pickle=True)
-        x_num_path = dataset_dir / "X_num_train.npy"
-        x_cat_path = dataset_dir / "X_cat_train.npy"
-        x_num_train = np.load(x_num_path, allow_pickle=True) if x_num_path.exists() else None
-        x_cat_train = np.load(x_cat_path, allow_pickle=True) if x_cat_path.exists() else None
-
-        parts: list[pd.DataFrame] = []
-        if x_num_train is not None:
-            parts.append(pd.DataFrame(x_num_train, columns=list(range(x_num_train.shape[1]))))
-        if x_cat_train is not None:
-            offset = 0 if x_num_train is None else x_num_train.shape[1]
-            parts.append(pd.DataFrame(x_cat_train, columns=list(range(offset, offset + x_cat_train.shape[1]))))
-        parts.append(pd.DataFrame(y_train, columns=["y"]))
-        frame = pd.concat(parts, axis=1)
-        frame.columns = [str(column) for column in frame.columns]
+        if dataset_spec.train_data_path is None:
+            raise FileNotFoundError("ctab-gan requires dataset_spec.train_data_path")
+        if len(dataset_spec.target_columns) != 1:
+            raise ValueError("ctab-gan requires exactly one target column")
+        ordered_features = [*dataset_spec.numerical_columns, *dataset_spec.categorical_columns]
+        frame = pd.read_csv(dataset_spec.train_data_path)[[*ordered_features, *dataset_spec.target_columns]].copy()
+        frame.columns = [*[str(index) for index in range(len(ordered_features))], "y"]
         return frame
 
     def _load_ctabgan_params(self, dataset_name: str) -> dict[str, Any]:
         columns_path = self.repo_root / "TabDDPM-main" / "CTAB-GAN" / "columns.json"
-        payload = json.loads(columns_path.read_text())
+        payload = read_json(columns_path)
         if dataset_name not in payload:
             raise KeyError(f"Missing CTAB-GAN column config for dataset {dataset_name}")
         return dict(payload[dataset_name])
@@ -193,7 +183,8 @@ class CTABGANAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             model = pickle.load(handle)
         train_df = self._load_training_frame(dataset_spec)
         num_samples = spec.num_samples or len(train_df)
@@ -204,7 +195,7 @@ class CTABGANAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sample_df = sample_df[[str(idx) for idx in range(len(dataset_spec.column_names))]].copy()
         sample_df.columns = dataset_spec.column_names
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

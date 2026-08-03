@@ -4,20 +4,20 @@ These presets are small, reproducible configs for quickly validating newly integ
 
 ## Included Presets
 
-- [configs/smoke/nrgboost-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/nrgboost-adult-smoke.json)
-- [configs/smoke/ctab-gan-plus-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/ctab-gan-plus-adult-smoke.json)
-- [configs/smoke/realtabformer-adult-tiny.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/realtabformer-adult-tiny.json)
-- [configs/smoke/bn-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/bn-adult-smoke.json)
-- [configs/smoke/nflow-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/nflow-adult-smoke.json)
-- [configs/smoke/goggle-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/goggle-adult-smoke.json)
-- [configs/smoke/arf-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/arf-adult-smoke.json)
-- [configs/smoke/arf-shoppers-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/arf-shoppers-smoke.json)
-- [configs/smoke/great-adult-train-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/great-adult-train-smoke.json)
-- [configs/smoke/great-adult-tiny.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/great-adult-tiny.json)
-- [configs/smoke/great-adult-distilgpt2-tiny.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/great-adult-distilgpt2-tiny.json)
-- [configs/smoke/great-adult-distilgpt2-strong.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/great-adult-distilgpt2-strong.json)
-- [configs/smoke/tabebm-adult-smoke.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/tabebm-adult-smoke.json)
-- [configs/smoke/tabebm-adult-gated-sample.json](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/configs/smoke/tabebm-adult-gated-sample.json)
+- [configs/smoke/nrgboost-adult-smoke.json](../configs/smoke/nrgboost-adult-smoke.json)
+- [configs/smoke/ctab-gan-plus-adult-smoke.json](../configs/smoke/ctab-gan-plus-adult-smoke.json)
+- [configs/smoke/realtabformer-adult-tiny.json](../configs/smoke/realtabformer-adult-tiny.json)
+- [configs/smoke/bn-adult-smoke.json](../configs/smoke/bn-adult-smoke.json)
+- [configs/smoke/nflow-adult-smoke.json](../configs/smoke/nflow-adult-smoke.json)
+- [configs/smoke/goggle-adult-smoke.json](../configs/smoke/goggle-adult-smoke.json)
+- [configs/smoke/arf-adult-smoke.json](../configs/smoke/arf-adult-smoke.json)
+- [configs/smoke/arf-shoppers-smoke.json](../configs/smoke/arf-shoppers-smoke.json)
+- [configs/smoke/great-adult-train-smoke.json](../configs/smoke/great-adult-train-smoke.json)
+- [configs/smoke/great-adult-tiny.json](../configs/smoke/great-adult-tiny.json)
+- [configs/smoke/great-adult-distilgpt2-tiny.json](../configs/smoke/great-adult-distilgpt2-tiny.json)
+- [configs/smoke/great-adult-distilgpt2-strong.json](../configs/smoke/great-adult-distilgpt2-strong.json)
+- [configs/smoke/tabebm-adult-smoke.json](../configs/smoke/tabebm-adult-smoke.json)
+- [configs/smoke/tabebm-adult-gated-sample.json](../configs/smoke/tabebm-adult-gated-sample.json)
 
 At the moment there is no dedicated smoke preset checked in for `tabula`, `ctab-gan`, `stasy`, or `codi`, even though those adapters are now integrated into the shared registry.
 

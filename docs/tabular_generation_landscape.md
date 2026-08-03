@@ -30,7 +30,7 @@ This document captures the current integration roadmap for the benchmarking repo
 
 - `tabebm` is standardized in code, but its runtime still depends on authenticated access to Prior Labs' gated TabPFN model.
 
-The current operational status of these models lives in [runtime_status.md](/Users/jpbach/Desktop/Standardized-Tabular-Diffusion/docs/runtime_status.md). This document focuses on benchmark scope, taxonomy, and the broader evolution of the literature rather than per-model execution readiness.
+The current operational status of these models lives in [runtime_status.md](runtime_status.md). This document focuses on benchmark scope, taxonomy, and the broader evolution of the literature rather than per-model execution readiness.
 
 ## Taxonomy
 
