@@ -1,6 +1,6 @@
 # TabDDPM Validation Protocol
 
-Status: executable protocol awaiting its first retained Linux result
+Status: passed on Linux/Python 3.11; native parity validated
 
 Protocol ID: `tabddpm-native-parity-v1`
 
@@ -74,4 +74,8 @@ python -m standardized_tabular_diffusion.validation.tabddpm \
   --evidence-path /tmp/tabddpm-evidence.json
 ```
 
-`.github/workflows/tabddpm-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence artifact for 90 days. The registry must remain `adapter-complete` until a successful retained run is linked in the source lock. Any later source, dependency, adapter-command, or protocol change invalidates the evidence and requires rerunning the workflow.
+`.github/workflows/tabddpm-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence artifact for 90 days. The registry remained `adapter-complete` until the successful retained run was linked in the source lock. Any later source, dependency, adapter-command, or protocol change invalidates the evidence and requires rerunning the workflow.
+
+The protocol passed in [GitHub Actions run 30863212268](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268) at repository commit `3339af2603bac7a4736e68d7f369194b6b095653`. All three seed cases passed every exact comparison. The retained artifact digest is `sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757`, and an exact permanent copy of the evidence is stored at `docs/evidence/tabddpm/native-parity-run-30863212268.json` with file SHA-256 `8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e`.
+
+Accordingly, TabDDPM is `native-parity-validated` while remaining `experimental`, `unsupported`, and pending a separate official-track eligibility decision.

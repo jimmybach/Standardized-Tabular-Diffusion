@@ -1,6 +1,6 @@
 # TabDDPM 验证协议
 
-状态：可执行协议，等待首个留存的 Linux 验证结果
+状态：已在 Linux/Python 3.11 通过，完成原生一致性验证
 
 协议 ID：`tabddpm-native-parity-v1`
 
@@ -74,4 +74,8 @@ python -m standardized_tabular_diffusion.validation.tabddpm \
   --evidence-path /tmp/tabddpm-evidence.json
 ```
 
-`.github/workflows/tabddpm-validation.yml` 会在 Linux/Python 3.11 上执行该命令，并将 JSON 证据保留 90 天。在成功运行链接写入来源锁定记录之前，注册表必须保持 `adapter-complete`。以后只要源码、依赖、适配器命令或协议发生变化，原证据就失效，必须重新运行验证。
+`.github/workflows/tabddpm-validation.yml` 会在 Linux/Python 3.11 上执行该命令，并将 JSON 证据保留 90 天。在成功运行及其来源锁定记录建立前，注册表一直保持 `adapter-complete`。以后只要源码、依赖、适配器命令或协议发生变化，原证据就失效，必须重新运行验证。
+
+协议已在仓库提交 `3339af2603bac7a4736e68d7f369194b6b095653` 对应的 [GitHub Actions 运行 30863212268](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268) 中通过。三个种子组合的全部精确对照均通过。留存 artifact 的摘要为 `sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757`；证据的永久逐字节副本位于 `docs/evidence/tabddpm/native-parity-run-30863212268.json`，文件 SHA-256 为 `8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e`。
+
+因此，TabDDPM 当前为 `native-parity-validated`，但仍保持 `experimental` 和 `unsupported`，正式榜单资格需要另行审阅决定。

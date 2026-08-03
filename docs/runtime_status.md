@@ -2,7 +2,7 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, every registered runnable adapter is conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, TabDDPM is recorded as `native-parity-validated`, `experimental`, and `unsupported`. Its real Linux/Python 3.11 native-versus-adapter evidence is retained under `docs/evidence/tabddpm/`. Every other registered runnable adapter remains conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`; their earlier local executions did not include the complete evidence required for `smoke-validated`.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -19,7 +19,7 @@ At the current release-preparation baseline, every registered runnable adapter i
 - `goggle`
 - `arf`
 
-These models were reported to have completed at least one local path through the shared CLI. The runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated TabDDPM path, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
