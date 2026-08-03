@@ -1,0 +1,131 @@
+{
+  "build_schema_version": "1.0.0",
+  "dataset_id": "sick",
+  "dataset_view": "sick-uci-102-model-v1",
+  "source_version": "uci-102-sha256-a0982569a744",
+  "source_members": {
+    "sick.data": "81d4e8ae85233d453afc3ac721cfc5af8d83c0e8cd39d70aa9923089022f2c02",
+    "sick.names": "00ca5bfcdba355c910ab311de4b2dd3f4e344628435922aba1dec8427bfcf7ea",
+    "sick.test": "e618b0a41f6df17ff297c8fbf7d15e8d97b37397d26e784e708ebb2297613018"
+  },
+  "raw_columns": [
+    "age",
+    "sex",
+    "on_thyroxine",
+    "query_on_thyroxine",
+    "on_antithyroid_medication",
+    "sick",
+    "pregnant",
+    "thyroid_surgery",
+    "I131_treatment",
+    "query_hypothyroid",
+    "query_hyperthyroid",
+    "lithium",
+    "goitre",
+    "tumor",
+    "hypopituitary",
+    "psych",
+    "TSH_measured",
+    "TSH",
+    "T3_measured",
+    "T3",
+    "TT4_measured",
+    "TT4",
+    "T4U_measured",
+    "T4U",
+    "FTI_measured",
+    "FTI",
+    "TBG_measured",
+    "TBG",
+    "referral_source",
+    "Class"
+  ],
+  "model_view": {
+    "numerical_columns": ["age", "TSH", "T3", "TT4", "T4U", "FTI"],
+    "categorical_columns": [
+      "sex",
+      "on_thyroxine",
+      "query_on_thyroxine",
+      "on_antithyroid_medication",
+      "sick",
+      "pregnant",
+      "thyroid_surgery",
+      "I131_treatment",
+      "query_hypothyroid",
+      "query_hyperthyroid",
+      "lithium",
+      "goitre",
+      "tumor",
+      "hypopituitary",
+      "psych",
+      "TSH_measured",
+      "T3_measured",
+      "TT4_measured",
+      "T4U_measured",
+      "FTI_measured",
+      "TBG_measured",
+      "referral_source"
+    ],
+    "target_columns": ["Class"],
+    "excluded_columns": {
+      "TBG": "The official train and test files contain no observed TBG value; no train-fitted statistic exists."
+    }
+  },
+  "split_suffix_pattern": "^(sick|negative)\\.\\|([0-9]+)$",
+  "duplicate_audit": {
+    "raw_model_view": {
+      "train_duplicate_rows": 47,
+      "test_duplicate_rows": 3,
+      "cross_split_unique_rows": 11,
+      "train_rows_in_cross_split_overlap": 20,
+      "test_rows_in_cross_split_overlap": 13
+    },
+    "processed_model_view": {
+      "train_duplicate_rows": 49,
+      "test_duplicate_rows": 3,
+      "cross_split_unique_rows": 11,
+      "train_rows_in_cross_split_overlap": 20,
+      "test_rows_in_cross_split_overlap": 13
+    }
+  },
+  "splits": {
+    "train": {
+      "member": "sick.data",
+      "rows": 2800,
+      "class_counts": {"negative": 2629, "sick": 171},
+      "record_ids_sha256": "97bba5c27f99c8ff9eb8ddaf9bac337de79916342bfbf17c5dbc92d97defc881",
+      "missing_counts": {
+        "age": 1,
+        "sex": 110,
+        "TSH": 284,
+        "T3": 585,
+        "TT4": 184,
+        "T4U": 297,
+        "FTI": 295,
+        "TBG": 2800
+      }
+    },
+    "test": {
+      "member": "sick.test",
+      "rows": 972,
+      "class_counts": {"negative": 912, "sick": 60},
+      "record_ids_sha256": "2623a7770f4964a32ef89ab9f99a174a852c47be6fd42e3d4c29ae2625adfa8a",
+      "missing_counts": {
+        "sex": 40,
+        "TSH": 85,
+        "T3": 184,
+        "TT4": 47,
+        "T4U": 90,
+        "FTI": 90,
+        "TBG": 972
+      }
+    }
+  },
+  "preprocessing": {
+    "missing_markers": ["?"],
+    "numerical_strategy": "mean",
+    "categorical_strategy": "most_frequent",
+    "fitted_on": "train",
+    "missing_indicators": false
+  }
+}

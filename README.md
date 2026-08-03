@@ -1,19 +1,25 @@
 # Standardized Tabular Diffusion Benchmark
 
+> **Development status:** this repository is currently a pre-alpha engineering workspace, not an official benchmark release. The existing `tabstruct-aligned-v1` output is a legacy compatibility path while the reviewed evaluation protocol is implemented. See the [development baseline](docs/DEVELOPMENT.md), [evaluation implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
+
 This repository now includes a shared benchmarking layer on top of the upstream model code in:
 
 - `TabDiff-main`
 - `TabSyn-main`
 - `TabDDPM-main`
 
-The goal is to keep the original implementations intact while giving every supported baseline the same external contract for:
+The goal is to preserve authoritative implementations whenever possible, record any reviewed source patch explicitly, and give every registered adapter the same external contract for:
 
 - training
 - sample generation
 - evaluation
 - result comparison
 
-The standardized layer is designed to be the integration boundary for a future single-repository benchmark setup, while the upstream projects remain close to their original research code.
+The standardized layer is the preferred integration boundary. The vendored source trees are not assumed to be pristine until their revisions and local diffs have been audited.
+
+Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. At this stage, adapters are conservatively recorded as experimental and unsupported unless stronger evidence is added.
+
+Project attribution and release review records live in [CONTRIBUTORS.md](CONTRIBUTORS.md), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [SECURITY.md](SECURITY.md), [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md), and the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md). The repository-level license and dataset redistribution decisions remain release blockers until the project owners approve them.
 
 ## Shared Layout
 
@@ -21,7 +27,7 @@ The new root package is `standardized_tabular_diffusion/`.
 
 - `interfaces.py`: common run and artifact schemas
 - `models/`: adapters for each upstream model family
-- `evaluation/`: TabStruct-aligned metric definitions and normalization
+- `evaluation/`: versioned contracts, profile and registry loaders, result-bundle validation, and the isolated legacy path
 - `comparison.py`: run aggregation utilities
 - `cli.py`: a single entrypoint for listing models, describing metrics, running evaluations, and building comparisons
 
@@ -73,23 +79,21 @@ Each standardized run writes canonical metadata such as:
 
 ## Evaluation Protocol
 
-The normalized evaluation schema is `tabstruct-aligned-v1`.
+The P1 evaluation foundation now provides versioned JSON Schemas and strict Python contracts for Evaluation Requests, Dataset Profiles, protocol profiles, Metric Registry entries, Atomic Results, stage records, manifests, metadata, summaries, and artifact indexes.
 
-It aligns outputs to the evaluation dimensions emphasized by the TabStruct paper:
+The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth.
 
-- density fidelity
-- ML efficacy
-- distinguishability / detection
-- privacy
-- structural fidelity
+The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P1 can create and validate auditable `incomplete` bundles, but deliberately cannot produce a finalized result. Metric execution and bundle finalization begin with the P2 vertical slice described in the [implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md).
 
-Where this repo already has exact implementations, the benchmark layer records normalized values directly. Where an upstream project does not yet expose the full TabStruct dimension, the summary records that gap explicitly instead of silently inventing a score.
+Useful contract commands include:
 
-The main normalized summary file is:
-
-- `standardized_summary.json`
-
-It is designed to be the only file a future benchmark table needs to read.
+~~~bash
+std-tabular-diffusion list-metrics
+std-tabular-diffusion validate-metric-registry
+std-tabular-diffusion list-protocols
+std-tabular-diffusion validate-dataset-profile --profile path/to/profile.json
+std-tabular-diffusion validate-result --bundle path/to/result_bundle
+~~~
 
 ## Benchmark Policy
 
@@ -141,25 +145,51 @@ For the operational status of each baseline, see:
 
 - `docs/runtime_status.md`
 
-## Dataset Materialization
+## Dataset Acquisition
 
-For datasets that need a shared canonical processed layout, use:
+List the checksum-pinned public sources:
 
 ```bash
+python -m standardized_tabular_diffusion.cli list-dataset-sources
+```
+
+Download and safely extract one source into the local cache:
+
+```bash
+python -m standardized_tabular_diffusion.cli download-dataset --dataset adult
+```
+
+Build Adult or Sick exclusively from the official checksum-pinned UCI train/test files:
+
+```bash
+pip install "standardized-tabular-diffusion[data]"
 python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset sick
 ```
 
-Check the resolved materialization state with:
+The Adult builder validates the official 32,561/16,281 split, exact source syntax, member and ordered-row hashes, class and missing counts, declared domains, and duplicate-row audits. It removes the test-only period from `income` labels and fits categorical modes on `adult.data` only. The official split's repeated and cross-split-identical rows are preserved and disclosed; old unbound tracked derivatives and unverified checkpoints have been removed.
+
+The Sick builder validates the 2,800/972 official split, source-member hashes, class counts, record-ID identity and disjointness, missing counts, categorical domains, and duplicate-row audits. It fits numerical means and categorical modes on `sick.data` only. The official `TBG` field is preserved in the audit schema but excluded from model input because every source value is missing; record IDs are also audit-only. The fixed official split contains 11 cross-split duplicate model rows, which are preserved and disclosed rather than silently removed. The former unverified 2,205-row derivative has been removed.
+
+The source registry fixes HTTPS URLs, licenses, citations, byte limits, selected archive members, and SHA-256 checksums. Downloading does not silently make a dataset official-eligible; its Dataset Profile must still freeze parsing, schema, splits, preprocessing, and rights review. See `docs/DATASET_ACQUISITION_AND_PREPROCESSING.md`.
+
+For incomplete data, split first and run the centralized train-only preprocessor before registration:
 
 ```bash
-python -m standardized_tabular_diffusion.cli materialization-status --dataset adult
+python -m standardized_tabular_diffusion.cli preprocess-missing-values \
+  --train-csv local-data/my_dataset/train.csv \
+  --test-csv local-data/my_dataset/test.csv \
+  --output-dir local-data/my_dataset/imputed-v1 \
+  --numerical-column age \
+  --categorical-column state \
+  --target-column label
 ```
 
-This is especially important for `TabDiff` and `TabSyn`, which are standardized around a shared processed dataset layout.
+Numerical means and categorical modes are fitted on the real training split only. Validation and test reuse the frozen state; missing targets and missing generated values are rejected.
 
 ## Register A Local Dataset
 
-For a brand new local dataset, first place the CSV anywhere on disk, then register it into the repo's canonical layout:
+For a complete local dataset, or a dataset already transformed by the centralized preprocessor, register its CSV into the legacy adapter layout:
 
 ```bash
 python -m standardized_tabular_diffusion.cli register-dataset \
@@ -171,7 +201,7 @@ python -m standardized_tabular_diffusion.cli register-dataset \
   --categorical-column state
 ```
 
-This writes the dataset metadata into `TabDiff-main/data/Info/`, copies the raw CSV into the canonical data roots, and makes the dataset visible to `list-datasets`.
+This writes metadata into `TabDiff-main/data/Info/`, copies the CSV into the adapter data roots, and makes the dataset visible to `list-datasets`. Registration fails closed when any missing value remains.
 
 Then process it into the shared train/test layout:
 
@@ -214,10 +244,10 @@ Filter the inventory to one benchmark paper:
 python -m standardized_tabular_diffusion.cli list-model-inventory --benchmark tabstruct-2026
 ```
 
-Filter the inventory to foundation-model references that are not yet integrated into the runnable generator registry:
+Filter the inventory to foundation-model references that are currently identity-registered but not adapter-complete:
 
 ```bash
-python -m standardized_tabular_diffusion.cli list-model-inventory --family foundation --status "not implemented"
+python -m standardized_tabular_diffusion.cli list-model-inventory --family foundation --status registered
 ```
 
 Inspect one model entry:
@@ -342,7 +372,7 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 
 - `TabDiff` and `TabSyn` can share the same normalized evaluator because both repos use the same `info.json`-style tabular metadata.
 - `TabDDPM` currently has a partially different evaluation stack, so the adapter normalizes the metrics that are already available and marks unavailable TabStruct dimensions explicitly.
-- `TabSyn` required a few upstream entrypoint fixes so the standardized runner can execute train/sample stages reliably.
+- `TabSyn` required locally classified compatibility patches so the standardized runner can execute train/sample stages reliably; those patches are not yet native-parity validated.
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
 - The broader baseline roadmap and literature map now live in `docs/tabular_generation_landscape.md`.
