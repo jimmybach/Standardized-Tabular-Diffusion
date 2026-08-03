@@ -4,15 +4,17 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import platform
 import subprocess
 import sys
 import tomllib
+import traceback
 from pathlib import Path
 from typing import Any
 
 from standardized_tabular_diffusion.interfaces import RunSpec
-from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
+from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter, build_tabddpm_environment
 
 PROTOCOL_ID = "tabddpm-native-parity-v1"
 MANIFEST_RELATIVE_PATH = Path(
@@ -177,9 +179,11 @@ y_policy = "default"
 
 def _run_native(upstream_root: Path, config_path: Path) -> list[list[str]]:
     commands: list[list[str]] = []
+    environment = os.environ.copy()
+    environment.update(build_tabddpm_environment(upstream_root))
     for flag in ("--train", "--sample"):
         command = [sys.executable, str(UPSTREAM_ENTRYPOINT), "--config", str(config_path), flag]
-        subprocess.run(command, cwd=upstream_root, check=True)
+        subprocess.run(command, cwd=upstream_root, check=True, env=environment)
         commands.append(command)
     return commands
 
@@ -279,6 +283,10 @@ def _version(distribution: str) -> str:
         return "vendored-or-unavailable"
 
 
+def _repository_commit(repo_root: Path) -> str:
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo_root, text=True).strip()
+
+
 def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     output_dir = output_dir.resolve()
@@ -374,6 +382,11 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             ],
         },
         "source": source_evidence,
+        "repository_commit": _repository_commit(repo_root),
+        "environment_lock": {
+            "path": "requirements-tabddpm-validation.txt",
+            "sha256": _sha256_file(repo_root / "requirements-tabddpm-validation.txt"),
+        },
         "environment": {
             "platform": platform.platform(),
             "python": platform.python_version(),
@@ -401,7 +414,30 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--evidence-path", type=Path, required=True)
     args = parser.parse_args(argv)
-    run_validation(args.repo_root, args.output_dir, args.evidence_path)
+    try:
+        run_validation(args.repo_root, args.output_dir, args.evidence_path)
+    except Exception as exc:
+        if not args.evidence_path.exists():
+            args.evidence_path.parent.mkdir(parents=True, exist_ok=True)
+            args.evidence_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "protocol_id": PROTOCOL_ID,
+                        "model_id": "tabddpm",
+                        "status": "fail",
+                        "repository_commit": _repository_commit(args.repo_root.resolve()),
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                        "traceback": traceback.format_exc(),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        raise
     return 0
 
 
