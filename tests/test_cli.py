@@ -5,13 +5,16 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
+
+pytestmark = pytest.mark.core
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from standardized_tabular_diffusion import cli
-from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
+from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.interfaces import ArtifactBundle
 
 
@@ -68,7 +71,7 @@ def test_cli_list_model_inventory_filters_foundation_family(monkeypatch, capsys)
 
 
 def test_cli_list_model_inventory_filters_not_implemented_status(monkeypatch, capsys) -> None:
-    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--status", "not implemented"])
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-model-inventory", "--status", "registered"])
 
     cli.main()
     captured = capsys.readouterr()
@@ -100,7 +103,7 @@ def test_cli_show_model_inventory_can_describe_not_yet_integrated_method(monkeyp
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabicl"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -112,7 +115,7 @@ def test_cli_show_model_inventory_can_describe_tabiclv2(monkeypatch, capsys) -> 
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabiclv2"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -124,7 +127,7 @@ def test_cli_show_model_inventory_can_describe_tabpfn(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabpfn"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -136,7 +139,7 @@ def test_cli_show_model_inventory_can_describe_tabula(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabula"
-    assert payload["standardized_status"] == "implemented"
+    assert payload["validation_level"] == "adapter-complete"
     assert payload["family"] == "llm"
 
 
@@ -148,7 +151,7 @@ def test_cli_show_model_inventory_can_describe_tabdpt(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabdpt"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -160,7 +163,7 @@ def test_cli_show_model_inventory_can_describe_tabsds(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabsds"
-    assert payload["standardized_status"] == "implemented"
+    assert payload["validation_level"] == "adapter-complete"
     assert payload["family"] == "traditional"
 
 
@@ -172,7 +175,7 @@ def test_cli_show_model_inventory_can_describe_tabularargn(monkeypatch, capsys) 
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabularargn"
-    assert payload["standardized_status"] == "implemented"
+    assert payload["validation_level"] == "adapter-complete"
     assert payload["family"] == "autoregressive"
 
 
@@ -184,7 +187,7 @@ def test_cli_show_model_inventory_can_describe_realtabpfn(monkeypatch, capsys) -
     payload = json.loads(captured.out)
 
     assert payload["name"] == "realtabpfn"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -196,7 +199,7 @@ def test_cli_show_model_inventory_can_describe_tabfm(monkeypatch, capsys) -> Non
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabfm"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -208,7 +211,7 @@ def test_cli_show_model_inventory_can_describe_mothernet(monkeypatch, capsys) ->
     payload = json.loads(captured.out)
 
     assert payload["name"] == "mothernet"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -220,7 +223,7 @@ def test_cli_show_model_inventory_can_describe_gamformer(monkeypatch, capsys) ->
     payload = json.loads(captured.out)
 
     assert payload["name"] == "gamformer"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -232,7 +235,7 @@ def test_cli_show_model_inventory_can_describe_causalfm(monkeypatch, capsys) -> 
     payload = json.loads(captured.out)
 
     assert payload["name"] == "causalfm"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -244,7 +247,7 @@ def test_cli_show_model_inventory_can_describe_tabflex(monkeypatch, capsys) -> N
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabflex"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -256,7 +259,7 @@ def test_cli_show_model_inventory_can_describe_transtab(monkeypatch, capsys) -> 
     payload = json.loads(captured.out)
 
     assert payload["name"] == "transtab"
-    assert payload["standardized_status"] == "not implemented"
+    assert payload["validation_level"] == "registered"
     assert payload["family"] == "foundation"
 
 
@@ -285,6 +288,156 @@ def test_cli_list_models_includes_new_sample_based_adapters(monkeypatch, capsys)
     assert "tabula" in payload["models"]
     assert "arf" in payload["models"]
     assert "tabebm" in payload["models"]
+
+
+def test_cli_list_models_details_exposes_validation_without_release_claims(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-models", "--details"])
+
+    cli.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["models"]["tabdiff"]["validation_level"] == "adapter-complete"
+    assert payload["models"]["tabdiff"]["benchmark_track"] == "experimental"
+    assert payload["models"]["tabdiff"]["support_level"] == "unsupported"
+    assert payload["models"]["tabddpm"]["evaluation_input"] == "upstream-artifacts"
+
+
+def test_cli_lists_checksum_pinned_dataset_sources(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(sys, "argv", ["std-cli", "list-dataset-sources"])
+
+    cli.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    records = {record["dataset_id"]: record for record in payload["dataset_sources"]}
+    assert set(records) == {"adult", "sick"}
+    assert len(records["adult"]["sha256"]) == 64
+
+
+def test_cli_download_dataset_dispatches_safe_fetch(monkeypatch, capsys, tmp_path: Path) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_fetch(dataset: str, *, cache_dir: str | None, refresh: bool, timeout_seconds: float):
+        observed.update(
+            dataset=dataset,
+            cache_dir=cache_dir,
+            refresh=refresh,
+            timeout_seconds=timeout_seconds,
+        )
+        return {"download": {"cached": False}, "extraction": {"cached": False}}
+
+    monkeypatch.setattr(cli, "_fetch_dataset_source", fake_fetch)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "download-dataset",
+            "--dataset",
+            "adult",
+            "--cache-dir",
+            str(tmp_path),
+            "--refresh",
+            "--timeout-seconds",
+            "12",
+        ],
+    )
+
+    cli.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert observed == {
+        "dataset": "adult",
+        "cache_dir": str(tmp_path),
+        "refresh": True,
+        "timeout_seconds": 12.0,
+    }
+    assert payload["download"]["cached"] is False
+
+
+def test_cli_materialize_dataset_forwards_official_source_controls(monkeypatch, capsys, tmp_path: Path) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_materialize(
+        dataset: str,
+        *,
+        cache_root: str | None,
+        refresh: bool,
+        timeout_seconds: float,
+    ) -> dict[str, object]:
+        observed.update(
+            dataset=dataset,
+            cache_root=cache_root,
+            refresh=refresh,
+            timeout_seconds=timeout_seconds,
+        )
+        return {"dataset": dataset, "materialized_by": "official-uci-builder"}
+
+    monkeypatch.setattr(cli, "materialize_dataset", fake_materialize)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "materialize-dataset",
+            "--dataset",
+            "sick",
+            "--cache-dir",
+            str(tmp_path),
+            "--refresh",
+            "--timeout-seconds",
+            "15",
+        ],
+    )
+
+    cli.main()
+    payload = json.loads(capsys.readouterr().out)
+
+    assert observed == {
+        "dataset": "sick",
+        "cache_root": str(tmp_path),
+        "refresh": True,
+        "timeout_seconds": 15.0,
+    }
+    assert payload["materialized_by"] == "official-uci-builder"
+
+
+def test_cli_preprocesses_missing_values_with_train_only_state(monkeypatch, capsys, tmp_path: Path) -> None:
+    train_path = tmp_path / "train.csv"
+    test_path = tmp_path / "test.csv"
+    output_dir = tmp_path / "processed"
+    pd.DataFrame({"age": [10, 30, None], "city": ["NY", "NY", "CA"], "target": [0, 1, 0]}).to_csv(
+        train_path,
+        index=False,
+    )
+    pd.DataFrame({"age": [None], "city": [None], "target": [1]}).to_csv(test_path, index=False)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "preprocess-missing-values",
+            "--train-csv",
+            str(train_path),
+            "--test-csv",
+            str(test_path),
+            "--output-dir",
+            str(output_dir),
+            "--numerical-column",
+            "age",
+            "--categorical-column",
+            "city",
+            "--target-column",
+            "target",
+        ],
+    )
+
+    cli.main()
+    payload = json.loads(capsys.readouterr().out)
+    transformed = pd.read_csv(output_dir / "test.csv")
+
+    assert payload["fitted_on_split"] == "train"
+    assert transformed.loc[0, "age"] == 20.0
+    assert transformed.loc[0, "city"] == "NY"
 
 
 def test_cli_example_config_can_save_to_file(tmp_path: Path, monkeypatch, capsys) -> None:

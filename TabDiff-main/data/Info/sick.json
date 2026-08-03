@@ -33,45 +33,13 @@
     "referral_source",
     "Class"
   ],
-  "num_col_idx": [
-    0,
-    17,
-    19,
-    21,
-    23,
-    25
-  ],
-  "cat_col_idx": [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    18,
-    20,
-    22,
-    24,
-    26,
-    27
-  ],
-  "target_col_idx": [
-    28
-  ],
+  "num_col_idx": [0, 17, 19, 21, 23, 25],
+  "cat_col_idx": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 27],
+  "target_col_idx": [28],
   "file_type": "csv",
-  "data_path": "data/sick/raw.csv",
+  "data_path": "data/sick/train.csv",
   "val_path": null,
-  "test_path": null,
+  "test_path": "data/sick/test.csv",
   "column_info": {
     "age": "float",
     "TSH": "float",
@@ -102,5 +70,21 @@
     "TBG_measured": "str",
     "referral_source": "str",
     "Class": "str"
+  },
+  "train_num": 2800,
+  "test_num": 972,
+  "val_num": 0,
+  "dataset_view": "sick-uci-102-model-v1",
+  "source_version": "uci-102-sha256-a0982569a744",
+  "source_page": "https://archive.ics.uci.edu/dataset/102/thyroid+disease",
+  "excluded_raw_columns": {
+    "TBG": "The official train and test files contain no observed TBG value; no train-fitted statistic exists."
+  },
+  "preprocessing": {
+    "fitted_on": "train",
+    "numerical_strategy": "mean",
+    "categorical_strategy": "most_frequent",
+    "missing_markers": ["?"],
+    "target_strategy": "error"
   }
 }

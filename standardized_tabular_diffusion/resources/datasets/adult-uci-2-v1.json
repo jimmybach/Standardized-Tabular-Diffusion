@@ -1,0 +1,134 @@
+{
+  "build_schema_version": "1.0.0",
+  "dataset_id": "adult",
+  "dataset_view": "adult-uci-2-model-v1",
+  "source_version": "uci-2-sha256-7537312dd56c",
+  "source_members": {
+    "Index": "c53c35ce8a0eb10c12dd4b73830f3c94ae212bb388389d3763bce63e8d6bc684",
+    "adult.data": "5b00264637dbfec36bdeaab5676b0b309ff9eb788d63554ca0a249491c86603d",
+    "adult.names": "c248284c0b5de30c9e1958d6cdd168a34a654758b620e68f46aefa83fc0a576a",
+    "adult.test": "a2a9044bc167a35b2361efbabec64e89d69ce82d9790d2980119aac5fd7e9c05",
+    "old.adult.names": "43cca99f2bdbff47fc2f7e29a27a5c85e7f69dbcf56b99db8cf4f5b68d639408"
+  },
+  "raw_columns": [
+    "age",
+    "workclass",
+    "fnlwgt",
+    "education",
+    "education.num",
+    "marital.status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "capital.gain",
+    "capital.loss",
+    "hours.per.week",
+    "native.country",
+    "income"
+  ],
+  "model_view": {
+    "numerical_columns": [
+      "age",
+      "fnlwgt",
+      "education.num",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week"
+    ],
+    "categorical_columns": [
+      "workclass",
+      "education",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "native.country"
+    ],
+    "target_columns": ["income"],
+    "excluded_columns": {},
+    "integer_columns": [
+      "age",
+      "fnlwgt",
+      "education.num",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week"
+    ]
+  },
+  "source_format": {
+    "encoding": "ascii",
+    "delimiter": ", ",
+    "terminal_newlines": 2,
+    "test_header": "|1x3 Cross validator",
+    "train_target_suffix": "",
+    "test_target_suffix": "."
+  },
+  "valid_domains": {
+    "numerical": {
+      "age": {"minimum": 17, "maximum": 90, "integer": true},
+      "fnlwgt": {"minimum": 12285, "maximum": 1490400, "integer": true},
+      "education.num": {"minimum": 1, "maximum": 16, "integer": true},
+      "capital.gain": {"minimum": 0, "maximum": 99999, "integer": true},
+      "capital.loss": {"minimum": 0, "maximum": 4356, "integer": true},
+      "hours.per.week": {"minimum": 1, "maximum": 99, "integer": true}
+    },
+    "categorical": {
+      "workclass": ["Federal-gov", "Local-gov", "Never-worked", "Private", "Self-emp-inc", "Self-emp-not-inc", "State-gov", "Without-pay"],
+      "education": ["10th", "11th", "12th", "1st-4th", "5th-6th", "7th-8th", "9th", "Assoc-acdm", "Assoc-voc", "Bachelors", "Doctorate", "HS-grad", "Masters", "Preschool", "Prof-school", "Some-college"],
+      "marital.status": ["Divorced", "Married-AF-spouse", "Married-civ-spouse", "Married-spouse-absent", "Never-married", "Separated", "Widowed"],
+      "occupation": ["Adm-clerical", "Armed-Forces", "Craft-repair", "Exec-managerial", "Farming-fishing", "Handlers-cleaners", "Machine-op-inspct", "Other-service", "Priv-house-serv", "Prof-specialty", "Protective-serv", "Sales", "Tech-support", "Transport-moving"],
+      "relationship": ["Husband", "Not-in-family", "Other-relative", "Own-child", "Unmarried", "Wife"],
+      "race": ["Amer-Indian-Eskimo", "Asian-Pac-Islander", "Black", "Other", "White"],
+      "sex": ["Female", "Male"],
+      "native.country": ["Cambodia", "Canada", "China", "Columbia", "Cuba", "Dominican-Republic", "Ecuador", "El-Salvador", "England", "France", "Germany", "Greece", "Guatemala", "Haiti", "Holand-Netherlands", "Honduras", "Hong", "Hungary", "India", "Iran", "Ireland", "Italy", "Jamaica", "Japan", "Laos", "Mexico", "Nicaragua", "Outlying-US(Guam-USVI-etc)", "Peru", "Philippines", "Poland", "Portugal", "Puerto-Rico", "Scotland", "South", "Taiwan", "Thailand", "Trinadad&Tobago", "United-States", "Vietnam", "Yugoslavia"],
+      "income": ["<=50K", ">50K"]
+    },
+    "nullable_raw_columns": ["workclass", "occupation", "native.country"]
+  },
+  "duplicate_audit": {
+    "raw_model_view": {
+      "train_duplicate_rows": 24,
+      "test_duplicate_rows": 5,
+      "cross_split_unique_rows": 23,
+      "train_rows_in_cross_split_overlap": 25,
+      "test_rows_in_cross_split_overlap": 23
+    },
+    "processed_model_view": {
+      "train_duplicate_rows": 24,
+      "test_duplicate_rows": 5,
+      "cross_split_unique_rows": 24,
+      "train_rows_in_cross_split_overlap": 26,
+      "test_rows_in_cross_split_overlap": 24
+    }
+  },
+  "splits": {
+    "train": {
+      "member": "adult.data",
+      "rows": 32561,
+      "class_counts": {"<=50K": 24720, ">50K": 7841},
+      "canonical_rows_sha256": "d7246ff964ec5340265e4384ef43a101dbaffd02a7f10528fa1d68a5e41719ce",
+      "missing_counts": {"native.country": 583, "occupation": 1843, "workclass": 1836}
+    },
+    "test": {
+      "member": "adult.test",
+      "rows": 16281,
+      "class_counts": {"<=50K": 12435, ">50K": 3846},
+      "canonical_rows_sha256": "50ab194c9b1bb6abe2894d7ff70997bf154cc8b592b161d8bc224b6288b773b7",
+      "missing_counts": {"native.country": 274, "occupation": 966, "workclass": 963}
+    }
+  },
+  "preprocessing": {
+    "missing_markers": ["?"],
+    "fitted_on_split": "train",
+    "numerical_strategy": "mean",
+    "categorical_strategy": "most_frequent",
+    "target_strategy": "error",
+    "expected_categorical_fill_values": {
+      "native.country": "United-States",
+      "occupation": "Prof-specialty",
+      "workclass": "Private"
+    }
+  }
+}
