@@ -88,6 +88,7 @@ jobs:
               "standardized_tabular_diffusion/resources/datasets/adult-uci-2-v1.json",
               "standardized_tabular_diffusion/resources/datasets/sick-uci-102-v1.json",
               "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+              "standardized_tabular_diffusion/resources/upstream/ctabgan-source-manifest.json",
               "standardized_tabular_diffusion/schemas/evaluation/atomic-result.schema.json",
               "standardized_tabular_diffusion/schemas/evaluation/metric-registry-entry.schema.json",
               "standardized_tabular_diffusion/resources/evaluation/metrics/legacy-tabstruct-aligned-v1.json",
