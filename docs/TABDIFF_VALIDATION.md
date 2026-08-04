@@ -1,6 +1,6 @@
 # TabDiff Validation Protocol
 
-Status: candidate protocol; Linux/Python 3.11 execution pending
+Status: passed on Linux/Python 3.11; native parity validated
 
 Protocol ID: `tabdiff-native-parity-v1`
 
@@ -77,4 +77,8 @@ python -m standardized_tabular_diffusion.validation.tabdiff \
   --evidence-path /tmp/tabdiff-evidence.json
 ```
 
-`.github/workflows/tabdiff-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence for 90 days. The registry remains `adapter-complete` until a successful retained run is copied into `docs/evidence/tabdiff/` and linked from the source lock. Any later source, dependency, adapter-command, or protocol change invalidates that evidence and requires another run.
+`.github/workflows/tabdiff-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence for 90 days. Any later source, dependency, adapter-command, or protocol change invalidates that evidence and requires another run.
+
+The protocol passed in [GitHub Actions run 30866879879](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879) at repository commit `230adafe96dc7ec224bada220e1ee184972b61ad`. The retained artifact digest is `sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8`. An exact permanent copy is stored at `docs/evidence/tabdiff/native-parity-run-30866879879.json` with file SHA-256 `d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234`.
+
+Accordingly, TabDiff is `native-parity-validated` while remaining `experimental`, `unsupported`, and ineligible for Official Results until the separate dataset, central-evaluation, governance, and release gates pass.

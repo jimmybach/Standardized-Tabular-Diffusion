@@ -83,4 +83,4 @@ Before any of these adapters can enter the Official Results track:
 5. no unproven checkpoint may be treated as an official pretrained artifact; and
 6. the model evidence record must be promoted independently through `registered`, `adapter-complete`, `smoke-validated`, `native-parity-validated`, `benchmark-eligible`, and `release-supported` states.
 
-Until those gates are met, registry records remain conservative: experimental track, unsupported, and no native-parity claim.
+Until all gates are met, registry records remain experimental and unsupported. Native-parity claims are made only for adapters with retained protocol evidence; TabDiff now has that evidence, but it remains outside the Official Results track.

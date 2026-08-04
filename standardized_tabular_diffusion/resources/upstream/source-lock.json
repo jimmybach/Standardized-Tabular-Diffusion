@@ -55,7 +55,7 @@
       "license_path": "TabDiff-main/LICENSE",
       "local_path": "TabDiff-main",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-native-parity-and-central-evaluation-approval",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-and-release-gates",
       "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
@@ -69,7 +69,18 @@
         "relation": "All 27 scoped files match the pinned method-author source after canonical line-ending normalization. The former local MLE evaluator patch was removed and the official evaluator restored."
       },
       "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
-      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91",
+      "validation": {
+        "artifact_digest": "sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8",
+        "artifact_id": 8876454339,
+        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "evidence_path": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "evidence_sha256": "d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234",
+        "protocol_id": "tabdiff-native-parity-v1",
+        "repository_commit": "230adafe96dc7ec224bada220e1ee184972b61ad",
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879",
+        "status": "passed-native-parity-validated"
+      }
     },
     "tabsyn": {
       "adapter_ids": [

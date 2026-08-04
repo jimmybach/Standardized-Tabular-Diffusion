@@ -1,6 +1,6 @@
 # TabDiff 验证协议
 
-状态：候选协议；等待 Linux/Python 3.11 执行
+状态：已在 Linux/Python 3.11 通过；已完成原生一致性验证
 
 协议 ID：`tabdiff-native-parity-v1`
 
@@ -77,4 +77,8 @@ python -m standardized_tabular_diffusion.validation.tabdiff \
   --evidence-path /tmp/tabdiff-evidence.json
 ```
 
-`.github/workflows/tabdiff-validation.yml` 在 Linux/Python 3.11 上执行该命令，并保留 JSON 证据 90 天。在成功运行的证据被复制到 `docs/evidence/tabdiff/` 且由 source lock 引用之前，registry 继续保持 `adapter-complete`。源码、依赖、适配器命令或协议若发生变化，已有证据立即失效，必须重新运行。
+`.github/workflows/tabdiff-validation.yml` 在 Linux/Python 3.11 上执行该命令，并保留 JSON 证据 90 天。源码、依赖、适配器命令或协议若发生变化，已有证据立即失效，必须重新运行。
+
+本协议已在 [GitHub Actions run 30866879879](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879) 中通过，对应仓库提交 `230adafe96dc7ec224bada220e1ee184972b61ad`。保留产物的摘要为 `sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8`。证据的精确永久副本位于 `docs/evidence/tabdiff/native-parity-run-30866879879.json`，文件 SHA-256 为 `d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234`。
+
+因此，TabDiff 当前状态提升为 `native-parity-validated`，但仍保持 `experimental` 与 `unsupported`；在数据集、中央评测、治理和发布门槛分别通过之前，不得进入 Official Results。

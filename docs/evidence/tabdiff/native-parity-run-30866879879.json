@@ -1,0 +1,178 @@
+{
+  "adapter_commands": [
+    [
+      "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+      "main.py",
+      "--dataname",
+      "tabdiff_parity_dcr",
+      "--mode",
+      "train",
+      "--exp_name",
+      "native-parity-v1",
+      "--gpu",
+      "-1",
+      "--no_wandb",
+      "--deterministic"
+    ],
+    [
+      "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+      "main.py",
+      "--dataname",
+      "tabdiff_parity_dcr",
+      "--mode",
+      "test",
+      "--exp_name",
+      "native-parity-v1",
+      "--ckpt_path",
+      "/home/runner/work/_temp/tabdiff-validation/adapter-training/ckpt/model_4.pt",
+      "--num_samples_to_generate",
+      "12",
+      "--report",
+      "--num_runs",
+      "1",
+      "--gpu",
+      "-1",
+      "--no_wandb",
+      "--deterministic"
+    ]
+  ],
+  "adapter_manifests": [
+    "/home/runner/work/_temp/tabdiff-validation/adapter-manifests/train/artifacts.json",
+    "/home/runner/work/_temp/tabdiff-validation/adapter-manifests/sample/artifacts.json"
+  ],
+  "comparisons": {
+    "adapter_manifests_valid": true,
+    "checkpoint": {
+      "adapter_sha256": "5d811289ea83bb24124493d477f42c234769bd8eb5e85be9787ab5c608820f7f",
+      "mismatches": [],
+      "native_sha256": "5d811289ea83bb24124493d477f42c234769bd8eb5e85be9787ab5c608820f7f",
+      "tensor_values_exact": true
+    },
+    "config_exact": true,
+    "generated_metrics_exact": true,
+    "generated_samples": {
+      "adapter_sha256": "d26110a7281773f97c7cedfa76e3dcdf555929ecde8f1190cc664e0f0f1e6275",
+      "columns": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "exact_bytes": true,
+      "exact_frame": true,
+      "expected_rows": 12,
+      "finite_numerical_values": true,
+      "native_sha256": "d26110a7281773f97c7cedfa76e3dcdf555929ecde8f1190cc664e0f0f1e6275",
+      "rows": 12
+    },
+    "training_metrics_exact": true,
+    "training_samples": {
+      "adapter_sha256": "272085b7cf8e2f85b3a431a2475250ca7b10ec0b5b049ceeb8ccca0470caa419",
+      "columns": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "exact_bytes": true,
+      "exact_frame": true,
+      "expected_rows": 30,
+      "finite_numerical_values": true,
+      "native_sha256": "272085b7cf8e2f85b3a431a2475250ca7b10ec0b5b049ceeb8ccca0470caa419",
+      "rows": 30
+    }
+  },
+  "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "scikit_learn": "1.5.2",
+    "sdmetrics": "0.12.1",
+    "torch": "2.3.0+cpu"
+  },
+  "environment_lock": {
+    "path": "requirements-tabdiff-validation.txt",
+    "sha256": "7240e20169166e133a381e8a6e1fd2f9317c242bebccdac3b760588d41b05aff"
+  },
+  "fixture": {
+    "categorical_features": 1,
+    "dataset_name": "tabdiff_parity_dcr",
+    "kind": "deterministic-mixed-type-binary-classification",
+    "missing_values": 0,
+    "numerical_features": 2,
+    "target_features": 1,
+    "test_rows": 14,
+    "train_rows": 30
+  },
+  "model_id": "tabdiff",
+  "native_commands": [
+    [
+      "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+      "main.py",
+      "--dataname",
+      "tabdiff_parity_dcr",
+      "--mode",
+      "train",
+      "--exp_name",
+      "native-parity-v1",
+      "--gpu",
+      "-1",
+      "--no_wandb",
+      "--deterministic"
+    ],
+    [
+      "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+      "main.py",
+      "--dataname",
+      "tabdiff_parity_dcr",
+      "--mode",
+      "test",
+      "--exp_name",
+      "native-parity-v1",
+      "--ckpt_path",
+      "/home/runner/work/_temp/tabdiff-validation/native-training/ckpt/model_4.pt",
+      "--num_samples_to_generate",
+      "12",
+      "--report",
+      "--num_runs",
+      "1",
+      "--gpu",
+      "-1",
+      "--no_wandb",
+      "--deterministic"
+    ]
+  ],
+  "protocol_id": "tabdiff-native-parity-v1",
+  "repository_commit": "230adafe96dc7ec224bada220e1ee184972b61ad",
+  "runtime_config": {
+    "base_sha256": "38eff74ecb572c9baafc5e912f8b5421cae686ddb4df6e3bc2a9b69c6ec69cd6",
+    "execution_sha256": "8b16a0eb0a3bc7f0993373b9426b9380fdd9839e361cef3d3202a3a63c461910",
+    "overrides": {
+      "diffusion_params.num_timesteps": 4,
+      "sample.batch_size": 32,
+      "train.main.batch_size": 32,
+      "train.main.check_val_every": 2,
+      "train.main.steps": 4,
+      "unimodmlp_params.dim_t": 64,
+      "unimodmlp_params.factor": 4,
+      "unimodmlp_params.num_layers": 1
+    },
+    "path": "tabdiff/configs/tabdiff_configs.toml",
+    "treatment": "validation-only hyperparameter override in an isolated verified source copy"
+  },
+  "schema_version": 1,
+  "seed_contract": {
+    "configurable_seed_claim": false,
+    "official_cli_capability": "deterministic mode fixes Python, NumPy, and PyTorch to seed 0",
+    "validated_seed": 0
+  },
+  "source": {
+    "manifest_path": "standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json",
+    "manifest_sha256": "c1e72d2d65c5478125f5938a8a113bc06e358a8e580fb7482e09aac2627efceb",
+    "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+    "upstream_files_verified": 27,
+    "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+  },
+  "status": "pass"
+}
