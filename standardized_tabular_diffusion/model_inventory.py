@@ -89,12 +89,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="multimodal diffusion",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/MinkaiXu/TabDiff",
         notes=[
             "Already standardized in this repository.",
+            "Passed the retained Linux/Python 3.11 native-parity protocol; this is not an Official Results or release-support claim.",
         ],
     ),
     "great": ModelInventoryEntry(

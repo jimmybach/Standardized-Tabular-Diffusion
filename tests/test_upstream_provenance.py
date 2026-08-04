@@ -50,6 +50,10 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         assert spec.upstream_revision is not None
         assert spec.benchmark_track == "experimental"
         assert spec.support_level == "unsupported"
+
+    assert get_adapter_spec("tabdiff").validation_level.value == "native-parity-validated"
+    for model_id in ("tabddpm", "tabsyn"):
+        spec = get_adapter_spec(model_id)
         assert "native-parity-validated" not in spec.validation_level.value
 
     tabddpm = get_adapter_spec("tabddpm")

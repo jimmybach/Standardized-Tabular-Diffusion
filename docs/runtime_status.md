@@ -2,7 +2,12 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, TabDDPM is recorded as `native-parity-validated`, `experimental`, and `unsupported`. Its real Linux/Python 3.11 native-versus-adapter evidence is retained under `docs/evidence/tabddpm/`. Every other registered runnable adapter remains conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`; their earlier local executions did not include the complete evidence required for `smoke-validated`.
+At the current release-preparation baseline, TabDDPM and TabDiff are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+
+## Current Retained Validation
+
+- `tabddpm`: passed `tabddpm-native-parity-v1` for seeds 0, 17, and 2025 in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
+- `tabdiff`: passed `tabdiff-native-parity-v1` in GitHub Actions run `30866879879`; see `docs/TABDIFF_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -19,7 +24,7 @@ At the current release-preparation baseline, TabDDPM is recorded as `native-pari
 - `goggle`
 - `arf`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated TabDDPM path, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated TabDDPM and TabDiff paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
