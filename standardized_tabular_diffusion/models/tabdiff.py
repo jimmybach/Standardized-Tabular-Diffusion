@@ -76,6 +76,17 @@ class TabDiffAdapter(BaseModelAdapter):
         result_dir = Path(*parent_parts)
         return result_dir / str(epoch) / "samples.csv"
 
+    def _infer_report_sample_path(self, spec: RunSpec, exp_name: str) -> Path:
+        return (
+            self.upstream_root
+            / "eval"
+            / "report_runs"
+            / exp_name
+            / spec.dataset
+            / "all_samples"
+            / "samples_0.csv"
+        )
+
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         args = [
@@ -101,6 +112,7 @@ class TabDiffAdapter(BaseModelAdapter):
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         checkpoint_path = self._resolve_checkpoint_path(spec)
+        exp_name = spec.extra.get("exp_name", spec.output_dir.name)
         args = [
             "main.py",
             "--dataname",
@@ -108,22 +120,31 @@ class TabDiffAdapter(BaseModelAdapter):
             "--mode",
             "test",
             "--exp_name",
-            spec.extra.get("exp_name", spec.output_dir.name),
+            exp_name,
             "--ckpt_path",
             str(checkpoint_path),
         ]
         if spec.num_samples is not None:
             args.extend(["--num_samples_to_generate", str(spec.num_samples)])
+        report = bool(spec.extra.get("report", False))
+        if report:
+            args.extend(["--report", "--num_runs", str(int(spec.extra.get("num_runs", 1)))])
         args.extend(self._common_args(spec))
         self._run_python(args, self.upstream_root)
-        sample_path = self._infer_sample_path(checkpoint_path)
+        sample_path = (
+            self._infer_report_sample_path(spec, exp_name) if report else self._infer_sample_path(checkpoint_path)
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path if sample_path.exists() else None,
-            notes=["TabDiff test mode generates samples and evaluation outputs together."],
+            notes=[
+                "TabDiff report mode generated samples and evaluation outputs together."
+                if report
+                else "TabDiff test mode generates samples and evaluation outputs together."
+            ],
         )
         return self._write_bundle(bundle)
 

@@ -93,3 +93,61 @@ def test_tabdiff_adapter_rejects_untrusted_explicit_checkpoint(tmp_path: Path) -
 
     with pytest.raises(PermissionError, match="can execute code"):
         adapter.sample(spec)
+
+
+def test_tabdiff_adapter_maps_official_report_output(tmp_path: Path, monkeypatch) -> None:
+    upstream_root = tmp_path / "TabDiff-main"
+    output_dir = tmp_path / "artifacts"
+    checkpoint = output_dir / "model_4.pt"
+    checkpoint.parent.mkdir(parents=True)
+    checkpoint.write_bytes(b"not loaded by mocked command")
+    sample_path = (
+        upstream_root
+        / "eval"
+        / "report_runs"
+        / "parity"
+        / "toy_dcr"
+        / "all_samples"
+        / "samples_0.csv"
+    )
+    sample_path.parent.mkdir(parents=True)
+    sample_path.write_text("0,1\n0.1,a\n")
+    adapter = TabDiffAdapter(tmp_path)
+    commands: list[list[str]] = []
+    monkeypatch.setattr(adapter, "_run_python", lambda args, _cwd: commands.append(args))
+
+    bundle = adapter.sample(
+        RunSpec(
+            model="tabdiff",
+            dataset="toy_dcr",
+            output_dir=output_dir,
+            device="cpu",
+            checkpoint_path=checkpoint,
+            num_samples=12,
+            extra={"exp_name": "parity", "report": True, "num_runs": 1},
+        )
+    )
+
+    assert bundle.generated_sample_path == sample_path
+    assert commands == [
+        [
+            "main.py",
+            "--dataname",
+            "toy_dcr",
+            "--mode",
+            "test",
+            "--exp_name",
+            "parity",
+            "--ckpt_path",
+            str(checkpoint.resolve()),
+            "--num_samples_to_generate",
+            "12",
+            "--report",
+            "--num_runs",
+            "1",
+            "--gpu",
+            "-1",
+            "--no_wandb",
+            "--deterministic",
+        ]
+    ]
