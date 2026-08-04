@@ -2,7 +2,7 @@
 
 Status: protocol implemented; mandatory Linux run pending
 
-Protocol: `tabularargn-official-package-parity-v1`
+Protocol: `tabularargn-official-package-parity-v2`
 
 Target: method-author official `mostlyai-engine==2.6.2` flat TabularARGN package
 
@@ -85,7 +85,7 @@ All nine cases must pass. The gate requires:
 1. exact Linux/Python 3.11 environment, release artifacts, source/wheel equivalence, license, installed files, and direct dependency identity;
 2. identical official checkpoint key order and tensor values;
 3. semantically identical official model configuration and target statistics;
-4. DataFrame-identical raw samples before serialization;
+4. value-identical samples after applying only the adapter's documented categorical string normalization, with the unnormalized native and adapter dtypes retained separately in evidence;
 5. byte-identical native and adapter CSV files;
 6. exact requested row count and canonical column order;
 7. no missing or non-finite numerical output and no out-of-domain categorical output;
@@ -94,6 +94,8 @@ All nine cases must pass. The gate requires:
 10. unchanged locked package files after every case.
 
 Any mismatch or provenance, dependency, platform, path, metadata, or integrity failure fails closed and retains a diagnostic JSON artifact.
+
+Protocol v2 makes the distinction in criterion 4 explicit. The official package may return a categorical value such as integer `1`, while the public adapter contract represents that same category as string `"1"`. This interface-only dtype normalization is audited separately and cannot hide value, row, order, numerical-dtype, checkpoint, or serialized-output differences.
 
 ## Known Boundaries
 

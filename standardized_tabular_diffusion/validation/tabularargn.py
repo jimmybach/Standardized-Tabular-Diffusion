@@ -34,7 +34,7 @@ from standardized_tabular_diffusion.models.tabularargn import (
     verify_tabularargn_distribution,
 )
 
-PROTOCOL_ID = "tabularargn-official-package-parity-v1"
+PROTOCOL_ID = "tabularargn-official-package-parity-v2"
 WHEEL_FILENAME = "mostlyai_engine-2.6.2-py3-none-any.whl"
 WHEEL_SHA256 = "3ead3770c936919f8fce4e1f9fffd271ffdd490f0292c2ab9a42cb4bafe3caea"
 WHEEL_BYTES = 185_077
@@ -425,6 +425,22 @@ def _json_artifact_exact(native_workspace: Path, adapter_workspace: Path, relati
     return json.loads(native_path.read_text(encoding="utf-8")) == json.loads(adapter_path.read_text(encoding="utf-8"))
 
 
+def _normalize_sample_for_adapter_contract(frame: pd.DataFrame, dataset_spec: DatasetSpec) -> pd.DataFrame:
+    """Apply only the adapter's documented categorical-output normalization."""
+
+    normalized = frame.loc[:, dataset_spec.column_names].reset_index(drop=True).copy()
+    categorical = [*dataset_spec.categorical_columns]
+    if dataset_spec.task_type == "classification":
+        categorical.extend(dataset_spec.target_columns)
+    for column in dict.fromkeys(categorical):
+        normalized[column] = normalized[column].astype(str)
+    return normalized
+
+
+def _sample_dtypes(frame: pd.DataFrame) -> dict[str, str]:
+    return {column: str(frame[column].dtype) for column in frame.columns}
+
+
 def run_validation(
     repo_root: Path,
     output_dir: Path,
@@ -467,6 +483,9 @@ def run_validation(
                 Path("ModelStore") / "tgt-stats" / "stats.json",
             )
             raw_exact = native_raw.equals(adapter_raw)
+            contract_samples_exact = _normalize_sample_for_adapter_contract(
+                native_raw, dataset_spec
+            ).equals(_normalize_sample_for_adapter_contract(adapter_raw, dataset_spec))
             csv_exact = native_csv.read_bytes() == adapter_csv.read_bytes()
             frame = pd.read_csv(adapter_csv)
             metadata_valid = (
@@ -489,7 +508,7 @@ def run_validation(
                 checkpoints["tensors_exact"]
                 and configs_exact
                 and stats_exact
-                and raw_exact
+                and contract_samples_exact
                 and csv_exact
                 and len(frame) == SAMPLE_ROWS
                 and frame.columns.tolist() == dataset_spec.column_names
@@ -512,6 +531,11 @@ def run_validation(
                         "model_config_semantics_exact": configs_exact,
                         "target_stats_semantics_exact": stats_exact,
                         "raw_samples_exact": raw_exact,
+                        "contract_normalized_samples_exact": contract_samples_exact,
+                        "raw_sample_dtypes": {
+                            "native": _sample_dtypes(native_raw),
+                            "adapter": _sample_dtypes(adapter_raw),
+                        },
                         "sample_bytes_exact": csv_exact,
                         "sample_sha256": _sha256_file(adapter_csv),
                         "sample_rows": len(frame),
