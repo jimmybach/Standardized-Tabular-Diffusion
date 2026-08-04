@@ -1,6 +1,6 @@
 # TVAE Validation Protocol
 
-Status: mandatory Linux/Python 3.11 run pending; adapter remains `adapter-complete`
+Status: passed; adapter is `native-parity-validated`
 
 Protocol ID: `tvae-native-parity-v1`
 
@@ -95,4 +95,10 @@ python -m standardized_tabular_diffusion.validation.tvae \
   --wheel-path /tmp/tvae-wheel/ctgan-0.12.1-py3-none-any.whl
 ```
 
-`.github/workflows/tvae-validation.yml` runs this command and retains evidence for 90 days. Any package, dependency, adapter, or protocol change requires a new run. TVAE remains `adapter-complete`, `experimental`, `unsupported`, and excluded from Official Results until a passing artifact has been inspected and permanently recorded.
+`.github/workflows/tvae-validation.yml` runs this command and retains evidence for 90 days. Any package, dependency, adapter, or protocol change requires a new run.
+
+## Retained result
+
+[GitHub Actions run `30913867621`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621) passed on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. All required comparisons passed for seeds `0`, `19`, and `73`: official wheel and installed-file identity, constructor and device settings, all five retained decoder tensors including finite sigma, transformed fixture data, recorded losses, NumPy and PyTorch random states, manifest integrity, generated DataFrames, and CSV bytes.
+
+The raw workflow artifact was inspected and retained unchanged at `docs/evidence/tvae/native-parity-run-30913867621.json` with SHA-256 `ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7`. TVAE is therefore promoted to `native-parity-validated`, while remaining `experimental`, `unsupported`, and excluded from Official Results until the separate license, evaluation, dataset, and release gates are satisfied.
