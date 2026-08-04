@@ -50,7 +50,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 
 - The six modified official files were restored to commit `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`.
 - The local `TabSyn-main/zero/` substitute was removed. The frozen validation environment uses `libzero==0.0.8`, which supplies the `zero` research-utility import used by the source. The PyPI distribution named `zero` is an unrelated circuit-analysis package.
-- Device selection, deterministic seeding, requested sample rows, and sampling steps are implemented in `standardized_tabular_diffusion/compat/tabsyn.py`. This is an adapter-only invocation boundary: it imports and calls the official VAE, latent diffusion, decoding, and EDM sampler implementations without changing files under `TabSyn-main/`.
+- Device selection, deterministic seeding, requested sample rows, and sampling steps are implemented in `standardized_tabular_diffusion/compat/tabsyn_launcher.py`. This is an adapter-only invocation boundary: it imports and calls the official VAE, latent diffusion, decoding, and EDM sampler implementations without changing files under `TabSyn-main/`.
 - The official source does not expose VAE or diffusion epoch counts. The public adapter therefore rejects those former local controls instead of silently relying on patched source.
 - A 20-file manifest freezes the primary TabSyn execution, shared data utilities, dependency declaration, and attribution files. Bundled baselines and upstream evaluation scripts remain outside this TabSyn-primary validation scope.
 

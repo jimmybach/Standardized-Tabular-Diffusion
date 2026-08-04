@@ -393,9 +393,17 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         "seed": SEED,
         "native_commands": native_commands,
         "adapter_commands": {
-            "vae_train": ["compat/tabsyn.py", "--action", "vae-train"],
-            "diffusion_train": ["compat/tabsyn.py", "--action", "diffusion-train"],
-            "sample": ["compat/tabsyn.py", "--action", "sample", "--num-samples", "12", "--steps", "4"],
+            "vae_train": ["compat/tabsyn_launcher.py", "--action", "vae-train"],
+            "diffusion_train": ["compat/tabsyn_launcher.py", "--action", "diffusion-train"],
+            "sample": [
+                "compat/tabsyn_launcher.py",
+                "--action",
+                "sample",
+                "--num-samples",
+                "12",
+                "--steps",
+                "4",
+            ],
         },
         "comparisons": {
             "checkpoints": checkpoints,
