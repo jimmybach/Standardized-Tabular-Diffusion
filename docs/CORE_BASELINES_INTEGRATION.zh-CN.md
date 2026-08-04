@@ -15,7 +15,7 @@ TabDDPM、TabDiff 和 TabSyn 首先在分别从仓库审计基线派生的独立
 本次集成统一处理了注册表、模型清单、来源锁、上游审计、运行状态、第三方声明、验证包入口和测试中的共享修改，同时发现并修正了两个跨分支问题：
 
 - TabDDPM 已在适配器注册表中晋级，但独立模型清单仍保留旧状态；现在两者均为 `native-parity-validated`。
-- 恢复 TabSyn 主实现源码本身不等于其单独附带的 CoDi baseline 已完成审计。CoDi 现已单独完成 24 文件 checksum 审计并建立仅适配层的运行边界；其专用 Linux/Python 3.11 一致性证据仍待完成。
+- 恢复 TabSyn 主实现源码本身不等于其单独附带的 CoDi baseline 已完成审计。CoDi 随后单独完成了 24 文件 checksum 审计并建立仅适配层的运行边界；九个 Linux/Python 3.11 TabSyn 快照精确一致性案例后来均在已保留的运行 `30941940893` 中通过。
 
 Windows checkout 还暴露出 TabDDPM 的 libzero 许可证使用原始字节哈希，而 Git 可能规范化其行尾。清单现在明确记录 `license_sha256_lf`，验证器也证明 LF 与 CRLF checkout 会得到相同的规范化哈希。官方 Python 模块仍按字节精确校验，主源码仍依照预先声明的规范化行尾规则进行哈希检查。
 

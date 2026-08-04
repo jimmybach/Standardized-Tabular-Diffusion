@@ -2,9 +2,9 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. STaSy's claim is limited to the TabSyn benchmark snapshot. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, CoDi, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. CoDi and STaSy claims are limited to their TabSyn benchmark snapshots. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
 
-CoDi now has a checksum-locked 24-file TabSyn-snapshot execution scope, strict dual-checkpoint handling, an exact-row compatibility boundary, and a dedicated CPU smoke preset. Its status remains `adapter-complete`, `experimental`, and `unsupported` until the mandatory nine-case Linux/Python 3.11 parity artifact is inspected and retained. The separate method-author repository has no declared license and materially differs from the TabSyn adaptation.
+CoDi now has a checksum-locked 24-file TabSyn-snapshot execution scope, strict dual-checkpoint handling, an exact-row compatibility boundary, and a dedicated CPU smoke preset. Its mandatory nine-case Linux/Python 3.11 protocol passed exactly in run `30941940893`, and the inspected evidence is retained, so its adapter status is `native-parity-validated`. It remains `experimental` and `unsupported`; the separate method-author repository has no declared license and materially differs from the TabSyn adaptation.
 
 CTAB-GAN+ no longer imports the semantically modified snapshot formerly embedded in the TabDDPM tree. The adapter now acquires five byte-exact files from locked method-author commit `6a6f901` into an ignored cache and does not patch them. Its mandatory six-case Linux/Python 3.11 protocol passed in run `30926267432`, and the inspected evidence is permanently retained, so its adapter status is `native-parity-validated`. The absent upstream license independently blocks redistribution, Official Results, and release claims.
 
@@ -24,6 +24,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `smote`: passed all nine `smote-native-parity-v1` sampler/seed cases in GitHub Actions run `30918785254`; see `docs/SMOTE_VALIDATION.md` and the permanent JSON evidence record. SMOTE remains a classification-only classical reference excluded from the joint generative-model ranking.
 - `nrgboost`: passed all six classification/regression and seed cases in `nrgboost-native-parity-v1` GitHub Actions run `30922326384`; see `docs/NRGBOOST_VALIDATION.md` and the permanent JSON evidence record. Benchmark eligibility, runtime policy, and release support remain separate gates.
 - `stasy`: passed all nine binary, multiclass, regression, and seed cases in `stasy-tabsyn-snapshot-parity-v1` GitHub Actions run `30936275831`; checkpoint state and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
+- `codi`: passed all nine binary, multiclass, regression, and seed cases in `codi-tabsyn-snapshot-parity-v1` GitHub Actions run `30941940893`; both checkpoint states and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -40,8 +41,9 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `goggle`
 - `arf`
 - `stasy`
+- `codi`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CoDi, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
@@ -51,7 +53,6 @@ These models were reported to have completed at least one local path through the
 - `tabularargn`
 - `tabula`
 - `ctab-gan`
-- `codi`
 
 These adapters were reported as runnable in a prior environment, but they depend on brittle stacks and require fresh supported-environment evidence:
 
@@ -61,7 +62,6 @@ These adapters were reported as runnable in a prior environment, but they depend
 - `tabularargn`: optional-package adapter around `mostlyai-engine`; integrated in code, but not yet smoke-validated in this repository.
 - `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
 - `ctab-gan`: official-source classification path with strict source checks and a documented scikit-learn keyword-only API bridge; full-scale qualification remains pending.
-- `codi`: exact TabSyn benchmark snapshot with a dedicated preset and parity protocol; mandatory Linux/Python 3.11 evidence is still pending, and original-method claims remain blocked.
 
 ## Previously Reported Training Path, Sampling Guarded
 
