@@ -25,6 +25,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "ctgan",
         "nrgboost",
         "smote",
+        "stasy",
         "tabddpm",
         "tabdiff",
         "tabsyn",
@@ -103,7 +104,30 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     assert smote.revision_status == "pinned-canonical-package-native-parity-validated"
     assert smote.reproduction_target == "classical-oversampling-reference"
 
-    # Restoring the primary TabSyn path does not audit its separately vendored baselines.
+    # STaSy is audited separately from the primary TabSyn model; CoDi remains pending.
+    stasy = get_adapter_spec("stasy")
+    assert stasy.modification_status == "adapter-only"
+    assert stasy.reproduction_target == "tabsyn-benchmark-snapshot"
+    assert stasy.validation_level.value == "adapter-complete"
+    stasy_lock = _load_source_lock()["components"]["stasy"]
+    assert stasy_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
+    assert stasy_lock["dependency_resolution"]["wheel_sha256"] == (
+        "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d"
+    )
+    assert stasy_lock["compatibility_shims"] == [
+        {
+            "classification": "adapter-only",
+            "id": "stasy-sklearn-onehot-keyword-v1",
+            "reason": (
+                "The pinned snapshot uses sparse=False, while scikit-learn 1.5.2 names the same "
+                "dense-output control sparse_output."
+            ),
+            "semantic_effect": (
+                "The bridge forwards the unchanged false value to sparse_output; it changes no "
+                "encoder, output representation, source file, or preprocessing operation."
+            ),
+        }
+    ]
     assert get_adapter_spec("codi").modification_status == "compatibility-patched"
 
 

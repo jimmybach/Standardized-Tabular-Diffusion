@@ -36,8 +36,9 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `nflow`
 - `goggle`
 - `arf`
+- `stasy`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate. STaSy now has a fail-closed adapter and dedicated preset, but its mandatory Linux evidence is still pending.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
@@ -47,7 +48,6 @@ These models were reported to have completed at least one local path through the
 - `tabularargn`
 - `tabula`
 - `ctab-gan`
-- `stasy`
 - `codi`
 
 These adapters were reported as runnable in a prior environment, but they depend on brittle stacks and require fresh supported-environment evidence:
@@ -58,7 +58,6 @@ These adapters were reported as runnable in a prior environment, but they depend
 - `tabularargn`: optional-package adapter around `mostlyai-engine`; integrated in code, but not yet smoke-validated in this repository.
 - `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
 - `ctab-gan`: official-source classification path with strict source checks and a documented scikit-learn keyword-only API bridge; full-scale qualification remains pending.
-- `stasy`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
 - `codi`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
 
 ## Previously Reported Training Path, Sampling Guarded

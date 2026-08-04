@@ -2,7 +2,7 @@
 
 Status: release-preparation record
 Audit date: 2026-08-04
-Scope: the primary TabDDPM, TabDiff, and TabSyn source trees plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, CTAB-GAN, and CTAB-GAN+
+Scope: the primary TabDDPM, TabDiff, and TabSyn source trees, the TabSyn STaSy baseline snapshot, plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, CTAB-GAN, and CTAB-GAN+
 
 ## Purpose
 
@@ -35,6 +35,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The initial import had 58 exact scoped files but omitted all six official `lib/` files. The missing files have now been restored; all 64 scoped files match the integrity manifest after declared text normalization. | Adapter-only. The former local `zero` shim was removed and replaced by the seven byte-exact modules from the official `libzero==0.0.8` wheel. | Native parity validated in run `30863212268`; official-track eligibility remains a separate pending decision. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Native parity validated in run `30866879879`; central-evaluation and other official-track gates remain pending. |
 | TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Native parity passed; Official Results remain blocked by central-evaluation, dataset, runtime, governance, and release gates. |
+| STaSy (TabSyn baseline snapshot) | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`, subtree `4f56a7223d71d6b75c1698824c5d0245bf716bc6` | All 17 local STaSy Python files match the TabSyn snapshot. The separate method-author commit `3dcc660` has no declared license; only 2 of 14 shared paths match after text normalization. | Thirty execution files are checksum-locked; device, seed, effective training controls, row count, and output-local checkpoints are adapter-only. | TabSyn-snapshot parity is pending Linux/Python 3.11 evidence. Original-method, Official Results, and release claims remain blocked. |
 
 ## Patch Classification
 
@@ -60,6 +61,15 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - Device selection, deterministic seeding, requested sample rows, and sampling steps are implemented in `standardized_tabular_diffusion/compat/tabsyn_launcher.py`. This is an adapter-only invocation boundary: it imports and calls the official VAE, latent diffusion, decoding, and EDM sampler implementations without changing files under `TabSyn-main/`.
 - The official source does not expose VAE or diffusion epoch counts. The public adapter therefore rejects those former local controls instead of silently relying on patched source.
 - A 20-file manifest freezes the primary TabSyn execution, shared data utilities, dependency declaration, and attribution files. Bundled baselines and upstream evaluation scripts remain outside this TabSyn-primary validation scope.
+
+### STaSy snapshot disposition
+
+- The active baseline is the STaSy adaptation distributed by the Apache-2.0 TabSyn repository, not a copy of the separate method-author repository.
+- The 17 local STaSy Python files exactly match the pinned TabSyn subtree after declared text normalization. Thirteen shared dispatcher, preprocessing, attribution, and dependency files bring the fail-closed execution scope to 30 files.
+- The method-author repository is pinned separately for provenance. It has no detected license and differs in 12 of 14 shared paths, so the TabSyn adaptation cannot be described as an unmodified original-method implementation.
+- `standardized_tabular_diffusion/compat/stasy_launcher.py` fixes the invocation contract without editing upstream source: CPU/CUDA selection, deterministic seeding, effective training configuration, exact requested rows, and checkpoint isolation under `output_dir`.
+- Its `stasy-sklearn-onehot-keyword-v1` bridge forwards the snapshot's unchanged `sparse=False` value to the renamed `sparse_output` parameter required by scikit-learn 1.5.2; encoder type and dense-output semantics are unchanged.
+- Formal status remains `adapter-complete` until the nine-case Linux/Python 3.11 snapshot-parity artifact is inspected and retained.
 
 ### CTAB-GAN snapshot and compatibility disposition
 

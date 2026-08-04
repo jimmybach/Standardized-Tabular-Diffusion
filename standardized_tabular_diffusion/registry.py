@@ -270,9 +270,24 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "STaSyAdapter",
         authority="benchmark-vendored",
         distribution="source",
-        target="benchmark-snapshot",
-        modification="compatibility-patched",
+        target="tabsyn-benchmark-snapshot",
+        modification="adapter-only",
+        install_extra="stasy",
         source_root="TabSyn-main",
+        upstream_repository="https://github.com/amazon-science/tabsyn",
+        upstream_revision="cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+        revision_status="pinned-exact-benchmark-snapshot-parity-pending",
+        license_status=(
+            "Apache-2.0 TabSyn snapshot retained; method-author repository has no declared license; "
+            "original-method and Official Results claims blocked"
+        ),
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/STASY_VALIDATION.md",
+            "standardized_tabular_diffusion/resources/upstream/stasy-source-manifest.json",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/stasy-validation.yml",
+        ),
     ),
     "tabsds": _spec(
         "standardized_tabular_diffusion.models.paper_gap_baselines",
