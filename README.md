@@ -19,6 +19,8 @@ The standardized layer is the preferred integration boundary. The vendored sourc
 
 Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. At this stage, adapters remain experimental and unsupported. TabDDPM, TabDiff, and TabSyn have passed separate Linux/Python 3.11 native-parity protocols, but that evidence does not make them benchmark-eligible or release-supported.
 
+CTGAN now targets the checksum-pinned official `ctgan==0.12.1` package instead of the legacy embedded source snapshot. Its mandatory Linux/Python 3.11 native-parity run is pending, so its status remains `adapter-complete`. The official package uses BUSL-1.1; see the [CTGAN validation protocol](docs/CTGAN_VALIDATION.md) before installation or use.
+
 Their coexistence on one cumulative candidate is documented in the [core baseline integration validation](docs/CORE_BASELINES_INTEGRATION.md), with a corresponding [Chinese translation](docs/CORE_BASELINES_INTEGRATION.zh-CN.md) and machine-readable evidence index.
 
 Project attribution and release review records live in [CONTRIBUTORS.md](CONTRIBUTORS.md), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [SECURITY.md](SECURITY.md), [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md), and the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md). The repository-level license and dataset redistribution decisions remain release blockers until the project owners approve them.

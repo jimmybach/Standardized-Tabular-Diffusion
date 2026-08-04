@@ -80,6 +80,7 @@ def _spec(
     revision_status: str = "unresolved",
     patch_set_ids: tuple[str, ...] = (),
     evidence_records: tuple[str, ...] = (),
+    license_status: str = "source-license-present; transitive-review-pending",
     validation_level: AdapterValidationLevel = AdapterValidationLevel.ADAPTER_COMPLETE,
 ) -> AdapterSpec:
     return AdapterSpec(
@@ -99,6 +100,7 @@ def _spec(
         revision_status=revision_status,
         patch_set_ids=patch_set_ids,
         evidence_records=evidence_records,
+        license_status=license_status,
         validation_level=validation_level,
     )
 
@@ -151,7 +153,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "CTGANAdapter",
         authority="method-author",
         distribution="package",
-        install_extra="evaluation",
+        install_extra="ctgan",
+        upstream_repository="https://github.com/sdv-dev/CTGAN",
+        upstream_revision="826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        revision_status="pinned-official-package-native-parity-pending",
+        license_status="BUSL-1.1 package dependency; official-track and release legal review required",
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/CTGAN_VALIDATION.md",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/ctgan-validation.yml",
+        ),
     ),
     "goggle": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",

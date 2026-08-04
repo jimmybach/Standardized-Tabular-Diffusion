@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import pickle
 import sys
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +59,7 @@ class _SampleFileEvaluatorMixin:
 
 class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
     checkpoint_filename = "model.pkl"
+    _CTGAN_PACKAGE_VERSION = "0.12.1"
 
     def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
         if spec.checkpoint_path is not None:
@@ -78,13 +80,6 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
                     discrete.append(target)
         return discrete
 
-    def _device_arg(self, spec: RunSpec) -> Any:
-        if spec.device == "cpu":
-            return False
-        if spec.device.startswith("cuda"):
-            return spec.device
-        return False
-
     def _train_kwargs(self, spec: RunSpec) -> dict[str, Any]:
         kwargs: dict[str, Any] = {}
         if spec.extra.get("epochs") is not None:
@@ -93,42 +88,124 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
             kwargs["batch_size"] = int(spec.extra["batch_size"])
         if spec.extra.get("verbose") is not None:
             kwargs["verbose"] = bool(spec.extra["verbose"])
+        if self.model_name == "ctgan":
+            for name in ("embedding_dim", "discriminator_steps", "pac"):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = int(spec.extra[name])
+            for name in ("generator_lr", "generator_decay", "discriminator_lr", "discriminator_decay"):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = float(spec.extra[name])
+            if spec.extra.get("log_frequency") is not None:
+                kwargs["log_frequency"] = bool(spec.extra["log_frequency"])
+            for name in ("generator_dim", "discriminator_dim"):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = tuple(int(value) for value in spec.extra[name])
+            batch_size = int(kwargs.get("batch_size", 500))
+            pac = int(kwargs.get("pac", 10))
+            epochs = int(kwargs.get("epochs", 300))
+            embedding_dim = int(kwargs.get("embedding_dim", 128))
+            discriminator_steps = int(kwargs.get("discriminator_steps", 1))
+            dimensions = (
+                tuple(kwargs.get("generator_dim", (256, 256))),
+                tuple(kwargs.get("discriminator_dim", (256, 256))),
+            )
+            if batch_size <= 0 or batch_size % 2 or pac <= 0 or batch_size % pac:
+                raise ValueError("CTGAN batch_size must be positive, even, and divisible by positive pac")
+            if epochs <= 0 or embedding_dim <= 0 or discriminator_steps <= 0:
+                raise ValueError("CTGAN epochs, embedding_dim, and discriminator_steps must be positive")
+            if any(not values or any(value <= 0 for value in values) for values in dimensions):
+                raise ValueError("CTGAN generator_dim and discriminator_dim must contain positive integers")
         return kwargs
 
     def _import_synthesizer_cls(self):
+        if self.model_name == "ctgan":
+            try:
+                installed_version = version("ctgan")
+            except PackageNotFoundError as exc:
+                raise ModuleNotFoundError(
+                    'CTGAN requires the pinned official package; install '
+                    '`standardized-tabular-diffusion[ctgan]`.'
+                ) from exc
+            if installed_version != self._CTGAN_PACKAGE_VERSION:
+                raise RuntimeError(
+                    "CTGAN package version mismatch: "
+                    f"expected {self._CTGAN_PACKAGE_VERSION}, observed {installed_version}. "
+                    'Install `standardized-tabular-diffusion[ctgan]` to restore the validated runtime.'
+                )
+            from ctgan import CTGAN  # pylint: disable=import-error
+
+            return CTGAN
+
         vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
         with _temporary_sys_path(vendor_root):
-            from ctgan import CTGANSynthesizer, TVAESynthesizer  # pylint: disable=import-error
+            from ctgan import TVAESynthesizer  # pylint: disable=import-error
 
-            return {
-                "ctgan": CTGANSynthesizer,
-                "tvae": TVAESynthesizer,
-            }[self.model_name]
+            return TVAESynthesizer
 
     def _build_synthesizer(self, spec: RunSpec):
         synthesizer_cls = self._import_synthesizer_cls()
         kwargs = self._train_kwargs(spec)
         if self.model_name == "ctgan":
-            kwargs["cuda"] = self._device_arg(spec)
+            kwargs["enable_gpu"] = spec.device.startswith("cuda")
         else:
             kwargs["device"] = spec.device
-        return synthesizer_cls(**kwargs)
+        model = synthesizer_cls(**kwargs)
+        if self.model_name == "ctgan":
+            model.set_device(spec.device)
+        return model
+
+    def _save_model(self, model: Any, checkpoint_path: Path) -> None:
+        if self.model_name == "ctgan":
+            model.save(checkpoint_path)
+            return
+        with checkpoint_path.open("wb") as handle:
+            pickle.dump(model, handle)
+
+    def _load_model(self, spec: RunSpec, checkpoint_path: Path) -> Any:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(
+            spec,
+            checkpoint_path,
+            format_name="PyTorch/pickle",
+        )
+        synthesizer_cls = self._import_synthesizer_cls()
+        if self.model_name == "ctgan":
+            model = synthesizer_cls.load(trusted_checkpoint)
+            model.set_device(spec.device)
+            return model
+        vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
+        with _temporary_sys_path(vendor_root), trusted_checkpoint.open("rb") as handle:
+            return pickle.load(handle)
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
+        missing_counts = train_df.isna().sum()
+        if bool(missing_counts.any()):
+            observed = {str(column): int(count) for column, count in missing_counts.items() if count}
+            raise ValueError(
+                f"{self.model_name} does not accept missing values in this benchmark. "
+                f"Run the explicit train-fitted preprocessing module first; observed: {observed}"
+            )
         model = self._build_synthesizer(spec)
+        if self.model_name == "ctgan":
+            model.set_random_state(spec.seed)
         model.fit(train_df, discrete_columns=self._discrete_columns(dataset_spec))
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("wb") as handle:
-            pickle.dump(model, handle)
+        self._save_model(model, checkpoint_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
-            notes=[f"Serialized {self.model_name} checkpoint written to {checkpoint_path}."],
+            notes=[
+                f"Serialized {self.model_name} checkpoint written to {checkpoint_path}.",
+                *(
+                    [f"Official ctgan package version: {self._CTGAN_PACKAGE_VERSION}."]
+                    if self.model_name == "ctgan"
+                    else []
+                ),
+            ],
         )
         return self._write_bundle(bundle)
 
@@ -139,11 +216,7 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
 
-        vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
-        with _temporary_sys_path(vendor_root):
-            trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
-            with trusted_checkpoint.open("rb") as handle:
-                model = pickle.load(handle)
+        model = self._load_model(spec, checkpoint_path)
 
         train_df = self._load_training_frame(dataset_spec)
         num_samples = spec.num_samples or len(train_df)
@@ -166,7 +239,7 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
 
 class CTGANAdapter(_PickleBackedGenerativeAdapter):
     model_name = "ctgan"
-    upstream_dirname = "TabDDPM-main"
+    upstream_dirname = "."
 
 
 class TVAEAdapter(_PickleBackedGenerativeAdapter):

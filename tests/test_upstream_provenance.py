@@ -18,14 +18,18 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"tabddpm", "tabdiff", "tabsyn"}
+    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
         assert spec.upstream_repository == component["authoritative_repository"]
         assert spec.upstream_revision == component["upstream_commit"]
         assert list(spec.patch_set_ids) == [patch["patch_set_id"] for patch in component["patch_sets"]]
-        assert (REPO_ROOT / component["license_path"]).is_file()
+        if component["distribution_form"] == "source":
+            assert (REPO_ROOT / component["license_path"]).is_file()
+        else:
+            assert component["package_lock"]["sha256"]
+            assert component["license_url"].startswith("https://")
 
 
 def test_source_lock_patch_ids_are_unique_and_classified() -> None:
@@ -78,6 +82,25 @@ def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> Non
     assert validation["workflow_run_id"] == 30863212268
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert tabddpm["official_eligibility"] == "pending-separate-official-track-review"
+
+
+def test_ctgan_package_lock_is_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    ctgan = payload["components"]["ctgan"]
+    assert isinstance(ctgan, dict)
+
+    assert ctgan["distribution_form"] == "package"
+    assert ctgan["license"] == "BUSL-1.1"
+    assert ctgan["package_lock"] == {
+        "filename": "ctgan-0.12.1-py3-none-any.whl",
+        "name": "ctgan",
+        "pypi_url": "https://pypi.org/project/ctgan/0.12.1/",
+        "sha256": "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18",
+        "trusted_publishing_source_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        "version": "0.12.1",
+    }
+    assert ctgan["validation"]["status"] == "pending-first-mandatory-run"
+    assert str(ctgan["official_eligibility"]).startswith("blocked-pending-native-parity-license")
 
 
 def test_removed_unverified_checkpoints_are_recorded_and_absent() -> None:
