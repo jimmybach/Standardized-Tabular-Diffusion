@@ -105,6 +105,7 @@ jobs:
             -q
 
       - name: Run real official-package-versus-adapter parity protocol
+        id: parity
         run: |
           set +e
           python -m standardized_tabular_diffusion.validation.tabularargn \
@@ -116,12 +117,12 @@ jobs:
           validation_status=$?
           set -e
           if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/tabularargn-evidence.json" ]; then
-            TABULARARGN_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("tabularargn-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "tabularargn-official-package-parity-v1", "model_id": "tabularargn", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["TABULARARGN_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+            TABULARARGN_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("tabularargn-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "tabularargn-official-package-parity-v2", "model_id": "tabularargn", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["TABULARARGN_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
           fi
           exit "$validation_status"
 
       - name: Retain validation evidence
-        if: always()
+        if: ${{ always() && steps.parity.outcome != 'skipped' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: tabularargn-native-parity-evidence
