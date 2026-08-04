@@ -1,0 +1,92 @@
+name: CTGAN Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/ctgan-validation.yml"
+      - "requirements-ctgan-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/sample_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/validation/ctgan.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/CTGAN_VALIDATION*.md"
+      - "docs/evidence/ctgan/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+  pull_request:
+    paths:
+      - ".github/workflows/ctgan-validation.yml"
+      - "requirements-ctgan-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/sample_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/validation/ctgan.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/CTGAN_VALIDATION*.md"
+      - "docs/evidence/ctgan/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ctgan-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / native parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-ctgan-validation.txt
+
+      - name: Install frozen official CTGAN environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install "torch==2.3.0" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-ctgan-validation.txt
+          mkdir -p "$RUNNER_TEMP/ctgan-wheel"
+          python -m pip download \
+            --index-url https://pypi.org/simple \
+            --only-binary=:all: \
+            --no-deps \
+            --dest "$RUNNER_TEMP/ctgan-wheel" \
+            "ctgan==0.12.1"
+          echo "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18  $RUNNER_TEMP/ctgan-wheel/ctgan-0.12.1-py3-none-any.whl" | sha256sum --check
+          python -m pip install --no-deps "$RUNNER_TEMP/ctgan-wheel/ctgan-0.12.1-py3-none-any.whl"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run real official-package-versus-adapter parity protocol
+        run: |
+          python -m standardized_tabular_diffusion.validation.ctgan \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/ctgan-validation" \
+            --evidence-path "$RUNNER_TEMP/ctgan-evidence.json" \
+            --wheel-path "$RUNNER_TEMP/ctgan-wheel/ctgan-0.12.1-py3-none-any.whl"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ctgan-native-parity-evidence
+          path: ${{ runner.temp }}/ctgan-evidence.json
+          if-no-files-found: error
+          retention-days: 90

@@ -412,8 +412,9 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="high",
         repository_url="https://github.com/sdv-dev/CTGAN",
         notes=[
-            "Maintained open-source project with tests, packaging, and SDV ecosystem support.",
-            "One of the cleanest non-diffusion baselines to integrate next.",
+            "The adapter now targets the checksum-pinned official ctgan 0.12.1 wheel instead of the legacy embedded 0.5.2.dev0 source snapshot.",
+            "A mandatory Linux/Python 3.11 native-parity protocol is pending before status promotion.",
+            "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),
     "nflow": ModelInventoryEntry(
