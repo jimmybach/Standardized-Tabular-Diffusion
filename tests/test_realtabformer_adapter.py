@@ -51,6 +51,7 @@ class _FakeGPT2Config:
             "n_head": self.n_head,
             "n_embd": self.n_embd,
             "n_positions": self.n_positions,
+            "id2label": {0: "LABEL_0"},
             **self.payload,
         }
 
@@ -177,6 +178,8 @@ def test_realtabformer_train_and_sample_are_output_local_and_integrity_checked(
     assert _FakeRTF.observed_fit_kwargs[0]["device"] == "cpu"
     assert _FakeRTF.observed_fit_kwargs[0]["n_critic"] == 0
     assert _FakeRTF.observed_fit_rows[0]["target"].dtype == object
+    training_metadata = json.loads((output_dir / "realtabformer-model-metadata.json").read_text(encoding="utf-8"))
+    assert training_metadata["training"]["constructor"]["tabular_config"]["id2label"] == {"0": "LABEL_0"}
 
     metadata_path = output_dir / "realtabformer-model-metadata.json"
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
