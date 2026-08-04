@@ -307,10 +307,12 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/scikit-learn-contrib/imbalanced-learn",
+        license_status="MIT package dependency; classification-only reference baseline",
         notes=[
-            "Mature scikit-learn style implementation with strong maintenance.",
-            "Not a true joint generative model; better treated as a classical oversampling baseline.",
-            "Best integrated as a lightweight adapter with explicit caveats in benchmark tables.",
+            "The adapter targets the checksum-pinned official imbalanced-learn 0.14.2 wheel.",
+            "Numerical, mixed-type, and all-categorical inputs dispatch to official SMOTE, SMOTENC, and SMOTEN respectively without repository-side feature encoding.",
+            "It is a classification-only classical oversampling reference, not a joint tabular generator, and is excluded from generative-model ranking.",
+            "The mandatory Linux/Python 3.11 native-parity workflow is pending before promotion beyond adapter-complete.",
         ],
     ),
     "stasy": ModelInventoryEntry(
