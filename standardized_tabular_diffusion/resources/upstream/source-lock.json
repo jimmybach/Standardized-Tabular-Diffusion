@@ -438,7 +438,7 @@
         "disposition": "removed-from-current-tree-without-history-rewrite",
         "local_source_files": 11,
         "shared_method-author_paths": 9,
-        "shared_paths_differing_after-text-normalization": 9,
+        "shared_paths_differing_after_text_normalization": 9,
         "tabsyn_subtree": "20204afa938487792e752671e415380b0343adf8",
         "treatment": "The former TabSyn-local copy changed the public fit contract, defaults, validation/early-stopping behavior, Synthcity constraints, and graph imports, so it is not represented as method-author official code."
       },
@@ -450,13 +450,60 @@
       "upstream_model_tree": "6dcaae801859f63e173537445548a50cd1f8625b",
       "upstream_tree": "2d6a54f6d6f4d156890bf4e035119dbb483a46d0",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:f8dc1dbe119cecb1b2febb803096ed416ea7d841a64fe805fc3911bd9e88218d",
+          "artifact_id": 8907023794,
+          "downloaded_evidence_sha256": "1dbcf50194505820cac0650ba72d519f4f331008bbcaac635f8eb846bec7da59",
+          "evidence_file_sha256": "1dbcf50194505820cac0650ba72d519f4f331008bbcaac635f8eb846bec7da59",
+          "expires_at": "2026-11-02T19:57:59Z",
+          "name": "goggle-method-author-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/goggle/native-parity-run-30945676747.json",
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization.",
+          "retention_days": 90
+        },
+        "environment": {
+          "dgl": "1.1.3",
+          "networkx": "3.3",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "psutil": "6.0.0",
+          "pytest": "8.3.5",
+          "python": "3.11.15",
+          "requests": "2.32.3",
+          "scikit_learn": "1.5.2",
+          "scipy": "1.13.1",
+          "torch": "2.3.0+cpu",
+          "torch_geometric": "2.5.3",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "df84de4126bdf5816f54107c544b0971704b58bafd21d93a499956892884bd7a",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "088aed9d2aab4cca38f1e6f8a79e3eea126020e1",
         "protocol_id": "goggle-method-author-native-parity-v1",
-        "status": "pending-linux-evidence",
-        "target_cases": {
-          "seed_cases": [0, 19, 73],
-          "variants": ["binary", "multiclass", "regression"]
-        }
+        "repository_commit": "f13f37d653bbdbc5bd4e99035989ff9bfa3a3444",
+        "result_summary": {
+          "adapter_checkpoint_outside_source": true,
+          "adapter_metadata_valid": true,
+          "adapter_source_remained_exact": true,
+          "checkpoint_file_bytes_exact": true,
+          "checkpoint_state_exact": true,
+          "finite_numerical_output": true,
+          "missing_values": 0,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_samples_exact": true,
+          "requested_rows_per_case": 7,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-04T20:00:06Z",
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747/job/92114929225",
+        "workflow_run_id": 30945676747
       }
     },
     "nrgboost": {

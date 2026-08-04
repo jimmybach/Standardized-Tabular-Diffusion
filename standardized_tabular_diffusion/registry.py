@@ -219,15 +219,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         install_extra="goggle",
         upstream_repository="https://github.com/vanderschaarlab/GOGGLE",
         upstream_revision="1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
-        revision_status="pinned-method-author-source-adapter-complete",
+        revision_status="pinned-method-author-source-native-parity-validated",
         license_status="MIT source acquired on demand; transitive dependency review pending",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/GOGGLE_VALIDATION.md",
+            "docs/evidence/goggle/native-parity-run-30945676747.json",
             "standardized_tabular_diffusion/resources/upstream/goggle-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/goggle-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "great": _spec(
         "standardized_tabular_diffusion.models.final_wave_baselines",
