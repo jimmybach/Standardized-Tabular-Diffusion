@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import platform
+import subprocess
+import sys
 
 import pytest
 
@@ -68,3 +70,18 @@ def test_nrgboost_authoritative_environment_rejects_non_linux(monkeypatch) -> No
     monkeypatch.setattr(platform, "python_version", lambda: "3.11.15")
     with pytest.raises(RuntimeError, match="requires Linux"):
         nrgboost_validation._verify_environment()
+
+
+def test_nrgboost_adapter_module_does_not_import_unrelated_sklearn_baselines() -> None:
+    script = """
+import builtins
+original_import = builtins.__import__
+def guarded_import(name, *args, **kwargs):
+    if name == 'sklearn' or name.startswith('sklearn.'):
+        raise AssertionError(f'unexpected optional import: {name}')
+    return original_import(name, *args, **kwargs)
+builtins.__import__ = guarded_import
+import standardized_tabular_diffusion.models.next_wave_baselines
+"""
+    completed = subprocess.run([sys.executable, "-c", script], text=True, capture_output=True)
+    assert completed.returncode == 0, completed.stderr

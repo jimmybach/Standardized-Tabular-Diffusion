@@ -14,8 +14,8 @@ from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, StandardScal
 
 from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin, temporary_sys_path
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
 
 
 @contextlib.contextmanager
@@ -158,7 +158,7 @@ class NFlowPreprocessor:
         return output[self.dataset_spec.column_names]
 
 
-class BNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class BNAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "bn"
     upstream_dirname = "TabSyn-main"
     checkpoint_filename = "model.pkl"
@@ -234,7 +234,7 @@ class BNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class NFlowAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class NFlowAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "nflow"
     upstream_dirname = "TabSyn-main"
     checkpoint_filename = "model.pkl"
@@ -336,7 +336,7 @@ class NFlowAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "goggle"
     upstream_dirname = "TabSyn-main"
     checkpoint_filename = "model.pt"
@@ -356,8 +356,8 @@ class GoggleAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
     def _import_bits(self):
         compat_root = self.repo_root / "standardized_tabular_diffusion" / "vendor"
         with _temporary_env(self._cache_env()):
-            with _temporary_sys_path(compat_root):
-                with _temporary_sys_path(self.upstream_root):
+            with temporary_sys_path(compat_root):
+                with temporary_sys_path(self.upstream_root):
                     from baselines.goggle.GoggleModel import GoggleModel  # pylint: disable=import-error
                     from utils_train import preprocess  # pylint: disable=import-error
 

@@ -11,8 +11,8 @@ import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin
 
 
 def _import_or_raise(module_name: str, install_hint: str):
@@ -32,7 +32,7 @@ class TabSDSState:
     task_type: str
 
 
-class TabSDSAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class TabSDSAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "tabsds"
     upstream_dirname = "."
     checkpoint_filename = "tabsds.pkl"
@@ -143,7 +143,7 @@ class TabSDSAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class TabularARGNAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class TabularARGNAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "tabularargn"
     upstream_dirname = "."
     checkpoint_filename = "tabularargn.pkl"
