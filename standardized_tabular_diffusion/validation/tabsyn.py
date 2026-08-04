@@ -20,7 +20,7 @@ PROTOCOL_ID = "tabsyn-native-parity-v1"
 MANIFEST_RELATIVE_PATH = Path("standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json")
 DATASET_NAME = "tabsyn_parity"
 EXPECTED_SAMPLE_ROWS = 12
-SEED = 19
+SEED_CASES = (0, 19, 73)
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -185,24 +185,24 @@ def _configure_runtime(upstream_root: Path) -> dict[str, Any]:
     }
 
 
-def _environment(upstream_root: Path) -> dict[str, str]:
+def _environment(upstream_root: Path, seed: int) -> dict[str, str]:
     environment = os.environ.copy()
     environment.update(
         {
-            "PYTHONHASHSEED": str(SEED),
+            "PYTHONHASHSEED": str(seed),
             "PYTHONPATH": str(upstream_root),
             "STANDARDIZED_TABSYN_NUM_THREADS": "1",
-            "TABSYN_VALIDATION_SEED": str(SEED),
+            "TABSYN_VALIDATION_SEED": str(seed),
         }
     )
     return environment
 
 
-def _run(command: list[str], upstream_root: Path) -> None:
-    subprocess.run(command, cwd=upstream_root, check=True, env=_environment(upstream_root))
+def _run(command: list[str], upstream_root: Path, seed: int) -> None:
+    subprocess.run(command, cwd=upstream_root, check=True, env=_environment(upstream_root, seed))
 
 
-def _native_commands(upstream_root: Path, sample_path: Path) -> list[list[str]]:
+def _native_commands(upstream_root: Path, sample_path: Path, seed: int) -> list[list[str]]:
     commands = [
         [sys.executable, "main.py", "--dataname", DATASET_NAME, "--method", "vae", "--mode", "train", "--gpu", "-1"],
         [sys.executable, "main.py", "--dataname", DATASET_NAME, "--method", "tabsyn", "--mode", "train", "--gpu", "-1"],
@@ -224,16 +224,21 @@ def _native_commands(upstream_root: Path, sample_path: Path) -> list[list[str]]:
         ],
     ]
     for command in commands:
-        _run(command, upstream_root)
+        _run(command, upstream_root, seed)
     return commands
 
 
-def _adapter_run(repo_root: Path, upstream_root: Path, output_root: Path) -> tuple[TabSynAdapter, list[Path]]:
+def _adapter_run(
+    repo_root: Path,
+    upstream_root: Path,
+    output_root: Path,
+    seed: int,
+) -> tuple[TabSynAdapter, list[Path]]:
     os.environ["STANDARDIZED_TABSYN_NUM_THREADS"] = "1"
     adapter = TabSynAdapter(repo_root)
     adapter.upstream_root = upstream_root
     train_bundle = adapter.train(
-        RunSpec(model="tabsyn", dataset=DATASET_NAME, output_dir=output_root / "train", device="cpu", seed=SEED)
+        RunSpec(model="tabsyn", dataset=DATASET_NAME, output_dir=output_root / "train", device="cpu", seed=seed)
     )
     sample_bundle = adapter.sample(
         RunSpec(
@@ -241,7 +246,7 @@ def _adapter_run(repo_root: Path, upstream_root: Path, output_root: Path) -> tup
             dataset=DATASET_NAME,
             output_dir=output_root / "sample",
             device="cpu",
-            seed=SEED,
+            seed=seed,
             num_samples=EXPECTED_SAMPLE_ROWS,
             extra={"steps": 4},
         )
@@ -345,22 +350,6 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             f"expected={expected_versions}, actual={actual_versions}"
         )
 
-    native_root = output_dir / "native" / "TabSyn-main"
-    adapter_root = output_dir / "adapter" / "TabSyn-main"
-    _copy_verified_source(repo_root, native_root)
-    _copy_verified_source(repo_root, adapter_root)
-    fixture = _write_fixture(native_root)
-    _write_fixture(adapter_root)
-    native_runtime = _configure_runtime(native_root)
-    adapter_runtime = _configure_runtime(adapter_root)
-    if native_runtime != adapter_runtime:
-        raise AssertionError("Native and adapter runtime controls differ.")
-
-    native_sample = output_dir / "native-samples.csv"
-    native_commands = _native_commands(native_root, native_sample)
-    adapter, manifests = _adapter_run(repo_root, adapter_root, output_dir / "adapter-manifests")
-    adapter_sample = output_dir / "adapter-manifests" / "sample" / "samples.csv"
-
     relative_checkpoints = [
         "tabsyn/vae/ckpt/tabsyn_parity/model.pt",
         "tabsyn/vae/ckpt/tabsyn_parity/encoder.pt",
@@ -368,28 +357,84 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         "tabsyn/ckpt/tabsyn_parity/model.pt",
         "tabsyn/ckpt/tabsyn_parity/model_0.pt",
     ]
-    checkpoints = {
-        relative: _compare_state_dicts(native_root / relative, adapter_root / relative)
-        for relative in relative_checkpoints
-    }
-    latent = _compare_array(
-        native_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
-        adapter_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
-    )
-    samples = _compare_samples(native_sample, adapter_sample)
-    manifests_valid = all(
-        json.loads(path.read_text(encoding="utf-8"))["model"] == "tabsyn" for path in manifests
-    )
-    passed = (
-        all(record["keys_exact"] and record["tensor_values_exact"] for record in checkpoints.values())
-        and latent["exact"]
-        and latent["finite"]
-        and samples["exact_bytes"]
-        and samples["finite_numerical_values"]
-        and samples["rows"] == EXPECTED_SAMPLE_ROWS
-        and samples["columns"] == ["0", "1", "2", "3"]
-        and manifests_valid
-    )
+    fixture: dict[str, Any] | None = None
+    runtime_config: dict[str, Any] | None = None
+    cases: list[dict[str, Any]] = []
+    for index, seed in enumerate(SEED_CASES, start=1):
+        case_root = output_dir / f"case-{index:02d}-seed-{seed}"
+        native_root = case_root / "native" / "TabSyn-main"
+        adapter_root = case_root / "adapter" / "TabSyn-main"
+        _copy_verified_source(repo_root, native_root)
+        _copy_verified_source(repo_root, adapter_root)
+        native_fixture = _write_fixture(native_root)
+        _write_fixture(adapter_root)
+        native_runtime = _configure_runtime(native_root)
+        adapter_runtime = _configure_runtime(adapter_root)
+        if native_runtime != adapter_runtime:
+            raise AssertionError("Native and adapter runtime controls differ.")
+        if fixture is None:
+            fixture = native_fixture
+            runtime_config = native_runtime
+        elif fixture != native_fixture or runtime_config != native_runtime:
+            raise AssertionError("TabSyn validation fixture or runtime controls changed between seed cases.")
+
+        native_sample = case_root / "native-samples.csv"
+        native_commands = _native_commands(native_root, native_sample, seed)
+        adapter, manifests = _adapter_run(repo_root, adapter_root, case_root / "adapter-manifests", seed)
+        adapter_sample = case_root / "adapter-manifests" / "sample" / "samples.csv"
+        checkpoints = {
+            relative: _compare_state_dicts(native_root / relative, adapter_root / relative)
+            for relative in relative_checkpoints
+        }
+        latent = _compare_array(
+            native_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
+            adapter_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
+        )
+        samples = _compare_samples(native_sample, adapter_sample)
+        manifests_valid = all(
+            json.loads(path.read_text(encoding="utf-8"))["model"] == "tabsyn" for path in manifests
+        )
+        case_passed = (
+            all(record["keys_exact"] and record["tensor_values_exact"] for record in checkpoints.values())
+            and latent["exact"]
+            and latent["finite"]
+            and samples["exact_bytes"]
+            and samples["finite_numerical_values"]
+            and samples["rows"] == EXPECTED_SAMPLE_ROWS
+            and samples["columns"] == ["0", "1", "2", "3"]
+            and manifests_valid
+        )
+        cases.append(
+            {
+                "case": index,
+                "seed": seed,
+                "status": "pass" if case_passed else "fail",
+                "native_commands": native_commands,
+                "adapter_commands": {
+                    "vae_train": ["compat/tabsyn_launcher.py", "--action", "vae-train"],
+                    "diffusion_train": ["compat/tabsyn_launcher.py", "--action", "diffusion-train"],
+                    "sample": [
+                        "compat/tabsyn_launcher.py",
+                        "--action",
+                        "sample",
+                        "--num-samples",
+                        "12",
+                        "--steps",
+                        "4",
+                    ],
+                },
+                "comparisons": {
+                    "checkpoints": checkpoints,
+                    "latent_embeddings": latent,
+                    "samples": samples,
+                    "adapter_manifests_valid": manifests_valid,
+                },
+                "adapter_upstream_root": str(adapter.upstream_root),
+            }
+        )
+    if fixture is None or runtime_config is None:
+        raise AssertionError("TabSyn validation did not execute any seed cases.")
+    passed = all(case["status"] == "pass" for case in cases)
     evidence: dict[str, Any] = {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
@@ -403,29 +448,9 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         },
         "environment": {"platform": platform.platform(), "python": platform.python_version(), **actual_versions},
         "fixture": fixture,
-        "runtime_config": native_runtime,
-        "seed": SEED,
-        "native_commands": native_commands,
-        "adapter_commands": {
-            "vae_train": ["compat/tabsyn_launcher.py", "--action", "vae-train"],
-            "diffusion_train": ["compat/tabsyn_launcher.py", "--action", "diffusion-train"],
-            "sample": [
-                "compat/tabsyn_launcher.py",
-                "--action",
-                "sample",
-                "--num-samples",
-                "12",
-                "--steps",
-                "4",
-            ],
-        },
-        "comparisons": {
-            "checkpoints": checkpoints,
-            "latent_embeddings": latent,
-            "samples": samples,
-            "adapter_manifests_valid": manifests_valid,
-        },
-        "adapter_upstream_root": str(adapter.upstream_root),
+        "runtime_config": runtime_config,
+        "seed_cases": list(SEED_CASES),
+        "cases": cases,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
     evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")
