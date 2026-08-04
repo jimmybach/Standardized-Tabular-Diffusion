@@ -26,6 +26,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "ctgan",
         "goggle",
         "nrgboost",
+        "realtabformer",
         "smote",
         "stasy",
         "tabddpm",

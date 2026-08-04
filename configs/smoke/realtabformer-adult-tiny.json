@@ -14,7 +14,18 @@
       "num_bootstrap": 0,
       "n_critic": 0,
       "report_to": "none",
-      "max_train_rows": 128
+      "max_train_rows": 128,
+      "tabular_config": {
+        "n_layer": 1,
+        "n_head": 1,
+        "n_embd": 16,
+        "n_inner": 64,
+        "n_positions": 256,
+        "n_ctx": 256,
+        "resid_pdrop": 0.0,
+        "embd_pdrop": 0.0,
+        "attn_pdrop": 0.0
+      }
     }
   },
   "sample": {
@@ -39,5 +50,5 @@
     "realtabformer",
     "tiny"
   ],
-  "notes": "Tiny local REaLTabFormer preset that samples 128 training rows to keep the first validation run practical."
+  "notes": "Tiny official-package REaLTabFormer integration preset. It limits the training table and GPT-2 dimensions for CPU smoke testing; it is not a benchmark-quality configuration."
 }

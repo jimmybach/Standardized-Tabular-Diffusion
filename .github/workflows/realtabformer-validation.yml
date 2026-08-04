@@ -1,0 +1,123 @@
+name: REaLTabFormer Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/realtabformer-validation.yml"
+      - "requirements-realtabformer-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/realtabformer.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/realtabformer.py"
+      - "standardized_tabular_diffusion/resources/upstream/realtabformer-wheel-manifest.json"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/REALTABFORMER_VALIDATION*.md"
+      - "docs/evidence/realtabformer/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_realtabformer_adapter.py"
+      - "tests/test_realtabformer_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  pull_request:
+    paths:
+      - ".github/workflows/realtabformer-validation.yml"
+      - "requirements-realtabformer-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/realtabformer.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/realtabformer.py"
+      - "standardized_tabular_diffusion/resources/upstream/realtabformer-wheel-manifest.json"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/REALTABFORMER_VALIDATION*.md"
+      - "docs/evidence/realtabformer/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_realtabformer_adapter.py"
+      - "tests/test_realtabformer_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: realtabformer-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / official package parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-realtabformer-validation.txt
+
+      - name: Install frozen official REaLTabFormer environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.3.0"
+          python -m pip install -r requirements-realtabformer-validation.txt
+          mkdir -p "$RUNNER_TEMP/realtabformer-wheel"
+          python -m pip download \
+            --index-url https://pypi.org/simple \
+            --only-binary=:all: \
+            --no-deps \
+            --dest "$RUNNER_TEMP/realtabformer-wheel" \
+            "realtabformer==0.2.4"
+          echo "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486  $RUNNER_TEMP/realtabformer-wheel/realtabformer-0.2.4-py3-none-any.whl" | sha256sum --check
+          python -m pip install --no-deps "$RUNNER_TEMP/realtabformer-wheel/realtabformer-0.2.4-py3-none-any.whl"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run locked-package and adapter contract tests
+        env:
+          REALTABFORMER_WHEEL_PATH: ${{ runner.temp }}/realtabformer-wheel/realtabformer-0.2.4-py3-none-any.whl
+        run: |
+          python -m pytest \
+            tests/test_realtabformer_adapter.py \
+            tests/test_realtabformer_validation.py \
+            tests/test_upstream_provenance.py \
+            -q
+
+      - name: Run real official-package-versus-adapter parity protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.realtabformer \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/realtabformer-validation" \
+            --evidence-path "$RUNNER_TEMP/realtabformer-evidence.json" \
+            --wheel-path "$RUNNER_TEMP/realtabformer-wheel/realtabformer-0.2.4-py3-none-any.whl"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/realtabformer-evidence.json" ]; then
+            REALTABFORMER_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("realtabformer-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "realtabformer-official-package-parity-v1", "model_id": "realtabformer", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["REALTABFORMER_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: realtabformer-native-parity-evidence
+          path: ${{ runner.temp }}/realtabformer-evidence.json
+          if-no-files-found: error
+          retention-days: 90

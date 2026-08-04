@@ -517,10 +517,10 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="high",
         repository_url="https://github.com/worldbank/REaLTabFormer",
         notes=[
-            "Well-packaged repository with PyPI support, docs, tests, and both tabular and relational modes.",
-            "Heavier than classical baselines because of transformer training cost and tokenizer/model setup.",
-            "The standardized adapter expects the optional `realtabformer` package to be installed locally.",
-            "Very good candidate for the next LLM-style adapter after GReaT.",
+            "The adapter requires the checksum-pinned official `realtabformer==0.2.4` wheel; no package source is vendored.",
+            "The selected wheel and method-author v0.2.4 source share 11 byte-exact source files and carry MIT licensing.",
+            "The tabular adapter now enforces typed missing-free input, output-local artifacts, deterministic seeds, and checkpoint integrity metadata.",
+            "Nine-case Linux/Python 3.11 official-package parity evidence is pending; sensitivity stopping and relational mode remain outside the current claim.",
         ],
     ),
     "tabsds": ModelInventoryEntry(
