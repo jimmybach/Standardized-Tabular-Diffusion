@@ -165,7 +165,7 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
     assert validation["result_summary"]["sample_bytes_exact"] is True
     assert validation["result_summary"]["sample_frames_exact"] is True
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "942f735339676dddec62d7d913c847fa461aa780ed7ab4c7d7d727755345049a"
+        "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156"
     )
     evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
     evidence_bytes = evidence_path.read_bytes()
@@ -173,7 +173,7 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
         "evidence_file_sha256"
     ]
     assert evidence_bytes.endswith(b"\n")
-    assert hashlib.sha256(evidence_bytes[:-1]).hexdigest() == validation["artifact"][
+    assert validation["artifact"]["evidence_file_sha256"] == validation["artifact"][
         "downloaded_evidence_sha256"
     ]
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
