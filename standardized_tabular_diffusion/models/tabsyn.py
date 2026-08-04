@@ -50,7 +50,7 @@ class TabSynAdapter(BaseModelAdapter):
         raise ValueError("TabSyn supports device='cpu', 'cuda', 'gpu', or 'cuda:<non-negative index>'.")
 
     def _run_tabsyn(self, args: list[str], *, seed: int) -> None:
-        launcher = self.repo_root / "standardized_tabular_diffusion" / "compat" / "tabsyn.py"
+        launcher = self.repo_root / "standardized_tabular_diffusion" / "compat" / "tabsyn_launcher.py"
         if not launcher.is_file():
             raise FileNotFoundError(f"TabSyn compatibility launcher is missing: {launcher}")
         environment = os.environ.copy()
