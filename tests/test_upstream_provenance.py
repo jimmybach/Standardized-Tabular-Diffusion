@@ -20,6 +20,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
 
     assert isinstance(components, dict)
     assert set(components) == {
+        "codi",
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
@@ -131,7 +132,17 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
             ),
         }
     ]
-    assert get_adapter_spec("codi").modification_status == "compatibility-patched"
+    codi = get_adapter_spec("codi")
+    assert codi.modification_status == "adapter-only"
+    assert codi.reproduction_target == "tabsyn-benchmark-snapshot"
+    assert codi.validation_level.value == "adapter-complete"
+    assert codi.revision_status == "pinned-exact-benchmark-snapshot-parity-pending"
+    codi_lock = _load_source_lock()["components"]["codi"]
+    assert codi_lock["snapshot_comparison"]["exact_local_codi_source_files"] == 11
+    assert codi_lock["selected_runtime_files"] == 24
+    assert codi_lock["method_author_source"]["license_file_present"] is False
+    assert codi_lock["method_author_source"]["exact_shared_paths"] == 5
+    assert codi_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
 
 
 def test_stasy_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:

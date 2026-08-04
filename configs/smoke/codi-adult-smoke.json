@@ -1,0 +1,43 @@
+{
+  "model": "codi",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/codi-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "training_batch_size": 64,
+      "eval_batch_size": 64,
+      "T": 4,
+      "total_epochs_both": 1,
+      "sample_step": 1,
+      "nf_con": 8,
+      "nf_dis": 8,
+      "encoder_dim_con": [32, 32],
+      "encoder_dim_dis": [32, 32],
+      "num_threads": 1
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {
+      "num_threads": 1
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": ["smoke", "codi", "tabsyn-benchmark-snapshot"],
+  "notes": "Small CPU smoke preset for the checksum-locked TabSyn CoDi benchmark snapshot. Materialize Adult first; CoDi requires at least one continuous and one discrete diffusion component after target assignment."
+}

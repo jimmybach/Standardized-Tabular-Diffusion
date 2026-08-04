@@ -275,18 +275,19 @@ def validate_action_inputs(
             if not stasy_metadata_path.exists():
                 missing.append(f"checkpoint_metadata_path missing: {stasy_metadata_path}")
         if config.model == "codi":
-            checkpoint_con = (
-                resolved_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_con.pt"
-            )
-            checkpoint_dis = (
-                resolved_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_dis.pt"
-            )
+            checkpoint_root = Path(config.output_dir) / "ckpt" / config.dataset
+            checkpoint_con = checkpoint_root / "model_con.pt"
+            checkpoint_dis = checkpoint_root / "model_dis.pt"
+            checkpoint_metadata = Path(config.output_dir) / "codi-model-metadata.json"
             checked["checkpoint_con_path"] = str(checkpoint_con)
             checked["checkpoint_dis_path"] = str(checkpoint_dis)
+            checked["checkpoint_metadata_path"] = str(checkpoint_metadata)
             if not checkpoint_con.exists():
                 missing.append(f"checkpoint_path missing: {checkpoint_con}")
             if not checkpoint_dis.exists():
                 missing.append(f"checkpoint_path missing: {checkpoint_dis}")
+            if not checkpoint_metadata.exists():
+                missing.append(f"checkpoint_metadata_path missing: {checkpoint_metadata}")
 
     if action == "sample" and config.model == "tabebm":
         allow_gated_model = bool(config.sample.extra.get("allow_gated_model", False))

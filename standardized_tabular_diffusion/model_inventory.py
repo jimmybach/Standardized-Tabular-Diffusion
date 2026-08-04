@@ -354,12 +354,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         covered_by_papers=[],
         validation_level="adapter-complete",
         runnable_recommendation="partial",
-        implementation_quality="medium",
+        implementation_quality="high",
         repository_url="https://github.com/amazon-science/tabsyn",
         notes=[
-            "Integrated through the vendored TabSyn baseline implementation.",
-            "Uses TabSyn's shared baseline dispatcher rather than a standalone upstream package.",
-            "Wired into the standardized train/sample/evaluate contract, but not yet smoke-validated in this repository.",
+            "All 11 local CoDi source files match the Apache-2.0 TabSyn benchmark snapshot at commit cb5ac0f byte-for-byte.",
+            "The 24-file execution scope is checksum-locked; deterministic device, checkpoint, and requested-row controls remain outside tracked upstream source.",
+            "The method-author repository has no declared license and differs in 5 of 10 shared paths, so this entry targets TabSyn-snapshot parity only.",
+            "Real Linux/Python 3.11 native-parity evidence is pending; Official Results and release support remain blocked.",
         ],
     ),
     "ctab-gan": ModelInventoryEntry(
