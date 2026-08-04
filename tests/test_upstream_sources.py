@@ -231,3 +231,21 @@ def test_codi_source_status_defaults_to_the_distributed_snapshot() -> None:
 
     assert result["status"] == "ready"
     assert Path(result["source_dir"]) == (repo_root / "TabSyn-main").resolve()
+
+
+def test_goggle_manifest_locks_method_author_source_and_license() -> None:
+    manifest = upstream_sources.load_source_manifest("goggle")
+
+    assert manifest["upstream_commit"] == "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
+    assert manifest["upstream_tree"] == "2d6a54f6d6f4d156890bf4e035119dbb483a46d0"
+    assert manifest["upstream_model_tree"] == "6dcaae801859f63e173537445548a50cd1f8625b"
+    assert manifest["authority"] == "method-author"
+    assert manifest["license"]["declared_expression"] == "MIT"
+    assert manifest["license"]["redistribution_status"] == "authorized"
+    assert len(manifest["runtime_files"]) == 18
+    assert {record["path"] for record in manifest["runtime_files"]} >= {
+        "LICENSE",
+        "requirements.txt",
+        "src/goggle/GoggleModel.py",
+        "src/goggle/model/RGCNConv.py",
+    }

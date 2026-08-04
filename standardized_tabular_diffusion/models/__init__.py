@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from standardized_tabular_diffusion.models.base import BaseModelAdapter
     from standardized_tabular_diffusion.models.ctabgan import CTABGANAdapter
     from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
+    from standardized_tabular_diffusion.models.goggle import GoggleAdapter
     from standardized_tabular_diffusion.models.next_wave_baselines import (
         CTABGANPlusAdapter,
         NRGBoostAdapter,
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     )
     from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
     from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
-    from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
+    from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
     from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
     from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
     from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
@@ -42,7 +43,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "SMOTEAdapter": ("standardized_tabular_diffusion.models.sample_baselines", "SMOTEAdapter"),
     "TVAEAdapter": ("standardized_tabular_diffusion.models.sample_baselines", "TVAEAdapter"),
     "BNAdapter": ("standardized_tabular_diffusion.models.structured_baselines", "BNAdapter"),
-    "GoggleAdapter": ("standardized_tabular_diffusion.models.structured_baselines", "GoggleAdapter"),
+    "GoggleAdapter": ("standardized_tabular_diffusion.models.goggle", "GoggleAdapter"),
     "NFlowAdapter": ("standardized_tabular_diffusion.models.structured_baselines", "NFlowAdapter"),
     "TabDDPMAdapter": ("standardized_tabular_diffusion.models.tabddpm", "TabDDPMAdapter"),
     "TabDiffAdapter": ("standardized_tabular_diffusion.models.tabdiff", "TabDiffAdapter"),

@@ -1,0 +1,794 @@
+{
+  "cases": [
+    {
+      "case": 1,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "ac58ce652c5d13edd3cf1d897a744662e2921bdd4c605b4e208cf39bce668090",
+          "adapter_state_sha256": "e973dd80c9950ec376b352d9811db7bf29a537a48bf2560482b8184856cf4c5e",
+          "keys_exact": true,
+          "native_file_sha256": "ac58ce652c5d13edd3cf1d897a744662e2921bdd4c605b4e208cf39bce668090",
+          "native_state_sha256": "e973dd80c9950ec376b352d9811db7bf29a537a48bf2560482b8184856cf4c5e",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "306748e568e0993a7b79047d119adcabe416d1d0cbadf487ef0495f66cc2dee0",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "8d8bfd055b79f93bcf7abda174953d601f5d82e11fe3c6c63feaee415d50b9e3"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 2,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "3ec0f5989448642057328dcd60a6cb7976cf103fb60e00a5beb65a943b7d74c4",
+          "adapter_state_sha256": "540a50e9c081a5f2500f13d7d11ed6257693851f34f4b30c6e06d8c08e28fcf1",
+          "keys_exact": true,
+          "native_file_sha256": "3ec0f5989448642057328dcd60a6cb7976cf103fb60e00a5beb65a943b7d74c4",
+          "native_state_sha256": "540a50e9c081a5f2500f13d7d11ed6257693851f34f4b30c6e06d8c08e28fcf1",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "ec60aef156dd973adb7dfd5d3b0f9777273b1bbc5c0ce57587e9d18edb3b831f",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "b6657252fea7eac02000abd2243530c630fce561def5789d5787de3ca4334155"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 3,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "c05c696bbe6dcabc2990f5f5b71fecc5a884d4c729c5a48a01c4a795c178f1b4",
+          "adapter_state_sha256": "876b842d6bb50ab0a4285682dedbb1a97819b65ee4adc525bfa8650a5f7823cd",
+          "keys_exact": true,
+          "native_file_sha256": "c05c696bbe6dcabc2990f5f5b71fecc5a884d4c729c5a48a01c4a795c178f1b4",
+          "native_state_sha256": "876b842d6bb50ab0a4285682dedbb1a97819b65ee4adc525bfa8650a5f7823cd",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "58151882239d53ceba6b7ff8f03bf094eef3e7c6b82d5b243d027eb41d378871",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "46ed40f8eadcd4114e51773783b94e84d1e4c4b2c815e02d13c964ccc708f28e"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 4,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "ba277c30f2d35d4dba1635b062f7c428bcd26012c3b7845d1ac5f377b2fd192d",
+          "adapter_state_sha256": "b72d85c53fbfb25cf142cbd6e083f436880ee6a140e9ef4afe88168d33beff4e",
+          "keys_exact": true,
+          "native_file_sha256": "ba277c30f2d35d4dba1635b062f7c428bcd26012c3b7845d1ac5f377b2fd192d",
+          "native_state_sha256": "b72d85c53fbfb25cf142cbd6e083f436880ee6a140e9ef4afe88168d33beff4e",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "47c557bf7abf2953df98b055c517b62f45da541a804e4aa930c3382fd8e2cfb1",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "7654bdfb2ec9d89bf18cd7ae554eb2de0e167b325e9d549023cabb3a4b849c42"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 5,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "82300430ec97673d84e4a7a228411b3563d2e8389155cf1f54ea6ea9425bdaa2",
+          "adapter_state_sha256": "2afa7c594fbca37c5668cb221f9f8afb685c452343285bcc3b202ff1d13b0b8d",
+          "keys_exact": true,
+          "native_file_sha256": "82300430ec97673d84e4a7a228411b3563d2e8389155cf1f54ea6ea9425bdaa2",
+          "native_state_sha256": "2afa7c594fbca37c5668cb221f9f8afb685c452343285bcc3b202ff1d13b0b8d",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "ec60aef156dd973adb7dfd5d3b0f9777273b1bbc5c0ce57587e9d18edb3b831f",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "b6657252fea7eac02000abd2243530c630fce561def5789d5787de3ca4334155"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 6,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "b17a6d31502e762fa05b596ffeb8204900c8c19400a0b2b99ba855446c1cf675",
+          "adapter_state_sha256": "611103408ca16e4fa1e3e16bf3d1d9e30acbd11c002b8278f9fe0a5abd574cf6",
+          "keys_exact": true,
+          "native_file_sha256": "b17a6d31502e762fa05b596ffeb8204900c8c19400a0b2b99ba855446c1cf675",
+          "native_state_sha256": "611103408ca16e4fa1e3e16bf3d1d9e30acbd11c002b8278f9fe0a5abd574cf6",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "7e92772132baeebfb0dbf6448e2064640c159f3ad32e36454c82572a4a38c802",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "cbbed59887ee1e1aacd98624071e708b4d9af98ee4140c94a7d333e90d8c0d28"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 7,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "410cb316dd09d4d044326983070cad9684b551d1c0329ef64f49f7ed7def4728",
+          "adapter_state_sha256": "28b31162dbbabfb86b21e2acfb589f101f78221909b53a23079d9b2a50304a40",
+          "keys_exact": true,
+          "native_file_sha256": "410cb316dd09d4d044326983070cad9684b551d1c0329ef64f49f7ed7def4728",
+          "native_state_sha256": "28b31162dbbabfb86b21e2acfb589f101f78221909b53a23079d9b2a50304a40",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "9856d9a8e4fc30d87487c1e53a0f200d4ca3d1005b502f7d66974d8da9ad1674",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "4759d9f038154de846819934fe7cecb51bff75d9055e097a7926f994a4bd375b"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 8,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "557afa67102069fb2c2f6ffc6b1f58d1b72ad3a54f6487529373b699bd6ef82d",
+          "adapter_state_sha256": "e0767e765855fb4c363757de894825dec71a3956689c55be4a9f8bbd164790eb",
+          "keys_exact": true,
+          "native_file_sha256": "557afa67102069fb2c2f6ffc6b1f58d1b72ad3a54f6487529373b699bd6ef82d",
+          "native_state_sha256": "e0767e765855fb4c363757de894825dec71a3956689c55be4a9f8bbd164790eb",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "8a09e80d77aed750015aee2cae43c5136d392b5d9f9cc113c238efd2d8399fc3",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "066ede99b30141b7281842bf8b56e9aaf041248a32db7a11c04b4f09fc996a2d"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 9,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "915ad31ce2f14ba8fc32968106bd0d5c1907d2c5d1a76c6246b176a9becabbee",
+          "adapter_state_sha256": "3648c066387b295eaab025936a5f284eade6a0b74402afcf2d2fdd2a3bcea49b",
+          "keys_exact": true,
+          "native_file_sha256": "915ad31ce2f14ba8fc32968106bd0d5c1907d2c5d1a76c6246b176a9becabbee",
+          "native_state_sha256": "3648c066387b295eaab025936a5f284eade6a0b74402afcf2d2fdd2a3bcea49b",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "32d3a323940db1ac0f7a3af1761ca1784f3d9354b13fa3e9df5462bb028ac823",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "66d876dcf4e61016aab6863c02b01c96f526197cf582a8e62dbf7edddfdce27b"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "compatibility_boundary": {
+    "rgcn_import_bridge": "used only when torch-sparse is absent; gcn parity does not instantiate RGCNConv",
+    "sampling_target": "official Goggle.model.sample before centralized inverse transformation",
+    "source_patches": [],
+    "synthcity_import_bridge": "evaluation-only imports are stubbed; fit and core sample do not execute them"
+  },
+  "environment": {
+    "dgl": "1.1.3",
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "psutil": "6.0.0",
+    "pytest": "8.3.5",
+    "python": "3.11.15",
+    "requests": "2.32.3",
+    "scikit_learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.0+cpu",
+    "torch_geometric": "2.5.3",
+    "tqdm": "4.66.5"
+  },
+  "environment_lock": {
+    "path": "requirements-goggle-validation.txt",
+    "sha256": "df84de4126bdf5816f54107c544b0971704b58bafd21d93a499956892884bd7a"
+  },
+  "model_id": "goggle",
+  "protocol_id": "goggle-method-author-native-parity-v1",
+  "repository_commit": "f13f37d653bbdbc5bd4e99035989ff9bfa3a3444",
+  "reproduction_target": "method-author-original-core",
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "license": {
+      "copyright": "Copyright (c) 2023 Tennison Liu",
+      "declared_expression": "MIT",
+      "license_file_present": true,
+      "redistribution_status": "authorized",
+      "review_status": "upstream-mit-license-retained-in-locked-source"
+    },
+    "manifest_sha256": "9cf77633d1553ed76bbfbd729baa2c1e0b430ca671ee90a116c3574c7165e1eb",
+    "model_id": "goggle",
+    "repository": "https://github.com/vanderschaarlab/GOGGLE",
+    "runtime_files": [
+      {
+        "bytes": 1069,
+        "path": "LICENSE",
+        "sha256": "6b7e98942d686b85f11ee77a588209491b003902d9091c0958a2981e2957fb9e"
+      },
+      {
+        "bytes": 72,
+        "path": "AUTHORS.rst",
+        "sha256": "ec21f618b8ce69f0c20fea2c814144a9510539878f5349c6aa8f948a5dd2eafa"
+      },
+      {
+        "bytes": 2325,
+        "path": "README.md",
+        "sha256": "edc3b8c11777d6379bd5c1686b1c2b32316232944d86d40a9cacd19b420ac9ca"
+      },
+      {
+        "bytes": 448,
+        "path": "requirements.txt",
+        "sha256": "c3fd17c460f4ba1ec2be4f8f99aa0c1351ab5368f1b55e20618bc37905e41b20"
+      },
+      {
+        "bytes": 703,
+        "path": "setup.py",
+        "sha256": "feef0d6e4bedb717f397ac30233a50730b66ee48f7196db89661ce08ab3b0420"
+      },
+      {
+        "bytes": 3930,
+        "path": "setup.cfg",
+        "sha256": "bc8c6f8887ef9a31a5b5a13d4900078c4abb6cf57714f9d7afb97106b38cb66c"
+      },
+      {
+        "bytes": 378,
+        "path": "pyproject.toml",
+        "sha256": "77c535a10b0573710b99d8c243bef57ca8b81279a2c538f2a6177e725cdf1d68"
+      },
+      {
+        "bytes": 1,
+        "path": "src/goggle/__init__.py",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 8856,
+        "path": "src/goggle/GoggleModel.py",
+        "sha256": "3142d4b9c0fc2728e495fb0976cd88bec32263dced310e4d4bdb85650e377642"
+      },
+      {
+        "bytes": 1076,
+        "path": "src/goggle/data_utils.py",
+        "sha256": "751dd1ecefafbb3e4c9647ec38e06375dfd377413a6ca0c30a47fb84dab706d9"
+      },
+      {
+        "bytes": 1,
+        "path": "src/goggle/model/__init__.py",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 998,
+        "path": "src/goggle/model/Encoder.py",
+        "sha256": "713014734a6e3fdc59bc2f881642bebb70fae667293c751603010ee53d0c0764"
+      },
+      {
+        "bytes": 2407,
+        "path": "src/goggle/model/Goggle.py",
+        "sha256": "a999cb392b564b98b182837cc494b4f2a19e20aa8e58a01fc18130d332d024f2"
+      },
+      {
+        "bytes": 1043,
+        "path": "src/goggle/model/GoggleLoss.py",
+        "sha256": "5728c4d2529adce91abbe3ed1e219e2a0d56c05fd5f1c39a2711608645e5aaf7"
+      },
+      {
+        "bytes": 3585,
+        "path": "src/goggle/model/GraphDecoder.py",
+        "sha256": "8d17f7a54fd44106ff729bdaa879ef583472bdec406f279db92f8bc1f3442cc8"
+      },
+      {
+        "bytes": 4235,
+        "path": "src/goggle/model/GraphInputProcessor.py",
+        "sha256": "8e99433a4181122d91f78c940d015e4f7bbcf820ef43cc3ebbff170e654adf73"
+      },
+      {
+        "bytes": 1437,
+        "path": "src/goggle/model/LearnedGraph.py",
+        "sha256": "e5462185b562b0c66e10b54e2e4a8d7c1106274a80c89167ca28eb0678891b12"
+      },
+      {
+        "bytes": 11562,
+        "path": "src/goggle/model/RGCNConv.py",
+        "sha256": "b59dfd7385a8ffbe654c31b3e998a93123c8693ed2222bda878e41e262da023a"
+      }
+    ],
+    "runtime_files_verified": 18,
+    "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/.cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+    "upstream_commit": "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+    "upstream_model_tree": "6dcaae801859f63e173537445548a50cd1f8625b",
+    "upstream_tree": "2d6a54f6d6f4d156890bf4e035119dbb483a46d0"
+  },
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

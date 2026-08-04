@@ -1,0 +1,140 @@
+{
+  "archive": {
+    "bytes": 615426,
+    "format": "zip",
+    "root_prefix": "GOGGLE-1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0/",
+    "sha256": "62dc6c98a2067d950513b4fe6343715f03a6a096990241fc6143b18fb56aaf65",
+    "url": "https://codeload.github.com/vanderschaarlab/GOGGLE/zip/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
+  },
+  "authority": "method-author",
+  "dependencies": {
+    "declared_environment": "Python 3.8 with torch==1.12.0, dgl==0.9.0, torch-geometric==2.2.0, torch-sparse==0.6.16, and torch_scatter==2.1.0",
+    "official_requirements_path": "requirements.txt",
+    "validation_environment": "Linux, Python 3.11, CPU-only compatibility stack locked separately"
+  },
+  "license": {
+    "copyright": "Copyright (c) 2023 Tennison Liu",
+    "declared_expression": "MIT",
+    "license_file_present": true,
+    "redistribution_status": "authorized",
+    "review_status": "upstream-mit-license-retained-in-locked-source"
+  },
+  "manifest_schema_version": "1.0.0",
+  "model_id": "goggle",
+  "repository": "https://github.com/vanderschaarlab/GOGGLE",
+  "runtime_files": [
+    {
+      "bytes": 1069,
+      "git_blob": "6d9f88ba95374bfccc97b6a6a98487c788400178",
+      "path": "LICENSE",
+      "sha256": "6b7e98942d686b85f11ee77a588209491b003902d9091c0958a2981e2957fb9e"
+    },
+    {
+      "bytes": 72,
+      "git_blob": "9b3f4500c588e5186a199f149b7d5b5d3eaddbfa",
+      "path": "AUTHORS.rst",
+      "sha256": "ec21f618b8ce69f0c20fea2c814144a9510539878f5349c6aa8f948a5dd2eafa"
+    },
+    {
+      "bytes": 2325,
+      "git_blob": "48ef4587a43bfdb3594542fdda1a0136d97fa18b",
+      "path": "README.md",
+      "sha256": "edc3b8c11777d6379bd5c1686b1c2b32316232944d86d40a9cacd19b420ac9ca"
+    },
+    {
+      "bytes": 448,
+      "git_blob": "e9dd7c74d1622b2d50ae321eb8737a4f79ffc357",
+      "path": "requirements.txt",
+      "sha256": "c3fd17c460f4ba1ec2be4f8f99aa0c1351ab5368f1b55e20618bc37905e41b20"
+    },
+    {
+      "bytes": 703,
+      "git_blob": "b1bf1d7137a2c7d1420231c6c6b94bbf9b64b0f9",
+      "path": "setup.py",
+      "sha256": "feef0d6e4bedb717f397ac30233a50730b66ee48f7196db89661ce08ab3b0420"
+    },
+    {
+      "bytes": 3930,
+      "git_blob": "a4dc56c6506200f695b9a4f84c33a9111c846790",
+      "path": "setup.cfg",
+      "sha256": "bc8c6f8887ef9a31a5b5a13d4900078c4abb6cf57714f9d7afb97106b38cb66c"
+    },
+    {
+      "bytes": 378,
+      "git_blob": "51b3def7efe3a29059b5dced0b9ac9179b4bba29",
+      "path": "pyproject.toml",
+      "sha256": "77c535a10b0573710b99d8c243bef57ca8b81279a2c538f2a6177e725cdf1d68"
+    },
+    {
+      "bytes": 1,
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "src/goggle/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 8856,
+      "git_blob": "8e55fd571bfb4cf0e4a7f40fafdc960397c2afdc",
+      "path": "src/goggle/GoggleModel.py",
+      "sha256": "3142d4b9c0fc2728e495fb0976cd88bec32263dced310e4d4bdb85650e377642"
+    },
+    {
+      "bytes": 1076,
+      "git_blob": "588947bb00d7f2a934708f1aee4d881237270c0b",
+      "path": "src/goggle/data_utils.py",
+      "sha256": "751dd1ecefafbb3e4c9647ec38e06375dfd377413a6ca0c30a47fb84dab706d9"
+    },
+    {
+      "bytes": 1,
+      "git_blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "path": "src/goggle/model/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "bytes": 998,
+      "git_blob": "35c3fdf57ca8995c44452ff288e02df929866050",
+      "path": "src/goggle/model/Encoder.py",
+      "sha256": "713014734a6e3fdc59bc2f881642bebb70fae667293c751603010ee53d0c0764"
+    },
+    {
+      "bytes": 2407,
+      "git_blob": "4264ff221744621833347d37361175393dd4f400",
+      "path": "src/goggle/model/Goggle.py",
+      "sha256": "a999cb392b564b98b182837cc494b4f2a19e20aa8e58a01fc18130d332d024f2"
+    },
+    {
+      "bytes": 1043,
+      "git_blob": "1cb9752814b5e6e36e1aa3dc0cced0daaa829781",
+      "path": "src/goggle/model/GoggleLoss.py",
+      "sha256": "5728c4d2529adce91abbe3ed1e219e2a0d56c05fd5f1c39a2711608645e5aaf7"
+    },
+    {
+      "bytes": 3585,
+      "git_blob": "9ef82c66f0972dcb78da76967757b86fb5adb331",
+      "path": "src/goggle/model/GraphDecoder.py",
+      "sha256": "8d17f7a54fd44106ff729bdaa879ef583472bdec406f279db92f8bc1f3442cc8"
+    },
+    {
+      "bytes": 4235,
+      "git_blob": "53191da0ed0f2d3a26fd3438f3830a3c0ac2823f",
+      "path": "src/goggle/model/GraphInputProcessor.py",
+      "sha256": "8e99433a4181122d91f78c940d015e4f7bbcf820ef43cc3ebbff170e654adf73"
+    },
+    {
+      "bytes": 1437,
+      "git_blob": "be0562ba1c7ccd163376699999dfc09accc1a14f",
+      "path": "src/goggle/model/LearnedGraph.py",
+      "sha256": "e5462185b562b0c66e10b54e2e4a8d7c1106274a80c89167ca28eb0678891b12"
+    },
+    {
+      "bytes": 11562,
+      "git_blob": "fc8962c7f87a6447f70c983b7d84ee31ac50ec27",
+      "path": "src/goggle/model/RGCNConv.py",
+      "sha256": "b59dfd7385a8ffbe654c31b3e998a93123c8693ed2222bda878e41e262da023a"
+    }
+  ],
+  "source_hash_normalization": "lf-one-final-newline",
+  "source_treatment": "checksum-locked-method-author-source-acquired-on-demand-without-patches",
+  "upstream_commit": "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+  "upstream_model_tree": "6dcaae801859f63e173537445548a50cd1f8625b",
+  "upstream_tree": "2d6a54f6d6f4d156890bf4e035119dbb483a46d0"
+}

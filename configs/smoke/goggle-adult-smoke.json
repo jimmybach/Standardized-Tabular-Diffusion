@@ -38,5 +38,5 @@
     "smoke",
     "goggle"
   ],
-  "notes": "Small CPU smoke preset for the vendored GOGGLE baseline on adult."
+  "notes": "Small CPU smoke preset for checksum-locked method-author Goggle source; materialize the source before running."
 }
