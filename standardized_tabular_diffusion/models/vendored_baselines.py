@@ -9,11 +9,11 @@ import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin, temporary_sys_path
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
 
 
-class _TabSynVendoredBaselineAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class _TabSynVendoredBaselineAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     upstream_dirname = "TabSyn-main"
     tabsyn_method_name: str
 
@@ -105,7 +105,7 @@ class CoDiAdapter(_TabSynVendoredBaselineAdapter):
     tabsyn_method_name = "codi"
 
 
-class CTABGANAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class CTABGANAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "ctab-gan"
     upstream_dirname = "TabDDPM-main"
     checkpoint_filename = "ctabgan.pkl"
@@ -147,7 +147,7 @@ class CTABGANAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
     def _build_model(self, train_df: pd.DataFrame, spec: RunSpec):
         ctabgan_root = self.repo_root / "TabDDPM-main" / "CTAB-GAN"
-        with _temporary_sys_path(ctabgan_root):
+        with temporary_sys_path(ctabgan_root):
             ctab_module = importlib.import_module("model.ctabgan")
             CTABGAN = ctab_module.CTABGAN
             params = self._load_ctabgan_params(spec.dataset)

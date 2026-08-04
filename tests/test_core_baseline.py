@@ -120,7 +120,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
     records = registry.list_adapter_specs()
 
     assert set(records) == set(registry.list_models())
-    validated = {"ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
+    validated = {"ctgan", "nrgboost", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
     assert all(records[model_id]["validation_level"] == "native-parity-validated" for model_id in validated)
     assert all(
         record["validation_level"] == "adapter-complete"
