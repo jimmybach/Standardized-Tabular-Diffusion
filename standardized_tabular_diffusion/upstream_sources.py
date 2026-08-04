@@ -16,7 +16,10 @@ from typing import Any
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 
 _RESOURCE_ROOT = Path(__file__).resolve().parent / "resources" / "upstream"
-_MANIFESTS = {"ctab-gan-plus": _RESOURCE_ROOT / "ctabgan-plus-source-manifest.json"}
+_MANIFESTS = {
+    "ctab-gan": _RESOURCE_ROOT / "ctabgan-source-manifest.json",
+    "ctab-gan-plus": _RESOURCE_ROOT / "ctabgan-plus-source-manifest.json",
+}
 _INSTALL_RECORD = ".standardized-source.json"
 _MAX_ARCHIVE_BYTES = 16 * 1024 * 1024
 
@@ -39,6 +42,15 @@ def _sha256_file(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _normalized_source_bytes(payload: bytes, manifest: dict[str, Any]) -> bytes:
+    normalization = manifest.get("source_hash_normalization")
+    if normalization is None:
+        return payload
+    if normalization != "lf-one-final-newline":
+        raise UpstreamSourceIntegrityError(f"Unsupported source hash normalization: {normalization!r}")
+    return payload.replace(b"\r\n", b"\n").replace(b"\r", b"\n").rstrip(b"\n") + b"\n"
 
 
 def load_source_manifest(model_id: str) -> dict[str, Any]:
@@ -77,8 +89,9 @@ def _validated_runtime_files(root: Path, manifest: dict[str, Any]) -> list[dict[
         resolved = path.resolve(strict=True)
         if not resolved.is_relative_to(resolved_root):
             raise UpstreamSourceIntegrityError(f"Official source file escapes its root: {path}")
-        observed_bytes = path.stat().st_size
-        observed_sha256 = _sha256_file(path)
+        payload = _normalized_source_bytes(path.read_bytes(), manifest)
+        observed_bytes = len(payload)
+        observed_sha256 = _sha256_bytes(payload)
         if observed_bytes != record["bytes"] or observed_sha256 != record["sha256"]:
             raise UpstreamSourceIntegrityError(
                 f"Official source mismatch for {record['path']}: "
@@ -159,10 +172,10 @@ def _extract_runtime_files(payload: bytes, staging: Path, manifest: dict[str, An
             member_path = PurePosixPath(info.filename)
             if member_path.is_absolute() or ".." in member_path.parts or "\\" in info.filename:
                 raise UpstreamSourceIntegrityError(f"Unsafe upstream archive path: {info.filename!r}")
-            if info.is_dir() or info.file_size != record["bytes"]:
+            if info.is_dir():
                 raise UpstreamSourceIntegrityError(f"Unexpected archive member metadata for {record['path']}")
-            data = archive.read(info)
-            if _sha256_bytes(data) != record["sha256"]:
+            data = _normalized_source_bytes(archive.read(info), manifest)
+            if len(data) != record["bytes"] or _sha256_bytes(data) != record["sha256"]:
                 raise UpstreamSourceIntegrityError(f"Archive member checksum mismatch for {record['path']}")
             output = staging.joinpath(*PurePosixPath(record["path"]).parts)
             output.parent.mkdir(parents=True, exist_ok=True)
