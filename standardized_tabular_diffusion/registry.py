@@ -80,6 +80,7 @@ def _spec(
     revision_status: str = "unresolved",
     patch_set_ids: tuple[str, ...] = (),
     evidence_records: tuple[str, ...] = (),
+    validation_level: AdapterValidationLevel = AdapterValidationLevel.ADAPTER_COMPLETE,
 ) -> AdapterSpec:
     return AdapterSpec(
         module=module,
@@ -98,6 +99,7 @@ def _spec(
         revision_status=revision_status,
         patch_set_ids=patch_set_ids,
         evidence_records=evidence_records,
+        validation_level=validation_level,
     )
 
 
@@ -274,16 +276,20 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "TabSynAdapter",
         authority="method-author",
         distribution="source",
-        modification="compatibility-patched",
+        modification="adapter-only",
         install_extra="evaluation",
         source_root="TabSyn-main",
         upstream_repository="https://github.com/amazon-science/tabsyn",
         upstream_revision="cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
-        revision_status="pinned-official-source-awaiting-native-parity",
+        revision_status="pinned-exact-native-parity-validated",
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/TABSYN_VALIDATION.md",
+            "docs/evidence/tabsyn/native-parity-run-30871758645.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
+            ".github/workflows/tabsyn-validation.yml",
         ),
     ),
     "tvae": _spec(
