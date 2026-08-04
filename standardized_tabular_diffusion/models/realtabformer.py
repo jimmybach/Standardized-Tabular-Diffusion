@@ -439,7 +439,9 @@ class REaLTabFormerAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
         recorded = dict(kwargs)
         tabular_config = recorded.get("tabular_config")
-        recorded["tabular_config"] = None if tabular_config is None else tabular_config.to_dict()
+        recorded["tabular_config"] = (
+            None if tabular_config is None else json.loads(json.dumps(tabular_config.to_dict(), allow_nan=False))
+        )
         for name in ("checkpoints_dir", "samples_save_dir", "full_save_dir"):
             recorded[name] = str(Path(recorded[name]).relative_to(spec.output_dir))
         return kwargs, recorded
