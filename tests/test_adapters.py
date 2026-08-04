@@ -1131,7 +1131,6 @@ def test_tabularargn_train_and_sample_with_stubbed_package(tmp_path: Path, monke
 
 def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
-    (repo_root / "TabSyn-main").mkdir(parents=True)
     adapter = NRGBoostAdapter(repo_root)
 
     dataset_spec = DatasetSpec(
@@ -1149,30 +1148,34 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
     dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
     dataset_spec.test_data_path.write_text("x,y\n3,1\n")
 
+    captured: dict[str, object] = {}
+
     class FakeDataset:
-        def __init__(self, df):
+        def __init__(self, df, **kwargs):
             self.df = df
+            captured["dataset_frame"] = df
+            captured["dataset_params"] = kwargs
 
     class FakeBoosterInstance:
         def save(self, path):
             Path(path).write_text("saved")
 
-        def sample(self, n_samples, num_steps=100):
+        def sample(self, n_samples, **kwargs):
+            captured["sample_params"] = kwargs
             return pd.DataFrame({"x": [10] * n_samples, "y": [1] * n_samples})
 
     class FakeBooster:
         @staticmethod
         def fit(dataset, params, seed=0):
+            captured["training_params"] = params
+            captured["training_seed"] = seed
             return FakeBoosterInstance()
 
         @staticmethod
         def load(path):
             return FakeBoosterInstance()
 
-    fake_module = types.ModuleType("nrgboost")
-    fake_module.Dataset = FakeDataset
-    fake_module.NRGBooster = FakeBooster
-    monkeypatch.setitem(sys.modules, "nrgboost", fake_module)
+    monkeypatch.setattr(adapter, "_import_bits", lambda: (FakeDataset, FakeBooster))
 
     train_config = ExperimentConfig(
         model="nrgboost",
@@ -1187,7 +1190,7 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
         dataset="adult",
         output_dir=str(tmp_path / "artifacts" / "nrgboost"),
         train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, num_samples=2),
+        sample=SampleConfig(enabled=True, num_samples=2, extra={"num_steps": 7, "temperature": 0.8}),
         evaluation=EvaluationConfig(enabled=False),
     )
 
@@ -1197,6 +1200,57 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
     assert (Path(train_config.output_dir) / "model.nrgboost").exists()
     assert bundle.generated_sample_path is not None
     assert pd.read_csv(bundle.generated_sample_path).shape == (2, 2)
+    assert captured["training_seed"] == 0
+    assert captured["dataset_params"] == {
+        "num_bins": 255,
+        "infer_fixed_point": True,
+        "discretization_types": None,
+        "infer_ordered_categoricals": False,
+        "infer_continuous_ordered_categoricals": False,
+    }
+    assert captured["sample_params"] == {
+        "num_steps": 7,
+        "num_rounds": None,
+        "temperature": 0.8,
+        "num_threads": 0,
+        "output_full_chain": False,
+        "seed": 0,
+    }
+    assert str(captured["dataset_frame"]["y"].dtype) == "category"  # type: ignore[index]
+    metadata = json.loads((Path(train_config.output_dir) / "nrgboost_metadata.json").read_text())
+    assert metadata["package_version"] == "0.0.3"
+    assert metadata["sampling"]["seed"] == 0
+
+
+def test_nrgboost_rejects_missing_values_and_invalid_controls(tmp_path: Path) -> None:
+    adapter = NRGBoostAdapter(tmp_path)
+    dataset_spec = DatasetSpec(
+        name="nrgboost-invalid",
+        task_type="regression",
+        column_names=["x", "target"],
+        numerical_columns=["x", "target"],
+        categorical_columns=[],
+        target_columns=["target"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.train_data_path.write_text("x,target\n1,2\n,3\n")
+    spec = RunSpec(
+        model="nrgboost",
+        dataset=dataset_spec.name,
+        output_dir=tmp_path / "output",
+        extra={"dataset_spec": dataset_spec.to_dict()},
+    )
+
+    with pytest.raises(ValueError, match="does not accept missing values"):
+        adapter._load_training_frame(dataset_spec)
+    with pytest.raises(ValueError, match="num_bins cannot exceed"):
+        adapter._dataset_params(RunSpec(**{**spec.__dict__, "extra": {"num_bins": 256}}))
+    with pytest.raises(ValueError, match="feature_frac"):
+        adapter._training_params(RunSpec(**{**spec.__dict__, "extra": {"feature_frac": 0}}))
+    with pytest.raises(ValueError, match="splitter"):
+        adapter._training_params(RunSpec(**{**spec.__dict__, "extra": {"splitter": "unsupported"}}))
 
 
 def test_bn_and_nflow_use_default_pickle_checkpoint_names(tmp_path: Path) -> None:

@@ -191,6 +191,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "NRGBoostAdapter",
         authority="method-author",
         distribution="package",
+        install_extra="nrgboost",
+        upstream_repository="https://github.com/Ajoo/nrgboost",
+        upstream_revision="feef73a3edb20b911c2f7214b13f810909ef20ad",
+        revision_status="pinned-canonical-package-parity-pending",
+        license_status="MIT package dependency; validation and release gates pending",
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/NRGBOOST_VALIDATION.md",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/nrgboost-validation.yml",
+        ),
     ),
     "nflow": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",

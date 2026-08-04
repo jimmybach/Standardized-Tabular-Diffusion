@@ -18,7 +18,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
+    assert set(components) == {"ctgan", "nrgboost", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
@@ -134,6 +134,34 @@ def test_tvae_package_lock_and_retained_validation_are_exact_and_conservatively_
         "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7"
     )
     assert str(tvae["official_eligibility"]).startswith("blocked-pending-license")
+
+
+def test_nrgboost_package_lock_is_exact_and_parity_claim_remains_pending() -> None:
+    payload = _load_source_lock()
+    nrgboost = payload["components"]["nrgboost"]
+    assert isinstance(nrgboost, dict)
+
+    assert nrgboost["distribution_form"] == "package"
+    assert nrgboost["license"] == "MIT"
+    assert nrgboost["package_lock"] == {
+        "filename": "nrgboost-0.0.3-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "name": "nrgboost",
+        "pypi_url": "https://pypi.org/project/nrgboost/0.0.3/",
+        "sha256": "dfe30829ceaf2d0d0ec03eab1744838bed857d56919238e7243c9fb7f273e1fb",
+        "trusted_publishing_source_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+        "version": "0.0.3",
+        "wheel_license_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945",
+    }
+    assert nrgboost["validation"] == {
+        "level": "adapter-complete",
+        "protocol_id": "nrgboost-native-parity-v1",
+        "status": "pending-authoritative-run",
+    }
+    spec = get_adapter_spec("nrgboost")
+    assert spec.validation_level.value == "adapter-complete"
+    assert spec.revision_status == "pinned-canonical-package-parity-pending"
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"
 
 
 def test_removed_unverified_checkpoints_are_recorded_and_absent() -> None:
