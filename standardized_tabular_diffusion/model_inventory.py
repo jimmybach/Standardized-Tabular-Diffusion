@@ -365,7 +365,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="gan",
         paradigm="conditional tabular GAN with tailored preprocessing",
         covered_by_papers=[],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/Team-TUD/CTAB-GAN",
@@ -374,7 +374,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "It has been replaced by seven checksum-locked files selected from method-author commit 73d4e315; Apache-2.0 and the original attribution notice are retained.",
             "The adapter preserves the official stratified training split, rejects missing values until explicit preprocessing has run, and supports classification only because the official preprocessing always stratifies its target.",
             "A documented runtime bridge maps the legacy positional BayesianGaussianMixture argument to the same keyword-only scikit-learn parameter without changing source or algorithm values.",
-            "The real six-case local parity protocol passes; authoritative Linux/Python 3.11 evidence is still pending.",
+            "All six binary/multiclass and seed cases passed exact native parity in retained Linux/Python 3.11 workflow run 30930939961.",
+            "Benchmark eligibility and release support remain separate pending gates.",
         ],
     ),
     "tvae": ModelInventoryEntry(

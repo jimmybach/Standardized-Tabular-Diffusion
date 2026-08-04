@@ -1,6 +1,6 @@
 # CTAB-GAN Validation
 
-Status: protocol implemented; authoritative Linux/Python 3.11 run pending
+Status: native-parity-validated; Official Results and release support remain pending
 
 ## Claim boundary
 
@@ -97,6 +97,19 @@ python -m standardized_tabular_diffusion.validation.ctabgan \
 
 `.github/workflows/ctabgan-validation.yml` runs the authoritative protocol and retains its JSON evidence for 90 days. Source, adapter, compatibility, protocol, or environment changes invalidate prior evidence and require a new inspected run.
 
+## Retained Linux evidence
+
+Pull-request workflow run [`30930939961`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961), job [`92065163118`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961/job/92065163118), passed on Linux/Python 3.11. The inspected artifact records:
+
+- all 6 of 6 binary/multiclass × seed cases passed;
+- generator/checkpoint state signatures matched exactly;
+- sample CSV bytes and parsed frames matched exactly;
+- all seven selected source files, adapter manifests, and metadata validated;
+- numerical/domain/missing-value checks passed; and
+- NumPy RNG state and global warning state were restored on both paths.
+
+The inspected JSON is permanently retained at `docs/evidence/ctabgan/native-parity-run-30930939961.json`, with SHA-256 `41788d11578c55530b55fbf392412de361ec2769c63329a3174fa15c6905d0c6` and 96,534 bytes. The corresponding GitHub artifact is ID `8901113892`, archive digest `sha256:0ce878b402b284ae34e5f13d96e52480f110a7873d511670b7707b6e4cee04ae`, expiring 2026-11-02.
+
 ## Current decision
 
-The complete local six-case protocol passes under Python 3.11 and the frozen dependency versions. This is implementation evidence, not the authoritative platform claim. The registry remains `adapter-complete`, `experimental`, and `unsupported` until the Linux artifact is inspected and permanently retained. Even after native-parity promotion, Official Results and release support remain separately blocked.
+The inspected Linux evidence promotes CTAB-GAN to `native-parity-validated`. It remains `experimental`, `unsupported`, and excluded from Official Results. Apache-2.0 resolves source redistribution, but dataset admission, central evaluation, full-scale runtime qualification, governance, and release testing remain pending.

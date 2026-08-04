@@ -142,15 +142,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         task_types=("classification",),
         upstream_repository="https://github.com/Team-TUD/CTAB-GAN",
         upstream_revision="73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
-        revision_status="pinned-official-source-pending-native-parity",
+        revision_status="pinned-official-source-native-parity-validated",
         license_status="Apache-2.0 source retained; central evaluation, dataset, runtime, and release gates pending",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/CTABGAN_VALIDATION.md",
+            "docs/evidence/ctabgan/native-parity-run-30930939961.json",
             "standardized_tabular_diffusion/resources/upstream/ctabgan-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/ctabgan-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "ctab-gan-plus": _spec(
         "standardized_tabular_diffusion.models.next_wave_baselines",

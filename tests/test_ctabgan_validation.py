@@ -39,7 +39,7 @@ def test_legacy_semantic_fork_is_removed_and_selected_official_source_is_present
     assert not (source_root / "model" / "eval" / "evaluation.py").exists()
 
 
-def test_registry_pins_classification_only_official_source_pending_linux_evidence() -> None:
+def test_registry_pins_classification_only_official_source_with_retained_linux_evidence() -> None:
     spec = get_adapter_spec("ctab-gan")
 
     assert spec.upstream_repository == ctabgan.UPSTREAM_REPOSITORY
@@ -47,7 +47,8 @@ def test_registry_pins_classification_only_official_source_pending_linux_evidenc
     assert spec.modification_status == "adapter-only"
     assert spec.install_extra == "ctab-gan"
     assert spec.task_types == ("classification",)
-    assert spec.validation_level is AdapterValidationLevel.ADAPTER_COMPLETE
-    assert spec.revision_status == "pinned-official-source-pending-native-parity"
+    assert spec.validation_level is AdapterValidationLevel.NATIVE_PARITY_VALIDATED
+    assert spec.revision_status == "pinned-official-source-native-parity-validated"
+    assert "docs/evidence/ctabgan/native-parity-run-30930939961.json" in spec.evidence_records
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"

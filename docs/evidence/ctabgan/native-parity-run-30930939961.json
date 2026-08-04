@@ -1,0 +1,2573 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "8add3c18b84957ea39fd3334556cef31a3a63074aaa8c4c83b770790416e0c88",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 0,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "8add3c18b84957ea39fd3334556cef31a3a63074aaa8c4c83b770790416e0c88",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "6e4a37396c09244891051f293785e21293becfcc920cc1539371c89579d30795",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "4fec6d3a2dfc955ee8567210384bee0f4dbad1e0ddb3912c568c7c323c1a37f1",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "b3f2d2e9fb6661d6043761cc277ec8a602cc211bcb70e68b2f71eda39ad213d2",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "53eab0b94406d5892de386888c5701e2f806772f3c8cae48426f3f8ac71398bd",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "4882921a38344ba9d4b9d8a5330fe21459485eb2449fa239697ac63430d63304",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "10efc79697f23778dd6919555203cb0d033784f01be33962ad572ee350994951",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "b692f5b5e98fc949e64a9f70e970f6f9d7401e85f8ed770ff36b5faaff67270b",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "f7e4da59823aaf285215ecf29a06ec55ed3645ed9e3b18fbe22ee21ce7036a03",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "8add3c18b84957ea39fd3334556cef31a3a63074aaa8c4c83b770790416e0c88",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/adapter/samples.csv",
+          "sample_sha256": "3669451eae5a14bc7a58ed0959e62aa9fe01f022042ae92836a33c9a036bb5a7",
+          "seed": 0,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/adapter/samples.csv",
+        "sample_sha256": "3669451eae5a14bc7a58ed0959e62aa9fe01f022042ae92836a33c9a036bb5a7"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/native/ctabgan.pkl",
+        "checkpoint_sha256": "730bd5e3da8daac64437e9d25edba421c7a4bcf7c634baca8e617e95dcbb9d8a",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "6e4a37396c09244891051f293785e21293becfcc920cc1539371c89579d30795",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "4fec6d3a2dfc955ee8567210384bee0f4dbad1e0ddb3912c568c7c323c1a37f1",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "b3f2d2e9fb6661d6043761cc277ec8a602cc211bcb70e68b2f71eda39ad213d2",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "53eab0b94406d5892de386888c5701e2f806772f3c8cae48426f3f8ac71398bd",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "4882921a38344ba9d4b9d8a5330fe21459485eb2449fa239697ac63430d63304",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "10efc79697f23778dd6919555203cb0d033784f01be33962ad572ee350994951",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "b692f5b5e98fc949e64a9f70e970f6f9d7401e85f8ed770ff36b5faaff67270b",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "f7e4da59823aaf285215ecf29a06ec55ed3645ed9e3b18fbe22ee21ce7036a03",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-0/native/samples.csv",
+        "sample_sha256": "3669451eae5a14bc7a58ed0959e62aa9fe01f022042ae92836a33c9a036bb5a7"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary-classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "535eb0920012e4f47a9a6c34fa6621620ca89112d904490b789e5e1019a69e1a",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 19,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "535eb0920012e4f47a9a6c34fa6621620ca89112d904490b789e5e1019a69e1a",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "4354ad4081a6283600403f4353c2978bb07ab2542c4c259c499f73f8e9d528d7",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "c6d3e9d45e2ac2ca0562397fe1da5ccafc5a2e95a58375b10ea5b85e21ba4bfb",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "be40ade118086ff8cc9391f36b3d362c576b0b3395b7778e9c9892683fc12dbc",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "b564daf4e64ed1869fd067c8c50bef7a16f7599072d0fd7046b0c4e70700c5b8",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "beba6e53beb6508ac8549f0c19c0d12b2cae776032cb3de60ed1b34d1404d9d9",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "6f082b3747c1773c63ae90a56e74f4f92975feea3113506bf891dbf2ab277a25",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "ec9c6eb4118a72776bbda5fa4b9c75617f462d28a8f92d122ed3efe0b8405958",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "b5eb3687ea54116cbbd65b865db631498e3cf8be7df75726e2a59b9e8b6531a0",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "535eb0920012e4f47a9a6c34fa6621620ca89112d904490b789e5e1019a69e1a",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/adapter/samples.csv",
+          "sample_sha256": "ac699497907d79b938580de9160486335c41742b44f37fc3f6dcf2d3bb161375",
+          "seed": 19,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/adapter/samples.csv",
+        "sample_sha256": "ac699497907d79b938580de9160486335c41742b44f37fc3f6dcf2d3bb161375"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/native/ctabgan.pkl",
+        "checkpoint_sha256": "5c9e4beee1e113a027747664fcad735da886834d1e32629772ac5bd39c71b314",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "4354ad4081a6283600403f4353c2978bb07ab2542c4c259c499f73f8e9d528d7",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "c6d3e9d45e2ac2ca0562397fe1da5ccafc5a2e95a58375b10ea5b85e21ba4bfb",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "be40ade118086ff8cc9391f36b3d362c576b0b3395b7778e9c9892683fc12dbc",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "b564daf4e64ed1869fd067c8c50bef7a16f7599072d0fd7046b0c4e70700c5b8",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "beba6e53beb6508ac8549f0c19c0d12b2cae776032cb3de60ed1b34d1404d9d9",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "6f082b3747c1773c63ae90a56e74f4f92975feea3113506bf891dbf2ab277a25",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "ec9c6eb4118a72776bbda5fa4b9c75617f462d28a8f92d122ed3efe0b8405958",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "b5eb3687ea54116cbbd65b865db631498e3cf8be7df75726e2a59b9e8b6531a0",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-19/native/samples.csv",
+        "sample_sha256": "ac699497907d79b938580de9160486335c41742b44f37fc3f6dcf2d3bb161375"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary-classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "6a49bddd65e1a17e2f3612245238d7d53a927ccbe974252316337fe91e23819b",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 73,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "6a49bddd65e1a17e2f3612245238d7d53a927ccbe974252316337fe91e23819b",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "4289a18d95a2d4e317511d5b333338ae1ac171b0276244c2bc03d5fbb7f5977b",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "2b49c94a37e1de2774bd86e0911502ff51ec689e1d48332db792fd6cbdae23b9",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "0f1f5c696a57a177e7b77b43873c1f2aea85746ed5d15ca9085e66121f2403b3",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "31f38f0ec6573b12968181effeca8965f3dd5729b11b2c8630406271c5c2ca63",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "45109968e063a913fc264ee3acd2b7e52241cf00130e1e0c74de7e84322caa22",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "a6deec3bf67346152ede1587842e1646863bbde9d16982073ae96def5156564c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "815271f4aff677a23777505e3cff4350fc96ad6344ea79bf389215ab2c7da665",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "65b3e6213c5102c56d2ca05196de6222d3bf8e9b7c63b293be70446d171715f6",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "6a49bddd65e1a17e2f3612245238d7d53a927ccbe974252316337fe91e23819b",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-binary-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/adapter/samples.csv",
+          "sample_sha256": "2472b70d9e32a175ab1344783b48c6edc7bdb294ee627c02cdbf47f459d1189c",
+          "seed": 73,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/adapter/samples.csv",
+        "sample_sha256": "2472b70d9e32a175ab1344783b48c6edc7bdb294ee627c02cdbf47f459d1189c"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/native/ctabgan.pkl",
+        "checkpoint_sha256": "1b39fcbbd9eaa683ecef3a271c4eb94e82fb04dadcb48579b4e1268839993e25",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "4289a18d95a2d4e317511d5b333338ae1ac171b0276244c2bc03d5fbb7f5977b",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5cb0b5ee59dfe9ab3e30c02602bdfafbecba6e85679eaec4378ff4026d4b05fb",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "2b49c94a37e1de2774bd86e0911502ff51ec689e1d48332db792fd6cbdae23b9",
+              "shape": [
+                17,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "0f1f5c696a57a177e7b77b43873c1f2aea85746ed5d15ca9085e66121f2403b3",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "31f38f0ec6573b12968181effeca8965f3dd5729b11b2c8630406271c5c2ca63",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "45109968e063a913fc264ee3acd2b7e52241cf00130e1e0c74de7e84322caa22",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "a6deec3bf67346152ede1587842e1646863bbde9d16982073ae96def5156564c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "815271f4aff677a23777505e3cff4350fc96ad6344ea79bf389215ab2c7da665",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "65b3e6213c5102c56d2ca05196de6222d3bf8e9b7c63b293be70446d171715f6",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+          "transformer_sha256": "2ae903b2bf6555337f18e87b14af2cd8e94363ecfedb624582b2a4af9ab48667"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/binary-classification/seed-73/native/samples.csv",
+        "sample_sha256": "2472b70d9e32a175ab1344783b48c6edc7bdb294ee627c02cdbf47f459d1189c"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary-classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "10f26edc8c469275b405e4a5749ad4d43494a42abfda6f8bb7b04bb4dc50b964",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 0,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "10f26edc8c469275b405e4a5749ad4d43494a42abfda6f8bb7b04bb4dc50b964",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "5a2d709c213e39f43432e723c1131651aa9edb6818dd50e075a45697efe12b15",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "907254d85f60c0bb3602de09d405d7c63b010040c250acecc6eaab6732e4c9c2",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "e7d9867b645d384077f424857fa200767f935ac62d9bc72169d32655ca1bff15",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "2dd2564f4dc78be6e9ae67f4cf9522f49ac27fab3b7dd0d677583dd420c3a484",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "ab7d0f118ad1df416243781c7f8c0674c0bbaeb2bc47ce991332b64dd3cff5b8",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "49b4701547f51f20c790b98c77a6de1a238cc7d2633d45b6a8cfa630e6b87ce9",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "ece3c20af52e36f1fee5f6e17c4a06609b92ff05f6cf6d57a23ccc145e72ac45",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "84c862d0e39ab1a02b5dd77ec89522aea4cf1fae979e5b0b2e22d72656b5c0ab",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "10f26edc8c469275b405e4a5749ad4d43494a42abfda6f8bb7b04bb4dc50b964",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/adapter/samples.csv",
+          "sample_sha256": "e672d1d781db0a77e35891aa20a93d19fe82286e240202c8fd5c4025204ea931",
+          "seed": 0,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/adapter/samples.csv",
+        "sample_sha256": "e672d1d781db0a77e35891aa20a93d19fe82286e240202c8fd5c4025204ea931"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/native/ctabgan.pkl",
+        "checkpoint_sha256": "fad5f9c7bf89a6c538111f08fd2e8484f06d0683c1d8cebc991efe5a7bd16282",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "5a2d709c213e39f43432e723c1131651aa9edb6818dd50e075a45697efe12b15",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "907254d85f60c0bb3602de09d405d7c63b010040c250acecc6eaab6732e4c9c2",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "e7d9867b645d384077f424857fa200767f935ac62d9bc72169d32655ca1bff15",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "2dd2564f4dc78be6e9ae67f4cf9522f49ac27fab3b7dd0d677583dd420c3a484",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "ab7d0f118ad1df416243781c7f8c0674c0bbaeb2bc47ce991332b64dd3cff5b8",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "49b4701547f51f20c790b98c77a6de1a238cc7d2633d45b6a8cfa630e6b87ce9",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "ece3c20af52e36f1fee5f6e17c4a06609b92ff05f6cf6d57a23ccc145e72ac45",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "84c862d0e39ab1a02b5dd77ec89522aea4cf1fae979e5b0b2e22d72656b5c0ab",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-0/native/samples.csv",
+        "sample_sha256": "e672d1d781db0a77e35891aa20a93d19fe82286e240202c8fd5c4025204ea931"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass-classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "8dc276a17e218dcd63d8f4a5275d0a34006ca594551b987b22b10ed1041b41fe",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 19,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "8dc276a17e218dcd63d8f4a5275d0a34006ca594551b987b22b10ed1041b41fe",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "49680b0340f232f5bbae8a5d6bc5cafaa688f35d44c2842d6a25a22d25959ba9",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "861206f06b33f70589163bf57bb0333375ab373582b3f8e6e9308e92374a6e58",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "57b3881333da003cf8aa04c663c440b6b9e9315f5b5c37487ff67922b1b0777c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "fa76a8d6dd850f409bedd807c6081e6635440577636c089c6d113d23e881bb9c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "70519fd40c3ba4142f2233e4045c1ac37e32f54aa5ffb021364ba66cbc92f655",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "36361c282593d52ea1ba327ea2fda89a438a9d8bc19b045bb9b9b8c580d0d123",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "48b5bacc312d3628557c84e0a9a0e30c3ceb792c6fb002fec8aed4cd5471b287",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "0303fe922e80389179d2102fd1ab4077f320b1c87defa838707b75de6e9c27b8",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "8dc276a17e218dcd63d8f4a5275d0a34006ca594551b987b22b10ed1041b41fe",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/adapter/samples.csv",
+          "sample_sha256": "ec846161fa2e58ee2d2802db099ccf1629ab40963deff0a509cd37c2e43c1c17",
+          "seed": 19,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/adapter/samples.csv",
+        "sample_sha256": "ec846161fa2e58ee2d2802db099ccf1629ab40963deff0a509cd37c2e43c1c17"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/native/ctabgan.pkl",
+        "checkpoint_sha256": "e86372346239c69eb36c6161d846575fb1b96290bcf2aa7ac5dd287d1cbf1146",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "49680b0340f232f5bbae8a5d6bc5cafaa688f35d44c2842d6a25a22d25959ba9",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "861206f06b33f70589163bf57bb0333375ab373582b3f8e6e9308e92374a6e58",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "57b3881333da003cf8aa04c663c440b6b9e9315f5b5c37487ff67922b1b0777c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "fa76a8d6dd850f409bedd807c6081e6635440577636c089c6d113d23e881bb9c",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "70519fd40c3ba4142f2233e4045c1ac37e32f54aa5ffb021364ba66cbc92f655",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "36361c282593d52ea1ba327ea2fda89a438a9d8bc19b045bb9b9b8c580d0d123",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "48b5bacc312d3628557c84e0a9a0e30c3ceb792c6fb002fec8aed4cd5471b287",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "0303fe922e80389179d2102fd1ab4077f320b1c87defa838707b75de6e9c27b8",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-19/native/samples.csv",
+        "sample_sha256": "ec846161fa2e58ee2d2802db099ccf1629ab40963deff0a509cd37c2e43c1c17"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass-classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "ed9aff26e25f8bb77babc56e2ed17ff09b257fd2a32cf123823a0d210ef068be",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "official_parameters": {
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "integer_columns": [
+              "count"
+            ],
+            "log_columns": [],
+            "mixed_columns": {},
+            "problem_type": {
+              "Classification": "target"
+            },
+            "test_ratio": 0.2
+          },
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "seed": 73,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          },
+          "source_rows": 40,
+          "training_parameters": {
+            "batch_size": 8,
+            "class_dim": [
+              8,
+              8
+            ],
+            "epochs": 1,
+            "l2scale": 1e-05,
+            "num_channels": 4,
+            "num_threads": 1,
+            "random_dim": 8
+          }
+        },
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/adapter/ctabgan.pkl",
+        "checkpoint_sha256": "ed9aff26e25f8bb77babc56e2ed17ff09b257fd2a32cf123823a0d210ef068be",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "8d87b21474e3d381d5b45ae09c4366ab915084d7612c9f665a6f9e58cb51ca52",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "dd2f06b72fa9672d5743436bb383b36deb11f24d72a9b81e70b002650b57cc6b",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "53c7027f79943110ff05ec6b2d98a7b57bf936eeacf81cb55858e87e9dd339d5",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "85deaab0818e920bcecc7b15902d541a7b4ad1263e82a158dec789b39e89dd50",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "911fb9e9c0870242dff5165199b40b7fade906b5f907d3f8d0d8f972cf3a58f6",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "c934cdda72be4d06fd2a2c70b209db16f4ef5d9567fc117a9d39b38a4c5ff582",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "3924ee40d7fe37414fe6414acaf8165b8951a46eb0d39c7de96e3cd9768ec629",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "718e87029c3492c7c733ff14ea296802d8eaaffda45e23fa329bb894167b8526",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_metadata": {
+          "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/adapter/ctabgan.pkl",
+          "checkpoint_sha256": "ed9aff26e25f8bb77babc56e2ed17ff09b257fd2a32cf123823a0d210ef068be",
+          "compatibility_shims": [
+            "ctabgan-sklearn-keyword-only-v1"
+          ],
+          "dataset": "ctabgan-multiclass-classification-parity",
+          "model": "ctab-gan",
+          "requested_rows": 13,
+          "runtime_versions": {
+            "numpy": "1.26.4",
+            "pandas": "2.2.3",
+            "scikit-learn": "1.5.2",
+            "scipy": "1.13.1",
+            "torch": "2.3.0+cpu",
+            "tqdm": "4.66.5"
+          },
+          "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/adapter/samples.csv",
+          "sample_sha256": "a7080770bd3a40c567a5eead28b09cc4670545977b5b04c207d160c7c2ed6bba",
+          "seed": 73,
+          "source": {
+            "license": {
+              "declared_expression": "Apache-2.0",
+              "license_file_present": true,
+              "redistribution_status": "authorized",
+              "review_status": "upstream-apache-2.0-license-retained"
+            },
+            "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+            "model_id": "ctab-gan",
+            "repository": "https://github.com/Team-TUD/CTAB-GAN",
+            "runtime_files": [
+              {
+                "bytes": 11357,
+                "path": "LICENSE",
+                "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+              },
+              {
+                "bytes": 767,
+                "path": "License.txt",
+                "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+              },
+              {
+                "bytes": 3351,
+                "path": "README.md",
+                "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+              },
+              {
+                "bytes": 3177,
+                "path": "model/ctabgan.py",
+                "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+              },
+              {
+                "bytes": 7098,
+                "path": "model/pipeline/data_preparation.py",
+                "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+              },
+              {
+                "bytes": 37596,
+                "path": "model/synthesizer/ctabgan_synthesizer.py",
+                "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+              },
+              {
+                "bytes": 22735,
+                "path": "model/synthesizer/transformer.py",
+                "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+              }
+            ],
+            "runtime_files_verified": 7,
+            "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+            "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+            "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+            "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/adapter/samples.csv",
+        "sample_sha256": "a7080770bd3a40c567a5eead28b09cc4670545977b5b04c207d160c7c2ed6bba"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_global_warning_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "checkpoint_state_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "native_global_warning_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/native/ctabgan.pkl",
+        "checkpoint_sha256": "c256a7745ac80a434062058bc4202f6eecb77c684b29bbc0d6d6d35e81d362a7",
+        "checkpoint_signature": {
+          "conditional_generator_sha256": "8d87b21474e3d381d5b45ae09c4366ab915084d7612c9f665a6f9e58cb51ca52",
+          "configuration": {
+            "batch_size": 8,
+            "categorical_columns": [
+              "segment",
+              "target"
+            ],
+            "class_dim": [
+              8,
+              8
+            ],
+            "device": "cpu",
+            "epochs": 1,
+            "integer_columns": [
+              "count"
+            ],
+            "l2scale": 1e-05,
+            "log_columns": [],
+            "mixed_columns": {},
+            "num_channels": 4,
+            "problem_type": {
+              "Classification": "target"
+            },
+            "random_dim": 8,
+            "test_ratio": 0.2
+          },
+          "data_prep_sha256": "5e29613e18d94ba7f953a0eaa73e503ce8dab6d214c7ba1fe9756e26146e7f47",
+          "generator_state": {
+            "seq.0.weight": {
+              "dtype": "float32",
+              "sha256": "dd2f06b72fa9672d5743436bb383b36deb11f24d72a9b81e70b002650b57cc6b",
+              "shape": [
+                19,
+                4,
+                2,
+                2
+              ]
+            },
+            "seq.1.bias": {
+              "dtype": "float32",
+              "sha256": "53c7027f79943110ff05ec6b2d98a7b57bf936eeacf81cb55858e87e9dd339d5",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.num_batches_tracked": {
+              "dtype": "int64",
+              "sha256": "220dde27afee4d537cac96d85d6546f825153b90e828931b74e103807541bc42",
+              "shape": []
+            },
+            "seq.1.running_mean": {
+              "dtype": "float32",
+              "sha256": "85deaab0818e920bcecc7b15902d541a7b4ad1263e82a158dec789b39e89dd50",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.running_var": {
+              "dtype": "float32",
+              "sha256": "911fb9e9c0870242dff5165199b40b7fade906b5f907d3f8d0d8f972cf3a58f6",
+              "shape": [
+                4
+              ]
+            },
+            "seq.1.weight": {
+              "dtype": "float32",
+              "sha256": "c934cdda72be4d06fd2a2c70b209db16f4ef5d9567fc117a9d39b38a4c5ff582",
+              "shape": [
+                4
+              ]
+            },
+            "seq.3.bias": {
+              "dtype": "float32",
+              "sha256": "3924ee40d7fe37414fe6414acaf8165b8951a46eb0d39c7de96e3cd9768ec629",
+              "shape": [
+                1
+              ]
+            },
+            "seq.3.weight": {
+              "dtype": "float32",
+              "sha256": "718e87029c3492c7c733ff14ea296802d8eaaffda45e23fa329bb894167b8526",
+              "shape": [
+                4,
+                1,
+                4,
+                4
+              ]
+            }
+          },
+          "raw_frame_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+          "transformer_sha256": "3045d714fbbd5ce59be167a71d88e9b9bc9835f3236bdadfcc9b8dc28d88a9c6"
+        },
+        "global_numpy_state_unchanged": true,
+        "global_warning_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/ctabgan-validation/multiclass-classification/seed-73/native/samples.csv",
+        "sample_sha256": "a7080770bd3a40c567a5eead28b09cc4670545977b5b04c207d160c7c2ed6bba"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass-classification"
+    }
+  ],
+  "claim_boundary": "Native adapter parity for the Apache-2.0 method-author source and the documented keyword-only API compatibility bridge. Benchmark eligibility, Official Results, and release support remain separate pending gates.",
+  "compatibility_shims": [
+    {
+      "id": "ctabgan-sklearn-keyword-only-v1",
+      "scope": "Maps the legacy positional n_components argument to the same keyword-only BayesianGaussianMixture parameter required by scikit-learn 1.5.2.",
+      "semantic_effect": "No parameter value, estimator, source file, or training operation is changed."
+    }
+  ],
+  "environment": {
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "threadpoolctl": "3.6.0",
+    "torch": "2.3.0+cpu",
+    "tqdm": "4.66.5",
+    "tzdata": "2026.3"
+  },
+  "environment_lock": {
+    "path": "requirements-ctabgan-validation.txt",
+    "sha256": "d89bb9ceec70c0de16d38b5652a57dbff58f097925a524d67deb0cb2677b60fb"
+  },
+  "fixtures": [
+    {
+      "columns": [
+        "continuous",
+        "count",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "rows": 40,
+      "train_csv_sha256": "704a3f3091ac42d7edf6761b5b0e8e706f929432defa8e20315ff0c4b2c5c43e",
+      "variant": "binary-classification"
+    },
+    {
+      "columns": [
+        "continuous",
+        "count",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "rows": 40,
+      "train_csv_sha256": "5cabd67303ecc0fbdc6f06e469822524f2a2c4dd019217bba152c0ff544383f4",
+      "variant": "multiclass-classification"
+    }
+  ],
+  "model_id": "ctab-gan",
+  "protocol_id": "ctabgan-native-parity-v1",
+  "repository_commit": "ecc7e0f1931c61d9ac019d44782385ecb4637fbf",
+  "runtime_config": {
+    "sample_rows": 13,
+    "training": {
+      "batch_size": 8,
+      "class_dim": [
+        8,
+        8
+      ],
+      "epochs": 1,
+      "l2scale": 1e-05,
+      "num_channels": 4,
+      "num_threads": 1,
+      "random_dim": 8
+    }
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "license": {
+      "declared_expression": "Apache-2.0",
+      "license_file_present": true,
+      "redistribution_status": "authorized",
+      "review_status": "upstream-apache-2.0-license-retained"
+    },
+    "manifest_sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de",
+    "model_id": "ctab-gan",
+    "repository": "https://github.com/Team-TUD/CTAB-GAN",
+    "runtime_files": [
+      {
+        "bytes": 11357,
+        "path": "LICENSE",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      },
+      {
+        "bytes": 767,
+        "path": "License.txt",
+        "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+      },
+      {
+        "bytes": 3351,
+        "path": "README.md",
+        "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+      },
+      {
+        "bytes": 3177,
+        "path": "model/ctabgan.py",
+        "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+      },
+      {
+        "bytes": 7098,
+        "path": "model/pipeline/data_preparation.py",
+        "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+      },
+      {
+        "bytes": 37596,
+        "path": "model/synthesizer/ctabgan_synthesizer.py",
+        "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+      },
+      {
+        "bytes": 22735,
+        "path": "model/synthesizer/transformer.py",
+        "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+      }
+    ],
+    "runtime_files_verified": 7,
+    "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabDDPM-main/CTAB-GAN",
+    "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+    "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+    "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+  },
+  "source_manifest": {
+    "path": "standardized_tabular_diffusion/resources/upstream/ctabgan-source-manifest.json",
+    "sha256": "8173f49ec2399f9b17ecb7849ffbee0cdbf07466348ba118cdb63e49207094de"
+  },
+  "status": "pass",
+  "variants": [
+    "binary-classification",
+    "multiclass-classification"
+  ]
+}
