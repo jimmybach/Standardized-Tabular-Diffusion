@@ -217,6 +217,22 @@ def validate_action_inputs(
                 "--model ctab-gan-plus` or provide the same verified source_dir for train and sample"
             )
 
+    if config.model == "ctab-gan" and action in {"train", "sample"}:
+        action_extra = config.train.extra if action == "train" else config.sample.extra
+        source_dir = (
+            action_extra.get("source_dir")
+            or os.environ.get("STANDARDIZED_TABULAR_DIFFUSION_CTABGAN_SOURCE")
+            or resolved_root / "TabDDPM-main" / "CTAB-GAN"
+        )
+        status = source_status("ctab-gan", repo_root=resolved_root, source_dir=source_dir)
+        checked["model_source"] = status
+        if status["status"] != "ready":
+            missing.append(
+                "checksum-locked CTAB-GAN source is not ready; restore the complete repository checkout, run "
+                "`python -m standardized_tabular_diffusion.cli materialize-model-source --model ctab-gan`, "
+                "or provide the same verified source_dir for train and sample"
+            )
+
     if action == "sample" and config.model in {
         "ctgan",
         "tvae",

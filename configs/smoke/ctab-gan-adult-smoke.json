@@ -1,0 +1,43 @@
+{
+  "model": "ctab-gan",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/ctabgan-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 64,
+      "random_dim": 16,
+      "num_channels": 8,
+      "class_dim": [16, 16],
+      "num_threads": 1
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {
+      "num_threads": 1
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "ctab-gan",
+    "official-source"
+  ],
+  "notes": "Small CPU smoke preset for the checksum-locked official CTAB-GAN classification path. Build the Adult dataset locally before running."
+}

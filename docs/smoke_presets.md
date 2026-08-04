@@ -6,6 +6,7 @@ These presets are small, reproducible configs for quickly validating newly integ
 
 - [configs/smoke/nrgboost-adult-smoke.json](../configs/smoke/nrgboost-adult-smoke.json)
 - [configs/smoke/ctab-gan-plus-adult-smoke.json](../configs/smoke/ctab-gan-plus-adult-smoke.json)
+- [configs/smoke/ctab-gan-adult-smoke.json](../configs/smoke/ctab-gan-adult-smoke.json)
 - [configs/smoke/realtabformer-adult-tiny.json](../configs/smoke/realtabformer-adult-tiny.json)
 - [configs/smoke/bn-adult-smoke.json](../configs/smoke/bn-adult-smoke.json)
 - [configs/smoke/nflow-adult-smoke.json](../configs/smoke/nflow-adult-smoke.json)
@@ -19,7 +20,7 @@ These presets are small, reproducible configs for quickly validating newly integ
 - [configs/smoke/tabebm-adult-smoke.json](../configs/smoke/tabebm-adult-smoke.json)
 - [configs/smoke/tabebm-adult-gated-sample.json](../configs/smoke/tabebm-adult-gated-sample.json)
 
-At the moment there is no dedicated smoke preset checked in for `tabula`, `ctab-gan`, `stasy`, or `codi`, even though those adapters are now integrated into the shared registry.
+At the moment there is no dedicated smoke preset checked in for `tabula`, `stasy`, or `codi`, even though those adapters are now integrated into the shared registry.
 
 ## Usage
 
@@ -67,6 +68,7 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 
 - `nrgboost-adult-smoke.json` is a historical local end-to-end preset; formal status is governed by `docs/NRGBOOST_VALIDATION.md` and retained Linux evidence, not by the preset label alone.
 - `ctab-gan-plus-adult-smoke.json` exercises the checksum-locked official source after materialization. Its formal `native-parity-validated` status is governed by `docs/CTABGAN_PLUS_VALIDATION.md` and retained Linux evidence, not by the preset label.
+- `ctab-gan-adult-smoke.json` exercises the distributed checksum-locked official classification source with reduced CPU dimensions. Its `native-parity-validated` status is governed by `docs/CTABGAN_VALIDATION.md` and retained Linux evidence, not by the preset label.
 - `bn-adult-smoke.json`, `nflow-adult-smoke.json`, and `goggle-adult-smoke.json` are real end-to-end validated smoke presets for the newly added baseline families.
 - `arf-adult-smoke.json` is intended to be a fast end-to-end validation preset for the ARF adapter.
 - `arf-shoppers-smoke.json` is a second-dataset ARF validation preset to confirm the adapter is not adult-specific.

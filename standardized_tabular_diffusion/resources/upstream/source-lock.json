@@ -1,5 +1,105 @@
 {
   "components": {
+    "ctab-gan": {
+      "adapter_ids": [
+        "ctab-gan"
+      ],
+      "archive_lock": {
+        "bytes": 1066556,
+        "format": "zip",
+        "sha256": "7d20aab479c05190b13a63e5e55f9c48ad3f83187d53bcc09c0e6f90a085de76",
+        "url": "https://codeload.github.com/Team-TUD/CTAB-GAN/zip/73d4e315a2a51cf16c97ed8a00d2dad456cfce8a"
+      },
+      "authoritative_repository": "https://github.com/Team-TUD/CTAB-GAN",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "ctabgan-sklearn-keyword-only-v1",
+          "reason": "The official 2021 call passes n_components positionally, while scikit-learn 1.5.2 makes that same parameter keyword-only.",
+          "semantic_effect": "The bridge forwards the unchanged integer as n_components; it changes no estimator, parameter value, source file, or training operation."
+        }
+      ],
+      "component_id": "ctab-gan",
+      "distribution_form": "source",
+      "legacy_snapshot_disposition": {
+        "files_replaced_or_removed": 15,
+        "git_blob_bytes": 78185,
+        "history_rewritten": false,
+        "imported_at_repository_commit": "3b7caea921cfbc5ea2ee8718e0c8e8753d025d26",
+        "latest_official_exact_shared_paths_after_lf_normalization": 2,
+        "latest_official_modified_shared_paths_after_lf_normalization": 7,
+        "latest_official_shared_paths": 9,
+        "original_path": "TabDDPM-main/CTAB-GAN",
+        "reason": "The runtime was a semantic fork that changed construction, the official stratified split, training controls, and sampling. It was replaced without history rewriting by the selected official files."
+      },
+      "license": "Apache-2.0",
+      "license_path": "TabDDPM-main/CTAB-GAN/LICENSE",
+      "license_notice_path": "TabDDPM-main/CTAB-GAN/License.txt",
+      "local_path": "TabDDPM-main/CTAB-GAN",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "patch_sets": [],
+      "selected_files": 7,
+      "source_hash_normalization": "lf-one-final-newline",
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/ctabgan-source-manifest.json",
+      "source_treatment": "selected-official-files-vendored-with-license-and-attribution",
+      "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+      "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+      "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173",
+      "validation": {
+        "artifact": {
+          "digest": "sha256:0ce878b402b284ae34e5f13d96e52480f110a7873d511670b7707b6e4cee04ae",
+          "evidence_file_bytes": 96534,
+          "evidence_file_sha256": "41788d11578c55530b55fbf392412de361ec2769c63329a3174fa15c6905d0c6",
+          "expires_at": "2026-11-02T16:48:55Z",
+          "github_artifact_id": 8901113892,
+          "name": "ctabgan-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/ctabgan/native-parity-run-30930939961.json"
+        },
+        "environment": {
+          "joblib": "1.5.3",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+          "python": "3.11.15",
+          "python-dateutil": "2.9.0.post0",
+          "pytz": "2026.3.post1",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "threadpoolctl": "3.6.0",
+          "torch": "2.3.0+cpu",
+          "tqdm": "4.66.5",
+          "tzdata": "2026.3"
+        },
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "4501d5ef8d552c840aea06035cd3902eaeef7a82",
+        "protocol_id": "ctabgan-native-parity-v1",
+        "repository_commit": "ecc7e0f1931c61d9ac019d44782385ecb4637fbf",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "adapter_metadata_valid": true,
+          "categorical_domains_valid": true,
+          "checkpoint_state_exact": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "parity_cases_passed": 6,
+          "parity_cases_total": 6,
+          "rng_state_restored": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "seed_values_passed": 3,
+          "source_runtime_files_verified": 7,
+          "variants_passed": 2,
+          "warning_state_restored": true
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T16:49:39Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961/job/92065163118",
+        "workflow_run_id": 30930939961,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961"
+      }
+    },
     "ctab-gan-plus": {
       "adapter_ids": [
         "ctab-gan-plus"

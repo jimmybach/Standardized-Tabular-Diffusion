@@ -1,0 +1,12 @@
+# Frozen CTAB-GAN validation environment for Linux + Python 3.11.
+# PyTorch 2.3.0 (CPU) is installed separately by the validation workflow.
+joblib==1.5.3
+numpy==1.26.4
+pandas==2.2.3
+python-dateutil==2.9.0.post0
+pytz==2026.3.post1
+scikit-learn==1.5.2
+scipy==1.13.1
+threadpoolctl==3.6.0
+tqdm==4.66.5
+tzdata==2026.3

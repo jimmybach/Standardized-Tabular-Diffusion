@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from standardized_tabular_diffusion.models.base import BaseModelAdapter
+    from standardized_tabular_diffusion.models.ctabgan import CTABGANAdapter
     from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
     from standardized_tabular_diffusion.models.next_wave_baselines import (
         CTABGANPlusAdapter,
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
     from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
     from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
     from standardized_tabular_diffusion.models.tabula import TabulaAdapter
-    from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, CTABGANAdapter, STaSyAdapter
+    from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, STaSyAdapter
 
 
 _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
@@ -47,7 +48,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "TabDiffAdapter": ("standardized_tabular_diffusion.models.tabdiff", "TabDiffAdapter"),
     "TabSynAdapter": ("standardized_tabular_diffusion.models.tabsyn", "TabSynAdapter"),
     "TabulaAdapter": ("standardized_tabular_diffusion.models.tabula", "TabulaAdapter"),
-    "CTABGANAdapter": ("standardized_tabular_diffusion.models.vendored_baselines", "CTABGANAdapter"),
+    "CTABGANAdapter": ("standardized_tabular_diffusion.models.ctabgan", "CTABGANAdapter"),
     "CoDiAdapter": ("standardized_tabular_diffusion.models.vendored_baselines", "CoDiAdapter"),
     "STaSyAdapter": ("standardized_tabular_diffusion.models.vendored_baselines", "STaSyAdapter"),
 }
