@@ -1,36 +1,16 @@
 from __future__ import annotations
 
-import contextlib
-import os
 import pickle
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, StandardScaler
 
-from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
-from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin, temporary_sys_path
+from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-
-
-@contextlib.contextmanager
-def _temporary_env(updates: dict[str, str]):
-    previous = {key: os.environ.get(key) for key in updates}
-    try:
-        for key, value in updates.items():
-            os.environ[key] = value
-        yield
-    finally:
-        for key, value in previous.items():
-            if value is None:
-                os.environ.pop(key, None)
-            else:
-                os.environ[key] = value
 
 
 @dataclass
@@ -323,172 +303,6 @@ class NFlowAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         sample_df = preprocessor.inverse_transform(samples)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            generated_sample_path=sample_path,
-        )
-        return self._write_bundle(bundle)
-
-    def evaluate(self, spec: RunSpec) -> ArtifactBundle:
-        return self._evaluate_from_sample_file(spec)
-
-
-class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
-    model_name = "goggle"
-    upstream_dirname = "TabSyn-main"
-    checkpoint_filename = "model.pt"
-
-    def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
-        return spec.checkpoint_path or (spec.output_dir / self.checkpoint_filename)
-
-    def _cache_env(self) -> dict[str, str]:
-        cache_root = Path(tempfile.gettempdir()) / "standardized-tabular-diffusion" / "dgl"
-        cache_root.mkdir(parents=True, exist_ok=True)
-        return {
-            "DGLBACKEND": "pytorch",
-            "HOME": str(cache_root),
-            "MPLCONFIGDIR": str(cache_root / "mpl"),
-        }
-
-    def _import_bits(self):
-        compat_root = self.repo_root / "standardized_tabular_diffusion" / "vendor"
-        with _temporary_env(self._cache_env()):
-            with temporary_sys_path(compat_root):
-                with temporary_sys_path(self.upstream_root):
-                    from baselines.goggle.GoggleModel import GoggleModel  # pylint: disable=import-error
-                    from utils_train import preprocess  # pylint: disable=import-error
-
-                    return preprocess, GoggleModel
-
-    def _load_info(self, dataset_spec: DatasetSpec) -> dict[str, Any]:
-        return read_json(dataset_spec.metadata_path)
-
-    def _recover_data(self, syn_num: np.ndarray, syn_cat: np.ndarray, info: dict[str, Any]) -> pd.DataFrame:
-        num_col_idx = info["num_col_idx"]
-        cat_col_idx = info["cat_col_idx"]
-        target_col_idx = info["target_col_idx"]
-        idx_mapping = {int(key): value for key, value in info["idx_mapping"].items()}
-
-        if info["task_type"] == "regression":
-            syn_target = syn_num[:, : len(target_col_idx)]
-            syn_num = syn_num[:, len(target_col_idx) :]
-        else:
-            syn_target = syn_cat[:, : len(target_col_idx)]
-            syn_cat = syn_cat[:, len(target_col_idx) :]
-
-        syn_df = pd.DataFrame()
-        total_columns = len(num_col_idx) + len(cat_col_idx) + len(target_col_idx)
-        for idx in range(total_columns):
-            if idx in set(num_col_idx):
-                syn_df[idx] = syn_num[:, idx_mapping[idx]]
-            elif idx in set(cat_col_idx):
-                syn_df[idx] = syn_cat[:, idx_mapping[idx] - len(num_col_idx)]
-            else:
-                syn_df[idx] = syn_target[:, idx_mapping[idx] - len(num_col_idx) - len(cat_col_idx)]
-        idx_name_mapping = {int(key): value for key, value in info["idx_name_mapping"].items()}
-        syn_df.rename(columns=idx_name_mapping, inplace=True)
-        return syn_df
-
-    def train(self, spec: RunSpec) -> ArtifactBundle:
-        import torch
-
-        self._ensure_output_dir(spec)
-        dataset_spec = self.resolve_dataset_spec(spec)
-        preprocess, GoggleModel = self._import_bits()
-        info = self._load_info(dataset_spec)
-        dataset_dir = dataset_spec.metadata_path.parent
-
-        with _temporary_env(self._cache_env()):
-            dataset = preprocess(str(dataset_dir), task_type=info["task_type"], cat_encoding="one-hot")
-            x_train = torch.tensor(dataset.X_num["train"]).float()
-            model = GoggleModel(
-                ds_name=spec.dataset,
-                input_dim=x_train.shape[1],
-                encoder_dim=int(spec.extra.get("encoder_dim", 256)),
-                encoder_l=int(spec.extra.get("encoder_l", 2)),
-                het_encoding=bool(spec.extra.get("het_encoding", True)),
-                decoder_dim=int(spec.extra.get("decoder_dim", 256)),
-                decoder_l=int(spec.extra.get("decoder_l", 2)),
-                threshold=float(spec.extra.get("threshold", 0.1)),
-                decoder_arch=spec.extra.get("decoder_arch", "gcn"),
-                graph_prior=None,
-                prior_mask=None,
-                device=spec.device,
-                beta=float(spec.extra.get("beta", 1.0)),
-                learning_rate=float(spec.extra.get("learning_rate", 0.01)),
-                seed=spec.seed,
-                epochs=int(spec.extra.get("epochs", 10)),
-                batch_size=int(spec.extra.get("batch_size", 512)),
-            )
-            train_loader = torch.utils.data.DataLoader(x_train, batch_size=model.batch_size, shuffle=True)
-            checkpoint_path = self._resolve_checkpoint_path(spec)
-            model.fit(train_loader, str(checkpoint_path))
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            notes=[f"Serialized GOGGLE checkpoint written to {self._resolve_checkpoint_path(spec)}."],
-        )
-        return self._write_bundle(bundle)
-
-    def sample(self, spec: RunSpec) -> ArtifactBundle:
-        import torch
-
-        self._ensure_output_dir(spec)
-        dataset_spec = self.resolve_dataset_spec(spec)
-        preprocess, GoggleModel = self._import_bits()
-        info = self._load_info(dataset_spec)
-        dataset_dir = dataset_spec.metadata_path.parent
-        with _temporary_env(self._cache_env()):
-            dataset = preprocess(str(dataset_dir), task_type=info["task_type"], cat_encoding="one-hot")
-            x_train = torch.tensor(dataset.X_num["train"]).float()
-            model = GoggleModel(
-                ds_name=spec.dataset,
-                input_dim=x_train.shape[1],
-                encoder_dim=int(spec.extra.get("encoder_dim", 256)),
-                encoder_l=int(spec.extra.get("encoder_l", 2)),
-                het_encoding=bool(spec.extra.get("het_encoding", True)),
-                decoder_dim=int(spec.extra.get("decoder_dim", 256)),
-                decoder_l=int(spec.extra.get("decoder_l", 2)),
-                threshold=float(spec.extra.get("threshold", 0.1)),
-                decoder_arch=spec.extra.get("decoder_arch", "gcn"),
-                graph_prior=None,
-                prior_mask=None,
-                device=spec.device,
-                beta=float(spec.extra.get("beta", 1.0)),
-                learning_rate=float(spec.extra.get("learning_rate", 0.01)),
-                seed=spec.seed,
-                epochs=int(spec.extra.get("epochs", 10)),
-                batch_size=int(spec.extra.get("batch_size", 512)),
-            )
-            checkpoint_path = self._validate_trusted_executable_artifact(
-                spec,
-                self._resolve_checkpoint_path(spec),
-                format_name="PyTorch",
-            )
-            model.model.load_state_dict(torch.load(checkpoint_path, map_location=spec.device, weights_only=True))
-
-            num_samples = spec.num_samples or len(x_train)
-            x_ref = x_train[:num_samples]
-            samples = model.sample(x_ref)
-            n_num_feat = len(info["num_col_idx"])
-            n_cat_feat = len(info["cat_col_idx"])
-            if info["task_type"] == "regression":
-                n_num_feat += len(info["target_col_idx"])
-            else:
-                n_cat_feat += len(info["target_col_idx"])
-            syn_data_num = samples[:, :n_num_feat]
-            cat_sample = samples[:, n_num_feat:]
-            syn_num = dataset.num_transform.inverse_transform(syn_data_num)
-            syn_cat = dataset.cat_transform.inverse_transform(cat_sample)
-            syn_df = self._recover_data(syn_num, syn_cat, info)
-
-        sample_path = spec.output_dir / "samples.csv"
-        self._write_dataframe_csv(syn_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
