@@ -1,0 +1,316 @@
+{
+  "authoritative_repository": "https://github.com/yandex-research/tab-ddpm",
+  "component_id": "tabddpm",
+  "dependencies": {
+    "libzero": {
+      "distribution_filename": "libzero-0.0.8-py3-none-any.whl",
+      "distribution_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
+      "license": "MIT",
+      "license_path": "TabDDPM-main/zero/LICENSE.libzero",
+      "license_sha256": "ee1085dc4d61b0af4d1a8e196af043e8221841c3de969236719a50b9310cae2c",
+      "package": "libzero",
+      "source_repository": "https://github.com/Yura52/zero",
+      "treatment": "Exact source modules from the official wheel are vendored because its torch<2 dependency metadata is incompatible with the supported Python 3.11 and torch 2.3 validation environment.",
+      "vendored_modules": [
+        {
+          "path": "zero/__init__.py",
+          "sha256": "ed42ff8e43028e340401403e8316d1daa95b1b4c7f74e6bb1f9a9916b56d8b2a"
+        },
+        {
+          "path": "zero/_stream.py",
+          "sha256": "a03f4be910cc70761fca24b50d9a41824925b088e5ccaccb1f93f4688f1b14a4"
+        },
+        {
+          "path": "zero/_utils.py",
+          "sha256": "08b77e7b65054bb32eeda88fda7912cfc6c9b988ddd78333eb234cdd1a08c38b"
+        },
+        {
+          "path": "zero/data.py",
+          "sha256": "ead851e5009454b094a63dc20682c4cae6d4a8c16ed66327c4d101c6432b5f96"
+        },
+        {
+          "path": "zero/hardware.py",
+          "sha256": "45cbd20d29bd45fd2966fbfd709e21cd16f3f222e9e75e4a37b763b6403a2f6f"
+        },
+        {
+          "path": "zero/nn.py",
+          "sha256": "d6921eec1ac20ea8337e719929bc761b78ad98cb64ab131f3ad3b53951d03c7f"
+        },
+        {
+          "path": "zero/random.py",
+          "sha256": "11a3ded718432c50f10535d6180e1079678357a582e9c57c2caf4aa6456da633"
+        }
+      ],
+      "version": "0.0.8"
+    }
+  },
+  "excluded_scopes": [
+    "data/",
+    "exp/",
+    "CTAB-GAN/",
+    "CTAB-GAN-Plus/",
+    "CTGAN/"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256_lf": "be87f7a784b005c934a2a3ce9eeebae15da80e0cc93f2585fa1f7e510f4e1c47"
+    },
+    {
+      "path": ".gitmodules",
+      "sha256_lf": "4fe26127edff9115664eeb8e0fbd68f8f45d36bb2dde3e5411776fca656e56e1"
+    },
+    {
+      "path": "CONFIG_DESCRIPTION.md",
+      "sha256_lf": "44f63ecfb2ceec926935d691583ce62edac0b01be57b6bde8302e899e97f29b2"
+    },
+    {
+      "path": "LICENSE.md",
+      "sha256_lf": "be701b4d15238cf3c2d730ead1b72868a99e397fe872da0e89e07ce50e68ca99"
+    },
+    {
+      "path": "README.md",
+      "sha256_lf": "f5cfba6c3ac3dfc009c52fb1ec58d1f0b6e4bd0390cbf2bf58801beddbf96aef"
+    },
+    {
+      "path": "agg_results.ipynb",
+      "sha256_lf": "2a6f6103c0ac08b0145807d8f570e079f05da9c4bdaa00001f871803ce7aae9d"
+    },
+    {
+      "path": "lib/__init__.py",
+      "sha256_lf": "6802d1802819d9f921bfff3ec36952903d145b094d59bc0fe6b159172049efee"
+    },
+    {
+      "path": "lib/data.py",
+      "sha256_lf": "74080d080ec6195ac73935aaf2a09a20f962ee78ea76c5d5a44e7833900b3556"
+    },
+    {
+      "path": "lib/deep.py",
+      "sha256_lf": "fcfca667a847dd952233a2bfbf6ac37dada9fb9c99ac4a4b5fb7ecdc4c428da1"
+    },
+    {
+      "path": "lib/env.py",
+      "sha256_lf": "b1d0b4f986fa1d8da1b0c83af1a015df4ac02a4ae6208c5cd3e7c2283d91b227"
+    },
+    {
+      "path": "lib/metrics.py",
+      "sha256_lf": "991ffbf3fdc1248534dee189da4655b0d8df74dea5069a8afcae90a4c0af1746"
+    },
+    {
+      "path": "lib/util.py",
+      "sha256_lf": "808221dded766ca2a30572460c0be16256cb70ad5519f19996e78f6642f0fef3"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256_lf": "6d70216122bbc21702e9fd3bb5209baf96ee89293d6e0d0a24961af079ff0e1c"
+    },
+    {
+      "path": "scripts/__init__.py",
+      "sha256_lf": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "scripts/eval_catboost.py",
+      "sha256_lf": "7eb585a78dc4941f4bee87dc38fc354ae6796d1132a21966be29ad181ab4937b"
+    },
+    {
+      "path": "scripts/eval_mlp.py",
+      "sha256_lf": "86028267cd7f5d3fcccd790b836d222a1edae358933946bf8315dfc41a10f983"
+    },
+    {
+      "path": "scripts/eval_seeds.py",
+      "sha256_lf": "e5a82df918479161f9af84387e55629dcf28327d92dedb268997b5a39d7b66ef"
+    },
+    {
+      "path": "scripts/eval_seeds_simple.py",
+      "sha256_lf": "ca587cb4d923c031c616508c8d4e1f6917e5c2cca372ac0fd2378302d6c0a954"
+    },
+    {
+      "path": "scripts/eval_simple.py",
+      "sha256_lf": "7183436a823a67b348c3c140b4c4bb660abad54291d6320662569cae9933e84a"
+    },
+    {
+      "path": "scripts/pipeline.py",
+      "sha256_lf": "de54c8195bcbfee008d46364bdc77725703e508a3def6c3c898858bee36f7638"
+    },
+    {
+      "path": "scripts/resample_privacy.py",
+      "sha256_lf": "6e4f1ea1e5a4b2a086e9607b4a8868499ee2ff5e4682e68a3725d108e8f55069"
+    },
+    {
+      "path": "scripts/sample.py",
+      "sha256_lf": "fd4a6c47d5fdbb8bc4e24111a1acc4d51c1e2795e7394ba845ac7067d4e20237"
+    },
+    {
+      "path": "scripts/train.py",
+      "sha256_lf": "c1cabdb592e2f511d2e34d887bf818e5f82acbe0249c87c262fdb201088faa92"
+    },
+    {
+      "path": "scripts/tune_ddpm.py",
+      "sha256_lf": "87833f557d7049d7679260bafd6075b4d5d8b71bdc44309f91841db9c652c63f"
+    },
+    {
+      "path": "scripts/tune_evaluation_model.py",
+      "sha256_lf": "d00a78d313fb17a27f5cbfeaebf4d6ada99e3b241c3da8f2abdd51ec89981841"
+    },
+    {
+      "path": "scripts/utils_train.py",
+      "sha256_lf": "93f175c8e1c69dd23b9bb8b58a68ac42c769c73f765e5b0c87f5cbe4d7caf9ca"
+    },
+    {
+      "path": "smote/pipeline_smote.py",
+      "sha256_lf": "34259576ede57df6f95077d102aedda829ce4493db2cf745e393fa72a1502de3"
+    },
+    {
+      "path": "smote/sample_smote.py",
+      "sha256_lf": "a6ab3575d45bfdb37bdd43679cac78fa7bd77f99f7320b4a45e653e44d4acd39"
+    },
+    {
+      "path": "smote/tune_smote.py",
+      "sha256_lf": "555bcfb8bbad33cc6da40191248f6a6d8bb350950ddf50f37c4ae211c08cbd2a"
+    },
+    {
+      "path": "tab_ddpm/__init__.py",
+      "sha256_lf": "bff5231072487c9ad858f5cecfb2eb28ee7845b024a252a424bc9573402348c1"
+    },
+    {
+      "path": "tab_ddpm/gaussian_multinomial_diffsuion.py",
+      "sha256_lf": "24236b08cbbe8ccf868828bda9c086a6b92611f3dba78896e462e1d34877a34c"
+    },
+    {
+      "path": "tab_ddpm/modules.py",
+      "sha256_lf": "c1636d738bad90b571def06ee2b5bcb03e22f7577ab0d2d07ff806fb8b0023b4"
+    },
+    {
+      "path": "tab_ddpm/utils.py",
+      "sha256_lf": "27d7e5410282a3f8ff11a7954fe1ac1e7a58ac6c97133defdf84e8a4f35a8129"
+    },
+    {
+      "path": "tuned_models/catboost/abalone_cv.json",
+      "sha256_lf": "aad08aabbf726ab65389e42c3a524f407e6bc791edcb5af304c31ba9037f6c10"
+    },
+    {
+      "path": "tuned_models/catboost/adult_cv.json",
+      "sha256_lf": "956a488f34e502db9975d86ef25b75cf5c01c08a3e5a47c7ade4f72cbf11374c"
+    },
+    {
+      "path": "tuned_models/catboost/buddy_cv.json",
+      "sha256_lf": "d4577f6d2af34360bff6faf7a01af5501463e8b13ff0fc0c18bf2bfa67c6c63b"
+    },
+    {
+      "path": "tuned_models/catboost/california_cv.json",
+      "sha256_lf": "0508cdc40c02386321976c9537fbe54a5f2b0fa0e8e7dde72a6d4d289ced862c"
+    },
+    {
+      "path": "tuned_models/catboost/cardio_cv.json",
+      "sha256_lf": "a411285e39c4cb685233ec73375cfd023fb834897dd6b5a8f99cf7a7ec1c6656"
+    },
+    {
+      "path": "tuned_models/catboost/churn2_cv.json",
+      "sha256_lf": "bc9b556a58a32d65ea4dadd30529b455b67fb7c0588518ab44b6428e7fa1379c"
+    },
+    {
+      "path": "tuned_models/catboost/default_cv.json",
+      "sha256_lf": "fb7ad47bb5b1c9fbe54cf14cc854581b22ed72f9dbc47f0a022e48fa572b5ffc"
+    },
+    {
+      "path": "tuned_models/catboost/diabetes_cv.json",
+      "sha256_lf": "0d1265117a3d8688b7878c62656b6d85bb543e723b1f5f01a2ed5bd4b12878dc"
+    },
+    {
+      "path": "tuned_models/catboost/fb-comments_cv.json",
+      "sha256_lf": "18ccbc230cd0959834d3155e67c29d259af90720d29bc4284b3209df5374886e"
+    },
+    {
+      "path": "tuned_models/catboost/gesture_cv.json",
+      "sha256_lf": "efa67605a7699adf3cd46bb7d7d5512516ab3e5da3e01451004aadf9ee4f9d62"
+    },
+    {
+      "path": "tuned_models/catboost/higgs-small_cv.json",
+      "sha256_lf": "d4c67d2f9937dc5548b3c3a1ae71846e5fccc66853b8067670b979ff2a4f0201"
+    },
+    {
+      "path": "tuned_models/catboost/house_cv.json",
+      "sha256_lf": "8e12178e6dc0890456547074af1c2b78fa9d52623f39937b6bb06aac6984137b"
+    },
+    {
+      "path": "tuned_models/catboost/insurance_cv.json",
+      "sha256_lf": "2201078a643eb78c649a3d4a9e897ecf39c2d7f35c5a9fdb055c91251694b808"
+    },
+    {
+      "path": "tuned_models/catboost/king_cv.json",
+      "sha256_lf": "a94473811e28035ef4781122c3da6e4f81b232b68a0042b64c30a1df648e02d3"
+    },
+    {
+      "path": "tuned_models/catboost/miniboone_cv.json",
+      "sha256_lf": "14dcf192aa15f491f147b30e2312b55889a146c546d72d89ee2d07ff26cc2103"
+    },
+    {
+      "path": "tuned_models/catboost/wilt_cv.json",
+      "sha256_lf": "4f6989397bf0029ee07b2ca9ab9335645ea3402bd6b782f2cec4cb40ad70b2ed"
+    },
+    {
+      "path": "tuned_models/mlp/abalone_cv.json",
+      "sha256_lf": "f99f28009311b8bb5413fbdbf72af25d1d384eec3c079c156e6a6eafa93e46bb"
+    },
+    {
+      "path": "tuned_models/mlp/adult_cv.json",
+      "sha256_lf": "1d4d4e1b062e420ce1838117b872e1794a632ea7f1dd8220eb640b71f793cd3a"
+    },
+    {
+      "path": "tuned_models/mlp/buddy_cv.json",
+      "sha256_lf": "bfe610df17eb46233b0dbba7fb71ea6117e9992763ae8ccd789159c296f3cc43"
+    },
+    {
+      "path": "tuned_models/mlp/california_cv.json",
+      "sha256_lf": "b9970d5c42859dce6fded5b3fb285bba98181076d8db75b8ef78e5e0167c7b0c"
+    },
+    {
+      "path": "tuned_models/mlp/cardio_cv.json",
+      "sha256_lf": "bc9642d070f056675cd4d004c0b446576eb162e2819dec052325fe7da59ce85d"
+    },
+    {
+      "path": "tuned_models/mlp/churn2_cv.json",
+      "sha256_lf": "ebea18b44a2d33a6643f283adf68961099d44d7e4f11e29148b501ddabb5894a"
+    },
+    {
+      "path": "tuned_models/mlp/default_cv.json",
+      "sha256_lf": "2d6082a82af0fb59906d778c57e4229eeff861066c1e24bea9c5e721f804214c"
+    },
+    {
+      "path": "tuned_models/mlp/diabetes_cv.json",
+      "sha256_lf": "243a914fe90215cab4867d415cb82078366b5d2472264c91ea46d3e0e3291534"
+    },
+    {
+      "path": "tuned_models/mlp/gesture_cv.json",
+      "sha256_lf": "a3a819ad5093581e1b94eeddb0655b99cccce3bb121f405b0b7e3b230c3c1a11"
+    },
+    {
+      "path": "tuned_models/mlp/higgs-small_cv.json",
+      "sha256_lf": "3520fe130d4570aa07a79031b6016f31a4f36cd5fdc9ff7167f0c7e1768a6697"
+    },
+    {
+      "path": "tuned_models/mlp/house_cv.json",
+      "sha256_lf": "22f1903d9a59e6cc1df1a643b9bc216392fbb3549cb6555482898d4a7ac936aa"
+    },
+    {
+      "path": "tuned_models/mlp/insurance_cv.json",
+      "sha256_lf": "381e76611b072a0fb5fa41a7c640740453293a6d0cda8210697d4b9833d715e4"
+    },
+    {
+      "path": "tuned_models/mlp/king_cv.json",
+      "sha256_lf": "afbbb1a2be60833c9468ded47ba78228e5a00c42bed93681e4e2aa0c6b68278d"
+    },
+    {
+      "path": "tuned_models/mlp/miniboone_cv.json",
+      "sha256_lf": "896a60d6ce4628cacdf5a3ec5a4c70b9fcff7944e373082ca34a6b55d7c6871a"
+    },
+    {
+      "path": "tuned_models/mlp/wilt_cv.json",
+      "sha256_lf": "1489c33a341492905b3145370808bd2201a18fe8a1ae604df8917408821f57de"
+    }
+  ],
+  "schema_version": 1,
+  "source_hash_normalization": "CRLF and LF are normalized to LF and the file is canonicalized to one trailing newline before SHA-256.",
+  "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
+  "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"
+}

@@ -12,21 +12,17 @@
       "license": "MIT",
       "license_path": "TabDDPM-main/LICENSE.md",
       "local_path": "TabDDPM-main",
-      "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-native-parity-and-shim-removal-or-approval",
-      "patch_sets": [
+      "dependency_treatment": [
         {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabDDPM-main/zero/__init__.py",
-            "TabDDPM-main/zero/hardware.py",
-            "TabDDPM-main/zero/random.py"
-          ],
-          "patch_set_id": "tabddpm-libzero-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Local compatibility substitute for the pinned libzero dependency; scientific parity has not been established."
+          "integrity_manifest": "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json",
+          "package": "libzero",
+          "status": "exact-official-wheel-source-vendored",
+          "version": "0.0.8"
         }
       ],
+      "modification_status": "adapter-only",
+      "official_eligibility": "pending-separate-official-track-review",
+      "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
@@ -35,9 +31,56 @@
           "CTAB-GAN-Plus/",
           "CTGAN/"
         ],
-        "import_exact_matches": 58,
-        "import_shared_paths": 58,
-        "relation": "The imported TabDDPM core matched every compared blob at the pinned upstream tree."
+        "current_scoped_files": 64,
+        "exact_after_declared_text_normalization": 64,
+        "initial_import_exact_matches": 58,
+        "initial_import_missing_files": [
+          "lib/__init__.py",
+          "lib/data.py",
+          "lib/deep.py",
+          "lib/env.py",
+          "lib/metrics.py",
+          "lib/util.py"
+        ],
+        "initial_import_shared_paths": 58,
+        "relation": "The six initially missing official lib files were restored from the pinned upstream checkout. All 64 scoped files now match the source manifest after declared line-ending normalization."
+      },
+      "validation": {
+        "artifact": {
+          "digest": "sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757",
+          "evidence_file_sha256": "8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e",
+          "expires_at": "2026-11-01T23:43:15Z",
+          "github_artifact_id": 8875144833,
+          "name": "tabddpm-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-30863212268.json"
+        },
+        "environment": {
+          "libzero": "0.0.8-exact-vendored-source",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "rtdl": "0.0.9",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
+        "protocol_id": "tabddpm-native-parity-v1",
+        "repository_commit": "3339af2603bac7a4736e68d7f369194b6b095653",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "config_mapping_exact": true,
+          "generated_arrays_exact": true,
+          "model_and_ema_state_exact": true,
+          "numeric_integrity_passed": true,
+          "seed_cases_passed": 3,
+          "seed_cases_total": 3
+        },
+        "status": "pass",
+        "validated_at": "2026-08-03T23:44:47Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268/job/91849440286",
+        "workflow_run_id": 30863212268,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268"
       },
       "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
       "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"

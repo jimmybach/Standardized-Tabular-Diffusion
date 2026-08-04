@@ -277,6 +277,7 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     repo_root = tmp_path
     upstream_root = repo_root / "TabDDPM-main"
     upstream_root.mkdir(parents=True)
@@ -285,10 +286,18 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
 
     adapter = TabDDPMAdapter(repo_root)
     commands: list[tuple[list[str], Path]] = []
+    environments: list[dict[str, str] | None] = []
 
-    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
+    def fake_run_python(
+        args: list[str],
+        cwd: Path,
+        *,
+        module: bool = False,
+        env: dict[str, str] | None = None,
+    ) -> None:
         assert not module
         commands.append((args, cwd))
+        environments.append(env)
 
     monkeypatch.setattr(adapter, "_run_python", fake_run_python)
     dataset_spec = DatasetSpec(
@@ -360,6 +369,10 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     assert commands == [
         (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
         (["scripts/pipeline.py", "--config", str(config_path), "--sample"], upstream_root),
+    ]
+    assert environments == [
+        {"PYTHONPATH": str(upstream_root.resolve())},
+        {"PYTHONPATH": str(upstream_root.resolve())},
     ]
     assert train_bundle.output_dir.joinpath("artifacts.json").exists()
     assert sample_bundle.output_dir.joinpath("artifacts.json").exists()
