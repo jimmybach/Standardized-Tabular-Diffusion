@@ -28,7 +28,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 |---|---|---|---|---|
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The imported core matched all 58 compared upstream blobs. | Local `zero` compatibility substitute; no generative-algorithm source change found. | Blocked pending shim removal or approval plus native-parity validation. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | The initial non-data snapshot matched all 30 compared upstream blobs. | `eval/mle/mle.py` was changed later and is a semantic evaluator patch; the generative core remains upstream-exact within the audited scope. | Patched upstream evaluator is excluded from official metrics; central reviewed evaluation must be used. |
-| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Blocked only pending a passing retained native-parity record. |
+| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Native parity passed; Official Results remain blocked by central-evaluation, dataset, runtime, governance, and release gates. |
 
 ## Patch Classification
 
@@ -77,4 +77,4 @@ Before any of these adapters can enter the Official Results track:
 5. no unproven checkpoint may be treated as an official pretrained artifact; and
 6. the model evidence record must be promoted independently through `registered`, `adapter-complete`, `smoke-validated`, `native-parity-validated`, `benchmark-eligible`, and `release-supported` states.
 
-Until those gates are met, registry records remain conservative: experimental track, unsupported, and no native-parity claim.
+Until all applicable gates are met, registry records remain conservative. TabSyn has a retained native-parity claim, but it remains experimental, unsupported, and excluded from Official Results.

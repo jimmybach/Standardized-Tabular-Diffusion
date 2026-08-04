@@ -92,7 +92,7 @@
       "license_path": "TabSyn-main/LICENSE",
       "local_path": "TabSyn-main",
       "modification_status": "official-unmodified",
-      "official_eligibility": "blocked-pending-native-parity-validation",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -136,6 +136,18 @@
         "declared_name": "zero",
         "resolved_distribution": "libzero==0.0.8",
         "reason": "The imported zero research-utility API is provided by libzero; the zero distribution is an unrelated circuit-analysis package. Its stale torch<2 dependency metadata is overridden while all actual dependencies are locked separately for the validated torch 2.3 environment."
+      },
+      "validation": {
+        "artifact_digest": "sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c",
+        "artifact_id": 8878140935,
+        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "evidence_path": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+        "evidence_sha256": "3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089",
+        "protocol_id": "tabsyn-native-parity-v1",
+        "repository_commit": "54d419642842d7146d6afa4aa1b3d5167301c51c",
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645",
+        "seed_cases": [0, 19, 73],
+        "status": "passed-native-parity-validated"
       },
       "snapshot_comparison": {
         "excluded_scopes": [

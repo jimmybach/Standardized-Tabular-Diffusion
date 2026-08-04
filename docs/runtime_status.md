@@ -2,7 +2,11 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, every registered runnable adapter is conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, TabSyn is `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+
+## Current Retained Validation
+
+- `tabsyn`: passed `tabsyn-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30871758645`; see `docs/TABSYN_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 
 ## Previously Reported Local End-to-End Executions
 
