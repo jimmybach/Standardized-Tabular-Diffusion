@@ -19,7 +19,16 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"ctgan", "nrgboost", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
+    assert set(components) == {
+        "ctab-gan-plus",
+        "ctgan",
+        "nrgboost",
+        "smote",
+        "tabddpm",
+        "tabdiff",
+        "tabsyn",
+        "tvae",
+    }
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
@@ -28,9 +37,14 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         assert list(spec.patch_set_ids) == [patch["patch_set_id"] for patch in component["patch_sets"]]
         if component["distribution_form"] == "source":
             assert (REPO_ROOT / component["license_path"]).is_file()
-        else:
+        elif component["distribution_form"] == "package":
             assert component["package_lock"]["sha256"]
             assert component["license_url"].startswith("https://")
+        else:
+            assert component["distribution_form"] == "source-on-demand"
+            assert component["license"] == "NONE-DECLARED"
+            assert component["license_review"]["redistribution_status"] == "not-authorized"
+            assert (REPO_ROOT / component["source_manifest"]).is_file()
 
 
 def test_source_lock_patch_ids_are_unique_and_classified() -> None:

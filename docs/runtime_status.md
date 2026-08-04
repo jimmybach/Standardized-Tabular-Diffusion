@@ -4,6 +4,8 @@ This document preserves historical local execution observations. It is not the m
 
 At the current release-preparation baseline, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
 
+CTAB-GAN+ no longer imports the semantically modified snapshot formerly embedded in the TabDDPM tree. The adapter now acquires five byte-exact files from locked method-author commit `6a6f901` into an ignored cache and does not patch them. A local Python 3.11 compatibility run completed, but the mandatory Linux workflow and permanent evidence are still pending, so its status remains `adapter-complete`. The absent upstream license independently blocks redistribution and release claims.
+
 CTGAN has been moved from the legacy embedded `0.5.2.dev0` import path to the checksum-pinned official `ctgan==0.12.1` wheel. Its first mandatory parity run passed and is retained. The package is BUSL-1.1, so validation cannot by itself grant Official Results or release eligibility.
 
 TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locally modified legacy subtree and its wrappers were removed. Its first mandatory Linux/Python 3.11 parity run passed and is permanently retained, so TVAE is `native-parity-validated`; the shared package-license gate still applies.

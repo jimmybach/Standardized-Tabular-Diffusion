@@ -18,6 +18,7 @@ from standardized_tabular_diffusion.runner import (
     save_pipeline_result,
     save_run_context,
 )
+from standardized_tabular_diffusion.upstream_sources import materialize_upstream_source, source_status
 
 
 def compare_summaries(summary_paths: list[Path]):
@@ -298,6 +299,37 @@ def build_parser() -> argparse.ArgumentParser:
     )
     materialize_status_parser.add_argument("--dataset", required=True, help="Dataset name")
 
+    materialize_model_source_parser = subparsers.add_parser(
+        "materialize-model-source",
+        help="Download and verify a registered official model source without vendoring it",
+    )
+    materialize_model_source_parser.add_argument(
+        "--model", required=True, choices=["ctab-gan-plus"], help="Registered source-backed model"
+    )
+    materialize_model_source_parser.add_argument(
+        "--repo-root", default=".", help="Repository root used to derive the default ignored source cache"
+    )
+    materialize_model_source_parser.add_argument(
+        "--destination", default=None, help="Optional explicit source destination"
+    )
+    materialize_model_source_parser.add_argument(
+        "--refresh", action="store_true", help="Replace the managed cache after verifying a fresh official archive"
+    )
+    materialize_model_source_parser.add_argument(
+        "--timeout-seconds", type=float, default=60.0, help="Positive network timeout in seconds"
+    )
+
+    model_source_status_parser = subparsers.add_parser(
+        "model-source-status", help="Verify the local checksum-locked source for one registered model"
+    )
+    model_source_status_parser.add_argument(
+        "--model", required=True, choices=["ctab-gan-plus"], help="Registered source-backed model"
+    )
+    model_source_status_parser.add_argument(
+        "--repo-root", default=".", help="Repository root used to derive the default ignored source cache"
+    )
+    model_source_status_parser.add_argument("--source-dir", default=None, help="Optional explicit source directory")
+
     download_dataset_parser = subparsers.add_parser(
         "download-dataset",
         help="Download and safely extract a checksum-pinned public dataset source",
@@ -540,6 +572,30 @@ def main() -> None:
 
     if args.command == "materialization-status":
         print(json.dumps(materialization_status(args.dataset), indent=2))
+        return
+
+    if args.command == "materialize-model-source":
+        print(
+            json.dumps(
+                materialize_upstream_source(
+                    args.model,
+                    repo_root=args.repo_root,
+                    destination=args.destination,
+                    refresh=args.refresh,
+                    timeout_seconds=args.timeout_seconds,
+                ),
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "model-source-status":
+        print(
+            json.dumps(
+                source_status(args.model, repo_root=args.repo_root, source_dir=args.source_dir),
+                indent=2,
+            )
+        )
         return
 
     if args.command == "download-dataset":

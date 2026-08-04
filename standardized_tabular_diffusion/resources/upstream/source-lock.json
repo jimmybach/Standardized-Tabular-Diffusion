@@ -1,5 +1,47 @@
 {
   "components": {
+    "ctab-gan-plus": {
+      "adapter_ids": [
+        "ctab-gan-plus"
+      ],
+      "archive_lock": {
+        "bytes": 1103324,
+        "format": "zip",
+        "sha256": "c3088a307f2f8ee8f374095096da365ddc33931ad244056c7fed084830059d47",
+        "url": "https://codeload.github.com/Team-TUD/CTAB-GAN-Plus/zip/6a6f90188cca3dac2c533fd5e8e7f20de074365b"
+      },
+      "authoritative_repository": "https://github.com/Team-TUD/CTAB-GAN-Plus",
+      "authority": "method-author",
+      "component_id": "ctab-gan-plus",
+      "distribution_form": "source-on-demand",
+      "legacy_snapshot_disposition": {
+        "bytes_removed": 146977,
+        "files_removed": 18,
+        "history_rewritten": false,
+        "imported_at_repository_commit": "3b7caea921cfbc5ea2ee8718e0c8e8753d025d26",
+        "original_path": "TabDDPM-main/CTAB-GAN-Plus",
+        "reason": "The embedded snapshot was semantically modified, could not be tied to the current official tree, and had no standalone redistribution license. It remains recoverable through Git history."
+      },
+      "license": "NONE-DECLARED",
+      "license_review": {
+        "license_file_present": false,
+        "redistribution_status": "not-authorized",
+        "status": "upstream-public-no-license-declared"
+      },
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-runtime-and-release-gates-pending",
+      "patch_sets": [],
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/ctabgan-plus-source-manifest.json",
+      "source_treatment": "download-five-byte-exact-runtime-files-to-ignored-local-cache",
+      "upstream_commit": "6a6f90188cca3dac2c533fd5e8e7f20de074365b",
+      "upstream_model_tree": "645e6a9d5129346f5d4e29085f1bafd5de4531fd",
+      "upstream_tree": "f5a08d81b0309d6635bf1c7a646965a34913fa93",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "ctabgan-plus-native-parity-v1",
+        "status": "pending"
+      }
+    },
     "ctgan": {
       "adapter_ids": [
         "ctgan"
