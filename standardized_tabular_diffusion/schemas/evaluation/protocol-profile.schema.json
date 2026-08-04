@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/protocol-profile/1.0.0",
+  "title": "Protocol Profile",
+  "type": "object", "additionalProperties": false,
+  "required": ["profile_schema_version", "protocol_id", "protocol_version", "display_name", "status", "official_results_allowed", "comparison_tracks", "metric_selections", "dataset_suites", "result_schema_versions", "policies", "owners", "review_record", "change_log"],
+  "properties": {
+    "profile_schema_version": {"const": "1.0.0"}, "protocol_id": {"$ref": "#/$defs/id"}, "protocol_version": {"$ref": "#/$defs/id"}, "display_name": {"type": "string", "minLength": 1},
+    "status": {"enum": ["draft", "frozen", "deprecated", "legacy"]}, "official_results_allowed": {"type": "boolean"}, "comparison_tracks": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["native", "standardized-tuning"]}},
+    "metric_selections": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["metric_id", "metric_version", "required", "role"], "properties": {"metric_id": {"$ref": "#/$defs/id"}, "metric_version": {"$ref": "#/$defs/id"}, "required": {"type": "boolean"}, "role": {"enum": ["official-component", "diagnostic", "excluded", "legacy-diagnostic"]}}}},
+    "dataset_suites": {"type": "array", "items": {"enum": ["universal-core", "extended-catalog", "diagnostic"]}},
+    "result_schema_versions": {"type": "object", "additionalProperties": false, "required": ["atomic_result", "manifest", "metadata", "summary", "stage_record", "artifact_index"], "properties": {"atomic_result": {"$ref": "#/$defs/id"}, "manifest": {"$ref": "#/$defs/id"}, "metadata": {"$ref": "#/$defs/id"}, "summary": {"$ref": "#/$defs/id"}, "stage_record": {"$ref": "#/$defs/id"}, "artifact_index": {"$ref": "#/$defs/id"}}},
+    "policies": {"type": "object"}, "owners": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "review_record": {"type": "object"}, "change_log": {"type": "array", "items": {"type": "object"}}
+  },
+  "allOf": [{"if": {"properties": {"status": {"enum": ["draft", "legacy"]}}}, "then": {"properties": {"official_results_allowed": {"const": false}}}}],
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"}}
+}

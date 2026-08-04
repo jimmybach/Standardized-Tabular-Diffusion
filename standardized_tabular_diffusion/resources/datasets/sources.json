@@ -1,0 +1,51 @@
+{
+  "registry_schema_version": "1.0.0",
+  "sources": {
+    "adult": {
+      "archive_format": "zip",
+      "archive_name": "adult.zip",
+      "canonical_page": "https://archive.ics.uci.edu/dataset/2/adult",
+      "citation": "Becker, B. and Kohavi, R. (1996). Adult [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5XW20.",
+      "dataset_view": "adult",
+      "license": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "max_download_bytes": 10000000,
+      "max_extracted_bytes": 10000000,
+      "publisher": "UCI Machine Learning Repository",
+      "redistribution_status": "permitted",
+      "required_members": [
+        "Index",
+        "adult.data",
+        "adult.names",
+        "adult.test",
+        "old.adult.names"
+      ],
+      "retrieval_url": "https://archive.ics.uci.edu/static/public/2/adult.zip",
+      "retrieved_date": "2026-08-03",
+      "sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+      "source_version": "uci-2-sha256-7537312dd56c"
+    },
+    "sick": {
+      "archive_format": "zip",
+      "archive_name": "thyroid-disease.zip",
+      "canonical_page": "https://archive.ics.uci.edu/dataset/102/thyroid+disease",
+      "citation": "Quinlan, R. (1986). Thyroid Disease [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5D010.",
+      "dataset_view": "sick",
+      "license": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "max_download_bytes": 10000000,
+      "max_extracted_bytes": 10000000,
+      "publisher": "UCI Machine Learning Repository",
+      "redistribution_status": "permitted",
+      "required_members": [
+        "sick.data",
+        "sick.names",
+        "sick.test"
+      ],
+      "retrieval_url": "https://archive.ics.uci.edu/static/public/102/thyroid+disease.zip",
+      "retrieved_date": "2026-08-03",
+      "sha256": "a0982569a7442c03a20815db58f271245e7a111b10ac46f6c6b5fa6feee4c1f4",
+      "source_version": "uci-102-sha256-a0982569a744"
+    }
+  }
+}

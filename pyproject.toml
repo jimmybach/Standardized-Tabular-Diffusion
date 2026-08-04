@@ -1,0 +1,164 @@
+[build-system]
+requires = ["setuptools>=75,<82"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "standardized-tabular-diffusion"
+version = "0.1.0.dev0"
+description = "A standardized research benchmark interface for tabular data synthesis methods"
+readme = "README.md"
+requires-python = ">=3.11"
+keywords = ["tabular-data", "synthetic-data", "benchmark", "diffusion"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+contracts = [
+  "jsonschema==4.23.0",
+  "PyYAML==6.0.2",
+]
+data = [
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+]
+evaluation = [
+  "jsonschema==4.23.0",
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "PyYAML==6.0.2",
+  "scikit-learn==1.5.2",
+  "scipy==1.13.1; python_version < '3.13'",
+  "scipy>=1.14,<1.15; python_version >= '3.13'",
+  "sdmetrics==0.11.1; python_version < '3.13'",
+]
+models = [
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "scikit-learn==1.5.2",
+  "torch==2.3.0; python_version < '3.13'",
+  "tokenizers==0.20.3; python_version < '3.13'",
+  "transformers==4.46.3; python_version < '3.13'",
+]
+test = [
+  "jsonschema==4.23.0",
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "pytest==8.3.5",
+  "PyYAML==6.0.2",
+  "scikit-learn==1.5.2",
+  "scipy==1.13.1; python_version < '3.13'",
+  "scipy>=1.14,<1.15; python_version >= '3.13'",
+]
+dev = [
+  "build==1.2.2.post1",
+  "jsonschema==4.23.0",
+  "mypy==1.15.0",
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "pytest==8.3.5",
+  "PyYAML==6.0.2",
+  "ruff==0.11.0",
+  "scikit-learn==1.5.2",
+  "scipy==1.13.1; python_version < '3.13'",
+  "scipy>=1.14,<1.15; python_version >= '3.13'",
+]
+
+[project.scripts]
+std-tabular-diffusion = "standardized_tabular_diffusion.cli:main"
+
+[project.urls]
+Repository = "https://github.com/jimmybach/Standardized-Tabular-Diffusion"
+Issues = "https://github.com/jimmybach/Standardized-Tabular-Diffusion/issues"
+
+[tool.setuptools.packages.find]
+include = ["standardized_tabular_diffusion*"]
+exclude = ["research_inputs*", "TabDDPM-main*", "TabDiff-main*", "TabSyn-main*", "tests*"]
+
+[tool.setuptools.package-data]
+standardized_tabular_diffusion = [
+  "resources/datasets/*.json",
+  "schemas/evaluation/*.json",
+  "resources/evaluation/metrics/*.json",
+  "resources/evaluation/protocols/*.json",
+  "resources/upstream/*.json",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = ["--strict-config", "--strict-markers", "-ra"]
+testpaths = ["tests"]
+norecursedirs = [
+  ".git",
+  ".pytest_cache",
+  ".venv",
+  "artifacts",
+  "research_inputs",
+  "TabDDPM-main",
+  "TabDiff-main",
+  "TabSyn-main",
+  "tmp",
+]
+markers = [
+  "core: dependency-light package, metadata, configuration, and CLI behavior",
+  "integration: repository-owned integration behavior that may require data dependencies",
+  "evaluation: evaluation formula, normalization, or reproducibility behavior",
+  "adapter: model-adapter behavior that requires optional model dependencies",
+  "legacy: compatibility behavior for the pre-roadmap implementation",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+  "research_inputs",
+  "TabDDPM-main",
+  "TabDiff-main",
+  "TabSyn-main",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"standardized_tabular_diffusion/__init__.py" = ["F401"]
+"standardized_tabular_diffusion/models/__init__.py" = ["F401"]
+"tests/*.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.11"
+files = [
+  "standardized_tabular_diffusion/__init__.py",
+  "standardized_tabular_diffusion/config.py",
+  "standardized_tabular_diffusion/datasets.py",
+  "standardized_tabular_diffusion/dataset_sources.py",
+  "standardized_tabular_diffusion/interfaces.py",
+  "standardized_tabular_diffusion/evaluation/bundle.py",
+  "standardized_tabular_diffusion/evaluation/contracts.py",
+  "standardized_tabular_diffusion/evaluation/profiles.py",
+  "standardized_tabular_diffusion/evaluation/registry.py",
+  "standardized_tabular_diffusion/evaluation/schema.py",
+  "standardized_tabular_diffusion/evaluation/serialization.py",
+  "standardized_tabular_diffusion/materialization.py",
+  "standardized_tabular_diffusion/registry.py",
+  "standardized_tabular_diffusion/runner.py",
+]
+exclude = "(?x)(research_inputs|TabDDPM-main|TabDiff-main|TabSyn-main)/"
+check_untyped_defs = true
+follow_imports = "skip"
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+warn_redundant_casts = true
+warn_unused_ignores = true

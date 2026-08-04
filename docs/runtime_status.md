@@ -1,8 +1,10 @@
-# Runtime Status
+# Runtime Observations (Non-Normative)
 
-This document separates "integrated in code" from "operationally easy to run".
+This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-## Fully Smoke-Validated End to End
+At the current release-preparation baseline, every registered runnable adapter is conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+
+## Previously Reported Local End-to-End Executions
 
 - `tabddpm`
 - `tabsyn`
@@ -17,9 +19,9 @@ This document separates "integrated in code" from "operationally easy to run".
 - `goggle`
 - `arf`
 
-These models have a standardized adapter and at least one successful local smoke path through the shared CLI in this environment.
+These models were reported to have completed at least one local path through the shared CLI. The runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
-## Train + Sample Works, but Environment Is Fragile
+## Previously Reported Train and Sample Paths with Fragile Environments
 
 - `goggle`
 - `realtabformer`
@@ -30,7 +32,7 @@ These models have a standardized adapter and at least one successful local smoke
 - `stasy`
 - `codi`
 
-These are integrated and runnable, but they depend on more brittle stacks:
+These adapters were reported as runnable in a prior environment, but they depend on brittle stacks and require fresh supported-environment evidence:
 
 - `goggle`: DGL, torch-geometric, and binary extension compatibility.
 - `realtabformer`: Hugging Face imports that currently need the adapter-side torchvision disable shim.
@@ -41,11 +43,11 @@ These are integrated and runnable, but they depend on more brittle stacks:
 - `stasy`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
 - `codi`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
 
-## Train-Validated, Sampling-Guarded
+## Previously Reported Training Path, Sampling Guarded
 
 - `great`
 
-`great` now imports and trains correctly through the standardized adapter. For the standardized path, ordered-column training plus a first-column start prompt materially improves parseability, and stronger `distilgpt2` runs can now complete sampling. The tiny CPU smoke presets still do not reliably emit parseable rows, so use the train-only preset for deterministic adapter validation and treat sampled tiny runs as stress tests rather than pass/fail quality checks.
+`great` was reported to import and train through the standardized adapter. Ordered-column training plus a first-column start prompt improved parseability in those experiments, while tiny CPU presets did not reliably emit parseable rows. These observations require fresh evidence and native-parity review before any stronger claim.
 
 ## Runtime-Gated by External Model Access
 
@@ -53,7 +55,7 @@ These are integrated and runnable, but they depend on more brittle stacks:
 
 `tabebm` is standardized in code and its train action completes, but sample generation depends on Prior Labs' gated TabPFN model access via Hugging Face. The standardized runner now treats sampling as an explicit opt-in path through `sample.extra.allow_gated_model=true`; without that plus accepted terms and authentication, it exits with a clear runtime error.
 
-## Current Environment Caveats
+## Historical Environment Caveats
 
 - `torch==2.3.0` is the current pinned runtime in the benchmark stack requirements.
 - `transformers==4.46.3` and `tokenizers==0.20.3` are pinned because the vendored `great` code is happier on that surface than on the newer 4.57 series.
@@ -61,8 +63,8 @@ These are integrated and runnable, but they depend on more brittle stacks:
 - `torch-scatter` and `torch-sparse` currently emit load warnings under this torch stack, but the `goggle` smoke path still completes in this environment.
 - Some vendored baselines expect legacy helper modules; this repository now vendors a minimal local `zero` compatibility shim for the `TabSyn-main` and `TabDDPM-main` paths to avoid pulling the wrong PyPI package.
 
-## Recommended Interpretation
+## Current Interpretation
 
-- Use `arf`, `ctgan`, `tvae`, `smote`, `bn`, `nflow`, `nrgboost`, and the diffusion models for the least surprising benchmark runs.
-- Treat `goggle`, `great`, `realtabformer`, `tabsds`, `tabularargn`, `tabula`, `ctab-gan`, `stasy`, `codi`, and `tabebm` as integrated but higher-maintenance baselines.
-- Use the train-only `tabebm` smoke preset for routine integration checks and the gated-sample preset only on machines that already have TabPFN access configured.
+- Treat every current adapter as an experimental engineering integration until its evidence record says otherwise.
+- Local compatibility implementations (`tabsds`, `tabula`, and the current `tabebm` path) are excluded from the future official track unless replaced by or validated against an approved authoritative implementation.
+- The `tabebm` gated-sample preset may be used only on machines whose users have accepted the applicable model terms and configured access.

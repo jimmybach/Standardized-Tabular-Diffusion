@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/evaluation-request/1.0.0",
+  "title": "Evaluation Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_schema_version", "subject_type", "sample_artifact", "dataset_profile", "protocol", "metrics", "comparison_track", "generation_seed", "evaluator_seeds", "evaluator_profile", "hardware_profile", "model", "resource_limits", "failure_policy"],
+  "properties": {
+    "request_schema_version": {"const": "1.0.0"},
+    "subject_type": {"enum": ["adapter-run", "external-synthetic-table"]},
+    "sample_artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_id", "media_type", "sha256"],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/identifier"},
+        "media_type": {"type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "uri": {"type": "string", "minLength": 1}
+      }
+    },
+    "dataset_profile": {"$ref": "#/$defs/datasetReference"},
+    "protocol": {"$ref": "#/$defs/protocolReference"},
+    "metrics": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/metricReference"}},
+    "comparison_track": {"enum": ["native", "standardized-tuning"]},
+    "generation_seed": {"type": "integer"},
+    "evaluator_seeds": {"type": "array", "minItems": 1, "items": {"type": "integer"}},
+    "evaluator_profile": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/profileReference"}]},
+    "hardware_profile": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/profileReference"}]},
+    "model": {"type": ["object", "null"]},
+    "resource_limits": {"type": "object"},
+    "failure_policy": {"type": "object"}
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "datasetReference": {"type": "object", "additionalProperties": false, "required": ["dataset_id", "dataset_profile_version", "sha256"], "properties": {"dataset_id": {"$ref": "#/$defs/identifier"}, "dataset_profile_version": {"$ref": "#/$defs/identifier"}, "sha256": {"$ref": "#/$defs/sha256"}}},
+    "protocolReference": {"type": "object", "additionalProperties": false, "required": ["protocol_id", "protocol_version", "sha256"], "properties": {"protocol_id": {"$ref": "#/$defs/identifier"}, "protocol_version": {"$ref": "#/$defs/identifier"}, "sha256": {"$ref": "#/$defs/sha256"}}},
+    "profileReference": {"type": "object", "additionalProperties": false, "required": ["profile_id", "profile_version", "sha256"], "properties": {"profile_id": {"$ref": "#/$defs/identifier"}, "profile_version": {"$ref": "#/$defs/identifier"}, "sha256": {"$ref": "#/$defs/sha256"}}},
+    "metricReference": {"type": "object", "additionalProperties": false, "required": ["metric_id", "metric_version"], "properties": {"metric_id": {"$ref": "#/$defs/identifier"}, "metric_version": {"$ref": "#/$defs/identifier"}}}
+  }
+}

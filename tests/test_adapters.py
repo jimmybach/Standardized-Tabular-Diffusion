@@ -8,7 +8,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import torch
+import pytest
+
+try:
+    import torch
+except ModuleNotFoundError:
+    torch = None  # type: ignore[assignment]
+
+pytestmark = pytest.mark.adapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -17,14 +24,19 @@ if str(REPO_ROOT) not in sys.path:
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
 from standardized_tabular_diffusion.interfaces import DatasetSpec
 from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
-from standardized_tabular_diffusion.models.next_wave_baselines import CTABGANPlusAdapter, NRGBoostAdapter, REaLTabFormerAdapter
+from standardized_tabular_diffusion.models.next_wave_baselines import (
+    CTABGANPlusAdapter,
+    NRGBoostAdapter,
+    REaLTabFormerAdapter,
+)
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
-from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
+from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
+from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
-from standardized_tabular_diffusion.models.vendored_baselines import CTABGANAdapter, CoDiAdapter, STaSyAdapter
+from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, CTABGANAdapter, STaSyAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
@@ -154,6 +166,34 @@ class FakeTabularARGN:
         return pd.DataFrame({"x": [11] * n_samples, "y": [1] * n_samples})
 
 
+def test_tabsyn_train_uses_authoritative_epoch_default_and_does_not_reuse_checkpoints(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    (tmp_path / "TabSyn-main").mkdir()
+    adapter = TabSynAdapter(tmp_path)
+    commands: list[tuple[list[str], bool]] = []
+
+    def fake_run_python(args: list[str], _cwd: Path, *, module: bool = False) -> None:
+        commands.append((args, module))
+
+    monkeypatch.setattr(adapter, "_run_python", fake_run_python)
+    spec = ExperimentConfig(
+        model="tabsyn",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts"),
+        train=TrainConfig(),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    ).to_run_spec("train")
+
+    adapter.train(spec)
+
+    assert commands[0] == (["tabsyn.vae.main", "--dataname", "adult", "--gpu", "0"], True)
+    assert commands[1][1] is False
+    assert commands[1][0][-2:] == ["--num_epochs", "10001"]
+
+
 def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command(
     tmp_path: Path,
     monkeypatch,
@@ -270,7 +310,15 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
 
     def fake_normalize(dataset: str, output_path: Path, metrics_paths: dict[str, Path | None]) -> None:
         normalized_calls.append((dataset, output_path, metrics_paths))
-        output_path.write_text(json.dumps({"dataset": dataset, "metrics_paths": {k: None if v is None else str(v) for k, v in metrics_paths.items()}}, indent=2))
+        output_path.write_text(
+            json.dumps(
+                {
+                    "dataset": dataset,
+                    "metrics_paths": {k: None if v is None else str(v) for k, v in metrics_paths.items()},
+                },
+                indent=2,
+            )
+        )
 
     monkeypatch.setattr("standardized_tabular_diffusion.models.tabddpm.normalize_tabddpm_summary", fake_normalize)
 
@@ -456,7 +504,9 @@ def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_p
         def fit_resample(self, x_train, y_train):
             x_df = pd.DataFrame(x_train).reset_index(drop=True)
             y_series = pd.Series(y_train).reset_index(drop=True)
-            return pd.concat([x_df, x_df.iloc[[0]]], ignore_index=True), pd.concat([y_series, y_series.iloc[[0]]], ignore_index=True)
+            return pd.concat([x_df, x_df.iloc[[0]]], ignore_index=True), pd.concat(
+                [y_series, y_series.iloc[[0]]], ignore_index=True
+            )
 
     fake_imblearn = types.ModuleType("imblearn")
     fake_over_sampling = types.ModuleType("imblearn.over_sampling")
@@ -477,6 +527,64 @@ def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_p
 
     assert bundle.generated_sample_path is not None
     assert pd.read_csv(bundle.generated_sample_path).shape == (4, 2)
+
+
+def test_smote_uses_smotenc_for_mixed_type_features(tmp_path: Path, monkeypatch) -> None:
+    (tmp_path / "TabSyn-main").mkdir(parents=True)
+    adapter = SMOTEAdapter(tmp_path)
+    dataset_spec = DatasetSpec(
+        name="mixed",
+        task_type="classification",
+        column_names=["x", "color", "target"],
+        numerical_columns=["x"],
+        categorical_columns=["color"],
+        target_columns=["target"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+        test_data_path=tmp_path / "test.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}")
+    pd.DataFrame(
+        {
+            "x": [1.0, 2.0, 3.0, 10.0, 11.0, 12.0],
+            "color": ["red", "blue", "red", "blue", "red", "blue"],
+            "target": [0, 0, 0, 1, 1, 1],
+        }
+    ).to_csv(dataset_spec.train_data_path, index=False)
+    dataset_spec.test_data_path.write_text("x,color,target\n4,red,0\n")
+
+    class FakeSMOTENC:
+        def __init__(self, categorical_features, random_state=None, k_neighbors=5):
+            assert categorical_features == [1]
+
+        def fit_resample(self, x_train, y_train):
+            x_frame = pd.DataFrame(x_train).reset_index(drop=True)
+            assert all(pd.api.types.is_numeric_dtype(dtype) for dtype in x_frame.dtypes)
+            y_series = pd.Series(y_train).reset_index(drop=True)
+            return x_frame, y_series
+
+    fake_imblearn = types.ModuleType("imblearn")
+    fake_over_sampling = types.ModuleType("imblearn.over_sampling")
+    fake_over_sampling.SMOTENC = FakeSMOTENC
+    fake_imblearn.over_sampling = fake_over_sampling
+    monkeypatch.setitem(sys.modules, "imblearn", fake_imblearn)
+    monkeypatch.setitem(sys.modules, "imblearn.over_sampling", fake_over_sampling)
+
+    config = ExperimentConfig(
+        model="smote",
+        dataset="mixed",
+        output_dir=str(tmp_path / "artifacts" / "smote-mixed"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, num_samples=6, extra={"k_neighbors": 1}),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
+
+    sampled = pd.read_csv(bundle.generated_sample_path)
+    metadata = json.loads((Path(config.output_dir) / "smote_metadata.json").read_text())
+    assert set(sampled["color"]) <= {"red", "blue"}
+    assert metadata["sampler"] == "SMOTENC"
+    assert metadata["categorical_indices"] == [1]
 
 
 def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, monkeypatch) -> None:
@@ -661,6 +769,7 @@ def test_realtabformer_can_limit_training_rows_for_tiny_smoke_runs(tmp_path: Pat
     assert observed["fit_rows"] == 2
 
 
+@pytest.mark.skipif(torch is None, reason="TabuLa tensor contract requires the optional PyTorch runtime")
 def test_tabula_train_and_sample_with_stubbed_transformers(tmp_path: Path, monkeypatch) -> None:
     adapter = TabulaAdapter(tmp_path)
     imports = types.SimpleNamespace(
@@ -982,6 +1091,66 @@ def test_great_arf_and_tabebm_checkpoint_conventions(tmp_path: Path) -> None:
     assert arf_adapter._resolve_checkpoint_path(arf_spec).name == "model.pkl"
     assert tabebm_adapter._resolve_checkpoint_path(tabebm_spec).name == "model.pkl"
     assert great_adapter._metadata_path(great_adapter._model_root(great_spec)).name == "adapter_metadata.json"
+
+
+def test_tabebm_surrogate_negatives_cover_one_feature_and_are_seeded() -> None:
+    one_feature = np.array([[0.1], [0.2]], dtype=np.float64)
+    augmented, labels = TabEBMAdapter._add_surrogate_negative_samples(
+        one_feature,
+        5.0,
+        rng=np.random.default_rng(7),
+    )
+    assert augmented.shape == (4, 1)
+    assert labels.tolist() == [0, 0, 1, 1]
+
+    multi_feature = np.zeros((2, 4), dtype=np.float64)
+    first, _ = TabEBMAdapter._add_surrogate_negative_samples(
+        multi_feature,
+        5.0,
+        rng=np.random.default_rng(11),
+    )
+    second, _ = TabEBMAdapter._add_surrogate_negative_samples(
+        multi_feature,
+        5.0,
+        rng=np.random.default_rng(11),
+    )
+    np.testing.assert_array_equal(first, second)
+
+    with pytest.raises(ValueError, match="at least one feature"):
+        TabEBMAdapter._add_surrogate_negative_samples(
+            np.empty((2, 0)),
+            5.0,
+            rng=np.random.default_rng(1),
+        )
+
+
+def test_code_executing_checkpoint_loads_fail_closed_outside_output_dir(tmp_path: Path) -> None:
+    adapter = ARFAdapter(tmp_path)
+    external_checkpoint = tmp_path / "external.pkl"
+    external_checkpoint.write_bytes(b"not-loaded")
+    config = ExperimentConfig(
+        model="arf",
+        dataset="adult",
+        output_dir=str(tmp_path / "artifacts" / "arf"),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(enabled=True, checkpoint_path=str(external_checkpoint)),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    spec = config.to_run_spec(action="sample")
+
+    with pytest.raises(PermissionError, match="can execute code"):
+        adapter._validate_trusted_executable_artifact(spec, external_checkpoint, format_name="pickle")
+
+    config.sample.extra["allow_unsafe_external_checkpoint"] = True
+    trusted_spec = config.to_run_spec(action="sample")
+    assert (
+        adapter._validate_trusted_executable_artifact(
+            trusted_spec,
+            external_checkpoint,
+            format_name="pickle",
+        )
+        == external_checkpoint.resolve()
+    )
 
 
 def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, monkeypatch) -> None:

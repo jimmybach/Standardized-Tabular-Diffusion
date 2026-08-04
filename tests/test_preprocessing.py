@@ -1,0 +1,184 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pandas as pd
+import pytest
+
+from standardized_tabular_diffusion.preprocessing import (
+    MissingTargetError,
+    MissingValuePolicy,
+    PreprocessingError,
+    SplitSchemaError,
+    UndefinedImputationStatisticError,
+    fit_imputation_state,
+    preprocess_split_files,
+    preprocess_splits,
+)
+
+pytestmark = pytest.mark.integration
+
+
+def _train_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "age": [20, 40, "?"],
+            "city": ["NY", "CA", "NY"],
+            "target": [0, 1, 0],
+        }
+    )
+
+
+def test_imputation_statistics_are_fitted_on_train_only() -> None:
+    train = _train_frame()
+    validation = pd.DataFrame({"age": [1000, None], "city": [None, "TX"], "target": [1, 0]})
+    test = pd.DataFrame({"age": [None], "city": [None], "target": [1]})
+
+    result = preprocess_splits(
+        train,
+        validation=validation,
+        test=test,
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+    )
+
+    assert result.state.fitted_on_split == "train"
+    assert result.state.numerical_fill_values == {"age": 30.0}
+    assert result.state.categorical_fill_values == {"city": "NY"}
+    assert result.train["age"].tolist() == [20.0, 40.0, 30.0]
+    assert result.validation is not None
+    assert result.validation["age"].tolist() == [1000.0, 30.0]
+    assert result.test is not None
+    assert result.test.loc[0, "age"] == 30.0
+    assert result.test.loc[0, "city"] == "NY"
+    assert result.reports["test"]["values_imputed"] == 2
+
+
+def test_categorical_mode_ties_have_a_deterministic_unicode_order() -> None:
+    train = pd.DataFrame({"x": [1, 2], "category": ["z", "a"], "target": [0, 1]})
+
+    state = fit_imputation_state(
+        train,
+        numerical_columns=["x"],
+        categorical_columns=["category"],
+        target_columns=["target"],
+    )
+
+    assert state.categorical_fill_values == {"category": "a"}
+
+
+@pytest.mark.parametrize("split_name", ["train", "validation", "test"])
+def test_missing_targets_are_never_imputed(split_name: str) -> None:
+    train = _train_frame()
+    validation = train.copy()
+    test = train.copy()
+    frame = {"train": train, "validation": validation, "test": test}[split_name]
+    frame.loc[0, "target"] = None
+
+    with pytest.raises(MissingTargetError, match="never imputed"):
+        preprocess_splits(
+            train,
+            validation=validation,
+            test=test,
+            numerical_columns=["age"],
+            categorical_columns=["city"],
+            target_columns=["target"],
+        )
+
+
+@pytest.mark.parametrize("column,column_type", [("age", "numerical"), ("city", "categorical")])
+def test_entirely_missing_training_features_fail_closed(column: str, column_type: str) -> None:
+    train = _train_frame()
+    train[column] = None
+
+    with pytest.raises(UndefinedImputationStatisticError, match=f"{column!r} is entirely missing"):
+        preprocess_splits(
+            train,
+            numerical_columns=["age"],
+            categorical_columns=["city"],
+            target_columns=["target"],
+        )
+
+
+def test_invalid_numerical_values_are_not_misclassified_as_missing() -> None:
+    train = _train_frame()
+    train.loc[0, "age"] = "not-a-number"
+
+    with pytest.raises(PreprocessingError, match="non-numeric values"):
+        preprocess_splits(
+            train,
+            numerical_columns=["age"],
+            categorical_columns=["city"],
+            target_columns=["target"],
+        )
+
+
+def test_split_schema_and_column_order_must_match_training() -> None:
+    train = _train_frame()
+    test = train[["city", "age", "target"]]
+
+    with pytest.raises(SplitSchemaError, match="column order differs"):
+        preprocess_splits(
+            train,
+            test=test,
+            numerical_columns=["age"],
+            categorical_columns=["city"],
+            target_columns=["target"],
+        )
+
+
+def test_missing_indicators_are_stable_for_every_feature() -> None:
+    test = pd.DataFrame({"age": [None], "city": ["NY"], "target": [1]})
+    result = preprocess_splits(
+        _train_frame(),
+        test=test,
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+        policy=MissingValuePolicy(add_missing_indicators=True),
+    )
+
+    assert result.test is not None
+    assert list(result.test.columns) == ["age", "city", "target", "age__missing", "city__missing"]
+    assert result.test.loc[0, "age__missing"] == 1
+    assert result.test.loc[0, "city__missing"] == 0
+
+
+def test_file_workflow_writes_portable_audit_artifacts(tmp_path: Path) -> None:
+    train_path = tmp_path / "source" / "train.csv"
+    test_path = tmp_path / "source" / "test.csv"
+    train_path.parent.mkdir()
+    _train_frame().to_csv(train_path, index=False)
+    pd.DataFrame({"age": [None], "city": [None], "target": [1]}).to_csv(test_path, index=False)
+
+    result = preprocess_split_files(
+        train_path=train_path,
+        test_path=test_path,
+        output_dir=tmp_path / "processed",
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+    )
+
+    output_dir = tmp_path / "processed"
+    manifest = json.loads((output_dir / "preprocessing-manifest.json").read_text(encoding="utf-8"))
+    state = json.loads((output_dir / "imputation-state.json").read_text(encoding="utf-8"))
+    transformed_test = pd.read_csv(output_dir / "test.csv")
+
+    assert result["train_only_fitting"] is True
+    assert manifest["fitted_on_split"] == "train"
+    assert manifest["inputs"]["train"]["filename"] == "train.csv"
+    assert "source" not in json.dumps(manifest["inputs"])
+    assert len(manifest["state"]["sha256"]) == 64
+    assert state["numerical_fill_values"] == {"age": 30.0}
+    assert transformed_test.loc[0, "age"] == 30.0
+    assert transformed_test.loc[0, "city"] == "NY"
+
+
+def test_policy_rejects_target_and_synthetic_repair_modes() -> None:
+    with pytest.raises(PreprocessingError, match="Target imputation"):
+        MissingValuePolicy(target_strategy="mean")
+    with pytest.raises(PreprocessingError, match="Generated samples"):
+        MissingValuePolicy(synthetic_strategy="impute")

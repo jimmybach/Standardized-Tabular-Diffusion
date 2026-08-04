@@ -6,8 +6,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from sklearn.preprocessing import OrdinalEncoder
 
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabdiff_or_tabsyn_summary
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
@@ -138,7 +141,8 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
 
         vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
         with _temporary_sys_path(vendor_root):
-            with checkpoint_path.open("rb") as handle:
+            trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+            with trusted_checkpoint.open("rb") as handle:
                 model = pickle.load(handle)
 
         train_df = self._load_training_frame(dataset_spec)
@@ -146,7 +150,7 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
         sample_df = model.sample(num_samples)
         sample_df = sample_df[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -203,17 +207,69 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         if dataset_spec.task_type != "classification":
             raise ValueError("SMOTE is only supported for classification datasets.")
 
-        from imblearn.over_sampling import SMOTE  # pylint: disable=import-error
+        from imblearn import over_sampling  # pylint: disable=import-error
 
         train_df = self._load_training_frame(dataset_spec)
+        if len(dataset_spec.target_columns) != 1:
+            raise ValueError("SMOTE requires exactly one target column.")
         target = dataset_spec.target_columns[0]
         feature_cols = [column for column in dataset_spec.column_names if column != target]
-        x_train = train_df[feature_cols]
-        y_train = train_df[target]
+        if not feature_cols:
+            raise ValueError("SMOTE requires at least one feature column.")
+        missing_counts = train_df[[*feature_cols, target]].isna().sum()
+        if bool(missing_counts.any()):
+            observed = {str(column): int(count) for column, count in missing_counts.items() if count}
+            raise ValueError(
+                "SMOTE does not accept missing values in this benchmark. "
+                f"Run the explicit preprocessing module first; observed: {observed}"
+            )
 
-        sampler = SMOTE(random_state=spec.seed, k_neighbors=int(spec.extra.get("k_neighbors", 5)))
-        x_resampled, y_resampled = sampler.fit_resample(x_train, y_train)
-        sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
+        x_train = train_df[feature_cols].copy()
+        y_train = train_df[target]
+        k_neighbors = int(spec.extra.get("k_neighbors", 5))
+        class_counts = y_train.value_counts(dropna=False)
+        if len(class_counts) < 2:
+            raise ValueError("SMOTE requires at least two target classes.")
+        if int(class_counts.min()) <= k_neighbors:
+            raise ValueError(
+                f"SMOTE k_neighbors={k_neighbors} requires at least {k_neighbors + 1} rows in every class; "
+                f"smallest class has {int(class_counts.min())}."
+            )
+
+        categorical_columns = [column for column in feature_cols if column in dataset_spec.categorical_columns]
+        categorical_indices = [feature_cols.index(column) for column in categorical_columns]
+        sampler_name: str
+        if not categorical_columns:
+            sampler = over_sampling.SMOTE(random_state=spec.seed, k_neighbors=k_neighbors)
+            x_resampled, y_resampled = sampler.fit_resample(x_train, y_train)
+            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
+            sampler_name = "SMOTE"
+        elif len(categorical_columns) == len(feature_cols):
+            sampler = over_sampling.SMOTEN(random_state=spec.seed, k_neighbors=k_neighbors)
+            x_resampled, y_resampled = sampler.fit_resample(x_train.astype("string"), y_train)
+            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
+            sampler_name = "SMOTEN"
+        else:
+            encoder = OrdinalEncoder(dtype=np.float64)
+            encoded_features = x_train.copy()
+            encoded_features[categorical_columns] = encoder.fit_transform(x_train[categorical_columns])
+            encoded_features = encoded_features.astype(float)
+            sampler = over_sampling.SMOTENC(
+                categorical_features=categorical_indices,
+                random_state=spec.seed,
+                k_neighbors=k_neighbors,
+            )
+            x_resampled, y_resampled = sampler.fit_resample(encoded_features, y_train)
+            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
+            encoded_categories = sampled_df[categorical_columns].to_numpy(dtype=float)
+            for index, categories in enumerate(encoder.categories_):
+                encoded_categories[:, index] = np.clip(
+                    np.rint(encoded_categories[:, index]),
+                    0,
+                    len(categories) - 1,
+                )
+            sampled_df[categorical_columns] = encoder.inverse_transform(encoded_categories)
+            sampler_name = "SMOTENC"
         sampled_df[target] = y_resampled
         sampled_df = sampled_df[dataset_spec.column_names]
 
@@ -222,7 +278,20 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sampled_df = sampled_df.sample(n=desired_rows, replace=replace, random_state=spec.seed).reset_index(drop=True)
 
         sample_path = spec.output_dir / "samples.csv"
-        sampled_df.to_csv(sample_path, index=False)
+        atomic_write_bytes(sample_path, sampled_df.to_csv(index=False).encode("utf-8"))
+        atomic_write_json(
+            spec.output_dir / "smote_metadata.json",
+            {
+                "sampler": sampler_name,
+                "random_state": spec.seed,
+                "k_neighbors": k_neighbors,
+                "categorical_columns": categorical_columns,
+                "categorical_indices": categorical_indices,
+                "source_rows": len(train_df),
+                "balanced_rows": len(x_resampled),
+                "output_rows": len(sampled_df),
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -231,6 +300,7 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             generated_sample_path=sample_path,
             notes=[
                 "Rows are drawn from the SMOTE-resampled table.",
+                f"Mixed-type handling used {sampler_name}; categorical values were never interpolated as continuous data.",
                 "If num_samples differs from the balanced-resample size, the adapter resamples rows from the SMOTE output.",
             ],
         )

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import shutil
 import subprocess
 import sys
@@ -11,7 +10,23 @@ import numpy as np
 import pandas as pd
 from pandas import CategoricalDtype
 
+from standardized_tabular_diffusion.datasets import validate_dataset_name
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.materialization import _build_manifest, _sync_processed_dataset, manifest_path
+
+
+class MissingValuePreprocessingRequiredError(ValueError):
+    """Raised when registration finds missing values that require an explicit policy."""
+
+    def __init__(self, report: dict[str, Any]) -> None:
+        self.report = report
+        columns = ", ".join(
+            f"{column}={count}" for column, count in report["missing_values_by_column"].items() if count
+        )
+        super().__init__(
+            "Missing values require the explicit preprocessing module before dataset registration. "
+            f"No rows or values were changed; observed missing counts: {columns}"
+        )
 
 
 def upload_root(repo_root: Path | None = None) -> Path:
@@ -47,13 +62,23 @@ def _infer_column_partitions(
     provided_categorical = list(categorical_columns or [])
 
     if provided_numerical or provided_categorical:
+        if len(set(provided_numerical)) != len(provided_numerical):
+            raise ValueError("numerical_columns contains duplicate names")
+        if len(set(provided_categorical)) != len(provided_categorical):
+            raise ValueError("categorical_columns contains duplicate names")
+        if target_column in set(provided_numerical + provided_categorical):
+            raise ValueError("The target column cannot also be assigned as a feature column")
         overlap = set(provided_numerical) & set(provided_categorical)
         if overlap:
             raise ValueError(f"Columns cannot be both numerical and categorical: {sorted(overlap)}")
         for column in [*provided_numerical, *provided_categorical, target_column]:
             if column not in frame.columns:
                 raise ValueError(f"Unknown column: {column}")
-        uncovered = [column for column in frame.columns if column != target_column and column not in set(provided_numerical + provided_categorical)]
+        uncovered = [
+            column
+            for column in frame.columns
+            if column != target_column and column not in set(provided_numerical + provided_categorical)
+        ]
         if uncovered:
             raise ValueError(
                 "Every non-target column must be assigned when explicit column groups are provided. "
@@ -113,29 +138,24 @@ def _sanitize_local_frame(
 ) -> tuple[pd.DataFrame, dict[str, Any]]:
     cleaned = frame.copy()
     missing_markers = {"?": np.nan, " ?": np.nan, "": np.nan, " ": np.nan}
-    categorical_missing_token = "__missing__"
     cleaned = cleaned.replace(missing_markers)
 
     for column in numerical_columns:
         cleaned[column] = pd.to_numeric(cleaned[column], errors="coerce")
 
-    dropped_target_rows = int(cleaned[target_column].isna().sum())
-    if dropped_target_rows:
-        cleaned = cleaned.loc[~cleaned[target_column].isna()].copy()
-
-    dropped_numeric_rows = int(cleaned[numerical_columns].isna().any(axis=1).sum()) if numerical_columns else 0
-    if dropped_numeric_rows:
-        cleaned = cleaned.loc[~cleaned[numerical_columns].isna().any(axis=1)].copy()
-
     for column in categorical_columns:
-        cleaned[column] = cleaned[column].fillna(categorical_missing_token).astype(str)
+        cleaned[column] = cleaned[column].astype("string")
 
+    missing_values_by_column = {str(column): int(count) for column, count in cleaned.isna().sum().items()}
     report = {
         "input_rows": int(len(frame)),
         "output_rows": int(len(cleaned)),
-        "dropped_missing_target_rows": dropped_target_rows,
-        "dropped_missing_numerical_rows": dropped_numeric_rows,
+        "rows_dropped": 0,
+        "values_imputed": 0,
+        "missing_values_by_column": missing_values_by_column,
     }
+    if any(missing_values_by_column.values()):
+        raise MissingValuePreprocessingRequiredError(report)
     return cleaned, report
 
 
@@ -154,6 +174,7 @@ def register_dataset(
     has_header: bool = True,
     repo_root: Path | None = None,
 ) -> dict[str, Any]:
+    validate_dataset_name(dataset_name)
     repo_root = repo_root or Path(__file__).resolve().parents[1]
     source_path = Path(raw_csv_path)
     if not source_path.exists():
@@ -178,6 +199,13 @@ def register_dataset(
     target_idx = column_names.index(target_column)
     numerical_indices = [column_names.index(column) for column in numerical_columns]
     categorical_indices = [column_names.index(column) for column in categorical_columns]
+    normalized_task_type = _normalize_task_type_for_info(task_type)
+    cleaned_frame, cleaning_report = _sanitize_local_frame(
+        frame,
+        numerical_columns=numerical_columns,
+        categorical_columns=categorical_columns,
+        target_column=target_column,
+    )
 
     tabdiff_data_dir = repo_root / "TabDiff-main" / "data" / dataset_name
     tabdiff_info_dir = repo_root / "TabDiff-main" / "data" / "Info"
@@ -190,15 +218,8 @@ def register_dataset(
     upload_copy_path = uploaded_dir / source_path.name
     shutil.copy2(source_path, upload_copy_path)
     raw_copy_path = tabdiff_data_dir / "raw.csv"
-    cleaned_frame, cleaning_report = _sanitize_local_frame(
-        frame,
-        numerical_columns=numerical_columns,
-        categorical_columns=categorical_columns,
-        target_column=target_column,
-    )
-    cleaned_frame.to_csv(raw_copy_path, index=False)
+    atomic_write_bytes(raw_copy_path, cleaned_frame.to_csv(index=False).encode("utf-8"))
 
-    normalized_task_type = _normalize_task_type_for_info(task_type)
     info_payload = {
         "name": dataset_name,
         "task_type": normalized_task_type,
@@ -221,7 +242,7 @@ def register_dataset(
     }
 
     info_path = tabdiff_info_dir / f"{dataset_name}.json"
-    info_path.write_text(json.dumps(info_payload, indent=2))
+    atomic_write_json(info_path, info_payload)
 
     return {
         "dataset": dataset_name,
@@ -241,12 +262,11 @@ def process_registered_dataset(
     dataset_name: str,
     repo_root: Path | None = None,
 ) -> dict[str, Any]:
+    validate_dataset_name(dataset_name)
     repo_root = repo_root or Path(__file__).resolve().parents[1]
     info_path = repo_root / "TabDiff-main" / "data" / "Info" / f"{dataset_name}.json"
     if not info_path.exists():
-        raise FileNotFoundError(
-            f"Dataset {dataset_name} is not registered. Expected metadata at {info_path}"
-        )
+        raise FileNotFoundError(f"Dataset {dataset_name} is not registered. Expected metadata at {info_path}")
 
     upstream_root = repo_root / "TabDiff-main"
     _run_python(["process_dataset.py", "--dataname", dataset_name], upstream_root)
@@ -256,5 +276,5 @@ def process_registered_dataset(
     manifest["synced_roots"] = _sync_processed_dataset(dataset_name, repo_root)
     out_path = manifest_path(dataset_name, repo_root=repo_root)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(manifest, indent=2))
+    atomic_write_json(out_path, manifest)
     return manifest

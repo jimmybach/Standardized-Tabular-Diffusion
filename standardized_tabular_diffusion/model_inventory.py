@@ -9,14 +9,50 @@ class ModelInventoryEntry:
     family: str
     paradigm: str
     covered_by_papers: list[str]
-    standardized_status: str
+    validation_level: str
     runnable_recommendation: str
     implementation_quality: str
     repository_url: str | None
+    license_status: str = "not-reviewed"
     notes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, object]:
-        return asdict(self)
+        payload = asdict(self)
+        from standardized_tabular_diffusion.registry import get_adapter_spec
+
+        try:
+            adapter = get_adapter_spec(self.name)
+        except KeyError:
+            payload.update(
+                {
+                    "adapter_registered": False,
+                    "source_authority": None,
+                    "distribution_form": None,
+                    "reproduction_target": None,
+                    "modification_status": None,
+                    "benchmark_track": "excluded",
+                    "support_level": "unsupported",
+                    "revision_status": "unresolved",
+                    "evidence_records": [],
+                }
+            )
+        else:
+            adapter_payload = adapter.to_dict(self.name)
+            payload.update(
+                {
+                    "adapter_registered": True,
+                    "source_authority": adapter_payload["source_authority"],
+                    "distribution_form": adapter_payload["distribution_form"],
+                    "reproduction_target": adapter_payload["reproduction_target"],
+                    "modification_status": adapter_payload["modification_status"],
+                    "benchmark_track": adapter_payload["benchmark_track"],
+                    "support_level": adapter_payload["support_level"],
+                    "revision_status": adapter_payload["revision_status"],
+                    "evidence_records": adapter_payload["evidence_records"],
+                    "license_status": adapter_payload["license_status"],
+                }
+            )
+        return payload
 
 
 MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
@@ -25,7 +61,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="score / denoising diffusion",
         covered_by_papers=["tabstruct-2026", "tabula-2025", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/yandex-research/tab-ddpm",
@@ -39,7 +75,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="latent diffusion",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/amazon-science/tabsyn",
@@ -53,7 +89,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="multimodal diffusion",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/MinkaiXu/TabDiff",
@@ -66,7 +102,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="llm",
         paradigm="autoregressive transformer over row text",
         covered_by_papers=["tabstruct-2026", "tabula-2025", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/kathrinse/greaT",
@@ -83,7 +119,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="in-context tabular foundation model",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/soda-inria/tabicl",
@@ -98,7 +134,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="scaled in-context tabular foundation model",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/soda-inria/tabicl",
@@ -113,7 +149,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="prior-data fitted network",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/PriorLabs/TabPFN",
@@ -128,7 +164,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="continued-pretrained prior-data fitted network",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="high",
         repository_url="https://github.com/PriorLabs/TabPFN",
@@ -143,7 +179,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="in-context tabular foundation model trained on real data",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/layer6ai-labs/TabDPT",
@@ -158,7 +194,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="hybrid row-column attention plus in-context tabular foundation model",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/google-research/tabfm",
@@ -173,7 +209,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="hypernetwork tabular foundation model",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/microsoft/ticl",
@@ -188,7 +224,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="interpretable in-context tabular foundation model",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/microsoft/ticl",
@@ -203,7 +239,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="prior-data fitted network for causal inference",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/yccm/CausalFM",
@@ -218,7 +254,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="linear-attention extension of tabular in-context learning",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/microsoft/ticl",
@@ -233,7 +269,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="llm",
         paradigm="language-model-based tabular synthesis",
         covered_by_papers=["tabula-2025"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/zhao-zilong/Tabula",
@@ -249,7 +285,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="transferable tabular transformer across variable-column tables",
         covered_by_papers=[],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/RyanWangZf/transtab",
@@ -264,7 +300,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="traditional",
         paradigm="interpolation / oversampling",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/scikit-learn-contrib/imbalanced-learn",
@@ -279,7 +315,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="score-based SDE diffusion",
         covered_by_papers=[],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/amazon-science/tabsyn",
@@ -294,13 +330,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="traditional",
         paradigm="bayesian network",
         covered_by_papers=["tabstruct-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/pgmpy/pgmpy",
         notes=[
             "Integrated as a direct pgmpy-backed Bayesian-network adapter rather than through Synthcity.",
-            "End-to-end adult smoke validation now passes through the shared CLI.",
+            "A local adult end-to-end run was previously reported, but formal Linux/Python 3.11 smoke evidence is not yet recorded.",
             "Sampling can drop low-variance variables in the learned graph, so the adapter restores missing columns with fitted fallback states.",
         ],
     ),
@@ -309,7 +345,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="co-evolving continuous/discrete diffusion",
         covered_by_papers=[],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/amazon-science/tabsyn",
@@ -324,7 +360,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="gan",
         paradigm="conditional tabular GAN with tailored preprocessing",
         covered_by_papers=[],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/Team-TUD/CTAB-GAN",
@@ -339,7 +375,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="vae",
         paradigm="variational autoencoder",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/sdv-dev/CTGAN",
@@ -353,13 +389,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="graph",
         paradigm="graph generative model",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/amazon-science/tabsyn",
         notes=[
             "Integrated against the vendored TabSyn baseline implementation with local compatibility fixes for modern sklearn and Python packaging.",
-            "End-to-end adult smoke validation now passes through the shared CLI.",
+            "A local adult end-to-end run was previously reported, but formal Linux/Python 3.11 smoke evidence is not yet recorded.",
             "Still the most fragile of the implemented adapters because it depends on DGL, torch-geometric, and version-sensitive graph extensions.",
         ],
     ),
@@ -368,7 +404,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="gan",
         paradigm="conditional GAN",
         covered_by_papers=["tabstruct-2026", "tabula-2025", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/sdv-dev/CTGAN",
@@ -382,13 +418,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="flow",
         paradigm="normalizing flow",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/bayesiains/nflows",
         notes=[
             "Integrated as a direct nflows-backed masked autoregressive flow adapter rather than through Synthcity.",
-            "End-to-end adult smoke validation now passes through the shared CLI.",
+            "A local adult end-to-end run was previously reported, but formal Linux/Python 3.11 smoke evidence is not yet recorded.",
             "The benchmark label is generic, so the registry should continue documenting the exact flow architecture used in standardized runs.",
         ],
     ),
@@ -397,7 +433,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="tree",
         paradigm="adversarial random forest",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/bips-hb/arf",
@@ -412,7 +448,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="energy-based",
         paradigm="class-conditional energy-based model",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/andreimargeloiu/TabEBM",
@@ -427,7 +463,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="energy-based",
         paradigm="energy-based boosted trees",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/Ajoo/nrgboost",
@@ -443,7 +479,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="gan",
         paradigm="conditional tabular GAN with tailored preprocessing",
         covered_by_papers=["tabula-2025"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/Team-TUD/CTAB-GAN-Plus",
@@ -459,7 +495,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="llm",
         paradigm="autoregressive / seq2seq transformer",
         covered_by_papers=["tabula-2025"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/worldbank/REaLTabFormer",
@@ -475,7 +511,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="traditional",
         paradigm="non-parametric rank-and-shuffle tabular synthesis",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/echaibub/TabSDS",
@@ -490,7 +526,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="continuous diffusion for mixed-type tabular data",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/muellermarkus/cdtd",
@@ -505,7 +541,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="diffusion",
         paradigm="cross-table latent diffusion foundation model",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="unknown",
         repository_url=None,
@@ -519,7 +555,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="autoregressive",
         paradigm="tabular-specific autoregressive generator",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="unknown",
         repository_url=None,
@@ -533,7 +569,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="autoregressive",
         paradigm="flexible autoregressive tabular synthesizer",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="implemented",
+        validation_level="adapter-complete",
         runnable_recommendation="partial",
         implementation_quality="high",
         repository_url="https://github.com/mostly-ai/mostlyai-engine",
@@ -548,7 +584,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="mixed-synthetic-priors tabular foundation model",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/autogluon/autogluon",
@@ -562,7 +598,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="foundation",
         paradigm="generalist structured-data foundation model",
         covered_by_papers=["tabforge-2026"],
-        standardized_status="not implemented",
+        validation_level="registered",
         runnable_recommendation="partial",
         implementation_quality="medium",
         repository_url="https://github.com/limix-ldm-ai/LimiX",
@@ -583,15 +619,15 @@ def list_inventory(
     *,
     benchmark: str | None = None,
     family: str | None = None,
-    standardized_status: str | None = None,
+    validation_level: str | None = None,
 ) -> list[ModelInventoryEntry]:
     entries = sorted(MODEL_INVENTORY.values(), key=lambda entry: entry.name)
     if benchmark is not None:
         entries = [entry for entry in entries if benchmark in entry.covered_by_papers]
     if family is not None:
         entries = [entry for entry in entries if entry.family == family]
-    if standardized_status is not None:
-        entries = [entry for entry in entries if entry.standardized_status == standardized_status]
+    if validation_level is not None:
+        entries = [entry for entry in entries if entry.validation_level == validation_level]
     return entries
 
 
@@ -599,13 +635,13 @@ def list_inventory_names(
     *,
     benchmark: str | None = None,
     family: str | None = None,
-    standardized_status: str | None = None,
+    validation_level: str | None = None,
 ) -> list[str]:
     return [
         entry.name
         for entry in list_inventory(
             benchmark=benchmark,
             family=family,
-            standardized_status=standardized_status,
+            validation_level=validation_level,
         )
     ]
