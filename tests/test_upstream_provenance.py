@@ -18,14 +18,18 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"tabddpm", "tabdiff", "tabsyn"}
+    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
         assert spec.upstream_repository == component["authoritative_repository"]
         assert spec.upstream_revision == component["upstream_commit"]
         assert list(spec.patch_set_ids) == [patch["patch_set_id"] for patch in component["patch_sets"]]
-        assert (REPO_ROOT / component["license_path"]).is_file()
+        if component["distribution_form"] == "source":
+            assert (REPO_ROOT / component["license_path"]).is_file()
+        else:
+            assert component["package_lock"]["sha256"]
+            assert component["license_url"].startswith("https://")
 
 
 def test_source_lock_patch_ids_are_unique_and_classified() -> None:
@@ -46,11 +50,12 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
+        "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
     }
-    for model_id in ("tabddpm", "tabdiff", "tabsyn"):
+    for model_id in ("ctgan", "tabddpm", "tabdiff", "tabsyn"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
@@ -78,6 +83,32 @@ def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> Non
     assert validation["workflow_run_id"] == 30863212268
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert tabddpm["official_eligibility"] == "pending-separate-official-track-review"
+
+
+def test_ctgan_package_lock_is_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    ctgan = payload["components"]["ctgan"]
+    assert isinstance(ctgan, dict)
+
+    assert ctgan["distribution_form"] == "package"
+    assert ctgan["license"] == "BUSL-1.1"
+    assert ctgan["package_lock"] == {
+        "filename": "ctgan-0.12.1-py3-none-any.whl",
+        "name": "ctgan",
+        "pypi_url": "https://pypi.org/project/ctgan/0.12.1/",
+        "sha256": "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18",
+        "trusted_publishing_source_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        "version": "0.12.1",
+    }
+    validation = ctgan["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30910275922
+    assert validation["result_summary"]["seed_cases_passed"] == 3
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
+    )
+    assert str(ctgan["official_eligibility"]).startswith("blocked-pending-license")
 
 
 def test_removed_unverified_checkpoints_are_recorded_and_absent() -> None:

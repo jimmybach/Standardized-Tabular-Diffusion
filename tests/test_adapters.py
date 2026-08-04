@@ -21,8 +21,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import standardized_tabular_diffusion.models.sample_baselines as sample_baselines
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
-from standardized_tabular_diffusion.interfaces import DatasetSpec
+from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
 from standardized_tabular_diffusion.models.next_wave_baselines import (
     CTABGANPlusAdapter,
@@ -41,12 +42,30 @@ from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
 class PickleableFakeSynth:
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def set_random_state(self, seed):
+        self.seed = seed
+
+    def set_device(self, device):
+        self.device = device
+
     def fit(self, train_data, discrete_columns=()):
         self.train_shape = train_data.shape
         self.discrete_columns = list(discrete_columns)
 
     def sample(self, samples):
         return pd.DataFrame({"x": [10] * samples, "y": [1] * samples})
+
+    def save(self, path):
+        with Path(path).open("wb") as handle:
+            pickle.dump(self, handle)
+
+    @classmethod
+    def load(cls, path):
+        with Path(path).open("rb") as handle:
+            return pickle.load(handle)
 
 
 class PickleableFakeCTABGAN:
@@ -444,7 +463,7 @@ def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: P
     assert ready_tabddpm_train["ready"] is True
 
 
-def test_ctgan_train_and_sample_use_local_pickle_checkpoint(tmp_path: Path, monkeypatch) -> None:
+def test_ctgan_train_and_sample_use_official_checkpoint_api_and_seed(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
     (repo_root / "TabDDPM-main").mkdir(parents=True)
     adapter = CTGANAdapter(repo_root)
@@ -464,13 +483,13 @@ def test_ctgan_train_and_sample_use_local_pickle_checkpoint(tmp_path: Path, monk
     dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
     dataset_spec.test_data_path.write_text("x,y\n3,1\n")
 
-    monkeypatch.setattr(adapter, "_build_synthesizer", lambda spec: PickleableFakeSynth())
+    monkeypatch.setattr(adapter, "_import_synthesizer_cls", lambda: PickleableFakeSynth)
 
     train_config = ExperimentConfig(
         model="ctgan",
         dataset="adult",
         output_dir=str(tmp_path / "artifacts" / "ctgan"),
-        train=TrainConfig(enabled=True),
+        train=TrainConfig(enabled=True, seed=23, extra={"epochs": 2, "batch_size": 20}),
         sample=SampleConfig(enabled=False),
         evaluation=EvaluationConfig(enabled=False),
     )
@@ -486,9 +505,62 @@ def test_ctgan_train_and_sample_use_local_pickle_checkpoint(tmp_path: Path, monk
     adapter.train_from_config(train_config, dataset_spec=dataset_spec)
     bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
-    assert (Path(train_config.output_dir) / "model.pkl").exists()
+    checkpoint_path = Path(train_config.output_dir) / "model.pkl"
+    assert checkpoint_path.exists()
+    trained = PickleableFakeSynth.load(checkpoint_path)
+    assert trained.seed == 23
+    assert trained.kwargs == {"epochs": 2, "batch_size": 20, "enable_gpu": False}
     assert bundle.generated_sample_path is not None
     assert pd.read_csv(bundle.generated_sample_path).shape == (3, 2)
+
+
+def test_ctgan_rejects_unvalidated_package_version(tmp_path: Path, monkeypatch) -> None:
+    adapter = CTGANAdapter(tmp_path)
+    monkeypatch.setattr(sample_baselines, "version", lambda _name: "0.12.0")
+
+    with pytest.raises(RuntimeError, match="expected 0.12.1, observed 0.12.0"):
+        adapter._import_synthesizer_cls()
+
+
+def test_ctgan_rejects_invalid_pac_configuration(tmp_path: Path) -> None:
+    adapter = CTGANAdapter(tmp_path)
+
+    with pytest.raises(ValueError, match="divisible"):
+        adapter._train_kwargs(
+            RunSpec(
+                model="ctgan",
+                dataset="fixture",
+                output_dir=tmp_path / "artifacts",
+                extra={"batch_size": 22, "pac": 10},
+            )
+        )
+
+
+def test_ctgan_requires_explicit_missing_value_preprocessing(tmp_path: Path, monkeypatch) -> None:
+    adapter = CTGANAdapter(tmp_path)
+    train_path = tmp_path / "train.csv"
+    train_path.write_text("x,y\n1,a\n,b\n", encoding="utf-8")
+    dataset_spec = DatasetSpec(
+        name="fixture",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=train_path,
+    )
+    monkeypatch.setattr(adapter, "_import_synthesizer_cls", lambda: PickleableFakeSynth)
+
+    with pytest.raises(ValueError, match="train-fitted preprocessing"):
+        adapter.train(
+            RunSpec(
+                model="ctgan",
+                dataset="fixture",
+                output_dir=tmp_path / "artifacts",
+                extra={"dataset_spec": dataset_spec.to_dict()},
+            )
+        )
 
 
 def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_path: Path, monkeypatch) -> None:
