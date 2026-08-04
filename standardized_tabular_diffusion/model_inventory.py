@@ -322,12 +322,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         covered_by_papers=[],
         validation_level="adapter-complete",
         runnable_recommendation="partial",
-        implementation_quality="medium",
+        implementation_quality="high",
         repository_url="https://github.com/amazon-science/tabsyn",
         notes=[
-            "Integrated through the vendored TabSyn baseline implementation.",
-            "Uses the upstream STaSy training and sampling flow via TabSyn's shared baseline dispatcher.",
-            "Wired into the standardized train/sample/evaluate contract, but not yet smoke-validated in this repository.",
+            "The 30-file execution scope is checksum-locked to the Apache-2.0 TabSyn benchmark snapshot at commit cb5ac0f.",
+            "All 17 local STaSy source files match that snapshot after declared text normalization; runtime controls remain outside tracked upstream source.",
+            "The method-author repository is separately identified but has no declared license and differs materially from the TabSyn adaptation, so this entry targets benchmark-snapshot parity only.",
+            "Real Linux/Python 3.11 native-parity evidence is pending; Official Results and release support remain blocked.",
         ],
     ),
     "bn": ModelInventoryEntry(

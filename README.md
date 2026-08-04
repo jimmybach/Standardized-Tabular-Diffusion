@@ -317,6 +317,7 @@ Smoke presets for newly added baseline families live in:
 - `configs/smoke/ctab-gan-plus-adult-smoke.json`
 - `configs/smoke/realtabformer-adult-tiny.json`
 - `configs/smoke/arf-adult-smoke.json`
+- `configs/smoke/stasy-adult-smoke.json`
 - `configs/smoke/great-adult-train-smoke.json`
 - `configs/smoke/great-adult-tiny.json`
 - `configs/smoke/great-adult-distilgpt2-strong.json`

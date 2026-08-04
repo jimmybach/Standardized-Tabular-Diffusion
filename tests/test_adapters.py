@@ -39,7 +39,7 @@ from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
-from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, STaSyAdapter
+from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
@@ -1444,8 +1444,7 @@ def test_code_executing_checkpoint_loads_fail_closed_outside_output_dir(tmp_path
     )
 
 
-def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, monkeypatch) -> None:
-    stasy_adapter = STaSyAdapter(tmp_path)
+def test_codi_builds_expected_tabsyn_dispatch_command(tmp_path: Path, monkeypatch) -> None:
     codi_adapter = CoDiAdapter(tmp_path)
     commands: list[tuple[list[str], Path]] = []
 
@@ -1453,17 +1452,8 @@ def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, 
         assert not module
         commands.append((args, cwd))
 
-    monkeypatch.setattr(stasy_adapter, "_run_python", fake_run_python)
     monkeypatch.setattr(codi_adapter, "_run_python", fake_run_python)
 
-    train_config = ExperimentConfig(
-        model="stasy",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "stasy"),
-        train=TrainConfig(enabled=True),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=False),
-    )
     sample_config = ExperimentConfig(
         model="codi",
         dataset="adult",
@@ -1488,14 +1478,9 @@ def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, 
     dataset_spec.train_data_path.write_text("x,y\n1,0\n")
     dataset_spec.test_data_path.write_text("x,y\n1,0\n")
 
-    stasy_adapter.train_from_config(train_config, dataset_spec=dataset_spec)
     bundle = codi_adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
     assert commands == [
-        (
-            ["main.py", "--method", "stasy", "--mode", "train", "--dataname", "adult", "--gpu", "0"],
-            tmp_path / "TabSyn-main",
-        ),
         (
             [
                 "main.py",
@@ -1645,11 +1630,12 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
     fake_runner_path.write_text("# test shim\n")
     monkeypatch.setattr("standardized_tabular_diffusion.runner.__file__", str(fake_runner_path))
     repo_root = tmp_path
-    stasy_ckpt = repo_root / "TabSyn-main" / "baselines" / "stasy" / "ckpt" / "adult"
+    stasy_ckpt = repo_root / "ckpt" / "adult"
     codi_ckpt = repo_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / "adult"
     stasy_ckpt.mkdir(parents=True, exist_ok=True)
     codi_ckpt.mkdir(parents=True, exist_ok=True)
     (stasy_ckpt / "model.pth").write_text("stub")
+    (repo_root / "stasy-model-metadata.json").write_text("{}")
     (codi_ckpt / "model_con.pt").write_text("stub")
     (codi_ckpt / "model_dis.pt").write_text("stub")
 

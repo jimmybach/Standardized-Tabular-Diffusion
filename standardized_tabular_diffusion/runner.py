@@ -265,11 +265,15 @@ def validate_action_inputs(
     if action == "sample" and config.model in {"stasy", "codi"}:
         if config.model == "stasy":
             stasy_checkpoint_path = (
-                resolved_root / "TabSyn-main" / "baselines" / "stasy" / "ckpt" / config.dataset / "model.pth"
+                Path(config.output_dir) / "ckpt" / config.dataset / "model.pth"
             )
+            stasy_metadata_path = Path(config.output_dir) / "stasy-model-metadata.json"
             checked["checkpoint_path"] = str(stasy_checkpoint_path)
+            checked["checkpoint_metadata_path"] = str(stasy_metadata_path)
             if not stasy_checkpoint_path.exists():
                 missing.append(f"checkpoint_path missing: {stasy_checkpoint_path}")
+            if not stasy_metadata_path.exists():
+                missing.append(f"checkpoint_metadata_path missing: {stasy_metadata_path}")
         if config.model == "codi":
             checkpoint_con = (
                 resolved_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / config.dataset / "model_con.pt"
