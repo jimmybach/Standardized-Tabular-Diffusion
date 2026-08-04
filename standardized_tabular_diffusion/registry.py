@@ -215,14 +215,16 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         task_types=("classification",),
         upstream_repository="https://github.com/scikit-learn-contrib/imbalanced-learn",
         upstream_revision="8504e95f0160f61d1b617ca66f779646d2ee609e",
-        revision_status="pinned-canonical-package-native-parity-pending",
+        revision_status="pinned-canonical-package-native-parity-validated",
         license_status="MIT package dependency; classification-only reference baseline",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/SMOTE_VALIDATION.md",
+            "docs/evidence/smote/native-parity-run-30918785254.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/smote-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "stasy": _spec(
         "standardized_tabular_diffusion.models.vendored_baselines",

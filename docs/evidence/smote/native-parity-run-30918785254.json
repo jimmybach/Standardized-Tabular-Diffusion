@@ -1,0 +1,809 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [],
+          "categorical_indices": [],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 0,
+          "sampler": "SMOTE",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-0/adapter/samples.csv",
+        "sample_sha256": "cc0699fd304ae64bc986db8435490612f89d40cf7c1b32ae4fe00921c91dca60",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            2
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-0/native/samples.csv",
+        "sample_sha256": "cc0699fd304ae64bc986db8435490612f89d40cf7c1b32ae4fe00921c91dca60"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "smote"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [],
+          "categorical_indices": [],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 19,
+          "sampler": "SMOTE",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-19/adapter/samples.csv",
+        "sample_sha256": "627530b96d57002a3f58b79d392540cb068544ad328c683570a15734689754c2",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            2
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-19/native/samples.csv",
+        "sample_sha256": "627530b96d57002a3f58b79d392540cb068544ad328c683570a15734689754c2"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "smote"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [],
+          "categorical_indices": [],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 73,
+          "sampler": "SMOTE",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-73/adapter/samples.csv",
+        "sample_sha256": "3e25a08fd327dcae00d894672ed4ca9e428cb45cc688542691514c6676b26211",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            2
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smote/seed-73/native/samples.csv",
+        "sample_sha256": "3e25a08fd327dcae00d894672ed4ca9e428cb45cc688542691514c6676b26211"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "smote"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment"
+          ],
+          "categorical_indices": [
+            2
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 0,
+          "sampler": "SMOTENC",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-0/adapter/samples.csv",
+        "sample_sha256": "30fbeae8a094279a9b54d9efd57292e68be95f4ef7c1716ee9146796c609fbcf",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            5
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-0/native/samples.csv",
+        "sample_sha256": "30fbeae8a094279a9b54d9efd57292e68be95f4ef7c1716ee9146796c609fbcf"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "smotenc"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment"
+          ],
+          "categorical_indices": [
+            2
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 19,
+          "sampler": "SMOTENC",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-19/adapter/samples.csv",
+        "sample_sha256": "c6b0ac2f9c2a5c264fbfcb872a1f5b3cd40b913931519b20b8a639e3e681ef40",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            5
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-19/native/samples.csv",
+        "sample_sha256": "c6b0ac2f9c2a5c264fbfcb872a1f5b3cd40b913931519b20b8a639e3e681ef40"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "smotenc"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment"
+          ],
+          "categorical_indices": [
+            2
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 73,
+          "sampler": "SMOTENC",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-73/adapter/samples.csv",
+        "sample_sha256": "3e3131fab6db4006936be00af1313e24f68d6c86664b6be610a0ef6b29119181",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            5
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smotenc/seed-73/native/samples.csv",
+        "sample_sha256": "3e3131fab6db4006936be00af1313e24f68d6c86664b6be610a0ef6b29119181"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "smotenc"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment",
+            "tier"
+          ],
+          "categorical_indices": [
+            0,
+            1
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 0,
+          "sampler": "SMOTEN",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-0/adapter/samples.csv",
+        "sample_sha256": "fbdcfb171e572190a0a9afac8ac178bc600ab74a0a729d7be46ec349d9f4fd6a",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            6
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-0/native/samples.csv",
+        "sample_sha256": "fbdcfb171e572190a0a9afac8ac178bc600ab74a0a729d7be46ec349d9f4fd6a"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "smoten"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment",
+            "tier"
+          ],
+          "categorical_indices": [
+            0,
+            1
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 19,
+          "sampler": "SMOTEN",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-19/adapter/samples.csv",
+        "sample_sha256": "1468b7d41263e825bcaa1c7152c4b88a3b32ff434d6c8574cb76094c871b19d4",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            6
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-19/native/samples.csv",
+        "sample_sha256": "1468b7d41263e825bcaa1c7152c4b88a3b32ff434d6c8574cb76094c871b19d4"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "smoten"
+    },
+    {
+      "adapter_artifacts": {
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "balanced_rows": 24,
+          "categorical_columns": [
+            "segment",
+            "tier"
+          ],
+          "categorical_indices": [
+            0,
+            1
+          ],
+          "k_neighbors": 3,
+          "output_rows": 20,
+          "package": "imbalanced-learn",
+          "package_version": "0.14.2",
+          "random_state": 73,
+          "sampler": "SMOTEN",
+          "sampling_strategy": "auto",
+          "source_rows": 18
+        },
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-73/adapter/samples.csv",
+        "sample_sha256": "e5e5224aec81cd24fc5e9381ebfb165cb65b82101587fb529988b696d0db60e6",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "native_balanced_classes_exact": true,
+        "native_balanced_rows_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sampler": {
+          "categorical_features_exact": true,
+          "class_exact": true,
+          "continuous_features_exact": true,
+          "encoder_categories_exact": true,
+          "feature_names_exact": true,
+          "median_std_exact": true,
+          "module_exact": true,
+          "n_features_exact": true,
+          "neighbor_fit_shape": [
+            6,
+            6
+          ],
+          "neighbor_state_exact": true,
+          "params_exact": true,
+          "sampling_strategy_exact": true
+        },
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 20,
+          "target_classes_present": true
+        }
+      },
+      "native_artifacts": {
+        "balanced_class_counts": {
+          "majority": 12,
+          "minority": 12
+        },
+        "balanced_rows": 24,
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/smote-validation/smoten/seed-73/native/samples.csv",
+        "sample_sha256": "e5e5224aec81cd24fc5e9381ebfb165cb65b82101587fb529988b696d0db60e6"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "smoten"
+    }
+  ],
+  "claim_boundary": "Classification-only classical oversampling reference; not a joint tabular generator.",
+  "environment": {
+    "imbalanced-learn": "0.14.2",
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "six": "1.17.0",
+    "sklearn-compat": "0.1.6",
+    "threadpoolctl": "3.6.0",
+    "tzdata": "2026.3"
+  },
+  "environment_lock": {
+    "path": "requirements-smote-validation.txt",
+    "sha256": "898021f712d744ab343d6736c55c133460069c2d61e54956dd953ebc59440f33"
+  },
+  "fixtures": [
+    {
+      "categorical_columns": [],
+      "class_counts": {
+        "majority": 12,
+        "minority": 6
+      },
+      "columns": [
+        "continuous",
+        "count",
+        "label"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "count"
+      ],
+      "rows": 18,
+      "target_columns": [
+        "label"
+      ],
+      "train_csv_sha256": "cd0c003390c5d6858bc2b41239249abd6f313f553a5e2ad7b59552b87b966a23",
+      "variant": "smote"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "class_counts": {
+        "majority": 12,
+        "minority": 6
+      },
+      "columns": [
+        "continuous",
+        "count",
+        "segment",
+        "label"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "count"
+      ],
+      "rows": 18,
+      "target_columns": [
+        "label"
+      ],
+      "train_csv_sha256": "560ba51702dbbcd68335859d5118726db3b9b6d30f789b896b8a6ecdcad962b4",
+      "variant": "smotenc"
+    },
+    {
+      "categorical_columns": [
+        "segment",
+        "tier"
+      ],
+      "class_counts": {
+        "majority": 12,
+        "minority": 6
+      },
+      "columns": [
+        "segment",
+        "tier",
+        "label"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [],
+      "rows": 18,
+      "target_columns": [
+        "label"
+      ],
+      "train_csv_sha256": "f2cbcfa87e6ee3f8400c6451b58d23bb98abd7b6b962cee2a9089cf8b0b84434",
+      "variant": "smoten"
+    }
+  ],
+  "model_id": "smote",
+  "protocol_id": "smote-native-parity-v1",
+  "repository_commit": "283c8987a28ef3c3871d8d819325a035f957a045",
+  "runtime_config": {
+    "k_neighbors": 3,
+    "sample_rows": 20,
+    "sampling_strategy": "auto"
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "canonical-third-party-reference-package",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license": "MIT",
+      "license_file_sha256": "fbcab88e3daf0f2f9248f5a774e97915b7a1a36da76a78c6a5baaa07095ef644",
+      "module_path": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/imblearn/__init__.py",
+      "record_files_verified": 123,
+      "sampler_classes": {
+        "SMOTE": "imblearn.over_sampling._smote.base",
+        "SMOTEN": "imblearn.over_sampling._smote.base",
+        "SMOTENC": "imblearn.over_sampling._smote.base"
+      },
+      "version": "0.14.2"
+    },
+    "repository": "https://github.com/scikit-learn-contrib/imbalanced-learn",
+    "source_license_file_sha256": "7e586fd494f7470067defb818540a1d34b773ee62a16baaaccc511cdbc753181",
+    "tag": "0.14.2",
+    "upstream_commit": "8504e95f0160f61d1b617ca66f779646d2ee609e",
+    "upstream_tree": "af452de62e0f5c3d7e65fdc44a32dc97078152f2",
+    "wheel": {
+      "archive_members": 124,
+      "bytes": 236073,
+      "filename": "imbalanced_learn-0.14.2-py3-none-any.whl",
+      "license": "MIT",
+      "license_file_sha256": "fbcab88e3daf0f2f9248f5a774e97915b7a1a36da76a78c6a5baaa07095ef644",
+      "sha256": "f9b81c47231aa1e3a71a1e4b3cc85b42e3b14f85e3a36922f3323c4da23605ef"
+    }
+  },
+  "status": "pass",
+  "variants": [
+    "smote",
+    "smotenc",
+    "smoten"
+  ]
+}

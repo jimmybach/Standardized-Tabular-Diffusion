@@ -303,7 +303,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="traditional",
         paradigm="interpolation / oversampling",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/scikit-learn-contrib/imbalanced-learn",
@@ -312,7 +312,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The adapter targets the checksum-pinned official imbalanced-learn 0.14.2 wheel.",
             "Numerical, mixed-type, and all-categorical inputs dispatch to official SMOTE, SMOTENC, and SMOTEN respectively without repository-side feature encoding.",
             "It is a classification-only classical oversampling reference, not a joint tabular generator, and is excluded from generative-model ranking.",
-            "The mandatory Linux/Python 3.11 native-parity workflow is pending before promotion beyond adapter-complete.",
+            "All nine exact native-parity cases passed on Linux/Python 3.11 in GitHub Actions run 30918785254.",
         ],
     ),
     "stasy": ModelInventoryEntry(
