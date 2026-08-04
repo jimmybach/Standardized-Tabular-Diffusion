@@ -1,0 +1,137 @@
+{
+  "profile_schema_version": "1.0.0",
+  "dataset_profile_version": "1.0.0-reviewed",
+  "dataset_id": "adult",
+  "display_name": "UCI Adult",
+  "dataset_version": "uci-2-7537312dd56c",
+  "dataset_view": "adult-uci-2-model-v1",
+  "dataset_family": "socioeconomic-classification",
+  "status": "reviewed",
+  "owners": ["repository-maintainers"],
+  "review_record": {
+    "source_schema_split_preprocessing": "reviewed",
+    "privacy_metric_and_suite_admission": "pending",
+    "date": "2026-08-03"
+  },
+  "change_log": [
+    {
+      "version": "1.0.0-reviewed",
+      "change": "Replaced unbound tracked derivatives with the checksum-pinned official UCI Adult train/test split and train-fitted preprocessing."
+    }
+  ],
+  "suite_membership": ["diagnostic"],
+  "official_eligible": false,
+  "source_rights": {
+    "canonical_source": "https://archive.ics.uci.edu/dataset/2/adult",
+    "publisher": "UCI Machine Learning Repository",
+    "source_version": "uci-2-sha256-7537312dd56c",
+    "retrieved_date": "2026-08-03",
+    "raw_files": [
+      {"name":"adult.zip","role":"source-archive","sha256":"7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb"},
+      {"name":"adult.data","role":"official-train","sha256":"5b00264637dbfec36bdeaab5676b0b309ff9eb788d63554ca0a249491c86603d"},
+      {"name":"adult.test","role":"official-test","sha256":"a2a9044bc167a35b2361efbabec64e89d69ce82d9790d2980119aac5fd7e9c05"},
+      {"name":"adult.names","role":"official-schema-and-documentation","sha256":"c248284c0b5de30c9e1958d6cdd168a34a654758b620e68f46aefa83fc0a576a"}
+    ],
+    "citation": "Becker, B. and Kohavi, R. (1996). Adult [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5XW20.",
+    "license": "CC-BY-4.0",
+    "access_restrictions": [],
+    "permitted_uses": ["research", "benchmarking", "redistribution-with-attribution"],
+    "redistribution_status": "permitted",
+    "modification_requirements": ["Identify generated CSV and NumPy tables as processed views of the official UCI source."],
+    "attribution_requirements": ["Retain the UCI citation and CC BY 4.0 attribution."],
+    "rights_review": {
+      "decision": "source-recorded-pending-independent-release-review",
+      "reviewer": "repository-maintainers",
+      "date": "2026-08-03"
+    }
+  },
+  "table_contract": {
+    "canonical_serialization": "UTF-8 CSV with a header and LF line endings",
+    "encoding": "ASCII source; UTF-8 processed view",
+    "source_delimiter": "comma followed by exactly one space",
+    "row_count_expectations": {"train": 32561, "test": 16281},
+    "unique_column_names": true,
+    "canonical_column_order": ["age","workclass","fnlwgt","education","education.num","marital.status","occupation","relationship","race","sex","capital.gain","capital.loss","hours.per.week","native.country","income"],
+    "duplicate_row_policy": "Preserve and disclose repeated and cross-split-identical rows in the official fixed split; do not silently deduplicate or resplit.",
+    "identifier_policy": "The official model table contains no declared direct identifier; all rows remain person-level records.",
+    "target_presence": ["income"],
+    "missing_value_inventory": "Locked per split in adult-uci-2-v1.json; only workclass, occupation, and native.country contain the ? marker.",
+    "supported_input_forms": ["checksum-pinned UCI archive"],
+    "canonical_table_checksum": null
+  },
+  "columns": [
+    {"name":"age","column_id":"age","semantic_type":"integer","storage_type":"float64","roles":["feature","quasi_identifier"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":17,"maximum":90},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range.","description":"Age in years.","unit":"years","sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["observed-integer-ranges"]},
+    {"name":"workclass","column_id":"workclass","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":{"values":["Federal-gov","Local-gov","Never-worked","Private","Self-emp-inc","Self-emp-not-inc","State-gov","Without-pay"]},"category_vocabulary_source":"adult.names","transformation_policy":"Replace ? using the most frequent observed training value only.","inverse_transformation_policy":"Require a declared category; generated missing markers are rejected.","description":"Employment class.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["train-only-imputation"]},
+    {"name":"fnlwgt","column_id":"fnlwgt","semantic_type":"integer","storage_type":"float64","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":12285,"maximum":1490400},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range.","description":"Census final sampling weight, not a direct person identifier.","unit":null,"sensitivity":{"status":"provisional","sensitive":false,"quasi_identifier":false},"constraint_refs":["observed-integer-ranges"]},
+    {"name":"education","column_id":"education","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["10th","11th","12th","1st-4th","5th-6th","7th-8th","9th","Assoc-acdm","Assoc-voc","Bachelors","Doctorate","HS-grad","Masters","Preschool","Prof-school","Some-college"]},"category_vocabulary_source":"adult.names","transformation_policy":"Identity after exact source parsing.","inverse_transformation_policy":"Require a declared category.","description":"Highest reported education category.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["declared-categorical-domains"]},
+    {"name":"education.num","column_id":"education-num","semantic_type":"integer","storage_type":"float64","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":1,"maximum":16},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range and enforce consistency with education when that constraint is approved.","description":"Ordinal encoding associated with education.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["observed-integer-ranges","education-consistency-pending"]},
+    {"name":"marital.status","column_id":"marital-status","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["Divorced","Married-AF-spouse","Married-civ-spouse","Married-spouse-absent","Never-married","Separated","Widowed"]},"category_vocabulary_source":"adult.names","transformation_policy":"Identity after exact source parsing.","inverse_transformation_policy":"Require a declared category.","description":"Marital-status category.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["declared-categorical-domains"]},
+    {"name":"occupation","column_id":"occupation","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":{"values":["Adm-clerical","Armed-Forces","Craft-repair","Exec-managerial","Farming-fishing","Handlers-cleaners","Machine-op-inspct","Other-service","Priv-house-serv","Prof-specialty","Protective-serv","Sales","Tech-support","Transport-moving"]},"category_vocabulary_source":"adult.names","transformation_policy":"Replace ? using the most frequent observed training value only.","inverse_transformation_policy":"Require a declared category; generated missing markers are rejected.","description":"Occupation category.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["train-only-imputation"]},
+    {"name":"relationship","column_id":"relationship","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["Husband","Not-in-family","Other-relative","Own-child","Unmarried","Wife"]},"category_vocabulary_source":"adult.names","transformation_policy":"Identity after exact source parsing.","inverse_transformation_policy":"Require a declared category.","description":"Relationship role within the household.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["declared-categorical-domains"]},
+    {"name":"race","column_id":"race","semantic_type":"categorical","storage_type":"string","roles":["feature","sensitive_attribute"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["Amer-Indian-Eskimo","Asian-Pac-Islander","Black","Other","White"]},"category_vocabulary_source":"adult.names","transformation_policy":"Identity after exact source parsing.","inverse_transformation_policy":"Require a declared source category.","description":"Race category as encoded by the historical source; labels are retained verbatim for reproducibility and require ethical review.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["declared-categorical-domains","fairness-review-pending"]},
+    {"name":"sex","column_id":"sex","semantic_type":"categorical","storage_type":"string","roles":["feature","sensitive_attribute"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["Female","Male"]},"category_vocabulary_source":"adult.names","transformation_policy":"Identity after exact source parsing.","inverse_transformation_policy":"Require a declared source category.","description":"Binary sex category as encoded by the historical source.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["declared-categorical-domains","fairness-review-pending"]},
+    {"name":"capital.gain","column_id":"capital-gain","semantic_type":"integer","storage_type":"float64","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":0,"maximum":99999},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range.","description":"Reported capital gain.","unit":"USD (historical source encoding)","sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["observed-integer-ranges"]},
+    {"name":"capital.loss","column_id":"capital-loss","semantic_type":"integer","storage_type":"float64","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":0,"maximum":4356},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range.","description":"Reported capital loss.","unit":"USD (historical source encoding)","sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["observed-integer-ranges"]},
+    {"name":"hours.per.week","column_id":"hours-per-week","semantic_type":"integer","storage_type":"float64","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"minimum":1,"maximum":99},"category_vocabulary_source":null,"transformation_policy":"Parse as a base-10 integer, then store in the common float64 numerical model view; no source value is missing.","inverse_transformation_policy":"Require an integer-valued number in the reviewed observed range.","description":"Usual hours worked per week.","unit":"hours/week","sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["observed-integer-ranges"]},
+    {"name":"native.country","column_id":"native-country","semantic_type":"categorical","storage_type":"string","roles":["feature","sensitive_attribute"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":{"values":["Cambodia","Canada","China","Columbia","Cuba","Dominican-Republic","Ecuador","El-Salvador","England","France","Germany","Greece","Guatemala","Haiti","Holand-Netherlands","Honduras","Hong","Hungary","India","Iran","Ireland","Italy","Jamaica","Japan","Laos","Mexico","Nicaragua","Outlying-US(Guam-USVI-etc)","Peru","Philippines","Poland","Portugal","Puerto-Rico","Scotland","South","Taiwan","Thailand","Trinadad&Tobago","United-States","Vietnam","Yugoslavia"]},"category_vocabulary_source":"adult.names","transformation_policy":"Replace ? using the most frequent observed training value only.","inverse_transformation_policy":"Require a declared category; generated missing markers are rejected.","description":"Native-country category as encoded by the historical source.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["train-only-imputation","fairness-review-pending"]},
+    {"name":"income","column_id":"income","semantic_type":"categorical","storage_type":"string","roles":["primary_target"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["<=50K",">50K"]},"category_vocabulary_source":"adult.names","transformation_policy":"Remove the official test-only terminal period; never impute the target.","inverse_transformation_policy":"Require <=50K or >50K.","description":"Binary annual-income class relative to the historical USD 50,000 threshold.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":["declared-categorical-domains","fairness-review-pending"]}
+  ],
+  "preprocessing": {
+    "status": "validated",
+    "raw_missingness": "Exact per-column counts are frozen in standardized_tabular_diffusion/resources/datasets/adult-uci-2-v1.json.",
+    "model_input_missing_values": "prohibited",
+    "require_centralized_imputation_if_present": true,
+    "fitted_on": "official adult.data training split only",
+    "configuration_version": "adult-uci-2-model-v1",
+    "implementation_version": "1.0.0",
+    "numerical_strategy": "arithmetic mean of observed training values; no official numerical value is missing",
+    "categorical_strategy": "most frequent observed training value",
+    "categorical_fill_values": {"workclass":"Private","occupation":"Prof-specialty","native.country":"United-States"},
+    "target_strategy": "error",
+    "synthetic_missing_strategy": "reject rather than repair generated samples"
+  },
+  "views": [
+    {"view_id":"adult-uci-2-raw-audit-v1","status":"reviewed","purpose":"Represent exact official fields after strict delimiter parsing and test-target suffix normalization."},
+    {"view_id":"adult-uci-2-model-v1","status":"reviewed","parent_dataset_version":"uci-2-7537312dd56c","columns":15,"excluded":[],"comparability":"Canonical model-input view for this repository."}
+  ],
+  "split": {
+    "split_id": "uci-official-adult-data-test-v1",
+    "status": "validated",
+    "frozen": true,
+    "train": {"member":"adult.data","rows":32561,"canonical_rows_sha256":"d7246ff964ec5340265e4384ef43a101dbaffd02a7f10528fa1d68a5e41719ce","class_counts":{"<=50K":24720,">50K":7841}},
+    "test": {"member":"adult.test","rows":16281,"canonical_rows_sha256":"50ab194c9b1bb6abe2894d7ff70997bf154cc8b592b161d8bc224b6288b773b7","class_counts":{"<=50K":12435,">50K":3846}},
+    "duplicate_audit": {
+      "raw_model_view": {"train_duplicate_rows":24,"test_duplicate_rows":5,"cross_split_unique_rows":23,"train_rows_in_cross_split_overlap":25,"test_rows_in_cross_split_overlap":23},
+      "processed_model_view": {"train_duplicate_rows":24,"test_duplicate_rows":5,"cross_split_unique_rows":24,"train_rows_in_cross_split_overlap":26,"test_rows_in_cross_split_overlap":24}
+    },
+    "validation_split": null
+  },
+  "predictive_tasks": [
+    {"task_id":"predict-income-class","target_column_id":"income","task_type":"classification","status":"reviewed","primary_metric_review":"pending evaluation-protocol implementation"}
+  ],
+  "validity": {
+    "status": "partially-reviewed",
+    "constraints": [
+      {"constraint_id":"observed-integer-ranges","rule":"Official source integers must stay within the checksum-bound observed ranges during parsing; generative validity policy remains subject to protocol review."},
+      {"constraint_id":"declared-categorical-domains","rule":"Categorical source values must match adult.names, with ? accepted only in the three declared nullable features."},
+      {"constraint_id":"train-only-imputation","rule":"All missing-value statistics are fitted on adult.data and applied unchanged to adult.test."},
+      {"constraint_id":"official-row-overlap","rule":"Preserve the official split despite 23 raw and 24 processed unique rows appearing in both train and test."},
+      {"constraint_id":"education-consistency-pending","rule":"The semantic relation between education and education.num requires an explicit validity implementation before scoring."},
+      {"constraint_id":"fairness-review-pending","rule":"Fairness and subgroup reporting must be reviewed before Official Results admission."}
+    ],
+    "domain_range_review": "source parsing reviewed; generative semantic constraints pending"
+  },
+  "privacy": {
+    "status": "review-required",
+    "data_nature": "person-level historical census-income records with demographic and socioeconomic attributes",
+    "sensitive_roles_reviewed": false,
+    "threat_models": [],
+    "default_release_behavior": "Do not publish row-level materializations or enable attribute-inference metrics until privacy and ethical-use review is complete."
+  },
+  "metric_applicability": {
+    "status": "partial",
+    "included": ["schema validation", "distributional fidelity", "classification utility", "duplicate and cross-split-overlap checks"],
+    "excluded": ["attribute inference pending privacy-role and threat-model approval", "fairness claims pending subgroup protocol review"],
+    "default_behavior": "error for metrics requiring unreviewed privacy, fairness, or semantic-constraint decisions"
+  }
+}

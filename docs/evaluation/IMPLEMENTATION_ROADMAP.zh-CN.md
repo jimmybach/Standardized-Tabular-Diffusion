@@ -1,0 +1,458 @@
+# 评测与榜单实施路线图
+
+英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
+
+- 状态：实施基线
+- 路线图版本：0.1.0
+- 最后更新：2026-08-03
+- 主要发布环境：Linux 与 Python 3.11
+
+## 1. 目的
+
+本路线图把已经批准的评测规范转化为适用于当前仓库的可执行工程顺序。它与现有代码直接对应：记录已经存在的内容、可以复用的内容、必须替换的内容、兼容性如何保留，以及某个指标或榜单在被称为“正式”之前必须具备哪些证据。
+
+本文件本身不会批准任何指标、模型、数据集、结果或发布版本。规范语义仍以相关规范文件为准。只有通过退出门槛并具备所需证据，某个阶段才算完成。
+
+## 2. 已锁定的实施原则
+
+实现必须遵守以下决定：
+
+1. 评测是独立子系统。适配器生成的样本和外部提交的合成表使用同一个评测引擎。
+2. 模型适配器负责训练、采样和解码，不负责指标公式、结果聚合或榜单资格。
+3. 对来源定义的指标，应尽可能包装不可变的官方软件包或锁定的官方源码。本地重实现绝不能在不说明的情况下替代来源等价指标。
+4. 上游模型和指标源码树是只读证据或运行时。任何不可避免的源码修改都必须先讨论，并具备隔离补丁、来源记录、许可证审阅和等价性验证。
+5. 必须提供机器可读的 Dataset Profile、Metric Registry 记录、协议配置和结果 schema。仅在文档中描述默认值是不够的。
+6. 签入仓库的 JSON Schema 是线格式契约的规范校验器。内部 Python 模型可以在不改变线格式契约的情况下演进，但不能绕过已签入 schema 和版本规则。
+7. 指标调用返回结构化状态。异常、`NaN`、无穷值、被遗漏的目标和静默缩小的分母都不是有效结果表示。
+8. 来源原始值、基准库派生变换和聚合贡献必须是不同字段。
+9. 在首个正式协议中，缺失值绝不能进入生成模型。原始数据含缺失值的数据集必须调用显式、版本化、仅在 train 上拟合的预处理模块；注册过程不得静默删除或填补行。
+10. 初始发布不设置总榜单分数。Fidelity、Local Utility、Global Utility、Validity、Privacy Risk 和 Efficiency 保持为可见维度或独立子榜单。
+11. 只有同时达到 `protocol-frozen` 和 `release-supported` 的指标才能影响 Official Results。
+12. 第一个端到端实现切片是结构校验加来源等价的 Column Shapes 与 Column Pair Trends。只有该切片能够生成有效的 finalized result bundle 后，才扩展指标广度。
+
+## 3. 当前实现审计
+
+### 3.1 当前执行路径
+
+当前路径为：
+
+~~~text
+ExperimentConfig
+    -> runner.run_action / runner.run_pipeline
+    -> model_adapter.evaluate
+    -> evaluation.tabstruct.normalize_*
+    -> standardized_summary.json
+    -> comparison.compare_summaries
+~~~
+
+该路径可以生成紧凑的对比表，但尚未实现已批准的 prepare/train/sample/validate/evaluate/aggregate/report 生命周期、Metric Registry、Dataset Profile 契约、Atomic Result、兼容性分组、finalized bundle 或榜单准入检查。
+
+### 3.2 代码处置映射
+
+| 当前位置 | 当前作用 | 处置方案 |
+|---|---|---|
+| [`evaluation/tabstruct.py`](../../standardized_tabular_diffusion/evaluation/tabstruct.py) | 在单个模块中同时承担静态指标描述、上游指标调用、Structural Utility、异常处理和旧摘要写入 | 冻结为 legacy 行为、拆分职责，并在保持迁移等价后移出新的正式路径 |
+| [`models/base.py`](../../standardized_tabular_diffusion/models/base.py) | 适配器接口和 artifact manifest 写入 | 保留 train/sample 适配器边界；将评测路由到独立引擎，并用 bundle 引用替代临时 artifact manifest |
+| [`models/tabdiff.py`](../../standardized_tabular_diffusion/models/tabdiff.py)、[`models/tabsyn.py`](../../standardized_tabular_diffusion/models/tabsyn.py) 和 [`models/sample_baselines.py`](../../standardized_tabular_diffusion/models/sample_baselines.py) | 调用相同的样本文件 normalizer | 复用样本路径发现；用 `EvaluationRequest` 替换直接指标调用 |
+| [`models/tabddpm.py`](../../standardized_tabular_diffusion/models/tabddpm.py) | 规范化已有的上游 JSON 指标文件 | 保留明确标注的 legacy 导入路径；正式评测必须使用规范解码样本和公共引擎 |
+| [`config.py`](../../standardized_tabular_diffusion/config.py) | 带评测布尔开关和无类型 `extra` 字典的 dataclass | 保留兼容加载器；引入有版本的协议、指标配置、数据集配置、种子、失败政策和硬件配置身份 |
+| [`interfaces.py`](../../standardized_tabular_diffusion/interfaces.py) | 最小化 `DatasetSpec`、`RunSpec` 和 `ArtifactBundle` | 临时保留适配器兼容类型；新增严格评测契约，而不是继续扩展 `extra` |
+| [`datasets.py`](../../standardized_tabular_diffusion/datasets.py) | 从上游 `info.json` 发现数据集元数据 | 仅作为把旧元数据导入待审 Dataset Profile 的工具；不得把上游元数据当作正式资格证据 |
+| [`dataset_onboarding.py`](../../standardized_tabular_diffusion/dataset_onboarding.py) | 注册 CSV 并静默清理缺失值 | 分离注册、画像、预处理和物化；弃用静默删行和隐式插入缺失标记 |
+| [`materialization.py`](../../standardized_tabular_diffusion/materialization.py) | 运行上游处理、复制数据并写入基于路径的 manifest | 增加 source/view/split 身份、校验和、预处理血缘和原子发布；不能把复制目录本身当作身份 |
+| [`runner.py`](../../standardized_tabular_diffusion/runner.py) | 执行 train、sample 和 evaluate 阶段 | 保留为高层模型工作流；把评测生命周期、恢复和结果 finalization 委托给评测 orchestrator |
+| [`comparison.py`](../../standardized_tabular_diffusion/comparison.py) | 把旧摘要展平成记录 | 正式用途改为 schema 校验、兼容性分组、覆盖率核算、不确定性和政策感知聚合 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | 提供元数据、三个运行 action 和旧摘要对比 | 增加 profile/registry/result 校验和独立评测命令；在迁移窗口内保留已弃用命令 |
+| [`requirements-benchmark-stack.txt`](../../requirements-benchmark-stack.txt) | 为模型和指标提供一个庞大的共享环境 | 拆分 core、evaluation、model 和 development 依赖组；锁定正式 Linux/Python 3.11 评测环境 |
+| [`tests/`](../../tests) | 51 个仓库测试函数，主要覆盖适配器、CLI、注册和字节稳定性 | 保留有用的适配器测试；新增评测测试金字塔，不能再把 mock 测试或旧摘要字节稳定性当作科学验证 |
+
+### 3.3 已确认的缺口与风险
+
+- `METRIC_DEFINITIONS` 是 Python 常量而不是经过校验的 registry，并仍使用旧的 `tabstruct-aligned-v1` 身份。
+- 每指标的 `EvaluationConfig` 开关没有以完整、可执行的指标请求传入 normalizer。
+- 宽泛异常捕获可能把实现缺陷转换为缺失值，却没有稳定状态或原因代码。
+- Structural Utility 可能从均值中静默排除未定义目标；当前对合成数据恒定目标的处理与已批准的失败政策不兼容。
+- Predictor 组合会随已安装软件包或环境变量而变化，因此当前 Structural Utility 输出没有唯一稳定的指标身份。
+- 旧摘要 schema 缺少每列、每列对、每目标、每种子的 Atomic Result，也缺少校验和、兼容性身份、覆盖率和 finalization 状态。
+- 数据注册当前会在注册时改变数据，导致无法清晰审计原始输入、预处理和所得 dataset view。
+- 包导入时会提前加载模型模块以及 PyTorch 等可选重依赖，导致最小环境无法运行核心元数据和数据测试。
+- 根目录没有 `pyproject.toml`、pytest 发现边界或仓库 CI workflow。
+- 在 2026-08-03 的审计机器上，不受限制的 `pytest -q` 收集了上游和研究参考材料中的测试套件，并因 105 个收集错误而停止；即使只运行本仓库的 onboarding 测试，也会因提前导入 PyTorch 而无法收集。这是基线证据，不是可接受的测试状态。
+
+## 4. 目标架构
+
+具体文件名可以经审阅后调整，但职责边界必须保持稳定：
+
+~~~text
+standardized_tabular_diffusion/evaluation/
+  contracts.py          # requests、contexts、atomic results、enums
+  registry.py           # 指标定义和生命周期记录
+  profiles.py           # 协议和 evaluator profile 加载
+  engine.py             # 具备依赖关系的指标执行
+  validation.py         # 表与契约校验
+  bundle.py             # 原子写入、校验和、finalization、resume
+  aggregation.py        # 只聚合兼容的 run/dataset
+  metrics/
+    fidelity/
+    utility/
+    validity/
+    privacy/
+    efficiency/
+  backends/             # SDMetrics、TabStruct 等隔离 wrapper
+
+schemas/evaluation/     # 签入仓库的 JSON Schema
+configs/evaluation/
+  protocols/
+  metrics/
+  evaluators/
+  hardware/
+configs/datasets/       # 已审 Dataset Profile
+tests/evaluation/
+  fixtures/             # 小型、合成、可再分发表
+  golden/               # 版本化的权威预期输出
+~~~
+
+依赖方向是单向的：适配器和 CLI 可以调用公开评测 API；指标模块可以依赖契约和隔离 backend；契约、registry 校验和 bundle 校验不得导入模型适配器或指标重依赖。
+
+### 4.1 公开评测请求
+
+评测请求至少必须标识：
+
+- 解码后的合成表或不可变样本 artifact；
+- Dataset Profile 标识符及校验和；
+- 协议配置及版本；
+- 请求的指标标识符和版本；
+- 适用的 evaluator 与硬件配置；
+- 可用时的模型/run 来源；
+- 主体类型：适配器运行或外部合成表；
+- 种子集合；
+- 输出 bundle 位置；以及
+- 资源与失败政策。
+
+引擎必须在计算前解析全部身份。未知字段、缺少必需身份、不兼容的指标/profile 组合以及未经审阅的正式声明，必须在昂贵计算开始前校验失败。
+
+### 4.2 执行图
+
+指标依赖必须显式。例如：结构校验先于所有正式指标；可复用编码视图可以供多个指标使用；原始 TRTR/TSTR/Dummy 结果先于 Local Utility retention；每目标 ratio 先于 Global Utility；Atomic Result 先于聚合；只有通过校验的 incomplete bundle 才能 finalization。
+
+每个节点记录内容寻址的输入、输出、实现版本、种子、状态、耗时和资源观测。只有全部身份输入一致时，resume 才能复用节点。
+
+## 5. 交付顺序与依赖门
+
+| 阶段 | 交付物 | 依赖 | 退出门槛 |
+|---|---|---|---|
+| P0 | 可信开发基线 | 无 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
+| P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
+| P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
+| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
+| P4 | Local 与 Global Utility | P1、P3 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
+| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
+| P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 阶段核算和复用完整性在声明的硬件配置下通过 |
+| P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 不兼容结果无法合并；覆盖率和发布门通过 |
+| P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 所声明发布类别的 public-preview 或 official-release 门通过 |
+
+依赖稳定后，P3、P4、P5 和 P6 的部分工作可以并行。每个参与指标和数据集分别通过准入门之前，P7 不能用于发布排名。
+
+## 6. 阶段工作包
+
+### 6.1 P0 — 可信基线
+
+任务：
+
+- 为 Python 3.11 增加根打包元数据、显式 core/evaluation/model/development extras 和控制台入口。
+- 配置 pytest 默认只收集本仓库拥有的测试。上游和 `research_inputs/` 测试只能通过显式 provenance/parity job 运行。
+- 让顶层导入保持轻量；把可选模型和指标导入移到工厂之后，并在缺少 extra 时给出可操作提示。
+- 建立格式化、lint、静态类型、schema 校验、单元测试和文档链接命令。
+- 把当前 51 个仓库测试记录为迁移基线；将每个测试分类为 unit、integration、smoke 或 legacy-regression。
+- 增加 Linux/Python 3.11 CI，仅安装 core 依赖并运行元数据、schema、CLI help 和 core 测试。
+- 把 `research_inputs/` 视为不可变审阅输入，排除在打包、普通测试发现和运行时导入路径之外。
+
+退出证据：
+
+- clean checkout 可以安装 core 包；
+- 导入契约、数据集元数据和 CLI help 不需要 PyTorch、AutoGluon、SDMetrics 或模型运行时；
+- 默认 pytest 发现只包含已声明的仓库测试；以及
+- 先前的收集失败已通过回归测试或 CI 配置检查得到防护。
+
+### 6.2 P1 — 契约与身份基础
+
+任务：
+
+- 为 Dataset Profile、Metric Registry entry、协议配置、Evaluation Request、Atomic Result、阶段记录、manifest、metadata、summary 和 artifact index 实现有版本的 schema。
+- 实现六种指标结果状态及稳定原因代码校验。
+- 实现有限数值、原始/派生分离、方向、支持计数和聚合影响不变量。
+- 创建数据驱动的 Metric Registry 加载器；把旧静态描述迁移为明确的 legacy 记录。
+- 创建 Dataset Profile 加载器，以及把现有上游 `info.json` 导入非正式 profile 的工具。
+- 定义协议解析、不可变身份哈希、canonical JSON、安全 YAML 加载和 bundle 相对路径校验。
+- 实现带原子文件替换、事件日志和确定性内容 fingerprint 的 incomplete Run Result bundle writer。
+- 增加列出和校验 metric record、Dataset Profile、协议配置和 result bundle 的 CLI 命令。
+
+退出证据：
+
+- schema 正例、反例、未知字段、版本、路径穿越、非有限值和 round-trip 测试通过；
+- 等价请求具有相同 fingerprint，科学上不同的请求具有不同 fingerprint；
+- 中断的 writer 留下可审计 incomplete bundle，而不会留下假的 finalized bundle；以及
+- 缺少必需证据字段时不能推进 registry 生命周期状态。
+
+### 6.3 P2 — 首个端到端垂直切片
+
+范围刻意限制为：一个外部或适配器生成的单表、结构门、来源等价 Shape、来源等价 Trend、Atomic Result、摘要视图和 bundle finalization。
+
+任务：
+
+- 把 CSV、Parquet 和 DataFrame 输入解析为同一个规范语义表，不允许有损强制转换。
+- 实现行数、列集合、唯一性、序列化、顺序和安全转换校验。
+- 在隔离的评测依赖配置中包装锁定的 SDMetrics Column Shapes 与 Column Pair Trends report 行为。
+- 为每个可评测列和列对保留一个 Atomic Result，包括输入计数和来源原始输出。
+- 只计算来源定义的等列/等列对摘要以及单独命名的基准库报告视图。
+- 实现 synthetic-vs-test、synthetic-vs-train 和版本化 real-vs-real 参考接口；尚未解决的参考构造保持 diagnostic。
+- 生成全部必需 Run Result 文件，校验后最后写入校验和，并不可变 finalization。
+- 增加不依赖模型训练的 `evaluate-table` 和 `validate-result` CLI 路径。
+
+等价测试套件：
+
+- 数值、分类、Boolean、datetime 和混合列对正常情形；
+- 适用时覆盖常量、空、单行、缺失、未见类别、零范围和不同样本行数；
+- report 级预处理与聚合对比直接锁定来源调用；
+- 精确来源 revision、解析参数、warning、容差和状态；以及
+- 与底层替代行为进行有意对比，防止在来源等价标识符下误用 Spearman 或 common-bin 混合列对行为。
+
+退出证据：
+
+- 直接权威调用和 benchmark 路径结果在批准的等价协议下吻合；
+- 两个相同请求生成语义等价的 bundle 和 fingerprint；
+- 结构失败阻止正式下游指标，但仍生成有效 incomplete/failed bundle；
+- 每个请求的列和列对都有分母完整的记录；以及
+- 高阶组件达到 protocol-frozen 前不输出总 Fidelity 分数。
+
+### 6.4 P3 — Validity 与预处理边界
+
+任务：
+
+- 为 nullability、finiteness、整数语义、已审边界、类别、字符串格式和 datetime 范围实现每列硬规则。
+- 实现带稳定标识符和适用性规则的已审跨列约束。
+- 保留原始解码输出；如获允许，另行记录 evaluator 规范化或修复视图。
+- 把数据 onboarding 拆分为原始注册、权利/来源审阅、schema 画像、显式预处理、split 生成和物化。
+- 用必需的预处理请求和完整 cleaning report 替换静默删除与隐式填补。
+- 所有学习型预处理器只在 train 上拟合；对学习状态和转换后 schema 计算校验和；政策变化产生新的 dataset-view 身份。
+- 在讨论并批准相关数据集和策略之前，不选择插补策略。
+
+退出证据：
+
+- 手算规则、畸形 schema、有损转换、无约束和宽度敏感性测试通过；
+- 测试证明 test 数据不能影响拟合的预处理状态；
+- 原始 validity 不会因 evaluation-only 视图被修复而提高；以及
+- 除显式声明的序列化转换外，单纯注册保持字节不变。
+
+### 6.5 P4 — Utility
+
+Local Utility 任务：
+
+- 在同一个 held-out real test set 上实现完全一致的 Dummy、TRTR 和 TSTR arms。
+- 经 pilot 审阅后冻结独立的分类和回归 evaluator profile。
+- 为每个 evaluator、目标和种子保留 Macro-F1/RMSE 主原始值和适用的次要值。
+- 把基线调整的 retention 实现为单独标识的 benchmark-derived 结果。
+- 编码缺失类别、恒定目标、TRTR 相对 Dummy 过弱、predictor 失败和资源失败，不得删除任务。
+
+Global Utility 任务：
+
+- 在聚合层精确实现 TabStruct Equation 4：分类目标用 Balanced Accuracy ratio，数值目标用逆 RMSE ratio，最后进行等目标均值。
+- 把 Full-tuned、Tiny-default 和任何锁定 TabEval predictor profile 保持为不同指标身份和兼容组。
+- 默认排除 identifier；其他每个目标排除都必须在 Dataset Profile 中给出理由。
+- 绝不裁剪大于一的 ratio，也绝不静默省略零或非有限分母。
+- 优先包装批准的权威 predictor 实现。若必须修改源码，实现暂停并进入审阅。
+
+退出证据：
+
+- 手算、原始 arm 不变量、类别支持失败、恒定目标、多分类、回归边界和全部目标分母测试通过；
+- 随机算法的可复现性和容差政策已预声明；
+- 声称来源等价的所选 profile 通过来源等价验证；以及
+- Local Utility 与 Global Utility 保持为不同输出和子榜单。
+
+### 6.6 P5 — 高阶 Fidelity 与经验 Privacy
+
+高阶任务：
+
+- 在 C2ST 影响 Fidelity 前，通过 pilot 冻结预处理、discriminator、split、平衡、种子、不确定性和 AUROC-complement 变换。
+- 在来源专用 diagnostic 标识符下保留 GReaT RF discriminator accuracy。
+- 在 mixed-table embedding 和积分行为解决前，Integrated Alpha-Precision/Beta-Recall 保持 experimental。
+
+Privacy 任务：
+
+- 分别实现精确 train collision 和 synthetic internal duplication diagnostic。
+- 包装锁定的 SDMetrics DCR 距离；添加单独标识的 held-out 校准和分布摘要。
+- 在冻结 privacy suite 前定义并验证至少一个 membership-inference threat model。
+- 只有 Dataset Profile 具备已审 sensitive/quasi-identifier role 和已批 threat model 时，才加入 attribute inference。
+- 在 paper/code 差异裁决前保持 Authenticity excluded。
+- 在 Delta Presence 的语义和失败行为得到科学解决前，将其排除在正式评分之外。
+
+退出证据：
+
+- 每个 privacy 输出都标识 attacker knowledge、member/non-member 构造、表示、模型和方向；
+- collision 与 DCR 边界/等价套件通过，包括 null 和 zero-range 行为；
+- 任何 privacy diagnostic 都不被描述为形式化 privacy guarantee；以及
+- 未解决的指标只以明确 experimental 或 excluded 记录存在。
+
+### 6.7 P6 — Orchestration、Efficiency、cache 与 resume
+
+任务：
+
+- 把执行扩展为 prepare、train、sample、validate、evaluate、aggregate 和 report 阶段记录。
+- 记录 wall time、可靠时的 CPU time、峰值 RAM、峰值 accelerator memory、行吞吐、请求/实际样本数、warm-up 政策和被排除的 setup time。
+- 定义 hardware profile，并禁止跨 profile 的 Efficiency 排名。
+- 在隔离进程或环境中运行可选指标 backend，并设置显式时间、内存和失败边界。
+- 实现内容寻址的阶段 cache 和 resume，不得改变结果身份或隐藏此前失败。
+- 日志结构化并删除 secrets 和不安全路径；把确定性科学输出与时间戳、host-specific 诊断分开。
+
+退出证据：
+
+- 强制 timeout、模拟 out-of-memory、中断、retry、stale-cache 和 partial-success 测试通过；
+- cache 复用证明所有身份输入吻合，并在阶段 metadata 中可见；
+- Efficiency 测量在命名硬件配置下、声明容差内可复现；以及
+- 一个可选指标失败不会删除已完成的 Atomic Result。
+
+### 6.8 P7 — 聚合与榜单发布
+
+任务：
+
+- 聚合前校验每个输入 bundle 并构造兼容组。
+- 按政策规定顺序把 Atomic Result 聚合到 run、seed、dataset、suite 和 snapshot。
+- 实现不确定性区间、两两完整性、覆盖率、失败/未定义分母核算、并列和纠正/supersession 记录。
+- 分离 Native 与 Standardized Tuning comparison track。
+- 强制执行 Official、Partial/Diagnostic 和 Community publication class 及其证据要求。
+- 从同一批已校验记录生成不可变 Leaderboard Snapshot bundle、人类可读表和机器可读导出。
+- 禁止展示代码重新计算科学值或改变排序规则。
+
+退出证据：
+
+- 人为构造的不兼容协议、split、预处理、指标、种子、硬件和 tuning 记录无法合并；
+- 缺失或失败贡献不能提高覆盖率或从分母中消失；
+- 可以从声明的 bundle 确定性重建 snapshot；以及
+- 没有独立准入记录的模型、数据集或指标不能进入 Official Results。
+
+### 6.9 P8 — 迁移与发布
+
+任务：
+
+- 把 `standardized_summary.json` 和 `tabstruct-aligned-v1` 标记为 legacy，冻结其 schema，并在声明的迁移窗口内保留只读 importer。
+- 当缺少必需 Atomic Result 证据时，绝不能把 legacy 摘要转换为 Official Result。
+- 让适配器评测通过新引擎，同时在安全情况下保留 train/sample 行为和现有 artifact 位置。
+- 用已批准的模型状态维度和证据记录替换旧的 `implemented` inventory 语言。
+- 更新英文 README、教程、示例、架构、metric card、dataset card、故障排除和贡献者指南；按计划提供中文审阅翻译。
+- 在完成各自审计后，增加 license、third-party notice、citation、contributor acknowledgement、security policy、code of conduct 和发布 checklist。
+- 在 Linux/Python 3.11 上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison。
+
+退出证据：
+
+- legacy 与新输出不会因文件名、schema、CLI 标签或文档而混淆；
+- clean-checkout quickstart 不依赖开发者本地路径或未声明数据并通过；
+- 发布声明与实际生命周期、资格和支持记录一致；以及
+- Repository Quality Standard 中每个适用发布门都有基于证据的决定。
+
+## 7. 验证策略
+
+### 7.1 必需测试层
+
+| 层 | 目的 | 必需示例 |
+|---|---|---|
+| Contract | 强制 schema 和不变量 | version、enum、未知字段、有限值、path、hash |
+| Formula unit | 校验 benchmark 数学 | 可手算正常与边界情况 |
+| Source parity | 校验权威行为 | 在共享 fixture 上直接锁定调用对比 wrapper |
+| State and negative | 防止有利的静默失败 | empty、constant、missing class、timeout、dependency failure |
+| Integration | 校验子系统边界 | profile -> table -> metric -> bundle -> validator |
+| End-to-end | 校验用户工作流 | Linux/Python 3.11 上的外部表和一个真实适配器 |
+| Determinism | 校验科学身份 | 重复 seed、进程隔离、cache reuse、canonical serialization |
+| Migration | 保留有意兼容性 | legacy reader、deprecation warning、不得正式升级 |
+| Security and publication | 保护发布 artifact | path traversal、unsafe YAML、secret/path redaction、manifest allowlist |
+
+Mock 测试适合验证控制流，但不能满足 source parity、真实 smoke、科学验证或 release-support 门槛。
+
+### 7.2 Golden fixture 政策
+
+Golden fixture 必须小型、合成、可再分发、可人工检查且有版本。每个 fixture 记录权威来源 revision、依赖 lock、调用参数、原始预期输出、允许容差以及任何平台容差的理由。更新 golden value 必须有审阅记录；依赖升级不会自动授权重新生成。
+
+### 7.3 CI 分区
+
+- `core`：不含模型或指标重依赖；运行契约、profile、CLI 元数据和 bundle 校验。
+- `evaluation-unit`：确定性指标公式和状态测试。
+- `source-parity`：每个权威 backend 使用隔离锁定环境。
+- `adapter-smoke`：选定真实适配器；必要时定期或按硬件标签运行。
+- `release`：clean installation、文档链接、artifact allowlist、安全/许可证证据和 quickstart。
+
+普通测试禁止网络访问。需要下载的测试使用预批准缓存输入并校验 checksum。
+
+## 8. 证据与审阅控制
+
+每个工作包必须产出：
+
+- 实现 commit 和已变更公开契约清单；
+- 测试与不可变 fixture；
+- 解析后的依赖 lock 和许可证记录；
+- 指标或模型生命周期更新；
+- 当公式或语义变化时的科学 reviewer 决定；
+- 兼容性影响与迁移说明；
+- 文档与局限更新；以及
+- 针对退出门槛的机器可读评估。
+
+源码修改、新插补政策、数据集硬约束、指标变换、predictor profile、threat model、聚合权重和正式阈值都是审阅检查点。做出或改变其中任何选择前，实施暂停并进入讨论。
+
+## 9. 阻止发布的待定事项
+
+路线图可以绕开下列事项继续推进，但在解决前，受影响输出不能成为正式结果：
+
+- 数据集专用插补策略和 missing-indicator 政策；
+- 正式 real-vs-real 参考构造；
+- Trend 来源忠实版本与单独命名 common-bin 变体的角色；
+- C2ST evaluator 与不确定性配置；
+- Local Utility evaluator profile 以及是否提供 clipped retention 视图；
+- Global Utility predictor profile；
+- Integrated Alpha-Precision/Beta-Recall embedding；
+- membership- 和 attribute-inference threat model；
+- Authenticity paper/code 差异；
+- Delta Presence 科学角色；
+- support、容差、宽表列对采样和资源限制的 pilot 阈值；以及
+- Core Dataset Suite、Core Model Set 和 hardware profile。
+
+这些事项不能成为编造临时正式默认值的理由。在获得批准前，对应 registry 记录停留在适当的早期生命周期阶段，其数值只能是 diagnostic 或 excluded。
+
+## 10. 里程碑与完成定义
+
+### M1 — 评测基础
+
+P0 和 P1 通过。契约和工具可用，但此时尚无指标被宣传为 source-parity-validated。
+
+### M2 — 首份可信报告
+
+P2 通过。用户可以评测兼容的合成表，并获得包含结构校验、Shape 和 Trend 证据的 finalized、validated bundle。在仓库级发布门也通过的前提下，这是第一个可以支持 public preview 的评测切片。
+
+### M3 — 基准维度
+
+批准子集的 P3 至 P6 通过。Validity、Utility、选定 Privacy diagnostic、已冻结时的高阶 Fidelity 和 Efficiency 具备显式生命周期记录与失败语义。
+
+### M4 — 可发布基准库
+
+声明发布类别的 P7 和 P8 通过。只有全部参与模型、数据集、指标、协议记录和 bundle 也分别通过独立门槛后，才能发布 Official ranking。
+
+代码存在、mock 测试通过或一台机器生成表格都不代表实施完成。只有适用阶段退出门、生命周期证据、兼容性检查、文档和发布评估全部完成，才算完成。
+
+## 11. 紧接着的首个实现增量
+
+第一个实现增量应仅包含：
+
+1. 根打包配置和 pytest 发现边界；
+2. 轻量可选依赖导入；
+3. metric record、Atomic Result、Evaluation Request 和 incomplete bundle 的 schema 与契约骨架；
+4. legacy 身份和弃用标记，不改变指标值；以及
+5. Linux/Python 3.11 的 core CI。
+
+该增量暂时不修改上游算法、不选择插补策略、不发布榜单，也不重写指标公式。它的目的，是建立一个可信表面，以便实现和审阅 Shape/Trend 垂直切片。
+
+## 12. 相关规范
+
+- [评测协议](EVALUATION_PROTOCOL.zh-CN.md)
+- [指标治理](METRIC_GOVERNANCE.zh-CN.md)
+- [指标来源审阅](METRIC_SOURCE_REVIEW.zh-CN.md)
+- [数据集配置规范](DATASET_PROFILE_SPEC.zh-CN.md)
+- [结果规范](RESULT_SPECIFICATION.zh-CN.md)
+- [榜单政策](LEADERBOARD_POLICY.zh-CN.md)
+- [仓库质量标准（英文规范原文）](../QUALITY_STANDARD.md)

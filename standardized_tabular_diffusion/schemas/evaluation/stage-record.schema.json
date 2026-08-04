@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/stage-record/1.0.0",
+  "title": "Stage Record",
+  "type": "object", "additionalProperties": false,
+  "required": ["stage_schema_version", "stage_name", "stage_version", "status", "dependency_stage_ids", "input_fingerprints", "resolved_action", "started_at", "ended_at", "elapsed_seconds", "process_exit_code", "log_refs", "outputs", "warning_codes", "failure_category", "failure_reason_code", "cache_decision", "retry_count", "resume_ancestry"],
+  "properties": {
+    "stage_schema_version": {"const": "1.0.0"}, "stage_name": {"$ref": "#/$defs/id"}, "stage_version": {"$ref": "#/$defs/id"},
+    "status": {"enum": ["pending", "running", "succeeded", "failed", "skipped", "cancelled", "invalidated"]},
+    "dependency_stage_ids": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "input_fingerprints": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "resolved_action": {"type": "string", "minLength": 1},
+    "started_at": {"oneOf": [{"type": "null"}, {"type": "string", "format": "date-time"}]}, "ended_at": {"oneOf": [{"type": "null"}, {"type": "string", "format": "date-time"}]},
+    "elapsed_seconds": {"type": ["number", "null"], "minimum": 0}, "process_exit_code": {"type": ["integer", "null"]},
+    "log_refs": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+    "outputs": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["path", "media_type", "sha256"], "properties": {"path": {"$ref": "#/$defs/path"}, "media_type": {"type": "string"}, "sha256": {"$ref": "#/$defs/sha256"}}}},
+    "warning_codes": {"type": "array", "items": {"$ref": "#/$defs/reason"}}, "failure_category": {"type": ["string", "null"]}, "failure_reason_code": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]},
+    "cache_decision": {"enum": ["not-requested", "miss", "hit", "bypassed", "invalid"]}, "retry_count": {"type": "integer", "minimum": 0}, "resume_ancestry": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+  },
+  "allOf": [{"if": {"properties": {"status": {"const": "skipped"}}}, "then": {"properties": {"failure_reason_code": {"$ref": "#/$defs/reason"}}}}],
+  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "reason": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"}, "path": {"type": "string", "pattern": "^(?!/)(?!.*[<>:|?*])(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"}}
+}

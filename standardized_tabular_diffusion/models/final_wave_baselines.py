@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import json
 import os
 import pickle
 import tempfile
@@ -11,9 +10,9 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder, StandardScaler
 
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
@@ -36,7 +35,11 @@ def _temporary_env(updates: dict[str, str]):
 
 @contextlib.contextmanager
 def _disable_torchvision_for_transformers():
-    import transformers.utils.import_utils as import_utils
+    try:
+        import transformers.utils.import_utils as import_utils
+    except ModuleNotFoundError:
+        yield
+        return
 
     previous = import_utils._torchvision_available
     import_utils._torchvision_available = False
@@ -127,7 +130,7 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         metadata_path = model_root / "adapter_metadata.json"
         if not metadata_path.exists():
             return {}
-        return json.loads(metadata_path.read_text())
+        return read_json(metadata_path)
 
     @staticmethod
     def _resolve_start_distribution(train_df: pd.DataFrame, start_col: str) -> dict[str, float] | list[Any]:
@@ -168,7 +171,7 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             logging_steps=int(spec.extra.get("logging_steps", 50)),
             report_to=spec.extra.get("report_to", "none"),
         )
-        preserve_column_order = bool(spec.extra.get("preserve_column_order", True))
+        preserve_column_order = bool(spec.extra.get("preserve_column_order", False))
         env_updates = {"STANDARDIZED_GREAT_PRESERVE_ORDER": "1" if preserve_column_order else "0"}
         with _temporary_env(env_updates):
             model.fit(train_df)
@@ -181,7 +184,7 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             preserve_column_order=preserve_column_order,
         )
         metadata["preserve_column_order"] = preserve_column_order
-        self._metadata_path(model_root).write_text(json.dumps(metadata, indent=2))
+        atomic_write_json(self._metadata_path(model_root), metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -201,7 +204,13 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         GReaT = self._import_model_cls()
         model_root = self._model_root(spec)
         metadata = self._load_training_metadata(model_root)
-        model = GReaT.load_from_dir(str(model_root))
+        trusted_model_root = self._validate_trusted_executable_artifact(
+            spec,
+            model_root,
+            format_name="GReaT model directory",
+            allow_directory=True,
+        )
+        model = GReaT.load_from_dir(str(trusted_model_root))
         model._update_column_information(train_df)  # noqa: SLF001
         model._update_conditional_information(train_df, conditional_col=None)  # noqa: SLF001
         num_samples = spec.num_samples or len(train_df)
@@ -245,7 +254,7 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             ) from last_error
         sample_df = sample_df[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -311,13 +320,14 @@ class ARFAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("rb") as handle:
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             model = pickle.load(handle)
         train_df = self._load_training_frame(dataset_spec)
         num_samples = spec.num_samples or len(train_df)
         sample_df = model.forge(num_samples)[dataset_spec.column_names].copy()
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -350,9 +360,13 @@ class TabEBMPreprocessor:
         if dataset_spec.task_type != "classification" or len(dataset_spec.target_columns) != 1:
             raise ValueError("tabebm currently supports only single-target classification datasets.")
         self.dataset_spec = dataset_spec
-        self.feature_columns = [column for column in dataset_spec.column_names if column not in dataset_spec.target_columns]
+        self.feature_columns = [
+            column for column in dataset_spec.column_names if column not in dataset_spec.target_columns
+        ]
         self.numeric_columns = [column for column in dataset_spec.numerical_columns if column in self.feature_columns]
-        self.categorical_columns = [column for column in dataset_spec.categorical_columns if column in self.feature_columns]
+        self.categorical_columns = [
+            column for column in dataset_spec.categorical_columns if column in self.feature_columns
+        ]
         self.scaler = StandardScaler()
         self.encoder = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
         self.target_encoder = LabelEncoder()
@@ -441,9 +455,23 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         )
 
     @staticmethod
-    def _add_surrogate_negative_samples(X: np.ndarray, distance_negative_class: float) -> tuple[np.ndarray, np.ndarray]:
+    def _add_surrogate_negative_samples(
+        X: np.ndarray,
+        distance_negative_class: float,
+        *,
+        rng: np.random.Generator,
+    ) -> tuple[np.ndarray, np.ndarray]:
         num_features = X.shape[1]
-        if num_features == 2:
+        if num_features == 0:
+            raise ValueError("TabEBM requires at least one feature column.")
+        if not np.isfinite(distance_negative_class) or distance_negative_class <= 0:
+            raise ValueError("distance_negative_class must be a finite positive number.")
+        if num_features == 1:
+            surrogate_negatives = np.array(
+                [[-distance_negative_class], [distance_negative_class]],
+                dtype=X.dtype,
+            )
+        elif num_features == 2:
             surrogate_negatives = np.array(
                 [
                     [-distance_negative_class, -distance_negative_class],
@@ -454,12 +482,13 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                 dtype=X.dtype,
             )
         else:
-            points: set[tuple[float, ...]] = set()
-            while len(points) < 4:
-                point = tuple(np.random.choice([-distance_negative_class, distance_negative_class], num_features).tolist())
-                points.add(point)
-                points.add(tuple((-np.array(point)).tolist()))
-            surrogate_negatives = np.array(list(points), dtype=X.dtype)
+            point = rng.choice([-distance_negative_class, distance_negative_class], size=num_features)
+            adjacent_point = point.copy()
+            adjacent_point[int(rng.integers(0, num_features))] *= -1
+            surrogate_negatives = np.stack([point, -point, adjacent_point, -adjacent_point]).astype(
+                X.dtype,
+                copy=False,
+            )
         X_ebm = np.concatenate([X, surrogate_negatives], axis=0)
         y_ebm = np.concatenate(
             [
@@ -486,6 +515,8 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         train_df = self._load_training_frame(dataset_spec)
         preprocessor = TabEBMPreprocessor(dataset_spec)
         X, y = preprocessor.fit_transform(train_df)
+        if X.shape[1] == 0:
+            raise ValueError("TabEBM requires at least one feature column.")
         state = TabEBMState(
             column_names=list(dataset_spec.column_names),
             feature_columns=list(preprocessor.feature_columns),
@@ -527,7 +558,12 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                 "Set sample.extra.allow_gated_model=true or STANDARDIZED_TABPFN_ALLOW_GATED=1 after accepting the Hugging Face terms."
             )
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("rb") as handle:
+        try:
+            import torch
+        except ModuleNotFoundError as exc:
+            raise RuntimeError("TabEBM sampling requires the optional PyTorch runtime.") from exc
+        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
+        with trusted_checkpoint.open("rb") as handle:
             payload = pickle.load(handle)
         state: TabEBMState = payload["state"]
         preprocessor: TabEBMPreprocessor = payload["preprocessor"]
@@ -537,7 +573,8 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         sampled_blocks: list[np.ndarray] = []
         sampled_targets: list[np.ndarray] = []
 
-        with _temporary_env(_tabpfn_cache_env()):
+        with _temporary_env(_tabpfn_cache_env()), torch.random.fork_rng(devices=[]):
+            torch.manual_seed(spec.seed)
             try:
                 for class_id, class_count in class_counts.items():
                     if class_count <= 0:
@@ -546,7 +583,10 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                     model = self._build_model(spec)
                     X_ebm, y_ebm = self._add_surrogate_negative_samples(
                         class_features,
-                        distance_negative_class=float(spec.extra.get("distance_negative_class", state.sgld_defaults["distance_negative_class"])),
+                        distance_negative_class=float(
+                            spec.extra.get("distance_negative_class", state.sgld_defaults["distance_negative_class"])
+                        ),
+                        rng=rng,
                     )
                     X_ebm_tensor = torch.tensor(X_ebm, dtype=torch.float32)
                     y_ebm_tensor = torch.tensor(y_ebm, dtype=torch.long)
@@ -554,7 +594,9 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
                     start_idx = rng.integers(0, len(class_features), size=class_count)
                     X_sgld = torch.tensor(class_features[start_idx], dtype=torch.float32)
-                    noise_std = float(spec.extra.get("starting_point_noise_std", state.sgld_defaults["starting_point_noise_std"]))
+                    noise_std = float(
+                        spec.extra.get("starting_point_noise_std", state.sgld_defaults["starting_point_noise_std"])
+                    )
                     if noise_std > 0:
                         X_sgld = X_sgld + torch.randn_like(X_sgld) * noise_std
                     X_sgld = X_sgld.requires_grad_(True)
@@ -573,10 +615,10 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
                         energy.backward()
                         with torch.no_grad():
                             X_sgld = (
-                                X_sgld
-                                - step_size * X_sgld.grad
-                                + sgld_noise_std * torch.randn_like(X_sgld)
-                            ).detach().requires_grad_(True)
+                                (X_sgld - step_size * X_sgld.grad + sgld_noise_std * torch.randn_like(X_sgld))
+                                .detach()
+                                .requires_grad_(True)
+                            )
 
                     sampled_blocks.append(X_sgld.detach().cpu().numpy())
                     sampled_targets.append(np.full(class_count, class_id, dtype=np.int64))
@@ -591,7 +633,7 @@ class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         y_sampled = np.concatenate(sampled_targets, axis=0)
         sample_df = preprocessor.inverse_transform(X_sampled, y_sampled)
         sample_path = spec.output_dir / "samples.csv"
-        sample_df.to_csv(sample_path, index=False)
+        self._write_dataframe_csv(sample_df, sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

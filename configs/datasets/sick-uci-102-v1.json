@@ -1,0 +1,184 @@
+{
+  "profile_schema_version": "1.0.0",
+  "dataset_profile_version": "1.0.0-reviewed",
+  "dataset_id": "sick",
+  "display_name": "UCI Thyroid Disease — Sick",
+  "dataset_version": "uci-102-a0982569a744",
+  "dataset_view": "sick-uci-102-model-v1",
+  "dataset_family": "health-classification",
+  "status": "reviewed",
+  "owners": ["repository-maintainers"],
+  "review_record": {
+    "source_schema_split_preprocessing": "reviewed",
+    "privacy_metric_and_suite_admission": "pending",
+    "date": "2026-08-03"
+  },
+  "change_log": [
+    {
+      "version": "1.0.0-reviewed",
+      "change": "Replaced the unverified 2,205-row derivative with the checksum-pinned official UCI train/test files."
+    }
+  ],
+  "suite_membership": ["diagnostic"],
+  "official_eligible": false,
+  "source_rights": {
+    "canonical_source": "https://archive.ics.uci.edu/dataset/102/thyroid+disease",
+    "publisher": "UCI Machine Learning Repository",
+    "source_version": "uci-102-sha256-a0982569a744",
+    "retrieved_date": "2026-08-03",
+    "raw_files": [
+      {
+        "name": "thyroid-disease.zip",
+        "role": "source-archive",
+        "sha256": "a0982569a7442c03a20815db58f271245e7a111b10ac46f6c6b5fa6feee4c1f4"
+      },
+      {
+        "name": "sick.data",
+        "role": "official-train",
+        "sha256": "81d4e8ae85233d453afc3ac721cfc5af8d83c0e8cd39d70aa9923089022f2c02"
+      },
+      {
+        "name": "sick.test",
+        "role": "official-test",
+        "sha256": "e618b0a41f6df17ff297c8fbf7d15e8d97b37397d26e784e708ebb2297613018"
+      },
+      {
+        "name": "sick.names",
+        "role": "official-schema",
+        "sha256": "00ca5bfcdba355c910ab311de4b2dd3f4e344628435922aba1dec8427bfcf7ea"
+      }
+    ],
+    "citation": "Quinlan, R. (1986). Thyroid Disease [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5D010.",
+    "license": "CC-BY-4.0",
+    "access_restrictions": [],
+    "permitted_uses": ["research", "benchmarking", "redistribution-with-attribution"],
+    "redistribution_status": "permitted",
+    "modification_requirements": ["Mark the model-input table as a processed view of the official source."],
+    "attribution_requirements": ["Retain the UCI citation and CC BY 4.0 attribution."],
+    "rights_review": {
+      "decision": "source-recorded-pending-independent-release-review",
+      "reviewer": "repository-maintainers",
+      "date": "2026-08-03"
+    }
+  },
+  "table_contract": {
+    "canonical_serialization": "UTF-8 CSV with LF line endings",
+    "encoding": "ASCII source; UTF-8 processed view",
+    "delimiter": ",",
+    "row_count_expectations": {"train": 2800, "test": 972},
+    "unique_column_names": true,
+    "canonical_column_order": [
+      "age", "sex", "on_thyroxine", "query_on_thyroxine", "on_antithyroid_medication", "sick",
+      "pregnant", "thyroid_surgery", "I131_treatment", "query_hypothyroid", "query_hyperthyroid",
+      "lithium", "goitre", "tumor", "hypopituitary", "psych", "TSH_measured", "TSH", "T3_measured",
+      "T3", "TT4_measured", "TT4", "T4U_measured", "T4U", "FTI_measured", "FTI", "TBG_measured",
+      "referral_source", "Class"
+    ],
+    "duplicate_row_policy": "Preserve the official fixed split. Record IDs must be unique, but repeated model rows are retained and disclosed in the split audit.",
+    "identifier_policy": "Parse the |record suffix for split auditing, then exclude it from model input and published CSV tables.",
+    "target_presence": ["Class"],
+    "missing_value_inventory": "Locked per split in sick-uci-102-v1.json; TBG is entirely missing and excluded.",
+    "supported_input_forms": ["checksum-pinned UCI archive"],
+    "canonical_table_checksum": null
+  },
+  "columns": [
+    {"name":"age","column_id":"age","semantic_type":"continuous","storage_type":"float64","roles":["feature","quasi_identifier"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"No inverse imputation; generated output is validated as finite.","description":"Age recorded by the official source.","unit":"years","sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":[]},
+    {"name":"sex","column_id":"sex","semantic_type":"categorical","storage_type":"string","roles":["feature","sensitive_attribute"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":{"values":["M","F"]},"category_vocabulary_source":"sick.names","transformation_policy":"Train-split most-frequent imputation.","inverse_transformation_policy":"Generated values must belong to the declared domain.","description":"Sex category in the official source.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":[]},
+    {"name":"on_thyroxine","column_id":"on-thyroxine","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether the subject is on thyroxine.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"query_on_thyroxine","column_id":"query-on-thyroxine","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Query-on-thyroxine indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"on_antithyroid_medication","column_id":"on-antithyroid-medication","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Antithyroid-medication indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"sick","column_id":"sick-feature","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Source feature named sick; distinct from the Class target.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"pregnant","column_id":"pregnant","semantic_type":"boolean","storage_type":"string","roles":["feature","sensitive_attribute"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Pregnancy indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"thyroid_surgery","column_id":"thyroid-surgery","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Thyroid-surgery indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"I131_treatment","column_id":"i131-treatment","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"I131-treatment indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"query_hypothyroid","column_id":"query-hypothyroid","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Query-hypothyroid indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"query_hyperthyroid","column_id":"query-hyperthyroid","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Query-hyperthyroid indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"lithium","column_id":"lithium","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Lithium indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"goitre","column_id":"goitre","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Goitre indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"tumor","column_id":"tumor","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Tumor indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"hypopituitary","column_id":"hypopituitary","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Hypopituitary indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"psych","column_id":"psych","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Psych indicator.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TSH_measured","column_id":"tsh-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether TSH was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TSH","column_id":"tsh","semantic_type":"continuous","storage_type":"float64","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"Require finite output.","description":"TSH measurement.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"T3_measured","column_id":"t3-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether T3 was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"T3","column_id":"t3","semantic_type":"continuous","storage_type":"float64","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"Require finite output.","description":"T3 measurement.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TT4_measured","column_id":"tt4-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether TT4 was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TT4","column_id":"tt4","semantic_type":"continuous","storage_type":"float64","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"Require finite output.","description":"TT4 measurement.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"T4U_measured","column_id":"t4u-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether T4U was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"T4U","column_id":"t4u","semantic_type":"continuous","storage_type":"float64","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"Require finite output.","description":"T4U measurement.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"FTI_measured","column_id":"fti-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Require f or t.","description":"Whether FTI was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"FTI","column_id":"fti","semantic_type":"continuous","storage_type":"float64","roles":["feature"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Train-split arithmetic-mean imputation.","inverse_transformation_policy":"Require finite output.","description":"FTI measurement.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TBG_measured","column_id":"tbg-measured","semantic_type":"boolean","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["f","t"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity; the official files contain f throughout.","inverse_transformation_policy":"Require f or t.","description":"Whether TBG was measured.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"TBG","column_id":"tbg","semantic_type":"continuous","storage_type":"raw-string","roles":["ignored","audit_only"],"nullable_raw":true,"nullable_model_input":false,"valid_domain":null,"category_vocabulary_source":null,"transformation_policy":"Excluded because both official splits are entirely missing and no train-fitted mean exists.","inverse_transformation_policy":"Not generated in the model-input view.","description":"TBG measurement declared by sick.names but unobserved in all official Sick rows.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":["tbg-all-missing"]},
+    {"name":"referral_source","column_id":"referral-source","semantic_type":"categorical","storage_type":"string","roles":["feature"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["WEST","STMW","SVHC","SVI","SVHD","other"]},"category_vocabulary_source":"sick.names","transformation_policy":"Identity.","inverse_transformation_policy":"Generated values must belong to the declared domain.","description":"Referral-source category.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":[]},
+    {"name":"Class","column_id":"class","semantic_type":"categorical","storage_type":"string","roles":["primary_target"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"values":["sick","negative"]},"category_vocabulary_source":"sick.names","transformation_policy":"Parse from the class.|record suffix; never impute.","inverse_transformation_policy":"Generated values must be sick or negative.","description":"Official binary classification target.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":false},"constraint_refs":[]},
+    {"name":"record_id","column_id":"record-id","semantic_type":"string","storage_type":"source-suffix","roles":["identifier","audit_only"],"nullable_raw":false,"nullable_model_input":false,"valid_domain":{"pattern":"^[0-9]+$"},"category_vocabulary_source":null,"transformation_policy":"Use only to verify split identity and overlap; exclude from model input and output tables.","inverse_transformation_policy":"Never synthesize.","description":"Record suffix following the class value in official source lines.","unit":null,"sensitivity":{"status":"provisional","sensitive":true,"quasi_identifier":true},"constraint_refs":["unique-within-and-disjoint-across-splits"]}
+  ],
+  "preprocessing": {
+    "status": "validated",
+    "raw_missingness": "Exact per-column counts are frozen in standardized_tabular_diffusion/resources/datasets/sick-uci-102-v1.json.",
+    "model_input_missing_values": "prohibited",
+    "require_centralized_imputation_if_present": true,
+    "fitted_on": "official sick.data train split only",
+    "configuration_version": "sick-uci-102-model-v1",
+    "implementation_version": "1.0.0",
+    "numerical_strategy": "arithmetic mean of observed training values",
+    "categorical_strategy": "most frequent observed training value",
+    "target_strategy": "error",
+    "all_missing_strategy": "exclude TBG through an explicit reviewed view; otherwise error"
+  },
+  "views": [
+    {
+      "view_id": "sick-uci-102-raw-audit-v1",
+      "status": "reviewed",
+      "purpose": "Preserve all official fields plus parsed record IDs for audit; not a model input."
+    },
+    {
+      "view_id": "sick-uci-102-model-v1",
+      "status": "reviewed",
+      "parent_dataset_version": "uci-102-a0982569a744",
+      "columns": 29,
+      "excluded": ["TBG", "record_id"],
+      "comparability": "Canonical model-input view for this repository."
+    }
+  ],
+  "split": {
+    "split_id": "uci-official-sick-data-test-v1",
+    "status": "validated",
+    "frozen": true,
+    "train": {"member":"sick.data","rows":2800,"record_ids_sha256":"97bba5c27f99c8ff9eb8ddaf9bac337de79916342bfbf17c5dbc92d97defc881","class_counts":{"negative":2629,"sick":171}},
+    "test": {"member":"sick.test","rows":972,"record_ids_sha256":"2623a7770f4964a32ef89ab9f99a174a852c47be6fd42e3d4c29ae2625adfa8a","class_counts":{"negative":912,"sick":60}},
+    "record_id_overlap": 0,
+    "duplicate_audit": {
+      "raw_model_view": {"train_duplicate_rows":47,"test_duplicate_rows":3,"cross_split_unique_rows":11,"train_rows_in_cross_split_overlap":20,"test_rows_in_cross_split_overlap":13},
+      "processed_model_view": {"train_duplicate_rows":49,"test_duplicate_rows":3,"cross_split_unique_rows":11,"train_rows_in_cross_split_overlap":20,"test_rows_in_cross_split_overlap":13}
+    },
+    "validation_split": null
+  },
+  "predictive_tasks": [
+    {"task_id":"predict-sick-class","target_column_id":"class","task_type":"classification","status":"reviewed","primary_metric_review":"pending evaluation-protocol implementation"}
+  ],
+  "validity": {
+    "status": "partially-reviewed",
+    "constraints": [
+      {"constraint_id":"tbg-all-missing","rule":"TBG is absent from the model view because every official value is missing."},
+      {"constraint_id":"unique-within-and-disjoint-across-splits","rule":"Parsed record IDs are unique within each split and disjoint across train and test."},
+      {"constraint_id":"official-model-row-overlap","rule":"The fixed official split contains 11 unique model rows in both train and test; preserve and disclose them rather than silently changing the source split."},
+      {"constraint_id":"declared-categorical-domains","rule":"Categorical values must match sick.names."}
+    ],
+    "domain_range_review": "pending medical-domain review"
+  },
+  "privacy": {
+    "status": "review-required",
+    "data_nature": "person-level health records",
+    "sensitive_roles_reviewed": false,
+    "threat_models": [],
+    "default_release_behavior": "Do not publish row-level materializations or enable attribute-inference metrics until approved."
+  },
+  "metric_applicability": {
+    "status": "partial",
+    "included": ["schema validation", "distributional fidelity", "classification utility", "duplicate and record-overlap checks"],
+    "excluded": ["attribute inference pending privacy-role and threat-model approval"],
+    "default_behavior": "error for metrics requiring unreviewed medical constraints or privacy roles"
+  }
+}

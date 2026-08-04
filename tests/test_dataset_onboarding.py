@@ -5,13 +5,20 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import pytest
+
+pytestmark = pytest.mark.integration
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from standardized_tabular_diffusion.dataset_onboarding import process_registered_dataset, register_dataset
-from standardized_tabular_diffusion.datasets import get_dataset_spec
+from standardized_tabular_diffusion.dataset_onboarding import (
+    MissingValuePreprocessingRequiredError,
+    process_registered_dataset,
+    register_dataset,
+)
+from standardized_tabular_diffusion.datasets import discover_dataset_specs, get_dataset_spec
 
 
 def _init_repo_layout(repo_root: Path) -> None:
@@ -128,6 +135,8 @@ def test_process_registered_dataset_builds_manifest_and_syncs_tabsyn(tmp_path: P
 
     assert manifest["dataset"] == "housing"
     assert manifest["materialized_by"] == "local-registration"
+    assert manifest["path_base"] == "repository-root"
+    assert manifest["train_data_path"] == "TabDiff-main/data/housing/train.csv"
     assert manifest_file.exists()
     assert (tmp_path / "TabSyn-main" / "data" / "housing" / "train.csv").exists()
     assert (tmp_path / "TabSyn-main" / "synthetic" / "housing" / "real.csv").exists()
@@ -137,7 +146,7 @@ def test_process_registered_dataset_builds_manifest_and_syncs_tabsyn(tmp_path: P
     assert dataset_spec.test_data_path == tmp_path / "TabDiff-main" / "data" / "housing" / "test.csv"
 
 
-def test_register_dataset_sanitizes_missing_numeric_markers(tmp_path: Path) -> None:
+def test_register_dataset_rejects_missing_values_without_explicit_preprocessing(tmp_path: Path) -> None:
     _init_repo_layout(tmp_path)
     raw_csv_path = tmp_path / "sick_like.csv"
     pd.DataFrame(
@@ -149,19 +158,69 @@ def test_register_dataset_sanitizes_missing_numeric_markers(tmp_path: Path) -> N
         }
     ).to_csv(raw_csv_path, index=False)
 
-    payload = register_dataset(
-        dataset_name="sick_like",
-        raw_csv_path=raw_csv_path,
-        task_type="classification",
-        target_column="Class",
-        repo_root=tmp_path,
+    with pytest.raises(MissingValuePreprocessingRequiredError) as error:
+        register_dataset(
+            dataset_name="sick_like",
+            raw_csv_path=raw_csv_path,
+            task_type="classification",
+            target_column="Class",
+            repo_root=tmp_path,
+        )
+
+    assert error.value.report["input_rows"] == 3
+    assert error.value.report["output_rows"] == 3
+    assert error.value.report["rows_dropped"] == 0
+    assert error.value.report["values_imputed"] == 0
+    assert error.value.report["missing_values_by_column"] == {"age": 1, "sex": 1, "TSH": 1, "Class": 0}
+    assert not (tmp_path / "TabDiff-main" / "data" / "sick_like").exists()
+    assert not (tmp_path / "data" / "uploads" / "sick_like").exists()
+
+
+@pytest.mark.parametrize("dataset_name", ["../escape", "UPPER", "name/child", "con", "name "])
+def test_register_dataset_rejects_unsafe_dataset_names(tmp_path: Path, dataset_name: str) -> None:
+    raw_csv_path = tmp_path / "safe.csv"
+    pd.DataFrame({"feature": [1], "target": [0]}).to_csv(raw_csv_path, index=False)
+
+    with pytest.raises(ValueError, match="Dataset name"):
+        register_dataset(
+            dataset_name=dataset_name,
+            raw_csv_path=raw_csv_path,
+            task_type="classification",
+            target_column="target",
+            repo_root=tmp_path,
+        )
+
+
+def test_dataset_discovery_ignores_manifest_paths_that_escape_repository(tmp_path: Path) -> None:
+    _init_repo_layout(tmp_path)
+    data_dir = tmp_path / "TabDiff-main" / "data" / "safe"
+    data_dir.mkdir(parents=True)
+    (data_dir / "raw.csv").write_text("feature,target\n1,0\n")
+    info = {
+        "name": "safe",
+        "task_type": "binclass",
+        "column_names": ["feature", "target"],
+        "num_col_idx": [0],
+        "cat_col_idx": [],
+        "target_col_idx": [1],
+        "data_path": "data/safe/raw.csv",
+    }
+    (tmp_path / "TabDiff-main" / "data" / "Info" / "safe.json").write_text(json.dumps(info))
+    manifest_dir = tmp_path / "materialized_datasets" / "safe"
+    manifest_dir.mkdir(parents=True)
+    (manifest_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "dataset": "safe",
+                "metadata_path": "../../outside-info.json",
+                "train_data_path": "../../outside.csv",
+                "val_data_path": None,
+                "test_data_path": None,
+            }
+        )
     )
 
-    cleaned_frame = pd.read_csv(tmp_path / "TabDiff-main" / "data" / "sick_like" / "raw.csv")
+    spec = discover_dataset_specs(tmp_path)["safe"]
 
-    assert payload["cleaning_report"]["input_rows"] == 3
-    assert payload["cleaning_report"]["output_rows"] == 2
-    assert payload["cleaning_report"]["dropped_missing_numerical_rows"] == 1
-    assert cleaned_frame.shape[0] == 2
-    assert cleaned_frame["TSH"].dtype.kind in {"f", "i"}
-    assert "__missing__" in set(cleaned_frame["sex"].astype(str))
+    assert spec.train_data_path == data_dir / "raw.csv"
+    assert spec.metadata_path == tmp_path / "TabDiff-main" / "data" / "Info" / "safe.json"

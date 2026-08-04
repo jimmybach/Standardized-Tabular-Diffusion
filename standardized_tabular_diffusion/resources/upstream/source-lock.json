@@ -1,0 +1,178 @@
+{
+  "components": {
+    "tabddpm": {
+      "adapter_ids": [
+        "tabddpm"
+      ],
+      "authoritative_repository": "https://github.com/yandex-research/tab-ddpm",
+      "authority": "method-author",
+      "component_id": "tabddpm",
+      "distribution_form": "source",
+      "imported_at_repository_commit": "3b7caea921cfbc5ea2ee8718e0c8e8753d025d26",
+      "license": "MIT",
+      "license_path": "TabDDPM-main/LICENSE.md",
+      "local_path": "TabDDPM-main",
+      "modification_status": "compatibility-patched",
+      "official_eligibility": "blocked-pending-native-parity-and-shim-removal-or-approval",
+      "patch_sets": [
+        {
+          "classification": "compatibility-patched",
+          "files": [
+            "TabDDPM-main/zero/__init__.py",
+            "TabDDPM-main/zero/hardware.py",
+            "TabDDPM-main/zero/random.py"
+          ],
+          "patch_set_id": "tabddpm-libzero-compat-v1",
+          "status": "unapproved-unvalidated",
+          "summary": "Local compatibility substitute for the pinned libzero dependency; scientific parity has not been established."
+        }
+      ],
+      "snapshot_comparison": {
+        "excluded_scopes": [
+          "data/",
+          "exp/",
+          "CTAB-GAN/",
+          "CTAB-GAN-Plus/",
+          "CTGAN/"
+        ],
+        "import_exact_matches": 58,
+        "import_shared_paths": 58,
+        "relation": "The imported TabDDPM core matched every compared blob at the pinned upstream tree."
+      },
+      "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
+      "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"
+    },
+    "tabdiff": {
+      "adapter_ids": [
+        "tabdiff"
+      ],
+      "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
+      "authority": "method-author",
+      "component_id": "tabdiff",
+      "distribution_form": "source",
+      "imported_at_repository_commit": "1caea9aee653d6d220765728951fe2de437268ad",
+      "license": "MIT",
+      "license_path": "TabDiff-main/LICENSE",
+      "local_path": "TabDiff-main",
+      "modification_status": "semantic-patched",
+      "official_eligibility": "blocked-while-patched-upstream-evaluator-is-in-tree",
+      "patch_sets": [
+        {
+          "classification": "semantic-patched",
+          "files": [
+            "TabDiff-main/eval/mle/mle.py"
+          ],
+          "patch_set_id": "tabdiff-mle-evaluator-v1",
+          "status": "unapproved-experimental",
+          "summary": "Changes evaluator models, compute backend, objectives, randomness, error handling, and edge-case metric semantics. It is not part of the TabDiff generative algorithm and must not supply official leaderboard metrics."
+        }
+      ],
+      "snapshot_comparison": {
+        "excluded_scopes": [
+          "data/",
+          "synthetic/"
+        ],
+        "import_exact_matches": 30,
+        "import_shared_paths": 30,
+        "relation": "The initial non-data snapshot exactly matched all compared blobs at the pinned upstream commit; one evaluator file was modified in a later root commit."
+      },
+      "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+    },
+    "tabsyn": {
+      "adapter_ids": [
+        "tabsyn"
+      ],
+      "authoritative_repository": "https://github.com/amazon-science/tabsyn",
+      "authority": "method-author",
+      "component_id": "tabsyn",
+      "distribution_form": "source",
+      "imported_at_repository_commit": "3b7caea921cfbc5ea2ee8718e0c8e8753d025d26",
+      "license": "Apache-2.0",
+      "license_path": "TabSyn-main/LICENSE",
+      "local_path": "TabSyn-main",
+      "modification_status": "compatibility-patched",
+      "official_eligibility": "blocked-pending-patch-isolation-and-native-parity",
+      "removed_unverified_artifacts": [
+        {
+          "bytes": 42472849,
+          "original_path": "TabSyn-main/tabsyn/ckpt/adult/model.pt",
+          "sha256": "f7f4e26304c8dd0551604df903a0e0db5b52710bc4e6772e38a81a2cb5808c6b"
+        },
+        {
+          "bytes": 42473145,
+          "original_path": "TabSyn-main/tabsyn/ckpt/adult/model_0.pt",
+          "sha256": "d45d697c9b944562c4fb009663800dec2d50c224f15797f4e589da836bf4efbb"
+        },
+        {
+          "bytes": 28240,
+          "original_path": "TabSyn-main/tabsyn/vae/ckpt/adult/decoder.pt",
+          "sha256": "61abae200dd55b7fc12472f14af1966e59fbf51d3b8d2226bf564000e554f96b"
+        },
+        {
+          "bytes": 23741,
+          "original_path": "TabSyn-main/tabsyn/vae/ckpt/adult/encoder.pt",
+          "sha256": "a8cbcd501422b092425513c4d3e45bd4f7d67acea89d53619a34b6146482d5b9"
+        },
+        {
+          "bytes": 69679,
+          "original_path": "TabSyn-main/tabsyn/vae/ckpt/adult/model.pt",
+          "sha256": "3d466f06a6ef33ac481b302576b2e2b1c29a133b5c76431f66464872051deb4c"
+        },
+        {
+          "bytes": 8335744,
+          "original_path": "TabSyn-main/tabsyn/vae/ckpt/adult/train_z.npy",
+          "sha256": "15f665a5fb13661388e0efa3d4bf4a3d1cd3558e2d66a337897743970bfff83a"
+        },
+        {
+          "bytes": 76470,
+          "original_path": "TabSyn-main/tabsyn/vae/ckpt/sick/model.pt",
+          "sha256": "1f1ef9db3e036da1215d5fb558660a517816fe14d3f199e7a74d2220a8ab8c39"
+        }
+      ],
+      "patch_sets": [
+        {
+          "classification": "compatibility-patched",
+          "files": [
+            "TabSyn-main/tabsyn/diffusion_utils.py",
+            "TabSyn-main/tabsyn/main.py",
+            "TabSyn-main/tabsyn/sample.py",
+            "TabSyn-main/tabsyn/vae/main.py",
+            "TabSyn-main/utils.py"
+          ],
+          "patch_set_id": "tabsyn-entrypoint-compat-v1",
+          "status": "unapproved-unvalidated",
+          "summary": "Adds working module entrypoints, CPU/device handling, configurable epoch/sample controls, and modern scheduler compatibility. The standardized adapter now pins the authoritative 10,001 diffusion-epoch default explicitly."
+        },
+        {
+          "classification": "compatibility-patched",
+          "files": [
+            "TabSyn-main/src/data.py",
+            "TabSyn-main/zero/__init__.py",
+            "TabSyn-main/zero/hardware.py",
+            "TabSyn-main/zero/random.py"
+          ],
+          "patch_set_id": "tabsyn-dependency-compat-v1",
+          "status": "unapproved-unvalidated",
+          "summary": "Adapts the scikit-learn OneHotEncoder API and substitutes a local zero compatibility module."
+        }
+      ],
+      "snapshot_comparison": {
+        "excluded_scopes": [
+          "data/",
+          "synthetic/",
+          "__pycache__/",
+          "tabsyn/**/ckpt/"
+        ],
+        "import_exact_matches": 96,
+        "import_modified_shared_paths": 5,
+        "import_shared_paths": 101,
+        "relation": "The closest authoritative tree is pinned below. Five shared TabSyn paths already carried local compatibility edits at import; seven local checkpoint artifacts were also imported and have now been removed from the working tree."
+      },
+      "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+    }
+  },
+  "generated_date": "2026-08-03",
+  "source_lock_schema_version": "1.0.0"
+}

@@ -1,0 +1,101 @@
+name: Core CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Linux / Python 3.11 / core
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Verify dependency-free package surface
+        run: |
+          python -m pip install --no-deps .
+          python - <<'PY'
+          import subprocess
+          import sys
+          import tempfile
+
+          clean_directory = tempfile.mkdtemp()
+          import_check = """
+          import sys
+          import standardized_tabular_diffusion as package
+
+          assert package.list_models()
+          assert not {"numpy", "pandas", "sklearn", "torch"} & set(sys.modules)
+          """
+          subprocess.run([sys.executable, "-c", import_check], cwd=clean_directory, check=True)
+          subprocess.run(
+              [sys.executable, "-m", "standardized_tabular_diffusion.cli", "--help"],
+              cwd=clean_directory,
+              check=True,
+          )
+          PY
+
+      - name: Install repository test dependencies
+        run: |
+          python -m pip install ".[dev]"
+          python -m pip check
+
+      - name: Run repository-owned tests
+        run: python -m pytest -m "not adapter"
+
+      - name: Run dependency-isolated adapter contract tests
+        run: python -m pytest -m adapter
+
+      - name: Lint
+        run: python -m ruff check standardized_tabular_diffusion tests
+
+      - name: Type-check the P0 and P1 core surface
+        run: python -m mypy
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Inspect wheel contents
+        run: |
+          python - <<'PY'
+          import pathlib
+          import zipfile
+
+          wheel = next(pathlib.Path("dist").glob("*.whl"))
+          names = set(zipfile.ZipFile(wheel).namelist())
+          required = {
+              "standardized_tabular_diffusion/resources/datasets/sources.json",
+              "standardized_tabular_diffusion/resources/datasets/adult-uci-2-v1.json",
+              "standardized_tabular_diffusion/resources/datasets/sick-uci-102-v1.json",
+              "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+              "standardized_tabular_diffusion/schemas/evaluation/atomic-result.schema.json",
+              "standardized_tabular_diffusion/schemas/evaluation/metric-registry-entry.schema.json",
+              "standardized_tabular_diffusion/resources/evaluation/metrics/legacy-tabstruct-aligned-v1.json",
+              "standardized_tabular_diffusion/resources/evaluation/protocols/development-p1.json",
+          }
+          assert required <= names
+          assert not any(
+              name.startswith(("research_inputs/", "TabDDPM-main/", "TabDiff-main/", "TabSyn-main/"))
+              for name in names
+          )
+          PY
