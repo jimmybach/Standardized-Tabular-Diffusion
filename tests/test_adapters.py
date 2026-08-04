@@ -31,7 +31,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
     REaLTabFormerAdapter,
 )
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
-from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
+from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, GoggleAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
@@ -559,6 +559,96 @@ def test_ctgan_requires_explicit_missing_value_preprocessing(tmp_path: Path, mon
                 dataset="fixture",
                 output_dir=tmp_path / "artifacts",
                 extra={"dataset_spec": dataset_spec.to_dict()},
+            )
+        )
+
+
+def test_tvae_train_and_sample_use_official_checkpoint_api_and_seed(tmp_path: Path, monkeypatch) -> None:
+    adapter = TVAEAdapter(tmp_path)
+    dataset_spec = DatasetSpec(
+        name="fixture",
+        task_type="classification",
+        column_names=["x", "y"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["y"],
+        metadata_path=tmp_path / "info.json",
+        train_data_path=tmp_path / "train.csv",
+    )
+    dataset_spec.metadata_path.write_text("{}", encoding="utf-8")
+    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n", encoding="utf-8")
+    monkeypatch.setattr(adapter, "_import_synthesizer_cls", lambda: PickleableFakeSynth)
+
+    common = {
+        "model": "tvae",
+        "dataset": "fixture",
+        "output_dir": tmp_path / "artifacts",
+        "device": "cpu",
+        "seed": 31,
+        "extra": {
+            "dataset_spec": dataset_spec.to_dict(),
+            "epochs": 2,
+            "batch_size": 20,
+            "embedding_dim": 16,
+            "compress_dims": [16],
+            "decompress_dims": [16],
+            "loss_factor": 2.0,
+            "l2scale": 1e-5,
+        },
+    }
+    adapter.train(RunSpec(**common))
+    bundle = adapter.sample(RunSpec(**common, num_samples=3))
+
+    checkpoint_path = Path(common["output_dir"]) / "model.pkl"
+    trained = PickleableFakeSynth.load(checkpoint_path)
+    assert trained.seed == 31
+    assert trained.kwargs == {
+        "epochs": 2,
+        "batch_size": 20,
+        "embedding_dim": 16,
+        "compress_dims": (16,),
+        "decompress_dims": (16,),
+        "loss_factor": 2.0,
+        "l2scale": 1e-5,
+        "enable_gpu": False,
+    }
+    assert bundle.generated_sample_path is not None
+    assert pd.read_csv(bundle.generated_sample_path).shape == (3, 2)
+
+
+def test_tvae_rejects_unvalidated_package_version(tmp_path: Path, monkeypatch) -> None:
+    adapter = TVAEAdapter(tmp_path)
+    monkeypatch.setattr(sample_baselines, "version", lambda _name: "0.12.0")
+
+    with pytest.raises(RuntimeError, match="expected 0.12.1, observed 0.12.0"):
+        adapter._import_synthesizer_cls()
+
+
+def test_tvae_rejects_invalid_dimensions(tmp_path: Path) -> None:
+    adapter = TVAEAdapter(tmp_path)
+
+    with pytest.raises(ValueError, match="compress_dims"):
+        adapter._train_kwargs(
+            RunSpec(
+                model="tvae",
+                dataset="fixture",
+                output_dir=tmp_path / "artifacts",
+                extra={"compress_dims": [16, 0]},
+            )
+        )
+
+
+def test_tvae_rejects_nondefault_cuda_index(tmp_path: Path, monkeypatch) -> None:
+    adapter = TVAEAdapter(tmp_path)
+    monkeypatch.setattr(adapter, "_import_synthesizer_cls", lambda: PickleableFakeSynth)
+
+    with pytest.raises(ValueError, match="default visible CUDA device"):
+        adapter._build_synthesizer(
+            RunSpec(
+                model="tvae",
+                dataset="fixture",
+                output_dir=tmp_path / "artifacts",
+                device="cuda:1",
             )
         )
 

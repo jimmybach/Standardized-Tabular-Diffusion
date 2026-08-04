@@ -383,8 +383,10 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="high",
         repository_url="https://github.com/sdv-dev/CTGAN",
         notes=[
-            "Official maintained implementation ships in the CTGAN project and is also exposed through SDV.",
-            "Very reasonable next integration target because it already has a pip-installable API and consistent preprocessing expectations.",
+            "The adapter now targets TVAE from the checksum-pinned official ctgan 0.12.1 wheel.",
+            "The locally modified 0.5.2.dev0 snapshot and its obsolete wrappers were removed rather than presented as the official implementation.",
+            "A mandatory Linux/Python 3.11 native-parity protocol is pending before status promotion.",
+            "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),
     "goggle": ModelInventoryEntry(

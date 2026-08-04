@@ -319,7 +319,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "TVAEAdapter",
         authority="method-author",
         distribution="package",
-        install_extra="evaluation",
+        install_extra="tvae",
+        upstream_repository="https://github.com/sdv-dev/CTGAN",
+        upstream_revision="826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        revision_status="pinned-official-package-native-parity-pending",
+        license_status="BUSL-1.1 package dependency; official-track and release legal review required",
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/TVAE_VALIDATION.md",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/tvae-validation.yml",
+        ),
     ),
 }
 

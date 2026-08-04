@@ -6,6 +6,8 @@ At the current release-preparation baseline, CTGAN, TabDDPM, TabDiff, and TabSyn
 
 CTGAN has been moved from the legacy embedded `0.5.2.dev0` import path to the checksum-pinned official `ctgan==0.12.1` wheel. Its first mandatory parity run passed and is retained. The package is BUSL-1.1, so validation cannot by itself grant Official Results or release eligibility.
 
+TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locally modified legacy subtree and its wrappers were removed. Its first mandatory Linux/Python 3.11 parity run is pending, so TVAE remains `adapter-complete`; the shared package-license gate also applies.
+
 ## Current Retained Validation
 
 - `tabddpm`: passed `tabddpm-native-parity-v1` for the `(training, sampling)` seed pairs `(0, 23)`, `(17, 47)`, and `(101, 89)` in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.

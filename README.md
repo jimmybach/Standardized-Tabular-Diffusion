@@ -21,6 +21,8 @@ Adapter presence is not a release claim. Run `python -m standardized_tabular_dif
 
 CTGAN now targets the checksum-pinned official `ctgan==0.12.1` package instead of the legacy embedded source snapshot. Its mandatory Linux/Python 3.11 protocol passed all exact comparisons for three fixed seeds in [run `30910275922`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922), so its status is `native-parity-validated`. The official package uses BUSL-1.1; see the [CTGAN validation protocol](docs/CTGAN_VALIDATION.md) before installation or use.
 
+TVAE now targets `ctgan.TVAE` from that same checksum-pinned official package. The locally modified `0.5.2.dev0` snapshot and its obsolete wrappers have been removed. TVAE remains `adapter-complete` until its mandatory Linux/Python 3.11 protocol passes and the evidence is permanently retained; see the [TVAE validation protocol](docs/TVAE_VALIDATION.md).
+
 The coexistence of the three vendored core baselines on one cumulative candidate is documented in the [core baseline integration validation](docs/CORE_BASELINES_INTEGRATION.md), with a corresponding [Chinese translation](docs/CORE_BASELINES_INTEGRATION.zh-CN.md) and machine-readable evidence index. CTGAN is package-backed and has its own retained protocol evidence.
 
 Project attribution and release review records live in [CONTRIBUTORS.md](CONTRIBUTORS.md), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [SECURITY.md](SECURITY.md), [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md), and the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md). The repository-level license and dataset redistribution decisions remain release blockers until the project owners approve them.
