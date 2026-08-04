@@ -45,16 +45,12 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
-    for model_id in ("tabdiff", "tabsyn"):
+    for model_id in ("tabddpm", "tabdiff", "tabsyn"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
+        assert spec.validation_level.value == "native-parity-validated"
         assert spec.benchmark_track == "experimental"
         assert spec.support_level == "unsupported"
-
-    assert get_adapter_spec("tabdiff").validation_level.value == "native-parity-validated"
-    for model_id in ("tabddpm", "tabsyn"):
-        spec = get_adapter_spec(model_id)
-        assert "native-parity-validated" not in spec.validation_level.value
 
     tabddpm = get_adapter_spec("tabddpm")
     assert tabddpm.validation_level.value == "native-parity-validated"

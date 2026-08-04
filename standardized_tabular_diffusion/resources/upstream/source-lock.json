@@ -137,35 +137,8 @@
       "license": "Apache-2.0",
       "license_path": "TabSyn-main/LICENSE",
       "local_path": "TabSyn-main",
-      "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-patch-isolation-and-native-parity",
-      "patch_sets": [
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/tabsyn/diffusion_utils.py",
-            "TabSyn-main/tabsyn/main.py",
-            "TabSyn-main/tabsyn/sample.py",
-            "TabSyn-main/tabsyn/vae/main.py",
-            "TabSyn-main/utils.py"
-          ],
-          "patch_set_id": "tabsyn-entrypoint-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adds working module entrypoints, CPU/device handling, configurable epoch/sample controls, and modern scheduler compatibility. The standardized adapter now pins the authoritative 10,001 diffusion-epoch default explicitly."
-        },
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/src/data.py",
-            "TabSyn-main/zero/__init__.py",
-            "TabSyn-main/zero/hardware.py",
-            "TabSyn-main/zero/random.py"
-          ],
-          "patch_set_id": "tabsyn-dependency-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adapts the scikit-learn OneHotEncoder API and substitutes a local zero compatibility module."
-        }
-      ],
+      "modification_status": "official-unmodified",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -203,6 +176,25 @@
           "sha256": "1f1ef9db3e036da1215d5fb558660a517816fe14d3f199e7a74d2220a8ab8c39"
         }
       ],
+      "patch_sets": [],
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
+      "dependency_resolution": {
+        "declared_name": "zero",
+        "resolved_distribution": "libzero==0.0.8",
+        "reason": "The imported zero research-utility API is provided by libzero; the zero distribution is an unrelated circuit-analysis package. Its stale torch<2 dependency metadata is overridden while all actual dependencies are locked separately for the validated torch 2.3 environment."
+      },
+      "validation": {
+        "artifact_digest": "sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c",
+        "artifact_id": 8878140935,
+        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "evidence_path": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+        "evidence_sha256": "3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089",
+        "protocol_id": "tabsyn-native-parity-v1",
+        "repository_commit": "54d419642842d7146d6afa4aa1b3d5167301c51c",
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645",
+        "seed_cases": [0, 19, 73],
+        "status": "passed-native-parity-validated"
+      },
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
@@ -213,7 +205,7 @@
         "import_exact_matches": 96,
         "import_modified_shared_paths": 5,
         "import_shared_paths": 101,
-        "relation": "The closest authoritative tree is pinned below. Five shared TabSyn paths already carried local compatibility edits at import; seven local checkpoint artifacts were also imported and have now been removed from the working tree."
+        "relation": "The initial import contained five compatibility edits, followed by additional local shims. The 20-file primary TabSyn execution scope has now been restored to the pinned official tree and is fail-closed through a frozen source manifest; seven unverified checkpoint artifacts remain removed."
       },
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
