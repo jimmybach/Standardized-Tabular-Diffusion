@@ -28,7 +28,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 |---|---|---|---|---|
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The imported core matched all 58 compared upstream blobs. | Local `zero` compatibility substitute; no generative-algorithm source change found. | Blocked pending shim removal or approval plus native-parity validation. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | The initial non-data snapshot matched all 30 compared upstream blobs. | `eval/mle/mle.py` was changed later and is a semantic evaluator patch; the generative core remains upstream-exact within the audited scope. | Patched upstream evaluator is excluded from official metrics; central reviewed evaluation must be used. |
-| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five already carried local changes at import. | Entrypoint/device/configuration and dependency-API compatibility patches. | Blocked pending patch isolation, approval, and native-parity validation. |
+| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Blocked only pending a passing retained native-parity record. |
 
 ## Patch Classification
 
@@ -46,19 +46,13 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - Changes include estimator configuration, compute backend, objectives, seeded splitting, failure handling, and edge-case metric semantics.
 - Decision: experimental only. This file is not part of the generative algorithm, but using it would change benchmark measurements. Official results must use the central versioned evaluator after metric validation.
 
-### `tabsyn-entrypoint-compat-v1`
+### TabSyn patch disposition
 
-- Classification: compatibility-patched.
-- Files: `tabsyn/diffusion_utils.py`, `tabsyn/main.py`, `tabsyn/sample.py`, `tabsyn/vae/main.py`, and `utils.py` under `TabSyn-main/`.
-- Purpose: module entrypoints, CPU/device selection, configurable epoch and sampling controls, and scheduler compatibility.
-- Decision: unapproved and unvalidated. The adapter explicitly restores the authoritative diffusion default of 10,001 epochs and retrains the VAE unless the caller explicitly opts into checkpoint reuse.
-
-### `tabsyn-dependency-compat-v1`
-
-- Classification: compatibility-patched.
-- Files: `TabSyn-main/src/data.py` and the local `TabSyn-main/zero/` module.
-- Purpose: current scikit-learn API compatibility and local substitution for the `zero` dependency.
-- Decision: unapproved and unvalidated pending dependency-version and native-parity tests.
+- The six modified official files were restored to commit `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`.
+- The local `TabSyn-main/zero/` substitute was removed. The frozen validation environment uses `libzero==0.0.8`, which supplies the `zero` research-utility import used by the source. The PyPI distribution named `zero` is an unrelated circuit-analysis package.
+- Device selection, deterministic seeding, requested sample rows, and sampling steps are implemented in `standardized_tabular_diffusion/compat/tabsyn.py`. This is an adapter-only invocation boundary: it imports and calls the official VAE, latent diffusion, decoding, and EDM sampler implementations without changing files under `TabSyn-main/`.
+- The official source does not expose VAE or diffusion epoch counts. The public adapter therefore rejects those former local controls instead of silently relying on patched source.
+- A 20-file manifest freezes the primary TabSyn execution, shared data utilities, dependency declaration, and attribution files. Bundled baselines and upstream evaluation scripts remain outside this TabSyn-primary validation scope.
 
 ## Artifact Disposition
 

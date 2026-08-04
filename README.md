@@ -372,7 +372,7 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 
 - `TabDiff` and `TabSyn` can share the same normalized evaluator because both repos use the same `info.json`-style tabular metadata.
 - `TabDDPM` currently has a partially different evaluation stack, so the adapter normalizes the metrics that are already available and marks unavailable TabStruct dimensions explicitly.
-- `TabSyn` required locally classified compatibility patches so the standardized runner can execute train/sample stages reliably; those patches are not yet native-parity validated.
+- `TabSyn` uses an unmodified, checksum-frozen official source scope. Device, seed, row-count, and sampling-step controls are isolated in the repository-owned invocation boundary while native-parity validation remains pending.
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
 - The broader baseline roadmap and literature map now live in `docs/tabular_generation_landscape.md`.

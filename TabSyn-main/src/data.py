@@ -311,15 +311,9 @@ def cat_encode(
     # Step 2. Encode.
 
     elif encoding == 'one-hot':
-        ohe_kwargs = {
-            'handle_unknown': 'ignore',
-            'dtype': np.float32,
-        }
-        if 'sparse_output' in sklearn.preprocessing.OneHotEncoder.__init__.__code__.co_varnames:
-            ohe_kwargs['sparse_output'] = False
-        else:
-            ohe_kwargs['sparse'] = False
-        ohe = sklearn.preprocessing.OneHotEncoder(**ohe_kwargs)  # type: ignore[arg-type]
+        ohe = sklearn.preprocessing.OneHotEncoder(
+            handle_unknown='ignore', sparse=False, dtype=np.float32 # type: ignore[code]
+        )
         encoder = make_pipeline(ohe)
 
         # encoder.steps.append(('ohe', ohe))

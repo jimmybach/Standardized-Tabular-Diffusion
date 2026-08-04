@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabdiff_or_tabsyn_summary
@@ -25,44 +28,90 @@ class TabSynAdapter(BaseModelAdapter):
             and (ckpt_dir / "encoder.pt").exists()
         )
 
+    def _gpu_argument(self, spec: RunSpec) -> int:
+        if "gpu" in spec.extra:
+            gpu = int(spec.extra["gpu"])
+            if gpu < -1:
+                raise ValueError("TabSyn GPU must be -1 for CPU or a non-negative CUDA index.")
+            return gpu
+        device = spec.device.strip().lower()
+        if device == "cpu":
+            return -1
+        if device in {"cuda", "gpu"}:
+            return 0
+        if device.startswith("cuda:"):
+            try:
+                gpu = int(device.split(":", maxsplit=1)[1])
+            except ValueError as exc:
+                raise ValueError(f"Invalid TabSyn CUDA device: {spec.device!r}") from exc
+            if gpu < 0:
+                raise ValueError(f"Invalid TabSyn CUDA device: {spec.device!r}")
+            return gpu
+        raise ValueError("TabSyn supports device='cpu', 'cuda', 'gpu', or 'cuda:<non-negative index>'.")
+
+    def _run_tabsyn(self, args: list[str], *, seed: int) -> None:
+        launcher = self.repo_root / "standardized_tabular_diffusion" / "compat" / "tabsyn.py"
+        if not launcher.is_file():
+            raise FileNotFoundError(f"TabSyn compatibility launcher is missing: {launcher}")
+        environment = os.environ.copy()
+        environment["PYTHONHASHSEED"] = str(seed)
+        subprocess.run(
+            [sys.executable, str(launcher), *args, "--seed", str(seed)],
+            cwd=self.upstream_root,
+            check=True,
+            env=environment,
+        )
+
+    def _require_internal_checkpoint(self, path: Path, *, label: str) -> Path:
+        if path.is_symlink():
+            raise PermissionError(f"Refusing to load a symlinked TabSyn {label}: {path}")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_relative_to(self.upstream_root.resolve()):
+            raise PermissionError(f"TabSyn {label} must remain inside the official source worktree: {resolved}")
+        if not resolved.is_file():
+            raise FileNotFoundError(f"TabSyn {label} must be a regular file: {resolved}")
+        return resolved
+
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
-        gpu = str(spec.extra.get("gpu", 0))
+        gpu = str(self._gpu_argument(spec))
         skip_vae_if_present = spec.extra.get("skip_vae_if_present", False)
+
+        unsupported_controls = [
+            key for key in ("vae_num_epochs", "diffusion_num_epochs") if spec.extra.get(key) is not None
+        ]
+        if unsupported_controls:
+            raise ValueError(
+                "The unmodified official TabSyn source does not expose epoch-count controls; remove: "
+                + ", ".join(unsupported_controls)
+            )
 
         if not (skip_vae_if_present and self._has_vae_artifacts(spec.dataset)):
             vae_args = [
-                "tabsyn.vae.main",
+                "--action",
+                "vae-train",
                 "--dataname",
                 spec.dataset,
                 "--gpu",
                 gpu,
             ]
-            if spec.extra.get("vae_num_epochs") is not None:
-                vae_args.extend(["--num_epochs", str(spec.extra["vae_num_epochs"])])
             if spec.extra.get("max_beta") is not None:
-                vae_args.extend(["--max_beta", str(spec.extra["max_beta"])])
+                vae_args.extend(["--max-beta", str(spec.extra["max_beta"])])
             if spec.extra.get("min_beta") is not None:
-                vae_args.extend(["--min_beta", str(spec.extra["min_beta"])])
+                vae_args.extend(["--min-beta", str(spec.extra["min_beta"])])
             if spec.extra.get("lambd") is not None:
                 vae_args.extend(["--lambd", str(spec.extra["lambd"])])
-            self._run_python(vae_args, self.upstream_root, module=True)
+            self._run_tabsyn(vae_args, seed=spec.seed)
 
         args = [
-            "main.py",
-            "--method",
-            spec.extra.get("method", "tabsyn"),
-            "--mode",
-            "train",
+            "--action",
+            "diffusion-train",
             "--dataname",
             spec.dataset,
             "--gpu",
             gpu,
         ]
-        # The shared patched parser defaults to 1,000 epochs for other baselines,
-        # while the authoritative TabSyn diffusion default is 10,001.
-        args.extend(["--num_epochs", str(spec.extra.get("diffusion_num_epochs", 10001))])
-        self._run_python(args, self.upstream_root)
+        self._run_tabsyn(args, seed=spec.seed)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -76,25 +125,31 @@ class TabSynAdapter(BaseModelAdapter):
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        if spec.checkpoint_path is not None:
+            raise ValueError(
+                "Official TabSyn sampling uses its fixed VAE and diffusion checkpoint layout; checkpoint_path is unsupported."
+            )
+        self._require_internal_checkpoint(self._vae_ckpt_dir(spec.dataset) / "train_z.npy", label="latent array")
+        self._require_internal_checkpoint(self._vae_ckpt_dir(spec.dataset) / "decoder.pt", label="decoder checkpoint")
+        self._require_internal_checkpoint(
+            self._diffusion_ckpt_dir(spec.dataset) / "model.pt", label="diffusion checkpoint"
+        )
         sample_path = (spec.output_dir / "samples.csv").resolve()
         args = [
-            "main.py",
-            "--method",
-            spec.extra.get("method", "tabsyn"),
-            "--mode",
+            "--action",
             "sample",
             "--dataname",
             spec.dataset,
             "--gpu",
-            str(spec.extra.get("gpu", 0)),
-            "--save_path",
+            str(self._gpu_argument(spec)),
+            "--save-path",
             str(sample_path),
+            "--steps",
+            str(spec.extra.get("steps", 50)),
         ]
         if spec.num_samples is not None:
             args.extend(["--num-samples", str(spec.num_samples)])
-        if spec.extra.get("steps") is not None:
-            args.extend(["--steps", str(spec.extra["steps"])])
-        self._run_python(args, self.upstream_root)
+        self._run_tabsyn(args, seed=spec.seed)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
