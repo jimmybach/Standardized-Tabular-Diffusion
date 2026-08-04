@@ -493,10 +493,10 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="medium",
         repository_url="https://github.com/Team-TUD/CTAB-GAN-Plus",
         notes=[
-            "Official code exists and is commonly reused in benchmarks.",
-            "Research-code ergonomics are rougher than SDV CTGAN/TVAE and preprocessing assumptions are more bespoke.",
-            "The standardized adapter uses the vendored implementation in this repository and still depends on legacy extras such as `dython`.",
-            "Still worth integrating because it is a recurring tabular benchmark baseline.",
+            "The method-author source is pinned at commit 6a6f901 and acquired on demand through a checksum-locked archive; it is not vendored.",
+            "The former embedded TabDDPM snapshot changed the critic loop, training split, constructors, and sampling behavior and has been removed.",
+            "The adapter uses the five byte-exact official runtime files and keeps all configuration and seeding behavior outside upstream source.",
+            "The upstream repository declares no license, so redistribution, Official Results, and release support remain blocked even after parity validation.",
         ],
     ),
     "realtabformer": ModelInventoryEntry(

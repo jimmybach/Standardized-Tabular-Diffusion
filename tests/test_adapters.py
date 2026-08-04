@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import pickle
 import sys
@@ -69,6 +70,18 @@ class PickleableFakeSynth:
 
 
 class PickleableFakeCTABGAN:
+    class Synthesizer:
+        def sample(self, samples):
+            return np.column_stack((np.full(samples, 10), np.ones(samples)))
+
+    class DataPrep:
+        def inverse_prep(self, values):
+            return pd.DataFrame(values, columns=["x", "target"])
+
+    def __init__(self):
+        self.synthesizer = self.Synthesizer()
+        self.data_prep = self.DataPrep()
+
     def fit(self):
         return None
 
@@ -770,22 +783,8 @@ def test_smote_uses_smotenc_for_mixed_type_features(tmp_path: Path, monkeypatch)
 
 def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
-    (repo_root / "TabDDPM-main" / "CTAB-GAN-Plus").mkdir(parents=True, exist_ok=True)
-    (repo_root / "TabDDPM-main").mkdir(parents=True, exist_ok=True)
-    columns_path = repo_root / "TabDDPM-main" / "CTAB-GAN-Plus" / "columns.json"
-    columns_path.write_text(
-        json.dumps(
-            {
-                "adult": {
-                    "categorical_columns": ["y"],
-                    "mixed_columns": {},
-                    "integer_columns": ["0"],
-                    "general_columns": [],
-                    "problem_type": {"Classification": "y"},
-                }
-            }
-        )
-    )
+    source_root = repo_root / ".cache" / "official-source"
+    source_root.mkdir(parents=True)
     adapter = CTABGANPlusAdapter(repo_root)
 
     dataset_spec = DatasetSpec(
@@ -803,8 +802,24 @@ def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, mo
     dataset_spec.train_data_path.write_text("x,target\n1,0\n2,1\n")
     dataset_spec.test_data_path.write_text("x,target\n3,1\n")
 
-    monkeypatch.setattr(adapter, "_load_training_frame", lambda dataset_spec: pd.DataFrame({"0": [1, 2], "y": [0, 1]}))
-    monkeypatch.setattr(adapter, "_build_model", lambda train_df, spec: PickleableFakeCTABGAN())
+    source = {
+        "upstream_commit": adapter.upstream_commit,
+        "manifest_sha256": "a" * 64,
+        "source_dir": str(source_root),
+    }
+    monkeypatch.setattr(adapter, "_resolve_source_root", lambda spec: (source_root, source))
+
+    @contextlib.contextmanager
+    def fake_runtime(source_path):
+        yield PickleableFakeCTABGAN, object(), {name: expected for name, expected in adapter.expected_versions.items()}
+
+    @contextlib.contextmanager
+    def fake_seeded(seed, torch_module, num_threads):
+        yield
+
+    monkeypatch.setattr(adapter, "_official_runtime", fake_runtime)
+    monkeypatch.setattr(adapter, "_seeded_runtime", fake_seeded)
+    monkeypatch.setattr(adapter, "_build_model", lambda *args, **kwargs: PickleableFakeCTABGAN())
 
     train_config = ExperimentConfig(
         model="ctab-gan-plus",
@@ -827,8 +842,48 @@ def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, mo
     bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
     assert (Path(train_config.output_dir) / "ctabgan_plus.pkl").exists()
+    assert (Path(train_config.output_dir) / "ctabgan_plus.pkl.metadata.json").exists()
     assert bundle.generated_sample_path is not None
     assert pd.read_csv(bundle.generated_sample_path).shape == (3, 2)
+
+
+def test_ctab_gan_plus_preflight_requires_locked_source(tmp_path: Path, monkeypatch) -> None:
+    metadata_path = tmp_path / "info.json"
+    train_path = tmp_path / "train.csv"
+    test_path = tmp_path / "test.csv"
+    metadata_path.write_text("{}", encoding="utf-8")
+    train_path.write_text("x,target\n1,no\n2,yes\n", encoding="utf-8")
+    test_path.write_text("x,target\n3,no\n", encoding="utf-8")
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "target"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["target"],
+        metadata_path=metadata_path,
+        train_data_path=train_path,
+        test_data_path=test_path,
+    )
+    config = ExperimentConfig(
+        model="ctab-gan-plus",
+        dataset="adult",
+        output_dir=str(tmp_path / "output"),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    missing = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=tmp_path)
+    assert missing["ready"] is False
+    assert "materialize-model-source" in " ".join(missing["missing"])
+
+    monkeypatch.setattr(
+        "standardized_tabular_diffusion.runner.source_status",
+        lambda *args, **kwargs: {"status": "ready", "upstream_commit": CTABGANPlusAdapter.upstream_commit},
+    )
+    ready = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=tmp_path)
+    assert ready["ready"] is True
 
 
 def test_realtabformer_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:

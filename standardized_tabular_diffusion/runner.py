@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,7 @@ from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
 from standardized_tabular_diffusion.interfaces import DatasetSpec
 from standardized_tabular_diffusion.registry import get_adapter, get_adapter_spec
+from standardized_tabular_diffusion.upstream_sources import source_status
 
 
 def validate_dataset_spec(dataset_spec: DatasetSpec) -> dict[str, Any]:
@@ -198,6 +200,22 @@ def validate_action_inputs(
         missing.append(
             f"{config.model} supports task types {list(adapter_spec.task_types)}, got: {dataset_spec.task_type}"
         )
+
+    if config.model == "ctab-gan-plus" and action in {"train", "sample"}:
+        action_extra = config.train.extra if action == "train" else config.sample.extra
+        status = source_status(
+            "ctab-gan-plus",
+            repo_root=resolved_root,
+            source_dir=action_extra.get("source_dir")
+            or os.environ.get("STANDARDIZED_TABULAR_DIFFUSION_CTABGAN_PLUS_SOURCE"),
+        )
+        checked["model_source"] = status
+        if status["status"] != "ready":
+            missing.append(
+                "checksum-locked CTAB-GAN+ source is not ready; run "
+                "`python -m standardized_tabular_diffusion.cli materialize-model-source "
+                "--model ctab-gan-plus` or provide the same verified source_dir for train and sample"
+            )
 
     if action == "sample" and config.model in {
         "ctgan",
