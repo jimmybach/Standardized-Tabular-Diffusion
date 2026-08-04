@@ -1,6 +1,6 @@
 # REaLTabFormer Validation Protocol
 
-Status: mandatory Linux evidence pending
+Status: passed and permanently retained
 
 Protocol: `realtabformer-official-package-parity-v1`
 
@@ -107,4 +107,8 @@ Any mismatch, dependency drift, wrong platform, unsafe artifact, ambiguous model
 
 ## Evidence
 
-The mandatory GitHub Actions workflow and permanent evidence record are pending. Until inspected Linux evidence is retained and bound into the source lock, the registry remains `adapter-complete`.
+[GitHub Actions run `30950369908`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908) passed all nine task/seed cases on Linux with Python 3.11.15. The run verified the official wheel and all 16 hash-bearing installed files, then produced exact native/adapter checkpoint tensors and files, semantically exact saved configurations, identical raw samples, and byte-identical final CSV files in every case. All requested outputs had seven canonical rows, finite numerical values, valid categorical domains, and no missing values.
+
+The permanent evidence record is `docs/evidence/realtabformer/native-parity-run-30950369908.json`, SHA-256 `0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07`. It is retained byte-for-byte from artifact `8908863813`, whose archive digest is `sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147`. The PR head was `7db46e00452ce5cc25d28d8b484c9d6ee14de5b3`, and the checked-out PR merge commit recorded by the evidence was `fb2f03dd579bb4d1847fa18395696ed698c8ce58`.
+
+REaLTabFormer is therefore `native-parity-validated` for the official tabular `n_critic=0` path. It remains `experimental` and `unsupported`; sensitivity stopping, relational mode, central benchmark evaluation, dataset admission, resource budgets, and release support are not promoted by this evidence.

@@ -512,7 +512,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="llm",
         paradigm="autoregressive / seq2seq transformer",
         covered_by_papers=["tabula-2025"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/worldbank/REaLTabFormer",
@@ -520,7 +520,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The adapter requires the checksum-pinned official `realtabformer==0.2.4` wheel; no package source is vendored.",
             "The selected wheel and method-author v0.2.4 source share 11 byte-exact source files and carry MIT licensing.",
             "The tabular adapter now enforces typed missing-free input, output-local artifacts, deterministic seeds, and checkpoint integrity metadata.",
-            "Nine-case Linux/Python 3.11 official-package parity evidence is pending; sensitivity stopping and relational mode remain outside the current claim.",
+            "All nine binary, multiclass, regression, and seed cases passed exact official-package parity in retained Linux/Python 3.11 run 30950369908.",
+            "Sensitivity stopping and relational mode remain outside the current validation claim; benchmark and release gates remain pending.",
         ],
     ),
     "tabsds": ModelInventoryEntry(

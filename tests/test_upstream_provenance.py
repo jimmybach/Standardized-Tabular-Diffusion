@@ -80,6 +80,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "goggle": "docs/evidence/goggle/native-parity-run-30945676747.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
+        "realtabformer": "docs/evidence/realtabformer/native-parity-run-30950369908.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
@@ -94,6 +95,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctgan",
         "goggle",
         "nrgboost",
+        "realtabformer",
         "smote",
         "stasy",
         "tabddpm",
@@ -104,7 +106,8 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
-        assert spec.modification_status == "adapter-only"
+        expected_modification = "compatibility-patched" if model_id == "realtabformer" else "adapter-only"
+        assert spec.modification_status == expected_modification
         assert spec.patch_set_ids == ()
         assert evidence_paths[model_id] in spec.evidence_records
         assert spec.benchmark_track == "experimental"

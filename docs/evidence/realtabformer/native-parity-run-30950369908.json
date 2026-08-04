@@ -1,0 +1,648 @@
+{
+  "cases": [
+    {
+      "case": 1,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "14d6759c7e204bba9282a162d199294546dda217e57b5fd90fff8e06e9936e7f",
+          "adapter_state_sha256": "312495f856837091e3cee8f9b1c66a9a443c0fd1545c5cd424b8ef8c2b55e122",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "14d6759c7e204bba9282a162d199294546dda217e57b5fd90fff8e06e9936e7f",
+          "native_state_sha256": "312495f856837091e3cee8f9b1c66a9a443c0fd1545c5cd424b8ef8c2b55e122",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "58abb0e38a4f26f32942f2c8b5badef836c27ce26ddbf4fa67b192f7da47438d",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "binary"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 2,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "02366b7711d4112a0fe84044ab57e838dfce395c67a166bdf488234dc3c1879f",
+          "adapter_state_sha256": "9f2934214e0f12eafaec457fd573b34e1583b3cc2ead23aafdcf9409b46e12b5",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "02366b7711d4112a0fe84044ab57e838dfce395c67a166bdf488234dc3c1879f",
+          "native_state_sha256": "9f2934214e0f12eafaec457fd573b34e1583b3cc2ead23aafdcf9409b46e12b5",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "383f077b8e62b5c998c974493445a8db9c1a0b16f8500cde410dd3081f35b2a9",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "binary"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 3,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "9c01cee1a20bd586f0b2722f6be9f22fc09c3184d16be445c4283b130650c6a9",
+          "adapter_state_sha256": "6bb4c63b8fbccb8f5dd98a4aa7555d47b89f38fe7e03629256854fcbfdafe5ac",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "9c01cee1a20bd586f0b2722f6be9f22fc09c3184d16be445c4283b130650c6a9",
+          "native_state_sha256": "6bb4c63b8fbccb8f5dd98a4aa7555d47b89f38fe7e03629256854fcbfdafe5ac",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "2cd7b1bc340c727638b6ba525c2ea6a3b6858056f88167c10dcb6b00c24f4363",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "binary"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 4,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "0dffc1aba89c28654808306dfcb84d476fb6d071c89f40665db5b32e031ad8dc",
+          "adapter_state_sha256": "caa96301a4ab06363669f370f949e53bdb370b005012bf298d2f0ab4e21116f8",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "0dffc1aba89c28654808306dfcb84d476fb6d071c89f40665db5b32e031ad8dc",
+          "native_state_sha256": "caa96301a4ab06363669f370f949e53bdb370b005012bf298d2f0ab4e21116f8",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "e2b7813245bc47299f6a4d3047a04cbb887823ff0a2968cc29876f35b7ba0ae7",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "multiclass"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 5,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "0d31b0e405a94fc25c768dc4a3fe5e136c83de8c1aa3cafd098bb48b443d0c28",
+          "adapter_state_sha256": "bf7aa69da39eae62bdf64a93b390482a2590072bac28398b9399460bd0a1d69a",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "0d31b0e405a94fc25c768dc4a3fe5e136c83de8c1aa3cafd098bb48b443d0c28",
+          "native_state_sha256": "bf7aa69da39eae62bdf64a93b390482a2590072bac28398b9399460bd0a1d69a",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "668f2644ce46616df0b4029299220526c4e77ec4addbd367df88acf8b2b77953",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "multiclass"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 6,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "c311c20758d09d67eb6714ac8bca664477af77eeec09ff0b62f6d99fcca2c3f7",
+          "adapter_state_sha256": "a5d3de4a398402deb10dd8b717ed167449c4b6b7ae5ba965b2e67b3a9349d7ff",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "c311c20758d09d67eb6714ac8bca664477af77eeec09ff0b62f6d99fcca2c3f7",
+          "native_state_sha256": "a5d3de4a398402deb10dd8b717ed167449c4b6b7ae5ba965b2e67b3a9349d7ff",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "e9468ef5ea63006c89b494723b8251c96acae824eb0bacbb2b258be5ffb6176a",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 24,
+        "variant": "multiclass"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 7,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "cde170587eb1be7495b259c4cc3ea49b67c8b6cba620f0063e4048aba46355be",
+          "adapter_state_sha256": "08994dc367db6fc268db0b631d33bd6da288f5cda0860cdc73897f7c708237bc",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "cde170587eb1be7495b259c4cc3ea49b67c8b6cba620f0063e4048aba46355be",
+          "native_state_sha256": "08994dc367db6fc268db0b631d33bd6da288f5cda0860cdc73897f7c708237bc",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "85f671667d0351e5e528a763ffdca4190aeb7bd85f2fad5a95a53d3728283da3",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 24,
+        "variant": "regression"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 8,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "f534654ca2948348ec267115fe0b4c1e052ac4d977a8bbecf1bd137db1c8dc10",
+          "adapter_state_sha256": "90311e2fbde2f23faa3feb43a052666b82b834c4199c2e75c6b1a296e1193dd8",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "f534654ca2948348ec267115fe0b4c1e052ac4d977a8bbecf1bd137db1c8dc10",
+          "native_state_sha256": "90311e2fbde2f23faa3feb43a052666b82b834c4199c2e75c6b1a296e1193dd8",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "e7c93ca070b62d98f2c3fc0660a2e9dd4c4905b31c9ab4a3d5e0cb536751bd63",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 24,
+        "variant": "regression"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 9,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "5f79422eca0547d0cef908ae89cbdfe0b68776e5ddadddfd55c420ea622e4fa0",
+          "adapter_state_sha256": "2666070d019233a109b02a9d7f33391920ef6452614a1805c36ff83126680034",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "5f79422eca0547d0cef908ae89cbdfe0b68776e5ddadddfd55c420ea622e4fa0",
+          "native_state_sha256": "2666070d019233a109b02a9d7f33391920ef6452614a1805c36ff83126680034",
+          "tensor_count": 17,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "234cb1aa8713474b664a34243fa50c72696a7ba74b90269ac4378ba2c21982ba",
+        "saved_config_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 24,
+        "variant": "regression"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "compatibility_boundary": {
+    "declared_type_coercion": "adapter and native control use the same DatasetSpec-directed categorical string coercion",
+    "full_save_dir_path_serialization": "v0.2.4 Path is converted to the string the official save configuration expects",
+    "sampling_rng_reset": "adapter and native control reset identical Python/NumPy/PyTorch seeds",
+    "secure_checkpoint_load": "adapter forces weights_only=True for the official state-dict loader; native control loads only the just-created audited checkpoint",
+    "source_patches": []
+  },
+  "environment": {
+    "accelerate": "1.1.1",
+    "datasets": "3.1.0",
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "realtabformer": "0.2.4",
+    "safetensors": "0.4.5",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "sentencepiece": "0.2.0",
+    "shapely": "2.0.6",
+    "tokenizers": "0.20.3",
+    "torch": "2.3.0",
+    "tqdm": "4.66.5",
+    "transformers": "4.46.3"
+  },
+  "environment_lock": {
+    "path": "requirements-realtabformer-validation.txt",
+    "sha256": "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e"
+  },
+  "model_id": "realtabformer",
+  "package": {
+    "authority": "method-author",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "authority": "method-author",
+      "distribution_form": "package",
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "installed_files": [
+        {
+          "bytes": 6,
+          "path": "realtabformer/VERSION",
+          "sha256": "1725bfa6524c5265e7c171cf06568417d39b947fff49c242f03859479c82334b"
+        },
+        {
+          "bytes": 504,
+          "path": "realtabformer/__init__.py",
+          "sha256": "adfa731e08dbb9832e6fed4ac0b2a0b6894f7e713bea01e53d7cc9270771f4e5"
+        },
+        {
+          "bytes": 272,
+          "path": "realtabformer/__main__.py",
+          "sha256": "a0e0f0c7632a2faa7952d949997160ad4026e7e8dcddcb1e9a839c3ece35425c"
+        },
+        {
+          "bytes": 25052,
+          "path": "realtabformer/data_utils.py",
+          "sha256": "10170edc57696bef69229689239bbde863d3480248f476f056d39e609e81c6f0"
+        },
+        {
+          "bytes": 68361,
+          "path": "realtabformer/realtabformer.py",
+          "sha256": "f58cc803deb6987a7dd063f1fe92173f4f6515796e280e049f8927c06f849535"
+        },
+        {
+          "bytes": 29164,
+          "path": "realtabformer/rtf_analyze.py",
+          "sha256": "824e5798b6214125fb71fa2d6c0cf14f090829ba59b08c7b9767d4b67512183f"
+        },
+        {
+          "bytes": 3233,
+          "path": "realtabformer/rtf_datacollator.py",
+          "sha256": "11e3ccd2f02742597c0848407e40cd41984d96af6ed12a48bf9259d9e844e0a0"
+        },
+        {
+          "bytes": 843,
+          "path": "realtabformer/rtf_exceptions.py",
+          "sha256": "eb7e4bda97ee1eb5140603c484321c488571f20da04026df8f326f37fc65c25e"
+        },
+        {
+          "bytes": 41795,
+          "path": "realtabformer/rtf_sampler.py",
+          "sha256": "01c88d699530d228effcf596cea810e0876f12f78ca3a8808c4de9088dd273e9"
+        },
+        {
+          "bytes": 0,
+          "path": "realtabformer/rtf_tokenizer.py",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 4348,
+          "path": "realtabformer/rtf_trainer.py",
+          "sha256": "0d13034e04554997bce0797a76172e3174dc23ce856e52316be80f05a9162869"
+        },
+        {
+          "bytes": 1960,
+          "path": "realtabformer/rtf_validators.py",
+          "sha256": "ff2278702207942e7d4a0efec8b0f15bd0876606fe3fed72a561c708026d903b"
+        },
+        {
+          "bytes": 1075,
+          "path": "realtabformer-0.2.4.dist-info/LICENSE",
+          "sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4"
+        },
+        {
+          "bytes": 11451,
+          "path": "realtabformer-0.2.4.dist-info/METADATA",
+          "sha256": "6b157f1e803a32b2b544bd487de2457e829bb569eeaaf547ead1cfc89492e191"
+        },
+        {
+          "bytes": 88,
+          "path": "realtabformer-0.2.4.dist-info/WHEEL",
+          "sha256": "ed9f3fdbbb9a1c8fd4640738528c783e906143d639fe6a1d65758cc6d522e0d5"
+        },
+        {
+          "bytes": 52,
+          "path": "realtabformer-0.2.4.dist-info/entry_points.txt",
+          "sha256": "b5d5cc6bcd945079cc39d5504eb450a26c8c6c065cca07672bea0505f5bb2c03"
+        }
+      ],
+      "installed_files_verified": 16,
+      "license": "MIT",
+      "license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4",
+      "manifest_path": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/standardized_tabular_diffusion/resources/upstream/realtabformer-wheel-manifest.json",
+      "manifest_sha256": "4c6f7084c7d7a6b8db36c237aa176d6da669b391610c956ee48fe60dde4c83ba",
+      "package_name": "realtabformer",
+      "package_version": "0.2.4",
+      "repository": "https://github.com/worldbank/REaLTabFormer",
+      "runtime_versions": {
+        "accelerate": "1.1.1",
+        "datasets": "3.1.0",
+        "joblib": "1.5.3",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "realtabformer": "0.2.4",
+        "safetensors": "0.4.5",
+        "scikit-learn": "1.5.2",
+        "scipy": "1.13.1",
+        "sentencepiece": "0.2.0",
+        "shapely": "2.0.6",
+        "tokenizers": "0.20.3",
+        "torch": "2.3.0",
+        "tqdm": "4.66.5",
+        "transformers": "4.46.3"
+      },
+      "tag": "v0.2.4",
+      "upstream_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+      "upstream_tree": "aa4431468f040fc485f82e7e15238c57eef05753",
+      "wheel_bytes": 49890,
+      "wheel_filename": "realtabformer-0.2.4-py3-none-any.whl",
+      "wheel_sha256": "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486"
+    },
+    "repository": "https://github.com/worldbank/REaLTabFormer",
+    "tag": "v0.2.4",
+    "upstream_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+    "upstream_tree": "aa4431468f040fc485f82e7e15238c57eef05753",
+    "wheel": {
+      "archive_members": 17,
+      "bytes": 49890,
+      "filename": "realtabformer-0.2.4-py3-none-any.whl",
+      "license": "MIT",
+      "license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4",
+      "record_hashed_files": 16,
+      "record_rows": 17,
+      "sha256": "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486"
+    }
+  },
+  "package_unchanged_after_validation": true,
+  "protocol_id": "realtabformer-official-package-parity-v1",
+  "repository_commit": "fb2f03dd579bb4d1847fa18395696ed698c8ce58",
+  "reproduction_target": "method-author-official-tabular-package",
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "status": "pass",
+  "validated_scope": {
+    "model_type": "tabular",
+    "relational_mode": "outside-the-current-single-table-contract",
+    "sensitivity_stopping": "not-native-parity-validated",
+    "tasks": [
+      "binary-classification",
+      "multiclass-classification",
+      "regression"
+    ],
+    "training_path": "official fit with n_critic=0"
+  },
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}
