@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import pickle
 import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
@@ -57,9 +56,9 @@ class _SampleFileEvaluatorMixin:
         return self._write_bundle(bundle)
 
 
-class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class _OfficialCTGANPackageAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
     checkpoint_filename = "model.pkl"
-    _CTGAN_PACKAGE_VERSION = "0.12.1"
+    _OFFICIAL_PACKAGE_VERSION = "0.12.1"
 
     def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
         if spec.checkpoint_path is not None:
@@ -115,51 +114,73 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
                 raise ValueError("CTGAN epochs, embedding_dim, and discriminator_steps must be positive")
             if any(not values or any(value <= 0 for value in values) for values in dimensions):
                 raise ValueError("CTGAN generator_dim and discriminator_dim must contain positive integers")
+        elif self.model_name == "tvae":
+            for name in ("embedding_dim",):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = int(spec.extra[name])
+            for name in ("l2scale", "loss_factor"):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = float(spec.extra[name])
+            for name in ("compress_dims", "decompress_dims"):
+                if spec.extra.get(name) is not None:
+                    kwargs[name] = tuple(int(value) for value in spec.extra[name])
+            batch_size = int(kwargs.get("batch_size", 500))
+            epochs = int(kwargs.get("epochs", 300))
+            embedding_dim = int(kwargs.get("embedding_dim", 128))
+            l2scale = float(kwargs.get("l2scale", 1e-5))
+            loss_factor = float(kwargs.get("loss_factor", 2))
+            dimensions = (
+                tuple(kwargs.get("compress_dims", (128, 128))),
+                tuple(kwargs.get("decompress_dims", (128, 128))),
+            )
+            if batch_size <= 0 or epochs <= 0 or embedding_dim <= 0 or loss_factor <= 0:
+                raise ValueError("TVAE batch_size, epochs, embedding_dim, and loss_factor must be positive")
+            if l2scale < 0:
+                raise ValueError("TVAE l2scale must be non-negative")
+            if any(not values or any(value <= 0 for value in values) for values in dimensions):
+                raise ValueError("TVAE compress_dims and decompress_dims must contain positive integers")
         return kwargs
 
     def _import_synthesizer_cls(self):
+        try:
+            installed_version = version("ctgan")
+        except PackageNotFoundError as exc:
+            raise ModuleNotFoundError(
+                f"{self.model_name.upper()} requires the pinned official package; install "
+                f"`standardized-tabular-diffusion[{self.model_name}]`."
+            ) from exc
+        if installed_version != self._OFFICIAL_PACKAGE_VERSION:
+            raise RuntimeError(
+                f"{self.model_name.upper()} package version mismatch: "
+                f"expected {self._OFFICIAL_PACKAGE_VERSION}, observed {installed_version}. "
+                f"Install `standardized-tabular-diffusion[{self.model_name}]` to restore the validated runtime."
+            )
         if self.model_name == "ctgan":
-            try:
-                installed_version = version("ctgan")
-            except PackageNotFoundError as exc:
-                raise ModuleNotFoundError(
-                    'CTGAN requires the pinned official package; install '
-                    '`standardized-tabular-diffusion[ctgan]`.'
-                ) from exc
-            if installed_version != self._CTGAN_PACKAGE_VERSION:
-                raise RuntimeError(
-                    "CTGAN package version mismatch: "
-                    f"expected {self._CTGAN_PACKAGE_VERSION}, observed {installed_version}. "
-                    'Install `standardized-tabular-diffusion[ctgan]` to restore the validated runtime.'
-                )
             from ctgan import CTGAN  # pylint: disable=import-error
 
             return CTGAN
+        if self.model_name == "tvae":
+            from ctgan import TVAE  # pylint: disable=import-error
 
-        vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
-        with _temporary_sys_path(vendor_root):
-            from ctgan import TVAESynthesizer  # pylint: disable=import-error
-
-            return TVAESynthesizer
+            return TVAE
+        raise RuntimeError(f"Unsupported official ctgan-package adapter: {self.model_name}")
 
     def _build_synthesizer(self, spec: RunSpec):
         synthesizer_cls = self._import_synthesizer_cls()
         kwargs = self._train_kwargs(spec)
-        if self.model_name == "ctgan":
-            kwargs["enable_gpu"] = spec.device.startswith("cuda")
-        else:
-            kwargs["device"] = spec.device
+        if self.model_name == "tvae" and spec.device.startswith("cuda:") and spec.device != "cuda:0":
+            raise ValueError(
+                "Official TVAE selects the default visible CUDA device during fit; "
+                "use 'cuda' or 'cuda:0', or remap devices with CUDA_VISIBLE_DEVICES"
+            )
+        kwargs["enable_gpu"] = spec.device.startswith("cuda")
         model = synthesizer_cls(**kwargs)
         if self.model_name == "ctgan":
             model.set_device(spec.device)
         return model
 
     def _save_model(self, model: Any, checkpoint_path: Path) -> None:
-        if self.model_name == "ctgan":
-            model.save(checkpoint_path)
-            return
-        with checkpoint_path.open("wb") as handle:
-            pickle.dump(model, handle)
+        model.save(checkpoint_path)
 
     def _load_model(self, spec: RunSpec, checkpoint_path: Path) -> Any:
         trusted_checkpoint = self._validate_trusted_executable_artifact(
@@ -168,13 +189,9 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
             format_name="PyTorch/pickle",
         )
         synthesizer_cls = self._import_synthesizer_cls()
-        if self.model_name == "ctgan":
-            model = synthesizer_cls.load(trusted_checkpoint)
-            model.set_device(spec.device)
-            return model
-        vendor_root = self.repo_root / "TabDDPM-main" / "CTGAN" / "CTGAN"
-        with _temporary_sys_path(vendor_root), trusted_checkpoint.open("rb") as handle:
-            return pickle.load(handle)
+        model = synthesizer_cls.load(trusted_checkpoint)
+        model.set_device(spec.device)
+        return model
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
@@ -188,8 +205,7 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
                 f"Run the explicit train-fitted preprocessing module first; observed: {observed}"
             )
         model = self._build_synthesizer(spec)
-        if self.model_name == "ctgan":
-            model.set_random_state(spec.seed)
+        model.set_random_state(spec.seed)
         model.fit(train_df, discrete_columns=self._discrete_columns(dataset_spec))
         checkpoint_path = self._resolve_checkpoint_path(spec)
         self._save_model(model, checkpoint_path)
@@ -201,8 +217,8 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
             notes=[
                 f"Serialized {self.model_name} checkpoint written to {checkpoint_path}.",
                 *(
-                    [f"Official ctgan package version: {self._CTGAN_PACKAGE_VERSION}."]
-                    if self.model_name == "ctgan"
+                    [f"Official ctgan package version: {self._OFFICIAL_PACKAGE_VERSION}."]
+                    if self.model_name in {"ctgan", "tvae"}
                     else []
                 ),
             ],
@@ -237,14 +253,14 @@ class _PickleBackedGenerativeAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin
         return self._evaluate_from_sample_file(spec)
 
 
-class CTGANAdapter(_PickleBackedGenerativeAdapter):
+class CTGANAdapter(_OfficialCTGANPackageAdapter):
     model_name = "ctgan"
     upstream_dirname = "."
 
 
-class TVAEAdapter(_PickleBackedGenerativeAdapter):
+class TVAEAdapter(_OfficialCTGANPackageAdapter):
     model_name = "tvae"
-    upstream_dirname = "TabDDPM-main"
+    upstream_dirname = "."
 
 
 class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
