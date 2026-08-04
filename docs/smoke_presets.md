@@ -66,7 +66,7 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 ## Notes
 
 - `nrgboost-adult-smoke.json` is a historical local end-to-end preset; formal status is governed by `docs/NRGBOOST_VALIDATION.md` and retained Linux evidence, not by the preset label alone.
-- `ctab-gan-plus-adult-smoke.json` exercises the checksum-locked official source after materialization. Its formal status is governed by `docs/CTABGAN_PLUS_VALIDATION.md`, not by historical local execution.
+- `ctab-gan-plus-adult-smoke.json` exercises the checksum-locked official source after materialization. Its formal `native-parity-validated` status is governed by `docs/CTABGAN_PLUS_VALIDATION.md` and retained Linux evidence, not by the preset label.
 - `bn-adult-smoke.json`, `nflow-adult-smoke.json`, and `goggle-adult-smoke.json` are real end-to-end validated smoke presets for the newly added baseline families.
 - `arf-adult-smoke.json` is intended to be a fast end-to-end validation preset for the ARF adapter.
 - `arf-shoppers-smoke.json` is a second-dataset ARF validation preset to confirm the adapter is not adult-specific.

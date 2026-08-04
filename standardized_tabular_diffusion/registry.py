@@ -150,15 +150,17 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         install_extra="ctab-gan-plus",
         upstream_repository="https://github.com/Team-TUD/CTAB-GAN-Plus",
         upstream_revision="6a6f90188cca3dac2c533fd5e8e7f20de074365b",
-        revision_status="pinned-official-source-native-parity-pending",
+        revision_status="pinned-official-source-native-parity-validated",
         license_status="upstream-public-no-license-declared; redistribution and release blocked",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/CTABGAN_PLUS_VALIDATION.md",
+            "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
             "standardized_tabular_diffusion/resources/upstream/ctabgan-plus-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/ctabgan-plus-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "ctgan": _spec(
         "standardized_tabular_diffusion.models.sample_baselines",
