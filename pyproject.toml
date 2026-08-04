@@ -45,6 +45,11 @@ ctgan = [
   "rdt==1.20.0",
   "tqdm==4.66.5",
 ]
+tvae = [
+  "ctgan==0.12.1",
+  "rdt==1.20.0",
+  "tqdm==4.66.5",
+]
 models = [
   "numpy==1.26.4; python_version < '3.13'",
   "numpy>=2.1,<2.2; python_version >= '3.13'",

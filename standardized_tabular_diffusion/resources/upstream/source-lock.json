@@ -67,6 +67,89 @@
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
     },
+    "tvae": {
+      "adapter_ids": [
+        "tvae"
+      ],
+      "authoritative_repository": "https://github.com/sdv-dev/CTGAN",
+      "authority": "method-author",
+      "component_id": "tvae",
+      "distribution_form": "package",
+      "legacy_snapshot_disposition": {
+        "closest_reviewed_upstream_commit": "ace3dbc4bd3ef7f4ddc027a1b47e8eb916378893",
+        "declared_version": "0.5.2.dev0",
+        "exact_shared_files_at_closest_commit": 39,
+        "files_removed": 47,
+        "original_path": "TabDDPM-main/CTGAN",
+        "reason": "The snapshot was locally modified, coupled to Python <3.10 and torch <2 dependencies, and superseded by the pinned official package.",
+        "removed_bytes": 168098,
+        "shared_files_at_closest_commit": 44,
+        "status": "removed-from-working-tree",
+        "tvae_source_sha256": "0b0bc0ed424f295084a395a212eb40f1464df0e6474c313e488e8ad43226689f",
+        "upstream_relation": "The closest reviewed 0.5.2.dev0 history point matched 39 of 44 shared files. TVAE and four other source files carried local changes, so the snapshot was not an exact official implementation."
+      },
+      "license": "BUSL-1.1",
+      "license_url": "https://github.com/sdv-dev/CTGAN/blob/v0.12.1/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-license-central-evaluation-dataset-admission-and-release-gates",
+      "package_lock": {
+        "filename": "ctgan-0.12.1-py3-none-any.whl",
+        "name": "ctgan",
+        "pypi_url": "https://pypi.org/project/ctgan/0.12.1/",
+        "sha256": "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18",
+        "trusted_publishing_source_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        "version": "0.12.1"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-02-13T03:09:04Z",
+        "tag": "v0.12.1",
+        "tag_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        "tag_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+      },
+      "validation": {
+        "artifact": {
+          "digest": "sha256:daf6dd3e7502e819bce916dfe8474ea3ea8355158450345fe27b6a41379291b7",
+          "evidence_file_sha256": "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7",
+          "expires_at": "2026-11-02T13:27:00Z",
+          "github_artifact_id": 8894224963,
+          "name": "tvae-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tvae/native-parity-run-30913867621.json"
+        },
+        "environment": {
+          "ctgan": "0.12.1",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "rdt": "1.20.0",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
+        "protocol_id": "tvae-native-parity-v1",
+        "repository_commit": "64f3c23c617f2fc4cbebfba9d36845a812892355",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "installed_record_files_verified": 20,
+          "loss_values_exact": true,
+          "model_state_exact": true,
+          "random_state_exact": true,
+          "sample_bytes_exact": true,
+          "seed_cases_passed": 3,
+          "seed_cases_total": 3,
+          "transformer_exact": true,
+          "wheel_identity_verified": true
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T13:28:12Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621/job/92006958402",
+        "workflow_run_id": 30913867621,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621"
+      },
+      "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+    },
     "tabddpm": {
       "adapter_ids": [
         "tabddpm"

@@ -28,7 +28,7 @@ BUSL-1.1 is not an OSI open-source license. Version 0.12.1 permits non-productio
 
 ## Legacy snapshot disposition
 
-The repository contains an older nested CTGAN `0.5.2.dev0` snapshot under `TabDDPM-main/CTGAN/CTGAN/`. It declares Python `<3.10`, PyTorch `<2`, and MIT. The CTGAN adapter no longer imports that snapshot and the parity protocol rejects repository-local package resolution. The old tree is retained temporarily because the still-unvalidated TVAE adapter shares it; it will be resolved in the TVAE validation task rather than silently removed in a CTGAN-only change.
+The repository previously contained an older, locally modified CTGAN `0.5.2.dev0` snapshot under `TabDDPM-main/CTGAN/`. After TVAE was also migrated to the official package, the 47-file legacy subtree and its obsolete wrappers were removed from the active working tree. Its history remains recoverable through Git, and the source lock records its version, closest reviewed upstream relation, modification status, size, and hashes.
 
 ## Adapter contract
 
