@@ -655,7 +655,6 @@ def test_tvae_rejects_nondefault_cuda_index(tmp_path: Path, monkeypatch) -> None
 
 def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_path: Path, monkeypatch) -> None:
     repo_root = tmp_path
-    (repo_root / "TabSyn-main").mkdir(parents=True)
     adapter = SMOTEAdapter(repo_root)
 
     dataset_spec = DatasetSpec(
@@ -674,9 +673,10 @@ def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_p
     dataset_spec.test_data_path.write_text("x,y\n4,0\n")
 
     class FakeSMOTE:
-        def __init__(self, random_state=None, k_neighbors=5):
+        def __init__(self, random_state=None, k_neighbors=5, sampling_strategy="auto"):
             self.random_state = random_state
             self.k_neighbors = k_neighbors
+            self.sampling_strategy = sampling_strategy
 
         def fit_resample(self, x_train, y_train):
             x_df = pd.DataFrame(x_train).reset_index(drop=True)
@@ -685,12 +685,11 @@ def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_p
                 [y_series, y_series.iloc[[0]]], ignore_index=True
             )
 
-    fake_imblearn = types.ModuleType("imblearn")
-    fake_over_sampling = types.ModuleType("imblearn.over_sampling")
-    fake_over_sampling.SMOTE = FakeSMOTE
-    fake_imblearn.over_sampling = fake_over_sampling
-    monkeypatch.setitem(sys.modules, "imblearn", fake_imblearn)
-    monkeypatch.setitem(sys.modules, "imblearn.over_sampling", fake_over_sampling)
+    monkeypatch.setattr(
+        adapter,
+        "_load_official_samplers",
+        lambda: (FakeSMOTE, FakeSMOTE, FakeSMOTE),
+    )
 
     config = ExperimentConfig(
         model="smote",
@@ -707,7 +706,6 @@ def test_smote_sample_generates_requested_rows_and_requires_classification(tmp_p
 
 
 def test_smote_uses_smotenc_for_mixed_type_features(tmp_path: Path, monkeypatch) -> None:
-    (tmp_path / "TabSyn-main").mkdir(parents=True)
     adapter = SMOTEAdapter(tmp_path)
     dataset_spec = DatasetSpec(
         name="mixed",
@@ -731,21 +729,27 @@ def test_smote_uses_smotenc_for_mixed_type_features(tmp_path: Path, monkeypatch)
     dataset_spec.test_data_path.write_text("x,color,target\n4,red,0\n")
 
     class FakeSMOTENC:
-        def __init__(self, categorical_features, random_state=None, k_neighbors=5):
-            assert categorical_features == [1]
+        def __init__(
+            self,
+            categorical_features,
+            random_state=None,
+            k_neighbors=5,
+            sampling_strategy="auto",
+        ):
+            assert categorical_features == ["color"]
 
         def fit_resample(self, x_train, y_train):
             x_frame = pd.DataFrame(x_train).reset_index(drop=True)
-            assert all(pd.api.types.is_numeric_dtype(dtype) for dtype in x_frame.dtypes)
+            assert list(x_frame.columns) == ["x", "color"]
+            assert x_frame["color"].tolist() == ["red", "blue", "red", "blue", "red", "blue"]
             y_series = pd.Series(y_train).reset_index(drop=True)
             return x_frame, y_series
 
-    fake_imblearn = types.ModuleType("imblearn")
-    fake_over_sampling = types.ModuleType("imblearn.over_sampling")
-    fake_over_sampling.SMOTENC = FakeSMOTENC
-    fake_imblearn.over_sampling = fake_over_sampling
-    monkeypatch.setitem(sys.modules, "imblearn", fake_imblearn)
-    monkeypatch.setitem(sys.modules, "imblearn.over_sampling", fake_over_sampling)
+    monkeypatch.setattr(
+        adapter,
+        "_load_official_samplers",
+        lambda: (FakeSMOTENC, FakeSMOTENC, FakeSMOTENC),
+    )
 
     config = ExperimentConfig(
         model="smote",
