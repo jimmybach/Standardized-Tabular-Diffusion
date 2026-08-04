@@ -193,6 +193,7 @@ def _common_command(mode: str, checkpoint_path: Path | None = None) -> list[str]
         command.extend(
             ["--ckpt_path", str(checkpoint_path), "--num_samples_to_generate", str(EXPECTED_SAMPLE_ROWS)]
         )
+        command.extend(["--report", "--num_runs", "1"])
     command.extend(["--gpu", "-1", "--no_wandb", "--deterministic"])
     return command
 
@@ -348,8 +349,9 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
     native_training = _snapshot_training_outputs(native_root, output_dir / "native-training")
     native_sample_command = _common_command("test", native_training["checkpoint"])
     _run_command(native_sample_command, native_root)
-    native_sample = output_dir / "native-training" / "result" / "4" / "samples.csv"
-    native_metrics = output_dir / "native-training" / "result" / "4" / "all_results.json"
+    native_report_root = native_root / "eval" / "report_runs" / EXPERIMENT_NAME / DATASET_NAME
+    native_sample = native_report_root / "all_samples" / "samples_0.csv"
+    native_metrics = native_report_root / "4" / "all_results.json"
 
     os.environ["PYTHONHASHSEED"] = "0"
     adapter = TabDiffAdapter(adapter_repo)
@@ -377,13 +379,15 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
                 "allow_unsafe_external_checkpoint": True,
                 "deterministic": True,
                 "exp_name": EXPERIMENT_NAME,
+                "num_runs": 1,
+                "report": True,
             },
         )
     )
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("TabDiff adapter did not record the generated sample path.")
     adapter_sample = sample_bundle.generated_sample_path
-    adapter_metrics = adapter_sample.with_name("all_results.json")
+    adapter_metrics = adapter_root / "eval" / "report_runs" / EXPERIMENT_NAME / DATASET_NAME / "4" / "all_results.json"
 
     config_exact = _normalized_cached_config(native_training["config"]) == _normalized_cached_config(
         adapter_training["config"]

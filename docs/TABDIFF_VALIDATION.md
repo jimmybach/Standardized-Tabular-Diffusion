@@ -52,7 +52,7 @@ The protocol creates two isolated copies from the verified source manifest so th
 
 The upstream `--debug` flag is not suitable for a smoke test: it leaves training at 8,000 epochs and sets the sampling batch to 10,000 rows. Instead, after source integrity is verified, both isolated copies receive the same predeclared TOML hyperparameter override: one transformer layer, time dimension 64, four optimizer epochs, four diffusion timesteps, batch size 32, validation every two epochs, and sampling batch size 32. This changes experimental configuration only; it does not modify Python algorithm source. Both paths use CPU execution, disabled online logging, and deterministic seed 0. The numeric-looking fixture column names exercise the upstream plotting path. The fixture is an execution/parity case, not a model-quality benchmark.
 
-The native path calls `main.py` directly for training and testing. The adapter path performs the same train and sample operations. The following must all pass:
+The native path calls `main.py` directly for training and sampling. Sampling uses the official `--report --num_runs 1` mode. This matters because the pinned ordinary test path attempts to save DCR NumPy detail arrays through code that accepts only DataFrames and dictionaries; report mode is the upstream-provided path that handles those arrays. The adapter invokes the same report mode and maps its first generated sample into the standardized artifact manifest. The following must all pass:
 
 1. all 27 scoped source hashes match the pinned manifest;
 2. the two predeclared runtime TOML overrides and cached runtime configs are semantically exact;
