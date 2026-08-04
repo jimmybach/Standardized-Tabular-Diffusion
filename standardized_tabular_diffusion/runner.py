@@ -233,6 +233,22 @@ def validate_action_inputs(
                 "or provide the same verified source_dir for train and sample"
             )
 
+    if config.model == "goggle" and action in {"train", "sample"}:
+        action_extra = config.train.extra if action == "train" else config.sample.extra
+        status = source_status(
+            "goggle",
+            repo_root=resolved_root,
+            source_dir=action_extra.get("source_dir")
+            or os.environ.get("STANDARDIZED_TABULAR_DIFFUSION_GOGGLE_SOURCE"),
+        )
+        checked["model_source"] = status
+        if status["status"] != "ready":
+            missing.append(
+                "checksum-locked method-author Goggle source is not ready; run "
+                "`python -m standardized_tabular_diffusion.cli materialize-model-source --model goggle` "
+                "or provide the same verified source_dir for train and sample"
+            )
+
     if action == "sample" and config.model in {
         "ctgan",
         "tvae",
@@ -261,6 +277,16 @@ def validate_action_inputs(
         if config.model == "tabularargn":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn.pkl")
         record_user_checkpoint(checkpoint_path)
+
+    if action == "sample" and config.model == "goggle":
+        metadata_path = Path(config.output_dir) / "goggle-model-metadata.json"
+        runtime_config_path = Path(config.output_dir) / "goggle-runtime-config.json"
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        checked["runtime_config_path"] = str(runtime_config_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+        if not runtime_config_path.exists():
+            missing.append(f"runtime_config_path missing: {runtime_config_path}")
 
     if action == "sample" and config.model in {"stasy", "codi"}:
         if config.model == "stasy":

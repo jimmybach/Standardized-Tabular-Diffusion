@@ -306,7 +306,7 @@ def build_parser() -> argparse.ArgumentParser:
     materialize_model_source_parser.add_argument(
         "--model",
         required=True,
-        choices=["ctab-gan", "ctab-gan-plus"],
+        choices=["ctab-gan", "ctab-gan-plus", "goggle"],
         help="Registered checksum-locked source component",
     )
     materialize_model_source_parser.add_argument(
@@ -328,7 +328,7 @@ def build_parser() -> argparse.ArgumentParser:
     model_source_status_parser.add_argument(
         "--model",
         required=True,
-        choices=["codi", "ctab-gan", "ctab-gan-plus", "stasy"],
+        choices=["codi", "ctab-gan", "ctab-gan-plus", "goggle", "stasy"],
         help="Registered checksum-locked source component",
     )
     model_source_status_parser.add_argument(
