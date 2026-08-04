@@ -78,9 +78,9 @@
           "artifact_digest": "sha256:2f009d9abe9ff65e3e0641739543ad0888d6e83e91f8e2cea3ae17b7728d2957",
           "artifact_id": 8905564052,
           "downloaded_evidence_sha256": "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156",
-          "evidence_file_sha256": "942f735339676dddec62d7d913c847fa461aa780ed7ab4c7d7d727755345049a",
+          "evidence_file_sha256": "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156",
           "permanent_evidence_path": "docs/evidence/codi/native-parity-run-30941940893.json",
-          "retention_treatment": "The downloaded JSON had no terminal newline. The permanent repository copy adds exactly one final LF and changes no JSON content.",
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization.",
           "retention_days": 90
         },
         "environment": {
