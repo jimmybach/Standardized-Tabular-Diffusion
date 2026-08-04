@@ -6,7 +6,7 @@ At the current release-preparation baseline, TabDDPM, TabDiff, and TabSyn are `n
 
 ## Current Retained Validation
 
-- `tabddpm`: passed `tabddpm-native-parity-v1` for seeds 0, 17, and 2025 in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
+- `tabddpm`: passed `tabddpm-native-parity-v1` for the `(training, sampling)` seed pairs `(0, 23)`, `(17, 47)`, and `(101, 89)` in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabdiff`: passed `tabdiff-native-parity-v1` in GitHub Actions run `30866879879`; see `docs/TABDIFF_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabsyn`: passed `tabsyn-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30871758645`; see `docs/TABSYN_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 
