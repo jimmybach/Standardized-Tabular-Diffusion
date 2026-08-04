@@ -98,6 +98,14 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - Python 3.11 cannot use the official scikit-learn 0.24.1 dependency. The adapter-only `ctabgan-sklearn-keyword-only-v1` bridge forwards the unchanged positional mixture-component count as the same `n_components` keyword required by scikit-learn 1.5.2. It is applied independently to native and adapter paths and changes no algorithm parameter.
 - The official `DataPrep` always stratifies its target. The registry therefore exposes CTAB-GAN as classification-only instead of claiming an unsupported regression path.
 
+### TabularARGN package and artifact disposition
+
+- The active adapter targets method-author `mostly-ai/mostlyai-engine` tag `2.6.2`, commit `0b96f02e`, distributed as the official `mostlyai-engine==2.6.2` wheel under Apache-2.0. No package source is vendored.
+- The GitHub archive, PyPI wheel, PyPI source distribution, source/wheel license, package metadata, and all 53 hash-bearing installed files are checksum-locked. All 50 wheel package source files match the tagged source byte-for-byte.
+- No official source statement is patched. Output placement, DatasetSpec-directed categorical coercion, explicit sampling seeding, and the official rare-category `SAMPLE` option are adapter arguments or pre/postconditions.
+- The former adapter's unrestricted estimator pickle has been removed. The persistent artifact is the official `ModelStore`; official 2.6.2 uses `weights_only=True` for model weights. The adapter verifies all retained files and removes `OriginalData`, including raw and encoded row files, after fit.
+- The current validated claim remains `adapter-complete` until the nine-case Linux/Python 3.11 official-package parity artifact passes inspection and is retained. Sequential, relational, differential-privacy, prediction, likelihood, and imputation APIs are outside this flat single-table generation scope.
+
 ## Artifact Disposition
 
 Six Adult TabSyn checkpoint artifacts and one Sick VAE checkpoint, totaling approximately 93.5 MB, were present in the root repository import but not in the pinned official upstream tree. They have been removed from the working tree because provenance, redistribution permission, training configuration, and checksum evidence were absent. Their original paths, byte sizes, and SHA-256 values are recorded in the source lock. Recoverable local copies remain under ignored `tmp/` quarantine directories during review. Git history has not been rewritten.
@@ -112,6 +120,7 @@ The legacy `TabDDPM-main/CTGAN/` subtree contained a locally modified `ctgan` `0
 - The official imbalanced-learn 0.14.2 package used by SMOTE declares MIT. The wheel and source license hashes are locked separately because packaging normalizes the license file; no package source is vendored.
 - The official NRGBoost 0.0.3 package declares MIT. Its method-author tag, Trusted Publishing source commit, Linux/Python 3.11 wheel, source and wheel license hashes, compiled extension, and bundled OpenMP runtime are locked; no package source is vendored.
 - The official REaLTabFormer 0.2.4 package declares MIT. Its method-author tag, source archive, universal wheel, source/wheel license, package metadata, all 16 hash-bearing installed files, and frozen Linux/Python 3.11 direct runtime are locked; no package source is vendored.
+- The official mostlyai-engine 2.6.2 package used for TabularARGN declares Apache-2.0. Its method-author tag, verified commit, source archive, universal wheel, source distribution, byte-exact source/wheel license, all 53 hash-bearing installed files, and frozen Linux/Python 3.11 direct runtime are locked; no package source is vendored.
 - The official CTAB-GAN+ repository declares no license file or expression. Public visibility does not grant redistribution rights. Its source is therefore fetched directly from the method-author repository into an ignored user cache, never committed here, and excluded from release support and Official Results pending explicit clarification.
 - The official CTAB-GAN repository declares Apache-2.0 and includes a separate attribution notice. Both files remain beside the selected source. Source redistribution is authorized, but release support remains blocked by non-license gates.
 - The official Goggle repository declares MIT and identifies Copyright 2023 Tennison Liu. The license, authorship file, archive, and selected source files are checksum-locked. Source is acquired on demand; the license is not the remaining release blocker.

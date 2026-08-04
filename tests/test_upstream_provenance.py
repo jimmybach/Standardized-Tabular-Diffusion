@@ -31,6 +31,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "stasy",
         "tabddpm",
         "tabdiff",
+        "tabularargn",
         "tabsyn",
         "tvae",
     }
@@ -70,6 +71,25 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
             patch_ids.append(patch["patch_set_id"])
 
     assert len(patch_ids) == len(set(patch_ids))
+
+
+def test_tabularargn_release_is_locked_without_premature_parity_claim() -> None:
+    payload = _load_source_lock()
+    component = payload["components"]["tabularargn"]
+    spec = get_adapter_spec("tabularargn")
+
+    assert component["authority"] == "method-author"
+    assert component["distribution_form"] == "package"
+    assert component["license"] == "Apache-2.0"
+    assert component["package_lock"]["installed_files_verified"] == 53
+    assert component["wheel_source_comparison"]["exact_shared_source_files"] == 50
+    assert component["patch_sets"] == []
+    assert "validation" not in component
+    assert spec.validation_level.value == "adapter-complete"
+    assert spec.modification_status == "adapter-only"
+    assert spec.revision_status == "pinned-official-package-adapter-complete"
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"
 
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:

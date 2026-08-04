@@ -394,10 +394,20 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         ),
     ),
     "tabularargn": _spec(
-        "standardized_tabular_diffusion.models.paper_gap_baselines",
+        "standardized_tabular_diffusion.models.tabularargn",
         "TabularARGNAdapter",
         authority="method-author",
         distribution="package",
+        install_extra="tabularargn",
+        upstream_repository="https://github.com/mostly-ai/mostlyai-engine",
+        upstream_revision="0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+        revision_status="pinned-official-package-adapter-complete",
+        license_status="Apache-2.0 package dependency; native parity and release gates pending",
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "standardized_tabular_diffusion/resources/upstream/tabularargn-wheel-manifest.json",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+        ),
     ),
     "tabula": _spec(
         "standardized_tabular_diffusion.models.tabula",
