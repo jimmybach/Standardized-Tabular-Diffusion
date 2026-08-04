@@ -20,6 +20,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
 
     assert isinstance(components, dict)
     assert set(components) == {
+        "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
         "nrgboost",
@@ -65,6 +66,7 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
+        "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
@@ -75,6 +77,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
     for model_id in (
+        "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
         "nrgboost",
@@ -102,6 +105,34 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
 
     # Restoring the primary TabSyn path does not audit its separately vendored baselines.
     assert get_adapter_spec("codi").modification_status == "compatibility-patched"
+
+
+def test_ctabgan_retained_validation_and_source_license_are_exact() -> None:
+    payload = _load_source_lock()
+    ctabgan = payload["components"]["ctab-gan"]
+    assert isinstance(ctabgan, dict)
+
+    assert ctabgan["distribution_form"] == "source"
+    assert ctabgan["license"] == "Apache-2.0"
+    assert ctabgan["selected_files"] == 7
+    assert ctabgan["modification_status"] == "adapter-only"
+    assert ctabgan["compatibility_shims"][0]["id"] == "ctabgan-sklearn-keyword-only-v1"
+    validation = ctabgan["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30930939961
+    assert validation["pull_request_head_commit"] == "4501d5ef8d552c840aea06035cd3902eaeef7a82"
+    assert validation["repository_commit"] == "ecc7e0f1931c61d9ac019d44782385ecb4637fbf"
+    assert validation["result_summary"]["parity_cases_passed"] == 6
+    assert validation["result_summary"]["checkpoint_state_exact"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "41788d11578c55530b55fbf392412de361ec2769c63329a3174fa15c6905d0c6"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
 
 
 def test_ctabgan_plus_retained_validation_is_exact_and_license_blocked() -> None:

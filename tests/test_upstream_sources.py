@@ -93,6 +93,55 @@ def test_source_validation_fails_closed_after_tampering(tmp_path: Path, monkeypa
         upstream_sources.validate_upstream_source("fixture", destination)
 
 
+def test_materializer_applies_declared_text_normalization_before_hashing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    runtime_archive = b"line-one\r\nline-two\r\n\r\n"
+    runtime_normalized = b"line-one\nline-two\n"
+    prefix = "Official-deadbeef/"
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(prefix + "model/runtime.py", runtime_archive)
+    payload = buffer.getvalue()
+    manifest = {
+        "manifest_schema_version": "1.0.0",
+        "model_id": "fixture",
+        "repository": "https://github.com/example/Official",
+        "upstream_commit": "deadbeef",
+        "upstream_tree": "tree",
+        "upstream_model_tree": "model-tree",
+        "source_hash_normalization": "lf-one-final-newline",
+        "license": {},
+        "archive": {
+            "url": "https://example.invalid/archive.zip",
+            "format": "zip",
+            "root_prefix": prefix,
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        },
+        "runtime_files": [
+            {
+                "path": "model/runtime.py",
+                "bytes": len(runtime_normalized),
+                "sha256": hashlib.sha256(runtime_normalized).hexdigest(),
+            }
+        ],
+    }
+    manifest_path = tmp_path / "fixture-manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    monkeypatch.setattr(upstream_sources, "load_source_manifest", lambda model_id: manifest)
+    monkeypatch.setattr(upstream_sources, "source_manifest_path", lambda model_id: manifest_path)
+    monkeypatch.setattr(upstream_sources, "_download_archive", lambda locked, timeout: payload)
+
+    destination = tmp_path / "normalized-source"
+    result = upstream_sources.materialize_upstream_source(
+        "fixture", repo_root=tmp_path, destination=destination
+    )
+
+    assert result["runtime_files_verified"] == 1
+    assert (destination / "model" / "runtime.py").read_bytes() == runtime_normalized
+
+
 def test_ctabgan_plus_manifest_forbids_redistribution_and_locks_runtime() -> None:
     manifest = upstream_sources.load_source_manifest("ctab-gan-plus")
 
@@ -101,3 +150,22 @@ def test_ctabgan_plus_manifest_forbids_redistribution_and_locks_runtime() -> Non
     assert manifest["license"]["license_file_present"] is False
     assert manifest["license"]["redistribution_status"] == "not-authorized"
     assert len(manifest["runtime_files"]) == 5
+
+
+def test_ctabgan_manifest_authorizes_redistribution_and_locks_selected_source() -> None:
+    manifest = upstream_sources.load_source_manifest("ctab-gan")
+
+    assert manifest["upstream_commit"] == "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a"
+    assert manifest["upstream_tree"] == "3ef0223477193400d88344ff66b7ac6ffeefa173"
+    assert manifest["source_hash_normalization"] == "lf-one-final-newline"
+    assert manifest["license"]["declared_expression"] == "Apache-2.0"
+    assert manifest["license"]["redistribution_status"] == "authorized"
+    assert len(manifest["runtime_files"]) == 7
+
+
+def test_distributed_ctabgan_source_matches_the_checksum_lock() -> None:
+    source_root = Path(__file__).resolve().parents[1] / "TabDDPM-main" / "CTAB-GAN"
+    result = upstream_sources.validate_upstream_source("ctab-gan", source_root)
+
+    assert result["upstream_commit"] == "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a"
+    assert result["runtime_files_verified"] == 7

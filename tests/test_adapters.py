@@ -25,6 +25,7 @@ if str(REPO_ROOT) not in sys.path:
 import standardized_tabular_diffusion.models.sample_baselines as sample_baselines
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models.ctabgan import CTABGANAdapter
 from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter, GReaTAdapter, TabEBMAdapter
 from standardized_tabular_diffusion.models.next_wave_baselines import (
     CTABGANPlusAdapter,
@@ -38,7 +39,7 @@ from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
-from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, CTABGANAdapter, STaSyAdapter
+from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter, STaSyAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
@@ -1519,46 +1520,76 @@ def test_stasy_and_codi_build_expected_tabsyn_dispatch_commands(tmp_path: Path, 
     assert bundle.generated_sample_path == (Path(sample_config.output_dir) / "samples.csv").resolve()
 
 
-def test_ctabgan_sample_restores_column_names(tmp_path: Path) -> None:
+def test_ctabgan_train_and_sample_use_locked_official_checkpoint(tmp_path: Path, monkeypatch) -> None:
     adapter = CTABGANAdapter(tmp_path)
+    source_root = tmp_path / "official-source"
+    source_root.mkdir()
     checkpoint_path = tmp_path / "artifacts" / "ctab-gan" / "ctabgan.pkl"
-    checkpoint_path.parent.mkdir(parents=True)
-    with checkpoint_path.open("wb") as handle:
-        pickleable = PickleableFakeCTABGAN()
-        pickle.dump(pickleable, handle)
-
     dataset_spec = DatasetSpec(
         name="adult",
         task_type="classification",
-        column_names=["x", "y"],
+        column_names=["x", "target"],
         numerical_columns=["x"],
         categorical_columns=[],
-        target_columns=["y"],
+        target_columns=["target"],
         metadata_path=tmp_path / "info.json",
         train_data_path=tmp_path / "train.csv",
         test_data_path=tmp_path / "test.csv",
     )
-    dataset_dir = dataset_spec.train_data_path.parent
-    dataset_dir.mkdir(parents=True, exist_ok=True)
     dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("x,y\n1,0\n")
-    dataset_spec.test_data_path.write_text("x,y\n1,0\n")
-    np.save(dataset_dir / "X_num_train.npy", np.array([[1.0]], dtype=np.float32))
-    np.save(dataset_dir / "y_train.npy", np.array([[0]], dtype=np.int64))
+    dataset_spec.train_data_path.write_text(
+        "x,target\n1,no\n2,yes\n3,no\n4,yes\n5,no\n6,yes\n7,no\n8,yes\n9,no\n10,yes\n"
+    )
+    dataset_spec.test_data_path.write_text("x,target\n3,no\n")
 
-    config = ExperimentConfig(
+    source = {
+        "upstream_commit": adapter.upstream_commit,
+        "manifest_sha256": "a" * 64,
+        "source_dir": str(source_root),
+    }
+    monkeypatch.setattr(adapter, "_resolve_source_root", lambda spec: (source_root, source))
+
+    @contextlib.contextmanager
+    def fake_runtime(source_path):
+        yield PickleableFakeCTABGAN, object(), {
+            name: expected for name, expected in adapter.expected_versions.items()
+        }
+
+    @contextlib.contextmanager
+    def fake_seeded(seed, torch_module, num_threads):
+        yield
+
+    monkeypatch.setattr(adapter, "_official_runtime", fake_runtime)
+    monkeypatch.setattr(adapter, "_seeded_runtime", fake_seeded)
+    monkeypatch.setattr(adapter, "_build_model", lambda *args, **kwargs: PickleableFakeCTABGAN())
+
+    train_config = ExperimentConfig(
+        model="ctab-gan",
+        dataset="adult",
+        output_dir=str(checkpoint_path.parent),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=False),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+
+    sample_config = ExperimentConfig(
         model="ctab-gan",
         dataset="adult",
         output_dir=str(checkpoint_path.parent),
         train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, checkpoint_path=str(checkpoint_path), num_samples=3),
+        sample=SampleConfig(enabled=True, num_samples=3),
         evaluation=EvaluationConfig(enabled=False),
     )
 
-    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
+    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
+    assert checkpoint_path.is_file()
+    assert checkpoint_path.with_name("ctabgan.pkl.metadata.json").is_file()
     assert bundle.generated_sample_path is not None
-    assert list(pd.read_csv(bundle.generated_sample_path).columns) == ["x", "y"]
+    assert list(pd.read_csv(bundle.generated_sample_path).columns) == ["x", "target"]
+    metadata = json.loads((checkpoint_path.parent / "ctabgan_sample_metadata.json").read_text())
+    assert metadata["compatibility_shims"] == [adapter.compatibility_shim_id]
 
 
 def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_path: Path, monkeypatch) -> None:
@@ -1577,6 +1608,10 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
     dataset_spec.metadata_path.write_text("{}")
     dataset_spec.train_data_path.write_text("x\n1\n")
     dataset_spec.test_data_path.write_text("x\n1\n")
+    monkeypatch.setattr(
+        "standardized_tabular_diffusion.runner.source_status",
+        lambda *args, **kwargs: {"status": "ready", "upstream_commit": CTABGANAdapter.upstream_commit},
+    )
 
     for model_name, checkpoint_name in [
         ("bn", "model.pkl"),

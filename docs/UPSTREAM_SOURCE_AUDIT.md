@@ -2,7 +2,7 @@
 
 Status: release-preparation record
 Audit date: 2026-08-04
-Scope: the primary TabDDPM, TabDiff, and TabSyn source trees plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, and CTAB-GAN+
+Scope: the primary TabDDPM, TabDiff, and TabSyn source trees plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, CTAB-GAN, and CTAB-GAN+
 
 ## Purpose
 
@@ -30,6 +30,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 | TVAE | `826da23f8f9385ad15fd206ecad691e04cb0ccdc` (`v0.12.1`) | The former `0.5.2.dev0` subtree matched 39 of 44 shared paths at its closest reviewed history point; TVAE and four other source files were locally modified. | The 47-file legacy subtree and obsolete wrappers were removed. The adapter now uses the unmodified official package API; exact native parity passed in run `30913867621`. | Blocked pending BUSL-1.1 review, central evaluation, dataset admission, and release gates. |
 | SMOTE | `8504e95f0160f61d1b617ca66f779646d2ee609e` (`0.14.2`) | The adapter now requires the checksum-pinned official imbalanced-learn wheel. No source snapshot is vendored. | Adapter-only package integration. Direct DataFrame dispatch selects official SMOTE, SMOTENC, or SMOTEN; all nine exact cases passed in run `30918785254`. | Native parity validated but excluded from joint generative-model ranking; classical-reference admission and release gates remain pending. |
 | NRGBoost | `feef73a3edb20b911c2f7214b13f810909ef20ad` (`v0.0.3`) | The adapter requires the checksum-pinned method-author Linux/Python 3.11 wheel. No source snapshot is vendored. | Adapter-only package integration. All six classification/regression and seed cases passed exact native parity in run `30922326384`. | Native parity validated; central evaluation, dataset, runtime, and release gates remain blocked. |
+| CTAB-GAN | `73d4e315a2a51cf16c97ed8a00d2dad456cfce8a` | The initial 15-file snapshot matched only two of nine latest-official shared paths after line-ending normalization; it changed construction, the stratified split, training controls, and sampling. | The semantic fork was removed. Seven selected official files are checksum-locked and distributed with Apache-2.0 and the original attribution. A documented adapter-only bridge maps the legacy positional `n_components` call to the same keyword-only scikit-learn parameter. All six exact cases passed in retained Linux run `30930939961`. | Native parity validated; central evaluation, dataset, runtime, and release gates remain pending. |
 | CTAB-GAN+ | `6a6f90188cca3dac2c533fd5e8e7f20de074365b` | The former TabDDPM-embedded snapshot changed the constructor, train split, critic loop, device/optimizer controls, and sampling behavior; its duplicate source made 18 files and 146,977 bytes. | The snapshot was removed without history rewriting. Five byte-exact official runtime files are downloaded on demand and used without source patches; all six exact native-parity cases passed in run `30926267432`. | Native parity validated, but blocked because the official repository declares no license and because central evaluation, dataset, runtime, and release gates remain pending. |
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The initial import had 58 exact scoped files but omitted all six official `lib/` files. The missing files have now been restored; all 64 scoped files match the integrity manifest after declared text normalization. | Adapter-only. The former local `zero` shim was removed and replaced by the seven byte-exact modules from the official `libzero==0.0.8` wheel. | Native parity validated in run `30863212268`; official-track eligibility remains a separate pending decision. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Native parity validated in run `30866879879`; central-evaluation and other official-track gates remain pending. |
@@ -60,6 +61,14 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - The official source does not expose VAE or diffusion epoch counts. The public adapter therefore rejects those former local controls instead of silently relying on patched source.
 - A 20-file manifest freezes the primary TabSyn execution, shared data utilities, dependency declaration, and attribution files. Bundled baselines and upstream evaluation scripts remain outside this TabSyn-primary validation scope.
 
+### CTAB-GAN snapshot and compatibility disposition
+
+- The initial CTAB-GAN subtree contained 15 files and 78,185 Git-blob bytes. Nine paths were shared with the pinned latest official tree; only `LICENSE` and `License.txt` matched after line-ending normalization, while seven shared paths differed.
+- The active source is now limited to the official license, attribution notice, README, and four generation runtime files from commit `73d4e315`. Dataset artifacts, notebooks, generated outputs, local wrappers, and upstream evaluation code are excluded.
+- The selected files are frozen after the same documented LF/one-final-newline normalization used by the source audit. No executable statement is edited.
+- Python 3.11 cannot use the official scikit-learn 0.24.1 dependency. The adapter-only `ctabgan-sklearn-keyword-only-v1` bridge forwards the unchanged positional mixture-component count as the same `n_components` keyword required by scikit-learn 1.5.2. It is applied independently to native and adapter paths and changes no algorithm parameter.
+- The official `DataPrep` always stratifies its target. The registry therefore exposes CTAB-GAN as classification-only instead of claiming an unsupported regression path.
+
 ## Artifact Disposition
 
 Six Adult TabSyn checkpoint artifacts and one Sick VAE checkpoint, totaling approximately 93.5 MB, were present in the root repository import but not in the pinned official upstream tree. They have been removed from the working tree because provenance, redistribution permission, training configuration, and checksum evidence were absent. Their original paths, byte sizes, and SHA-256 values are recorded in the source lock. Recoverable local copies remain under ignored `tmp/` quarantine directories during review. Git history has not been rewritten.
@@ -74,6 +83,7 @@ The legacy `TabDDPM-main/CTGAN/` subtree contained a locally modified `ctgan` `0
 - The official imbalanced-learn 0.14.2 package used by SMOTE declares MIT. The wheel and source license hashes are locked separately because packaging normalizes the license file; no package source is vendored.
 - The official NRGBoost 0.0.3 package declares MIT. Its method-author tag, Trusted Publishing source commit, Linux/Python 3.11 wheel, source and wheel license hashes, compiled extension, and bundled OpenMP runtime are locked; no package source is vendored.
 - The official CTAB-GAN+ repository declares no license file or expression. Public visibility does not grant redistribution rights. Its source is therefore fetched directly from the method-author repository into an ignored user cache, never committed here, and excluded from release support and Official Results pending explicit clarification.
+- The official CTAB-GAN repository declares Apache-2.0 and includes a separate attribution notice. Both files remain beside the selected source. Source redistribution is authorized, but release support remains blocked by non-license gates.
 - The TabDDPM snapshot carries its upstream MIT license; the vendored official `libzero==0.0.8` modules carry their separate upstream MIT license.
 - The TabDiff license file is byte-for-byte identical to the pinned upstream file. Its malformed quote characters are therefore an upstream defect, not local corruption; the original attribution is preserved.
 - The TabSyn snapshot carries Apache-2.0 license and NOTICE files. Its bundled baseline directories require their own source, license, and patch audit.
@@ -89,4 +99,4 @@ Before any of these adapters can enter the Official Results track:
 5. no unproven checkpoint may be treated as an official pretrained artifact; and
 6. the model evidence record must be promoted independently through `registered`, `adapter-complete`, `smoke-validated`, `native-parity-validated`, `benchmark-eligible`, and `release-supported` states.
 
-Until all applicable gates are met, registry records remain conservative. CTGAN, TVAE, NRGBoost, TabDDPM, TabDiff, TabSyn, and SMOTE have retained native-parity claims, but remain experimental, unsupported, and excluded from Official Results. SMOTE is additionally and categorically excluded from the joint generative-model ranking.
+Until all applicable gates are met, registry records remain conservative. CTAB-GAN, CTAB-GAN+, CTGAN, TVAE, NRGBoost, TabDDPM, TabDiff, TabSyn, and SMOTE have retained native-parity claims, but remain experimental, unsupported, and excluded from Official Results. SMOTE is additionally and categorically excluded from the joint generative-model ranking.

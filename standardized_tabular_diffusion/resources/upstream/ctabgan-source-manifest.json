@@ -1,0 +1,67 @@
+{
+  "archive": {
+    "bytes": 1066556,
+    "format": "zip",
+    "root_prefix": "CTAB-GAN-73d4e315a2a51cf16c97ed8a00d2dad456cfce8a/",
+    "sha256": "7d20aab479c05190b13a63e5e55f9c48ad3f83187d53bcc09c0e6f90a085de76",
+    "url": "https://codeload.github.com/Team-TUD/CTAB-GAN/zip/73d4e315a2a51cf16c97ed8a00d2dad456cfce8a"
+  },
+  "authority": "method-author",
+  "license": {
+    "declared_expression": "Apache-2.0",
+    "license_file_present": true,
+    "redistribution_status": "authorized",
+    "review_status": "upstream-apache-2.0-license-retained"
+  },
+  "manifest_schema_version": "1.0.0",
+  "model_id": "ctab-gan",
+  "repository": "https://github.com/Team-TUD/CTAB-GAN",
+  "runtime_files": [
+    {
+      "bytes": 11357,
+      "git_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+      "path": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "bytes": 767,
+      "git_blob": "5404b6f9e08e11c3a28a214518830c963060c885",
+      "path": "License.txt",
+      "sha256": "428d2cd9bbf842030b3dd82adfede8251e2e0f00bfe41d735f1dc9ec2ac7ba50"
+    },
+    {
+      "bytes": 3351,
+      "git_blob": "2f4bf137537f97bceb43524e3b6039ea152578c4",
+      "path": "README.md",
+      "sha256": "0e6117be778cf3f901e9dea0b32914a0a6409cc04f9b907baf4aebabb46b4fdc"
+    },
+    {
+      "bytes": 3177,
+      "git_blob": "439a485153278ee2a7af4ea52c09cb5466dd2171",
+      "path": "model/ctabgan.py",
+      "sha256": "a37a6f51c52bcebec0c5063078ef5e49618e6e216567435c148cf298eed47f24"
+    },
+    {
+      "bytes": 7098,
+      "git_blob": "9a934ee9ef00e43fcddc077e5da0a2f8b26b7a6c",
+      "path": "model/pipeline/data_preparation.py",
+      "sha256": "a35857c793cb1577f9db37bea552f74ef2ab0907f97cfb88d0f740eb271f9758"
+    },
+    {
+      "bytes": 37596,
+      "git_blob": "2e3d562aea610cabbd3424a95478801eec9a3290",
+      "path": "model/synthesizer/ctabgan_synthesizer.py",
+      "sha256": "9d10eea9893ba89778a63731028d054a2c78fd834f2a7036a7b5f95679af1f71"
+    },
+    {
+      "bytes": 22735,
+      "git_blob": "daa4536a5094e2ba8e3b19270dcd7a38944d1829",
+      "path": "model/synthesizer/transformer.py",
+      "sha256": "c8bcf2d8672eb0a75643094922c4371ad002625c535d89cdb90cff5212933490"
+    }
+  ],
+  "source_hash_normalization": "lf-one-final-newline",
+  "upstream_commit": "73d4e315a2a51cf16c97ed8a00d2dad456cfce8a",
+  "upstream_model_tree": "89ad16bce9f0f6c23f393d9b6b2959ce8ef64bf9",
+  "upstream_tree": "3ef0223477193400d88344ff66b7ac6ffeefa173"
+}
