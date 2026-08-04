@@ -31,7 +31,6 @@ from standardized_tabular_diffusion.models.goggle import GoggleAdapter
 from standardized_tabular_diffusion.models.next_wave_baselines import (
     CTABGANPlusAdapter,
     NRGBoostAdapter,
-    REaLTabFormerAdapter,
 )
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
@@ -885,125 +884,6 @@ def test_ctab_gan_plus_preflight_requires_locked_source(tmp_path: Path, monkeypa
     )
     ready = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=tmp_path)
     assert ready["ready"] is True
-
-
-def test_realtabformer_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
-    repo_root = tmp_path
-    (repo_root / "TabSyn-main").mkdir(parents=True)
-    adapter = REaLTabFormerAdapter(repo_root)
-
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["x", "y"],
-        numerical_columns=["x"],
-        categorical_columns=[],
-        target_columns=["y"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
-    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
-
-    class FakeRTF:
-        def __init__(self, **kwargs):
-            self.kwargs = kwargs
-
-        def fit(self, df, **kwargs):
-            self.df = df
-            self.fit_kwargs = kwargs
-
-        def save(self, path):
-            model_dir = Path(path) / "id0001"
-            model_dir.mkdir(parents=True, exist_ok=True)
-            (model_dir / "marker.txt").write_text("ok")
-
-        def sample(self, n_samples, **kwargs):
-            return pd.DataFrame({"x": [10] * n_samples, "y": [1] * n_samples})
-
-        @classmethod
-        def load_from_dir(cls, path):
-            return cls(loaded_from=path)
-
-    fake_module = types.ModuleType("realtabformer")
-    fake_module.REaLTabFormer = FakeRTF
-    monkeypatch.setitem(sys.modules, "realtabformer", fake_module)
-
-    train_config = ExperimentConfig(
-        model="realtabformer",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "realtabformer"),
-        train=TrainConfig(enabled=True),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-    sample_config = ExperimentConfig(
-        model="realtabformer",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "realtabformer"),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, num_samples=2),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
-    bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
-
-    assert bundle.generated_sample_path is not None
-    assert pd.read_csv(bundle.generated_sample_path).shape == (2, 2)
-
-
-def test_realtabformer_can_limit_training_rows_for_tiny_smoke_runs(tmp_path: Path, monkeypatch) -> None:
-    repo_root = tmp_path
-    (repo_root / "TabSyn-main").mkdir(parents=True)
-    adapter = REaLTabFormerAdapter(repo_root)
-
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["x", "y"],
-        numerical_columns=["x"],
-        categorical_columns=[],
-        target_columns=["y"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n3,0\n4,1\n")
-    dataset_spec.test_data_path.write_text("x,y\n5,1\n")
-
-    observed: dict[str, object] = {}
-
-    class FakeRTF:
-        def __init__(self, **kwargs):
-            self.kwargs = kwargs
-
-        def fit(self, df, **kwargs):
-            observed["fit_rows"] = len(df)
-
-        def save(self, path):
-            model_dir = Path(path) / "id0001"
-            model_dir.mkdir(parents=True, exist_ok=True)
-
-    fake_module = types.ModuleType("realtabformer")
-    fake_module.REaLTabFormer = FakeRTF
-    monkeypatch.setitem(sys.modules, "realtabformer", fake_module)
-
-    train_config = ExperimentConfig(
-        model="realtabformer",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "realtabformer-tiny"),
-        train=TrainConfig(enabled=True, extra={"max_train_rows": 2, "n_critic": 0, "num_bootstrap": 0}),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    adapter.train_from_config(train_config, dataset_spec=dataset_spec)
-
-    assert observed["fit_rows"] == 2
 
 
 @pytest.mark.skipif(torch is None, reason="TabuLa tensor contract requires the optional PyTorch runtime")

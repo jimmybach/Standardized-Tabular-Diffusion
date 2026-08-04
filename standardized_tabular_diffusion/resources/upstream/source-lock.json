@@ -579,6 +579,103 @@
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384"
       }
     },
+    "realtabformer": {
+      "adapter_ids": [
+        "realtabformer"
+      ],
+      "authoritative_repository": "https://github.com/worldbank/REaLTabFormer",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-output-isolation-v1",
+          "reason": "Official defaults write checkpoints, sensitivity samples, and periodic full saves relative to the process working directory.",
+          "semantic_effect": "All three official directory arguments are set beneath output_dir; model construction, training, and sampling statements are unchanged."
+        },
+        {
+          "classification": "compatibility-patched",
+          "id": "realtabformer-full-save-path-json-v1",
+          "reason": "Official v0.2.4 save() converts checkpoints_dir and samples_save_dir from Path to str but omits full_save_dir, causing json.dumps to fail for every newly constructed model.",
+          "semantic_effect": "Immediately before calling the unchanged official save(), the existing full_save_dir Path is represented by its identical string path. No model, tensor, optimizer, preprocessing, or sampling state changes."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-declared-types-v1",
+          "reason": "CSV inference can represent declared categorical targets and features as integers even though the benchmark DatasetSpec marks them categorical.",
+          "semantic_effect": "Declared categorical features and classification targets are converted to strings before the unchanged official fit path; numerical roles are checked for finite numeric values. The exact transformed training frame is hashed and recorded."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-sampling-seed-v1",
+          "reason": "Official fit seeds Python, NumPy, and PyTorch, while load_from_dir followed by sample does not reset their process-global generators.",
+          "semantic_effect": "The standardized sample seed is applied immediately before the unchanged official sample() call, making independent sample actions reproducible without changing the generation algorithm."
+        },
+        {
+          "classification": "compatibility-patched",
+          "id": "realtabformer-weights-only-load-v1",
+          "reason": "Official v0.2.4 load_from_dir reads its state-dict-only rtf_model.pt with unrestricted torch.load.",
+          "semantic_effect": "During the unchanged official load_from_dir call, torch.load is temporarily forced to weights_only=True. The same state dict is reconstructed while arbitrary pickle globals are rejected."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-transformers-vision-boundary-v1",
+          "reason": "Transformers probes optional torchvision components that are unused by REaLTabFormer tabular generation and can be ABI-incompatible with the frozen CPU torch runtime.",
+          "semantic_effect": "Optional torchvision availability is disabled only while importing the official package. No text, model, trainer, or sampler symbol is replaced."
+        }
+      ],
+      "component_id": "realtabformer",
+      "dependency_resolution": {
+        "declared_requirement": "Python >=3.8; transformers >=4.46.0 plus datasets, numpy, pandas, scikit-learn, tqdm, and shapely lower bounds",
+        "validation_environment_lock": "requirements-realtabformer-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/worldbank/REaLTabFormer/blob/v0.2.4/LICENSE",
+      "modification_status": "compatibility-patched",
+      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-relational-scope-resource-and-release-gates",
+      "package_lock": {
+        "bytes": 49890,
+        "filename": "realtabformer-0.2.4-py3-none-any.whl",
+        "installed_files_verified": 16,
+        "manifest": "standardized_tabular_diffusion/resources/upstream/realtabformer-wheel-manifest.json",
+        "name": "realtabformer",
+        "pypi_url": "https://pypi.org/project/realtabformer/0.2.4/",
+        "sha256": "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486",
+        "version": "0.2.4",
+        "wheel_license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-01-04T08:14:48.935559Z",
+        "tag": "v0.2.4",
+        "tag_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+        "tag_tree": "aa4431468f040fc485f82e7e15238c57eef05753"
+      },
+      "reproduction_target": "method-author-official-tabular-package",
+      "source_archive_lock": {
+        "bytes": 822039,
+        "sha256": "d0d0d0e3b73f2d9b9128242c40207b87e1be6a869d885bca1bf65ef5166cb761",
+        "url": "https://codeload.github.com/worldbank/REaLTabFormer/zip/73f239643f9ea5abc877f685ce927e986302ac2d"
+      },
+      "source_license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4",
+      "upstream_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+      "upstream_tree": "aa4431468f040fc485f82e7e15238c57eef05753",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "realtabformer-official-package-parity-v1",
+        "status": "pending-linux-evidence",
+        "target_cases": {
+          "seed_cases": [0, 19, 73],
+          "variants": ["binary", "multiclass", "regression"],
+        "sensitivity_training_case": false
+        }
+      },
+      "wheel_source_comparison": {
+        "exact_shared_source_files": 11,
+        "shared_source_files": 11,
+        "wheel_only_empty_file": "realtabformer/rtf_tokenizer.py"
+      }
+    },
     "smote": {
       "adapter_ids": [
         "smote"

@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "model_id": "realtabformer",
+  "package": {
+    "name": "realtabformer",
+    "version": "0.2.4",
+    "filename": "realtabformer-0.2.4-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/8c/18/5a4bc71a57e4923817b9962a9ab2e6f9e82360c7771af90b11eb5a6f249a/realtabformer-0.2.4-py3-none-any.whl",
+    "bytes": 49890,
+    "sha256": "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486",
+    "archive_members": 17,
+    "record_rows": 17,
+    "record_hashed_files": 16,
+    "upload_time_utc": "2026-01-04T08:14:48.935559Z"
+  },
+  "source": {
+    "repository": "https://github.com/worldbank/REaLTabFormer",
+    "tag": "v0.2.4",
+    "commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+    "tree": "aa4431468f040fc485f82e7e15238c57eef05753",
+    "archive_url": "https://codeload.github.com/worldbank/REaLTabFormer/zip/73f239643f9ea5abc877f685ce927e986302ac2d",
+    "archive_bytes": 822039,
+    "archive_sha256": "d0d0d0e3b73f2d9b9128242c40207b87e1be6a869d885bca1bf65ef5166cb761",
+    "license": "MIT",
+    "license_copyright": "Copyright (c) 2022 Aivin V. Solatorio",
+    "license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4",
+    "pyproject_sha256": "60120439d590e50dedcd1275d853c09ca37e29ec1fef30ff1857fbe14b871cd1"
+  },
+  "installed_files": [
+    {"path": "realtabformer/VERSION", "bytes": 6, "sha256": "1725bfa6524c5265e7c171cf06568417d39b947fff49c242f03859479c82334b"},
+    {"path": "realtabformer/__init__.py", "bytes": 504, "sha256": "adfa731e08dbb9832e6fed4ac0b2a0b6894f7e713bea01e53d7cc9270771f4e5"},
+    {"path": "realtabformer/__main__.py", "bytes": 272, "sha256": "a0e0f0c7632a2faa7952d949997160ad4026e7e8dcddcb1e9a839c3ece35425c"},
+    {"path": "realtabformer/data_utils.py", "bytes": 25052, "sha256": "10170edc57696bef69229689239bbde863d3480248f476f056d39e609e81c6f0"},
+    {"path": "realtabformer/realtabformer.py", "bytes": 68361, "sha256": "f58cc803deb6987a7dd063f1fe92173f4f6515796e280e049f8927c06f849535"},
+    {"path": "realtabformer/rtf_analyze.py", "bytes": 29164, "sha256": "824e5798b6214125fb71fa2d6c0cf14f090829ba59b08c7b9767d4b67512183f"},
+    {"path": "realtabformer/rtf_datacollator.py", "bytes": 3233, "sha256": "11e3ccd2f02742597c0848407e40cd41984d96af6ed12a48bf9259d9e844e0a0"},
+    {"path": "realtabformer/rtf_exceptions.py", "bytes": 843, "sha256": "eb7e4bda97ee1eb5140603c484321c488571f20da04026df8f326f37fc65c25e"},
+    {"path": "realtabformer/rtf_sampler.py", "bytes": 41795, "sha256": "01c88d699530d228effcf596cea810e0876f12f78ca3a8808c4de9088dd273e9"},
+    {"path": "realtabformer/rtf_tokenizer.py", "bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+    {"path": "realtabformer/rtf_trainer.py", "bytes": 4348, "sha256": "0d13034e04554997bce0797a76172e3174dc23ce856e52316be80f05a9162869"},
+    {"path": "realtabformer/rtf_validators.py", "bytes": 1960, "sha256": "ff2278702207942e7d4a0efec8b0f15bd0876606fe3fed72a561c708026d903b"},
+    {"path": "realtabformer-0.2.4.dist-info/LICENSE", "bytes": 1075, "sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4"},
+    {"path": "realtabformer-0.2.4.dist-info/METADATA", "bytes": 11451, "sha256": "6b157f1e803a32b2b544bd487de2457e829bb569eeaaf547ead1cfc89492e191"},
+    {"path": "realtabformer-0.2.4.dist-info/WHEEL", "bytes": 88, "sha256": "ed9f3fdbbb9a1c8fd4640738528c783e906143d639fe6a1d65758cc6d522e0d5"},
+    {"path": "realtabformer-0.2.4.dist-info/entry_points.txt", "bytes": 52, "sha256": "b5d5cc6bcd945079cc39d5504eb450a26c8c6c065cca07672bea0505f5bb2c03"}
+  ],
+  "wheel_source_comparison": {
+    "shared_source_files": 11,
+    "exact_shared_source_files": 11,
+    "wheel_only_file": "realtabformer/rtf_tokenizer.py",
+    "wheel_only_file_bytes": 0
+  }
+}
