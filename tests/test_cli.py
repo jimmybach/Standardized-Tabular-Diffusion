@@ -296,7 +296,7 @@ def test_cli_list_models_details_exposes_validation_without_release_claims(monke
     cli.main()
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["models"]["tabdiff"]["validation_level"] == "adapter-complete"
+    assert payload["models"]["tabdiff"]["validation_level"] == "native-parity-validated"
     assert payload["models"]["tabdiff"]["benchmark_track"] == "experimental"
     assert payload["models"]["tabdiff"]["support_level"] == "unsupported"
     assert payload["models"]["tabddpm"]["evaluation_input"] == "upstream-artifacts"

@@ -17,7 +17,9 @@ The goal is to preserve authoritative implementations whenever possible, record 
 
 The standardized layer is the preferred integration boundary. The vendored source trees are not assumed to be pristine until their revisions and local diffs have been audited.
 
-Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. At this stage, adapters are conservatively recorded as experimental and unsupported unless stronger evidence is added.
+Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. At this stage, adapters remain experimental and unsupported. TabDDPM, TabDiff, and TabSyn have passed separate Linux/Python 3.11 native-parity protocols, but that evidence does not make them benchmark-eligible or release-supported.
+
+Their coexistence on one cumulative candidate is documented in the [core baseline integration validation](docs/CORE_BASELINES_INTEGRATION.md), with a corresponding [Chinese translation](docs/CORE_BASELINES_INTEGRATION.zh-CN.md) and machine-readable evidence index.
 
 Project attribution and release review records live in [CONTRIBUTORS.md](CONTRIBUTORS.md), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [SECURITY.md](SECURITY.md), [docs/DATA_GOVERNANCE.md](docs/DATA_GOVERNANCE.md), and the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md). The repository-level license and dataset redistribution decisions remain release blockers until the project owners approve them.
 
@@ -355,6 +357,8 @@ The main files to inspect afterward are:
 
 For `tabddpm`, also set `upstream_config_path` in the experiment config so the standardized adapter can call the upstream TOML-based pipeline.
 
+TabDDPM's adapter is `native-parity-validated` on Linux/Python 3.11 against the pinned author implementation. The protocol, three-seed exact comparisons, environment lock, workflow link, and permanent evidence are documented in `docs/TABDDPM_VALIDATION.md`. This validation does not yet make TabDDPM eligible for the Official Results track or release-supported.
+
 ## Tests
 
 The standardized layer now has lightweight regression coverage for:
@@ -372,7 +376,7 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 
 - `TabDiff` and `TabSyn` can share the same normalized evaluator because both repos use the same `info.json`-style tabular metadata.
 - `TabDDPM` currently has a partially different evaluation stack, so the adapter normalizes the metrics that are already available and marks unavailable TabStruct dimensions explicitly.
-- `TabSyn` required locally classified compatibility patches so the standardized runner can execute train/sample stages reliably; those patches are not yet native-parity validated.
+- `TabSyn` uses an unmodified, checksum-frozen official source scope. Device, seed, row-count, and sampling-step controls are isolated in the repository-owned invocation boundary, and three exact seed cases passed the retained native-parity protocol.
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
 - The broader baseline roadmap and literature map now live in `docs/tabular_generation_landscape.md`.

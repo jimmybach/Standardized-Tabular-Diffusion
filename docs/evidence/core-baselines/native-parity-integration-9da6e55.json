@@ -1,0 +1,110 @@
+{
+  "candidate_commit": "9da6e556a091f2501af4cd80ed938feaccb34055",
+  "claim_boundary": {
+    "benchmark_eligible": false,
+    "benchmark_track": "experimental",
+    "official_results_eligible": false,
+    "release_supported": false,
+    "support_level": "unsupported",
+    "validation_level": "native-parity-validated"
+  },
+  "core_ci": {
+    "run_id": 30873942339,
+    "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30873942339",
+    "status": "pass"
+  },
+  "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux",
+    "python": "3.11.15",
+    "scikit_learn": "1.5.2",
+    "torch": "2.3.0+cpu"
+  },
+  "models": {
+    "tabddpm": {
+      "artifact_digest": "sha256:72da27768abb9c92a1e4b04932f80e2d18691d304baf65853674d8ce00e90f5d",
+      "artifact_id": 8878855123,
+      "comparison_summary": {
+        "adapter_manifests_valid": true,
+        "config_exact": true,
+        "generated_arrays_exact_and_finite": true,
+        "loss_csv_exact": true,
+        "model_and_ema_tensor_values_exact": true,
+        "seed_pairs_passed": 3
+      },
+      "downloaded_evidence_sha256": "8a790ae0718b526cad4ab742ba1716e8a3c2edc05fab92e9349ca3b3a573073f",
+      "protocol_id": "tabddpm-native-parity-v1",
+      "run_id": 30873942377,
+      "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30873942377",
+      "seed_pairs": [
+        {
+          "sampling": 23,
+          "training": 0
+        },
+        {
+          "sampling": 47,
+          "training": 17
+        },
+        {
+          "sampling": 89,
+          "training": 101
+        }
+      ],
+      "source_files_verified": 64,
+      "status": "pass",
+      "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8"
+    },
+    "tabdiff": {
+      "artifact_digest": "sha256:dc4e3b9d5a2426a1354451d334af6fb82a65a1be8b3b9c909b619950912244c1",
+      "artifact_id": 8878859972,
+      "comparison_summary": {
+        "adapter_manifests_valid": true,
+        "checkpoint_tensor_values_exact": true,
+        "config_exact": true,
+        "generated_metrics_exact": true,
+        "generated_samples_exact_bytes": true,
+        "training_metrics_exact": true,
+        "training_samples_exact_bytes": true
+      },
+      "downloaded_evidence_sha256": "2b1ed383e7712ca9d2749e4949ca23809cb47193d4a84874520f188527e984b9",
+      "protocol_id": "tabdiff-native-parity-v1",
+      "run_id": 30873942340,
+      "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30873942340",
+      "seed_contract": {
+        "configurable_seed_claim": false,
+        "validated_official_deterministic_seed": 0
+      },
+      "source_files_verified": 27,
+      "status": "pass",
+      "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4"
+    },
+    "tabsyn": {
+      "artifact_digest": "sha256:5ee1339c00528bdc3a514d868ae1198e5e579be95766a443437ca83a3e187473",
+      "artifact_id": 8878857161,
+      "comparison_summary": {
+        "adapter_manifests_valid": true,
+        "checkpoint_keys_and_tensor_values_exact": true,
+        "latent_embeddings_exact": true,
+        "sample_csv_exact_bytes": true,
+        "seed_cases_passed": 3
+      },
+      "downloaded_evidence_sha256": "08b57c0ca92fa3a9c83dd0050139a260261605eddd78183f5806ecc5be699466",
+      "protocol_id": "tabsyn-native-parity-v1",
+      "run_id": 30873942394,
+      "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30873942394",
+      "seed_cases": [
+        0,
+        19,
+        73
+      ],
+      "source_files_verified": 20,
+      "status": "pass",
+      "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7"
+    }
+  },
+  "record_type": "core-baselines-native-parity-integration",
+  "schema_version": "1.0.0",
+  "status": "pass",
+  "validated_at_utc": "2026-08-04"
+}

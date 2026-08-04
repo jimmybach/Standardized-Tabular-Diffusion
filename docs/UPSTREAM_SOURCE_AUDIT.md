@@ -26,39 +26,34 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 
 | Component | Pinned upstream revision | Snapshot relation | Local source treatment | Current official eligibility |
 |---|---|---|---|---|
-| TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The imported core matched all 58 compared upstream blobs. | Local `zero` compatibility substitute; no generative-algorithm source change found. | Blocked pending shim removal or approval plus native-parity validation. |
-| TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | The initial non-data snapshot matched all 30 compared upstream blobs. | `eval/mle/mle.py` was changed later and is a semantic evaluator patch; the generative core remains upstream-exact within the audited scope. | Patched upstream evaluator is excluded from official metrics; central reviewed evaluation must be used. |
-| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five already carried local changes at import. | Entrypoint/device/configuration and dependency-API compatibility patches. | Blocked pending patch isolation, approval, and native-parity validation. |
+| TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The initial import had 58 exact scoped files but omitted all six official `lib/` files. The missing files have now been restored; all 64 scoped files match the integrity manifest after declared text normalization. | Adapter-only. The former local `zero` shim was removed and replaced by the seven byte-exact modules from the official `libzero==0.0.8` wheel. | Native parity validated in run `30863212268`; official-track eligibility remains a separate pending decision. |
+| TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Native parity validated in run `30866879879`; central-evaluation and other official-track gates remain pending. |
+| TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Native parity passed; Official Results remain blocked by central-evaluation, dataset, runtime, governance, and release gates. |
 
 ## Patch Classification
 
-### `tabddpm-libzero-compat-v1`
+### Resolved TabDDPM import and dependency defects
 
-- Classification: compatibility-patched.
-- Files: `TabDDPM-main/zero/__init__.py`, `hardware.py`, and `random.py`.
-- Reason: substitutes locally for the upstream `libzero` dependency.
-- Decision: unapproved and unvalidated. It cannot support a native-parity claim until behavior is compared with the upstream dependency or the shim is removed.
+- The initial repository import omitted `lib/__init__.py`, `data.py`, `deep.py`, `env.py`, `metrics.py`, and `util.py`, so the real upstream pipeline could not import `lib`.
+- Those six files are now restored from the pinned TabDDPM checkout and covered by the 64-file integrity manifest.
+- `tabddpm-libzero-compat-v1` was removed because its `improve_reproducibility` implementation used the same seed for Python, NumPy, and PyTorch, whereas official `libzero==0.0.8` deliberately uses offset seeds. It therefore was not behaviorally equivalent.
+- `TabDDPM-main/zero/` now contains the seven byte-exact Python modules from the official `libzero==0.0.8` wheel, along with its MIT license. Vendoring avoids the wheel's legacy `torch<2` dependency metadata while retaining official runtime behavior in the supported Python 3.11 / PyTorch 2.3 validation environment.
+- This source repair changes the treatment from `compatibility-patched` to `adapter-only`. The mandatory real protocol subsequently passed all exact comparisons across three seed cases in run `30863212268`; evidence is permanently retained under `docs/evidence/tabddpm/`.
 
 ### `tabdiff-mle-evaluator-v1`
 
 - Classification: semantic-patched.
 - File: `TabDiff-main/eval/mle/mle.py`.
 - Changes include estimator configuration, compute backend, objectives, seeded splitting, failure handling, and edge-case metric semantics.
-- Decision: experimental only. This file is not part of the generative algorithm, but using it would change benchmark measurements. Official results must use the central versioned evaluator after metric validation.
+- Disposition: removed. The pinned method-author file was restored exactly modulo repository line endings. This upstream evaluator remains outside the benchmark's formal leaderboard path; official results must use the separately reviewed central versioned evaluator.
 
-### `tabsyn-entrypoint-compat-v1`
+### TabSyn patch disposition
 
-- Classification: compatibility-patched.
-- Files: `tabsyn/diffusion_utils.py`, `tabsyn/main.py`, `tabsyn/sample.py`, `tabsyn/vae/main.py`, and `utils.py` under `TabSyn-main/`.
-- Purpose: module entrypoints, CPU/device selection, configurable epoch and sampling controls, and scheduler compatibility.
-- Decision: unapproved and unvalidated. The adapter explicitly restores the authoritative diffusion default of 10,001 epochs and retrains the VAE unless the caller explicitly opts into checkpoint reuse.
-
-### `tabsyn-dependency-compat-v1`
-
-- Classification: compatibility-patched.
-- Files: `TabSyn-main/src/data.py` and the local `TabSyn-main/zero/` module.
-- Purpose: current scikit-learn API compatibility and local substitution for the `zero` dependency.
-- Decision: unapproved and unvalidated pending dependency-version and native-parity tests.
+- The six modified official files were restored to commit `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`.
+- The local `TabSyn-main/zero/` substitute was removed. The frozen validation environment uses `libzero==0.0.8`, which supplies the `zero` research-utility import used by the source. The PyPI distribution named `zero` is an unrelated circuit-analysis package. Because the 2021 `libzero` wheel carries stale `torch<2` metadata, it is installed without dependencies; its actual dependencies are locked separately and parity-tested with the repository's PyTorch 2.3 stack.
+- Device selection, deterministic seeding, requested sample rows, and sampling steps are implemented in `standardized_tabular_diffusion/compat/tabsyn_launcher.py`. This is an adapter-only invocation boundary: it imports and calls the official VAE, latent diffusion, decoding, and EDM sampler implementations without changing files under `TabSyn-main/`.
+- The official source does not expose VAE or diffusion epoch counts. The public adapter therefore rejects those former local controls instead of silently relying on patched source.
+- A 20-file manifest freezes the primary TabSyn execution, shared data utilities, dependency declaration, and attribution files. Bundled baselines and upstream evaluation scripts remain outside this TabSyn-primary validation scope.
 
 ## Artifact Disposition
 
@@ -68,7 +63,7 @@ Legacy Adult data directories contained duplicated raw archives, processed table
 
 ## License Notes
 
-- The TabDDPM snapshot carries its upstream MIT license.
+- The TabDDPM snapshot carries its upstream MIT license; the vendored official `libzero==0.0.8` modules carry their separate upstream MIT license.
 - The TabDiff license file is byte-for-byte identical to the pinned upstream file. Its malformed quote characters are therefore an upstream defect, not local corruption; the original attribution is preserved.
 - The TabSyn snapshot carries Apache-2.0 license and NOTICE files. Its bundled baseline directories require their own source, license, and patch audit.
 
@@ -83,4 +78,4 @@ Before any of these adapters can enter the Official Results track:
 5. no unproven checkpoint may be treated as an official pretrained artifact; and
 6. the model evidence record must be promoted independently through `registered`, `adapter-complete`, `smoke-validated`, `native-parity-validated`, `benchmark-eligible`, and `release-supported` states.
 
-Until those gates are met, registry records remain conservative: experimental track, unsupported, and no native-parity claim.
+Until all applicable gates are met, registry records remain conservative. TabDDPM, TabDiff, and TabSyn have retained native-parity claims, but remain experimental, unsupported, and excluded from Official Results.
