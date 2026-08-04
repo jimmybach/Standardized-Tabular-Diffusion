@@ -14,8 +14,12 @@ from sklearn.preprocessing import LabelEncoder, OrdinalEncoder, StandardScaler
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import (
+    SampleFileEvaluatorMixin,
+    disable_torchvision_for_transformers,
+    temporary_sys_path,
+)
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
 
 
 @contextlib.contextmanager
@@ -33,22 +37,6 @@ def _temporary_env(updates: dict[str, str]):
                 os.environ[key] = value
 
 
-@contextlib.contextmanager
-def _disable_torchvision_for_transformers():
-    try:
-        import transformers.utils.import_utils as import_utils
-    except ModuleNotFoundError:
-        yield
-        return
-
-    previous = import_utils._torchvision_available
-    import_utils._torchvision_available = False
-    try:
-        yield
-    finally:
-        import_utils._torchvision_available = previous
-
-
 def _tabpfn_cache_env() -> dict[str, str]:
     cache_root = Path(tempfile.gettempdir()) / "standardized-tabular-diffusion" / "tabpfn"
     cache_root.mkdir(parents=True, exist_ok=True)
@@ -59,7 +47,7 @@ def _tabpfn_cache_env() -> dict[str, str]:
     }
 
 
-class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class GReaTAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "great"
     upstream_dirname = "TabSyn-main"
 
@@ -83,8 +71,8 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
 
     def _import_model_cls(self):
-        with _disable_torchvision_for_transformers():
-            with _temporary_sys_path(self.upstream_root):
+        with disable_torchvision_for_transformers():
+            with temporary_sys_path(self.upstream_root):
                 from baselines.great.models.great import GReaT  # pylint: disable=import-error
 
                 return GReaT
@@ -269,7 +257,7 @@ class GReaTAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class ARFAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "arf"
     upstream_dirname = "TabSyn-main"
     checkpoint_filename = "model.pkl"
@@ -412,7 +400,7 @@ class TabEBMPreprocessor:
         return output[self.dataset_spec.column_names]
 
 
-class TabEBMAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class TabEBMAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "tabebm"
     upstream_dirname = "TabSyn-main"
     checkpoint_filename = "model.pkl"

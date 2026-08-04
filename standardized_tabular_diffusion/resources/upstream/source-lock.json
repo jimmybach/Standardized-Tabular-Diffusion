@@ -67,6 +67,79 @@
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
     },
+    "nrgboost": {
+      "adapter_ids": [
+        "nrgboost"
+      ],
+      "authoritative_repository": "https://github.com/Ajoo/nrgboost",
+      "authority": "method-author",
+      "component_id": "nrgboost",
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/Ajoo/nrgboost/blob/v0.0.3/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "filename": "nrgboost-0.0.3-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "name": "nrgboost",
+        "pypi_url": "https://pypi.org/project/nrgboost/0.0.3/",
+        "sha256": "dfe30829ceaf2d0d0ec03eab1744838bed857d56919238e7243c9fb7f273e1fb",
+        "trusted_publishing_source_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+        "version": "0.0.3",
+        "wheel_license_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-06-29T21:57:29Z",
+        "tag": "v0.0.3",
+        "tag_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+        "tag_tree": "e3e84bacc7236a36af93c3d214de14bd308d2767"
+      },
+      "source_license_sha256": "999f9e9b53bb8aae7225dac0599ff28bbcb61f8604da1bcb201cf767543998bf",
+      "upstream_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+      "upstream_tree": "e3e84bacc7236a36af93c3d214de14bd308d2767",
+      "validation": {
+        "artifact": {
+          "digest": "sha256:3b2d192d26e40feb6b8306e18c1cd2fdf148226acc166efad4cef05a16227d13",
+          "evidence_file_sha256": "5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c",
+          "expires_at": "2026-11-02T15:05:19Z",
+          "github_artifact_id": 8897627795,
+          "name": "nrgboost-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/nrgboost/native-parity-run-30922326384.json"
+        },
+        "environment": {
+          "cffi": "1.17.1",
+          "joblib": "1.5.3",
+          "llvmlite": "0.44.0",
+          "nrgboost": "0.0.3",
+          "numba": "0.61.2",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "scipy": "1.13.1"
+        },
+        "level": "native-parity-validated",
+        "protocol_id": "nrgboost-native-parity-v1",
+        "repository_commit": "4cd32c8beedd116c6385463d41cf9cba8b1d5438",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "checkpoint_bytes_exact": true,
+          "installed_record_files_verified": 22,
+          "parity_cases_passed": 6,
+          "parity_cases_total": 6,
+          "sample_bytes_exact": true,
+          "seed_values_passed": 3,
+          "variants_passed": 2,
+          "wheel_identity_verified": true
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T15:06:20Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384/job/92035794936",
+        "workflow_run_id": 30922326384,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384"
+      }
+    },
     "smote": {
       "adapter_ids": [
         "smote"

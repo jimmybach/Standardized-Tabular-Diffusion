@@ -9,9 +9,11 @@ import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import (
+    SampleFileEvaluatorMixin,
+    disable_torchvision_for_transformers,
+)
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.final_wave_baselines import _disable_torchvision_for_transformers
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin
 
 
 class _TokenizedTextDataset:
@@ -48,7 +50,7 @@ class _TabulaImports:
     default_data_collator: Any
 
 
-class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "tabula"
     upstream_dirname = "."
 
@@ -72,7 +74,7 @@ class TabulaAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
 
     def _import_transformer_bits(self) -> _TabulaImports:
-        with _disable_torchvision_for_transformers():
+        with disable_torchvision_for_transformers():
             from transformers import (
                 AutoConfig,
                 AutoModelForCausalLM,

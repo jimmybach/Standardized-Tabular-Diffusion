@@ -2,16 +2,21 @@ from __future__ import annotations
 
 import importlib
 import pickle
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
-from standardized_tabular_diffusion.evaluation.serialization import read_json
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import (
+    SampleFileEvaluatorMixin,
+    disable_torchvision_for_transformers,
+    temporary_sys_path,
+)
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.final_wave_baselines import _disable_torchvision_for_transformers
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
 
 
 def _import_or_raise(module_name: str, install_hint: str):
@@ -21,7 +26,7 @@ def _import_or_raise(module_name: str, install_hint: str):
         raise RuntimeError(f"{module_name} is required for this adapter. Install it with `{install_hint}`.") from exc
 
 
-class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "ctab-gan-plus"
     upstream_dirname = "TabDDPM-main"
     checkpoint_filename = "ctabgan_plus.pkl"
@@ -63,7 +68,7 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
     def _build_model(self, train_df: pd.DataFrame, spec: RunSpec):
         ctabgan_root = self.repo_root / "TabDDPM-main" / "CTAB-GAN-Plus"
-        with _temporary_sys_path(ctabgan_root):
+        with temporary_sys_path(ctabgan_root):
             ctab_module = _import_or_raise("model.ctabgan", "pip install dython")
             CTABGAN = ctab_module.CTABGAN
             params = self._load_ctabgan_params(spec.dataset)
@@ -125,7 +130,7 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class REaLTabFormerAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "realtabformer"
     upstream_dirname = "TabSyn-main"
 
@@ -154,7 +159,7 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
 
     def _import_model_cls(self):
-        with _disable_torchvision_for_transformers():
+        with disable_torchvision_for_transformers():
             module = _import_or_raise("realtabformer", "pip install realtabformer")
             return module.REaLTabFormer
 
@@ -225,10 +230,12 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "nrgboost"
-    upstream_dirname = "TabSyn-main"
+    upstream_dirname = "."
     checkpoint_filename = "model.nrgboost"
+    package_name = "nrgboost"
+    package_version = "0.0.3"
 
     def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
         if spec.checkpoint_path is not None:
@@ -237,8 +244,15 @@ class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
         if dataset_spec.train_data_path is None:
-            raise FileNotFoundError("nrgboost requires dataset_spec.train_data_path")
+            raise FileNotFoundError("NRGBoost requires dataset_spec.train_data_path")
         frame = pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
+        missing_counts = frame.isna().sum()
+        if bool(missing_counts.any()):
+            observed = {str(column): int(count) for column, count in missing_counts.items() if count}
+            raise ValueError(
+                "NRGBoost does not accept missing values in this benchmark. "
+                f"Run the explicit preprocessing module first; observed: {observed}"
+            )
         for column in dataset_spec.categorical_columns + (
             dataset_spec.target_columns if dataset_spec.task_type == "classification" else []
         ):
@@ -247,30 +261,169 @@ class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return frame
 
     def _import_bits(self):
-        module = _import_or_raise("nrgboost", "pip install nrgboost")
+        try:
+            observed_version = version(self.package_name)
+        except PackageNotFoundError as exc:
+            raise ImportError(
+                "NRGBoost requires the optional official nrgboost package. "
+                "Install the project with the 'nrgboost' extra."
+            ) from exc
+        if observed_version != self.package_version:
+            raise ImportError(
+                "NRGBoost requires the exact validated official package version "
+                f"{self.package_name}=={self.package_version}; observed {observed_version}."
+            )
+        module = importlib.import_module("nrgboost")
         return module.Dataset, module.NRGBooster
 
-    def _training_params(self, spec: RunSpec) -> dict[str, Any]:
+    @staticmethod
+    def _positive_int(name: str, value: Any) -> int:
+        parsed = int(value)
+        if isinstance(value, bool) or parsed < 1:
+            raise ValueError(f"NRGBoost {name} must be a positive integer; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _nonnegative_int(name: str, value: Any) -> int:
+        parsed = int(value)
+        if isinstance(value, bool) or parsed < 0:
+            raise ValueError(f"NRGBoost {name} must be a non-negative integer; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _finite_float(name: str, value: Any) -> float:
+        parsed = float(value)
+        if not np.isfinite(parsed):
+            raise ValueError(f"NRGBoost {name} must be finite; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _boolean(name: str, value: Any) -> bool:
+        if not isinstance(value, bool):
+            raise TypeError(f"NRGBoost {name} must be a boolean; observed {value!r}.")
+        return value
+
+    def _dataset_params(self, spec: RunSpec) -> dict[str, Any]:
+        num_bins = self._positive_int("num_bins", spec.extra.get("num_bins", 255))
+        if num_bins > 255:
+            raise ValueError(
+                f"NRGBoost num_bins cannot exceed the uint8 domain limit of 255; observed {num_bins}."
+            )
+        discretization_types = spec.extra.get("discretization_types")
+        if discretization_types is not None and not isinstance(discretization_types, dict):
+            raise TypeError("NRGBoost discretization_types must be a mapping when explicitly provided.")
         return {
-            "num_trees": int(spec.extra.get("num_trees", 200)),
-            "shrinkage": float(spec.extra.get("shrinkage", 0.15)),
-            "max_leaves": int(spec.extra.get("max_leaves", 256)),
-            "max_ratio_in_leaf": float(spec.extra.get("max_ratio_in_leaf", 2)),
-            "num_model_samples": int(spec.extra.get("num_model_samples", 80000)),
-            "p_refresh": float(spec.extra.get("p_refresh", 0.1)),
-            "num_chains": int(spec.extra.get("num_chains", 16)),
-            "burn_in": int(spec.extra.get("burn_in", 100)),
+            "num_bins": num_bins,
+            "infer_fixed_point": self._boolean("infer_fixed_point", spec.extra.get("infer_fixed_point", True)),
+            "discretization_types": discretization_types,
+            "infer_ordered_categoricals": self._boolean(
+                "infer_ordered_categoricals", spec.extra.get("infer_ordered_categoricals", False)
+            ),
+            "infer_continuous_ordered_categoricals": self._boolean(
+                "infer_continuous_ordered_categoricals",
+                spec.extra.get("infer_continuous_ordered_categoricals", False)
+            ),
         }
+
+    def _training_params(self, spec: RunSpec) -> dict[str, Any]:
+        params = {
+            "num_trees": self._nonnegative_int("num_trees", spec.extra.get("num_trees", 200)),
+            "shrinkage": self._finite_float("shrinkage", spec.extra.get("shrinkage", 0.15)),
+            "line_search": self._boolean("line_search", spec.extra.get("line_search", True)),
+            "max_leaves": self._positive_int("max_leaves", spec.extra.get("max_leaves", 256)),
+            "max_ratio_in_leaf": self._finite_float(
+                "max_ratio_in_leaf", spec.extra.get("max_ratio_in_leaf", 2)
+            ),
+            "min_data_in_leaf": self._finite_float(
+                "min_data_in_leaf", spec.extra.get("min_data_in_leaf", 0)
+            ),
+            "initial_uniform_mixture": self._finite_float(
+                "initial_uniform_mixture", spec.extra.get("initial_uniform_mixture", 0.1)
+            ),
+            "categorical_split_one_vs_all": self._boolean(
+                "categorical_split_one_vs_all", spec.extra.get("categorical_split_one_vs_all", False)
+            ),
+            "feature_frac": self._finite_float("feature_frac", spec.extra.get("feature_frac", 1)),
+            "splitter": str(spec.extra.get("splitter", "best")),
+            "num_model_samples": self._positive_int(
+                "num_model_samples", spec.extra.get("num_model_samples", 80000)
+            ),
+            "p_refresh": self._finite_float("p_refresh", spec.extra.get("p_refresh", 0.1)),
+            "num_chains": self._positive_int("num_chains", spec.extra.get("num_chains", 16)),
+            "burn_in": self._nonnegative_int("burn_in", spec.extra.get("burn_in", 100)),
+            "temperature": self._finite_float("temperature", spec.extra.get("training_temperature", 1.0)),
+            "initial_samples": str(spec.extra.get("initial_samples", "data")),
+            "min_gain": self._finite_float("min_gain", spec.extra.get("min_gain", 0.0)),
+            "jit_all": self._boolean("jit_all", spec.extra.get("jit_all", False)),
+            "num_threads": self._nonnegative_int("num_threads", spec.extra.get("num_threads", 0)),
+        }
+        if params["shrinkage"] <= 0 or params["max_ratio_in_leaf"] <= 0 or params["temperature"] <= 0:
+            raise ValueError("NRGBoost shrinkage, max_ratio_in_leaf, and training_temperature must be positive.")
+        if params["min_data_in_leaf"] < 0:
+            raise ValueError("NRGBoost min_data_in_leaf must be non-negative.")
+        if not 0 <= params["initial_uniform_mixture"] <= 1:
+            raise ValueError("NRGBoost initial_uniform_mixture must lie in [0, 1].")
+        if not 0 < params["feature_frac"] <= 1:
+            raise ValueError("NRGBoost feature_frac must lie in (0, 1].")
+        if not 0 <= params["p_refresh"] <= 1:
+            raise ValueError("NRGBoost p_refresh must lie in [0, 1].")
+        if params["splitter"] not in {"best", "depth", "random"}:
+            raise ValueError("NRGBoost splitter must be one of: best, depth, random.")
+        if params["initial_samples"] not in {"data", "uniform", "initial"}:
+            raise ValueError("NRGBoost initial_samples must be one of: data, uniform, initial.")
+        if params["num_model_samples"] < params["num_chains"]:
+            raise ValueError("NRGBoost num_model_samples must be at least num_chains.")
+        return params
+
+    def _sampling_params(self, spec: RunSpec) -> dict[str, Any]:
+        num_rounds_value = spec.extra.get("num_rounds")
+        num_rounds = None if num_rounds_value is None else self._positive_int("num_rounds", num_rounds_value)
+        params = {
+            "num_steps": self._positive_int("num_steps", spec.extra.get("num_steps", 100)),
+            "num_rounds": num_rounds,
+            "temperature": self._finite_float("temperature", spec.extra.get("temperature", 1.0)),
+            "num_threads": self._nonnegative_int("num_threads", spec.extra.get("num_threads", 0)),
+            "output_full_chain": False,
+            "seed": spec.seed,
+        }
+        if params["temperature"] <= 0:
+            raise ValueError("NRGBoost sampling temperature must be positive.")
+        return params
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
         Dataset, NRGBooster = self._import_bits()
-        train_ds = Dataset(train_df)
-        model = NRGBooster.fit(train_ds, self._training_params(spec), seed=spec.seed)
+        dataset_params = self._dataset_params(spec)
+        training_params = self._training_params(spec)
+        train_ds = Dataset(train_df, **dataset_params)
+        model = NRGBooster.fit(train_ds, dict(training_params), seed=spec.seed)
         checkpoint_path = self._resolve_checkpoint_path(spec)
         model.save(str(checkpoint_path))
+        if checkpoint_path.is_symlink() or not checkpoint_path.is_file():
+            raise RuntimeError(f"NRGBoost did not create the expected checkpoint file: {checkpoint_path}")
+        atomic_write_json(
+            spec.output_dir / "nrgboost_metadata.json",
+            {
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "seed": spec.seed,
+                "source_rows": len(train_df),
+                "columns": dataset_spec.column_names,
+                "categorical_columns": [
+                    *dataset_spec.categorical_columns,
+                    *(
+                        dataset_spec.target_columns
+                        if dataset_spec.task_type == "classification"
+                        else []
+                    ),
+                ],
+                "dataset_params": dataset_params,
+                "training_params": training_params,
+                "checkpoint_path": str(checkpoint_path),
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -291,15 +444,36 @@ class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         trusted_checkpoint = self._validate_trusted_executable_artifact(
             spec,
             checkpoint_path,
-            format_name="NRGBoost model",
-            allow_directory=True,
+            format_name="NRGBoost joblib model",
         )
         model = NRGBooster.load(str(trusted_checkpoint))
-        num_samples = spec.num_samples or len(train_df)
-        sample_df = model.sample(num_samples, num_steps=int(spec.extra.get("num_steps", 100)))
+        num_samples = len(train_df) if spec.num_samples is None else spec.num_samples
+        if num_samples < 1:
+            raise ValueError(f"NRGBoost num_samples must be positive; observed {num_samples}.")
+        sampling_params = self._sampling_params(spec)
+        sample_df = model.sample(num_samples, **sampling_params)
+        if not isinstance(sample_df, pd.DataFrame):
+            sample_df = pd.DataFrame(sample_df, columns=dataset_spec.column_names)
+        missing_columns = [column for column in dataset_spec.column_names if column not in sample_df.columns]
+        if missing_columns:
+            raise ValueError(f"NRGBoost sample output is missing canonical columns: {missing_columns}")
         sample_df = sample_df[dataset_spec.column_names].copy()
+        if len(sample_df) != num_samples:
+            raise ValueError(
+                f"NRGBoost returned {len(sample_df)} rows for a request of {num_samples}."
+            )
+        if bool(sample_df.isna().any().any()):
+            raise ValueError("NRGBoost produced missing values; refusing to write an invalid benchmark sample.")
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        metadata_path = spec.output_dir / "nrgboost_metadata.json"
+        metadata = read_json(metadata_path) if metadata_path.is_file() else {}
+        metadata["sampling"] = {
+            "requested_rows": num_samples,
+            **sampling_params,
+        }
+        metadata["sample_path"] = str(sample_path)
+        atomic_write_json(metadata_path, metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

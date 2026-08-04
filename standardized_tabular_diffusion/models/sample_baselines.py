@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import contextlib
 import json
-import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
@@ -10,52 +8,12 @@ from typing import Any
 import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
-from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabdiff_or_tabsyn_summary
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 
 
-@contextlib.contextmanager
-def _temporary_sys_path(path: Path):
-    inserted = False
-    path_str = str(path)
-    if path_str not in sys.path:
-        sys.path.insert(0, path_str)
-        inserted = True
-    try:
-        yield
-    finally:
-        if inserted:
-            with contextlib.suppress(ValueError):
-                sys.path.remove(path_str)
-
-
-class _SampleFileEvaluatorMixin:
-    def _evaluate_from_sample_file(self, spec: RunSpec) -> ArtifactBundle:
-        self._ensure_output_dir(spec)
-        sample_path = spec.extra.get("sample_path")
-        if sample_path is None:
-            raise ValueError(f"{self.model_name} evaluation requires spec.extra['sample_path'].")
-        summary_path = spec.output_dir / "standardized_summary.json"
-        normalize_tabdiff_or_tabsyn_summary(
-            repo_root=self.repo_root,
-            model_name=self.model_name,
-            dataset=spec.dataset,
-            sample_path=Path(sample_path),
-            output_path=summary_path,
-        )
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            generated_sample_path=Path(sample_path),
-            standardized_summary_path=summary_path,
-        )
-        return self._write_bundle(bundle)
-
-
-class _OfficialCTGANPackageAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class _OfficialCTGANPackageAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     checkpoint_filename = "model.pkl"
     _OFFICIAL_PACKAGE_VERSION = "0.12.1"
 
@@ -262,7 +220,7 @@ class TVAEAdapter(_OfficialCTGANPackageAdapter):
     upstream_dirname = "."
 
 
-class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class SMOTEAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "smote"
     upstream_dirname = "."
     package_name = "imbalanced-learn"
