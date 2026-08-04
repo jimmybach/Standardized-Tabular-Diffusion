@@ -1,6 +1,6 @@
 # CTGAN 验证协议
 
-状态：首次强制性 Linux/Python 3.11 运行尚未完成；适配器仍为 `adapter-complete`
+状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
 
 协议 ID：`ctgan-native-parity-v1`
 
@@ -79,6 +79,12 @@ python -m pip check
 
 本协议不使用数值容差；确定性一致性必须完全相等。
 
+## 留存结果
+
+GitHub Actions 运行 [`30910275922`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922) 在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过了全部三个随机种子用例。该运行验证了已安装包中 20 个带哈希的文件记录，并且每个随机种子的原生路径与适配器路径样本 CSV 都逐字节一致。经审阅的 JSON 已永久留存在 `docs/evidence/ctgan/native-parity-run-30910275922.json`，其 SHA-256 为 `748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570`。
+
+对应的 GitHub artifact ID 为 `8892774473`，artifact 摘要为 `sha256:96ba5b9dde6eed95fa1972990c6a4231e43f204bdcb99a4a0d7837099ff3b71a`。临时 artifact 到期后，仓库内的永久副本仍是权威证据。
+
 ## 执行与状态提升规则
 
 权威命令为：
@@ -91,4 +97,4 @@ python -m standardized_tabular_diffusion.validation.ctgan \
   --wheel-path /tmp/ctgan-wheel/ctgan-0.12.1-py3-none-any.whl
 ```
 
-`.github/workflows/ctgan-validation.yml` 执行该命令并保留证据 90 天。包、依赖、适配器或协议一旦变化，都必须重新运行。在通过证据经过审阅并永久固化之前，CTGAN 仍为 `adapter-complete`、`experimental`、`unsupported`，并排除在 Official Results 之外。
+`.github/workflows/ctgan-validation.yml` 执行该命令并将工作流 artifact 保留 90 天。包、依赖、适配器或协议一旦变化，都必须重新运行。经审阅并永久固化的通过证据使 CTGAN 提升为 `native-parity-validated`；在完成上述所有独立门槛之前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。

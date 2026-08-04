@@ -1,0 +1,261 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-0/adapter/model.pkl",
+        "checkpoint_sha256": "3bb683ad0ad0a0170d1911eaedbe0bc3e0aa0a85596b62819761d154c3295de7",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-0/adapter/samples.csv",
+        "sample_sha256": "4a0bf636bf88166c39075b4384521bd72b87c233d4b0df1634606a099c9439f3",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "data_sampler": {
+            "arrays_exact": true,
+            "row_ids_exact": true,
+            "scalars_exact": true
+          },
+          "generator": {
+            "finite": true,
+            "keys_exact": true,
+            "tensor_count": 9,
+            "tensor_values_exact": true
+          },
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            10
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-0/native/model.pkl",
+        "checkpoint_sha256": "36133c356b29a5d3e84bf1c10f7768fe2270557f0c77d790a7093bdbdffb6026",
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-0/native/samples.csv",
+        "sample_sha256": "4a0bf636bf88166c39075b4384521bd72b87c233d4b0df1634606a099c9439f3"
+      },
+      "seed": 0,
+      "status": "pass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-19/adapter/model.pkl",
+        "checkpoint_sha256": "16e274897b8ab08b81751b9e4d810d50555c1c791f29ffb328da631da7b467f4",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-19/adapter/samples.csv",
+        "sample_sha256": "54e63e37904375d60fd6a2bba6ebb8ae48a412b09dde5dca3cc01af78ecba758",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "data_sampler": {
+            "arrays_exact": true,
+            "row_ids_exact": true,
+            "scalars_exact": true
+          },
+          "generator": {
+            "finite": true,
+            "keys_exact": true,
+            "tensor_count": 9,
+            "tensor_values_exact": true
+          },
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            10
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-19/native/model.pkl",
+        "checkpoint_sha256": "9acb466b28afafb9f5bfb97a84454c6622ef6dba3b05c4056b527e219340626a",
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-19/native/samples.csv",
+        "sample_sha256": "54e63e37904375d60fd6a2bba6ebb8ae48a412b09dde5dca3cc01af78ecba758"
+      },
+      "seed": 19,
+      "status": "pass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-73/adapter/model.pkl",
+        "checkpoint_sha256": "fa1ea13cf2b3a73fa81e1f9baf0c8227a57bef212a6fde5be4797536e3103f23",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-73/adapter/samples.csv",
+        "sample_sha256": "db3c8ed760263e72c8323a2ddccf82d33e28cf3e3ade2857a3c926628d072aed",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "data_sampler": {
+            "arrays_exact": true,
+            "row_ids_exact": true,
+            "scalars_exact": true
+          },
+          "generator": {
+            "finite": true,
+            "keys_exact": true,
+            "tensor_count": 9,
+            "tensor_values_exact": true
+          },
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            10
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/ctgan-validation/seed-73/native/model.pkl",
+        "checkpoint_sha256": "a8bb864fecd2112afe4e19b60aa17d8bdf59d25f4b2e24cb240bccc6e4d36fb2",
+        "sample_path": "/home/runner/work/_temp/ctgan-validation/seed-73/native/samples.csv",
+        "sample_sha256": "db3c8ed760263e72c8323a2ddccf82d33e28cf3e3ade2857a3c926628d072aed"
+      },
+      "seed": 73,
+      "status": "pass"
+    }
+  ],
+  "environment": {
+    "Faker": "37.12.0",
+    "ctgan": "0.12.1",
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "rdt": "1.20.0",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "six": "1.17.0",
+    "threadpoolctl": "3.6.0",
+    "torch": "2.3.0+cpu",
+    "tqdm": "4.66.5",
+    "tzdata": "2026.3"
+  },
+  "environment_lock": {
+    "path": "requirements-ctgan-validation.txt",
+    "sha256": "2697509472a3a9acfdafcc8b781e2906b82c216ffd64d5a214510ac43b9cc9e9",
+    "torch_install": "torch==2.3.0 from https://download.pytorch.org/whl/cpu"
+  },
+  "fixture": {
+    "categorical_columns": [
+      "segment"
+    ],
+    "columns": [
+      "continuous",
+      "count",
+      "segment",
+      "label"
+    ],
+    "kind": "deterministic-mixed-type-binary-classification",
+    "missing_values": 0,
+    "numerical_columns": [
+      "continuous",
+      "count"
+    ],
+    "rows": 40,
+    "target_columns": [
+      "label"
+    ],
+    "train_csv_sha256": "25979f069e1fbb45ae02e58a571d61570a08fe99fad704d2db56757f412cc92c"
+  },
+  "model_id": "ctgan",
+  "protocol_id": "ctgan-native-parity-v1",
+  "repository_commit": "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e",
+  "runtime_config": {
+    "batch_size": 20,
+    "discriminator_dim": [
+      16
+    ],
+    "discriminator_steps": 1,
+    "embedding_dim": 16,
+    "enable_gpu": false,
+    "epochs": 1,
+    "generator_dim": [
+      16
+    ],
+    "log_frequency": true,
+    "pac": 10,
+    "sample_rows": 12,
+    "verbose": false
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "method-author",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license_expression": "BUSL-1.1",
+      "module_path": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/ctgan/__init__.py",
+      "record_files_verified": 20,
+      "version": "0.12.1"
+    },
+    "repository": "https://github.com/sdv-dev/CTGAN",
+    "tag": "v0.12.1",
+    "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+    "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+    "wheel": {
+      "archive_members": 18,
+      "bytes": 25490,
+      "filename": "ctgan-0.12.1-py3-none-any.whl",
+      "license_expression": "BUSL-1.1",
+      "sha256": "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18"
+    }
+  },
+  "status": "pass"
+}
