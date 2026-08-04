@@ -67,6 +67,43 @@
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
     },
+    "nrgboost": {
+      "adapter_ids": [
+        "nrgboost"
+      ],
+      "authoritative_repository": "https://github.com/Ajoo/nrgboost",
+      "authority": "method-author",
+      "component_id": "nrgboost",
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/Ajoo/nrgboost/blob/v0.0.3/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "filename": "nrgboost-0.0.3-cp311-cp311-manylinux_2_28_x86_64.whl",
+        "name": "nrgboost",
+        "pypi_url": "https://pypi.org/project/nrgboost/0.0.3/",
+        "sha256": "dfe30829ceaf2d0d0ec03eab1744838bed857d56919238e7243c9fb7f273e1fb",
+        "trusted_publishing_source_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+        "version": "0.0.3",
+        "wheel_license_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-06-29T21:57:29Z",
+        "tag": "v0.0.3",
+        "tag_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+        "tag_tree": "e3e84bacc7236a36af93c3d214de14bd308d2767"
+      },
+      "source_license_sha256": "999f9e9b53bb8aae7225dac0599ff28bbcb61f8604da1bcb201cf767543998bf",
+      "upstream_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+      "upstream_tree": "e3e84bacc7236a36af93c3d214de14bd308d2767",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "nrgboost-native-parity-v1",
+        "status": "pending-authoritative-run"
+      }
+    },
     "smote": {
       "adapter_ids": [
         "smote"

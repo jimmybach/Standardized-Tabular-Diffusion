@@ -476,10 +476,10 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="medium",
         repository_url="https://github.com/Ajoo/nrgboost",
         notes=[
-            "Official code and pip package are available.",
-            "Requires Python 3.10+ and currently supports Linux/macOS, with source builds needing OpenMP when wheels are unavailable.",
-            "The standardized adapter expects the optional `nrgboost` package to be installed locally.",
-            "Promising integration target if we want broader methodological coverage beyond neural generators.",
+            "The method-author v0.0.3 commit and official CPython 3.11 Linux wheel are checksum-locked; no upstream source is vendored or patched.",
+            "The adapter requires the exact optional nrgboost 0.0.3 package, forwards train and sample seeds, and rejects missing values until explicit preprocessing has run.",
+            "Linux/Python 3.11 is authoritative because the official package does not support Windows and source builds require a C compiler plus OpenMP.",
+            "The six-case classification/regression native-parity workflow is implemented, but status remains adapter-complete until successful evidence is retained.",
         ],
     ),
     "ctab-gan-plus": ModelInventoryEntry(
