@@ -1,6 +1,6 @@
 # TVAE 验证协议
 
-状态：首次强制性 Linux/Python 3.11 运行尚未完成；适配器仍为 `adapter-complete`
+状态：已通过；适配器为 `native-parity-validated`
 
 协议 ID：`tvae-native-parity-v1`
 
@@ -95,4 +95,10 @@ python -m standardized_tabular_diffusion.validation.tvae \
   --wheel-path /tmp/tvae-wheel/ctgan-0.12.1-py3-none-any.whl
 ```
 
-`.github/workflows/tvae-validation.yml` 执行该命令并保留证据 90 天。包、依赖、适配器或协议一旦变化，都必须重新运行。在通过证据经过审阅并永久固化之前，TVAE 仍为 `adapter-complete`、`experimental`、`unsupported`，并排除在 Official Results 之外。
+`.github/workflows/tvae-validation.yml` 执行该命令并保留证据 90 天。包、依赖、适配器或协议一旦变化，都必须重新运行。
+
+## 已保留的验证结果
+
+[GitHub Actions 运行 `30913867621`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621) 已在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。随机种子 `0`、`19` 和 `73` 的所有强制比较均通过：官方 wheel 与安装文件身份、构造参数与设备、全部五个保留的 decoder 张量（包括有限的 sigma）、转换后的夹具数据、记录的损失、NumPy 与 PyTorch 随机状态、清单完整性、生成的 DataFrame 以及 CSV 字节。
+
+原始工作流产物经审阅后未作修改，永久保存在 `docs/evidence/tvae/native-parity-run-30913867621.json`，其 SHA-256 为 `ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7`。因此 TVAE 已提升为 `native-parity-validated`；但在许可证、统一评测、数据集准入和发布门槛分别完成前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。

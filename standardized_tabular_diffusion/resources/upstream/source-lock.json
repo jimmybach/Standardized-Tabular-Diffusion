@@ -91,7 +91,7 @@
       "license": "BUSL-1.1",
       "license_url": "https://github.com/sdv-dev/CTGAN/blob/v0.12.1/LICENSE",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-native-parity-license-central-evaluation-dataset-admission-and-release-gates",
+      "official_eligibility": "blocked-pending-license-central-evaluation-dataset-admission-and-release-gates",
       "package_lock": {
         "filename": "ctgan-0.12.1-py3-none-any.whl",
         "name": "ctgan",
@@ -108,9 +108,44 @@
         "tag_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
       },
       "validation": {
-        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "artifact": {
+          "digest": "sha256:daf6dd3e7502e819bce916dfe8474ea3ea8355158450345fe27b6a41379291b7",
+          "evidence_file_sha256": "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7",
+          "expires_at": "2026-11-02T13:27:00Z",
+          "github_artifact_id": 8894224963,
+          "name": "tvae-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tvae/native-parity-run-30913867621.json"
+        },
+        "environment": {
+          "ctgan": "0.12.1",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "rdt": "1.20.0",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
         "protocol_id": "tvae-native-parity-v1",
-        "status": "pending-first-mandatory-run"
+        "repository_commit": "64f3c23c617f2fc4cbebfba9d36845a812892355",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "installed_record_files_verified": 20,
+          "loss_values_exact": true,
+          "model_state_exact": true,
+          "random_state_exact": true,
+          "sample_bytes_exact": true,
+          "seed_cases_passed": 3,
+          "seed_cases_total": 3,
+          "transformer_exact": true,
+          "wheel_identity_verified": true
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T13:28:12Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621/job/92006958402",
+        "workflow_run_id": 30913867621,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
