@@ -1,0 +1,256 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-0/adapter/model.pkl",
+        "checkpoint_sha256": "bdd2484ce778571b69ff47ea7026f82f787f1c6287fdb9079c6db8b5097c909c",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-0/adapter/samples.csv",
+        "sample_sha256": "3a4fd505a04482c2eaf04a6114d5b99531e9a0a25f47996c73318055adc7a3f1",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "decoder": {
+            "finite": true,
+            "keys_exact": true,
+            "sigma_finite": true,
+            "tensor_count": 5,
+            "tensor_values_exact": true
+          },
+          "device_exact": true,
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            11
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-0/native/model.pkl",
+        "checkpoint_sha256": "df29de22cfdd27025cdfca18990a84cae3795bb2213660f666d5603a166fc08f",
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-0/native/samples.csv",
+        "sample_sha256": "3a4fd505a04482c2eaf04a6114d5b99531e9a0a25f47996c73318055adc7a3f1"
+      },
+      "seed": 0,
+      "status": "pass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-19/adapter/model.pkl",
+        "checkpoint_sha256": "3f56f2da6ee4d3da7c5c15f6767b4d34ff6e491f92e6490964a5ad2f21f41437",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-19/adapter/samples.csv",
+        "sample_sha256": "e9bb7caa474ba7de5b64d3d75a1bd1683074a1527e3bd89f9d7dbe51ffaba5c0",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "decoder": {
+            "finite": true,
+            "keys_exact": true,
+            "sigma_finite": true,
+            "tensor_count": 5,
+            "tensor_values_exact": true
+          },
+          "device_exact": true,
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            11
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-19/native/model.pkl",
+        "checkpoint_sha256": "bdee07cf830a9aebadb911c98b761b4e841cd04473d34e56d64fffadcb1481eb",
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-19/native/samples.csv",
+        "sample_sha256": "e9bb7caa474ba7de5b64d3d75a1bd1683074a1527e3bd89f9d7dbe51ffaba5c0"
+      },
+      "seed": 19,
+      "status": "pass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-73/adapter/model.pkl",
+        "checkpoint_sha256": "721fdcea02ed54bbe3ae99cd925e1fc02e69f3ef5958f06c018986a3e6f99ad5",
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-73/adapter/samples.csv",
+        "sample_sha256": "bf45b4c3420d3749f92664342c0c781e8c9fd017c65ef2e1bfcd81c8b2fc14e8",
+        "upstream_root": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion"
+      },
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "model": {
+          "constructor_exact": true,
+          "decoder": {
+            "finite": true,
+            "keys_exact": true,
+            "sigma_finite": true,
+            "tensor_count": 5,
+            "tensor_values_exact": true
+          },
+          "device_exact": true,
+          "loss_values_exact": true,
+          "random_state": {
+            "numpy_exact": true,
+            "torch_exact": true
+          },
+          "transformed_shape": [
+            40,
+            11
+          ],
+          "transformer_exact": true
+        },
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 12
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/tvae-validation/seed-73/native/model.pkl",
+        "checkpoint_sha256": "0398a2543105f35d2d6dea574ceba8f28b577ddc7f040de5efb8caf7cb686580",
+        "sample_path": "/home/runner/work/_temp/tvae-validation/seed-73/native/samples.csv",
+        "sample_sha256": "bf45b4c3420d3749f92664342c0c781e8c9fd017c65ef2e1bfcd81c8b2fc14e8"
+      },
+      "seed": 73,
+      "status": "pass"
+    }
+  ],
+  "environment": {
+    "Faker": "37.12.0",
+    "ctgan": "0.12.1",
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "rdt": "1.20.0",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "six": "1.17.0",
+    "threadpoolctl": "3.6.0",
+    "torch": "2.3.0+cpu",
+    "tqdm": "4.66.5",
+    "tzdata": "2026.3"
+  },
+  "environment_lock": {
+    "path": "requirements-tvae-validation.txt",
+    "sha256": "cd2cca53950203df9d772cffd8ca57e91fc9874d9663f6af4e08948b48733f7b",
+    "torch_install": "torch==2.3.0 from https://download.pytorch.org/whl/cpu"
+  },
+  "fixture": {
+    "categorical_columns": [
+      "segment"
+    ],
+    "columns": [
+      "continuous",
+      "count",
+      "segment",
+      "label"
+    ],
+    "kind": "deterministic-mixed-type-binary-classification",
+    "missing_values": 0,
+    "numerical_columns": [
+      "continuous",
+      "count"
+    ],
+    "rows": 40,
+    "target_columns": [
+      "label"
+    ],
+    "train_csv_sha256": "e2e73b77e69441a48921173a6b5cddb650b70aff1480fd71f5edca3f07390bf5"
+  },
+  "model_id": "tvae",
+  "protocol_id": "tvae-native-parity-v1",
+  "repository_commit": "64f3c23c617f2fc4cbebfba9d36845a812892355",
+  "runtime_config": {
+    "batch_size": 20,
+    "compress_dims": [
+      16
+    ],
+    "decompress_dims": [
+      16
+    ],
+    "embedding_dim": 16,
+    "enable_gpu": false,
+    "epochs": 1,
+    "l2scale": 1e-05,
+    "loss_factor": 2.0,
+    "sample_rows": 12,
+    "verbose": false
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "method-author",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license_expression": "BUSL-1.1",
+      "module_path": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/ctgan/__init__.py",
+      "record_files_verified": 20,
+      "version": "0.12.1"
+    },
+    "repository": "https://github.com/sdv-dev/CTGAN",
+    "synthesizer": {
+      "class": "TVAE",
+      "legacy_snapshot_absent": true,
+      "module": "ctgan.synthesizers.tvae"
+    },
+    "tag": "v0.12.1",
+    "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+    "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+    "wheel": {
+      "archive_members": 18,
+      "bytes": 25490,
+      "filename": "ctgan-0.12.1-py3-none-any.whl",
+      "license_expression": "BUSL-1.1",
+      "sha256": "38a3b83432643caa8381c74c49e6a079166efa40f8f6c3b7204db44d6d2c8f18"
+    }
+  },
+  "status": "pass"
+}

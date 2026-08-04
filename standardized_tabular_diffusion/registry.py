@@ -106,8 +106,9 @@ def _spec(
 
 
 # This registry is deliberately conservative: mocked contract tests establish
-# adapter completeness only. No adapter is promoted to smoke/parity validation,
-# official-track eligibility, or release support without an evidence record.
+# adapter completeness only. An adapter is promoted beyond that level only with
+# a retained evidence record; benchmark eligibility and release support remain
+# independent gates.
 _ADAPTER_SPECS: dict[str, AdapterSpec] = {
     "arf": _spec(
         "standardized_tabular_diffusion.models.final_wave_baselines",
@@ -319,7 +320,19 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "TVAEAdapter",
         authority="method-author",
         distribution="package",
-        install_extra="evaluation",
+        install_extra="tvae",
+        upstream_repository="https://github.com/sdv-dev/CTGAN",
+        upstream_revision="826da23f8f9385ad15fd206ecad691e04cb0ccdc",
+        revision_status="pinned-official-package-native-parity-validated",
+        license_status="BUSL-1.1 package dependency; official-track and release legal review required",
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/TVAE_VALIDATION.md",
+            "docs/evidence/tvae/native-parity-run-30913867621.json",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/tvae-validation.yml",
+        ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
 }
 

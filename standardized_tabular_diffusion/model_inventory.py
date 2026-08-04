@@ -378,13 +378,15 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="vae",
         paradigm="variational autoencoder",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/sdv-dev/CTGAN",
         notes=[
-            "Official maintained implementation ships in the CTGAN project and is also exposed through SDV.",
-            "Very reasonable next integration target because it already has a pip-installable API and consistent preprocessing expectations.",
+            "The adapter now targets TVAE from the checksum-pinned official ctgan 0.12.1 wheel.",
+            "The locally modified 0.5.2.dev0 snapshot and its obsolete wrappers were removed rather than presented as the official implementation.",
+            "Exact native parity passed for three fixed seeds on Linux/Python 3.11 in GitHub Actions run 30913867621.",
+            "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),
     "goggle": ModelInventoryEntry(

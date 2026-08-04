@@ -18,7 +18,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn"}
+    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn", "tvae"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
@@ -54,8 +54,9 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+        "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
-    for model_id in ("ctgan", "tabddpm", "tabdiff", "tabsyn"):
+    for model_id in ("ctgan", "tabddpm", "tabdiff", "tabsyn", "tvae"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
@@ -109,6 +110,25 @@ def test_ctgan_package_lock_is_exact_and_conservatively_gated() -> None:
         "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
     )
     assert str(ctgan["official_eligibility"]).startswith("blocked-pending-license")
+
+
+def test_tvae_package_lock_and_retained_validation_are_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    tvae = payload["components"]["tvae"]
+    assert isinstance(tvae, dict)
+
+    assert tvae["distribution_form"] == "package"
+    assert tvae["license"] == "BUSL-1.1"
+    assert tvae["package_lock"] == payload["components"]["ctgan"]["package_lock"]
+    validation = tvae["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30913867621
+    assert validation["result_summary"]["seed_cases_passed"] == 3
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7"
+    )
+    assert str(tvae["official_eligibility"]).startswith("blocked-pending-license")
 
 
 def test_removed_unverified_checkpoints_are_recorded_and_absent() -> None:
