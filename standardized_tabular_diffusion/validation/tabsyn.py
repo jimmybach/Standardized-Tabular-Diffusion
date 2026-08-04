@@ -320,6 +320,30 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         raise FileExistsError(f"Validation output directory must be empty: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
     source = verify_sources(repo_root)
+    actual_versions = {
+        "torch": _version("torch"),
+        "numpy": _version("numpy"),
+        "pandas": _version("pandas"),
+        "scikit_learn": _version("scikit-learn"),
+        "scipy": _version("scipy"),
+        "category_encoders": _version("category-encoders"),
+        "libzero": _version("libzero"),
+    }
+    expected_versions = {
+        "torch": "2.3.0",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "scikit_learn": "1.5.2",
+        "scipy": "1.13.1",
+        "category_encoders": "2.6.4",
+        "libzero": "0.0.8",
+    }
+    normalized_actual_versions = {**actual_versions, "torch": actual_versions["torch"].split("+")[0]}
+    if normalized_actual_versions != expected_versions:
+        raise RuntimeError(
+            "TabSyn validation environment does not match its frozen lock: "
+            f"expected={expected_versions}, actual={actual_versions}"
+        )
 
     native_root = output_dir / "native" / "TabSyn-main"
     adapter_root = output_dir / "adapter" / "TabSyn-main"
@@ -377,17 +401,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             "path": "requirements-tabsyn-validation.txt",
             "sha256": _sha256_file(repo_root / "requirements-tabsyn-validation.txt"),
         },
-        "environment": {
-            "platform": platform.platform(),
-            "python": platform.python_version(),
-            "torch": _version("torch"),
-            "numpy": _version("numpy"),
-            "pandas": _version("pandas"),
-            "scikit_learn": _version("scikit-learn"),
-            "scipy": _version("scipy"),
-            "category_encoders": _version("category-encoders"),
-            "libzero": _version("libzero"),
-        },
+        "environment": {"platform": platform.platform(), "python": platform.python_version(), **actual_versions},
         "fixture": fixture,
         "runtime_config": native_runtime,
         "seed": SEED,
