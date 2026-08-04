@@ -399,6 +399,112 @@
       "upstream_commit": "8504e95f0160f61d1b617ca66f779646d2ee609e",
       "upstream_tree": "af452de62e0f5c3d7e65fdc44a32dc97078152f2"
     },
+    "stasy": {
+      "adapter_ids": [
+        "stasy"
+      ],
+      "archive_lock": {
+        "bytes": 1579204,
+        "format": "zip",
+        "sha256": "ed009b99c6b4d48ed413ec6604fad338e8e20ccb946f69cdb9244a34678a8d61",
+        "url": "https://codeload.github.com/amazon-science/tabsyn/zip/cb5ac0f74ec36ee88e7a974a393dfbef50d42da7"
+      },
+      "authoritative_repository": "https://github.com/amazon-science/tabsyn",
+      "authority": "benchmark-vendored",
+      "component_id": "stasy",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "stasy-sklearn-onehot-keyword-v1",
+          "reason": "The pinned snapshot uses sparse=False, while scikit-learn 1.5.2 names the same dense-output control sparse_output.",
+          "semantic_effect": "The bridge forwards the unchanged false value to sparse_output; it changes no encoder, output representation, source file, or preprocessing operation."
+        }
+      ],
+      "distribution_form": "source",
+      "dependency_resolution": {
+        "declared_name": "zero",
+        "resolved_distribution": "libzero==0.0.8",
+        "wheel_filename": "libzero-0.0.8-py3-none-any.whl",
+        "wheel_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
+        "reason": "The shared TabSyn runtime imports the zero research-utility API from libzero. The unrelated zero distribution is excluded; the official libzero wheel is installed without its stale torch<2 dependency metadata, with actual dependencies locked separately."
+      },
+      "license": "Apache-2.0",
+      "license_path": "TabSyn-main/LICENSE",
+      "license_notice_path": "TabSyn-main/NOTICE",
+      "local_path": "TabSyn-main/baselines/stasy",
+      "method_author_source": {
+        "commit": "3dcc660db26e31cc1bbb00cfc14bf7687fde448d",
+        "license_file_present": false,
+        "repository": "https://github.com/JayoungKim408/STaSy",
+        "shared_paths": 14,
+        "exact_shared_paths_after_lf_normalization": 2,
+        "modified_shared_paths_after_lf_normalization": 12,
+        "tree": "6a1307d4a0bf0819e70b15a13fb3a0a65fbbee57"
+      },
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; central-evaluation-dataset-runtime-and-release-gates-pending",
+      "patch_sets": [],
+      "reproduction_target": "tabsyn-benchmark-snapshot",
+      "selected_runtime_files": 30,
+      "snapshot_comparison": {
+        "excluded_scopes": [
+          "tracked Python bytecode",
+          "data/",
+          "synthetic/",
+          "checkpoints/",
+          "other TabSyn baselines and primary TabSyn model"
+        ],
+        "local_stasy_source_files": 17,
+        "exact_after_declared_text_normalization": 17,
+        "relation": "Every selected local STaSy Python source file matches the pinned TabSyn benchmark snapshot. Shared preprocessing, dispatcher, license, and notice files bring the locked execution scope to 30 files."
+      },
+      "source_hash_normalization": "lf-one-final-newline",
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/stasy-source-manifest.json",
+      "source_treatment": "exact-tabsyn-benchmark-snapshot-with-adapter-only-runtime-boundary",
+      "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+      "upstream_model_tree": "4f56a7223d71d6b75c1698824c5d0245bf716bc6",
+      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:0f758862ea98570d97857914d0c8023fc5d72a1fe7b5e0f67367c845a99e662b",
+          "artifact_id": 8903307370,
+          "evidence_file_sha256": "53c6bdbe66d38ce1a3d91cee4472ffbb8379c5d7a2ac3aa8c4ffcfa86f44cb67",
+          "permanent_evidence_path": "docs/evidence/stasy/native-parity-run-30936275831.json",
+          "retention_days": 90
+        },
+        "environment": {
+          "libzero": "0.0.8",
+          "numpy": "1.26.4",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit_learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "95f339b60916c82e2cd3987a0e30e369744781ee",
+        "protocol_id": "stasy-tabsyn-snapshot-parity-v1",
+        "repository_commit": "ccfb02e29aa1e9e14f25816e86ba74c3ec088a87",
+        "result_summary": {
+          "adapter_checkpoint_outside_source": true,
+          "adapter_source_remained_exact": true,
+          "checkpoint_ema_exact": true,
+          "checkpoint_model_exact": true,
+          "checkpoint_optimizer_exact": true,
+          "checkpoint_step_and_epoch_exact": true,
+          "finite_numerical_output": true,
+          "missing_values": 0,
+          "parity_cases_passed": 9,
+          "requested_rows_exact": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "seed_cases": [0, 19, 73],
+          "variants": ["binary", "multiclass", "regression"]
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831",
+        "status": "pass",
+        "workflow_run_id": 30936275831
+      }
+    },
     "tvae": {
       "adapter_ids": [
         "tvae"

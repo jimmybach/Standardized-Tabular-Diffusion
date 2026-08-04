@@ -1,4 +1,4 @@
-"""Checksum-locked acquisition of non-redistributable upstream model sources."""
+"""Checksum-locked acquisition and validation of upstream model sources."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ _RESOURCE_ROOT = Path(__file__).resolve().parent / "resources" / "upstream"
 _MANIFESTS = {
     "ctab-gan": _RESOURCE_ROOT / "ctabgan-source-manifest.json",
     "ctab-gan-plus": _RESOURCE_ROOT / "ctabgan-plus-source-manifest.json",
+    "stasy": _RESOURCE_ROOT / "stasy-source-manifest.json",
 }
 _INSTALL_RECORD = ".standardized-source.json"
 _MAX_ARCHIVE_BYTES = 16 * 1024 * 1024
@@ -121,9 +122,14 @@ def validate_upstream_source(model_id: str, source_dir: str | Path) -> dict[str,
 
 
 def source_status(model_id: str, *, repo_root: str | Path, source_dir: str | Path | None = None) -> dict[str, Any]:
-    destination = Path(source_dir) if source_dir is not None else default_source_path(repo_root, model_id)
+    manifest = load_source_manifest(model_id)
+    if source_dir is not None:
+        destination = Path(source_dir)
+    elif manifest.get("distributed_source_path") is not None:
+        destination = Path(repo_root).resolve() / manifest["distributed_source_path"]
+    else:
+        destination = default_source_path(repo_root, model_id)
     if not destination.exists():
-        manifest = load_source_manifest(model_id)
         return {
             "model_id": model_id,
             "status": "missing",

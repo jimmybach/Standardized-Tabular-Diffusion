@@ -1,0 +1,74 @@
+{
+  "manifest_schema_version": "1.0.0",
+  "model_id": "stasy",
+  "repository": "https://github.com/amazon-science/tabsyn",
+  "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+  "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
+  "upstream_model_tree": "4f56a7223d71d6b75c1698824c5d0245bf716bc6",
+  "source_hash_normalization": "lf-one-final-newline",
+  "authority": "benchmark-vendored",
+  "reproduction_target": "tabsyn-benchmark-snapshot",
+  "distributed_source_path": "TabSyn-main",
+  "method_author_repository": {
+    "url": "https://github.com/JayoungKim408/STaSy",
+    "commit": "3dcc660db26e31cc1bbb00cfc14bf7687fde448d",
+    "tree": "6a1307d4a0bf0819e70b15a13fb3a0a65fbbee57",
+    "license_file_present": false,
+    "relation": "The TabSyn benchmark snapshot is a distinct adaptation: only 2 of 14 shared paths match the method-author repository after text normalization. It is not represented as the original-method implementation."
+  },
+  "license": {
+    "declared_expression": "Apache-2.0",
+    "license_file_present": true,
+    "redistribution_status": "authorized-as-part-of-tabsyn-snapshot",
+    "review_status": "tabsyn-apache-2.0-license-and-notice-retained"
+  },
+  "dependencies": {
+    "libzero": {
+      "distribution": "libzero",
+      "version": "0.0.8",
+      "import_name": "zero",
+      "wheel_filename": "libzero-0.0.8-py3-none-any.whl",
+      "wheel_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
+      "resolution": "The shared TabSyn runtime imports the research utility API supplied by libzero. The unrelated zero distribution must not be installed. The frozen Python 3.11 environment installs the official libzero wheel without dependencies because its stale torch<2 metadata conflicts with the validated torch 2.3 stack; all actual dependencies are locked separately."
+    }
+  },
+  "archive": {
+    "url": "https://codeload.github.com/amazon-science/tabsyn/zip/cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+    "format": "zip",
+    "root_prefix": "tabsyn-cb5ac0f74ec36ee88e7a974a393dfbef50d42da7/",
+    "bytes": 1579204,
+    "sha256": "ed009b99c6b4d48ed413ec6604fad338e8e20ccb946f69cdb9244a34678a8d61"
+  },
+  "runtime_files": [
+    {"path": "LICENSE", "bytes": 10142, "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"},
+    {"path": "NOTICE", "bytes": 67, "sha256": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287"},
+    {"path": "README.md", "bytes": 10290, "sha256": "52157207eb9f6b187a97e6e46de2a0aaa10cf3bfb444c44367661e52e1011b4b"},
+    {"path": "main.py", "bytes": 395, "sha256": "860ddede1c014c6f3687ab32d92e657f7286711c456ab32d84cc98f833118dba"},
+    {"path": "requirements.txt", "bytes": 194, "sha256": "2b02c30b1eea0f411646a95fbeb5c8ab103f584f727086d79cc4706512f10905"},
+    {"path": "utils.py", "bytes": 7571, "sha256": "6b146a4c9f1866f2bf90ae64f15f9f9bd6480491e232d32bbc97e497e9deaa1a"},
+    {"path": "utils_train.py", "bytes": 4709, "sha256": "7e846cc6abd92899054f218d9ae57cd32eb097874e0955a80b8e53455cd5f3f0"},
+    {"path": "src/__init__.py", "bytes": 247, "sha256": "6802d1802819d9f921bfff3ec36952903d145b094d59bc0fe6b159172049efee"},
+    {"path": "src/data.py", "bytes": 25003, "sha256": "0d9ea4750471100cf648ade616d8a1a3dae40fa21c2507f1c7cb569ba636f9d5"},
+    {"path": "src/deep.py", "bytes": 5298, "sha256": "f288159188165cc61dc11e5a3bf4cc2b05d72c2124d183df15b98addec1d01bb"},
+    {"path": "src/env.py", "bytes": 1022, "sha256": "b1d0b4f986fa1d8da1b0c83af1a015df4ac02a4ae6208c5cd3e7c2283d91b227"},
+    {"path": "src/metrics.py", "bytes": 5408, "sha256": "a0b6d9b95a8f6178d0f1ec6cf490668a2acf748404b73065943666932c99af8e"},
+    {"path": "src/util.py", "bytes": 13541, "sha256": "93fd5e0136198d6c67b5cdbd267fae9b9d11df58fe944e6706b010ac991307e3"},
+    {"path": "baselines/stasy/configs/config.py", "bytes": 1886, "sha256": "b2782b48a0d0d79be2a837575ad41fafaa1b5956875a1b31eca698961221aa69"},
+    {"path": "baselines/stasy/configs/default_tabular_configs.py", "bytes": 1805, "sha256": "2d003f7a2d177cabb57d7a085cf8642e9918809921d46b5bc1e279a19ac928a6"},
+    {"path": "baselines/stasy/datasets.py", "bytes": 1075, "sha256": "0924b9beec66a0e7133f66f510bb139f08e0226d0b3f43b7f4d0c6d20ecc11e5"},
+    {"path": "baselines/stasy/likelihood.py", "bytes": 3415, "sha256": "d89fc874ca57cffc7ed5a4ed147623034d585853f95631527800aa72147345c0"},
+    {"path": "baselines/stasy/losses.py", "bytes": 7546, "sha256": "6d35552e77428f38fd4b5394427e894b6eeadebf1c5e921ed0b15ba8c372a021"},
+    {"path": "baselines/stasy/main.py", "bytes": 4875, "sha256": "fb319b772ce6c994a07e7caea2774d89e9808498966909c9895659e2eea4eedf"},
+    {"path": "baselines/stasy/models/ema.py", "bytes": 3202, "sha256": "45f1ef96100220cdd3eefd48746948fa515ddff610135a2978828677eedcf91e"},
+    {"path": "baselines/stasy/models/layers.py", "bytes": 5963, "sha256": "b1024448882e421d942b7b92ae1d9ef0e0a27f51707ddba3aa55802d3baa76eb"},
+    {"path": "baselines/stasy/models/layerspp.py", "bytes": 1158, "sha256": "aeb36cc251e10931c96fde9f1866fb6095260b8598cc8015af04295c964c6605"},
+    {"path": "baselines/stasy/models/ncsnpp_tabular.py", "bytes": 3928, "sha256": "c0859359b6a9780abd7ee9c5f113845c61423bbed354c1fd5ee12e3de274117d"},
+    {"path": "baselines/stasy/models/tabular_utils.py", "bytes": 4512, "sha256": "de21bedc8b886a2651c8f72913e938b6340ed7bfe83da364346f7f854ff7af8d"},
+    {"path": "baselines/stasy/models/utils.py", "bytes": 5155, "sha256": "aa657ca6778472c32c467955e4111d1d1b10992337d393a4ef434ca94929bda1"},
+    {"path": "baselines/stasy/sample.py", "bytes": 6027, "sha256": "e6e97ba938ab493d794b374b43402c44975663b887be6379b30fc512f492f3fd"},
+    {"path": "baselines/stasy/sample_steps.py", "bytes": 5980, "sha256": "b02e3de95b4a2c448762afe85535e84879bcc601029a55b3767396f3f41699a2"},
+    {"path": "baselines/stasy/sampling.py", "bytes": 17755, "sha256": "1a9db67b4c6e5cdc01cc8ba1253eaaf9b71e823807dd8d7bf769c1688d79bb83"},
+    {"path": "baselines/stasy/sde_lib.py", "bytes": 7635, "sha256": "47f1360e8205eac290ef81d4a11489ea88d6b5f1c8a6279ffe8b92182a290ba5"},
+    {"path": "baselines/stasy/utils.py", "bytes": 1356, "sha256": "a7c969d47cdbc04cb34d672b45d0f4cc27f2917a8c58a2dbec6ede2f20218b77"}
+  ]
+}
