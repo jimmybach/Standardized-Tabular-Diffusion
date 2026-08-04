@@ -1,6 +1,6 @@
 # CTAB-GAN+ 原生等价性验证
 
-状态：实现已完成；强制 Linux/Python 3.11 证据待生成
+状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
 
 ## 声明边界
 
@@ -109,4 +109,12 @@ python -m standardized_tabular_diffusion.cli model-source-status --model ctab-ga
 
 ## 证据流程
 
-`.github/workflows/ctabgan-plus-validation.yml` 会把锁定源码下载到临时 runner 目录，安装冻结的 Linux/Python 3.11 CPU 环境，运行真实六用例协议，并将 JSON 产物保留 90 天。通过后必须审阅工作流产物，将未经修改的 JSON 及其 SHA-256 永久提交到 `docs/evidence/ctabgan-plus/`，同时写入 source lock，之后才能提升注册状态。
+`.github/workflows/ctabgan-plus-validation.yml` 会把锁定源码下载到临时 runner 目录，安装冻结的 Linux/Python 3.11 CPU 环境，运行真实六用例协议，并将 JSON 产物保留 90 天。源码、适配器、协议或冻结环境一旦变化，都必须重新执行强制工作流并审阅、固化新的证据记录。
+
+## 已保留证据
+
+GitHub Actions [运行 `30926267432`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432)中的[作业 `92049288002`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432/job/92049288002)，已在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过本协议。该运行通过 GitHub 测试合并提交 `48837271b693b8af396f4f35cb68707b5c52e5bc` 验证了拉取请求分支提交 `473af6334d6f367b75b35736370c4dfa6adf85bf`。
+
+分类/回归与三个随机种子组成的六个用例全部通过。每个用例的原生路径与适配器路径均具有完全一致的 checkpoint 状态签名和逐字节一致的样本 CSV，同时满足清单、元数据、随机状态恢复、13 行列顺序、无缺失值、数值有限性和类别取值域要求。该运行还依据源码清单 SHA-256 `a76cb5e64fec6d99aae2df2d66a51598bd72ae26bc7f2e0e3104bf5a1dc1652a` 验证了全部五个官方运行时文件。
+
+经审阅的 JSON 已永久保存在 `docs/evidence/ctabgan-plus/native-parity-run-30926267432.json`，其 SHA-256 为 `df3bbf0dd46d34e8d57551048c7b7abe60340eddb3738e31d400e44344c5e5f2`。对应的 GitHub artifact ID 为 `8899232990`，压缩包摘要为 `sha256:f3abfc1e2bbd69d7858e2ce1e5b1ab0099e9b8fa06b95711a762dd16a06a2729`，到期日为 2026-11-02。该证据只提升适配器的验证级别；在上游许可证和其他独立准入门槛解决前，CTAB-GAN+ 仍为 `experimental`、`unsupported`，不得进入 Official Results，也不得作为发布支持模型。

@@ -65,6 +65,7 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
+        "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
@@ -73,7 +74,16 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
-    for model_id in ("ctgan", "nrgboost", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"):
+    for model_id in (
+        "ctab-gan-plus",
+        "ctgan",
+        "nrgboost",
+        "smote",
+        "tabddpm",
+        "tabdiff",
+        "tabsyn",
+        "tvae",
+    ):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
@@ -92,6 +102,33 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
 
     # Restoring the primary TabSyn path does not audit its separately vendored baselines.
     assert get_adapter_spec("codi").modification_status == "compatibility-patched"
+
+
+def test_ctabgan_plus_retained_validation_is_exact_and_license_blocked() -> None:
+    payload = _load_source_lock()
+    ctabgan_plus = payload["components"]["ctab-gan-plus"]
+    assert isinstance(ctabgan_plus, dict)
+
+    assert ctabgan_plus["distribution_form"] == "source-on-demand"
+    assert ctabgan_plus["license"] == "NONE-DECLARED"
+    assert ctabgan_plus["license_review"]["redistribution_status"] == "not-authorized"
+    validation = ctabgan_plus["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30926267432
+    assert validation["pull_request_head_commit"] == "473af6334d6f367b75b35736370c4dfa6adf85bf"
+    assert validation["repository_commit"] == "48837271b693b8af396f4f35cb68707b5c52e5bc"
+    assert validation["result_summary"]["parity_cases_passed"] == 6
+    assert validation["result_summary"]["checkpoint_state_exact"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "df3bbf0dd46d34e8d57551048c7b7abe60340eddb3738e31d400e44344c5e5f2"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
+    assert str(ctabgan_plus["official_eligibility"]).startswith("blocked-no-upstream-license")
 
 
 def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> None:

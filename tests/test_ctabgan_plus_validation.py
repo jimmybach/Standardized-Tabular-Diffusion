@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from standardized_tabular_diffusion.registry import get_adapter_spec
+from standardized_tabular_diffusion.registry import AdapterValidationLevel, get_adapter_spec
 from standardized_tabular_diffusion.validation import ctabgan_plus
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -40,5 +40,8 @@ def test_registry_pins_official_source_without_release_claim() -> None:
     assert spec.upstream_revision == ctabgan_plus.UPSTREAM_COMMIT
     assert spec.modification_status == "adapter-only"
     assert spec.install_extra == "ctab-gan-plus"
+    assert spec.validation_level is AdapterValidationLevel.NATIVE_PARITY_VALIDATED
+    assert spec.revision_status == "pinned-official-source-native-parity-validated"
+    assert "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json" in spec.evidence_records
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"

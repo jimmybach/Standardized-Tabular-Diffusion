@@ -1,6 +1,6 @@
 # CTAB-GAN+ Native-Parity Validation
 
-Status: implementation complete; mandatory Linux/Python 3.11 evidence pending
+Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
 
 ## Claim Boundary
 
@@ -109,4 +109,12 @@ Any source, environment, metadata, checkpoint, sample, or state mismatch fails c
 
 ## Evidence Procedure
 
-`.github/workflows/ctabgan-plus-validation.yml` downloads the locked source into a temporary runner directory, installs the frozen Linux/Python 3.11 CPU environment, runs the real six-case protocol, and retains the JSON artifact for 90 days. After a passing artifact is inspected, its unchanged JSON and SHA-256 must be committed under `docs/evidence/ctabgan-plus/` and recorded in the source lock before the registry status is promoted.
+`.github/workflows/ctabgan-plus-validation.yml` downloads the locked source into a temporary runner directory, installs the frozen Linux/Python 3.11 CPU environment, runs the real six-case protocol, and retains the JSON artifact for 90 days. Any source, adapter, protocol, or frozen-environment change requires a new mandatory run and a new inspected evidence record.
+
+## Retained Evidence
+
+GitHub Actions [run `30926267432`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432), job [`92049288002`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432/job/92049288002), passed the protocol on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. It evaluated pull-request head `473af6334d6f367b75b35736370c4dfa6adf85bf` through GitHub's test merge commit `48837271b693b8af396f4f35cb68707b5c52e5bc`.
+
+All six classification/regression and seed cases passed. Every case had an exact native/adapter checkpoint-state signature and byte-exact sample CSV, valid manifests and metadata, restored random state, 13 correctly ordered rows, no missing values, finite numerical values, and valid categorical domains. The run also verified all five official runtime files against source-manifest SHA-256 `a76cb5e64fec6d99aae2df2d66a51598bd72ae26bc7f2e0e3104bf5a1dc1652a`.
+
+The inspected JSON is permanently retained at `docs/evidence/ctabgan-plus/native-parity-run-30926267432.json` with SHA-256 `df3bbf0dd46d34e8d57551048c7b7abe60340eddb3738e31d400e44344c5e5f2`. The corresponding GitHub artifact is ID `8899232990`, archive digest `sha256:f3abfc1e2bbd69d7858e2ce1e5b1ab0099e9b8fa06b95711a762dd16a06a2729`, expiring 2026-11-02. This retained result promotes only the adapter's validation level; CTAB-GAN+ remains `experimental`, `unsupported`, excluded from Official Results, and blocked from release while the upstream license and every independent admission gate remain unresolved.
