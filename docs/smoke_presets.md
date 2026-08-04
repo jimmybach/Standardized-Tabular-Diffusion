@@ -50,6 +50,7 @@ For the newly wired structured baselines:
 ```bash
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/bn-adult-smoke.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/nflow-adult-smoke.json
+python -m standardized_tabular_diffusion.cli materialize-model-source --model goggle
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/goggle-adult-smoke.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/stasy-adult-smoke.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/codi-adult-smoke.json
@@ -73,7 +74,8 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 - `nrgboost-adult-smoke.json` is a historical local end-to-end preset; formal status is governed by `docs/NRGBOOST_VALIDATION.md` and retained Linux evidence, not by the preset label alone.
 - `ctab-gan-plus-adult-smoke.json` exercises the checksum-locked official source after materialization. Its formal `native-parity-validated` status is governed by `docs/CTABGAN_PLUS_VALIDATION.md` and retained Linux evidence, not by the preset label.
 - `ctab-gan-adult-smoke.json` exercises the distributed checksum-locked official classification source with reduced CPU dimensions. Its `native-parity-validated` status is governed by `docs/CTABGAN_VALIDATION.md` and retained Linux evidence, not by the preset label.
-- `bn-adult-smoke.json`, `nflow-adult-smoke.json`, and `goggle-adult-smoke.json` are real end-to-end validated smoke presets for the newly added baseline families.
+- `bn-adult-smoke.json` and `nflow-adult-smoke.json` are local end-to-end integration presets; they do not establish formal validation status.
+- `goggle-adult-smoke.json` uses checksum-locked method-author source acquired on demand and a small GCN configuration. It tests integration rather than generation quality; formal `native-parity-validated` status is governed by `docs/GOGGLE_VALIDATION.md` and retained Linux evidence, and does not cover SAGE or heterogeneous decoding.
 - `stasy-adult-smoke.json` uses the checksum-locked TabSyn STaSy snapshot with a deliberately small CPU network and predictor-corrector schedule. It tests integration, not generation quality; formal status is governed by `docs/STASY_VALIDATION.md` and retained Linux evidence.
 - `codi-adult-smoke.json` uses the checksum-locked TabSyn CoDi snapshot with small continuous/discrete networks and four reverse steps. It tests integration, checkpoint isolation, and exact row handling—not generation quality; formal status is governed by `docs/CODI_VALIDATION.md` and retained Linux evidence.
 - `arf-adult-smoke.json` is intended to be a fast end-to-end validation preset for the ARF adapter.

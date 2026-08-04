@@ -2,7 +2,7 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, CoDi, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. CoDi and STaSy claims are limited to their TabSyn benchmark snapshots. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, CoDi, CTAB-GAN+, CTGAN, Goggle, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. CoDi and STaSy claims are limited to their TabSyn benchmark snapshots; Goggle's claim is limited to the method-author GCN core. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
 
 CoDi now has a checksum-locked 24-file TabSyn-snapshot execution scope, strict dual-checkpoint handling, an exact-row compatibility boundary, and a dedicated CPU smoke preset. Its mandatory nine-case Linux/Python 3.11 protocol passed exactly in run `30941940893`, and the inspected evidence is retained, so its adapter status is `native-parity-validated`. It remains `experimental` and `unsupported`; the separate method-author repository has no declared license and materially differs from the TabSyn adaptation.
 
@@ -25,6 +25,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `nrgboost`: passed all six classification/regression and seed cases in `nrgboost-native-parity-v1` GitHub Actions run `30922326384`; see `docs/NRGBOOST_VALIDATION.md` and the permanent JSON evidence record. Benchmark eligibility, runtime policy, and release support remain separate gates.
 - `stasy`: passed all nine binary, multiclass, regression, and seed cases in `stasy-tabsyn-snapshot-parity-v1` GitHub Actions run `30936275831`; checkpoint state and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
 - `codi`: passed all nine binary, multiclass, regression, and seed cases in `codi-tabsyn-snapshot-parity-v1` GitHub Actions run `30941940893`; both checkpoint states and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
+- `goggle`: passed all nine binary, multiclass, regression, and seed cases in `goggle-method-author-native-parity-v1` GitHub Actions run `30945676747`; checkpoint tensors and files, raw core samples, and final frames/CSV bytes matched exactly. The permanent evidence validates the unmodified method-author GCN core only; SAGE, heterogeneous decoding, Official Results, and release gates remain pending.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -43,11 +44,10 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `stasy`
 - `codi`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CoDi, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CoDi, CTAB-GAN+, CTGAN, Goggle, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
-- `goggle`
 - `realtabformer`
 - `tabsds`
 - `tabularargn`
@@ -56,7 +56,6 @@ These models were reported to have completed at least one local path through the
 
 These adapters were reported as runnable in a prior environment, but they depend on brittle stacks and require fresh supported-environment evidence:
 
-- `goggle`: DGL, torch-geometric, and binary extension compatibility.
 - `realtabformer`: Hugging Face imports that currently need the adapter-side torchvision disable shim.
 - `tabsds`: local lightweight compatibility implementation inspired by the TabSDS method, not yet smoke-validated against the official upstream code.
 - `tabularargn`: optional-package adapter around `mostlyai-engine`; integrated in code, but not yet smoke-validated in this repository.
@@ -79,8 +78,7 @@ These adapters were reported as runnable in a prior environment, but they depend
 
 - `torch==2.3.0` is the current pinned runtime in the benchmark stack requirements.
 - `transformers==4.46.3` and `tokenizers==0.20.3` are pinned because the vendored `great` code is happier on that surface than on the newer 4.57 series.
-- `dgl` still wants a writable home/cache path; the adapter works around this by redirecting cache-related environment variables.
-- `torch-scatter` and `torch-sparse` currently emit load warnings under this torch stack, but the `goggle` smoke path still completes in this environment.
+- Goggle's validated GCN path uses `dgl==1.1.3` and `torch-geometric==2.5.3` without requiring the unused heterogeneous `torch-sparse` path. Requesting the heterogeneous decoder still fails closed unless its official extension stack is available; that path has no parity claim.
 - TabDDPM vendors the byte-exact runtime modules from the official `libzero==0.0.8` wheel; TabSyn installs that same distribution without its stale dependency metadata. The similarly named `zero` distribution is unrelated, and neither path uses the former local compatibility substitutes.
 
 ## Current Interpretation

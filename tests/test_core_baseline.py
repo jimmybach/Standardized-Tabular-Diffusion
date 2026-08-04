@@ -125,6 +125,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
+        "goggle",
         "nrgboost",
         "smote",
         "stasy",

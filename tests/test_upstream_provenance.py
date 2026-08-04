@@ -77,6 +77,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
+        "goggle": "docs/evidence/goggle/native-parity-run-30945676747.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
@@ -90,6 +91,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
+        "goggle",
         "nrgboost",
         "smote",
         "stasy",
@@ -151,6 +153,64 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     assert codi_lock["method_author_source"]["exact_shared_paths"] == 5
     assert codi_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
     assert codi_lock["dependency_resolution"]["actual_runtime_dependencies"] == {"tqdm": "4.66.5"}
+
+
+def test_goggle_retained_method_author_validation_is_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    goggle = payload["components"]["goggle"]
+    assert isinstance(goggle, dict)
+
+    assert goggle["authority"] == "method-author"
+    assert goggle["distribution_form"] == "source-on-demand"
+    assert goggle["license"] == "MIT"
+    assert goggle["source_treatment"].endswith("without-patches")
+    assert goggle["selected_runtime_files"] == 18
+    assert goggle["retired_snapshot"]["shared_paths_differing_after_text_normalization"] == 9
+
+    validation = goggle["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30945676747
+    assert validation["pull_request_head_commit"] == "088aed9d2aab4cca38f1e6f8a79e3eea126020e1"
+    assert validation["repository_commit"] == "f13f37d653bbdbc5bd4e99035989ff9bfa3a3444"
+    assert validation["environment"]["platform"] == "Linux / x86_64"
+    assert validation["environment"]["python"] == "3.11.15"
+    assert validation["environment_lock_sha256"] == (
+        "df84de4126bdf5816f54107c544b0971704b58bafd21d93a499956892884bd7a"
+    )
+
+    summary = validation["result_summary"]
+    assert summary["parity_cases_passed"] == summary["parity_cases_total"] == 9
+    assert summary["checkpoint_state_exact"] is True
+    assert summary["checkpoint_file_bytes_exact"] is True
+    assert summary["raw_samples_exact"] is True
+    assert summary["sample_bytes_exact"] is True
+    assert summary["sample_frames_exact"] is True
+    assert summary["adapter_source_remained_exact"] is True
+    assert summary["missing_values"] == 0
+
+    artifact = validation["artifact"]
+    assert artifact["evidence_file_sha256"] == (
+        "1dbcf50194505820cac0650ba72d519f4f331008bbcaac635f8eb846bec7da59"
+    )
+    assert artifact["evidence_file_sha256"] == artifact["downloaded_evidence_sha256"]
+    evidence_path = REPO_ROOT / artifact["permanent_evidence_path"]
+    evidence_bytes = evidence_path.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == artifact["evidence_file_sha256"]
+    assert evidence_bytes.endswith(b"\n")
+
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert evidence["status"] == "pass"
+    assert evidence["reproduction_target"] == "method-author-original-core"
+    assert evidence["source"]["runtime_files_verified"] == 18
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(case["comparisons"]["checkpoints"]["tensors_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["raw_samples_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["adapter_source_remained_exact"] for case in evidence["cases"])
+    assert "heterogeneous-decoder-runtime" in goggle["official_eligibility"]
+    assert "release-gates" in goggle["official_eligibility"]
 
 
 def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:
