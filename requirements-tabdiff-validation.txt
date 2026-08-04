@@ -10,7 +10,8 @@ plotly==5.24.1
 prdc==0.2
 scikit-learn==1.5.2
 scipy==1.13.1
-sdmetrics==0.11.1
+# 0.11.1 omitted the sdmetrics.visualization module imported by pinned TabDiff.
+sdmetrics==0.12.1
 tomli==2.0.1
 tomli-w==1.0.0
 tqdm==4.66.5
