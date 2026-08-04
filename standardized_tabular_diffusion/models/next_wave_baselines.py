@@ -11,9 +11,12 @@ import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models._runtime import (
+    SampleFileEvaluatorMixin,
+    disable_torchvision_for_transformers,
+    temporary_sys_path,
+)
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-from standardized_tabular_diffusion.models.final_wave_baselines import _disable_torchvision_for_transformers
-from standardized_tabular_diffusion.models.sample_baselines import _SampleFileEvaluatorMixin, _temporary_sys_path
 
 
 def _import_or_raise(module_name: str, install_hint: str):
@@ -23,7 +26,7 @@ def _import_or_raise(module_name: str, install_hint: str):
         raise RuntimeError(f"{module_name} is required for this adapter. Install it with `{install_hint}`.") from exc
 
 
-class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "ctab-gan-plus"
     upstream_dirname = "TabDDPM-main"
     checkpoint_filename = "ctabgan_plus.pkl"
@@ -65,7 +68,7 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
     def _build_model(self, train_df: pd.DataFrame, spec: RunSpec):
         ctabgan_root = self.repo_root / "TabDDPM-main" / "CTAB-GAN-Plus"
-        with _temporary_sys_path(ctabgan_root):
+        with temporary_sys_path(ctabgan_root):
             ctab_module = _import_or_raise("model.ctabgan", "pip install dython")
             CTABGAN = ctab_module.CTABGAN
             params = self._load_ctabgan_params(spec.dataset)
@@ -127,7 +130,7 @@ class CTABGANPlusAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class REaLTabFormerAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "realtabformer"
     upstream_dirname = "TabSyn-main"
 
@@ -156,7 +159,7 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
 
     def _import_model_cls(self):
-        with _disable_torchvision_for_transformers():
+        with disable_torchvision_for_transformers():
             module = _import_or_raise("realtabformer", "pip install realtabformer")
             return module.REaLTabFormer
 
@@ -227,7 +230,7 @@ class REaLTabFormerAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         return self._evaluate_from_sample_file(spec)
 
 
-class NRGBoostAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
+class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "nrgboost"
     upstream_dirname = "."
     checkpoint_filename = "model.nrgboost"

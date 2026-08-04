@@ -81,11 +81,18 @@ jobs:
 
       - name: Run real official-package-versus-adapter parity protocol
         run: |
+          set +e
           python -m standardized_tabular_diffusion.validation.nrgboost \
             --repo-root "$GITHUB_WORKSPACE" \
             --output-dir "$RUNNER_TEMP/nrgboost-validation" \
             --evidence-path "$RUNNER_TEMP/nrgboost-evidence.json" \
             --wheel-path "$RUNNER_TEMP/nrgboost-wheel/nrgboost-0.0.3-cp311-cp311-manylinux_2_28_x86_64.whl"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/nrgboost-evidence.json" ]; then
+            NRGBOOST_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("nrgboost-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "nrgboost-native-parity-v1", "model_id": "nrgboost", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["NRGBOOST_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
 
       - name: Retain validation evidence
         if: always()
