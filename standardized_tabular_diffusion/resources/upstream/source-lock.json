@@ -632,7 +632,7 @@
       "license": "MIT",
       "license_url": "https://github.com/worldbank/REaLTabFormer/blob/v0.2.4/LICENSE",
       "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-relational-scope-resource-and-release-gates",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
       "package_lock": {
         "bytes": 49890,
         "filename": "realtabformer-0.2.4-py3-none-any.whl",
@@ -661,14 +661,64 @@
       "upstream_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
       "upstream_tree": "aa4431468f040fc485f82e7e15238c57eef05753",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147",
+          "artifact_id": 8908863813,
+          "downloaded_evidence_sha256": "0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07",
+          "evidence_file_sha256": "0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07",
+          "expires_at": "2026-11-02T20:59:24Z",
+          "name": "realtabformer-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/realtabformer/native-parity-run-30950369908.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "realtabformer": "0.2.4",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "7db46e00452ce5cc25d28d8b484c9d6ee14de5b3",
         "protocol_id": "realtabformer-official-package-parity-v1",
-        "status": "pending-linux-evidence",
-        "target_cases": {
-          "seed_cases": [0, 19, 73],
-          "variants": ["binary", "multiclass", "regression"],
-        "sensitivity_training_case": false
-        }
+        "repository_commit": "fb2f03dd579bb4d1847fa18395696ed698c8ce58",
+        "result_summary": {
+          "adapter_metadata_valid": true,
+          "categorical_domains_valid": true,
+          "checkpoint_file_bytes_exact": true,
+          "checkpoint_state_exact": true,
+          "finite_numerical_output": true,
+          "installed_files_verified": 16,
+          "missing_values": 0,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_samples_exact": true,
+          "requested_rows_per_case": 7,
+          "sample_bytes_exact": true,
+          "saved_config_semantics_exact": true,
+          "wheel_identity_verified": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-04T21:00:41Z",
+        "validated_scope": {
+          "model_type": "tabular",
+          "relational_mode": "outside-current-single-table-contract",
+          "sensitivity_stopping": "not-native-parity-validated",
+          "training_path": "official-fit-n-critic-zero"
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908/job/92130640933",
+        "workflow_run_id": 30950369908
       },
       "wheel_source_comparison": {
         "exact_shared_source_files": 11,

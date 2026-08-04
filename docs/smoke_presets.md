@@ -88,5 +88,5 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 - `tabebm-adult-gated-sample.json` is the explicit opt-in sample path for machines with accepted TabPFN gated-model access.
 - `realtabformer-adult-tiny.json` is intentionally more conservative than the other presets:
   it disables sensitivity analysis, disables external reporting, and samples a small training subset with `max_train_rows`.
-- The `realtabformer` tiny preset is meant for local integration checks, not meaningful benchmark numbers.
+- The `realtabformer` tiny preset is meant for local integration checks, not meaningful benchmark numbers. Formal `native-parity-validated` status is governed by `docs/REALTABFORMER_VALIDATION.md` and retained Linux evidence; that claim covers tabular training with `n_critic=0`, not sensitivity stopping or relational mode.
 - `tabula` is integrated in code, but it does not yet have a committed smoke preset; use `example-config --model tabula` as the starting point for local validation runs.

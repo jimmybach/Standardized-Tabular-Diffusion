@@ -1,6 +1,6 @@
 # REaLTabFormer 验证协议
 
-状态：等待 Linux 强制验证证据
+状态：已通过并永久保留证据
 
 协议：`realtabformer-official-package-parity-v1`
 
@@ -107,4 +107,8 @@
 
 ## 证据
 
-强制 GitHub Actions 和永久证据记录尚待完成。在经过审阅的 Linux 证据被永久保留并写入来源锁之前，注册状态维持 `adapter-complete`。
+[GitHub Actions 运行 `30950369908`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908) 在 Linux、Python 3.11.15 上通过全部 9 个任务/种子用例。该运行核验了官方 wheel 和 16 个带哈希的已安装文件；每个用例中的原生/适配器检查点张量与文件完全一致，保存配置语义一致，原始样本相同，最终 CSV 逐字节一致。所有输出均为请求的 7 行规范列，数值有限、类别域有效且无缺失值。
+
+永久证据记录为 `docs/evidence/realtabformer/native-parity-run-30950369908.json`，SHA-256 为 `0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07`。该文件从制品 `8908863813` 逐字节保留；制品归档摘要为 `sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147`。PR head 为 `7db46e00452ce5cc25d28d8b484c9d6ee14de5b3`，证据中记录的 PR merge checkout 提交为 `fb2f03dd579bb4d1847fa18395696ed698c8ce58`。
+
+因此，REaLTabFormer 在官方表格 `n_critic=0` 路径上现为 `native-parity-validated`。它仍然是 `experimental` 和 `unsupported`；本证据不会提升 sensitivity stopping、关系模式、中心 benchmark 评测、数据集准入、资源预算或发布支持状态。
