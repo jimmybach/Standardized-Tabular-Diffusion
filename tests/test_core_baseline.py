@@ -120,10 +120,15 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
     records = registry.list_adapter_specs()
 
     assert set(records) == set(registry.list_models())
-    assert all(record["validation_level"] == "adapter-complete" for record in records.values())
+    assert records["tabdiff"]["validation_level"] == "native-parity-validated"
+    assert all(
+        record["validation_level"] == "adapter-complete"
+        for name, record in records.items()
+        if name != "tabdiff"
+    )
     assert all(record["benchmark_track"] == "experimental" for record in records.values())
     assert all(record["support_level"] == "unsupported" for record in records.values())
-    assert all(MODEL_INVENTORY[name].validation_level == "adapter-complete" for name in records)
+    assert all(MODEL_INVENTORY[name].validation_level == record["validation_level"] for name, record in records.items())
 
 
 def test_run_spec_keeps_action_extra_namespaces_isolated() -> None:

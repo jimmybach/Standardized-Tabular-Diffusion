@@ -80,6 +80,7 @@ def _spec(
     revision_status: str = "unresolved",
     patch_set_ids: tuple[str, ...] = (),
     evidence_records: tuple[str, ...] = (),
+    validation_level: AdapterValidationLevel = AdapterValidationLevel.ADAPTER_COMPLETE,
 ) -> AdapterSpec:
     return AdapterSpec(
         module=module,
@@ -98,6 +99,7 @@ def _spec(
         revision_status=revision_status,
         patch_set_ids=patch_set_ids,
         evidence_records=evidence_records,
+        validation_level=validation_level,
     )
 
 
@@ -230,11 +232,15 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         source_root="TabDiff-main",
         upstream_repository="https://github.com/MinkaiXu/TabDiff",
         upstream_revision="5ecdb3356261aea72716cc9a779f31d7ad083bf4",
-        revision_status="pinned-exact",
+        revision_status="pinned-exact-native-parity-validated",
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/TABDIFF_VALIDATION.md",
+            "docs/evidence/tabdiff/native-parity-run-30866879879.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             "standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json",
+            ".github/workflows/tabdiff-validation.yml",
         ),
     ),
     "tabddpm": _spec(
