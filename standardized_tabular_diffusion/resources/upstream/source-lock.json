@@ -375,6 +375,90 @@
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
     },
+    "goggle": {
+      "adapter_ids": [
+        "goggle"
+      ],
+      "archive_lock": {
+        "bytes": 615426,
+        "format": "zip",
+        "sha256": "62dc6c98a2067d950513b4fe6343715f03a6a096990241fc6143b18fb56aaf65",
+        "url": "https://codeload.github.com/vanderschaarlab/GOGGLE/zip/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
+      },
+      "authoritative_repository": "https://github.com/vanderschaarlab/GOGGLE",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "goggle-synthcity-import-boundary-v1",
+          "reason": "The official model module imports Synthcity 0.2.2 metrics and Schema eagerly although fit and core sampling do not execute those evaluators; that legacy dependency set is incompatible with the official Python 3.11 target.",
+          "semantic_effect": "Evaluation-only import names are supplied at module load. Official GoggleModel.fit and Goggle.model.sample never call them, and the central evaluator remains the only benchmark evaluator."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-gcn-rgcn-import-boundary-v1",
+          "reason": "GraphDecoder imports the heterogeneous RGCN implementation eagerly even for the default homogeneous GCN/SAGE paths, forcing unused compiled torch-sparse extensions.",
+          "semantic_effect": "When torch-sparse is absent, only the unused RGCN symbol is replaced by a fail-on-instantiation placeholder. The validated GCN path does not construct or execute RGCNConv; the heterogeneous path still requires the official extension stack."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-output-isolation-v1",
+          "reason": "Official fit writes tmp/<dataset>.pt relative to the process working directory.",
+          "semantic_effect": "The working directory is confined to output_dir and the resulting unchanged state_dict is atomically moved to output_dir/model.pt; source files and tensor contents are unchanged."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-standardized-data-contract-v1",
+          "reason": "Official experiments consume a finite numeric DataFrame, whereas the benchmark accepts named numerical and categorical columns.",
+          "semantic_effect": "Numerical features are population-standardized and categorical features are train-fitted one-hot encoded before official training. Official raw samples are inversely transformed afterward; the target is included in the jointly modeled vector and no validation/test row is used to fit transforms."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-exact-sample-count-v1",
+          "reason": "Official GoggleModel.sample derives its count from an arbitrary reference DataFrame and couples sampling to the legacy Synthcity Schema postprocessor.",
+          "semantic_effect": "The requested positive count is passed directly to the unchanged Goggle.model.sample core. Categorical and target domain recovery is performed by the recorded train-fitted standardized transform; model state and latent sampling equations are unchanged."
+        }
+      ],
+      "component_id": "goggle",
+      "dependency_resolution": {
+        "declared_environment": "Python 3.8, torch 1.12.0, DGL 0.9.0, torch-geometric 2.2.0, torch-sparse 0.6.16, torch-scatter 2.1.0, and Synthcity 0.2.2",
+        "official_environment_status": "not directly installable as declared on Python 3.11",
+        "validation_environment_lock": "requirements-goggle-validation.txt"
+      },
+      "distribution_form": "source-on-demand",
+      "license": "MIT",
+      "license_copyright": "Copyright (c) 2023 Tennison Liu",
+      "license_path_in_locked_source": "LICENSE",
+      "local_path": ".cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-heterogeneous-decoder-runtime-and-release-gates",
+      "patch_sets": [],
+      "reproduction_target": "method-author-original-core",
+      "retired_snapshot": {
+        "disposition": "removed-from-current-tree-without-history-rewrite",
+        "local_source_files": 11,
+        "shared_method-author_paths": 9,
+        "shared_paths_differing_after-text-normalization": 9,
+        "tabsyn_subtree": "20204afa938487792e752671e415380b0343adf8",
+        "treatment": "The former TabSyn-local copy changed the public fit contract, defaults, validation/early-stopping behavior, Synthcity constraints, and graph imports, so it is not represented as method-author official code."
+      },
+      "selected_runtime_files": 18,
+      "source_hash_normalization": "lf-one-final-newline",
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/goggle-source-manifest.json",
+      "source_treatment": "checksum-locked-method-author-source-acquired-on-demand-without-patches",
+      "upstream_commit": "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+      "upstream_model_tree": "6dcaae801859f63e173537445548a50cd1f8625b",
+      "upstream_tree": "2d6a54f6d6f4d156890bf4e035119dbb483a46d0",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "goggle-method-author-native-parity-v1",
+        "status": "pending-linux-evidence",
+        "target_cases": {
+          "seed_cases": [0, 19, 73],
+          "variants": ["binary", "multiclass", "regression"]
+        }
+      }
+    },
     "nrgboost": {
       "adapter_ids": [
         "nrgboost"
