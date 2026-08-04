@@ -10,6 +10,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import tomllib
 import traceback
 from pathlib import Path
 from typing import Any
@@ -146,6 +147,37 @@ def _write_fixture(upstream_root: Path) -> dict[str, Any]:
     }
 
 
+def _configure_runtime(upstream_root: Path) -> dict[str, Any]:
+    import tomli_w
+
+    config_path = upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+    original_sha256 = _sha256_file(config_path)
+    with config_path.open("rb") as stream:
+        config = tomllib.load(stream)
+    overrides = {
+        "unimodmlp_params.num_layers": 1,
+        "unimodmlp_params.factor": 4,
+        "unimodmlp_params.dim_t": 64,
+        "diffusion_params.num_timesteps": 4,
+        "train.main.steps": 4,
+        "train.main.batch_size": 32,
+        "train.main.check_val_every": 2,
+        "sample.batch_size": 32,
+    }
+    config["unimodmlp_params"].update({"num_layers": 1, "factor": 4, "dim_t": 64})
+    config["diffusion_params"]["num_timesteps"] = 4
+    config["train"]["main"].update({"steps": 4, "batch_size": 32, "check_val_every": 2})
+    config["sample"]["batch_size"] = 32
+    config_path.write_text(tomli_w.dumps(config), encoding="utf-8")
+    return {
+        "path": "tabdiff/configs/tabdiff_configs.toml",
+        "base_sha256": original_sha256,
+        "execution_sha256": _sha256_file(config_path),
+        "overrides": overrides,
+        "treatment": "validation-only hyperparameter override in an isolated verified source copy",
+    }
+
+
 def _common_command(mode: str, checkpoint_path: Path | None = None) -> list[str]:
     command = [
         sys.executable,
@@ -161,7 +193,7 @@ def _common_command(mode: str, checkpoint_path: Path | None = None) -> list[str]
         command.extend(
             ["--ckpt_path", str(checkpoint_path), "--num_samples_to_generate", str(EXPECTED_SAMPLE_ROWS)]
         )
-    command.extend(["--gpu", "-1", "--debug", "--no_wandb", "--deterministic"])
+    command.extend(["--gpu", "-1", "--no_wandb", "--deterministic"])
     return command
 
 
@@ -172,21 +204,23 @@ def _run_command(command: list[str], cwd: Path) -> None:
 
 
 def _snapshot_training_outputs(upstream_root: Path, destination: Path) -> dict[str, Path]:
+    checkpoint_root = upstream_root / "tabdiff" / "ckpt" / DATASET_NAME / EXPERIMENT_NAME
+    result_root = upstream_root / "tabdiff" / "result" / DATASET_NAME / EXPERIMENT_NAME / "4"
     records = {
         "checkpoint": (
-            upstream_root / "debug" / "ckpt" / "model_4.pt",
+            checkpoint_root / "model_4.pt",
             destination / "ckpt" / "model_4.pt",
         ),
         "config": (
-            upstream_root / "debug" / "ckpt" / "config.pkl",
+            checkpoint_root / "config.pkl",
             destination / "ckpt" / "config.pkl",
         ),
         "samples": (
-            upstream_root / "debug" / "result" / "4" / "samples.csv",
+            result_root / "samples.csv",
             destination / "training-result" / "samples.csv",
         ),
         "metrics": (
-            upstream_root / "debug" / "result" / "4" / "all_results.json",
+            result_root / "all_results.json",
             destination / "training-result" / "all_results.json",
         ),
     }
@@ -215,6 +249,13 @@ def _jsonable(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
     return value
+
+
+def _normalized_cached_config(path: Path) -> Any:
+    config = _jsonable(_load_config(path))
+    config["model_save_path"] = "<runtime-model-output>"
+    config["result_save_path"] = "<runtime-result-output>"
+    return config
 
 
 def _compare_checkpoints(native_path: Path, adapter_path: Path) -> dict[str, Any]:
@@ -297,6 +338,10 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
     _copy_verified_source(repo_root, adapter_root)
     fixture = _write_fixture(native_root)
     _write_fixture(adapter_root)
+    native_runtime_config = _configure_runtime(native_root)
+    adapter_runtime_config = _configure_runtime(adapter_root)
+    if native_runtime_config != adapter_runtime_config:
+        raise AssertionError("Native and adapter runtime config overrides differ.")
 
     native_train_command = _common_command("train")
     _run_command(native_train_command, native_root)
@@ -315,7 +360,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             output_dir=output_dir / "adapter-manifests" / "train",
             device="cpu",
             seed=0,
-            extra={"debug": True, "deterministic": True, "exp_name": EXPERIMENT_NAME},
+            extra={"deterministic": True, "exp_name": EXPERIMENT_NAME},
         )
     )
     adapter_training = _snapshot_training_outputs(adapter_root, output_dir / "adapter-training")
@@ -330,7 +375,6 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             checkpoint_path=adapter_training["checkpoint"],
             extra={
                 "allow_unsafe_external_checkpoint": True,
-                "debug": True,
                 "deterministic": True,
                 "exp_name": EXPERIMENT_NAME,
             },
@@ -341,8 +385,8 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
     adapter_sample = sample_bundle.generated_sample_path
     adapter_metrics = adapter_sample.with_name("all_results.json")
 
-    config_exact = _jsonable(_load_config(native_training["config"])) == _jsonable(
-        _load_config(adapter_training["config"])
+    config_exact = _normalized_cached_config(native_training["config"]) == _normalized_cached_config(
+        adapter_training["config"]
     )
     checkpoint = _compare_checkpoints(native_training["checkpoint"], adapter_training["checkpoint"])
     training_samples = _compare_csv(native_training["samples"], adapter_training["samples"], 30)
@@ -390,6 +434,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             "sdmetrics": _version("sdmetrics"),
         },
         "fixture": fixture,
+        "runtime_config": native_runtime_config,
         "seed_contract": {
             "official_cli_capability": "deterministic mode fixes Python, NumPy, and PyTorch to seed 0",
             "validated_seed": 0,
