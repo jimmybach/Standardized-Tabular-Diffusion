@@ -2,7 +2,7 @@
 
 Status: release-preparation record
 Audit date: 2026-08-03
-Scope: the primary TabDDPM, TabDiff, and TabSyn source trees plus CTGAN and TVAE from the official CTGAN package
+Scope: the primary TabDDPM, TabDiff, and TabSyn source trees plus official package integrations for CTGAN, TVAE, and SMOTE
 
 ## Purpose
 
@@ -28,6 +28,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 |---|---|---|---|---|
 | CTGAN | `826da23f8f9385ad15fd206ecad691e04cb0ccdc` (`v0.12.1`) | The adapter previously loaded a nested `0.5.2.dev0` snapshot. It now requires the official PyPI wheel whose SHA-256 and trusted-publishing source commit are locked. | Adapter-only package integration; no 0.12.1 source is vendored. Exact native parity passed in run `30910275922`. | Blocked pending BUSL-1.1 review, central evaluation, dataset admission, and release gates. |
 | TVAE | `826da23f8f9385ad15fd206ecad691e04cb0ccdc` (`v0.12.1`) | The former `0.5.2.dev0` subtree matched 39 of 44 shared paths at its closest reviewed history point; TVAE and four other source files were locally modified. | The 47-file legacy subtree and obsolete wrappers were removed. The adapter now uses the unmodified official package API; exact native parity passed in run `30913867621`. | Blocked pending BUSL-1.1 review, central evaluation, dataset admission, and release gates. |
+| SMOTE | `8504e95f0160f61d1b617ca66f779646d2ee609e` (`0.14.2`) | The adapter now requires the checksum-pinned official imbalanced-learn wheel. No source snapshot is vendored. | Adapter-only package integration. Direct DataFrame dispatch selects official SMOTE, SMOTENC, or SMOTEN; the authoritative native-parity run is pending. | Excluded from joint generative-model ranking; classical-reference admission and release gates remain pending. |
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The initial import had 58 exact scoped files but omitted all six official `lib/` files. The missing files have now been restored; all 64 scoped files match the integrity manifest after declared text normalization. | Adapter-only. The former local `zero` shim was removed and replaced by the seven byte-exact modules from the official `libzero==0.0.8` wheel. | Native parity validated in run `30863212268`; official-track eligibility remains a separate pending decision. |
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Native parity validated in run `30866879879`; central-evaluation and other official-track gates remain pending. |
 | TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Native parity passed; Official Results remain blocked by central-evaluation, dataset, runtime, governance, and release gates. |
@@ -68,6 +69,7 @@ The legacy `TabDDPM-main/CTGAN/` subtree contained a locally modified `ctgan` `0
 ## License Notes
 
 - The official CTGAN package used by both CTGAN and TVAE declares BUSL-1.1, not an OSI open-source license. It is installed optionally and is not vendored. Validation is permitted research work, but Official Results and release support remain blocked pending an explicit review of the upstream use restrictions.
+- The official imbalanced-learn 0.14.2 package used by SMOTE declares MIT. The wheel and source license hashes are locked separately because packaging normalizes the license file; no package source is vendored.
 - The TabDDPM snapshot carries its upstream MIT license; the vendored official `libzero==0.0.8` modules carry their separate upstream MIT license.
 - The TabDiff license file is byte-for-byte identical to the pinned upstream file. Its malformed quote characters are therefore an upstream defect, not local corruption; the original attribution is preserved.
 - The TabSyn snapshot carries Apache-2.0 license and NOTICE files. Its bundled baseline directories require their own source, license, and patch audit.
@@ -83,4 +85,4 @@ Before any of these adapters can enter the Official Results track:
 5. no unproven checkpoint may be treated as an official pretrained artifact; and
 6. the model evidence record must be promoted independently through `registered`, `adapter-complete`, `smoke-validated`, `native-parity-validated`, `benchmark-eligible`, and `release-supported` states.
 
-Until all applicable gates are met, registry records remain conservative. CTGAN, TVAE, TabDDPM, TabDiff, and TabSyn have retained native-parity claims, but remain experimental, unsupported, and excluded from Official Results.
+Until all applicable gates are met, registry records remain conservative. CTGAN, TVAE, TabDDPM, TabDiff, and TabSyn have retained native-parity claims, but remain experimental, unsupported, and excluded from Official Results. SMOTE remains `adapter-complete` until its authoritative evidence is retained and is categorically excluded from the joint generative-model ranking.

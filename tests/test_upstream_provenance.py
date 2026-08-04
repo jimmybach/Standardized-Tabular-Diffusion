@@ -18,7 +18,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn", "tvae"}
+    assert set(components) == {"ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
