@@ -166,18 +166,18 @@ class FakeTabularARGN:
         return pd.DataFrame({"x": [11] * n_samples, "y": [1] * n_samples})
 
 
-def test_tabsyn_train_uses_authoritative_epoch_default_and_does_not_reuse_checkpoints(
+def test_tabsyn_train_uses_unmodified_official_stages_and_does_not_reuse_checkpoints(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     (tmp_path / "TabSyn-main").mkdir()
     adapter = TabSynAdapter(tmp_path)
-    commands: list[tuple[list[str], bool]] = []
+    commands: list[tuple[list[str], int]] = []
 
-    def fake_run_python(args: list[str], _cwd: Path, *, module: bool = False) -> None:
-        commands.append((args, module))
+    def fake_run_tabsyn(args: list[str], *, seed: int) -> None:
+        commands.append((args, seed))
 
-    monkeypatch.setattr(adapter, "_run_python", fake_run_python)
+    monkeypatch.setattr(adapter, "_run_tabsyn", fake_run_tabsyn)
     spec = ExperimentConfig(
         model="tabsyn",
         dataset="adult",
@@ -189,9 +189,10 @@ def test_tabsyn_train_uses_authoritative_epoch_default_and_does_not_reuse_checkp
 
     adapter.train(spec)
 
-    assert commands[0] == (["tabsyn.vae.main", "--dataname", "adult", "--gpu", "0"], True)
-    assert commands[1][1] is False
-    assert commands[1][0][-2:] == ["--num_epochs", "10001"]
+    assert commands == [
+        (["--action", "vae-train", "--dataname", "adult", "--gpu", "-1"], 0),
+        (["--action", "diffusion-train", "--dataname", "adult", "--gpu", "-1"], 0),
+    ]
 
 
 def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command(
@@ -256,15 +257,16 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
                 "adult",
                 "--mode",
                 "test",
-                "--gpu",
-                "1",
                 "--exp_name",
                 "exp-smoke",
                 "--ckpt_path",
                 str(checkpoint_path),
                 "--num_samples_to_generate",
                 "512",
+                "--gpu",
+                "1",
                 "--no_wandb",
+                "--deterministic",
             ],
             upstream_root,
         )
@@ -277,6 +279,7 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     repo_root = tmp_path
     upstream_root = repo_root / "TabDDPM-main"
     upstream_root.mkdir(parents=True)
@@ -285,10 +288,18 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
 
     adapter = TabDDPMAdapter(repo_root)
     commands: list[tuple[list[str], Path]] = []
+    environments: list[dict[str, str] | None] = []
 
-    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
+    def fake_run_python(
+        args: list[str],
+        cwd: Path,
+        *,
+        module: bool = False,
+        env: dict[str, str] | None = None,
+    ) -> None:
         assert not module
         commands.append((args, cwd))
+        environments.append(env)
 
     monkeypatch.setattr(adapter, "_run_python", fake_run_python)
     dataset_spec = DatasetSpec(
@@ -360,6 +371,10 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     assert commands == [
         (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
         (["scripts/pipeline.py", "--config", str(config_path), "--sample"], upstream_root),
+    ]
+    assert environments == [
+        {"PYTHONPATH": str(upstream_root.resolve())},
+        {"PYTHONPATH": str(upstream_root.resolve())},
     ]
     assert train_bundle.output_dir.joinpath("artifacts.json").exists()
     assert sample_bundle.output_dir.joinpath("artifacts.json").exists()

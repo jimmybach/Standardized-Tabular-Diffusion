@@ -33,10 +33,10 @@ def main(args):
     '''
     start_time = time.time()
 
-    num_samples = args.num_samples or train_z.shape[0]
+    num_samples = train_z.shape[0]
     sample_dim = in_dim
 
-    x_next = sample(model.denoise_fn_D, num_samples, sample_dim, num_steps=steps or 50, device=device)
+    x_next = sample(model.denoise_fn_D, num_samples, sample_dim)
     x_next = x_next * 2 + mean.to(device)
 
     syn_data = x_next.float().cpu().numpy()
@@ -63,8 +63,6 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', type=int, default=0, help='GPU index.')
     parser.add_argument('--epoch', type=int, default=None, help='Epoch.')
     parser.add_argument('--steps', type=int, default=None, help='Number of function evaluations.')
-    parser.add_argument('--num_samples', type=int, default=None, help='Number of rows to generate.')
-    parser.add_argument('--save_path', type=str, default='samples.csv', help='Path to save synthetic data.')
 
     args = parser.parse_args()
 
@@ -73,5 +71,3 @@ if __name__ == '__main__':
         args.device = f'cuda:{args.gpu}'
     else:
         args.device = 'cpu'
-
-    main(args)

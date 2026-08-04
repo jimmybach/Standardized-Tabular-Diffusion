@@ -1,8 +1,8 @@
 # Known-good benchmark stack for the standardized baseline adapters.
 # This file is meant as a practical shared install surface for the standardized
 # adapters and the vendored upstream runtimes, not as a minimal dependency set.
-# The `zero` helper used by TabSyn/TabDDPM is now vendored locally, so no extra
-# `zero`/`libzero` install should be needed.
+# TabDDPM vendors the exact runtime modules from official `libzero==0.0.8`;
+# TabSyn still carries a separate compatibility implementation under audit.
 
 torch==2.3.0
 numpy==1.26.4

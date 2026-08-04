@@ -37,10 +37,10 @@ def main(args):
         train_data,
         batch_size = batch_size,
         shuffle = True,
-        num_workers = 0,
+        num_workers = 4,
     )
 
-    num_epochs = args.num_epochs
+    num_epochs = 10000 + 1
 
     denoise_fn = MLPDiffusion(in_dim, 1024).to(device)
     print(denoise_fn)
@@ -51,7 +51,7 @@ def main(args):
     model = Model(denoise_fn = denoise_fn, hid_dim = train_z.shape[1]).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0)
-    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=20)
+    scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.9, patience=20, verbose=True)
 
     model.train()
 
@@ -105,7 +105,6 @@ if __name__ == '__main__':
 
     parser.add_argument('--dataname', type=str, default='adult', help='Name of dataset.')
     parser.add_argument('--gpu', type=int, default=0, help='GPU index.')
-    parser.add_argument('--num_epochs', type=int, default=10001, help='Number of training epochs.')
 
     args = parser.parse_args()
 
@@ -114,5 +113,3 @@ if __name__ == '__main__':
         args.device = f'cuda:{args.gpu}'
     else:
         args.device = 'cpu'
-
-    main(args)

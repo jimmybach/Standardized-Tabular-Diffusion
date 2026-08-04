@@ -12,21 +12,17 @@
       "license": "MIT",
       "license_path": "TabDDPM-main/LICENSE.md",
       "local_path": "TabDDPM-main",
-      "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-native-parity-and-shim-removal-or-approval",
-      "patch_sets": [
+      "dependency_treatment": [
         {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabDDPM-main/zero/__init__.py",
-            "TabDDPM-main/zero/hardware.py",
-            "TabDDPM-main/zero/random.py"
-          ],
-          "patch_set_id": "tabddpm-libzero-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Local compatibility substitute for the pinned libzero dependency; scientific parity has not been established."
+          "integrity_manifest": "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json",
+          "package": "libzero",
+          "status": "exact-official-wheel-source-vendored",
+          "version": "0.0.8"
         }
       ],
+      "modification_status": "adapter-only",
+      "official_eligibility": "pending-separate-official-track-review",
+      "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
@@ -35,9 +31,56 @@
           "CTAB-GAN-Plus/",
           "CTGAN/"
         ],
-        "import_exact_matches": 58,
-        "import_shared_paths": 58,
-        "relation": "The imported TabDDPM core matched every compared blob at the pinned upstream tree."
+        "current_scoped_files": 64,
+        "exact_after_declared_text_normalization": 64,
+        "initial_import_exact_matches": 58,
+        "initial_import_missing_files": [
+          "lib/__init__.py",
+          "lib/data.py",
+          "lib/deep.py",
+          "lib/env.py",
+          "lib/metrics.py",
+          "lib/util.py"
+        ],
+        "initial_import_shared_paths": 58,
+        "relation": "The six initially missing official lib files were restored from the pinned upstream checkout. All 64 scoped files now match the source manifest after declared line-ending normalization."
+      },
+      "validation": {
+        "artifact": {
+          "digest": "sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757",
+          "evidence_file_sha256": "8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e",
+          "expires_at": "2026-11-01T23:43:15Z",
+          "github_artifact_id": 8875144833,
+          "name": "tabddpm-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-30863212268.json"
+        },
+        "environment": {
+          "libzero": "0.0.8-exact-vendored-source",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "rtdl": "0.0.9",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
+        "protocol_id": "tabddpm-native-parity-v1",
+        "repository_commit": "3339af2603bac7a4736e68d7f369194b6b095653",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "config_mapping_exact": true,
+          "generated_arrays_exact": true,
+          "model_and_ema_state_exact": true,
+          "numeric_integrity_passed": true,
+          "seed_cases_passed": 3,
+          "seed_cases_total": 3
+        },
+        "status": "pass",
+        "validated_at": "2026-08-03T23:44:47Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268/job/91849440286",
+        "workflow_run_id": 30863212268,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268"
       },
       "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
       "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"
@@ -54,30 +97,33 @@
       "license": "MIT",
       "license_path": "TabDiff-main/LICENSE",
       "local_path": "TabDiff-main",
-      "modification_status": "semantic-patched",
-      "official_eligibility": "blocked-while-patched-upstream-evaluator-is-in-tree",
-      "patch_sets": [
-        {
-          "classification": "semantic-patched",
-          "files": [
-            "TabDiff-main/eval/mle/mle.py"
-          ],
-          "patch_set_id": "tabdiff-mle-evaluator-v1",
-          "status": "unapproved-experimental",
-          "summary": "Changes evaluator models, compute backend, objectives, randomness, error handling, and edge-case metric semantics. It is not part of the TabDiff generative algorithm and must not supply official leaderboard metrics."
-        }
-      ],
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-and-release-gates",
+      "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
-          "synthetic/"
+          "synthetic/",
+          "images/",
+          ".gitignore (repository-local ignore policy)"
         ],
-        "import_exact_matches": 30,
-        "import_shared_paths": 30,
-        "relation": "The initial non-data snapshot exactly matched all compared blobs at the pinned upstream commit; one evaluator file was modified in a later root commit."
+        "import_exact_matches": 27,
+        "import_shared_paths": 27,
+        "relation": "All 27 scoped files match the pinned method-author source after canonical line-ending normalization. The former local MLE evaluator patch was removed and the official evaluator restored."
       },
       "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
-      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91",
+      "validation": {
+        "artifact_digest": "sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8",
+        "artifact_id": 8876454339,
+        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "evidence_path": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "evidence_sha256": "d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234",
+        "protocol_id": "tabdiff-native-parity-v1",
+        "repository_commit": "230adafe96dc7ec224bada220e1ee184972b61ad",
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879",
+        "status": "passed-native-parity-validated"
+      }
     },
     "tabsyn": {
       "adapter_ids": [
@@ -91,8 +137,8 @@
       "license": "Apache-2.0",
       "license_path": "TabSyn-main/LICENSE",
       "local_path": "TabSyn-main",
-      "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-patch-isolation-and-native-parity",
+      "modification_status": "official-unmodified",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -130,33 +176,25 @@
           "sha256": "1f1ef9db3e036da1215d5fb558660a517816fe14d3f199e7a74d2220a8ab8c39"
         }
       ],
-      "patch_sets": [
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/tabsyn/diffusion_utils.py",
-            "TabSyn-main/tabsyn/main.py",
-            "TabSyn-main/tabsyn/sample.py",
-            "TabSyn-main/tabsyn/vae/main.py",
-            "TabSyn-main/utils.py"
-          ],
-          "patch_set_id": "tabsyn-entrypoint-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adds working module entrypoints, CPU/device handling, configurable epoch/sample controls, and modern scheduler compatibility. The standardized adapter now pins the authoritative 10,001 diffusion-epoch default explicitly."
-        },
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/src/data.py",
-            "TabSyn-main/zero/__init__.py",
-            "TabSyn-main/zero/hardware.py",
-            "TabSyn-main/zero/random.py"
-          ],
-          "patch_set_id": "tabsyn-dependency-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adapts the scikit-learn OneHotEncoder API and substitutes a local zero compatibility module."
-        }
-      ],
+      "patch_sets": [],
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
+      "dependency_resolution": {
+        "declared_name": "zero",
+        "resolved_distribution": "libzero==0.0.8",
+        "reason": "The imported zero research-utility API is provided by libzero; the zero distribution is an unrelated circuit-analysis package. Its stale torch<2 dependency metadata is overridden while all actual dependencies are locked separately for the validated torch 2.3 environment."
+      },
+      "validation": {
+        "artifact_digest": "sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c",
+        "artifact_id": 8878140935,
+        "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
+        "evidence_path": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+        "evidence_sha256": "3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089",
+        "protocol_id": "tabsyn-native-parity-v1",
+        "repository_commit": "54d419642842d7146d6afa4aa1b3d5167301c51c",
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645",
+        "seed_cases": [0, 19, 73],
+        "status": "passed-native-parity-validated"
+      },
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
@@ -167,7 +205,7 @@
         "import_exact_matches": 96,
         "import_modified_shared_paths": 5,
         "import_shared_paths": 101,
-        "relation": "The closest authoritative tree is pinned below. Five shared TabSyn paths already carried local compatibility edits at import; seven local checkpoint artifacts were also imported and have now been removed from the working tree."
+        "relation": "The initial import contained five compatibility edits, followed by additional local shims. The 20-file primary TabSyn execution scope has now been restored to the pinned official tree and is fail-closed through a frozen source manifest; seven unverified checkpoint artifacts remain removed."
       },
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"

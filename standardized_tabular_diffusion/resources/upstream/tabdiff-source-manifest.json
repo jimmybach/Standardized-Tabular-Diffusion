@@ -1,0 +1,125 @@
+{
+  "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
+  "component_id": "tabdiff",
+  "excluded_scopes": [
+    "data/",
+    "synthetic/",
+    "images/",
+    ".gitignore (repository-local ignore policy)"
+  ],
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256_lf": "db876a01c8d6cf840cccf6456a91e846e3bf99e4c9321f5ba0d2e265ce78d95a"
+    },
+    {
+      "path": "README.md",
+      "sha256_lf": "70adaa5c208bdd142a52cd0e9dc1713d80e668ea56271d74e2e9b02ca050c525"
+    },
+    {
+      "path": "download_dataset.py",
+      "sha256_lf": "0119e4d206db9729bfa3e11e0675a73321e704ecaa323813881d1adb9a170675"
+    },
+    {
+      "path": "eval/eval_quality.py",
+      "sha256_lf": "377eab8a08fb9decd0777e2ac85a3d2d8b73ebba6c68423fdbbec101642007aa"
+    },
+    {
+      "path": "eval/mle/mle.py",
+      "sha256_lf": "e324b2b555a06462acbf1fb518024bc6877da9b19a8f09d612e25e0c565a2dab"
+    },
+    {
+      "path": "eval/mle/tabular_dataload.py",
+      "sha256_lf": "c8035eaa06e97255f07d5364b309475288fe46e6fc46d1f712c349e1701aa793"
+    },
+    {
+      "path": "eval/mle/tabular_transformer.py",
+      "sha256_lf": "756d04737c8a09147135492faf3676181b9597659a25da16034534447f6169b2"
+    },
+    {
+      "path": "eval/visualize_density.py",
+      "sha256_lf": "194d010f4ebbf2f983bfb0f89f9f7302aeee70412f0ce1c345719152b618551a"
+    },
+    {
+      "path": "eval_impute.py",
+      "sha256_lf": "7bbce3ac6b333f2e2e059ea21a363078388f969e2537b872289a0c0a40b46a92"
+    },
+    {
+      "path": "main.py",
+      "sha256_lf": "f717a4c59330088d18ef263af657c176bff5c7e709be1841e33a10e12efd5a71"
+    },
+    {
+      "path": "process_dataset.py",
+      "sha256_lf": "5f6231ddb9ee448dbd123d1e4f5537be479874f79e163552ba557aae20e82914"
+    },
+    {
+      "path": "src/__init__.py",
+      "sha256_lf": "9ec2494484c9d4a045cb5e2522a889114859c6d086fb457b42a265efe9233736"
+    },
+    {
+      "path": "src/data.py",
+      "sha256_lf": "2ed153499ab495c71044395aab0f339aef6a525f4b246e2c6809e93840d4e2e8"
+    },
+    {
+      "path": "src/env.py",
+      "sha256_lf": "b1d0b4f986fa1d8da1b0c83af1a015df4ac02a4ae6208c5cd3e7c2283d91b227"
+    },
+    {
+      "path": "src/metrics.py",
+      "sha256_lf": "a0b6d9b95a8f6178d0f1ec6cf490668a2acf748404b73065943666932c99af8e"
+    },
+    {
+      "path": "src/util.py",
+      "sha256_lf": "a07b4b7a2bc8ee6240db7c3ebbee3d4fe764b30a47c685a8c8579b9ef4189dd5"
+    },
+    {
+      "path": "synthcity.yaml",
+      "sha256_lf": "d96622b987462914816d9b3b0655479b188fff7b13acb9ffa049a91d6573d5f4"
+    },
+    {
+      "path": "tabdiff.yaml",
+      "sha256_lf": "d37365f76f442a991acb09d1de6de4f40cb01120d2f678a407befad8f2a397d8"
+    },
+    {
+      "path": "tabdiff/configs/tabdiff_configs.toml",
+      "sha256_lf": "38eff74ecb572c9baafc5e912f8b5421cae686ddb4df6e3bc2a9b69c6ec69cd6"
+    },
+    {
+      "path": "tabdiff/main.py",
+      "sha256_lf": "1682a2e54442e0c7badd01aecdcd8d88557b9a9cb40990fa86ae3a785404e844"
+    },
+    {
+      "path": "tabdiff/metrics.py",
+      "sha256_lf": "23d586549b7962ba45408eccc1b295f27d8108e3193bc05dfa14050bf0742613"
+    },
+    {
+      "path": "tabdiff/models/noise_schedule.py",
+      "sha256_lf": "50006962741c2922bb6671aaceb0d743e0dfb93545f1c953b2fd7c0f6b718ee7"
+    },
+    {
+      "path": "tabdiff/models/unified_ctime_diffusion.py",
+      "sha256_lf": "a28f9955bcbbda08cfc6563af80355939ed1c3c2b727c2536408d9250779c1d3"
+    },
+    {
+      "path": "tabdiff/modules/main_modules.py",
+      "sha256_lf": "830009bb8f3dffee5bfb802727cfdf56e2c5da28efc8e73cfef9ff602d4f113a"
+    },
+    {
+      "path": "tabdiff/modules/transformer.py",
+      "sha256_lf": "f3197ebb0af083c25b5714ec81520b141d8cec5d7e2bc3fcb9d1c577e3748382"
+    },
+    {
+      "path": "tabdiff/trainer.py",
+      "sha256_lf": "8a80682c9ee90a82f2bfd09c0d607bd1cf296487633cb453f3230774cb1b4511"
+    },
+    {
+      "path": "utils_train.py",
+      "sha256_lf": "49c88f2034d0962b7fff7b21b6ab731de5eb70dcc5eb9783b05d1ed339c98ef3"
+    }
+  ],
+  "license": "MIT",
+  "license_path": "LICENSE",
+  "source_treatment": "The runtime snapshot is official source restored byte-for-byte modulo repository line-ending normalization; generated data and images are outside the integrity scope.",
+  "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+  "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+}
