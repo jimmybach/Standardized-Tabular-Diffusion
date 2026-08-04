@@ -304,7 +304,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Download and verify a registered checksum-locked official model source",
     )
     materialize_model_source_parser.add_argument(
-        "--model", required=True, choices=["ctab-gan", "ctab-gan-plus"], help="Registered source-backed model"
+        "--model",
+        required=True,
+        choices=["ctab-gan", "ctab-gan-plus"],
+        help="Registered checksum-locked source component",
     )
     materialize_model_source_parser.add_argument(
         "--repo-root", default=".", help="Repository root used to derive the default ignored source cache"
@@ -323,7 +326,10 @@ def build_parser() -> argparse.ArgumentParser:
         "model-source-status", help="Verify the local checksum-locked source for one registered model"
     )
     model_source_status_parser.add_argument(
-        "--model", required=True, choices=["ctab-gan", "ctab-gan-plus"], help="Registered source-backed model"
+        "--model",
+        required=True,
+        choices=["ctab-gan", "ctab-gan-plus", "stasy"],
+        help="Registered checksum-locked source component",
     )
     model_source_status_parser.add_argument(
         "--repo-root", default=".", help="Repository root used to derive the default ignored source cache"

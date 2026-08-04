@@ -25,6 +25,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "ctgan",
         "nrgboost",
         "smote",
+        "stasy",
         "tabddpm",
         "tabdiff",
         "tabsyn",
@@ -71,6 +72,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
+        "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
@@ -82,6 +84,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctgan",
         "nrgboost",
         "smote",
+        "stasy",
         "tabddpm",
         "tabdiff",
         "tabsyn",
@@ -103,8 +106,63 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     assert smote.revision_status == "pinned-canonical-package-native-parity-validated"
     assert smote.reproduction_target == "classical-oversampling-reference"
 
-    # Restoring the primary TabSyn path does not audit its separately vendored baselines.
+    # STaSy validates the TabSyn benchmark snapshot, not the distinct method-author source.
+    stasy = get_adapter_spec("stasy")
+    assert stasy.modification_status == "adapter-only"
+    assert stasy.reproduction_target == "tabsyn-benchmark-snapshot"
+    assert stasy.validation_level.value == "native-parity-validated"
+    assert stasy.revision_status == "pinned-exact-tabsyn-snapshot-parity-validated"
+    stasy_lock = _load_source_lock()["components"]["stasy"]
+    assert stasy_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
+    assert stasy_lock["dependency_resolution"]["wheel_sha256"] == (
+        "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d"
+    )
+    assert stasy_lock["compatibility_shims"] == [
+        {
+            "classification": "adapter-only",
+            "id": "stasy-sklearn-onehot-keyword-v1",
+            "reason": (
+                "The pinned snapshot uses sparse=False, while scikit-learn 1.5.2 names the same "
+                "dense-output control sparse_output."
+            ),
+            "semantic_effect": (
+                "The bridge forwards the unchanged false value to sparse_output; it changes no "
+                "encoder, output representation, source file, or preprocessing operation."
+            ),
+        }
+    ]
     assert get_adapter_spec("codi").modification_status == "compatibility-patched"
+
+
+def test_stasy_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    stasy = payload["components"]["stasy"]
+    assert isinstance(stasy, dict)
+
+    validation = stasy["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30936275831
+    assert validation["pull_request_head_commit"] == "95f339b60916c82e2cd3987a0e30e369744781ee"
+    assert validation["repository_commit"] == "ccfb02e29aa1e9e14f25816e86ba74c3ec088a87"
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["checkpoint_model_exact"] is True
+    assert validation["result_summary"]["checkpoint_optimizer_exact"] is True
+    assert validation["result_summary"]["checkpoint_ema_exact"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "53c6bdbe66d38ce1a3d91cee4472ffbb8379c5d7a2ac3aa8c4ffcfa86f44cb67"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert evidence["status"] == "pass"
+    assert evidence["reproduction_target"] == "tabsyn-benchmark-snapshot"
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert "benchmark-snapshot-not-method-author-original" in stasy["official_eligibility"]
 
 
 def test_ctabgan_retained_validation_and_source_license_are_exact() -> None:

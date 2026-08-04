@@ -1,0 +1,43 @@
+{
+  "model": "stasy",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/stasy-smoke",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cpu",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 64,
+      "nf": 16,
+      "hidden_dims": [64, 64],
+      "num_scales": 4,
+      "num_workers": 0,
+      "num_threads": 1,
+      "sampler": "pc",
+      "spl": true
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 16,
+    "checkpoint_path": null,
+    "extra": {
+      "num_threads": 1,
+      "sampler": "pc"
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "compute_density": true,
+    "compute_ml_efficacy": true,
+    "compute_detection": true,
+    "compute_privacy": true,
+    "compute_structural_fidelity": true,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": ["smoke", "stasy", "tabsyn-benchmark-snapshot"],
+  "notes": "Small CPU smoke preset for the checksum-locked TabSyn STaSy benchmark snapshot. Materialize Adult before running."
+}

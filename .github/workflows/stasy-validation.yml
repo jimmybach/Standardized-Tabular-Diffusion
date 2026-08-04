@@ -1,0 +1,92 @@
+name: STaSy Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/stasy-validation.yml"
+      - "requirements-stasy-validation.txt"
+      - "standardized_tabular_diffusion/compat/stasy_launcher.py"
+      - "standardized_tabular_diffusion/models/vendored_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/upstream_sources.py"
+      - "standardized_tabular_diffusion/validation/stasy.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "standardized_tabular_diffusion/resources/upstream/stasy-source-manifest.json"
+      - "docs/STASY_VALIDATION*.md"
+      - "docs/evidence/stasy/**"
+      - "TabSyn-main/baselines/stasy/**"
+      - "TabSyn-main/src/**"
+      - "TabSyn-main/main.py"
+      - "TabSyn-main/utils.py"
+      - "TabSyn-main/utils_train.py"
+  pull_request:
+    paths:
+      - ".github/workflows/stasy-validation.yml"
+      - "requirements-stasy-validation.txt"
+      - "standardized_tabular_diffusion/compat/stasy_launcher.py"
+      - "standardized_tabular_diffusion/models/vendored_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/upstream_sources.py"
+      - "standardized_tabular_diffusion/validation/stasy.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "standardized_tabular_diffusion/resources/upstream/stasy-source-manifest.json"
+      - "docs/STASY_VALIDATION*.md"
+      - "docs/evidence/stasy/**"
+      - "TabSyn-main/baselines/stasy/**"
+      - "TabSyn-main/src/**"
+      - "TabSyn-main/main.py"
+      - "TabSyn-main/utils.py"
+      - "TabSyn-main/utils_train.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stasy-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot-parity:
+    name: Linux / Python 3.11 / TabSyn snapshot parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-stasy-validation.txt
+
+      - name: Install frozen STaSy validation environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install "torch==2.3.0" --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r requirements-stasy-validation.txt
+          python -m pip install --no-deps "libzero==0.0.8"
+          python -m pip install --no-deps .
+
+      - name: Run real TabSyn-snapshot-versus-adapter parity protocol
+        run: |
+          python -m standardized_tabular_diffusion.validation.stasy \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/stasy-validation" \
+            --evidence-path "$RUNNER_TEMP/stasy-evidence.json"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: stasy-tabsyn-snapshot-parity-evidence
+          path: ${{ runner.temp }}/stasy-evidence.json
+          if-no-files-found: error
+          retention-days: 90
