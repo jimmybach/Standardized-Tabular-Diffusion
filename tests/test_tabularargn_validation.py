@@ -70,11 +70,11 @@ def test_sample_contract_normalizes_only_categorical_outputs(tmp_path: Path, var
 
     assert not native.equals(adapter)
     assert normalized_native.equals(normalized_adapter)
-    assert normalized_native["group"].dtype == object
+    assert normalized_native["group"].map(lambda value: isinstance(value, str)).all()
     if variant == "regression":
-        assert normalized_native["target"].dtype.kind == "f"
+        assert pd.api.types.is_float_dtype(normalized_native["target"])
     else:
-        assert normalized_native["target"].dtype == object
+        assert normalized_native["target"].map(lambda value: isinstance(value, str)).all()
 
 
 def test_sample_contract_does_not_hide_numerical_dtype_or_value_changes(tmp_path: Path) -> None:
