@@ -408,6 +408,7 @@ def _environment_versions() -> dict[str, str]:
         "scipy": _version("scipy"),
         "category_encoders": _version("category-encoders"),
         "libzero": _version("libzero"),
+        "tqdm": _version("tqdm"),
     }
     expected = {
         "torch": "2.3.0",
@@ -417,6 +418,7 @@ def _environment_versions() -> dict[str, str]:
         "scipy": "1.13.1",
         "category_encoders": "2.6.4",
         "libzero": "0.0.8",
+        "tqdm": "4.66.5",
     }
     normalized = {**actual, "torch": actual["torch"].split("+")[0]}
     if normalized != expected:

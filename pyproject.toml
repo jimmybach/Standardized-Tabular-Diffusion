@@ -123,6 +123,7 @@ codi = [
   "tomli==2.0.1",
   "tomli-w==1.1.0",
   "torch==2.3.0; python_version < '3.13'",
+  "tqdm==4.66.5",
 ]
 models = [
   "numpy==1.26.4; python_version < '3.13'",

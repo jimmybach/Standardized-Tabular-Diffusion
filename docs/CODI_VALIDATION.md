@@ -18,7 +18,7 @@ The local CoDi subtree contains 11 files and is byte-exact with TabSyn tree `85c
 
 Every file is checked after LF normalization before training and again after training or sampling. Missing, additional execution assumptions do not weaken this check: the adapter refuses to run if any locked file differs.
 
-The shared runtime imports `zero`, but the required distribution is `libzero==0.0.8`, not the unrelated PyPI project named `zero`. The official wheel is locked to SHA-256 `f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d`. The validation workflow installs that wheel with `--no-deps` because its historical `torch<2` metadata does not describe the validated PyTorch 2.3 runtime; every actual dependency is frozen separately.
+The shared runtime imports `zero`, but the required distribution is `libzero==0.0.8`, not the unrelated PyPI project named `zero`. The official wheel is locked to SHA-256 `f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d`. The validation workflow installs that wheel with `--no-deps` because its historical `torch<2` metadata does not describe the validated PyTorch 2.3 runtime. Its import-time fallback requires `tqdm`, which is separately frozen at `4.66.5` and checked by the protocol.
 
 For the supported Python 3.11 environment, install the CoDi extra and then the locked research utility wheel explicitly:
 
