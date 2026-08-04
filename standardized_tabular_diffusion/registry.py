@@ -124,7 +124,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         authority="benchmark-vendored",
         distribution="source",
         target="benchmark-snapshot",
-        modification="compatibility-patched",
+        modification="official-unmodified",
         source_root="TabSyn-main",
     ),
     "ctab-gan": _spec(
@@ -279,11 +279,11 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         source_root="TabSyn-main",
         upstream_repository="https://github.com/amazon-science/tabsyn",
         upstream_revision="cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
-        revision_status="pinned-base-with-unvalidated-source-patches",
-        patch_set_ids=("tabsyn-entrypoint-compat-v1", "tabsyn-dependency-compat-v1"),
+        revision_status="pinned-official-source-awaiting-native-parity",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
         ),
     ),
     "tvae": _spec(

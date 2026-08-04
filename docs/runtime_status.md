@@ -61,7 +61,7 @@ These adapters were reported as runnable in a prior environment, but they depend
 - `transformers==4.46.3` and `tokenizers==0.20.3` are pinned because the vendored `great` code is happier on that surface than on the newer 4.57 series.
 - `dgl` still wants a writable home/cache path; the adapter works around this by redirecting cache-related environment variables.
 - `torch-scatter` and `torch-sparse` currently emit load warnings under this torch stack, but the `goggle` smoke path still completes in this environment.
-- Some vendored baselines expect legacy helper modules; this repository now vendors a minimal local `zero` compatibility shim for the `TabSyn-main` and `TabDDPM-main` paths to avoid pulling the wrong PyPI package.
+- The TabSyn primary path resolves its imported `zero` research-utility API to the frozen `libzero==0.0.8` distribution; the similarly named `zero` distribution is unrelated. The separate TabDDPM shim remains tracked by its own audit record.
 
 ## Current Interpretation
 
