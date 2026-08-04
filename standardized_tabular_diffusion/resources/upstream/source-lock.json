@@ -74,9 +74,51 @@
       "upstream_model_tree": "85c16ccfb76fbf00db6b30450ca47e9928efa8d3",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:2f009d9abe9ff65e3e0641739543ad0888d6e83e91f8e2cea3ae17b7728d2957",
+          "artifact_id": 8905564052,
+          "downloaded_evidence_sha256": "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156",
+          "evidence_file_sha256": "942f735339676dddec62d7d913c847fa461aa780ed7ab4c7d7d727755345049a",
+          "permanent_evidence_path": "docs/evidence/codi/native-parity-run-30941940893.json",
+          "retention_treatment": "The downloaded JSON had no terminal newline. The permanent repository copy adds exactly one final LF and changes no JSON content.",
+          "retention_days": 90
+        },
+        "environment": {
+          "category_encoders": "2.6.4",
+          "libzero": "0.0.8",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit_learn": "1.5.2",
+          "scipy": "1.13.1",
+          "torch": "2.3.0+cpu",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "bcfc4dd1d6b219c578bac44c4bd85606158bfb83",
         "protocol_id": "codi-tabsyn-snapshot-parity-v1",
-        "status": "pending-linux-python311-evidence"
+        "repository_commit": "b0a380cd01ee08378742c231ec5811351103b20c",
+        "result_summary": {
+          "adapter_checkpoint_outside_source": true,
+          "adapter_manifests_valid": true,
+          "adapter_metadata_valid": true,
+          "adapter_source_remained_exact": true,
+          "continuous_checkpoint_state_exact": true,
+          "discrete_checkpoint_state_exact": true,
+          "finite_numerical_output": true,
+          "missing_values": 0,
+          "parity_cases_passed": 9,
+          "requested_rows_per_case": 7,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30941940893",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_run_id": 30941940893
       }
     },
     "ctab-gan": {

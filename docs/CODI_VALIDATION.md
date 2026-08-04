@@ -1,6 +1,6 @@
 # CoDi Validation Protocol
 
-Status: implementation complete; mandatory Linux/Python 3.11 evidence pending
+Status: native parity validated against the pinned TabSyn snapshot
 
 ## Claim Boundary
 
@@ -73,7 +73,9 @@ For every case, the protocol creates two isolated source roots. The native root 
 
 The protocol requires exact continuous-checkpoint state, exact discrete-checkpoint state, byte-for-byte and frame-for-frame identical CSV output, exact row and schema checks, finite values, zero missing values, valid manifests and metadata, source integrity after execution, and absence of checkpoints under the adapter source tree.
 
-The environment is frozen in `requirements-codi-validation.txt` with CPU PyTorch `2.3.0`. Evidence is uploaded even on failure. Registry promotion beyond `adapter-complete` is forbidden until a successful artifact has been inspected and retained in the repository.
+The environment is frozen in `requirements-codi-validation.txt` with CPU PyTorch `2.3.0`. Evidence is uploaded even on failure.
+
+All nine cases passed in GitHub Actions [run `30941940893`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30941940893) on Linux, Python 3.11.15, and PyTorch 2.3.0 CPU. For every case, both checkpoint states were exactly equal, generated CSV files were equal byte-for-byte and frame-for-frame, all seven requested rows were present, and every safety and source-integrity assertion passed. The inspected evidence is permanently retained at [`docs/evidence/codi/native-parity-run-30941940893.json`](evidence/codi/native-parity-run-30941940893.json). This supports promotion to `native-parity-validated` for the pinned TabSyn snapshot only.
 
 ## Remaining Gates
 
