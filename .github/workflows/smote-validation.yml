@@ -1,0 +1,97 @@
+name: SMOTE Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/smote-validation.yml"
+      - "requirements-smote-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/sample_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/validation/smote.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/SMOTE_VALIDATION*.md"
+      - "docs/evidence/smote/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_smote_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  pull_request:
+    paths:
+      - ".github/workflows/smote-validation.yml"
+      - "requirements-smote-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/sample_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/validation/smote.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/SMOTE_VALIDATION*.md"
+      - "docs/evidence/smote/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_smote_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smote-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / native parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-smote-validation.txt
+
+      - name: Install frozen official SMOTE environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install -r requirements-smote-validation.txt
+          mkdir -p "$RUNNER_TEMP/smote-wheel"
+          python -m pip download \
+            --index-url https://pypi.org/simple \
+            --only-binary=:all: \
+            --no-deps \
+            --dest "$RUNNER_TEMP/smote-wheel" \
+            "imbalanced-learn==0.14.2"
+          echo "f9b81c47231aa1e3a71a1e4b3cc85b42e3b14f85e3a36922f3323c4da23605ef  $RUNNER_TEMP/smote-wheel/imbalanced_learn-0.14.2-py3-none-any.whl" | sha256sum --check
+          python -m pip install --no-deps "$RUNNER_TEMP/smote-wheel/imbalanced_learn-0.14.2-py3-none-any.whl"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run real official-package-versus-adapter parity protocol
+        run: |
+          python -m standardized_tabular_diffusion.validation.smote \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/smote-validation" \
+            --evidence-path "$RUNNER_TEMP/smote-evidence.json" \
+            --wheel-path "$RUNNER_TEMP/smote-wheel/imbalanced_learn-0.14.2-py3-none-any.whl"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: smote-native-parity-evidence
+          path: ${{ runner.temp }}/smote-evidence.json
+          if-no-files-found: error
+          retention-days: 90

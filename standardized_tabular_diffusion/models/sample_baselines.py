@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OrdinalEncoder
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabdiff_or_tabsyn_summary
@@ -265,7 +264,51 @@ class TVAEAdapter(_OfficialCTGANPackageAdapter):
 
 class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
     model_name = "smote"
-    upstream_dirname = "TabSyn-main"
+    upstream_dirname = "."
+    package_name = "imbalanced-learn"
+    package_version = "0.14.2"
+
+    def _load_official_samplers(self) -> tuple[type[Any], type[Any], type[Any]]:
+        try:
+            observed_version = version(self.package_name)
+        except PackageNotFoundError as exc:
+            raise ImportError(
+                "SMOTE requires the optional official imbalanced-learn package. "
+                "Install the project with the 'smote' extra."
+            ) from exc
+        if observed_version != self.package_version:
+            raise ImportError(
+                "SMOTE requires the exact validated official package version "
+                f"{self.package_name}=={self.package_version}; observed {observed_version}."
+            )
+
+        from imblearn.over_sampling import SMOTE, SMOTEN, SMOTENC
+
+        return SMOTE, SMOTENC, SMOTEN
+
+    def _create_sampler(
+        self,
+        *,
+        feature_columns: list[str],
+        categorical_columns: list[str],
+        random_state: int,
+        k_neighbors: int,
+        sampling_strategy: Any,
+    ) -> tuple[Any, str]:
+        smote_class, smotenc_class, smoten_class = self._load_official_samplers()
+        common = {
+            "sampling_strategy": sampling_strategy,
+            "random_state": random_state,
+            "k_neighbors": k_neighbors,
+        }
+        if not categorical_columns:
+            return smote_class(**common), "SMOTE"
+        if len(categorical_columns) == len(feature_columns):
+            return smoten_class(**common), "SMOTEN"
+        return (
+            smotenc_class(categorical_features=categorical_columns, **common),
+            "SMOTENC",
+        )
 
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
         if dataset_spec.train_data_path is None:
@@ -296,8 +339,6 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         if dataset_spec.task_type != "classification":
             raise ValueError("SMOTE is only supported for classification datasets.")
 
-        from imblearn import over_sampling  # pylint: disable=import-error
-
         train_df = self._load_training_frame(dataset_spec)
         if len(dataset_spec.target_columns) != 1:
             raise ValueError("SMOTE requires exactly one target column.")
@@ -316,6 +357,19 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
         x_train = train_df[feature_cols].copy()
         y_train = train_df[target]
         k_neighbors = int(spec.extra.get("k_neighbors", 5))
+        if k_neighbors < 1:
+            raise ValueError(f"SMOTE k_neighbors must be positive; observed {k_neighbors}.")
+        sampling_strategy = spec.extra.get("sampling_strategy", "auto")
+        if callable(sampling_strategy) or not isinstance(sampling_strategy, (str, float, dict)):
+            raise TypeError(
+                "SMOTE sampling_strategy must be a JSON-serializable string, float, or dictionary."
+            )
+        try:
+            json.dumps(sampling_strategy, allow_nan=False)
+        except (TypeError, ValueError) as exc:
+            raise TypeError(
+                "SMOTE sampling_strategy must contain only finite JSON-serializable values."
+            ) from exc
         class_counts = y_train.value_counts(dropna=False)
         if len(class_counts) < 2:
             raise ValueError("SMOTE requires at least two target classes.")
@@ -327,42 +381,21 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
 
         categorical_columns = [column for column in feature_cols if column in dataset_spec.categorical_columns]
         categorical_indices = [feature_cols.index(column) for column in categorical_columns]
-        sampler_name: str
-        if not categorical_columns:
-            sampler = over_sampling.SMOTE(random_state=spec.seed, k_neighbors=k_neighbors)
-            x_resampled, y_resampled = sampler.fit_resample(x_train, y_train)
-            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
-            sampler_name = "SMOTE"
-        elif len(categorical_columns) == len(feature_cols):
-            sampler = over_sampling.SMOTEN(random_state=spec.seed, k_neighbors=k_neighbors)
-            x_resampled, y_resampled = sampler.fit_resample(x_train.astype("string"), y_train)
-            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
-            sampler_name = "SMOTEN"
-        else:
-            encoder = OrdinalEncoder(dtype=np.float64)
-            encoded_features = x_train.copy()
-            encoded_features[categorical_columns] = encoder.fit_transform(x_train[categorical_columns])
-            encoded_features = encoded_features.astype(float)
-            sampler = over_sampling.SMOTENC(
-                categorical_features=categorical_indices,
-                random_state=spec.seed,
-                k_neighbors=k_neighbors,
-            )
-            x_resampled, y_resampled = sampler.fit_resample(encoded_features, y_train)
-            sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
-            encoded_categories = sampled_df[categorical_columns].to_numpy(dtype=float)
-            for index, categories in enumerate(encoder.categories_):
-                encoded_categories[:, index] = np.clip(
-                    np.rint(encoded_categories[:, index]),
-                    0,
-                    len(categories) - 1,
-                )
-            sampled_df[categorical_columns] = encoder.inverse_transform(encoded_categories)
-            sampler_name = "SMOTENC"
+        sampler, sampler_name = self._create_sampler(
+            feature_columns=feature_cols,
+            categorical_columns=categorical_columns,
+            random_state=spec.seed,
+            k_neighbors=k_neighbors,
+            sampling_strategy=sampling_strategy,
+        )
+        x_resampled, y_resampled = sampler.fit_resample(x_train, y_train)
+        sampled_df = pd.DataFrame(x_resampled, columns=feature_cols)
         sampled_df[target] = y_resampled
         sampled_df = sampled_df[dataset_spec.column_names]
 
-        desired_rows = spec.num_samples or len(sampled_df)
+        desired_rows = len(sampled_df) if spec.num_samples is None else spec.num_samples
+        if desired_rows < 1:
+            raise ValueError(f"SMOTE num_samples must be positive; observed {desired_rows}.")
         replace = len(sampled_df) < desired_rows
         sampled_df = sampled_df.sample(n=desired_rows, replace=replace, random_state=spec.seed).reset_index(drop=True)
 
@@ -372,8 +405,11 @@ class SMOTEAdapter(BaseModelAdapter, _SampleFileEvaluatorMixin):
             spec.output_dir / "smote_metadata.json",
             {
                 "sampler": sampler_name,
+                "package": self.package_name,
+                "package_version": self.package_version,
                 "random_state": spec.seed,
                 "k_neighbors": k_neighbors,
+                "sampling_strategy": sampling_strategy,
                 "categorical_columns": categorical_columns,
                 "categorical_indices": categorical_indices,
                 "source_rows": len(train_df),

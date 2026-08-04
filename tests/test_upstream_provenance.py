@@ -18,7 +18,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     components = payload["components"]
 
     assert isinstance(components, dict)
-    assert set(components) == {"ctgan", "tabddpm", "tabdiff", "tabsyn", "tvae"}
+    assert set(components) == {"ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"}
     for component_id, component in components.items():
         assert isinstance(component, dict)
         spec = get_adapter_spec(component_id)
@@ -51,12 +51,13 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
+        "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
-    for model_id in ("ctgan", "tabddpm", "tabdiff", "tabsyn", "tvae"):
+    for model_id in ("ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
@@ -68,6 +69,10 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
 
     tabddpm = get_adapter_spec("tabddpm")
     assert tabddpm.revision_status == "pinned-complete-native-parity-validated"
+
+    smote = get_adapter_spec("smote")
+    assert smote.revision_status == "pinned-canonical-package-native-parity-validated"
+    assert smote.reproduction_target == "classical-oversampling-reference"
 
     # Restoring the primary TabSyn path does not audit its separately vendored baselines.
     assert get_adapter_spec("codi").modification_status == "compatibility-patched"
