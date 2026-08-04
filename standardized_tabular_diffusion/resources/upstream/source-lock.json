@@ -54,27 +54,19 @@
       "license": "MIT",
       "license_path": "TabDiff-main/LICENSE",
       "local_path": "TabDiff-main",
-      "modification_status": "semantic-patched",
-      "official_eligibility": "blocked-while-patched-upstream-evaluator-is-in-tree",
-      "patch_sets": [
-        {
-          "classification": "semantic-patched",
-          "files": [
-            "TabDiff-main/eval/mle/mle.py"
-          ],
-          "patch_set_id": "tabdiff-mle-evaluator-v1",
-          "status": "unapproved-experimental",
-          "summary": "Changes evaluator models, compute backend, objectives, randomness, error handling, and edge-case metric semantics. It is not part of the TabDiff generative algorithm and must not supply official leaderboard metrics."
-        }
-      ],
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-native-parity-and-central-evaluation-approval",
+      "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
           "data/",
-          "synthetic/"
+          "synthetic/",
+          "images/",
+          ".gitignore (repository-local ignore policy)"
         ],
-        "import_exact_matches": 30,
-        "import_shared_paths": 30,
-        "relation": "The initial non-data snapshot exactly matched all compared blobs at the pinned upstream commit; one evaluator file was modified in a later root commit."
+        "import_exact_matches": 27,
+        "import_shared_paths": 27,
+        "relation": "All 27 scoped files match the pinned method-author source after canonical line-ending normalization. The former local MLE evaluator patch was removed and the official evaluator restored."
       },
       "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
       "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
@@ -93,6 +85,33 @@
       "local_path": "TabSyn-main",
       "modification_status": "compatibility-patched",
       "official_eligibility": "blocked-pending-patch-isolation-and-native-parity",
+      "patch_sets": [
+        {
+          "classification": "compatibility-patched",
+          "files": [
+            "TabSyn-main/tabsyn/diffusion_utils.py",
+            "TabSyn-main/tabsyn/main.py",
+            "TabSyn-main/tabsyn/sample.py",
+            "TabSyn-main/tabsyn/vae/main.py",
+            "TabSyn-main/utils.py"
+          ],
+          "patch_set_id": "tabsyn-entrypoint-compat-v1",
+          "status": "unapproved-unvalidated",
+          "summary": "Adds working module entrypoints, CPU/device handling, configurable epoch/sample controls, and modern scheduler compatibility. The standardized adapter now pins the authoritative 10,001 diffusion-epoch default explicitly."
+        },
+        {
+          "classification": "compatibility-patched",
+          "files": [
+            "TabSyn-main/src/data.py",
+            "TabSyn-main/zero/__init__.py",
+            "TabSyn-main/zero/hardware.py",
+            "TabSyn-main/zero/random.py"
+          ],
+          "patch_set_id": "tabsyn-dependency-compat-v1",
+          "status": "unapproved-unvalidated",
+          "summary": "Adapts the scikit-learn OneHotEncoder API and substitutes a local zero compatibility module."
+        }
+      ],
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -128,33 +147,6 @@
           "bytes": 76470,
           "original_path": "TabSyn-main/tabsyn/vae/ckpt/sick/model.pt",
           "sha256": "1f1ef9db3e036da1215d5fb558660a517816fe14d3f199e7a74d2220a8ab8c39"
-        }
-      ],
-      "patch_sets": [
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/tabsyn/diffusion_utils.py",
-            "TabSyn-main/tabsyn/main.py",
-            "TabSyn-main/tabsyn/sample.py",
-            "TabSyn-main/tabsyn/vae/main.py",
-            "TabSyn-main/utils.py"
-          ],
-          "patch_set_id": "tabsyn-entrypoint-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adds working module entrypoints, CPU/device handling, configurable epoch/sample controls, and modern scheduler compatibility. The standardized adapter now pins the authoritative 10,001 diffusion-epoch default explicitly."
-        },
-        {
-          "classification": "compatibility-patched",
-          "files": [
-            "TabSyn-main/src/data.py",
-            "TabSyn-main/zero/__init__.py",
-            "TabSyn-main/zero/hardware.py",
-            "TabSyn-main/zero/random.py"
-          ],
-          "patch_set_id": "tabsyn-dependency-compat-v1",
-          "status": "unapproved-unvalidated",
-          "summary": "Adapts the scikit-learn OneHotEncoder API and substitutes a local zero compatibility module."
         }
       ],
       "snapshot_comparison": {
