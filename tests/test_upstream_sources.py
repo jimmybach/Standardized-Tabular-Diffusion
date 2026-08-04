@@ -200,3 +200,34 @@ def test_stasy_source_status_defaults_to_the_distributed_snapshot() -> None:
 
     assert result["status"] == "ready"
     assert Path(result["source_dir"]) == (repo_root / "TabSyn-main").resolve()
+
+
+def test_codi_manifest_locks_the_exact_tabsyn_benchmark_snapshot() -> None:
+    manifest = upstream_sources.load_source_manifest("codi")
+
+    assert manifest["upstream_commit"] == "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7"
+    assert manifest["upstream_model_tree"] == "85c16ccfb76fbf00db6b30450ca47e9928efa8d3"
+    assert manifest["license"]["declared_expression"] == "Apache-2.0"
+    assert manifest["authority"] == "benchmark-vendored"
+    assert manifest["distributed_source_path"] == "TabSyn-main"
+    assert manifest["method_author_repository"]["license_file_present"] is False
+    assert manifest["dependencies"]["libzero"]["wheel_sha256"] == (
+        "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d"
+    )
+    assert len(manifest["runtime_files"]) == 24
+
+
+def test_distributed_codi_source_matches_the_checksum_lock() -> None:
+    source_root = Path(__file__).resolve().parents[1] / "TabSyn-main"
+    result = upstream_sources.validate_upstream_source("codi", source_root)
+
+    assert result["upstream_commit"] == "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7"
+    assert result["runtime_files_verified"] == 24
+
+
+def test_codi_source_status_defaults_to_the_distributed_snapshot() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    result = upstream_sources.source_status("codi", repo_root=repo_root)
+
+    assert result["status"] == "ready"
+    assert Path(result["source_dir"]) == (repo_root / "TabSyn-main").resolve()

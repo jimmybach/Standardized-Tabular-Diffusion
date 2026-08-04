@@ -4,6 +4,8 @@ This document preserves historical local execution observations. It is not the m
 
 At the current release-preparation baseline, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. STaSy's claim is limited to the TabSyn benchmark snapshot. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
 
+CoDi now has a checksum-locked 24-file TabSyn-snapshot execution scope, strict dual-checkpoint handling, an exact-row compatibility boundary, and a dedicated CPU smoke preset. Its status remains `adapter-complete`, `experimental`, and `unsupported` until the mandatory nine-case Linux/Python 3.11 parity artifact is inspected and retained. The separate method-author repository has no declared license and materially differs from the TabSyn adaptation.
+
 CTAB-GAN+ no longer imports the semantically modified snapshot formerly embedded in the TabDDPM tree. The adapter now acquires five byte-exact files from locked method-author commit `6a6f901` into an ignored cache and does not patch them. Its mandatory six-case Linux/Python 3.11 protocol passed in run `30926267432`, and the inspected evidence is permanently retained, so its adapter status is `native-parity-validated`. The absent upstream license independently blocks redistribution, Official Results, and release claims.
 
 CTGAN has been moved from the legacy embedded `0.5.2.dev0` import path to the checksum-pinned official `ctgan==0.12.1` wheel. Its first mandatory parity run passed and is retained. The package is BUSL-1.1, so validation cannot by itself grant Official Results or release eligibility.
@@ -59,7 +61,7 @@ These adapters were reported as runnable in a prior environment, but they depend
 - `tabularargn`: optional-package adapter around `mostlyai-engine`; integrated in code, but not yet smoke-validated in this repository.
 - `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
 - `ctab-gan`: official-source classification path with strict source checks and a documented scikit-learn keyword-only API bridge; full-scale qualification remains pending.
-- `codi`: vendored baseline path under `TabSyn-main/baselines`, not yet smoke-validated through the shared presets.
+- `codi`: exact TabSyn benchmark snapshot with a dedicated preset and parity protocol; mandatory Linux/Python 3.11 evidence is still pending, and original-method claims remain blocked.
 
 ## Previously Reported Training Path, Sampling Guarded
 
