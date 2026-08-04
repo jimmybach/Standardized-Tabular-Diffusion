@@ -12,7 +12,7 @@
       "import_name": "zero",
       "wheel_filename": "libzero-0.0.8-py3-none-any.whl",
       "wheel_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
-      "resolution": "The upstream requirements file names zero, but the imported research utility API is supplied by libzero; the zero distribution is an unrelated circuit-analysis package."
+      "resolution": "The upstream requirements file names zero, but the imported research utility API is supplied by libzero; the zero distribution is an unrelated circuit-analysis package. The frozen Python 3.11 environment installs the official wheel without dependencies because its stale torch<2 metadata conflicts with the repository's validated torch 2.3 stack; numpy, pynvml, torch, and tqdm are locked separately."
     }
   },
   "files": [
