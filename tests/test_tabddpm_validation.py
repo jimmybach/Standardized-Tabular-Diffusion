@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from standardized_tabular_diffusion.validation.tabddpm import MANIFEST_RELATIVE_PATH, verify_sources
+from standardized_tabular_diffusion.validation.tabddpm import MANIFEST_RELATIVE_PATH, _sha256_lf, verify_sources
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabddpm" / "native-parity-run-30863212268.json"
@@ -27,6 +27,18 @@ def test_tabddpm_source_manifest_has_unique_complete_paths() -> None:
     assert len(zero_paths) == len(set(zero_paths)) == 7
     assert all(len(record["sha256_lf"]) == 64 for record in payload["files"])
     assert all(len(record["sha256"]) == 64 for record in payload["dependencies"]["libzero"]["vendored_modules"])
+
+
+def test_tabddpm_libzero_license_hash_is_line_ending_independent(tmp_path: Path) -> None:
+    payload = json.loads((REPO_ROOT / MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
+    expected = payload["dependencies"]["libzero"]["license_sha256_lf"]
+    source = (REPO_ROOT / "TabDDPM-main" / "zero" / "LICENSE.libzero").read_text(encoding="utf-8")
+    lf_path = tmp_path / "license-lf.txt"
+    crlf_path = tmp_path / "license-crlf.txt"
+    lf_path.write_bytes(source.replace("\r\n", "\n").encode())
+    crlf_path.write_bytes(source.replace("\r\n", "\n").replace("\n", "\r\n").encode())
+
+    assert _sha256_lf(lf_path) == _sha256_lf(crlf_path) == expected
 
 
 def test_tabddpm_native_parity_evidence_is_complete_and_immutable() -> None:

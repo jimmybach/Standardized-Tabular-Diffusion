@@ -58,10 +58,14 @@ def verify_sources(repo_root: Path) -> dict[str, Any]:
             failures.append({"path": str(path), "expected": record["sha256"], "actual": actual})
 
     license_path = repo_root / libzero["license_path"]
-    actual_license = "missing" if not license_path.is_file() else _sha256_file(license_path)
-    if actual_license != libzero["license_sha256"]:
+    actual_license = "missing" if not license_path.is_file() else _sha256_lf(license_path)
+    if actual_license != libzero["license_sha256_lf"]:
         failures.append(
-            {"path": str(license_path), "expected": libzero["license_sha256"], "actual": actual_license}
+            {
+                "path": str(license_path),
+                "expected": libzero["license_sha256_lf"],
+                "actual": actual_license,
+            }
         )
 
     if failures:

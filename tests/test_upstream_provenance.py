@@ -45,19 +45,26 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
+    evidence_paths = {
+        "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
+        "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+    }
     for model_id in ("tabddpm", "tabdiff", "tabsyn"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
+        assert spec.modification_status == "adapter-only"
+        assert spec.patch_set_ids == ()
+        assert evidence_paths[model_id] in spec.evidence_records
         assert spec.benchmark_track == "experimental"
         assert spec.support_level == "unsupported"
 
     tabddpm = get_adapter_spec("tabddpm")
-    assert tabddpm.validation_level.value == "native-parity-validated"
-    assert tabddpm.modification_status == "adapter-only"
-    assert tabddpm.benchmark_track == "experimental"
-    assert tabddpm.support_level == "unsupported"
-    assert "docs/evidence/tabddpm/native-parity-run-30863212268.json" in tabddpm.evidence_records
+    assert tabddpm.revision_status == "pinned-complete-native-parity-validated"
+
+    # Restoring the primary TabSyn path does not audit its separately vendored baselines.
+    assert get_adapter_spec("codi").modification_status == "compatibility-patched"
 
 
 def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> None:
