@@ -50,12 +50,12 @@ python -m pip install --no-deps .
 
 The protocol creates two isolated copies from the verified source manifest so that validation never writes data, checkpoints, or results into the working source tree. Each copy receives the same deterministic mixed-type binary-classification fixture: 30 training rows, 14 test rows, two numerical features, one categorical feature, one categorical target, and no missing values.
 
-Both paths use the official debug configuration: four optimizer epochs, four diffusion timesteps, CPU execution, disabled online logging, and deterministic seed 0. The numeric-looking fixture column names intentionally exercise the upstream plotting path without modifying its source. The fixture is an execution/parity case, not a model-quality benchmark.
+The upstream `--debug` flag is not suitable for a smoke test: it leaves training at 8,000 epochs and sets the sampling batch to 10,000 rows. Instead, after source integrity is verified, both isolated copies receive the same predeclared TOML hyperparameter override: one transformer layer, time dimension 64, four optimizer epochs, four diffusion timesteps, batch size 32, validation every two epochs, and sampling batch size 32. This changes experimental configuration only; it does not modify Python algorithm source. Both paths use CPU execution, disabled online logging, and deterministic seed 0. The numeric-looking fixture column names exercise the upstream plotting path. The fixture is an execution/parity case, not a model-quality benchmark.
 
 The native path calls `main.py` directly for training and testing. The adapter path performs the same train and sample operations. The following must all pass:
 
 1. all 27 scoped source hashes match the pinned manifest;
-2. cached runtime configs are semantically exact;
+2. the two predeclared runtime TOML overrides and cached runtime configs are semantically exact;
 3. every tensor in the epoch-4 checkpoint is exactly equal;
 4. training-time samples and density metrics are exact;
 5. final generated CSV files are byte-for-byte exact;
