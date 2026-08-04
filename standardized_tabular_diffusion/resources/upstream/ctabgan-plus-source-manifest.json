@@ -1,0 +1,49 @@
+{
+  "archive": {
+    "bytes": 1103324,
+    "format": "zip",
+    "root_prefix": "CTAB-GAN-Plus-6a6f90188cca3dac2c533fd5e8e7f20de074365b/",
+    "sha256": "c3088a307f2f8ee8f374095096da365ddc33931ad244056c7fed084830059d47",
+    "url": "https://codeload.github.com/Team-TUD/CTAB-GAN-Plus/zip/6a6f90188cca3dac2c533fd5e8e7f20de074365b"
+  },
+  "authority": "method-author",
+  "license": {
+    "declared_expression": null,
+    "license_file_present": false,
+    "redistribution_status": "not-authorized",
+    "review_status": "upstream-public-no-license-declared"
+  },
+  "manifest_schema_version": "1.0.0",
+  "model_id": "ctab-gan-plus",
+  "repository": "https://github.com/Team-TUD/CTAB-GAN-Plus",
+  "runtime_files": [
+    {
+      "bytes": 2364,
+      "path": "model/ctabgan.py",
+      "sha256": "bf3fb6a3e067c826e8221a8f65da852bd49fe5b6b67e71368a26b8f4ae441990"
+    },
+    {
+      "bytes": 6279,
+      "path": "model/pipeline/data_preparation.py",
+      "sha256": "9bd8353ba60016cefe209310ea0658fae39631a99f7226506161a8a9bd7d454f"
+    },
+    {
+      "bytes": 8040,
+      "path": "model/privacy_utils/rdp_accountant.py",
+      "sha256": "226196b7b0be8689beaf3a3a2f36b8f6750f09e83c84bbc89ea34d8d54e42da8"
+    },
+    {
+      "bytes": 21711,
+      "path": "model/synthesizer/ctabgan_synthesizer.py",
+      "sha256": "f7c1132c9b41438cedc1db41142f2db9467b971a3844b75aa2c170b12085560f"
+    },
+    {
+      "bytes": 18238,
+      "path": "model/synthesizer/transformer.py",
+      "sha256": "c1fa863ec9657a7e38af8741adb89ca4478057c9772b1fdc451b6ea24efc1728"
+    }
+  ],
+  "upstream_commit": "6a6f90188cca3dac2c533fd5e8e7f20de074365b",
+  "upstream_model_tree": "645e6a9d5129346f5d4e29085f1bafd5de4531fd",
+  "upstream_tree": "f5a08d81b0309d6635bf1c7a646965a34913fa93"
+}

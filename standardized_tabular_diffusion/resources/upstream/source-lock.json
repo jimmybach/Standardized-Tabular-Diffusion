@@ -1,5 +1,92 @@
 {
   "components": {
+    "ctab-gan-plus": {
+      "adapter_ids": [
+        "ctab-gan-plus"
+      ],
+      "archive_lock": {
+        "bytes": 1103324,
+        "format": "zip",
+        "sha256": "c3088a307f2f8ee8f374095096da365ddc33931ad244056c7fed084830059d47",
+        "url": "https://codeload.github.com/Team-TUD/CTAB-GAN-Plus/zip/6a6f90188cca3dac2c533fd5e8e7f20de074365b"
+      },
+      "authoritative_repository": "https://github.com/Team-TUD/CTAB-GAN-Plus",
+      "authority": "method-author",
+      "component_id": "ctab-gan-plus",
+      "distribution_form": "source-on-demand",
+      "legacy_snapshot_disposition": {
+        "bytes_removed": 146977,
+        "files_removed": 18,
+        "history_rewritten": false,
+        "imported_at_repository_commit": "3b7caea921cfbc5ea2ee8718e0c8e8753d025d26",
+        "original_path": "TabDDPM-main/CTAB-GAN-Plus",
+        "reason": "The embedded snapshot was semantically modified, could not be tied to the current official tree, and had no standalone redistribution license. It remains recoverable through Git history."
+      },
+      "license": "NONE-DECLARED",
+      "license_review": {
+        "license_file_present": false,
+        "redistribution_status": "not-authorized",
+        "status": "upstream-public-no-license-declared"
+      },
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-runtime-and-release-gates-pending",
+      "patch_sets": [],
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/ctabgan-plus-source-manifest.json",
+      "source_treatment": "download-five-byte-exact-runtime-files-to-ignored-local-cache",
+      "upstream_commit": "6a6f90188cca3dac2c533fd5e8e7f20de074365b",
+      "upstream_model_tree": "645e6a9d5129346f5d4e29085f1bafd5de4531fd",
+      "upstream_tree": "f5a08d81b0309d6635bf1c7a646965a34913fa93",
+      "validation": {
+        "artifact": {
+          "digest": "sha256:f3abfc1e2bbd69d7858e2ce1e5b1ab0099e9b8fa06b95711a762dd16a06a2729",
+          "evidence_file_sha256": "df3bbf0dd46d34e8d57551048c7b7abe60340eddb3738e31d400e44344c5e5f2",
+          "expires_at": "2026-11-02T15:51:33Z",
+          "github_artifact_id": 8899232990,
+          "name": "ctabgan-plus-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json"
+        },
+        "environment": {
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+          "python": "3.11.15",
+          "python-dateutil": "2.9.0.post0",
+          "pytz": "2026.3.post1",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "six": "1.17.0",
+          "threadpoolctl": "3.6.0",
+          "torch": "2.3.0+cpu",
+          "tqdm": "4.66.5",
+          "tzdata": "2026.3"
+        },
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "473af6334d6f367b75b35736370c4dfa6adf85bf",
+        "protocol_id": "ctabgan-plus-native-parity-v1",
+        "repository_commit": "48837271b693b8af396f4f35cb68707b5c52e5bc",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "adapter_metadata_valid": true,
+          "categorical_domains_valid": true,
+          "checkpoint_state_exact": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "parity_cases_passed": 6,
+          "parity_cases_total": 6,
+          "rng_state_restored": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "seed_values_passed": 3,
+          "source_runtime_files_verified": 5,
+          "variants_passed": 2
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T15:52:24Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432/job/92049288002",
+        "workflow_run_id": 30926267432,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432"
+      }
+    },
     "ctgan": {
       "adapter_ids": [
         "ctgan"
