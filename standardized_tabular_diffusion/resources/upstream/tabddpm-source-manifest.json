@@ -7,7 +7,7 @@
       "distribution_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
       "license": "MIT",
       "license_path": "TabDDPM-main/zero/LICENSE.libzero",
-      "license_sha256": "ee1085dc4d61b0af4d1a8e196af043e8221841c3de969236719a50b9310cae2c",
+      "license_sha256_lf": "ee1085dc4d61b0af4d1a8e196af043e8221841c3de969236719a50b9310cae2c",
       "package": "libzero",
       "source_repository": "https://github.com/Yura52/zero",
       "treatment": "Exact source modules from the official wheel are vendored because its torch<2 dependency metadata is incompatible with the supported Python 3.11 and torch 2.3 validation environment.",

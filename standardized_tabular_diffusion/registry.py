@@ -126,7 +126,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         authority="benchmark-vendored",
         distribution="source",
         target="benchmark-snapshot",
-        modification="official-unmodified",
+        modification="compatibility-patched",
         source_root="TabSyn-main",
     ),
     "ctab-gan": _spec(
