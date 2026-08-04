@@ -126,6 +126,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
         "ctgan",
         "nrgboost",
         "smote",
+        "stasy",
         "tabddpm",
         "tabdiff",
         "tabsyn",

@@ -465,9 +465,44 @@
       "upstream_model_tree": "4f56a7223d71d6b75c1698824c5d0245bf716bc6",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:0f758862ea98570d97857914d0c8023fc5d72a1fe7b5e0f67367c845a99e662b",
+          "artifact_id": 8903307370,
+          "evidence_file_sha256": "53c6bdbe66d38ce1a3d91cee4472ffbb8379c5d7a2ac3aa8c4ffcfa86f44cb67",
+          "permanent_evidence_path": "docs/evidence/stasy/native-parity-run-30936275831.json",
+          "retention_days": 90
+        },
+        "environment": {
+          "libzero": "0.0.8",
+          "numpy": "1.26.4",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit_learn": "1.5.2",
+          "torch": "2.3.0+cpu"
+        },
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "95f339b60916c82e2cd3987a0e30e369744781ee",
         "protocol_id": "stasy-tabsyn-snapshot-parity-v1",
-        "status": "pending-linux-python311-evidence"
+        "repository_commit": "ccfb02e29aa1e9e14f25816e86ba74c3ec088a87",
+        "result_summary": {
+          "adapter_checkpoint_outside_source": true,
+          "adapter_source_remained_exact": true,
+          "checkpoint_ema_exact": true,
+          "checkpoint_model_exact": true,
+          "checkpoint_optimizer_exact": true,
+          "checkpoint_step_and_epoch_exact": true,
+          "finite_numerical_output": true,
+          "missing_values": 0,
+          "parity_cases_passed": 9,
+          "requested_rows_exact": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "seed_cases": [0, 19, 73],
+          "variants": ["binary", "multiclass", "regression"]
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831",
+        "status": "pass",
+        "workflow_run_id": 30936275831
       }
     },
     "tvae": {
