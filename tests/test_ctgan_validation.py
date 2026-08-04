@@ -12,6 +12,8 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-30910275922.json"
+EVIDENCE_SHA256 = "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
 
 
 def _write_test_wheel(path: Path, *, unsafe_member: str | None = None) -> str:
@@ -34,11 +36,34 @@ def test_ctgan_package_lock_matches_registry_and_protocol() -> None:
     assert spec.upstream_repository == ctgan_validation.UPSTREAM_REPOSITORY
     assert spec.upstream_revision == ctgan_validation.UPSTREAM_COMMIT
     assert spec.install_extra == "ctgan"
-    assert spec.validation_level.value == "adapter-complete"
+    assert spec.validation_level.value == "native-parity-validated"
     assert source_lock["package_lock"]["version"] == ctgan_validation.PACKAGE_VERSION
     assert source_lock["package_lock"]["sha256"] == ctgan_validation.WHEEL_SHA256
     assert source_lock["upstream_tree"] == ctgan_validation.UPSTREAM_TREE
     assert source_lock["license"] == ctgan_validation.LICENSE_EXPRESSION
+
+
+def test_retained_ctgan_evidence_is_immutable_and_complete() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    evidence = json.loads(evidence_bytes)
+
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == ctgan_validation.PROTOCOL_ID
+    assert evidence["repository_commit"] == "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e"
+    assert evidence["environment"]["platform"].startswith("Linux-")
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["torch"] == "2.3.0+cpu"
+    assert evidence["source"]["installed_distribution"]["record_files_verified"] == 20
+    assert evidence["source"]["wheel"]["sha256"] == ctgan_validation.WHEEL_SHA256
+    assert evidence["seed_cases"] == [0, 19, 73]
+    assert [case["seed"] for case in evidence["cases"]] == [0, 19, 73]
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(ctgan_validation._case_passed(case["comparisons"]) for case in evidence["cases"])
+    assert all(
+        case["adapter_artifacts"]["sample_sha256"] == case["native_artifacts"]["sample_sha256"]
+        for case in evidence["cases"]
+    )
 
 
 def test_ctgan_wheel_validation_checks_identity_and_license(tmp_path: Path, monkeypatch) -> None:

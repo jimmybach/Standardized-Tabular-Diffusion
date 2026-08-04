@@ -1,6 +1,6 @@
 # CTGAN Validation Protocol
 
-Status: mandatory Linux/Python 3.11 run pending; adapter remains `adapter-complete`
+Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
 
 Protocol ID: `ctgan-native-parity-v1`
 
@@ -79,6 +79,12 @@ The native path directly constructs, seeds, fits, saves, loads, and samples the 
 
 There is no numerical tolerance: deterministic parity must be exact.
 
+## Retained result
+
+GitHub Actions run [`30910275922`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922) passed this protocol for all three seed cases on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. The run verified 20 hash-bearing installed-package records and produced byte-exact native/adapter sample CSV files for every seed. The inspected JSON is permanently retained at `docs/evidence/ctgan/native-parity-run-30910275922.json` with SHA-256 `748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570`.
+
+The corresponding GitHub artifact is `8892774473`, with artifact digest `sha256:96ba5b9dde6eed95fa1972990c6a4231e43f204bdcb99a4a0d7837099ff3b71a`. The permanent repository copy remains authoritative after the temporary artifact expires.
+
 ## Execution and promotion rule
 
 The authoritative command is:
@@ -91,4 +97,4 @@ python -m standardized_tabular_diffusion.validation.ctgan \
   --wheel-path /tmp/ctgan-wheel/ctgan-0.12.1-py3-none-any.whl
 ```
 
-`.github/workflows/ctgan-validation.yml` runs this command and retains evidence for 90 days. Any package, dependency, adapter, or protocol change requires a new run. CTGAN remains `adapter-complete`, `experimental`, `unsupported`, and excluded from Official Results until a passing artifact has been inspected and permanently recorded.
+`.github/workflows/ctgan-validation.yml` runs this command and retains the workflow artifact for 90 days. Any package, dependency, adapter, or protocol change requires a new run. The inspected passing evidence promotes CTGAN to `native-parity-validated`; it remains `experimental`, `unsupported`, and excluded from Official Results pending every separate gate described above.

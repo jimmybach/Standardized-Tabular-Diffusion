@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/ctgan-validation.yml"
+      - ".gitattributes"
       - "requirements-ctgan-validation.txt"
       - "pyproject.toml"
       - "standardized_tabular_diffusion/models/sample_baselines.py"
@@ -18,6 +19,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/ctgan-validation.yml"
+      - ".gitattributes"
       - "requirements-ctgan-validation.txt"
       - "pyproject.toml"
       - "standardized_tabular_diffusion/models/sample_baselines.py"

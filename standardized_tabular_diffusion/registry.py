@@ -156,14 +156,16 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         install_extra="ctgan",
         upstream_repository="https://github.com/sdv-dev/CTGAN",
         upstream_revision="826da23f8f9385ad15fd206ecad691e04cb0ccdc",
-        revision_status="pinned-official-package-native-parity-pending",
+        revision_status="pinned-official-package-native-parity-validated",
         license_status="BUSL-1.1 package dependency; official-track and release legal review required",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/CTGAN_VALIDATION.md",
+            "docs/evidence/ctgan/native-parity-run-30910275922.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/ctgan-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "goggle": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",
