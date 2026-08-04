@@ -32,5 +32,5 @@
     "smoke",
     "ctab-gan-plus"
   ],
-  "notes": "Small CPU smoke preset for the vendored CTAB-GAN+ adapter on adult."
+  "notes": "Small CPU smoke preset for the checksum-locked official CTAB-GAN+ source. Materialize the source before running."
 }

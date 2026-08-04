@@ -27,6 +27,26 @@ def temporary_sys_path(path: Path) -> Iterator[None]:
 
 
 @contextlib.contextmanager
+def isolated_module_tree(path: Path, namespace: str) -> Iterator[None]:
+    """Import one uninstalled source tree without leaking or reusing its namespace."""
+
+    prefix = f"{namespace}."
+    previous = {
+        name: module for name, module in tuple(sys.modules.items()) if name == namespace or name.startswith(prefix)
+    }
+    for name in previous:
+        sys.modules.pop(name, None)
+    try:
+        with temporary_sys_path(path):
+            yield
+    finally:
+        for name in tuple(sys.modules):
+            if name == namespace or name.startswith(prefix):
+                sys.modules.pop(name, None)
+        sys.modules.update(previous)
+
+
+@contextlib.contextmanager
 def disable_torchvision_for_transformers() -> Iterator[None]:
     """Temporarily prevent optional torchvision probing by Transformers."""
 

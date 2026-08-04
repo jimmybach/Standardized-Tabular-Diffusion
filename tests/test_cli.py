@@ -354,6 +354,49 @@ def test_cli_download_dataset_dispatches_safe_fetch(monkeypatch, capsys, tmp_pat
     assert payload["download"]["cached"] is False
 
 
+def test_cli_materialize_model_source_dispatches_locked_acquisition(monkeypatch, capsys, tmp_path: Path) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_materialize(model_id, *, repo_root, destination, refresh, timeout_seconds):
+        observed.update(
+            model_id=model_id,
+            repo_root=repo_root,
+            destination=destination,
+            refresh=refresh,
+            timeout_seconds=timeout_seconds,
+        )
+        return {"status": "ready", "upstream_commit": "locked"}
+
+    monkeypatch.setattr(cli, "materialize_upstream_source", fake_materialize)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "materialize-model-source",
+            "--model",
+            "ctab-gan-plus",
+            "--repo-root",
+            str(tmp_path),
+            "--destination",
+            str(tmp_path / "source"),
+            "--refresh",
+            "--timeout-seconds",
+            "12",
+        ],
+    )
+
+    cli.main()
+    assert json.loads(capsys.readouterr().out)["status"] == "ready"
+    assert observed == {
+        "model_id": "ctab-gan-plus",
+        "repo_root": str(tmp_path),
+        "destination": str(tmp_path / "source"),
+        "refresh": True,
+        "timeout_seconds": 12.0,
+    }
+
+
 def test_cli_materialize_dataset_forwards_official_source_controls(monkeypatch, capsys, tmp_path: Path) -> None:
     observed: dict[str, object] = {}
 

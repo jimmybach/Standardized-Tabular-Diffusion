@@ -2,7 +2,9 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+
+CTAB-GAN+ no longer imports the semantically modified snapshot formerly embedded in the TabDDPM tree. The adapter now acquires five byte-exact files from locked method-author commit `6a6f901` into an ignored cache and does not patch them. Its mandatory six-case Linux/Python 3.11 protocol passed in run `30926267432`, and the inspected evidence is permanently retained, so its adapter status is `native-parity-validated`. The absent upstream license independently blocks redistribution, Official Results, and release claims.
 
 CTGAN has been moved from the legacy embedded `0.5.2.dev0` import path to the checksum-pinned official `ctgan==0.12.1` wheel. Its first mandatory parity run passed and is retained. The package is BUSL-1.1, so validation cannot by itself grant Official Results or release eligibility.
 
@@ -10,6 +12,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 
 ## Current Retained Validation
 
+- `ctab-gan-plus`: passed all six classification/regression and seed cases in `ctabgan-plus-native-parity-v1` GitHub Actions run `30926267432`; see `docs/CTABGAN_PLUS_VALIDATION.md` and the permanent JSON evidence record. The absent upstream license remains an independent redistribution and release gate.
 - `tabddpm`: passed `tabddpm-native-parity-v1` for the `(training, sampling)` seed pairs `(0, 23)`, `(17, 47)`, and `(101, 89)` in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabdiff`: passed `tabdiff-native-parity-v1` in GitHub Actions run `30866879879`; see `docs/TABDIFF_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabsyn`: passed `tabsyn-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30871758645`; see `docs/TABSYN_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
@@ -33,7 +36,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `goggle`
 - `arf`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTAB-GAN+, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
