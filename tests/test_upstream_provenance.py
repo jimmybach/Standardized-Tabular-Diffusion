@@ -24,6 +24,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
+        "goggle",
         "nrgboost",
         "smote",
         "stasy",
@@ -43,10 +44,14 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         elif component["distribution_form"] == "package":
             assert component["package_lock"]["sha256"]
             assert component["license_url"].startswith("https://")
+        elif component["license"] == "NONE-DECLARED":
+            assert component["distribution_form"] == "source-on-demand"
+            assert component["license_review"]["redistribution_status"] == "not-authorized"
+            assert (REPO_ROOT / component["source_manifest"]).is_file()
         else:
             assert component["distribution_form"] == "source-on-demand"
-            assert component["license"] == "NONE-DECLARED"
-            assert component["license_review"]["redistribution_status"] == "not-authorized"
+            assert component["license"] == "MIT"
+            assert component["source_treatment"].endswith("without-patches")
             assert (REPO_ROOT / component["source_manifest"]).is_file()
 
 

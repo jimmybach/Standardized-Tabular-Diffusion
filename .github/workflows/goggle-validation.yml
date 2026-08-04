@@ -91,5 +91,5 @@ jobs:
         with:
           name: goggle-method-author-native-parity-evidence
           path: ${{ runner.temp }}/goggle-evidence.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90

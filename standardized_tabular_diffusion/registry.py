@@ -215,7 +215,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "standardized_tabular_diffusion.models.goggle",
         "GoggleAdapter",
         authority="method-author",
-        distribution="source",
+        distribution="source-on-demand",
         install_extra="goggle",
         upstream_repository="https://github.com/vanderschaarlab/GOGGLE",
         upstream_revision="1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
