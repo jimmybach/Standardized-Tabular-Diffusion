@@ -1,6 +1,6 @@
 # CTAB-GAN 验证说明
 
-状态：协议已实现；等待权威 Linux/Python 3.11 运行
+状态：native-parity-validated；Official Results 与发布支持仍待完成
 
 ## 声明边界
 
@@ -97,6 +97,19 @@ python -m standardized_tabular_diffusion.validation.ctabgan \
 
 `.github/workflows/ctabgan-validation.yml` 执行权威协议，并将 JSON 证据保留 90 天。源码、适配器、兼容行为、协议或环境任何变化都会使旧证据失效，必须重新运行并审阅新证据。
 
+## 已保留的 Linux 证据
+
+Pull Request 工作流运行 [`30930939961`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961) 中的作业 [`92065163118`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961/job/92065163118) 已在 Linux/Python 3.11 上通过。经审阅的 artifact 证明：
+
+- 二分类/多分类 × 种子的 6/6 用例全部通过；
+- 生成器/checkpoint 状态签名完全一致；
+- 样本 CSV 字节和解析后的 DataFrame 完全一致；
+- 七个选定源码文件、适配器 manifest 和元数据全部有效；
+- 数值、类别域和缺失值检查全部通过；
+- 两条路径均恢复了 NumPy 随机状态和全局 warning 状态。
+
+经审阅的 JSON 已永久保存在 `docs/evidence/ctabgan/native-parity-run-30930939961.json`，SHA-256 为 `41788d11578c55530b55fbf392412de361ec2769c63329a3174fa15c6905d0c6`，大小为 96,534 字节。对应 GitHub artifact ID 为 `8901113892`，压缩包摘要为 `sha256:0ce878b402b284ae34e5f13d96e52480f110a7873d511670b7707b6e4cee04ae`，到期日为 2026-11-02。
+
 ## 当前决定
 
-完整的本地六用例协议已在 Python 3.11 和冻结依赖版本下通过，但这只是实现证据，不是权威平台声明。在 Linux artifact 被检查并永久保留前，注册表仍保持 `adapter-complete`、`experimental` 和 `unsupported`。即使之后提升到 native parity，Official Results 和发布支持仍需分别通过其他门槛。
+经审阅的 Linux 证据将 CTAB-GAN 提升为 `native-parity-validated`。它仍是 `experimental`、`unsupported`，且不进入 Official Results。Apache-2.0 已解决源码再分发问题，但数据集准入、中央评测、完整规模运行资格、治理和发布测试仍待完成。

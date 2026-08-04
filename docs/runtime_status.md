@@ -13,7 +13,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 ## Current Retained Validation
 
 - `ctab-gan-plus`: passed all six classification/regression and seed cases in `ctabgan-plus-native-parity-v1` GitHub Actions run `30926267432`; see `docs/CTABGAN_PLUS_VALIDATION.md` and the permanent JSON evidence record. The absent upstream license remains an independent redistribution and release gate.
-- `ctab-gan`: the former semantic fork has been replaced by checksum-locked Apache-2.0 official source. All six local binary/multiclass and seed parity cases pass under Python 3.11; authoritative Linux evidence is pending, so the registry remains `adapter-complete`.
+- `ctab-gan`: the former semantic fork has been replaced by checksum-locked Apache-2.0 official source. All six binary/multiclass and seed parity cases passed exactly in retained Linux/Python 3.11 run `30930939961`; the registry is `native-parity-validated` while Official Results and release gates remain pending.
 - `tabddpm`: passed `tabddpm-native-parity-v1` for the `(training, sampling)` seed pairs `(0, 23)`, `(17, 47)`, and `(101, 89)` in GitHub Actions run `30863212268`; see `docs/TABDDPM_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabdiff`: passed `tabdiff-native-parity-v1` in GitHub Actions run `30866879879`; see `docs/TABDIFF_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
 - `tabsyn`: passed `tabsyn-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30871758645`; see `docs/TABSYN_VALIDATION.md` and the permanent JSON evidence record. This is not an Official Results or release-support claim.
