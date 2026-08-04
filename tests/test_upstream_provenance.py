@@ -20,6 +20,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
 
     assert isinstance(components, dict)
     assert set(components) == {
+        "codi",
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
@@ -67,6 +68,7 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
+        "codi": "docs/evidence/codi/native-parity-run-30941940893.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
@@ -79,6 +81,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
     for model_id in (
+        "codi",
         "ctab-gan",
         "ctab-gan-plus",
         "ctgan",
@@ -131,7 +134,57 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
             ),
         }
     ]
-    assert get_adapter_spec("codi").modification_status == "compatibility-patched"
+    codi = get_adapter_spec("codi")
+    assert codi.modification_status == "adapter-only"
+    assert codi.reproduction_target == "tabsyn-benchmark-snapshot"
+    assert codi.validation_level.value == "native-parity-validated"
+    assert codi.revision_status == "pinned-exact-tabsyn-snapshot-parity-validated"
+    codi_lock = _load_source_lock()["components"]["codi"]
+    assert codi_lock["snapshot_comparison"]["exact_local_codi_source_files"] == 11
+    assert codi_lock["selected_runtime_files"] == 24
+    assert codi_lock["method_author_source"]["license_file_present"] is False
+    assert codi_lock["method_author_source"]["exact_shared_paths"] == 5
+    assert codi_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
+    assert codi_lock["dependency_resolution"]["actual_runtime_dependencies"] == {"tqdm": "4.66.5"}
+
+
+def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    codi = payload["components"]["codi"]
+    assert isinstance(codi, dict)
+
+    validation = codi["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30941940893
+    assert validation["pull_request_head_commit"] == "bcfc4dd1d6b219c578bac44c4bd85606158bfb83"
+    assert validation["repository_commit"] == "b0a380cd01ee08378742c231ec5811351103b20c"
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["continuous_checkpoint_state_exact"] is True
+    assert validation["result_summary"]["discrete_checkpoint_state_exact"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["result_summary"]["sample_frames_exact"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    evidence_bytes = evidence_path.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
+    assert evidence_bytes.endswith(b"\n")
+    assert validation["artifact"]["evidence_file_sha256"] == validation["artifact"][
+        "downloaded_evidence_sha256"
+    ]
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert evidence["status"] == "pass"
+    assert evidence["reproduction_target"] == "tabsyn-benchmark-snapshot"
+    assert evidence["environment"]["tqdm"] == "4.66.5"
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(case["comparisons"]["checkpoints"]["pair_state_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["samples"]["exact_bytes"] for case in evidence["cases"])
+    assert "benchmark-snapshot-not-method-author-original" in codi["official_eligibility"]
 
 
 def test_stasy_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:

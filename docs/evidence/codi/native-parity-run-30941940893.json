@@ -1,0 +1,1309 @@
+{
+  "cases": [
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 1,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "fddd526492953ab86d1c64eeea353046d41d9f755b097792bae1b423473e7519",
+            "native_sha256": "fddd526492953ab86d1c64eeea353046d41d9f755b097792bae1b423473e7519",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "b64698f00c299ce6f41f2f0b0bf4c88c9d2e3d85737c711d45d3e2c4f2698375",
+            "native_sha256": "b64698f00c299ce6f41f2f0b0bf4c88c9d2e3d85737c711d45d3e2c4f2698375",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "7868b0b8c0949f55b7badda3343af14d01e2b6e7348cea8b5126bf2878963564",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "7868b0b8c0949f55b7badda3343af14d01e2b6e7348cea8b5126bf2878963564",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 2,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "4ccd67e62c868a058afc44a783b36298f1d092fcb36e01bddb4fd7576fd64d3c",
+            "native_sha256": "4ccd67e62c868a058afc44a783b36298f1d092fcb36e01bddb4fd7576fd64d3c",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "e34dded38e030c2c102706797b032acaf6ee9ca337696dd144b063323ce49e03",
+            "native_sha256": "e34dded38e030c2c102706797b032acaf6ee9ca337696dd144b063323ce49e03",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "22f730ef39b37fccc5fcaef32b4844f63ef78b9c0024fff6ed0b5a5a826bed52",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "22f730ef39b37fccc5fcaef32b4844f63ef78b9c0024fff6ed0b5a5a826bed52",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-02-binary-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 3,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "e561862b5aa3d763b2663ff3899a5db2f8bd6d4452db9faf8732f887361a8f0e",
+            "native_sha256": "e561862b5aa3d763b2663ff3899a5db2f8bd6d4452db9faf8732f887361a8f0e",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "c25364cd37e65119ce091defe0b2587823abed64b3d1e2ab1e28ff0323ef1fb7",
+            "native_sha256": "c25364cd37e65119ce091defe0b2587823abed64b3d1e2ab1e28ff0323ef1fb7",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "207f1e7fe1080b8555e193f9d23c78c784b08d1eb09f8e49f1b9b2522c867c88",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "207f1e7fe1080b8555e193f9d23c78c784b08d1eb09f8e49f1b9b2522c867c88",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-03-binary-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 4,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "a94c0b1ce59f05bbb594b7bf57abb1802dc6fdd533f05a954e87385d4e554a81",
+            "native_sha256": "a94c0b1ce59f05bbb594b7bf57abb1802dc6fdd533f05a954e87385d4e554a81",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "9f66011e75c17a9f869c9a5c022da78d47db07eb1c0821192be9674f4e0da1cd",
+            "native_sha256": "9f66011e75c17a9f869c9a5c022da78d47db07eb1c0821192be9674f4e0da1cd",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "c57ddb13402737b0210c8bd4a6b6ff555d40d83d13b0bd78fd0910ba1ac479b0",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "c57ddb13402737b0210c8bd4a6b6ff555d40d83d13b0bd78fd0910ba1ac479b0",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-04-multiclass-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 5,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "65277d55063256814342fea7ddc8784af1667e6896e9ee2b7f98bcabfd0f5360",
+            "native_sha256": "65277d55063256814342fea7ddc8784af1667e6896e9ee2b7f98bcabfd0f5360",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "09e4b7bc858f639e6319aa31a7ac89c8ce7cde854cd32475ef0d392feb65581b",
+            "native_sha256": "09e4b7bc858f639e6319aa31a7ac89c8ce7cde854cd32475ef0d392feb65581b",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "7eeb8c5058f99661bb269d2494092c797824ff79450a65c3c3888c4d4979562a",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "7eeb8c5058f99661bb269d2494092c797824ff79450a65c3c3888c4d4979562a",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-05-multiclass-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 6,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "5f415924a59b110ab8750df8a216be3309486b63fe3f103ac556d09081f9179e",
+            "native_sha256": "5f415924a59b110ab8750df8a216be3309486b63fe3f103ac556d09081f9179e",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "52b714ad52bc293ee34eb76395c804ee93ab3cdc6465c314921aa5ffc24a1907",
+            "native_sha256": "52b714ad52bc293ee34eb76395c804ee93ab3cdc6465c314921aa5ffc24a1907",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "8992e36863e6ba85da9722c1f0fb8b00e403dc3e1ebc07b7cc56aae5dbe91e3a",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "8992e36863e6ba85da9722c1f0fb8b00e403dc3e1ebc07b7cc56aae5dbe91e3a",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-06-multiclass-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 7,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "0f37e73d122c57c90bdcc9b4b1efa78cab76b0ae6a0a1339fd997670b0f683b5",
+            "native_sha256": "0f37e73d122c57c90bdcc9b4b1efa78cab76b0ae6a0a1339fd997670b0f683b5",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "d83ecd3884071de3c547b8e86cc450851d280fd5f2d7aa89c3fb7b334f7b5af0",
+            "native_sha256": "d83ecd3884071de3c547b8e86cc450851d280fd5f2d7aa89c3fb7b334f7b5af0",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "d8fbdc530dcf4e9c6e274ddb53d628e013ca9eafd5cce9a7735d5e9c2fc77057",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "d8fbdc530dcf4e9c6e274ddb53d628e013ca9eafd5cce9a7735d5e9c2fc77057",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-07-regression-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 8,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "3981683c65e8f0dace336812efd9041fa7b712ff05f122e2d533a27bd575a912",
+            "native_sha256": "3981683c65e8f0dace336812efd9041fa7b712ff05f122e2d533a27bd575a912",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "52859c304aaf9f76bb26b3831b1e6bc719fc456c90df08b7b41d1f18c16cfdd3",
+            "native_sha256": "52859c304aaf9f76bb26b3831b1e6bc719fc456c90df08b7b41d1f18c16cfdd3",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "c1c7607ce68211c78dd5ac8976f43e86c3a27942b41d0ce8f8377d249dd5358a",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "c1c7607ce68211c78dd5ac8976f43e86c3a27942b41d0ce8f8377d249dd5358a",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-08-regression-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_runtime": {
+        "T": 2,
+        "activation": "relu",
+        "beta_1": 1e-05,
+        "beta_T": 0.02,
+        "encoder_dim_con": [
+          8,
+          16,
+          8
+        ],
+        "encoder_dim_dis": [
+          8,
+          16,
+          8
+        ],
+        "eval_batch_size": 8,
+        "grad_clip": 1.0,
+        "lambda_con": 0.2,
+        "lambda_dis": 0.2,
+        "lr_con": 0.002,
+        "lr_dis": 0.002,
+        "mean_type": "epsilon",
+        "nf_con": 4,
+        "nf_dis": 4,
+        "num_threads": 1,
+        "sample_step": 2000,
+        "total_epochs_both": 1,
+        "training_batch_size": 8,
+        "var_type": "fixedsmall"
+      },
+      "case": 9,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "model_con.pt": {
+            "adapter_sha256": "468b060bf135116595ca5e53e1593607c8de0d330cf465f4499c5b2eb85f56e9",
+            "native_sha256": "468b060bf135116595ca5e53e1593607c8de0d330cf465f4499c5b2eb85f56e9",
+            "state_exact": true
+          },
+          "model_dis.pt": {
+            "adapter_sha256": "f1e118dca66a588decb0a6236060470a59ff5a0c5a5f15fed5a0aaee51c9b7b9",
+            "native_sha256": "f1e118dca66a588decb0a6236060470a59ff5a0c5a5f15fed5a0aaee51c9b7b9",
+            "state_exact": true
+          },
+          "pair_state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "e480ed390c360dba982d43d772583c01741dce641ab82581356bdee20baf91a1",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "e480ed390c360dba982d43d772583c01741dce641ab82581356bdee20baf91a1",
+          "rows": 7
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "codi_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "train",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "codi",
+          "--mode",
+          "sample",
+          "--dataname",
+          "codi_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/codi-validation/case-09-regression-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "52c2fd951a20794eb823550a7d7a9812b3af5c25d28714b72a7c7e7469f54730",
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "environment": {
+    "category_encoders": "2.6.4",
+    "libzero": "0.0.8",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "scikit_learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.0+cpu",
+    "tqdm": "4.66.5"
+  },
+  "environment_lock": {
+    "path": "requirements-codi-validation.txt",
+    "sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149"
+  },
+  "method_author_boundary": {
+    "commit": "8da2af242e7c43cba86b9ff5a86d05d3411b4ed5",
+    "license_file_present": false,
+    "relation": "The TabSyn benchmark snapshot is a distinct adaptation: 5 of 10 shared source paths are byte-exact and 5 differ. TabSyn also separates sampling into a dedicated file. It is not represented as the unmodified method-author implementation.",
+    "tree": "6b41bd82ada37535d2405bb0cb14285e92858a21",
+    "url": "https://github.com/ChaejeongLee/CoDi"
+  },
+  "model_id": "codi",
+  "protocol_id": "codi-tabsyn-snapshot-parity-v1",
+  "repository_commit": "b0a380cd01ee08378742c231ec5811351103b20c",
+  "reproduction_target": "tabsyn-benchmark-snapshot",
+  "runtime_config": {
+    "adapter_equivalent_config": {
+      "T": 2,
+      "activation": "relu",
+      "beta_1": 1e-05,
+      "beta_T": 0.02,
+      "encoder_dim_con": [
+        8,
+        16,
+        8
+      ],
+      "encoder_dim_dis": [
+        8,
+        16,
+        8
+      ],
+      "eval_batch_size": 8,
+      "grad_clip": 1.0,
+      "lambda_con": 0.2,
+      "lambda_dis": 0.2,
+      "lr_con": 0.002,
+      "lr_dis": 0.002,
+      "mean_type": "epsilon",
+      "nf_con": 4,
+      "nf_dis": 4,
+      "num_threads": 1,
+      "sample_step": 2000,
+      "total_epochs_both": 1,
+      "training_batch_size": 8,
+      "var_type": "fixedsmall"
+    },
+    "compatibility_bridges": [
+      {
+        "id": "codi-cpu-device-count-v1",
+        "semantic_effect": "one logical CPU execution device for the loader divisibility guard"
+      },
+      {
+        "id": "codi-output-checkpoint-root-v1",
+        "semantic_effect": "same state_dict bytes written under output_dir"
+      },
+      {
+        "id": "codi-exact-sample-count-v1",
+        "semantic_effect": "resize transformed placeholders only after fitting official transformers"
+      }
+    ],
+    "overrides": [
+      {
+        "base_sha256": "6b146a4c9f1866f2bf90ae64f15f9f9bd6480491e232d32bbc97e497e9deaa1a",
+        "execution_sha256": "f1ed13e6a0af55d0aac6154cd3bee71c3a60736f159d7faa9dac3374f29381b6",
+        "from": "parser.add_argument('--encoder_dim_con', type=str, default=\"512,1024,1024,512\", help='encoder_dim_con')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded continuous-network width",
+        "to": "parser.add_argument('--encoder_dim_con', type=str, default=\"8,16,8\", help='encoder_dim_con')"
+      },
+      {
+        "base_sha256": "f1ed13e6a0af55d0aac6154cd3bee71c3a60736f159d7faa9dac3374f29381b6",
+        "execution_sha256": "46c01cb52c7836dc4977ee4cf189c9dc65e01573be322eb38148023ed265bc4c",
+        "from": "parser.add_argument('--encoder_dim_dis', type=str, default=\"512,1024,1024,512\", help='encoder_dim_dis')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded discrete-network width",
+        "to": "parser.add_argument('--encoder_dim_dis', type=str, default=\"8,16,8\", help='encoder_dim_dis')"
+      },
+      {
+        "base_sha256": "46c01cb52c7836dc4977ee4cf189c9dc65e01573be322eb38148023ed265bc4c",
+        "execution_sha256": "a99054eec66f414c30eb187d910fd8fb4cf9cabe02a49b2abb8e7f26dc9e12a9",
+        "from": "parser.add_argument('--nf_con', type=int, default=16, help='nf_con')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded continuous timestep width",
+        "to": "parser.add_argument('--nf_con', type=int, default=4, help='nf_con')"
+      },
+      {
+        "base_sha256": "a99054eec66f414c30eb187d910fd8fb4cf9cabe02a49b2abb8e7f26dc9e12a9",
+        "execution_sha256": "fb3a87c4d7d2106e75f4da492ed3f612dfec98b4cc85798ac1df25b8850d78e6",
+        "from": "parser.add_argument('--nf_dis', type=int, default=64, help='nf_dis')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded discrete timestep width",
+        "to": "parser.add_argument('--nf_dis', type=int, default=4, help='nf_dis')"
+      },
+      {
+        "base_sha256": "fb3a87c4d7d2106e75f4da492ed3f612dfec98b4cc85798ac1df25b8850d78e6",
+        "execution_sha256": "809ba7ae2ad3e3a09bbe622a852f5f406c7d4a5a97d505874e8badab1b053864",
+        "from": "parser.add_argument('--training_batch_size', type=int, default=4096, help='batch size')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded smoke batch size",
+        "to": "parser.add_argument('--training_batch_size', type=int, default=8, help='batch size')"
+      },
+      {
+        "base_sha256": "809ba7ae2ad3e3a09bbe622a852f5f406c7d4a5a97d505874e8badab1b053864",
+        "execution_sha256": "387e6e6c7d8722ff93918624e1b8cab84d7cf9bb801359d09084f93a8beec6a6",
+        "from": "parser.add_argument('--eval_batch_size', type=int, default=2100, help='batch size')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded smoke evaluation batch size",
+        "to": "parser.add_argument('--eval_batch_size', type=int, default=8, help='batch size')"
+      },
+      {
+        "base_sha256": "387e6e6c7d8722ff93918624e1b8cab84d7cf9bb801359d09084f93a8beec6a6",
+        "execution_sha256": "2ce3fa6fc5e03fd4bb46e6d6d0fb1f4d13f3a17851e7ba5e6ca4add2e7cd10d9",
+        "from": "parser.add_argument('--T', type=int, default=50, help='total diffusion steps')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "bounded reverse-diffusion steps",
+        "to": "parser.add_argument('--T', type=int, default=2, help='total diffusion steps')"
+      },
+      {
+        "base_sha256": "2ce3fa6fc5e03fd4bb46e6d6d0fb1f4d13f3a17851e7ba5e6ca4add2e7cd10d9",
+        "execution_sha256": "552de585f690c3aabdc229dd9e133b7af75b9496ede9b43064954e6a8648e7f8",
+        "from": "parser.add_argument('--total_epochs_both', type=int, default=20000, help='total training steps')",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/utils.py",
+        "purpose": "one bounded training epoch multiplier",
+        "to": "parser.add_argument('--total_epochs_both', type=int, default=1, help='total training steps')"
+      },
+      {
+        "base_sha256": "834bdcaf48b5bec424690e1b2151acebf0834014618e642090d943489ce75b5f",
+        "execution_sha256": "be56b14abd9549e8f7d29a81f901eb75be73c261e6d8a1049e60854ab9d95434",
+        "from": "if batch_size % torch.cuda.device_count() != 0:",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/codi/tabular_dataload.py",
+        "purpose": "CPU-only native-reference device-count compatibility",
+        "to": "if batch_size % max(torch.cuda.device_count(), 1) != 0:"
+      },
+      {
+        "base_sha256": "7347a96f1a29031b7885a1b07501d59385b2cb5111c7ac77ab177d0ca8a83c17",
+        "execution_sha256": "ad00bf149f23400080e207b19aa2db575dbcca250a4140a2ebc79114fd4fcf28",
+        "from": "    train, train_con_data, train_dis_data, test, (transformer_con, transformer_dis, meta), con_idx, dis_idx = tabular_dataload.get_dataset(args) ",
+        "path": "/home/runner/work/_temp/codi-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/codi/sample.py",
+        "purpose": "native-reference equivalent of the adapter exact-row bridge after official transformer fitting",
+        "to": "    train, train_con_data, train_dis_data, test, (transformer_con, transformer_dis, meta), con_idx, dis_idx = tabular_dataload.get_dataset(args)\n    requested_rows = int(os.environ.get('CODI_VALIDATION_NUM_SAMPLES', len(train)))\n    requested_idx = np.arange(requested_rows) % len(train)\n    train = train[requested_idx]\n    train_con_data = train_con_data[requested_idx]\n    train_dis_data = train_dis_data[requested_idx]"
+      }
+    ],
+    "treatment": "native-reference-only temporary overrides; tracked repository source remains exact"
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "license": {
+      "declared_expression": "Apache-2.0",
+      "license_file_present": true,
+      "redistribution_status": "authorized-as-part-of-tabsyn-snapshot",
+      "review_status": "tabsyn-apache-2.0-license-and-notice-retained"
+    },
+    "manifest_sha256": "ba896443241d2aa7f6b149ac0e9bdd56a26a16dfb38bc4343f36e03f33346273",
+    "model_id": "codi",
+    "repository": "https://github.com/amazon-science/tabsyn",
+    "runtime_files": [
+      {
+        "bytes": 10142,
+        "path": "LICENSE",
+        "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"
+      },
+      {
+        "bytes": 67,
+        "path": "NOTICE",
+        "sha256": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287"
+      },
+      {
+        "bytes": 10290,
+        "path": "README.md",
+        "sha256": "52157207eb9f6b187a97e6e46de2a0aaa10cf3bfb444c44367661e52e1011b4b"
+      },
+      {
+        "bytes": 395,
+        "path": "main.py",
+        "sha256": "860ddede1c014c6f3687ab32d92e657f7286711c456ab32d84cc98f833118dba"
+      },
+      {
+        "bytes": 194,
+        "path": "requirements.txt",
+        "sha256": "2b02c30b1eea0f411646a95fbeb5c8ab103f584f727086d79cc4706512f10905"
+      },
+      {
+        "bytes": 7571,
+        "path": "utils.py",
+        "sha256": "6b146a4c9f1866f2bf90ae64f15f9f9bd6480491e232d32bbc97e497e9deaa1a"
+      },
+      {
+        "bytes": 4709,
+        "path": "utils_train.py",
+        "sha256": "7e846cc6abd92899054f218d9ae57cd32eb097874e0955a80b8e53455cd5f3f0"
+      },
+      {
+        "bytes": 247,
+        "path": "src/__init__.py",
+        "sha256": "6802d1802819d9f921bfff3ec36952903d145b094d59bc0fe6b159172049efee"
+      },
+      {
+        "bytes": 25003,
+        "path": "src/data.py",
+        "sha256": "0d9ea4750471100cf648ade616d8a1a3dae40fa21c2507f1c7cb569ba636f9d5"
+      },
+      {
+        "bytes": 5298,
+        "path": "src/deep.py",
+        "sha256": "f288159188165cc61dc11e5a3bf4cc2b05d72c2124d183df15b98addec1d01bb"
+      },
+      {
+        "bytes": 1022,
+        "path": "src/env.py",
+        "sha256": "b1d0b4f986fa1d8da1b0c83af1a015df4ac02a4ae6208c5cd3e7c2283d91b227"
+      },
+      {
+        "bytes": 5408,
+        "path": "src/metrics.py",
+        "sha256": "a0b6d9b95a8f6178d0f1ec6cf490668a2acf748404b73065943666932c99af8e"
+      },
+      {
+        "bytes": 13541,
+        "path": "src/util.py",
+        "sha256": "93fd5e0136198d6c67b5cdbd267fae9b9d11df58fe944e6706b010ac991307e3"
+      },
+      {
+        "bytes": 5133,
+        "path": "baselines/codi/diffusion_continuous.py",
+        "sha256": "e74c71c49f819406aac4b74df6faa66baf129c4b529f7f19e7a8e5699489da78"
+      },
+      {
+        "bytes": 9056,
+        "path": "baselines/codi/diffusion_discrete.py",
+        "sha256": "079ea0c868ceceffd19d8550ae2674d4bd7aef04ac4b30cf16e0fb9cc62eb1a4"
+      },
+      {
+        "bytes": 25044,
+        "path": "baselines/codi/evaluation.py",
+        "sha256": "140650d1856cdbd0ff109ef05046bff2a49f35f3cc4255c9ca4bfd6d65ae0f58"
+      },
+      {
+        "bytes": 6319,
+        "path": "baselines/codi/main.py",
+        "sha256": "b3b8b23f9c1fb33473c9523f45799433f3ac00875034b06227c5f9743d58651d"
+      },
+      {
+        "bytes": 607,
+        "path": "baselines/codi/models/__init__.py",
+        "sha256": "1dd2dab26bc6f2430cd7c3bd8c92f93cdcd6bd6e5e3b46fe6f36104ce7a04863"
+      },
+      {
+        "bytes": 5612,
+        "path": "baselines/codi/models/layers.py",
+        "sha256": "4aa7b5c31d2a9aab0e59de2a35dee6e8d7dd924c4acc2335e20dbad974c90294"
+      },
+      {
+        "bytes": 2918,
+        "path": "baselines/codi/models/tabular_unet.py",
+        "sha256": "046bed4719b7ff430c12f7f0b8a9e5a4bff2802b431daff7a7e5efe89b47d6c3"
+      },
+      {
+        "bytes": 7146,
+        "path": "baselines/codi/sample.py",
+        "sha256": "f45205d0002b1858997d2e5530ada467ec883cd007680297be48d49d203510f2"
+      },
+      {
+        "bytes": 3602,
+        "path": "baselines/codi/tabular_dataload.py",
+        "sha256": "9829303c970a4a71a5be5fbc150a3ca89afeacac85ce3443f988a996b6f6755b"
+      },
+      {
+        "bytes": 3359,
+        "path": "baselines/codi/tabular_transformer.py",
+        "sha256": "3dee3597af6d67a77e920d81f641af37afce9555824b9dc7ca4dcd8227c31669"
+      },
+      {
+        "bytes": 4922,
+        "path": "baselines/codi/utils.py",
+        "sha256": "3381bec69a232430cb6a8d20e9193135a95e2a19d7a4df950e03a4cfa9c7e28c"
+      }
+    ],
+    "runtime_files_verified": 24,
+    "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabSyn-main",
+    "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+    "upstream_model_tree": "85c16ccfb76fbf00db6b30450ca47e9928efa8d3",
+    "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+  },
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}
