@@ -1,0 +1,1179 @@
+{
+  "cases": [
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 1,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "d2a66b5e06a65139794c1430515e6a2607a5c44c4ba0a82d750e1d49d3260005",
+          "native_sha256": "d2a66b5e06a65139794c1430515e6a2607a5c44c4ba0a82d750e1d49d3260005",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "0f386004e9ea9acf776e815e2e0cb8fe396b09338f8f3208ae94e145608e98b4",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "0f386004e9ea9acf776e815e2e0cb8fe396b09338f8f3208ae94e145608e98b4",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 2,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "5c001362baec640b547384e058597a61900cd59ef6b7e15893aca827a64b4cd4",
+          "native_sha256": "5c001362baec640b547384e058597a61900cd59ef6b7e15893aca827a64b4cd4",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "74d43e3c5e7d3f40f71280eec3932fd3b53ddb973765eb434856eeecbaefd60f",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "74d43e3c5e7d3f40f71280eec3932fd3b53ddb973765eb434856eeecbaefd60f",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-02-binary-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 3,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "b95d13d9e9b5ad6a2f1ecc9f83d49c866e603379f551717f7d76764be2029dc1",
+          "native_sha256": "b95d13d9e9b5ad6a2f1ecc9f83d49c866e603379f551717f7d76764be2029dc1",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "4f4399cacbe56de4231e2daa7e92cb08518670fd70bd800830d935b92c224fdf",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "4f4399cacbe56de4231e2daa7e92cb08518670fd70bd800830d935b92c224fdf",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "binclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "binary"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_binary",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-03-binary-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 4,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "af7f15978d0870140fa469620cb87367255049c08340f347a039c817f93833be",
+          "native_sha256": "af7f15978d0870140fa469620cb87367255049c08340f347a039c817f93833be",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "f5a708aa167851f4a003ec3af04179791b0ac1fa0c433e5523af38902faaf9b9",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "f5a708aa167851f4a003ec3af04179791b0ac1fa0c433e5523af38902faaf9b9",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-04-multiclass-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 5,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "e3a4c4281db82f0c5f64b3d3426c11b75b5b1fa4c6c2d3c2d330c5cecefc6cd5",
+          "native_sha256": "e3a4c4281db82f0c5f64b3d3426c11b75b5b1fa4c6c2d3c2d330c5cecefc6cd5",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "64566dcecc0e601a1e3b6d66d2cefd3ab440c1e4f2db2609b46586d5d3364d71",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "64566dcecc0e601a1e3b6d66d2cefd3ab440c1e4f2db2609b46586d5d3364d71",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-05-multiclass-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 6,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "3cd93afc66ffcb223c075afc020d50f7a0bd416b9c68dbdb332f4c635542ace1",
+          "native_sha256": "3cd93afc66ffcb223c075afc020d50f7a0bd416b9c68dbdb332f4c635542ace1",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "cf9b1e94c02606d7838ec477604c2948a9ca09aea82501c71bef32c552cbbb43",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "cf9b1e94c02606d7838ec477604c2948a9ca09aea82501c71bef32c552cbbb43",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "multiclass",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "multiclass"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_multiclass",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-06-multiclass-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 7,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "cbf280380ea6b184c4bc2a48ddf9ff1c644478ce7ad0523ff4e4397dc8f5d82a",
+          "native_sha256": "cbf280380ea6b184c4bc2a48ddf9ff1c644478ce7ad0523ff4e4397dc8f5d82a",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "93802124c4bc9d6229c4bda152ffe584fc05b993778cca9d99d4c7ee299b1931",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "93802124c4bc9d6229c4bda152ffe584fc05b993778cca9d99d4c7ee299b1931",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-07-regression-seed-0/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 8,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "464056276eb636f7edc466b16cf3cf32340dfcbbe15b4648a6439a3342743486",
+          "native_sha256": "464056276eb636f7edc466b16cf3cf32340dfcbbe15b4648a6439a3342743486",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "5145c6962c5953c768ed30f7b14c03fee5698b14212bbc5d4bc8400042ff3851",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "5145c6962c5953c768ed30f7b14c03fee5698b14212bbc5d4bc8400042ff3851",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-08-regression-seed-19/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_runtime": {
+        "batch_size": 8,
+        "epochs": 1,
+        "hidden_dims": [
+          16,
+          16
+        ],
+        "nf": 8,
+        "num_scales": 2,
+        "num_threads": 1,
+        "num_workers": 0,
+        "sampler": "pc",
+        "spl": true
+      },
+      "case": 9,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoint": {
+          "adapter_sha256": "e63335304d13a672defeacd5fe1372c5640e19b6eb61acb9ceaa7570739faaf3",
+          "native_sha256": "e63335304d13a672defeacd5fe1372c5640e19b6eb61acb9ceaa7570739faaf3",
+          "scalars_exact": {
+            "epoch": true,
+            "step": true
+          },
+          "sections_exact": {
+            "ema": true,
+            "model": true,
+            "optimizer": true
+          },
+          "state_exact": true
+        },
+        "samples": {
+          "adapter_sha256": "46825869d4705d7a0165c6edc7bfecfffe7cc4ceaa5d44be466e3d81b39fc964",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical": true,
+          "missing_values": 0,
+          "native_sha256": "46825869d4705d7a0165c6edc7bfecfffe7cc4ceaa5d44be466e3d81b39fc964",
+          "rows": 12
+        }
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "stasy_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "train_rows": 12,
+        "variant": "regression"
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "train",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--method",
+          "stasy",
+          "--mode",
+          "sample",
+          "--dataname",
+          "stasy_parity_regression",
+          "--gpu",
+          "0",
+          "--save_path",
+          "/home/runner/work/_temp/stasy-validation/case-09-regression-seed-73/native-samples.csv"
+        ]
+      ],
+      "native_sitecustomize_sha256": "893ba112b70245d64d3caa3218e4afc61d35c2cea5d6366e33dae72b32b073f7",
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "environment": {
+    "category_encoders": "2.6.4",
+    "libzero": "0.0.8",
+    "ml_collections": "0.1.1",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "scikit_learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.0+cpu"
+  },
+  "environment_lock": {
+    "path": "requirements-stasy-validation.txt",
+    "sha256": "1af4bb8eae6781a55c0b7fa355a43ad330c06b6556ab43f5360efc964dc9ebca"
+  },
+  "method_author_boundary": {
+    "commit": "3dcc660db26e31cc1bbb00cfc14bf7687fde448d",
+    "license_file_present": false,
+    "relation": "The TabSyn benchmark snapshot is a distinct adaptation: only 2 of 14 shared paths match the method-author repository after text normalization. It is not represented as the original-method implementation.",
+    "tree": "6a1307d4a0bf0819e70b15a13fb3a0a65fbbee57",
+    "url": "https://github.com/JayoungKim408/STaSy"
+  },
+  "model_id": "stasy",
+  "protocol_id": "stasy-tabsyn-snapshot-parity-v1",
+  "repository_commit": "ccfb02e29aa1e9e14f25816e86ba74c3ec088a87",
+  "reproduction_target": "tabsyn-benchmark-snapshot",
+  "runtime_config": {
+    "adapter_equivalent_config": {
+      "batch_size": 8,
+      "epochs": 1,
+      "hidden_dims": [
+        16,
+        16
+      ],
+      "nf": 8,
+      "num_scales": 2,
+      "num_threads": 1,
+      "num_workers": 0,
+      "sampler": "pc",
+      "spl": true
+    },
+    "compatibility_bridge": {
+      "from": "sparse=False",
+      "id": "stasy-sklearn-onehot-keyword-v1",
+      "semantic_effect": "none; the same OneHotEncoder dense-output boolean is forwarded",
+      "to": "sparse_output=False"
+    },
+    "overrides": [
+      {
+        "base_sha256": "ef548d1831a5f1012099f1ab205c7d63703c4d3d6512d6fe99446d33bdb9406a",
+        "execution_sha256": "c6068c7b65c20ae9087185d4f0b0511966c4f08ddbe28159a5d7ccd619e4db25",
+        "from": "training.epoch = 10000",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/default_tabular_configs.py",
+        "purpose": "one inclusive-loop smoke epoch",
+        "to": "training.epoch = 0"
+      },
+      {
+        "base_sha256": "c6068c7b65c20ae9087185d4f0b0511966c4f08ddbe28159a5d7ccd619e4db25",
+        "execution_sha256": "eadb87c19a807297f52613f811fad7df1d0cc89d7b64ccc813d7af79bfbbfae3",
+        "from": "model.num_scales = 50",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/default_tabular_configs.py",
+        "purpose": "bounded predictor-corrector sampling",
+        "to": "model.num_scales = 2"
+      },
+      {
+        "base_sha256": "2fe2854a5438e3d1c784844e7ce9e5bb573d07b54b0219b859386a41321e1124",
+        "execution_sha256": "a6d17a69a505bb0c0559c1e2d6475b7bd071b36420d1f5f985e99f4391d31f2f",
+        "from": "config.training.batch_size = 1000",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/config.py",
+        "purpose": "bounded smoke batch size",
+        "to": "config.training.batch_size = 8"
+      },
+      {
+        "base_sha256": "a6d17a69a505bb0c0559c1e2d6475b7bd071b36420d1f5f985e99f4391d31f2f",
+        "execution_sha256": "60ffb8135511214f50cdf0887c7c2479d4d1f011b386fdc3ee32eb46c491b706",
+        "from": "config.eval.batch_size = 1000",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/config.py",
+        "purpose": "bounded smoke evaluation batch size",
+        "to": "config.eval.batch_size = 8"
+      },
+      {
+        "base_sha256": "60ffb8135511214f50cdf0887c7c2479d4d1f011b386fdc3ee32eb46c491b706",
+        "execution_sha256": "6fd563ec8f1559b6a1b2fae4833dcb03f66ea9e188e904d33f73b750384b47f6",
+        "from": "sampling.method = 'ode'",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/config.py",
+        "purpose": "bounded official predictor-corrector sampler",
+        "to": "sampling.method = 'pc'"
+      },
+      {
+        "base_sha256": "6fd563ec8f1559b6a1b2fae4833dcb03f66ea9e188e904d33f73b750384b47f6",
+        "execution_sha256": "6c5bae0828c9177e2677747815c3a5e4f518874a067f2b6f0f824ec7f1be5b0d",
+        "from": "model.nf = 64",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/config.py",
+        "purpose": "bounded smoke Fourier width",
+        "to": "model.nf = 8"
+      },
+      {
+        "base_sha256": "6c5bae0828c9177e2677747815c3a5e4f518874a067f2b6f0f824ec7f1be5b0d",
+        "execution_sha256": "70a253173d74a811b681ba9b7211f273a8db550c5983331f54c05a1c09e3c67f",
+        "from": "model.hidden_dims = (1024, 2048, 1024, 1024)",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/configs/config.py",
+        "purpose": "bounded smoke score-network width",
+        "to": "model.hidden_dims = (16, 16)"
+      },
+      {
+        "base_sha256": "f3a52b4137c082a18da317d94be9bd86cd6a613ca25df824abcc8e9a99007f88",
+        "execution_sha256": "f0dd9db88d762a8ac165f12dab248240f2f74fcf9bd48686054e91324e29cd75",
+        "from": "config.device = torch.device(f'cuda:{args.gpu}')",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/main.py",
+        "purpose": "CPU validation device",
+        "to": "config.device = torch.device('cpu')"
+      },
+      {
+        "base_sha256": "f0dd9db88d762a8ac165f12dab248240f2f74fcf9bd48686054e91324e29cd75",
+        "execution_sha256": "a6637337deeaf3512e44cb44f6ce8f2db5f13c866c7c21c7c9ac9c2a8dfc47f8",
+        "from": "num_workers=4",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/main.py",
+        "purpose": "deterministic validation loader",
+        "to": "num_workers=0"
+      },
+      {
+        "base_sha256": "e6e97ba938ab493d794b374b43402c44975663b887be6379b30fc512f492f3fd",
+        "execution_sha256": "7435cb74a3e35b61ad72af4be155b4ac021cb2e13ec48dc2cb74e46531f9ea03",
+        "from": "config.device = torch.device(f'cuda:{args.gpu}')",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/baselines/stasy/sample.py",
+        "purpose": "CPU validation device",
+        "to": "config.device = torch.device('cpu')"
+      },
+      {
+        "base_sha256": "0d9ea4750471100cf648ade616d8a1a3dae40fa21c2507f1c7cb569ba636f9d5",
+        "execution_sha256": "d3b62908204a0b5b92f2be8900580311f3f6fd98960358035a670bb26654ca5a",
+        "from": "handle_unknown='ignore', sparse=False, dtype=np.float32",
+        "path": "/home/runner/work/_temp/stasy-validation/case-01-binary-seed-0/native/TabSyn-main/src/data.py",
+        "purpose": "forward the unchanged dense-output boolean to scikit-learn's renamed keyword",
+        "to": "handle_unknown='ignore', sparse_output=False, dtype=np.float32"
+      }
+    ],
+    "treatment": "native-reference-only temporary overrides; tracked repository source remains exact"
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "license": {
+      "declared_expression": "Apache-2.0",
+      "license_file_present": true,
+      "redistribution_status": "authorized-as-part-of-tabsyn-snapshot",
+      "review_status": "tabsyn-apache-2.0-license-and-notice-retained"
+    },
+    "manifest_sha256": "b835cd7a729ed37c1f20ed70d6f50041ea72100cb906e8b835b948257cfc3fec",
+    "model_id": "stasy",
+    "repository": "https://github.com/amazon-science/tabsyn",
+    "runtime_files": [
+      {
+        "bytes": 10142,
+        "path": "LICENSE",
+        "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"
+      },
+      {
+        "bytes": 67,
+        "path": "NOTICE",
+        "sha256": "d4290ed64c2edd0fce1d84e3f9dfb2881240fe534def76b8cd29ed6af683e287"
+      },
+      {
+        "bytes": 10290,
+        "path": "README.md",
+        "sha256": "52157207eb9f6b187a97e6e46de2a0aaa10cf3bfb444c44367661e52e1011b4b"
+      },
+      {
+        "bytes": 395,
+        "path": "main.py",
+        "sha256": "860ddede1c014c6f3687ab32d92e657f7286711c456ab32d84cc98f833118dba"
+      },
+      {
+        "bytes": 194,
+        "path": "requirements.txt",
+        "sha256": "2b02c30b1eea0f411646a95fbeb5c8ab103f584f727086d79cc4706512f10905"
+      },
+      {
+        "bytes": 7571,
+        "path": "utils.py",
+        "sha256": "6b146a4c9f1866f2bf90ae64f15f9f9bd6480491e232d32bbc97e497e9deaa1a"
+      },
+      {
+        "bytes": 4709,
+        "path": "utils_train.py",
+        "sha256": "7e846cc6abd92899054f218d9ae57cd32eb097874e0955a80b8e53455cd5f3f0"
+      },
+      {
+        "bytes": 247,
+        "path": "src/__init__.py",
+        "sha256": "6802d1802819d9f921bfff3ec36952903d145b094d59bc0fe6b159172049efee"
+      },
+      {
+        "bytes": 25003,
+        "path": "src/data.py",
+        "sha256": "0d9ea4750471100cf648ade616d8a1a3dae40fa21c2507f1c7cb569ba636f9d5"
+      },
+      {
+        "bytes": 5298,
+        "path": "src/deep.py",
+        "sha256": "f288159188165cc61dc11e5a3bf4cc2b05d72c2124d183df15b98addec1d01bb"
+      },
+      {
+        "bytes": 1022,
+        "path": "src/env.py",
+        "sha256": "b1d0b4f986fa1d8da1b0c83af1a015df4ac02a4ae6208c5cd3e7c2283d91b227"
+      },
+      {
+        "bytes": 5408,
+        "path": "src/metrics.py",
+        "sha256": "a0b6d9b95a8f6178d0f1ec6cf490668a2acf748404b73065943666932c99af8e"
+      },
+      {
+        "bytes": 13541,
+        "path": "src/util.py",
+        "sha256": "93fd5e0136198d6c67b5cdbd267fae9b9d11df58fe944e6706b010ac991307e3"
+      },
+      {
+        "bytes": 1886,
+        "path": "baselines/stasy/configs/config.py",
+        "sha256": "b2782b48a0d0d79be2a837575ad41fafaa1b5956875a1b31eca698961221aa69"
+      },
+      {
+        "bytes": 1805,
+        "path": "baselines/stasy/configs/default_tabular_configs.py",
+        "sha256": "2d003f7a2d177cabb57d7a085cf8642e9918809921d46b5bc1e279a19ac928a6"
+      },
+      {
+        "bytes": 1075,
+        "path": "baselines/stasy/datasets.py",
+        "sha256": "0924b9beec66a0e7133f66f510bb139f08e0226d0b3f43b7f4d0c6d20ecc11e5"
+      },
+      {
+        "bytes": 3415,
+        "path": "baselines/stasy/likelihood.py",
+        "sha256": "d89fc874ca57cffc7ed5a4ed147623034d585853f95631527800aa72147345c0"
+      },
+      {
+        "bytes": 7546,
+        "path": "baselines/stasy/losses.py",
+        "sha256": "6d35552e77428f38fd4b5394427e894b6eeadebf1c5e921ed0b15ba8c372a021"
+      },
+      {
+        "bytes": 4875,
+        "path": "baselines/stasy/main.py",
+        "sha256": "fb319b772ce6c994a07e7caea2774d89e9808498966909c9895659e2eea4eedf"
+      },
+      {
+        "bytes": 3202,
+        "path": "baselines/stasy/models/ema.py",
+        "sha256": "45f1ef96100220cdd3eefd48746948fa515ddff610135a2978828677eedcf91e"
+      },
+      {
+        "bytes": 5963,
+        "path": "baselines/stasy/models/layers.py",
+        "sha256": "b1024448882e421d942b7b92ae1d9ef0e0a27f51707ddba3aa55802d3baa76eb"
+      },
+      {
+        "bytes": 1158,
+        "path": "baselines/stasy/models/layerspp.py",
+        "sha256": "aeb36cc251e10931c96fde9f1866fb6095260b8598cc8015af04295c964c6605"
+      },
+      {
+        "bytes": 3928,
+        "path": "baselines/stasy/models/ncsnpp_tabular.py",
+        "sha256": "c0859359b6a9780abd7ee9c5f113845c61423bbed354c1fd5ee12e3de274117d"
+      },
+      {
+        "bytes": 4512,
+        "path": "baselines/stasy/models/tabular_utils.py",
+        "sha256": "de21bedc8b886a2651c8f72913e938b6340ed7bfe83da364346f7f854ff7af8d"
+      },
+      {
+        "bytes": 5155,
+        "path": "baselines/stasy/models/utils.py",
+        "sha256": "aa657ca6778472c32c467955e4111d1d1b10992337d393a4ef434ca94929bda1"
+      },
+      {
+        "bytes": 6027,
+        "path": "baselines/stasy/sample.py",
+        "sha256": "e6e97ba938ab493d794b374b43402c44975663b887be6379b30fc512f492f3fd"
+      },
+      {
+        "bytes": 5980,
+        "path": "baselines/stasy/sample_steps.py",
+        "sha256": "b02e3de95b4a2c448762afe85535e84879bcc601029a55b3767396f3f41699a2"
+      },
+      {
+        "bytes": 17755,
+        "path": "baselines/stasy/sampling.py",
+        "sha256": "1a9db67b4c6e5cdc01cc8ba1253eaaf9b71e823807dd8d7bf769c1688d79bb83"
+      },
+      {
+        "bytes": 7635,
+        "path": "baselines/stasy/sde_lib.py",
+        "sha256": "47f1360e8205eac290ef81d4a11489ea88d6b5f1c8a6279ffe8b92182a290ba5"
+      },
+      {
+        "bytes": 1356,
+        "path": "baselines/stasy/utils.py",
+        "sha256": "a7c969d47cdbc04cb34d672b45d0f4cc27f2917a8c58a2dbec6ede2f20218b77"
+      }
+    ],
+    "runtime_files_verified": 30,
+    "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/TabSyn-main",
+    "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+    "upstream_model_tree": "4f56a7223d71d6b75c1698824c5d0245bf716bc6",
+    "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+  },
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

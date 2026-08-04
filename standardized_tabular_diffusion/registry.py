@@ -276,7 +276,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         source_root="TabSyn-main",
         upstream_repository="https://github.com/amazon-science/tabsyn",
         upstream_revision="cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
-        revision_status="pinned-exact-benchmark-snapshot-parity-pending",
+        revision_status="pinned-exact-tabsyn-snapshot-parity-validated",
         license_status=(
             "Apache-2.0 TabSyn snapshot retained; method-author repository has no declared license; "
             "original-method and Official Results claims blocked"
@@ -284,10 +284,12 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/STASY_VALIDATION.md",
+            "docs/evidence/stasy/native-parity-run-30936275831.json",
             "standardized_tabular_diffusion/resources/upstream/stasy-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/stasy-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "tabsds": _spec(
         "standardized_tabular_diffusion.models.paper_gap_baselines",

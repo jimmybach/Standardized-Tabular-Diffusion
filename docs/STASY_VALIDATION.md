@@ -1,6 +1,6 @@
 # STaSy Validation Protocol
 
-Status: implementation complete; mandatory Linux/Python 3.11 evidence pending
+Status: passed; native parity validated against the pinned TabSyn benchmark snapshot
 
 ## Claim Boundary
 
@@ -93,6 +93,10 @@ For each case, the protocol creates two isolated source roots. The native refere
 - no checkpoint or generated artifact written into the upstream source tree.
 
 The environment is frozen in `requirements-stasy-validation.txt` with PyTorch `2.3.0` on CPU. Evidence is uploaded even when validation fails. The registry cannot be promoted beyond `adapter-complete` until a successful artifact has been inspected and retained in the repository.
+
+The protocol passed in [GitHub Actions run `30936275831`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831). The validated PR-head commit is `95f339b60916c82e2cd3987a0e30e369744781ee`; GitHub executed pull-request merge commit `ccfb02e29aa1e9e14f25816e86ba74c3ec088a87`. Artifact `8903307370` has digest `sha256:0f758862ea98570d97857914d0c8023fc5d72a1fe7b5e0f67367c845a99e662b`. The byte-exact retained record is `docs/evidence/stasy/native-parity-run-30936275831.json`, SHA-256 `53c6bdbe66d38ce1a3d91cee4472ffbb8379c5d7a2ac3aa8c4ffcfa86f44cb67`.
+
+All nine cases passed. For every case, model, optimizer, EMA, step, and epoch state matched exactly; generated CSV files matched byte-for-byte and frame-for-frame; row counts, finite-value checks, source integrity, manifests, metadata, and checkpoint isolation all passed.
 
 ## Remaining Gates
 

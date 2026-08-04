@@ -1,6 +1,6 @@
 # STaSy 验证协议
 
-状态：实现已完成；等待强制性的 Linux/Python 3.11 证据
+状态：已通过；已针对固定的 TabSyn benchmark 快照完成原生一致性验证
 
 ## 声明边界
 
@@ -93,6 +93,10 @@ Linux/Python 3.11 工作流会执行 9 个真实案例：
 - 检查点和生成产物均未写入上游源码树。
 
 验证环境由 `requirements-stasy-validation.txt` 冻结，并使用 CPU 版 PyTorch `2.3.0`。即使验证失败也会上传证据。在成功产物经过检查并保留到仓库之前，registry 不得从 `adapter-complete` 晋级。
+
+该协议已在 [GitHub Actions run `30936275831`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831) 中通过。已验证的 PR head 提交为 `95f339b60916c82e2cd3987a0e30e369744781ee`；GitHub 实际执行的 pull-request merge 提交为 `ccfb02e29aa1e9e14f25816e86ba74c3ec088a87`。产物 `8903307370` 的摘要为 `sha256:0f758862ea98570d97857914d0c8023fc5d72a1fe7b5e0f67367c845a99e662b`。仓库内逐字节一致的永久记录为 `docs/evidence/stasy/native-parity-run-30936275831.json`，SHA-256 为 `53c6bdbe66d38ce1a3d91cee4472ffbb8379c5d7a2ac3aa8c4ffcfa86f44cb67`。
+
+九个案例全部通过。每个案例中的模型、优化器、EMA、step 和 epoch 状态均精确一致；生成的 CSV 在字节和 DataFrame 层面均完全一致；行数、有限值检查、源码完整性、manifest、metadata 和检查点隔离也全部通过。
 
 ## 尚未完成的门槛
 
