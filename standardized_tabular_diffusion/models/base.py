@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from abc import ABC, abstractmethod
@@ -61,12 +62,23 @@ class BaseModelAdapter(ABC):
             raise FileNotFoundError(f"Expected a {expected} for the {format_name} artifact: {resolved_path}")
         return resolved_path
 
-    def _run_python(self, args: list[str], cwd: Path, *, module: bool = False) -> None:
+    def _run_python(
+        self,
+        args: list[str],
+        cwd: Path,
+        *,
+        module: bool = False,
+        env: dict[str, str] | None = None,
+    ) -> None:
         command = [sys.executable]
         if module:
             command.append("-m")
         command.extend(args)
-        subprocess.run(command, cwd=cwd, check=True)
+        run_env = None
+        if env is not None:
+            run_env = os.environ.copy()
+            run_env.update(env)
+        subprocess.run(command, cwd=cwd, check=True, env=run_env)
 
     def _write_dataframe_csv(self, frame: object, path: Path) -> None:
         csv_text = frame.to_csv(index=False)  # type: ignore[attr-defined]

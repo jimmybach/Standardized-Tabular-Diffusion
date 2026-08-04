@@ -1,10 +1,21 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabddpm_summary
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+
+
+def build_tabddpm_environment(upstream_root: Path) -> dict[str, str]:
+    """Expose the upstream root to its script-style `lib` and `zero` imports."""
+
+    entries = [str(upstream_root.resolve())]
+    existing = os.environ.get("PYTHONPATH")
+    if existing:
+        entries.append(existing)
+    return {"PYTHONPATH": os.pathsep.join(entries)}
 
 
 class TabDDPMAdapter(BaseModelAdapter):
@@ -19,7 +30,11 @@ class TabDDPMAdapter(BaseModelAdapter):
     def train(self, spec: RunSpec) -> ArtifactBundle:
         config_path = self._require_config(spec)
         self._ensure_output_dir(spec)
-        self._run_python(["scripts/pipeline.py", "--config", str(config_path), "--train"], self.upstream_root)
+        self._run_python(
+            ["scripts/pipeline.py", "--config", str(config_path), "--train"],
+            self.upstream_root,
+            env=build_tabddpm_environment(self.upstream_root),
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -32,7 +47,11 @@ class TabDDPMAdapter(BaseModelAdapter):
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         config_path = self._require_config(spec)
         self._ensure_output_dir(spec)
-        self._run_python(["scripts/pipeline.py", "--config", str(config_path), "--sample"], self.upstream_root)
+        self._run_python(
+            ["scripts/pipeline.py", "--config", str(config_path), "--sample"],
+            self.upstream_root,
+            env=build_tabddpm_environment(self.upstream_root),
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

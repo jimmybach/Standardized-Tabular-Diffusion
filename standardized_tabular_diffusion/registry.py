@@ -80,6 +80,7 @@ def _spec(
     revision_status: str = "unresolved",
     patch_set_ids: tuple[str, ...] = (),
     evidence_records: tuple[str, ...] = (),
+    validation_level: AdapterValidationLevel = AdapterValidationLevel.ADAPTER_COMPLETE,
 ) -> AdapterSpec:
     return AdapterSpec(
         module=module,
@@ -98,6 +99,7 @@ def _spec(
         revision_status=revision_status,
         patch_set_ids=patch_set_ids,
         evidence_records=evidence_records,
+        validation_level=validation_level,
     )
 
 
@@ -242,18 +244,22 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         "TabDDPMAdapter",
         authority="method-author",
         distribution="source",
-        modification="compatibility-patched",
+        modification="adapter-only",
         install_extra="evaluation",
         evaluation_input="upstream-artifacts",
         requires_dataset_paths=False,
         source_root="TabDDPM-main",
         upstream_repository="https://github.com/yandex-research/tab-ddpm",
         upstream_revision="b476257dd460b778ba09eb97f7a51d6490fa17f8",
-        revision_status="pinned-with-unvalidated-compatibility-shim",
-        patch_set_ids=("tabddpm-libzero-compat-v1",),
+        revision_status="pinned-complete-native-parity-validated",
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/TABDDPM_VALIDATION.md",
+            "docs/evidence/tabddpm/native-parity-run-30863212268.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json",
+            ".github/workflows/tabddpm-validation.yml",
         ),
     ),
     "tabularargn": _spec(
