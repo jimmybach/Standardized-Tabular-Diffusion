@@ -143,6 +143,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     assert codi_lock["method_author_source"]["license_file_present"] is False
     assert codi_lock["method_author_source"]["exact_shared_paths"] == 5
     assert codi_lock["dependency_resolution"]["resolved_distribution"] == "libzero==0.0.8"
+    assert codi_lock["dependency_resolution"]["actual_runtime_dependencies"] == {"tqdm": "4.66.5"}
 
 
 def test_stasy_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_gated() -> None:
