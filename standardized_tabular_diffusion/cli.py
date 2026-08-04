@@ -328,7 +328,7 @@ def build_parser() -> argparse.ArgumentParser:
     model_source_status_parser.add_argument(
         "--model",
         required=True,
-        choices=["ctab-gan", "ctab-gan-plus", "stasy"],
+        choices=["codi", "ctab-gan", "ctab-gan-plus", "stasy"],
         help="Registered checksum-locked source component",
     )
     model_source_status_parser.add_argument(

@@ -2,7 +2,7 @@
 
 Status: release-preparation record
 Audit date: 2026-08-04
-Scope: the primary TabDDPM, TabDiff, and TabSyn source trees, the TabSyn STaSy baseline snapshot, plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, CTAB-GAN, and CTAB-GAN+
+Scope: the primary TabDDPM, TabDiff, and TabSyn source trees, the TabSyn STaSy and CoDi baseline snapshots, plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, CTAB-GAN, and CTAB-GAN+
 
 ## Purpose
 
@@ -36,6 +36,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 | TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Native parity validated in run `30866879879`; central-evaluation and other official-track gates remain pending. |
 | TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five carried local changes at import. The 20-file primary execution scope has now been restored exactly. | Official source is unmodified; compatibility controls are outside the upstream tree. | Native parity passed; Official Results remain blocked by central-evaluation, dataset, runtime, governance, and release gates. |
 | STaSy (TabSyn baseline snapshot) | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`, subtree `4f56a7223d71d6b75c1698824c5d0245bf716bc6` | All 17 local STaSy Python files match the TabSyn snapshot. The separate method-author commit `3dcc660` has no declared license; only 2 of 14 shared paths match after text normalization. | Thirty execution files are checksum-locked; device, seed, effective training controls, row count, and output-local checkpoints are adapter-only. All nine exact snapshot-parity cases passed in retained Linux/Python 3.11 run `30936275831`. | Native parity validated only against the TabSyn snapshot. Original-method, Official Results, and release claims remain blocked. |
+| CoDi (TabSyn baseline snapshot) | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`, subtree `85c16ccfb76fbf00db6b30450ca47e9928efa8d3` | All 11 local CoDi files match the TabSyn snapshot byte-for-byte. The separate method-author commit `8da2af2` has no declared license; 5 of 10 shared paths match and 5 differ. | Twenty-four execution files are checksum-locked; device-count compatibility, deterministic controls, exact rows, and output-local checkpoint roots are adapter-only. All nine exact snapshot-parity cases passed in retained Linux/Python 3.11 run `30941940893`. | Native parity validated only against the TabSyn snapshot. Original-method, Official Results, and release claims remain blocked. |
 
 ## Patch Classification
 
@@ -70,6 +71,14 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - `standardized_tabular_diffusion/compat/stasy_launcher.py` fixes the invocation contract without editing upstream source: CPU/CUDA selection, deterministic seeding, effective training configuration, exact requested rows, and checkpoint isolation under `output_dir`.
 - Its `stasy-sklearn-onehot-keyword-v1` bridge forwards the snapshot's unchanged `sparse=False` value to the renamed `sparse_output` parameter required by scikit-learn 1.5.2; encoder type and dense-output semantics are unchanged.
 - The nine-case Linux/Python 3.11 snapshot-parity protocol passed in run `30936275831`. Its inspected evidence is retained under `docs/evidence/stasy/`, so the adapter is `native-parity-validated` against the TabSyn snapshot only.
+
+### CoDi snapshot disposition
+
+- The active baseline is the CoDi adaptation distributed by the Apache-2.0 TabSyn repository, not an unmodified copy of the separate method-author repository.
+- All 11 local CoDi files match the pinned TabSyn subtree byte-for-byte. Thirteen shared dispatcher, preprocessing, dependency, and attribution files bring the fail-closed execution scope to 24 files.
+- The method-author repository is pinned separately for provenance. It has no detected license; 5 of 10 shared paths differ, and TabSyn adds a separate sampling entry point. Original-method equivalence is therefore blocked.
+- `standardized_tabular_diffusion/compat/codi_launcher.py` changes no tracked upstream file. Its module-local bridges prevent the CPU device-count division by zero, isolate both official state-dict checkpoints under `output_dir`, and resize only post-transform sampling placeholders to honor exact requested rows.
+- The nine-case Linux/Python 3.11 snapshot-parity protocol passed in run `30941940893`. Both checkpoint states and generated CSV bytes matched exactly in every case. Its inspected evidence is retained under `docs/evidence/codi/`, so the adapter is `native-parity-validated` against the TabSyn snapshot only.
 
 ### CTAB-GAN snapshot and compatibility disposition
 

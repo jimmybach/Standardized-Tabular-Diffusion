@@ -17,6 +17,7 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 
 _RESOURCE_ROOT = Path(__file__).resolve().parent / "resources" / "upstream"
 _MANIFESTS = {
+    "codi": _RESOURCE_ROOT / "codi-source-manifest.json",
     "ctab-gan": _RESOURCE_ROOT / "ctabgan-source-manifest.json",
     "ctab-gan-plus": _RESOURCE_ROOT / "ctabgan-plus-source-manifest.json",
     "stasy": _RESOURCE_ROOT / "stasy-source-manifest.json",

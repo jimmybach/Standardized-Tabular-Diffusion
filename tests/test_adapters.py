@@ -39,7 +39,6 @@ from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
-from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter
 from standardized_tabular_diffusion.runner import validate_action_inputs
 
 
@@ -1444,67 +1443,6 @@ def test_code_executing_checkpoint_loads_fail_closed_outside_output_dir(tmp_path
     )
 
 
-def test_codi_builds_expected_tabsyn_dispatch_command(tmp_path: Path, monkeypatch) -> None:
-    codi_adapter = CoDiAdapter(tmp_path)
-    commands: list[tuple[list[str], Path]] = []
-
-    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
-        assert not module
-        commands.append((args, cwd))
-
-    monkeypatch.setattr(codi_adapter, "_run_python", fake_run_python)
-
-    sample_config = ExperimentConfig(
-        model="codi",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "codi"),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, num_samples=32, extra={"steps": 25}),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["x", "y"],
-        numerical_columns=["x"],
-        categorical_columns=[],
-        target_columns=["y"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("x,y\n1,0\n")
-    dataset_spec.test_data_path.write_text("x,y\n1,0\n")
-
-    bundle = codi_adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
-
-    assert commands == [
-        (
-            [
-                "main.py",
-                "--method",
-                "codi",
-                "--mode",
-                "sample",
-                "--dataname",
-                "adult",
-                "--gpu",
-                "0",
-                "--steps",
-                "25",
-                "--save_path",
-                str((Path(sample_config.output_dir) / "samples.csv").resolve()),
-                "--num-samples",
-                "32",
-            ],
-            tmp_path / "TabSyn-main",
-        ),
-    ]
-    assert bundle.generated_sample_path == (Path(sample_config.output_dir) / "samples.csv").resolve()
-
-
 def test_ctabgan_train_and_sample_use_locked_official_checkpoint(tmp_path: Path, monkeypatch) -> None:
     adapter = CTABGANAdapter(tmp_path)
     source_root = tmp_path / "official-source"
@@ -1631,13 +1569,14 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
     monkeypatch.setattr("standardized_tabular_diffusion.runner.__file__", str(fake_runner_path))
     repo_root = tmp_path
     stasy_ckpt = repo_root / "ckpt" / "adult"
-    codi_ckpt = repo_root / "TabSyn-main" / "baselines" / "codi" / "ckpt" / "adult"
+    codi_ckpt = repo_root / "ckpt" / "adult"
     stasy_ckpt.mkdir(parents=True, exist_ok=True)
     codi_ckpt.mkdir(parents=True, exist_ok=True)
     (stasy_ckpt / "model.pth").write_text("stub")
     (repo_root / "stasy-model-metadata.json").write_text("{}")
     (codi_ckpt / "model_con.pt").write_text("stub")
     (codi_ckpt / "model_dis.pt").write_text("stub")
+    (repo_root / "codi-model-metadata.json").write_text("{}")
 
     for model_name in ["stasy", "codi"]:
         config = ExperimentConfig(

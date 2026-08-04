@@ -15,7 +15,7 @@ The cumulative branch preserves the complete commit histories of the three indep
 The integration resolved shared changes in the registry, model inventory, source lock, upstream audit, runtime status, third-party notices, validation package, and tests. The review also found and corrected two cross-branch defects:
 
 - TabDDPM had been promoted in the adapter registry but not in the separate model inventory. Both now report `native-parity-validated`.
-- Restoring the primary TabSyn source must not imply that its separately vendored CoDi baseline was audited. CoDi remains conservatively classified as `compatibility-patched`.
+- Restoring the primary TabSyn source did not by itself audit its separately vendored CoDi baseline. CoDi subsequently received a separate 24-file checksum audit and adapter-only runtime boundary; all nine exact Linux/Python 3.11 TabSyn-snapshot parity cases later passed in retained run `30941940893`.
 
 A Windows checkout also exposed that the TabDDPM libzero license used a raw-byte hash while Git could normalize its line endings. The manifest now explicitly records `license_sha256_lf`, and the validator proves that LF and CRLF checkouts produce the same canonical hash. Official Python modules remain byte-exact; primary source files remain hash-checked using their declared canonical line-ending policy.
 
