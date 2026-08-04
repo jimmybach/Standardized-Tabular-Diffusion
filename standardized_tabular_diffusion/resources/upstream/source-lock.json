@@ -98,10 +98,43 @@
       },
       "source_license_sha256": "7e586fd494f7470067defb818540a1d34b773ee62a16baaaccc511cdbc753181",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "digest": "sha256:ecc8167acd739762bdaca258d5dcb6a5f23648b45e6adba9c6900c14063d1aa6",
+          "evidence_file_sha256": "1b375b93c332327dd2118c2aad9420497008be1390078e1e48e79f8270f74863",
+          "expires_at": "2026-11-02T14:24:33Z",
+          "github_artifact_id": 8896180932,
+          "name": "smote-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/smote/native-parity-run-30918785254.json"
+        },
+        "environment": {
+          "imbalanced-learn": "0.14.2",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "sklearn-compat": "0.1.6"
+        },
+        "level": "native-parity-validated",
         "protocol_id": "smote-native-parity-v1",
-        "status": "pending-authoritative-linux-python-3.11-run",
-        "workflow_path": ".github/workflows/smote-validation.yml"
+        "repository_commit": "283c8987a28ef3c3871d8d819325a035f957a045",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "installed_record_files_verified": 123,
+          "sample_bytes_exact": true,
+          "sampler_state_exact": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "seed_values_passed": 3,
+          "variants_passed": 3,
+          "wheel_identity_verified": true
+        },
+        "status": "pass",
+        "validated_at": "2026-08-04T14:25:17Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254/job/92023627287",
+        "workflow_run_id": 30918785254,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254"
       },
       "upstream_commit": "8504e95f0160f61d1b617ca66f779646d2ee609e",
       "upstream_tree": "af452de62e0f5c3d7e65fdc44a32dc97078152f2"

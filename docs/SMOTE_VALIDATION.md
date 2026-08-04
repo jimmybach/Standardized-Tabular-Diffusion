@@ -1,6 +1,6 @@
 # SMOTE Validation Protocol
 
-Status: authoritative Linux/Python 3.11 run pending; adapter remains `adapter-complete`
+Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
 
 Protocol ID: `smote-native-parity-v1`
 
@@ -88,6 +88,12 @@ Each fixture has 18 source rows with class counts 12 and 6. `sampling_strategy="
 
 There is no numerical tolerance: deterministic parity must be exact across all nine variant/seed cases.
 
+## Retained result
+
+GitHub Actions run [`30918785254`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254) passed all nine variant/seed cases on Linux with Python 3.11.15. It verified 123 hash-bearing installed files against the locked wheel, executed official SMOTE, SMOTENC, and SMOTEN for seeds 0, 19, and 73, and produced byte-exact native/adapter CSV output for every case.
+
+The inspected JSON is permanently retained at `docs/evidence/smote/native-parity-run-30918785254.json` with SHA-256 `1b375b93c332327dd2118c2aad9420497008be1390078e1e48e79f8270f74863`. The corresponding GitHub artifact is `8896180932`, with artifact digest `sha256:ecc8167acd739762bdaca258d5dcb6a5f23648b45e6adba9c6900c14063d1aa6`. The repository copy remains authoritative after the temporary artifact expires.
+
 ## Execution and promotion rule
 
 The authoritative command is:
@@ -100,4 +106,4 @@ python -m standardized_tabular_diffusion.validation.smote \
   --wheel-path /tmp/smote-wheel/imbalanced_learn-0.14.2-py3-none-any.whl
 ```
 
-`.github/workflows/smote-validation.yml` runs this command and retains the evidence artifact for 90 days. Any package, dependency, adapter, fixture, or protocol change requires a new run. Promotion is forbidden until a passing Linux/Python 3.11 artifact has been inspected and an immutable copy has been committed under `docs/evidence/smote/`.
+`.github/workflows/smote-validation.yml` runs this command and retains the evidence artifact for 90 days. Any package, dependency, adapter, fixture, or protocol change requires a new run. The inspected passing evidence promotes the adapter to `native-parity-validated`; it remains `experimental`, `unsupported`, excluded from Official Results, and excluded from joint generative-model ranking pending the separate gates described above.

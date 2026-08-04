@@ -1,6 +1,6 @@
 # SMOTE 验证协议
 
-状态：等待 Linux/Python 3.11 权威运行；适配器仍为 `adapter-complete`
+状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
 
 协议 ID：`smote-native-parity-v1`
 
@@ -88,6 +88,12 @@ python -m pip check
 
 验证不设置数值容差：全部 9 个“采样器变体 × 随机种子”用例都必须确定性精确一致。
 
+## 留存结果
+
+GitHub Actions 运行 [`30918785254`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254) 在 Linux、Python 3.11.15 环境中通过全部 9 个“采样器变体 × 随机种子”用例。运行将 123 个带哈希的已安装文件与锁定 wheel 逐一核对，分别以种子 0、19 和 73 执行官方 SMOTE、SMOTENC 和 SMOTEN，并在每个用例中得到字节级一致的原生/适配器 CSV 输出。
+
+经审阅的 JSON 已永久保存在 `docs/evidence/smote/native-parity-run-30918785254.json`，SHA-256 为 `1b375b93c332327dd2118c2aad9420497008be1390078e1e48e79f8270f74863`。对应 GitHub 产物 ID 为 `8896180932`，产物摘要为 `sha256:ecc8167acd739762bdaca258d5dcb6a5f23648b45e6adba9c6900c14063d1aa6`。临时 Actions 产物过期后，仓库中的永久副本仍为权威记录。
+
 ## 执行与提升规则
 
 权威命令为：
@@ -100,4 +106,4 @@ python -m standardized_tabular_diffusion.validation.smote \
   --wheel-path /tmp/smote-wheel/imbalanced_learn-0.14.2-py3-none-any.whl
 ```
 
-`.github/workflows/smote-validation.yml` 执行该命令，并保留证据产物 90 天。包、依赖、适配器、用例或协议发生任何变化，都必须重新运行。在通过的 Linux/Python 3.11 产物完成审阅并将不可变副本提交到 `docs/evidence/smote/` 之前，禁止提升验证状态。
+`.github/workflows/smote-validation.yml` 执行该命令，并保留证据产物 90 天。包、依赖、适配器、用例或协议发生任何变化，都必须重新运行。经审阅的通过证据将适配器提升为 `native-parity-validated`；在上述独立门槛全部满足前，它仍为 `experimental`、`unsupported`，不能进入 Official Results，也不能进入联合生成模型排名。
