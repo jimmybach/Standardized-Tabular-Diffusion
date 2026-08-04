@@ -38,15 +38,8 @@ def get_args():
 
     ''' configs for CTGAN '''
 
-    parser.add_argument(
-        '-e',
-        '--epochs',
-        '--num_epochs',
-        dest='num_epochs',
-        default=1000,
-        type=int,
-        help='Number of training epochs'
-    )
+    parser.add_argument('-e', '--epochs', default=1000, type=int,
+                        help='Number of training epochs')
     parser.add_argument('--no-header', dest='header', action='store_false',
                         help='The CSV file has no header. Discrete columns will be indices.')
 

@@ -1,0 +1,532 @@
+{
+  "cases": [
+    {
+      "adapter_commands": {
+        "diffusion_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "diffusion-train"
+        ],
+        "sample": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "sample",
+          "--num-samples",
+          "12",
+          "--steps",
+          "4"
+        ],
+        "vae_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "vae-train"
+        ]
+      },
+      "adapter_upstream_root": "/home/runner/work/_temp/tabsyn-validation/case-01-seed-0/adapter/TabSyn-main",
+      "case": 1,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "checkpoints": {
+          "tabsyn/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "aa1d3550d0b3b9fc69159e8760f382e73cfae3fa650d60dcc2301e59b343e7b1",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "aa1d3550d0b3b9fc69159e8760f382e73cfae3fa650d60dcc2301e59b343e7b1",
+            "tensor_values_exact": true
+          },
+          "tabsyn/ckpt/tabsyn_parity/model_0.pt": {
+            "adapter_sha256": "6702161ccc4e7bcebc95436d35d8c3799ba58e2a7778232a86f953e91ca11a16",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "6702161ccc4e7bcebc95436d35d8c3799ba58e2a7778232a86f953e91ca11a16",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/decoder.pt": {
+            "adapter_sha256": "d85ffe36905d914433d40fa67f2af127e59467fe1865e2de75a8fa9d8ddc6d42",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "d85ffe36905d914433d40fa67f2af127e59467fe1865e2de75a8fa9d8ddc6d42",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/encoder.pt": {
+            "adapter_sha256": "3b583b02e3ee0cb5610d7abd8bb799ee742d0a9dc5a243929e0c4d1b4a340646",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "3b583b02e3ee0cb5610d7abd8bb799ee742d0a9dc5a243929e0c4d1b4a340646",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "e82b2efa3f0921062a4972c436ba834885598227b5e855c384a8724cb733778e",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "e82b2efa3f0921062a4972c436ba834885598227b5e855c384a8724cb733778e",
+            "tensor_values_exact": true
+          }
+        },
+        "latent_embeddings": {
+          "adapter_sha256": "9acfc36475bae669bcbde41acc7a9547d1ebe4b20a9e1e639f89ad33110aef5b",
+          "dtype": "float32",
+          "exact": true,
+          "finite": true,
+          "native_sha256": "9acfc36475bae669bcbde41acc7a9547d1ebe4b20a9e1e639f89ad33110aef5b",
+          "shape": [
+            24,
+            5,
+            4
+          ]
+        },
+        "samples": {
+          "adapter_sha256": "f919d7fe6a93fe6bb8776cd4770d78e35cc5c79dcba24ff6b473ee2a286c5a75",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical_values": true,
+          "native_sha256": "f919d7fe6a93fe6bb8776cd4770d78e35cc5c79dcba24ff6b473ee2a286c5a75",
+          "rows": 12
+        }
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "vae",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "sample",
+          "--gpu",
+          "-1",
+          "--steps",
+          "4",
+          "--save_path",
+          "/home/runner/work/_temp/tabsyn-validation/case-01-seed-0/native-samples.csv"
+        ]
+      ],
+      "seed": 0,
+      "status": "pass"
+    },
+    {
+      "adapter_commands": {
+        "diffusion_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "diffusion-train"
+        ],
+        "sample": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "sample",
+          "--num-samples",
+          "12",
+          "--steps",
+          "4"
+        ],
+        "vae_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "vae-train"
+        ]
+      },
+      "adapter_upstream_root": "/home/runner/work/_temp/tabsyn-validation/case-02-seed-19/adapter/TabSyn-main",
+      "case": 2,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "checkpoints": {
+          "tabsyn/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "d0d881cdbde56fbf96d108e1e359b100b547be379f8a9cbf6a5bfb0b8f328813",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "d0d881cdbde56fbf96d108e1e359b100b547be379f8a9cbf6a5bfb0b8f328813",
+            "tensor_values_exact": true
+          },
+          "tabsyn/ckpt/tabsyn_parity/model_0.pt": {
+            "adapter_sha256": "bf58c2358976ee963392edd2ade53b77c9d346d9019e23ff2e8b1d8b5154cbc9",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "bf58c2358976ee963392edd2ade53b77c9d346d9019e23ff2e8b1d8b5154cbc9",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/decoder.pt": {
+            "adapter_sha256": "4c395da7796ff434924586944a5e406b4d6c1cf0444e49fb0c5ab18666ab3345",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "4c395da7796ff434924586944a5e406b4d6c1cf0444e49fb0c5ab18666ab3345",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/encoder.pt": {
+            "adapter_sha256": "f5bbf7290e16755db18354c9a761d8121de26c6d370c78e618b8025c314dfe8b",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "f5bbf7290e16755db18354c9a761d8121de26c6d370c78e618b8025c314dfe8b",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "51116dc598374b49a052c42863748051ad570504dccaaf637fc2b3205768ba7b",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "51116dc598374b49a052c42863748051ad570504dccaaf637fc2b3205768ba7b",
+            "tensor_values_exact": true
+          }
+        },
+        "latent_embeddings": {
+          "adapter_sha256": "2281975d090fdf26e94218229b6b0ba3d74d050d5790dd282d1f3178f06251d7",
+          "dtype": "float32",
+          "exact": true,
+          "finite": true,
+          "native_sha256": "2281975d090fdf26e94218229b6b0ba3d74d050d5790dd282d1f3178f06251d7",
+          "shape": [
+            24,
+            5,
+            4
+          ]
+        },
+        "samples": {
+          "adapter_sha256": "10cd1680b61ab22a2c9629b7f653d5a4f5e23c7ec1f5d0b856227d852d94e8fb",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical_values": true,
+          "native_sha256": "10cd1680b61ab22a2c9629b7f653d5a4f5e23c7ec1f5d0b856227d852d94e8fb",
+          "rows": 12
+        }
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "vae",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "sample",
+          "--gpu",
+          "-1",
+          "--steps",
+          "4",
+          "--save_path",
+          "/home/runner/work/_temp/tabsyn-validation/case-02-seed-19/native-samples.csv"
+        ]
+      ],
+      "seed": 19,
+      "status": "pass"
+    },
+    {
+      "adapter_commands": {
+        "diffusion_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "diffusion-train"
+        ],
+        "sample": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "sample",
+          "--num-samples",
+          "12",
+          "--steps",
+          "4"
+        ],
+        "vae_train": [
+          "compat/tabsyn_launcher.py",
+          "--action",
+          "vae-train"
+        ]
+      },
+      "adapter_upstream_root": "/home/runner/work/_temp/tabsyn-validation/case-03-seed-73/adapter/TabSyn-main",
+      "case": 3,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "checkpoints": {
+          "tabsyn/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "7cfd8a4b88364e125df202f7e5a00d835bea4f1acc4546b266ed0c0d0f174bb1",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "7cfd8a4b88364e125df202f7e5a00d835bea4f1acc4546b266ed0c0d0f174bb1",
+            "tensor_values_exact": true
+          },
+          "tabsyn/ckpt/tabsyn_parity/model_0.pt": {
+            "adapter_sha256": "f2b43eb8710aa6416448efb70489e079620ff4cd198b7d8d95196c0a2c727d21",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "f2b43eb8710aa6416448efb70489e079620ff4cd198b7d8d95196c0a2c727d21",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/decoder.pt": {
+            "adapter_sha256": "0d70e08e18f1c3244504a314bb741a1700c14581b8e4e8c21a44e68ff78e6b84",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "0d70e08e18f1c3244504a314bb741a1700c14581b8e4e8c21a44e68ff78e6b84",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/encoder.pt": {
+            "adapter_sha256": "20e20ff17bda19bb6c43b5252b677138e29a53df2deffe4434b10756727b804e",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "20e20ff17bda19bb6c43b5252b677138e29a53df2deffe4434b10756727b804e",
+            "tensor_values_exact": true
+          },
+          "tabsyn/vae/ckpt/tabsyn_parity/model.pt": {
+            "adapter_sha256": "4eedf1bf6978860866435924751e299cda90ac91b76f1fdaf9fb0962a7386e38",
+            "keys_exact": true,
+            "mismatches": [],
+            "native_sha256": "4eedf1bf6978860866435924751e299cda90ac91b76f1fdaf9fb0962a7386e38",
+            "tensor_values_exact": true
+          }
+        },
+        "latent_embeddings": {
+          "adapter_sha256": "a4de42e4255d7c29c7d4d58e81705d5617d44be7456f4165819c0a3e0d28969d",
+          "dtype": "float32",
+          "exact": true,
+          "finite": true,
+          "native_sha256": "a4de42e4255d7c29c7d4d58e81705d5617d44be7456f4165819c0a3e0d28969d",
+          "shape": [
+            24,
+            5,
+            4
+          ]
+        },
+        "samples": {
+          "adapter_sha256": "fc6992659722f36375a220d003f74a730285266cb421e3df73b7fc492f916b18",
+          "columns": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ],
+          "exact_bytes": true,
+          "exact_frame": true,
+          "finite_numerical_values": true,
+          "native_sha256": "fc6992659722f36375a220d003f74a730285266cb421e3df73b7fc492f916b18",
+          "rows": 12
+        }
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "vae",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "train",
+          "--gpu",
+          "-1"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "main.py",
+          "--dataname",
+          "tabsyn_parity",
+          "--method",
+          "tabsyn",
+          "--mode",
+          "sample",
+          "--gpu",
+          "-1",
+          "--steps",
+          "4",
+          "--save_path",
+          "/home/runner/work/_temp/tabsyn-validation/case-03-seed-73/native-samples.csv"
+        ]
+      ],
+      "seed": 73,
+      "status": "pass"
+    }
+  ],
+  "environment": {
+    "category_encoders": "2.6.4",
+    "libzero": "0.0.8",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "scikit_learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.0+cpu"
+  },
+  "environment_lock": {
+    "path": "requirements-tabsyn-validation.txt",
+    "sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149"
+  },
+  "fixture": {
+    "categorical_features": 1,
+    "dataset_name": "tabsyn_parity",
+    "kind": "deterministic-mixed-type-binary-classification",
+    "missing_values": 0,
+    "numerical_features": 2,
+    "target_features": 1,
+    "test_rows": 12,
+    "train_rows": 24
+  },
+  "model_id": "tabsyn",
+  "protocol_id": "tabsyn-native-parity-v1",
+  "repository_commit": "54d419642842d7146d6afa4aa1b3d5167301c51c",
+  "runtime_config": {
+    "overrides": [
+      {
+        "base_sha256": "ccb1ab85a0672727c50a64b28b5547b3310bbe2332aa106d4242e5a954106346",
+        "execution_sha256": "ad2c6297f15a982cfcbd1e27f3ffc3ff33ef7058e6434d612f18b79821b53a89",
+        "from": "num_workers = 4",
+        "path": "tabsyn/vae/main.py",
+        "purpose": "bounded CI worker count",
+        "to": "num_workers = 0"
+      },
+      {
+        "base_sha256": "ad2c6297f15a982cfcbd1e27f3ffc3ff33ef7058e6434d612f18b79821b53a89",
+        "execution_sha256": "51d58a4e3fc08641675380f986657097d6e9b2f1ca105c397fa426192a75d8f2",
+        "from": "num_epochs = 4000",
+        "path": "tabsyn/vae/main.py",
+        "purpose": "bounded VAE smoke training",
+        "to": "num_epochs = 2"
+      },
+      {
+        "base_sha256": "e3f75dc56f5367e66b78818a9c398c5b48b6e0324a8bea7d5789356199742508",
+        "execution_sha256": "ed6345204a173fcdba26b76bf125d6d2fd3e06a614b68ea4d26c785a3531efd2",
+        "from": "num_workers = 4",
+        "path": "tabsyn/main.py",
+        "purpose": "bounded CI worker count",
+        "to": "num_workers = 0"
+      },
+      {
+        "base_sha256": "ed6345204a173fcdba26b76bf125d6d2fd3e06a614b68ea4d26c785a3531efd2",
+        "execution_sha256": "0387190990376e5a863bf7940574debe9c1767d676c29cf83b4a71d83a0497f0",
+        "from": "num_epochs = 10000 + 1",
+        "path": "tabsyn/main.py",
+        "purpose": "bounded diffusion smoke training",
+        "to": "num_epochs = 2"
+      },
+      {
+        "base_sha256": "0387190990376e5a863bf7940574debe9c1767d676c29cf83b4a71d83a0497f0",
+        "execution_sha256": "e2ecd1c05db128401637a9828c050b7679b354e5f0d0778ae178e5919c74469b",
+        "from": "MLPDiffusion(in_dim, 1024)",
+        "path": "tabsyn/main.py",
+        "purpose": "bounded MLP width",
+        "to": "MLPDiffusion(in_dim, 64)"
+      },
+      {
+        "base_sha256": "cd7b3ef701239b4ff9a0f1e9af7c2884efb4480075a56d73f5f5b5d5554dc399",
+        "execution_sha256": "f4f0963658fa5fbd8b2f2faeafd4c42f4371ce33c9dbc000a4b88359179aa220",
+        "from": "MLPDiffusion(in_dim, 1024)",
+        "path": "tabsyn/sample.py",
+        "purpose": "match training width",
+        "to": "MLPDiffusion(in_dim, 64)"
+      },
+      {
+        "base_sha256": "f4f0963658fa5fbd8b2f2faeafd4c42f4371ce33c9dbc000a4b88359179aa220",
+        "execution_sha256": "0d1ba07af46a4332d9985b235d22195075cf6c67d96d7fc967651a774455ceae",
+        "from": "num_samples = train_z.shape[0]",
+        "path": "tabsyn/sample.py",
+        "purpose": "bounded requested row count",
+        "to": "num_samples = 12"
+      },
+      {
+        "base_sha256": "0d1ba07af46a4332d9985b235d22195075cf6c67d96d7fc967651a774455ceae",
+        "execution_sha256": "e42e5aa635f6a2556ed43f73055210d99bb529df9bf120e298b7bcf75ab2ae7d",
+        "from": "sample(model.denoise_fn_D, num_samples, sample_dim)",
+        "path": "tabsyn/sample.py",
+        "purpose": "explicit official sampler controls for CPU execution",
+        "to": "sample(model.denoise_fn_D, num_samples, sample_dim, num_steps=steps, device=device)"
+      }
+    ],
+    "sitecustomize_sha256": "2fa84a636e6ea5f283fd90e5559af15a5686401fdf0a774a94d65071822391b1",
+    "tracked_upstream_source_modified": false,
+    "treatment": "validation-only execution overrides applied equally to two isolated verified copies"
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "dependency_resolution": {
+      "libzero": {
+        "distribution": "libzero",
+        "import_name": "zero",
+        "resolution": "The upstream requirements file names zero, but the imported research utility API is supplied by libzero; the zero distribution is an unrelated circuit-analysis package. The frozen Python 3.11 environment installs the official wheel without dependencies because its stale torch<2 metadata conflicts with the repository's validated torch 2.3 stack; numpy, pynvml, torch, and tqdm are locked separately.",
+        "version": "0.0.8",
+        "wheel_filename": "libzero-0.0.8-py3-none-any.whl",
+        "wheel_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d"
+      }
+    },
+    "manifest_path": "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
+    "manifest_sha256": "273999bc5b2b6ff7f871c3b6c291e8b5d0aedf3f6b05d9d9af61144deca955a6",
+    "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
+    "upstream_files_verified": 20,
+    "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+  },
+  "status": "pass"
+}
