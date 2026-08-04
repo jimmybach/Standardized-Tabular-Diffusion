@@ -194,14 +194,16 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         install_extra="nrgboost",
         upstream_repository="https://github.com/Ajoo/nrgboost",
         upstream_revision="feef73a3edb20b911c2f7214b13f810909ef20ad",
-        revision_status="pinned-canonical-package-parity-pending",
-        license_status="MIT package dependency; validation and release gates pending",
+        revision_status="pinned-canonical-package-native-parity-validated",
+        license_status="MIT package dependency; central evaluation, dataset, runtime, and release gates pending",
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/NRGBOOST_VALIDATION.md",
+            "docs/evidence/nrgboost/native-parity-run-30922326384.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/nrgboost-validation.yml",
         ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "nflow": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",

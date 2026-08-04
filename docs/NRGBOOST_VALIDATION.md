@@ -1,6 +1,6 @@
 # NRGBoost Validation Protocol
 
-Status: mandatory native-parity protocol; authoritative run pending
+Status: passed and permanently retained
 
 Protocol: `nrgboost-native-parity-v1`
 
@@ -86,4 +86,6 @@ Any mismatch, missing artifact, wrong platform, dependency drift, unsafe wheel p
 
 ## Evidence
 
-The mandatory workflow is `.github/workflows/nrgboost-validation.yml`; the frozen dependency lock is `requirements-nrgboost-validation.txt`. Until a successful Linux run is downloaded, permanently committed, and bound to its repository commit, the registry remains `adapter-complete`.
+[GitHub Actions run `30922326384`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384) passed all six task/seed cases on Linux with Python 3.11.15. It verified all 22 hash-bearing installed files against the locked wheel, ran classification and regression fixtures with seeds 0, 19, and 73, and produced byte-exact native/adapter checkpoints and sample CSV files in every case.
+
+The permanent evidence record is `docs/evidence/nrgboost/native-parity-run-30922326384.json`, SHA-256 `5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c`. The run is bound to repository commit `4cd32c8beedd116c6385463d41cf9cba8b1d5438`; the downloaded GitHub artifact is additionally recorded by artifact ID and digest in the source lock. NRGBoost is therefore `native-parity-validated`, while benchmark eligibility and release support remain pending.
