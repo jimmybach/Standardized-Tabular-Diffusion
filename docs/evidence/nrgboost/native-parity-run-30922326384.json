@@ -1,0 +1,800 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/adapter/model.nrgboost",
+        "checkpoint_sha256": "f20bdecc3d70be8b1d7832d598833239b7a4d61db84227fdb551ae9957a5a9f8",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment",
+            "target"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 0,
+            "temperature": 1.0
+          },
+          "seed": 0,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/adapter/samples.csv",
+        "sample_sha256": "c31c3bdb23ce5bb31a9c47f72ea65f433625cb98d4bc0a8908059951b41ad01f",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/native/model.nrgboost",
+        "checkpoint_sha256": "f20bdecc3d70be8b1d7832d598833239b7a4d61db84227fdb551ae9957a5a9f8",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-0/native/samples.csv",
+        "sample_sha256": "c31c3bdb23ce5bb31a9c47f72ea65f433625cb98d4bc0a8908059951b41ad01f",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/adapter/model.nrgboost",
+        "checkpoint_sha256": "1f10f20705a99f4c0f54b35d30d27190be4bab97c4ac95c03f34dfa525b48868",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment",
+            "target"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 19,
+            "temperature": 1.0
+          },
+          "seed": 19,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/adapter/samples.csv",
+        "sample_sha256": "e6b68d97e7156e8fc515d41dadba20c8cd60e1de6e7c4328d6bd38b6e828590e",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/native/model.nrgboost",
+        "checkpoint_sha256": "1f10f20705a99f4c0f54b35d30d27190be4bab97c4ac95c03f34dfa525b48868",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-19/native/samples.csv",
+        "sample_sha256": "e6b68d97e7156e8fc515d41dadba20c8cd60e1de6e7c4328d6bd38b6e828590e",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/adapter/model.nrgboost",
+        "checkpoint_sha256": "4018f180586cedb5c754dc91e5176b604341fb41f1d9b635f43e66fb46f5d495",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment",
+            "target"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 73,
+            "temperature": 1.0
+          },
+          "seed": 73,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/adapter/samples.csv",
+        "sample_sha256": "f9146fe89f22b7686215b2179fcc16aa5377aea3166054341a7afc9c48cb4046",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/native/model.nrgboost",
+        "checkpoint_sha256": "4018f180586cedb5c754dc91e5176b604341fb41f1d9b635f43e66fb46f5d495",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/classification/seed-73/native/samples.csv",
+        "sample_sha256": "f9146fe89f22b7686215b2179fcc16aa5377aea3166054341a7afc9c48cb4046",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "classification"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/adapter/model.nrgboost",
+        "checkpoint_sha256": "09f8e7165a356d4f9f866d23e4d67aa3670979cffac5144e671d81c0bc3696cf",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 0,
+            "temperature": 1.0
+          },
+          "seed": 0,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/adapter/samples.csv",
+        "sample_sha256": "3eec40cf2c8d3a64b4945dda0f37fbff4f3ddd771b2da1717f9cb45b74fc8932",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/native/model.nrgboost",
+        "checkpoint_sha256": "09f8e7165a356d4f9f866d23e4d67aa3670979cffac5144e671d81c0bc3696cf",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-0/native/samples.csv",
+        "sample_sha256": "3eec40cf2c8d3a64b4945dda0f37fbff4f3ddd771b2da1717f9cb45b74fc8932",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/adapter/model.nrgboost",
+        "checkpoint_sha256": "75d6e92af1908517109674f92fab3a2acfc68fc634bbebd57b5889683c4aa19b",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 19,
+            "temperature": 1.0
+          },
+          "seed": 19,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/adapter/samples.csv",
+        "sample_sha256": "f00bd31bf4eb626a150d7105c6f29e94056e35a6a0b9650d8ee5b711deeb686c",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/native/model.nrgboost",
+        "checkpoint_sha256": "75d6e92af1908517109674f92fab3a2acfc68fc634bbebd57b5889683c4aa19b",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-19/native/samples.csv",
+        "sample_sha256": "f00bd31bf4eb626a150d7105c6f29e94056e35a6a0b9650d8ee5b711deeb686c",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/adapter/model.nrgboost",
+        "checkpoint_sha256": "2ccb6f7a8f3ae170301a2caccb2be8440997c892ca57ff5d2dc3cbfb6dffb37c",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "metadata": {
+          "categorical_columns": [
+            "segment"
+          ],
+          "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/adapter/model.nrgboost",
+          "columns": [
+            "continuous",
+            "count",
+            "segment",
+            "target"
+          ],
+          "dataset_params": {
+            "discretization_types": null,
+            "infer_continuous_ordered_categoricals": false,
+            "infer_fixed_point": true,
+            "infer_ordered_categoricals": false,
+            "num_bins": 32
+          },
+          "package": "nrgboost",
+          "package_version": "0.0.3",
+          "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/adapter/samples.csv",
+          "sampling": {
+            "num_rounds": null,
+            "num_steps": 12,
+            "num_threads": 1,
+            "output_full_chain": false,
+            "requested_rows": 16,
+            "seed": 73,
+            "temperature": 1.0
+          },
+          "seed": 73,
+          "source_rows": 36,
+          "training_params": {
+            "burn_in": 8,
+            "categorical_split_one_vs_all": false,
+            "feature_frac": 1.0,
+            "initial_samples": "data",
+            "initial_uniform_mixture": 0.1,
+            "jit_all": false,
+            "line_search": true,
+            "max_leaves": 8,
+            "max_ratio_in_leaf": 2.0,
+            "min_data_in_leaf": 0.0,
+            "min_gain": 0.0,
+            "num_chains": 4,
+            "num_model_samples": 256,
+            "num_threads": 1,
+            "num_trees": 3,
+            "p_refresh": 0.2,
+            "shrinkage": 0.15,
+            "splitter": "best",
+            "temperature": 1.0
+          }
+        },
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/adapter/samples.csv",
+        "sample_sha256": "8548139b733eb0524e90fced9045b892c879c4a0bed201780fbcad37df8abbdf",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "adapter_metadata_exact": true,
+        "checkpoint_bytes_exact": true,
+        "checkpoint_structure_exact": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 16
+        }
+      },
+      "native_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/native/model.nrgboost",
+        "checkpoint_sha256": "2ccb6f7a8f3ae170301a2caccb2be8440997c892ca57ff5d2dc3cbfb6dffb37c",
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/nrgboost-validation/regression/seed-73/native/samples.csv",
+        "sample_sha256": "8548139b733eb0524e90fced9045b892c879c4a0bed201780fbcad37df8abbdf",
+        "serialized_tree_count": 3,
+        "serialized_version": "0.0",
+        "transform_columns": [
+          "continuous",
+          "count",
+          "segment",
+          "target"
+        ]
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "claim_boundary": "Native adapter parity only; benchmark eligibility and release support remain separate gates.",
+  "environment": {
+    "cffi": "1.17.1",
+    "joblib": "1.5.3",
+    "llvmlite": "0.44.0",
+    "nrgboost": "0.0.3",
+    "numba": "0.61.2",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "pycparser": "2.22",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "scipy": "1.13.1",
+    "six": "1.17.0",
+    "tqdm": "4.66.5",
+    "tzdata": "2026.3"
+  },
+  "environment_lock": {
+    "path": "requirements-nrgboost-validation.txt",
+    "sha256": "991d4f44b3bb85c87e565daa5aee1afcf23ebd58535864c61295cb8bb2c0afd8"
+  },
+  "fixtures": [
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "count",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "count"
+      ],
+      "rows": 36,
+      "target_columns": [
+        "target"
+      ],
+      "train_csv_sha256": "65c9ea7d1a39932f9e2cc71ae50a4770634d775a803339c2ab0b4d42854c1040",
+      "variant": "classification"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "count",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "count",
+        "target"
+      ],
+      "rows": 36,
+      "target_columns": [
+        "target"
+      ],
+      "train_csv_sha256": "35575b1ccb77621d20749c7ebfc803def2c44d451f98aab6dbb77016d5d1872d",
+      "variant": "regression"
+    }
+  ],
+  "model_id": "nrgboost",
+  "protocol_id": "nrgboost-native-parity-v1",
+  "repository_commit": "4cd32c8beedd116c6385463d41cf9cba8b1d5438",
+  "runtime_config": {
+    "dataset_params": {
+      "discretization_types": null,
+      "infer_continuous_ordered_categoricals": false,
+      "infer_fixed_point": true,
+      "infer_ordered_categoricals": false,
+      "num_bins": 32
+    },
+    "sample_rows": 16,
+    "sampling_params": {
+      "num_rounds": null,
+      "num_steps": 12,
+      "num_threads": 1,
+      "output_full_chain": false,
+      "temperature": 1.0
+    },
+    "training_params": {
+      "burn_in": 8,
+      "categorical_split_one_vs_all": false,
+      "feature_frac": 1.0,
+      "initial_samples": "data",
+      "initial_uniform_mixture": 0.1,
+      "jit_all": false,
+      "line_search": true,
+      "max_leaves": 8,
+      "max_ratio_in_leaf": 2.0,
+      "min_data_in_leaf": 0.0,
+      "min_gain": 0.0,
+      "num_chains": 4,
+      "num_model_samples": 256,
+      "num_threads": 1,
+      "num_trees": 3,
+      "p_refresh": 0.2,
+      "shrinkage": 0.15,
+      "splitter": "best",
+      "temperature": 1.0
+    }
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "method-author",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license": "MIT",
+      "license_file_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945",
+      "module_path": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/nrgboost/__init__.py",
+      "public_exports_exact": true,
+      "record_files_verified": 22,
+      "version": "0.0.3"
+    },
+    "release_provenance": "PyPI Trusted Publishing from the locked tag commit",
+    "repository": "https://github.com/Ajoo/nrgboost",
+    "source_license_file_sha256": "999f9e9b53bb8aae7225dac0599ff28bbcb61f8604da1bcb201cf767543998bf",
+    "tag": "v0.0.3",
+    "upstream_commit": "feef73a3edb20b911c2f7214b13f810909ef20ad",
+    "upstream_tree": "e3e84bacc7236a36af93c3d214de14bd308d2767",
+    "wheel": {
+      "archive_members": 29,
+      "bundled_openmp_sha256": "ec3543cb6fa11f34258fe3d59082e4bd9740a18349e097fc42a7bc692a21bf2c",
+      "bytes": 200775,
+      "c_extension_sha256": "c7574e824be9f116f95142c64335ea6078f7effdc9279f797cf0503534ba09c7",
+      "filename": "nrgboost-0.0.3-cp311-cp311-manylinux_2_28_x86_64.whl",
+      "license": "MIT",
+      "license_file_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945",
+      "sha256": "dfe30829ceaf2d0d0ec03eab1744838bed857d56919238e7243c9fb7f273e1fb"
+    }
+  },
+  "status": "pass",
+  "variants": [
+    "classification",
+    "regression"
+  ]
+}

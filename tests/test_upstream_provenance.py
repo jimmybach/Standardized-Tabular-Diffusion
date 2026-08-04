@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -51,13 +52,14 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
+        "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
-    for model_id in ("ctgan", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"):
+    for model_id in ("ctgan", "nrgboost", "smote", "tabddpm", "tabdiff", "tabsyn", "tvae"):
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
@@ -136,7 +138,7 @@ def test_tvae_package_lock_and_retained_validation_are_exact_and_conservatively_
     assert str(tvae["official_eligibility"]).startswith("blocked-pending-license")
 
 
-def test_nrgboost_package_lock_is_exact_and_parity_claim_remains_pending() -> None:
+def test_nrgboost_package_lock_and_retained_validation_are_exact_and_conservatively_gated() -> None:
     payload = _load_source_lock()
     nrgboost = payload["components"]["nrgboost"]
     assert isinstance(nrgboost, dict)
@@ -152,14 +154,24 @@ def test_nrgboost_package_lock_is_exact_and_parity_claim_remains_pending() -> No
         "version": "0.0.3",
         "wheel_license_sha256": "3693dc7c451fe74ffead14c00964ac00a1123242c9fc3d8cb13c8fef3091b945",
     }
-    assert nrgboost["validation"] == {
-        "level": "adapter-complete",
-        "protocol_id": "nrgboost-native-parity-v1",
-        "status": "pending-authoritative-run",
-    }
+    validation = nrgboost["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30922326384
+    assert validation["repository_commit"] == "4cd32c8beedd116c6385463d41cf9cba8b1d5438"
+    assert validation["result_summary"]["parity_cases_passed"] == 6
+    assert validation["result_summary"]["checkpoint_bytes_exact"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
     spec = get_adapter_spec("nrgboost")
-    assert spec.validation_level.value == "adapter-complete"
-    assert spec.revision_status == "pinned-canonical-package-parity-pending"
+    assert spec.validation_level.value == "native-parity-validated"
+    assert spec.revision_status == "pinned-canonical-package-native-parity-validated"
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
 

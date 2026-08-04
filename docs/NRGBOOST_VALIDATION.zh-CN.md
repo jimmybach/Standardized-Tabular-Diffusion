@@ -1,6 +1,6 @@
 # NRGBoost 验证协议
 
-状态：强制原生等价性协议，等待权威运行
+状态：已通过并永久保留
 
 协议：`nrgboost-native-parity-v1`
 
@@ -86,4 +86,6 @@ NRGBoost 0.0.3 提供 Linux 和 macOS wheel，当前不支持 Windows；源码�
 
 ## 证据
 
-强制工作流为 `.github/workflows/nrgboost-validation.yml`，冻结依赖锁为 `requirements-nrgboost-validation.txt`。在成功的 Linux 运行被下载、永久提交并绑定到对应仓库提交之前，注册表保持 `adapter-complete`。
+[GitHub Actions 运行 `30922326384`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384) 在 Linux、Python 3.11.15 上通过全部 6 个任务/种子用例。它将 22 个带哈希的已安装文件与锁定 wheel 逐一核对，使用种子 0、19 和 73 执行分类与回归固件，并在每个用例中生成字节级一致的原生/适配器检查点和样本 CSV。
+
+永久证据记录为 `docs/evidence/nrgboost/native-parity-run-30922326384.json`，SHA-256 为 `5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c`。运行绑定到仓库提交 `4cd32c8beedd116c6385463d41cf9cba8b1d5438`；下载的 GitHub 制品 ID 和摘要也已写入来源锁。因此 NRGBoost 现为 `native-parity-validated`，但基准准入与发布支持仍待完成。

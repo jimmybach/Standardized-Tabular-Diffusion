@@ -471,7 +471,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="energy-based",
         paradigm="energy-based boosted trees",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="medium",
         repository_url="https://github.com/Ajoo/nrgboost",
@@ -479,7 +479,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The method-author v0.0.3 commit and official CPython 3.11 Linux wheel are checksum-locked; no upstream source is vendored or patched.",
             "The adapter requires the exact optional nrgboost 0.0.3 package, forwards train and sample seeds, and rejects missing values until explicit preprocessing has run.",
             "Linux/Python 3.11 is authoritative because the official package does not support Windows and source builds require a C compiler plus OpenMP.",
-            "The six-case classification/regression native-parity workflow is implemented, but status remains adapter-complete until successful evidence is retained.",
+            "All six classification/regression and seed cases passed exact native parity in retained Linux/Python 3.11 workflow run 30922326384.",
+            "Benchmark eligibility and release support remain separate pending gates.",
         ],
     ),
     "ctab-gan-plus": ModelInventoryEntry(

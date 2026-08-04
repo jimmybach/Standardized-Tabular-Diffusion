@@ -2,7 +2,7 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, CTGAN, TVAE, SMOTE, TabDDPM, TabDiff, and TabSyn are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
 
 CTGAN has been moved from the legacy embedded `0.5.2.dev0` import path to the checksum-pinned official `ctgan==0.12.1` wheel. Its first mandatory parity run passed and is retained. The package is BUSL-1.1, so validation cannot by itself grant Official Results or release eligibility.
 
@@ -16,8 +16,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `ctgan`: passed `ctgan-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30910275922`; see `docs/CTGAN_VALIDATION.md` and the permanent JSON evidence record. The official package's BUSL-1.1 terms remain a separate release gate.
 - `tvae`: passed `tvae-native-parity-v1` for seeds 0, 19, and 73 in GitHub Actions run `30913867621`; see `docs/TVAE_VALIDATION.md` and the permanent JSON evidence record. The official package's BUSL-1.1 terms remain a separate release gate.
 - `smote`: passed all nine `smote-native-parity-v1` sampler/seed cases in GitHub Actions run `30918785254`; see `docs/SMOTE_VALIDATION.md` and the permanent JSON evidence record. SMOTE remains a classification-only classical reference excluded from the joint generative-model ranking.
-
-The NRGBoost 0.0.3 source and wheel are now locked and its mandatory six-case Linux parity protocol is implemented. Its status remains `adapter-complete` until successful workflow evidence is permanently retained.
+- `nrgboost`: passed all six classification/regression and seed cases in `nrgboost-native-parity-v1` GitHub Actions run `30922326384`; see `docs/NRGBOOST_VALIDATION.md` and the permanent JSON evidence record. Benchmark eligibility, runtime policy, and release support remain separate gates.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -34,7 +33,7 @@ The NRGBoost 0.0.3 source and wheel are now locked and its mandatory six-case Li
 - `goggle`
 - `arf`
 
-These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTGAN, TVAE, SMOTE, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. Except for the separately revalidated CTGAN, TVAE, SMOTE, NRGBoost, TabDDPM, TabDiff, and TabSyn paths, these runs are useful engineering history but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 
