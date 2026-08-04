@@ -18,7 +18,6 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import (
     SampleFileEvaluatorMixin,
-    disable_torchvision_for_transformers,
     isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
@@ -374,106 +373,6 @@ class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=source_root,
-            generated_sample_path=sample_path,
-        )
-        return self._write_bundle(bundle)
-
-    def evaluate(self, spec: RunSpec) -> ArtifactBundle:
-        return self._evaluate_from_sample_file(spec)
-
-
-class REaLTabFormerAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
-    model_name = "realtabformer"
-    upstream_dirname = "TabSyn-main"
-
-    def _model_root(self, spec: RunSpec) -> Path:
-        if spec.checkpoint_path is not None:
-            return spec.checkpoint_path
-        return spec.output_dir / "realtabformer_model"
-
-    def _resolve_saved_model_dir(self, model_root: Path) -> Path:
-        if model_root.is_dir() and model_root.name.startswith("id"):
-            return model_root
-        candidates = sorted([path for path in model_root.glob("id*") if path.is_dir()])
-        if not candidates:
-            raise FileNotFoundError(f"Could not find saved REaLTabFormer model directory under {model_root}")
-        return candidates[-1]
-
-    def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
-        if dataset_spec.train_data_path is None:
-            raise FileNotFoundError("realtabformer requires dataset_spec.train_data_path")
-        return pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
-
-    def _limit_training_frame(self, train_df: pd.DataFrame, spec: RunSpec) -> pd.DataFrame:
-        max_train_rows = spec.extra.get("max_train_rows")
-        if max_train_rows is None or len(train_df) <= int(max_train_rows):
-            return train_df
-        return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
-
-    def _import_model_cls(self):
-        with disable_torchvision_for_transformers():
-            module = _import_or_raise("realtabformer", "pip install realtabformer")
-            return module.REaLTabFormer
-
-    def train(self, spec: RunSpec) -> ArtifactBundle:
-        self._ensure_output_dir(spec)
-        dataset_spec = self.resolve_dataset_spec(spec)
-        train_df = self._limit_training_frame(self._load_training_frame(dataset_spec), spec)
-        REaLTabFormer = self._import_model_cls()
-        model = REaLTabFormer(
-            model_type="tabular",
-            epochs=int(spec.extra.get("epochs", 100)),
-            batch_size=int(spec.extra.get("batch_size", 64)),
-            gradient_accumulation_steps=int(spec.extra.get("gradient_accumulation_steps", 4)),
-            logging_steps=int(spec.extra.get("logging_steps", 100)),
-            report_to=spec.extra.get("report_to", "none"),
-        )
-        fit_kwargs: dict[str, Any] = {
-            "num_bootstrap": int(spec.extra.get("num_bootstrap", 0)),
-            "n_critic": int(spec.extra.get("n_critic", 0)),
-        }
-        model.fit(train_df, **fit_kwargs)
-        model_root = self._model_root(spec)
-        model_root.mkdir(parents=True, exist_ok=True)
-        full_save_dir = getattr(model, "full_save_dir", None)
-        if full_save_dir is not None:
-            setattr(model, "full_save_dir", str(full_save_dir))
-        model.save(str(model_root))
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            notes=[f"Saved REaLTabFormer artifacts under {model_root}."],
-        )
-        return self._write_bundle(bundle)
-
-    def sample(self, spec: RunSpec) -> ArtifactBundle:
-        self._ensure_output_dir(spec)
-        dataset_spec = self.resolve_dataset_spec(spec)
-        train_df = self._load_training_frame(dataset_spec)
-        REaLTabFormer = self._import_model_cls()
-        model_dir = self._resolve_saved_model_dir(self._model_root(spec))
-        trusted_model_dir = self._validate_trusted_executable_artifact(
-            spec,
-            model_dir,
-            format_name="REaLTabFormer model directory",
-            allow_directory=True,
-        )
-        model = REaLTabFormer.load_from_dir(path=str(trusted_model_dir))
-        num_samples = spec.num_samples or len(train_df)
-        sample_kwargs: dict[str, Any] = {}
-        if spec.extra.get("gen_batch") is not None:
-            sample_kwargs["gen_batch"] = int(spec.extra["gen_batch"])
-        sample_df = model.sample(n_samples=num_samples, **sample_kwargs)
-        sample_df = sample_df[dataset_spec.column_names].copy()
-        sample_path = spec.output_dir / "samples.csv"
-        self._write_dataframe_csv(sample_df, sample_path)
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
         )
         return self._write_bundle(bundle)

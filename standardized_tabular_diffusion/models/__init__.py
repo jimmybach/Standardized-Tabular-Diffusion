@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     from standardized_tabular_diffusion.models.next_wave_baselines import (
         CTABGANPlusAdapter,
         NRGBoostAdapter,
-        REaLTabFormerAdapter,
     )
     from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
+    from standardized_tabular_diffusion.models.realtabformer import REaLTabFormerAdapter
     from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
     from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
     from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
@@ -36,7 +36,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     "TabEBMAdapter": ("standardized_tabular_diffusion.models.final_wave_baselines", "TabEBMAdapter"),
     "CTABGANPlusAdapter": ("standardized_tabular_diffusion.models.next_wave_baselines", "CTABGANPlusAdapter"),
     "NRGBoostAdapter": ("standardized_tabular_diffusion.models.next_wave_baselines", "NRGBoostAdapter"),
-    "REaLTabFormerAdapter": ("standardized_tabular_diffusion.models.next_wave_baselines", "REaLTabFormerAdapter"),
+    "REaLTabFormerAdapter": ("standardized_tabular_diffusion.models.realtabformer", "REaLTabFormerAdapter"),
     "TabSDSAdapter": ("standardized_tabular_diffusion.models.paper_gap_baselines", "TabSDSAdapter"),
     "TabularARGNAdapter": ("standardized_tabular_diffusion.models.paper_gap_baselines", "TabularARGNAdapter"),
     "CTGANAdapter": ("standardized_tabular_diffusion.models.sample_baselines", "CTGANAdapter"),

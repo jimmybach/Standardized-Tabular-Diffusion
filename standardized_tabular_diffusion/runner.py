@@ -334,6 +334,15 @@ def validate_action_inputs(
     if action == "sample" and config.model == "realtabformer":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "realtabformer_model")
         record_user_checkpoint(checkpoint_path)
+        metadata_path = Path(
+            config.sample.extra.get(
+                "checkpoint_metadata_path",
+                Path(config.output_dir) / "realtabformer-model-metadata.json",
+            )
+        )
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
 
     if config.model == "tabsyn":
         method = config.sample.extra.get("method") or config.train.extra.get("method") or "tabsyn"

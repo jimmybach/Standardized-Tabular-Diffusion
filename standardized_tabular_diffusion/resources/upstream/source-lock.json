@@ -579,6 +579,153 @@
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384"
       }
     },
+    "realtabformer": {
+      "adapter_ids": [
+        "realtabformer"
+      ],
+      "authoritative_repository": "https://github.com/worldbank/REaLTabFormer",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-output-isolation-v1",
+          "reason": "Official defaults write checkpoints, sensitivity samples, and periodic full saves relative to the process working directory.",
+          "semantic_effect": "All three official directory arguments are set beneath output_dir; model construction, training, and sampling statements are unchanged."
+        },
+        {
+          "classification": "compatibility-patched",
+          "id": "realtabformer-full-save-path-json-v1",
+          "reason": "Official v0.2.4 save() converts checkpoints_dir and samples_save_dir from Path to str but omits full_save_dir, causing json.dumps to fail for every newly constructed model.",
+          "semantic_effect": "Immediately before calling the unchanged official save(), the existing full_save_dir Path is represented by its identical string path. No model, tensor, optimizer, preprocessing, or sampling state changes."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-declared-types-v1",
+          "reason": "CSV inference can represent declared categorical targets and features as integers even though the benchmark DatasetSpec marks them categorical.",
+          "semantic_effect": "Declared categorical features and classification targets are converted to strings before the unchanged official fit path; numerical roles are checked for finite numeric values. The exact transformed training frame is hashed and recorded."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-sampling-seed-v1",
+          "reason": "Official fit seeds Python, NumPy, and PyTorch, while load_from_dir followed by sample does not reset their process-global generators.",
+          "semantic_effect": "The standardized sample seed is applied immediately before the unchanged official sample() call, making independent sample actions reproducible without changing the generation algorithm."
+        },
+        {
+          "classification": "compatibility-patched",
+          "id": "realtabformer-weights-only-load-v1",
+          "reason": "Official v0.2.4 load_from_dir reads its state-dict-only rtf_model.pt with unrestricted torch.load.",
+          "semantic_effect": "During the unchanged official load_from_dir call, torch.load is temporarily forced to weights_only=True. The same state dict is reconstructed while arbitrary pickle globals are rejected."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "realtabformer-transformers-vision-boundary-v1",
+          "reason": "Transformers probes optional torchvision components that are unused by REaLTabFormer tabular generation and can be ABI-incompatible with the frozen CPU torch runtime.",
+          "semantic_effect": "Optional torchvision availability is disabled only while importing the official package. No text, model, trainer, or sampler symbol is replaced."
+        }
+      ],
+      "component_id": "realtabformer",
+      "dependency_resolution": {
+        "declared_requirement": "Python >=3.8; transformers >=4.46.0 plus datasets, numpy, pandas, scikit-learn, tqdm, and shapely lower bounds",
+        "validation_environment_lock": "requirements-realtabformer-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/worldbank/REaLTabFormer/blob/v0.2.4/LICENSE",
+      "modification_status": "compatibility-patched",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
+      "package_lock": {
+        "bytes": 49890,
+        "filename": "realtabformer-0.2.4-py3-none-any.whl",
+        "installed_files_verified": 16,
+        "manifest": "standardized_tabular_diffusion/resources/upstream/realtabformer-wheel-manifest.json",
+        "name": "realtabformer",
+        "pypi_url": "https://pypi.org/project/realtabformer/0.2.4/",
+        "sha256": "852436c5c82a0bf470ca7e9063e5a4f3e250b3ff5b9c8f6c50113c1e9ba76486",
+        "version": "0.2.4",
+        "wheel_license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-01-04T08:14:48.935559Z",
+        "tag": "v0.2.4",
+        "tag_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+        "tag_tree": "aa4431468f040fc485f82e7e15238c57eef05753"
+      },
+      "reproduction_target": "method-author-official-tabular-package",
+      "source_archive_lock": {
+        "bytes": 822039,
+        "sha256": "d0d0d0e3b73f2d9b9128242c40207b87e1be6a869d885bca1bf65ef5166cb761",
+        "url": "https://codeload.github.com/worldbank/REaLTabFormer/zip/73f239643f9ea5abc877f685ce927e986302ac2d"
+      },
+      "source_license_sha256": "fb11fe9573168aa7f96555f0e7cafa8c9a8b44089646692626cf12fb95bf9db4",
+      "upstream_commit": "73f239643f9ea5abc877f685ce927e986302ac2d",
+      "upstream_tree": "aa4431468f040fc485f82e7e15238c57eef05753",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147",
+          "artifact_id": 8908863813,
+          "downloaded_evidence_sha256": "0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07",
+          "evidence_file_sha256": "0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07",
+          "expires_at": "2026-11-02T20:59:24Z",
+          "name": "realtabformer-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/realtabformer/native-parity-run-30950369908.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "realtabformer": "0.2.4",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "7db46e00452ce5cc25d28d8b484c9d6ee14de5b3",
+        "protocol_id": "realtabformer-official-package-parity-v1",
+        "repository_commit": "fb2f03dd579bb4d1847fa18395696ed698c8ce58",
+        "result_summary": {
+          "adapter_metadata_valid": true,
+          "categorical_domains_valid": true,
+          "checkpoint_file_bytes_exact": true,
+          "checkpoint_state_exact": true,
+          "finite_numerical_output": true,
+          "installed_files_verified": 16,
+          "missing_values": 0,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_samples_exact": true,
+          "requested_rows_per_case": 7,
+          "sample_bytes_exact": true,
+          "saved_config_semantics_exact": true,
+          "wheel_identity_verified": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-04T21:00:41Z",
+        "validated_scope": {
+          "model_type": "tabular",
+          "relational_mode": "outside-current-single-table-contract",
+          "sensitivity_stopping": "not-native-parity-validated",
+          "training_path": "official-fit-n-critic-zero"
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30950369908/job/92130640933",
+        "workflow_run_id": 30950369908
+      },
+      "wheel_source_comparison": {
+        "exact_shared_source_files": 11,
+        "shared_source_files": 11,
+        "wheel_only_empty_file": "realtabformer/rtf_tokenizer.py"
+      }
+    },
     "smote": {
       "adapter_ids": [
         "smote"
