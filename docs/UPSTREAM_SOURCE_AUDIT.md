@@ -27,7 +27,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 | Component | Pinned upstream revision | Snapshot relation | Local source treatment | Current official eligibility |
 |---|---|---|---|---|
 | TabDDPM | `b476257dd460b778ba09eb97f7a51d6490fa17f8` | The imported core matched all 58 compared upstream blobs. | Local `zero` compatibility substitute; no generative-algorithm source change found. | Blocked pending shim removal or approval plus native-parity validation. |
-| TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | The initial non-data snapshot matched all 30 compared upstream blobs. | `eval/mle/mle.py` was changed later and is a semantic evaluator patch; the generative core remains upstream-exact within the audited scope. | Patched upstream evaluator is excluded from official metrics; central reviewed evaluation must be used. |
+| TabDiff | `5ecdb3356261aea72716cc9a779f31d7ad083bf4` | All 27 files in the frozen validation scope match the pinned source after line-ending normalization. | Adapter-only. The former local evaluator patch was removed and the official file restored. | Blocked pending native-parity evidence and separate central-evaluation approval. |
 | TabSyn | `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7` | Of 101 shared source paths, 96 matched and five already carried local changes at import. | Entrypoint/device/configuration and dependency-API compatibility patches. | Blocked pending patch isolation, approval, and native-parity validation. |
 
 ## Patch Classification
@@ -44,7 +44,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - Classification: semantic-patched.
 - File: `TabDiff-main/eval/mle/mle.py`.
 - Changes include estimator configuration, compute backend, objectives, seeded splitting, failure handling, and edge-case metric semantics.
-- Decision: experimental only. This file is not part of the generative algorithm, but using it would change benchmark measurements. Official results must use the central versioned evaluator after metric validation.
+- Disposition: removed. The pinned method-author file was restored exactly modulo repository line endings. This upstream evaluator remains outside the benchmark's formal leaderboard path; official results must use the separately reviewed central versioned evaluator.
 
 ### `tabsyn-entrypoint-compat-v1`
 
