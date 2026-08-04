@@ -272,6 +272,16 @@ def _environment(upstream_root: Path, seed: int) -> dict[str, str]:
 
 
 def _run_native(upstream_root: Path, dataset: str, sample_path: Path, seed: int) -> list[list[str]]:
+    # TabSyn's dynamic loader catches every nested ModuleNotFoundError and
+    # reports it as though ``baselines.codi.main`` itself were absent.  Probe
+    # the import in an isolated process first so CI retains the actual missing
+    # dependency without changing the native train/sample processes.
+    subprocess.run(
+        [sys.executable, "-c", "import baselines.codi.main"],
+        cwd=upstream_root,
+        check=True,
+        env=_environment(upstream_root, seed),
+    )
     commands = [
         [sys.executable, "main.py", "--method", "codi", "--mode", "train", "--dataname", dataset, "--gpu", "0"],
         [
