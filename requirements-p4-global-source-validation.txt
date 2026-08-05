@@ -44,6 +44,7 @@ pyparsing==3.2.0
 pytest==8.3.5
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+pytz==2026.3.post1
 PyYAML==6.0.2
 referencing==0.35.1
 requests==2.32.4
@@ -58,5 +59,6 @@ threadpoolctl==3.6.0
 tqdm==4.67.1
 typing-extensions==4.12.2
 typing-inspection==0.4.2
+tzdata==2026.3
 urllib3==2.5.0
 xgboost-cpu==3.0.3

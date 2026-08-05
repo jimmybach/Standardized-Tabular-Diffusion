@@ -1,0 +1,700 @@
+{
+  "checkpoints": {
+    "classifier": {
+      "bytes": 29009539,
+      "filename": "tabpfn-v2-classifier-finetuned-zk73skhh.ckpt",
+      "repository": "Prior-Labs/TabPFN-v2-clf",
+      "revision": "f851f2a3c941544733b712d8c0f96dfae9b28862",
+      "sha256": "cf8c519c01eaf1613ee91239006d57b1c806ff5f23ac1aeb1315ba1015210e49"
+    },
+    "regressor": {
+      "bytes": 44390977,
+      "filename": "tabpfn-v2-regressor.ckpt",
+      "repository": "Prior-Labs/TabPFN-v2-reg",
+      "revision": "4972a65a1b30806315c6f92499959ffbfc69a673",
+      "sha256": "2ab5a07d5c41dfe6db9aa7ae106fc6de898326c2765be66505a07e2868c10736"
+    }
+  },
+  "claim_boundary": "Executes the exact locked TabEval UtilityPerFeature and CustomTabPFNModel source with real AutoGluon, CPU XGBoost, KNN, and checksum-locked TabPFN-v2 checkpoints, then compares the P4 adapter on classification and regression fixtures. This reconstructs a benchmark-approved pilot runtime because upstream published no dependency lock; it does not freeze Official Results or complete Adult/Sick multi-seed admission.",
+  "elapsed_seconds": 6.321236008,
+  "environment": {
+    "platform": "Linux / x86_64",
+    "primary_environment_required": true,
+    "python": "3.11.15"
+  },
+  "evidence_schema_version": "1.0.0",
+  "execution": {
+    "absolute_differences": {
+      "binary_target": 0.0,
+      "numeric_target": 0.0
+    },
+    "absolute_tolerance": 1e-08,
+    "adapter_elapsed_seconds": 1.3276572489999978,
+    "adapter_results": {
+      "binary_target": {
+        "predictor_scores": {
+          "CustomTabPFNModel": 0.59375,
+          "KNeighbors": 0.5,
+          "XGBoost": 0.53125
+        },
+        "predictors": [
+          "CustomTabPFNModel",
+          "KNeighbors",
+          "XGBoost"
+        ],
+        "score": 0.5416666666666666
+      },
+      "numeric_target": {
+        "predictor_scores": {
+          "CustomTabPFNModel": 8.615177643572755,
+          "KNeighbors": 9.570592956668698,
+          "XGBoost": 8.752348581364844
+        },
+        "predictors": [
+          "CustomTabPFNModel",
+          "KNeighbors",
+          "XGBoost"
+        ],
+        "score": 8.979373060535432
+      }
+    },
+    "exact_source_evaluate_completed": true,
+    "high_cardinality_source_guard": {
+      "class_count": 11,
+      "error": "TabPFN only supports up to 10 classes. Please use a different model for this task.",
+      "executed": true,
+      "rejected_before_model_fit": true
+    },
+    "rows": {
+      "test": 32,
+      "train": 64
+    },
+    "seed": 42,
+    "source_elapsed_seconds": 2.9554796919999973,
+    "source_predictor_traces": [
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "binary_target",
+        "leaderboard": {
+          "extra_metrics": [
+            "balanced_accuracy"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "binary",
+          "records": [
+            {
+              "balanced_accuracy": 0.59375,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 3,
+              "fit_time": 0.5196878910064697,
+              "fit_time_marginal": 0.5196878910064697,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.17701411247253418,
+              "pred_time_test_marginal": 0.17701411247253418,
+              "pred_time_val": 0.547480583190918,
+              "pred_time_val_marginal": 0.547480583190918,
+              "score_test": 0.59375,
+              "score_val": 0.38461538461538464,
+              "stack_level": 1
+            },
+            {
+              "balanced_accuracy": 0.53125,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 2,
+              "fit_time": 0.06497621536254883,
+              "fit_time_marginal": 0.06497621536254883,
+              "model": "XGBoost",
+              "pred_time_test": 0.0052716732025146484,
+              "pred_time_test_marginal": 0.0052716732025146484,
+              "pred_time_val": 0.0013692378997802734,
+              "pred_time_val_marginal": 0.0013692378997802734,
+              "score_test": 0.53125,
+              "score_val": 0.5384615384615384,
+              "stack_level": 1
+            },
+            {
+              "balanced_accuracy": 0.5,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 1,
+              "fit_time": 0.0021767616271972656,
+              "fit_time_marginal": 0.0021767616271972656,
+              "model": "KNeighbors",
+              "pred_time_test": 0.013221263885498047,
+              "pred_time_test_marginal": 0.013221263885498047,
+              "pred_time_val": 0.02532029151916504,
+              "pred_time_val_marginal": 0.02532029151916504,
+              "score_test": 0.5,
+              "score_val": 0.46153846153846156,
+              "stack_level": 1
+            }
+          ]
+        }
+      },
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "numeric_target",
+        "leaderboard": {
+          "extra_metrics": [
+            "root_mean_squared_error"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "regression",
+          "records": [
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 3,
+              "fit_time": 0.09748077392578125,
+              "fit_time_marginal": 0.09748077392578125,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.1941375732421875,
+              "pred_time_test_marginal": 0.1941375732421875,
+              "pred_time_val": 0.14673233032226562,
+              "pred_time_val_marginal": 0.14673233032226562,
+              "root_mean_squared_error": -8.615177643572755,
+              "score_test": -8.615177643572755,
+              "score_val": -9.195757999266421,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 2,
+              "fit_time": 0.06806635856628418,
+              "fit_time_marginal": 0.06806635856628418,
+              "model": "XGBoost",
+              "pred_time_test": 0.0054874420166015625,
+              "pred_time_test_marginal": 0.0054874420166015625,
+              "pred_time_val": 0.0013496875762939453,
+              "pred_time_val_marginal": 0.0013496875762939453,
+              "root_mean_squared_error": -8.752348581364844,
+              "score_test": -8.752348581364844,
+              "score_val": -9.306145948276292,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 1,
+              "fit_time": 0.002149820327758789,
+              "fit_time_marginal": 0.002149820327758789,
+              "model": "KNeighbors",
+              "pred_time_test": 0.012751102447509766,
+              "pred_time_test_marginal": 0.012751102447509766,
+              "pred_time_val": 0.012578487396240234,
+              "pred_time_val_marginal": 0.012578487396240234,
+              "root_mean_squared_error": -9.570592956668698,
+              "score_test": -9.570592956668698,
+              "score_val": -10.921696784017026,
+              "stack_level": 1
+            }
+          ]
+        }
+      },
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "numeric_feature",
+        "leaderboard": {
+          "extra_metrics": [
+            "root_mean_squared_error"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "regression",
+          "records": [
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 2,
+              "fit_time": 0.06773781776428223,
+              "fit_time_marginal": 0.06773781776428223,
+              "model": "XGBoost",
+              "pred_time_test": 0.005467891693115234,
+              "pred_time_test_marginal": 0.005467891693115234,
+              "pred_time_val": 0.0014197826385498047,
+              "pred_time_val_marginal": 0.0014197826385498047,
+              "root_mean_squared_error": -9.061874312664333,
+              "score_test": -9.061874312664333,
+              "score_val": -9.951702357850028,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 3,
+              "fit_time": 0.08296918869018555,
+              "fit_time_marginal": 0.08296918869018555,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.1888430118560791,
+              "pred_time_test_marginal": 0.1888430118560791,
+              "pred_time_val": 0.14705920219421387,
+              "pred_time_val_marginal": 0.14705920219421387,
+              "root_mean_squared_error": -9.120516939297092,
+              "score_test": -9.120516939297092,
+              "score_val": -10.103161740124522,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 1,
+              "fit_time": 0.0021657943725585938,
+              "fit_time_marginal": 0.0021657943725585938,
+              "model": "KNeighbors",
+              "pred_time_test": 0.012834310531616211,
+              "pred_time_test_marginal": 0.012834310531616211,
+              "pred_time_val": 0.012684822082519531,
+              "pred_time_val_marginal": 0.012684822082519531,
+              "root_mean_squared_error": -9.252651850169379,
+              "score_test": -9.252651850169379,
+              "score_val": -9.953004546680312,
+              "stack_level": 1
+            }
+          ]
+        }
+      }
+    ],
+    "source_results": {
+      "balanced_accuracy": {
+        "binary_target": [
+          0.5416666666666666
+        ]
+      },
+      "negative_RMSE": {
+        "numeric_feature": [
+          -9.145014367376936
+        ],
+        "numeric_target": [
+          -8.979373060535432
+        ]
+      }
+    },
+    "source_scores_normalized_for_comparison": {
+      "binary_target": 0.5416666666666666,
+      "numeric_target": 8.979373060535432
+    },
+    "time_limit_per_target_seconds": 120
+  },
+  "exit_gates": {
+    "apache_license_attested": "pass",
+    "benchmark_selected_runtime_attested": "pass",
+    "classifier_and_regressor_checkpoints_attested": "pass",
+    "exact_lf_normalized_source_attested": "pass",
+    "exact_source_classification_and_regression_executed": "pass",
+    "official_results_admission": "not-assessed",
+    "real_xgb_knn_tabpfn_families_trained": "pass",
+    "source_adapter_aggregate_numerical_parity": "pass",
+    "source_high_cardinality_guard_executed": "pass"
+  },
+  "installed_distributions": [
+    "Jinja2==3.1.4",
+    "MarkupSafe==3.0.2",
+    "PyYAML==6.0.2",
+    "annotated-types==0.7.0",
+    "attrs==24.3.0",
+    "autogluon.common==1.4.0",
+    "autogluon.core==1.4.0",
+    "autogluon.features==1.4.0",
+    "autogluon.tabular==1.4.0",
+    "boto3==1.40.3",
+    "botocore==1.40.3",
+    "certifi==2025.8.3",
+    "charset-normalizer==3.4.2",
+    "contourpy==1.3.1",
+    "cycler==0.12.1",
+    "einops==0.8.1",
+    "eval_type_backport==0.2.2",
+    "filelock==3.16.1",
+    "fonttools==4.55.3",
+    "fsspec==2024.10.0",
+    "huggingface-hub==0.26.5",
+    "idna==3.10",
+    "iniconfig==2.0.0",
+    "jmespath==1.0.1",
+    "joblib==1.4.2",
+    "jsonschema-specifications==2024.10.1",
+    "jsonschema==4.23.0",
+    "kiwisolver==1.4.7",
+    "matplotlib==3.9.2",
+    "mpmath==1.3.0",
+    "networkx==3.4.2",
+    "numpy==1.26.4",
+    "packaging==24.2",
+    "pandas==2.2.3",
+    "pillow==11.0.0",
+    "pip==25.1.1",
+    "pluggy==1.5.0",
+    "psutil==6.1.1",
+    "pyarrow==18.1.0",
+    "pydantic-settings==2.10.1",
+    "pydantic==2.10.4",
+    "pydantic_core==2.27.2",
+    "pyparsing==3.2.0",
+    "pytest==8.3.5",
+    "python-dateutil==2.9.0.post0",
+    "python-dotenv==1.0.1",
+    "pytz==2026.3.post1",
+    "referencing==0.35.1",
+    "requests==2.32.4",
+    "rpds-py==0.22.3",
+    "s3transfer==0.13.1",
+    "scikit-learn==1.5.2",
+    "scipy==1.13.1",
+    "setuptools==80.10.2",
+    "six==1.17.0",
+    "standardized-tabular-diffusion @ file:///home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion",
+    "sympy==1.12.1",
+    "tabpfn==2.1.2",
+    "threadpoolctl==3.6.0",
+    "torch==2.3.0+cpu",
+    "tqdm==4.67.1",
+    "typing-inspection==0.4.2",
+    "typing_extensions==4.12.2",
+    "tzdata==2026.3",
+    "urllib3==2.5.0",
+    "xgboost-cpu==3.0.3"
+  ],
+  "locked_files": {
+    ".github/workflows/p4-global-source-validation.yml": "d3f1c18b86c2ab713ac7670e09434bdf82e3086210585e9eea54e2e685a67b02",
+    "THIRD_PARTY_NOTICES.md": "c950763d24c0d139fa9db55fc9e8dc26bcc5082b4eab31eecf6c279dfd393541",
+    "requirements-p4-global-source-validation.txt": "0f721e20490f99147d4479f4a37a9a4e0eda3027a7433de755960923de93c647",
+    "standardized_tabular_diffusion/evaluation/tabstruct.py": "8927d09ea10b81d78534c83a8d8c678e2392ff8bebb0ac0e46c33637a3416e9c",
+    "standardized_tabular_diffusion/evaluation/utility.py": "e92daca8ae5592c8f92cbf3de288613c981794fe370556d107d0fd06515c4d0e",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json": "5e8d2c32d91384af06795201fcbcb7e2fdbfa03e46fade65c1a2ac4f53cd387e",
+    "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json": "e74a2309d629273b241174153fc4e0e59cd1bfc2cebed25923348ec66206c76e",
+    "standardized_tabular_diffusion/validation/p4_global_source.py": "5a802d1bb95049bf10bd90e8a2eae6db82d1c4bcbe676c73b35efbb947a3503b",
+    "tests/evaluation/test_p4_global_source_validation.py": "b98436524ff4ef44e3b899ace911b32c615294d9856d55e33ad09f6e27faf77e"
+  },
+  "phase": "P4 Global source-runtime pilot",
+  "protocol_id": "p4-global-source-runtime-pilot-v1",
+  "repository_commit": "d710950c24cbe11700f877975b05c90937273113",
+  "runtime": {
+    "selection_basis": "Stable releases available when the current XGB/KNN/TabPFN UtilityPerFeature configuration first appeared at TabEval revision 3a98b39977b43ae97151b4eb01a41d876829d9d0 on 2025-08-10.",
+    "status": "benchmark-approved-not-upstream-official",
+    "torch_cuda_available": false,
+    "upstream_official_environment_claimed": false,
+    "versions": {
+      "autogluon.common": "1.4.0",
+      "autogluon.core": "1.4.0",
+      "autogluon.features": "1.4.0",
+      "autogluon.tabular": "1.4.0",
+      "tabpfn": "2.1.2",
+      "torch": "2.3.0+cpu",
+      "xgboost": "3.0.3",
+      "xgboost_distribution": "xgboost-cpu",
+      "xgboost_import": "3.0.3"
+    }
+  },
+  "source": {
+    "implementation_symbols": {
+      "evaluator": "tabeval.metrics.eval_structure.UtilityPerFeature",
+      "tabpfn_model": "tabeval.metrics.eval_structure.CustomTabPFNModel"
+    },
+    "license_sha256": "11d68d4f6040e19f06cfce52c85f1f64d9a2d2d8cc67567daf53377f7b8358a7",
+    "license_spdx": "Apache-2.0",
+    "release_version": "2026.03.04",
+    "repository": "https://github.com/SilenceX12138/TabEval",
+    "revision": "dba19a4ee7aa391621cbeb464609285fd515dece",
+    "source_hash_algorithm": "sha256(lf-normalized-source-bytes)",
+    "source_id": "tabeval-p4-utility-per-feature",
+    "source_path": "src/tabeval/metrics/eval_structure.py",
+    "source_sha256": "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743",
+    "upstream_dependency_disclosure": {
+      "autogluon_declared": false,
+      "status": "not-reproducibly-locked",
+      "tabpfn_constraint": "unbounded",
+      "xgboost_constraint": "unbounded"
+    }
+  },
+  "source_execution": {
+    "completed": true,
+    "elapsed_seconds": 2.9554796919999973,
+    "predictor_traces": [
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "binary_target",
+        "leaderboard": {
+          "extra_metrics": [
+            "balanced_accuracy"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "binary",
+          "records": [
+            {
+              "balanced_accuracy": 0.59375,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 3,
+              "fit_time": 0.5196878910064697,
+              "fit_time_marginal": 0.5196878910064697,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.17701411247253418,
+              "pred_time_test_marginal": 0.17701411247253418,
+              "pred_time_val": 0.547480583190918,
+              "pred_time_val_marginal": 0.547480583190918,
+              "score_test": 0.59375,
+              "score_val": 0.38461538461538464,
+              "stack_level": 1
+            },
+            {
+              "balanced_accuracy": 0.53125,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 2,
+              "fit_time": 0.06497621536254883,
+              "fit_time_marginal": 0.06497621536254883,
+              "model": "XGBoost",
+              "pred_time_test": 0.0052716732025146484,
+              "pred_time_test_marginal": 0.0052716732025146484,
+              "pred_time_val": 0.0013692378997802734,
+              "pred_time_val_marginal": 0.0013692378997802734,
+              "score_test": 0.53125,
+              "score_val": 0.5384615384615384,
+              "stack_level": 1
+            },
+            {
+              "balanced_accuracy": 0.5,
+              "can_infer": true,
+              "eval_metric": "accuracy",
+              "fit_order": 1,
+              "fit_time": 0.0021767616271972656,
+              "fit_time_marginal": 0.0021767616271972656,
+              "model": "KNeighbors",
+              "pred_time_test": 0.013221263885498047,
+              "pred_time_test_marginal": 0.013221263885498047,
+              "pred_time_val": 0.02532029151916504,
+              "pred_time_val_marginal": 0.02532029151916504,
+              "score_test": 0.5,
+              "score_val": 0.46153846153846156,
+              "stack_level": 1
+            }
+          ]
+        }
+      },
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "numeric_target",
+        "leaderboard": {
+          "extra_metrics": [
+            "root_mean_squared_error"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "regression",
+          "records": [
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 3,
+              "fit_time": 0.09748077392578125,
+              "fit_time_marginal": 0.09748077392578125,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.1941375732421875,
+              "pred_time_test_marginal": 0.1941375732421875,
+              "pred_time_val": 0.14673233032226562,
+              "pred_time_val_marginal": 0.14673233032226562,
+              "root_mean_squared_error": -8.615177643572755,
+              "score_test": -8.615177643572755,
+              "score_val": -9.195757999266421,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 2,
+              "fit_time": 0.06806635856628418,
+              "fit_time_marginal": 0.06806635856628418,
+              "model": "XGBoost",
+              "pred_time_test": 0.0054874420166015625,
+              "pred_time_test_marginal": 0.0054874420166015625,
+              "pred_time_val": 0.0013496875762939453,
+              "pred_time_val_marginal": 0.0013496875762939453,
+              "root_mean_squared_error": -8.752348581364844,
+              "score_test": -8.752348581364844,
+              "score_val": -9.306145948276292,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 1,
+              "fit_time": 0.002149820327758789,
+              "fit_time_marginal": 0.002149820327758789,
+              "model": "KNeighbors",
+              "pred_time_test": 0.012751102447509766,
+              "pred_time_test_marginal": 0.012751102447509766,
+              "pred_time_val": 0.012578487396240234,
+              "pred_time_val_marginal": 0.012578487396240234,
+              "root_mean_squared_error": -9.570592956668698,
+              "score_test": -9.570592956668698,
+              "score_val": -10.921696784017026,
+              "stack_level": 1
+            }
+          ]
+        }
+      },
+      {
+        "constructor_problem_type": null,
+        "fit": {
+          "fit_weighted_ensemble": false,
+          "hyperparameters": [
+            "CustomTabPFNModel",
+            "KNN",
+            "XGB"
+          ],
+          "presets": "medium_quality",
+          "time_limit": 120
+        },
+        "label": "numeric_feature",
+        "leaderboard": {
+          "extra_metrics": [
+            "root_mean_squared_error"
+          ],
+          "models": [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost"
+          ],
+          "problem_type": "regression",
+          "records": [
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 2,
+              "fit_time": 0.06773781776428223,
+              "fit_time_marginal": 0.06773781776428223,
+              "model": "XGBoost",
+              "pred_time_test": 0.005467891693115234,
+              "pred_time_test_marginal": 0.005467891693115234,
+              "pred_time_val": 0.0014197826385498047,
+              "pred_time_val_marginal": 0.0014197826385498047,
+              "root_mean_squared_error": -9.061874312664333,
+              "score_test": -9.061874312664333,
+              "score_val": -9.951702357850028,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 3,
+              "fit_time": 0.08296918869018555,
+              "fit_time_marginal": 0.08296918869018555,
+              "model": "CustomTabPFNModel",
+              "pred_time_test": 0.1888430118560791,
+              "pred_time_test_marginal": 0.1888430118560791,
+              "pred_time_val": 0.14705920219421387,
+              "pred_time_val_marginal": 0.14705920219421387,
+              "root_mean_squared_error": -9.120516939297092,
+              "score_test": -9.120516939297092,
+              "score_val": -10.103161740124522,
+              "stack_level": 1
+            },
+            {
+              "can_infer": true,
+              "eval_metric": "root_mean_squared_error",
+              "fit_order": 1,
+              "fit_time": 0.0021657943725585938,
+              "fit_time_marginal": 0.0021657943725585938,
+              "model": "KNeighbors",
+              "pred_time_test": 0.012834310531616211,
+              "pred_time_test_marginal": 0.012834310531616211,
+              "pred_time_val": 0.012684822082519531,
+              "pred_time_val_marginal": 0.012684822082519531,
+              "root_mean_squared_error": -9.252651850169379,
+              "score_test": -9.252651850169379,
+              "score_val": -9.953004546680312,
+              "stack_level": 1
+            }
+          ]
+        }
+      }
+    ],
+    "results": {
+      "balanced_accuracy": {
+        "binary_target": [
+          0.5416666666666666
+        ]
+      },
+      "negative_RMSE": {
+        "numeric_feature": [
+          -9.145014367376936
+        ],
+        "numeric_target": [
+          -8.979373060535432
+        ]
+      }
+    }
+  },
+  "status": "pass"
+}
