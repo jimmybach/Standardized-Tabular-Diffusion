@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0 passed; P1 completion candidate pending authoritative Linux evidence
+- Status: P0 and P1 passed; P2 is next
 - Primary environment: Linux and Python 3.11
 - Last updated: 2026-08-05
 
@@ -91,6 +91,8 @@ python -m build
 Mocked tests demonstrate control flow only. They do not satisfy source-parity, native-parity, real-smoke, scientific-validation, or release-support gates.
 
 The dedicated `.github/workflows/p1-foundation-validation.yml` workflow runs the P1 contract suite, lint, typing, build, and a machine-readable exit-gate assessment on Linux/Python 3.11. A local or mocked pass is not a scientific metric validation.
+
+P1 passed in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264). The exact [Linux/Python 3.11 evidence](evidence/evaluation/p1-foundation-run-31018595264.json) is retained in the repository; its scope explicitly excludes metric computation, source parity, and bundle finalization.
 
 ## CI baseline
 

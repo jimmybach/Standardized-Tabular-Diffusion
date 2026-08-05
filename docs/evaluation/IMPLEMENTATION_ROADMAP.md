@@ -2,8 +2,8 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 completion candidate; authoritative Linux evidence pending
-- Roadmap version: 0.2.0
+- Status: P1 passed; P2 is the next implementation phase
+- Roadmap version: 0.2.1
 - Last updated: 2026-08-05
 - Primary release environment: Linux and Python 3.11
 
@@ -144,7 +144,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | Phase | Deliverable | Depends on | Current state | Exit gate |
 |---|---|---|---|---|
 | P0 | Trustworthy development baseline | None | Passed | Core tests collect in a minimal environment; repository and reference tests are isolated |
-| P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Completion candidate; authoritative Linux evidence pending | Invalid contracts fail deterministically; round-trip and schema tests pass |
+| P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Not started | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Not started | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
@@ -196,7 +196,7 @@ Exit evidence:
 - an interrupted writer leaves an auditable incomplete bundle, never a false finalized bundle; and
 - registry lifecycle status cannot be advanced without its required evidence fields.
 
-Current implementation note (2026-08-05): all listed P1 surfaces are implemented. The phase remains a completion candidate until the dedicated read-only Linux/Python 3.11 workflow passes and its machine-readable evidence artifact is retained. This evidence validates engineering contracts only; it executes no scientific metric and makes no source-parity claim.
+Completion evidence (2026-08-05): all listed P1 surfaces are implemented. The dedicated read-only workflow passed on Linux x86-64 and Python 3.11.15 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264); its [machine-readable evidence](../evidence/evaluation/p1-foundation-run-31018595264.json) is retained with SHA-256 `3013e913c58adf0c03c6ec30118879c522a87f4682d1cceb99f8778115c7da5a`. This evidence validates engineering contracts only; it executed no scientific metric and makes no source-parity claim.
 
 ### 6.3 P2 — first end-to-end vertical slice
 
@@ -423,7 +423,7 @@ These are not reasons to invent temporary official defaults. Until approved, the
 
 ### M1 — evaluation foundation
 
-P0 and P1 pass. Contracts and tooling are usable, but no metric is yet advertised as source-parity validated. Current state: P0 has passed; P1 is a completion candidate pending retained Linux/Python 3.11 evidence.
+P0 and P1 pass. Contracts and tooling are usable, but no metric is yet advertised as source-parity validated. Current state: M1 passed with retained Linux/Python 3.11 evidence; P2 is the next phase.
 
 ### M2 — trustworthy first report
 
