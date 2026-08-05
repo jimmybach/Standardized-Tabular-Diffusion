@@ -96,7 +96,7 @@ Graph-based:
 | `smote` | Yes | [scikit-learn-contrib/imbalanced-learn](https://github.com/scikit-learn-contrib/imbalanced-learn) | Extremely reliable and actively maintained. Not a joint generative model, but a strong classical oversampling baseline. |
 | `bn` | Yes, with caveats | [pgmpy/pgmpy](https://github.com/pgmpy/pgmpy) | High-quality, actively maintained library. Reproducibility is fine, but benchmark behavior depends strongly on exact modeling choices. |
 | `nflow` | Yes, with caveats | [bayesiains/nflows](https://github.com/bayesiains/nflows) | Solid library, but more of a toolkit than a tabular benchmark package. Requires precise architecture and preprocessing choices for fair reproduction. |
-| `arf` | Partial / yes via the Python wrapper path | [bips-hb/arf](https://github.com/bips-hb/arf) | Official implementation is R-first. In this repository, practical usability comes from the Python `arfpy` path instead of the original workflow. |
+| `arf` | Yes via the method-author official Python package; native parity validated | [bips-hb/arfpy](https://github.com/bips-hb/arfpy), with the related [R method repository](https://github.com/bips-hb/arf) recorded separately | `arfpy==0.1.1` is authored in the same method-author organization by ARF authors. Its PyPI source distribution and runtime files are checksum-locked to commit `6f737baa`. The adapter calls official FORDE/FORGE, rejects missing values and the broken `oob=true` path, and stores safe JSON FORGE state without the forest or row-level training data. All nine exact official-package cases passed in retained Linux/Python 3.11 run `30964711614`; the claim does not establish R/Python cross-language equivalence. |
 | `great` | Yes, but higher-maintenance | [tabularis-ai/be_great](https://github.com/tabularis-ai/be_great) | Maintained modern GReaT implementation. Better packaged than many paper repos, but still inherits HF/LLM runtime cost and sampling sensitivity. |
 | `realtabformer` | Yes | [worldbank/REaLTabFormer](https://github.com/worldbank/REaLTabFormer) | Good engineering quality: tests, docs, packaging, and recent releases. Reproducible, but heavier than non-transformer baselines. |
 | `tabula` | Partial / adapterized compatibility path | [zhao-zilong/Tabula](https://github.com/zhao-zilong/Tabula) | Official code exists, but the upstream is notebook-oriented. This repository now provides a local Transformers-based compatibility adapter instead of a direct wrapper around the original training flow, so reproduction should be treated as approximate rather than bit-for-bit. |
@@ -140,7 +140,7 @@ Real implementations, but less reproduction-friendly:
 - `stasy`
 - `codi`
 - `tabebm`
-- `arf` if strict parity with the original R-first path is required
+- `arf` if strict cross-language parity with the separate R implementation is required; the maintained target here is the official Python package
 
 ## Notes on Current Evidence
 
