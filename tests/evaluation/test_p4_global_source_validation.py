@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -60,6 +61,7 @@ def test_exact_source_file_imports_with_real_selected_autogluon() -> None:
     module = validation.load_tabeval_source_module(_available_source())
     assert module.UtilityPerFeature.timestamp(None) == "2025-08-09"
     assert module.CustomTabPFNModel.__module__ == validation.SOURCE_MODULE_NAME
+    assert sys.modules[validation.SOURCE_MODULE_NAME] is module
 
 
 def test_checkpoint_manifest_has_immutable_revisions_and_sha256() -> None:

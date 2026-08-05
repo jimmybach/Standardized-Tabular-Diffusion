@@ -192,6 +192,10 @@ def load_tabeval_source_module(source_path: Path) -> types.ModuleType:
         module = importlib.util.module_from_spec(spec)
         sys.modules[SOURCE_MODULE_NAME] = module
         spec.loader.exec_module(module)
+    # AutoGluon serializes custom model classes while fitting. Keep the exact,
+    # checksum-verified module importable for the remainder of this process so
+    # pickle can resolve CustomTabPFNModel by its upstream module identity.
+    sys.modules[SOURCE_MODULE_NAME] = module
     for symbol in ("UtilityPerFeature", "CustomTabPFNModel", "TabularPredictor"):
         if not hasattr(module, symbol):
             raise P4GlobalSourceValidationError(f"Imported TabEval source lacks {symbol}")
