@@ -80,6 +80,7 @@ jobs:
           tests/evaluation/test_bundle.py
           tests/test_preprocessing.py
           tests/test_dataset_onboarding.py
+          tests/test_p3_retained_evidence.py
 
       - name: Lint and type-check P3 surfaces
         run: |

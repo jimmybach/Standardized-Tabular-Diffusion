@@ -2,7 +2,7 @@
 
 英文原文：[P3_VALIDITY_AND_PREPROCESSING.md](P3_VALIDITY_AND_PREPROCESSING.md)
 
-- 状态：通过单元验证的诊断性实现
+- 状态：通过 Linux/Python 3.11 验证的诊断性实现
 - 协议：`p3-validity@0.3.0`
 - 指标版本：`1.0.0`
 - 主要环境：Linux 与 Python 3.11
@@ -180,4 +180,4 @@ std-tabular-diffusion preprocess-missing-values `
 
 两个 P3 指标均为 `unit-validated`、本仓库原生定义的诊断指标。它们不是来源等价性指标，因为不存在定义这些仓库公式的上游实现。它们尚未达到 `protocol-frozen` 或 `release-supported`，不能进入 Official Results。
 
-P3 专用 CI 覆盖手工可计算规则、畸形 Profile、无约束行为、适用性、宽度敏感性、无隐藏修复、只在训练集拟合、schema 与策略身份、注册字节保留、结果包重算、CLI、Linux/Python 3.11 打包、lint 和类型检查。只有远程工作流通过后，才会保留权威 CI 证据。
+P3 专用 CI 覆盖手工可计算规则、畸形 Profile、无约束行为、适用性、宽度敏感性、无隐藏修复、只在训练集拟合、schema 与策略身份、注册字节保留、结果包重算、CLI、Linux/Python 3.11 打包、lint 和类型检查。它已在 [GitHub Actions 运行 31036844043](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043) 中通过；精确的[机器可读证据](../evidence/evaluation/p3-validity-run-31036844043.json)已留存，SHA-256 为 `bc63a2df553036ee7e161ce81c6f264dace950f3fe414ba2f8195d8e557e401d`。

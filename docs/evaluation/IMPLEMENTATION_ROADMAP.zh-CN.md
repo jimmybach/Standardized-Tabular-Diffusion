@@ -2,7 +2,7 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 与 P2 已通过；P3 实现和本地退出门已通过，等待 Linux/Python 3.11 证据
+- 状态：P1 至 P3 已通过各自适用的退出门；权威 Linux/Python 3.11 证据均已留存
 - 路线图版本：0.3.0
 - 最后更新：2026-08-05
 - 主要发布环境：Linux 与 Python 3.11
@@ -94,7 +94,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
-- P3 已实现并通过本地单元验证，但在留存 Linux/Python 3.11 退出证据、协议冻结和发布审批前仍为诊断用途。
+- P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
 - P4 效用、经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
@@ -165,7 +165,7 @@ tests/evaluation/
 | P0 | 可信开发基线 | 无 | 已通过 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
-| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 实现完成；本地退出门通过，等待 Linux 证据 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
+| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
@@ -460,7 +460,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-当前紧接着的门槛是留存权威 Linux/Python 3.11 P3 证据。该门槛通过后，下一实施阶段是 P4 Local 与 Global Utility。P4 必须使用经过 P3 审阅的不可变模型视图和预处理身份，不得修复生成数据或推断新的硬约束。
+P3 的权威 Linux/Python 3.11 证据已留存。下一实施阶段是 P4 Local 与 Global Utility。P4 必须使用经过 P3 审阅的不可变模型视图和预处理身份，不得修复生成数据或推断新的硬约束。
 
 ## 12. 相关规范
 
