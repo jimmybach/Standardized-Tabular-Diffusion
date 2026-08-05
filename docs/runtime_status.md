@@ -6,6 +6,8 @@ At the current release-preparation baseline, ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+,
 
 BN targets the checksum-locked official `pgmpy==1.1.2` wheel plus an explicit quantile/BIC/BDeu recipe. Its adapter includes every canonical node, fails closed on missing data and unsupported recipe changes, and stores safe JSON graph/CPD state rather than pickle. All nine exact cases passed in retained Linux/Python 3.11 run `30967779298`, so its adapter status is `native-parity-validated`. This target is recipe parity with a canonical library, not a paper-native implementation claim; Official Results and release support remain separate gates.
 
+NFlow now targets the checksum-locked canonical `nflows==0.14` source distribution plus an explicit mixed-type MAF recipe. The adapter fails closed on invalid data and unsupported recipe changes, restores PyTorch RNG/thread state, and replaces executable pickle with integrity-checked JSON plus `allow_pickle=False` NumPy tensors. The nine-case Linux/Python 3.11 protocol is implemented but has not yet produced reviewed retained evidence, so the status remains `adapter-complete`, `experimental`, and `unsupported`. This is a declared-recipe target, not a paper-native tabular synthesizer claim.
+
 CoDi now has a checksum-locked 24-file TabSyn-snapshot execution scope, strict dual-checkpoint handling, an exact-row compatibility boundary, and a dedicated CPU smoke preset. Its mandatory nine-case Linux/Python 3.11 protocol passed exactly in run `30941940893`, and the inspected evidence is retained, so its adapter status is `native-parity-validated`. It remains `experimental` and `unsupported`; the separate method-author repository has no declared license and materially differs from the TabSyn adaptation.
 
 CTAB-GAN+ no longer imports the semantically modified snapshot formerly embedded in the TabDDPM tree. The adapter now acquires five byte-exact files from locked method-author commit `6a6f901` into an ignored cache and does not patch them. Its mandatory six-case Linux/Python 3.11 protocol passed in run `30926267432`, and the inspected evidence is permanently retained, so its adapter status is `native-parity-validated`. The absent upstream license independently blocks redistribution, Official Results, and release claims.
@@ -50,7 +52,7 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `stasy`
 - `codi`
 
-These models were reported to have completed at least one local path through the shared CLI. ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, TabDDPM, TabDiff, TabSyn, and STaSy now have separate retained native-parity evidence; all other entries in this historical list remain useful engineering observations but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, TabDDPM, TabDiff, TabSyn, and STaSy now have separate retained native-parity evidence. NFlow now has a stricter implementation and an authoritative protocol but still awaits a retained passing artifact; all other historical entries remain useful engineering observations but do not currently satisfy the formal smoke-validation gate.
 
 ## Previously Reported Train and Sample Paths with Fragile Environments
 

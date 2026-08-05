@@ -3,7 +3,8 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import importlib
-import pickle
+import io
+import zipfile
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
 from numbers import Integral
@@ -15,6 +16,7 @@ import pandas as pd
 from sklearn.preprocessing import KBinsDiscretizer, OrdinalEncoder, StandardScaler
 
 from standardized_tabular_diffusion.evaluation.serialization import (
+    atomic_write_bytes,
     atomic_write_json,
     read_json,
     sha256_file,
@@ -204,7 +206,9 @@ class NFlowPreprocessorState:
     numerical_columns: list[str]
     categorical_columns: list[str]
     target_columns: list[str]
-    categorical_sizes: dict[str, int]
+    numerical_mean: list[float]
+    numerical_scale: list[float]
+    categorical_levels: dict[str, list[str]]
 
 
 class NFlowPreprocessor:
@@ -223,18 +227,23 @@ class NFlowPreprocessor:
             numerical_columns=self.numeric_columns,
             categorical_columns=self.categorical_columns,
             target_columns=list(dataset_spec.target_columns),
-            categorical_sizes={},
+            numerical_mean=[],
+            numerical_scale=[],
+            categorical_levels={},
         )
         self._fitted = False
 
     def fit_transform(self, df: pd.DataFrame) -> np.ndarray:
         blocks: list[np.ndarray] = []
         if self.numeric_columns:
-            blocks.append(self.scaler.fit_transform(df[self.numeric_columns].astype(float)))
+            numerical = self.scaler.fit_transform(df[self.numeric_columns].astype(float))
+            self.state.numerical_mean = [float(value) for value in self.scaler.mean_]
+            self.state.numerical_scale = [float(value) for value in self.scaler.scale_]
+            blocks.append(numerical)
         if self.categorical_columns:
             encoded = self.encoder.fit_transform(df[self.categorical_columns].astype(str))
             for idx, column in enumerate(self.categorical_columns):
-                self.state.categorical_sizes[column] = int(len(self.encoder.categories_[idx]))
+                self.state.categorical_levels[column] = [str(value) for value in self.encoder.categories_[idx]]
             blocks.append(encoded.astype(np.float32))
         self._fitted = True
         return np.concatenate(blocks, axis=1).astype(np.float32)
@@ -242,25 +251,89 @@ class NFlowPreprocessor:
     def inverse_transform(self, array: np.ndarray) -> pd.DataFrame:
         if not self._fitted:
             raise RuntimeError("NFlowPreprocessor must be fitted before inverse_transform.")
+        expected_features = len(self.numeric_columns) + len(self.categorical_columns)
+        if array.ndim != 2 or array.shape[1] != expected_features or not np.isfinite(array).all():
+            raise ValueError("NFlow inverse transformation requires a finite 2D array with one value per column.")
         output = pd.DataFrame(index=range(len(array)))
         start = 0
         if self.numeric_columns:
             stop = start + len(self.numeric_columns)
-            numeric = self.scaler.inverse_transform(array[:, start:stop])
+            numeric = array[:, start:stop].astype(np.float32, copy=True)
+            numeric *= np.asarray(self.state.numerical_scale, dtype=np.float64)
+            numeric += np.asarray(self.state.numerical_mean, dtype=np.float64)
             for idx, column in enumerate(self.numeric_columns):
                 output[column] = numeric[:, idx]
             start = stop
         if self.categorical_columns:
             stop = start + len(self.categorical_columns)
             categorical = array[:, start:stop]
-            decoded = np.zeros_like(categorical)
             for idx, column in enumerate(self.categorical_columns):
-                size = self.state.categorical_sizes[column]
-                decoded[:, idx] = np.clip(np.round(categorical[:, idx]), 0, max(0, size - 1))
-            recovered = self.encoder.inverse_transform(decoded)
-            for idx, column in enumerate(self.categorical_columns):
-                output[column] = recovered[:, idx]
+                levels = self.state.categorical_levels[column]
+                indices = np.clip(np.round(categorical[:, idx]), 0, len(levels) - 1).astype(np.int64)
+                output[column] = [levels[int(value)] for value in indices]
         return output[self.dataset_spec.column_names]
+
+    def to_payload(self) -> dict[str, Any]:
+        if not self._fitted:
+            raise RuntimeError("NFlowPreprocessor must be fitted before serialization.")
+        return {
+            "column_names": list(self.state.column_names),
+            "numerical_columns": list(self.state.numerical_columns),
+            "categorical_columns": list(self.state.categorical_columns),
+            "target_columns": list(self.state.target_columns),
+            "numerical_mean": list(self.state.numerical_mean),
+            "numerical_scale": list(self.state.numerical_scale),
+            "categorical_levels": {
+                column: list(self.state.categorical_levels[column]) for column in self.state.categorical_columns
+            },
+        }
+
+    @classmethod
+    def from_payload(cls, dataset_spec: DatasetSpec, payload: Any) -> NFlowPreprocessor:
+        if not isinstance(payload, dict):
+            raise ValueError("NFlow checkpoint preprocessing state must be a JSON object.")
+        instance = cls(dataset_spec)
+        expected_roles = {
+            "column_names": dataset_spec.column_names,
+            "numerical_columns": instance.numeric_columns,
+            "categorical_columns": instance.categorical_columns,
+            "target_columns": dataset_spec.target_columns,
+        }
+        if any(payload.get(key) != value for key, value in expected_roles.items()):
+            raise ValueError("NFlow checkpoint preprocessing roles differ from the current DatasetSpec.")
+        means = payload.get("numerical_mean")
+        scales = payload.get("numerical_scale")
+        if (
+            not isinstance(means, list)
+            or not isinstance(scales, list)
+            or len(means) != len(instance.numeric_columns)
+            or len(scales) != len(instance.numeric_columns)
+            or any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in means + scales)
+        ):
+            raise ValueError("NFlow checkpoint numerical preprocessing state is invalid.")
+        mean_array = np.asarray(means, dtype=float)
+        scale_array = np.asarray(scales, dtype=float)
+        if not np.isfinite(mean_array).all() or not np.isfinite(scale_array).all() or bool((scale_array <= 0).any()):
+            raise ValueError("NFlow checkpoint numerical scales must be positive and all statistics must be finite.")
+        levels = payload.get("categorical_levels")
+        if not isinstance(levels, dict) or set(levels) != set(instance.categorical_columns):
+            raise ValueError("NFlow checkpoint categorical preprocessing state is invalid.")
+        normalized_levels: dict[str, list[str]] = {}
+        for column in instance.categorical_columns:
+            values = levels[column]
+            if (
+                not isinstance(values, list)
+                or not values
+                or any(not isinstance(value, str) for value in values)
+                or len(values) != len(set(values))
+            ):
+                raise ValueError(f"NFlow checkpoint category levels are invalid for {column!r}.")
+            normalized_levels[column] = values
+        instance.state.numerical_mean = [float(value) for value in means]
+        instance.state.numerical_scale = [float(value) for value in scales]
+        instance.state.categorical_levels = normalized_levels
+        instance._fitted = True
+        return instance
 
 
 class BNAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
@@ -837,93 +910,629 @@ class BNAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
 class NFlowAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "nflow"
-    upstream_dirname = "TabSyn-main"
-    checkpoint_filename = "model.pkl"
+    upstream_dirname = "."
+    checkpoint_filename = "model.nflow.json"
+    package_name = "nflows"
+    package_version = "0.14"
+    upstream_commit = "64b856c081e5f07521b32be99da262e8338fbfe8"
+    upstream_tree = "83057958f8773e35044e3aa5c13ac9c06c4a3994"
+    checkpoint_schema_version = 1
+    max_checkpoint_bytes = 1024 * 1024
+    max_weights_bytes = 1024 * 1024 * 1024
+    runtime_file_sha256 = {
+        "version.py": "30f8af2fc2d2e23d6dc061e36586e4843adda27833afbceff06e4a1cff0210a3",
+        "flows/base.py": "f4ababbed0fac5afc4678f7df2fe804f8bc81c4a9168523e71040fda76480c62",
+        "distributions/base.py": "914d98088ef44233388293a37f38260c3a7fdb40d749bfdd0725491655f86bab",
+        "distributions/normal.py": "194d6e1c3b75d3e088a88b8dedbab3fb4c0c19f76fd03f994be95b420e53e62e",
+        "transforms/base.py": "f302d6042a996681477cd2f9159bfb7736e2e1819d2d4369201ece37bc901330",
+        "transforms/autoregressive.py": "eb52e2841c1cb5fd27c985979a98eb1e6ff8336b5bf638b82b6b651d1f1c55bf",
+        "transforms/permutations.py": "774296ca27ce18bb73a501906d35166b3ebbb8b79494fe9ac24cb7a0be1f7305",
+        "transforms/made.py": "5e621fa91b7fc0e8659a65f46f3fd6d00f2931cb01307de23d83e367dcf40480",
+        "nn/nde/made.py": "3a91441c32f3d9e842297475822b54b7895877d79c2218f908f345fc1c06900e",
+    }
 
     def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
         return spec.checkpoint_path or (spec.output_dir / self.checkpoint_filename)
 
+    @staticmethod
+    def _metadata_path(checkpoint_path: Path) -> Path:
+        return checkpoint_path.with_name(f"{checkpoint_path.name}.metadata.json")
+
+    @staticmethod
+    def _weights_path(checkpoint_path: Path) -> Path:
+        return checkpoint_path.with_name(f"{checkpoint_path.stem}.weights.npz")
+
+    @staticmethod
+    def _positive_int(name: str, value: Any, *, maximum: int | None = None) -> int:
+        if isinstance(value, bool) or not isinstance(value, Integral) or int(value) < 1:
+            raise ValueError(f"NFlow {name} must be a positive integer; observed {value!r}.")
+        parsed = int(value)
+        if maximum is not None and parsed > maximum:
+            raise ValueError(f"NFlow {name} must be <= {maximum}; observed {parsed}.")
+        return parsed
+
+    @staticmethod
+    def _positive_float(name: str, value: Any) -> float:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"NFlow {name} must be numeric; observed {value!r}.") from exc
+        if isinstance(value, bool) or not np.isfinite(parsed) or parsed <= 0:
+            raise ValueError(f"NFlow {name} must be positive and finite; observed {value!r}.")
+        return parsed
+
+    @classmethod
+    def _validate_seed(cls, seed: int) -> int:
+        if isinstance(seed, bool) or not isinstance(seed, Integral) or int(seed) < 0 or int(seed) >= 2**63:
+            raise ValueError("NFlow seed must be an integer in [0, 2**63).")
+        return int(seed)
+
+    def _recipe_params(self, spec: RunSpec) -> dict[str, Any]:
+        fixed_values = {
+            "transform_order": "random-permutation-then-masked-affine-autoregressive",
+            "base_distribution": "standard-normal",
+            "context_features": None,
+            "use_residual_blocks": True,
+            "random_mask": False,
+            "activation": "relu",
+            "dropout_probability": 0.0,
+            "use_batch_norm": False,
+            "optimizer": "adam",
+            "shuffle": True,
+            "dtype": "float32",
+        }
+        for name, expected in fixed_values.items():
+            if name in spec.extra and spec.extra[name] != expected:
+                raise ValueError(f"NFlow supports only the validated {name}={expected!r} recipe.")
+        num_threads = self._positive_int("num_threads", spec.extra.get("num_threads", 1), maximum=64)
+        if num_threads != 1:
+            raise ValueError("NFlow requires num_threads=1 for deterministic official-package parity.")
+        return {
+            "num_layers": self._positive_int("num_layers", spec.extra.get("num_layers", 4), maximum=64),
+            "hidden_features": self._positive_int(
+                "hidden_features", spec.extra.get("hidden_features", 64), maximum=16384
+            ),
+            "num_blocks": self._positive_int("num_blocks", spec.extra.get("num_blocks", 2), maximum=64),
+            "learning_rate": self._positive_float("learning_rate", spec.extra.get("learning_rate", 1e-3)),
+            "batch_size": self._positive_int("batch_size", spec.extra.get("batch_size", 512)),
+            "epochs": self._positive_int("epochs", spec.extra.get("epochs", 10)),
+            "num_threads": num_threads,
+            **fixed_values,
+            "adam_betas": [0.9, 0.999],
+            "adam_eps": 1e-8,
+            "weight_decay": 0.0,
+            "amsgrad": False,
+        }
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _scoped_torch_runtime(torch: Any, seed: int, num_threads: int):
+        previous_state = torch.random.get_rng_state()
+        previous_threads = torch.get_num_threads()
+        try:
+            torch.set_num_threads(num_threads)
+            torch.manual_seed(seed)
+            yield
+        finally:
+            torch.random.set_rng_state(previous_state)
+            torch.set_num_threads(previous_threads)
+
+    def _import_official_api(self) -> dict[str, Any]:
+        try:
+            observed_version = version(self.package_name)
+        except PackageNotFoundError as exc:
+            raise ImportError(
+                "NFlow requires the checksum-audited official nflows package. "
+                "Install the project with the 'nflow' extra."
+            ) from exc
+        if observed_version != self.package_version:
+            raise ImportError(f"NFlow requires nflows=={self.package_version}; observed {observed_version}.")
+        package = importlib.import_module("nflows")
+        package_root = Path(package.__file__).resolve().parent
+        for relative_path, expected_sha256 in self.runtime_file_sha256.items():
+            path = package_root / relative_path
+            if path.is_symlink() or not path.is_file() or sha256_file(path) != expected_sha256:
+                raise ImportError(
+                    "Installed nflows runtime differs from the checksum-locked official 0.14 release: "
+                    f"{relative_path}."
+                )
+        torch = importlib.import_module("torch")
+        api = {
+            "torch": torch,
+            "StandardNormal": getattr(importlib.import_module("nflows.distributions"), "StandardNormal"),
+            "Flow": getattr(importlib.import_module("nflows.flows"), "Flow"),
+            "CompositeTransform": getattr(importlib.import_module("nflows.transforms"), "CompositeTransform"),
+            "RandomPermutation": getattr(importlib.import_module("nflows.transforms"), "RandomPermutation"),
+            "MaskedAffineAutoregressiveTransform": getattr(
+                importlib.import_module("nflows.transforms.autoregressive"),
+                "MaskedAffineAutoregressiveTransform",
+            ),
+        }
+        expected_modules = {
+            "StandardNormal": "nflows.distributions.normal",
+            "Flow": "nflows.flows.base",
+            "CompositeTransform": "nflows.transforms.base",
+            "RandomPermutation": "nflows.transforms.permutations",
+            "MaskedAffineAutoregressiveTransform": "nflows.transforms.autoregressive",
+        }
+        for name, expected_module in expected_modules.items():
+            if not isinstance(api[name], type) or api[name].__module__ != expected_module:
+                raise ImportError(f"Installed nflows does not expose the expected official {name} class.")
+        return api
+
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
         if dataset_spec.train_data_path is None:
             raise FileNotFoundError("nflow requires dataset_spec.train_data_path")
-        return pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
+        if len(dataset_spec.column_names) != len(set(dataset_spec.column_names)):
+            raise ValueError("NFlow requires unique canonical column names.")
+        if len(dataset_spec.target_columns) != 1:
+            raise ValueError("NFlow supports exactly one target column in the standardized benchmark.")
+        if dataset_spec.task_type not in {"classification", "regression"}:
+            raise ValueError(f"NFlow does not support task type {dataset_spec.task_type!r}.")
+        raw = pd.read_csv(dataset_spec.train_data_path)
+        missing_columns = [column for column in dataset_spec.column_names if column not in raw.columns]
+        if missing_columns:
+            raise ValueError(f"NFlow training data is missing canonical columns: {missing_columns}")
+        frame = raw[dataset_spec.column_names].copy()
+        if len(frame) < 2:
+            raise ValueError("NFlow requires at least two training rows.")
+        missing_counts = frame.isna().sum()
+        if bool(missing_counts.any()):
+            observed = {str(column): int(count) for column, count in missing_counts.items() if count}
+            raise ValueError(
+                "NFlow does not accept missing values. Run the explicit train-fitted preprocessing module first; "
+                f"observed: {observed}"
+            )
+        numerical_columns = list(dataset_spec.numerical_columns)
+        categorical_columns = list(dataset_spec.categorical_columns)
+        if dataset_spec.task_type == "regression":
+            numerical_columns.extend(dataset_spec.target_columns)
+        else:
+            categorical_columns.extend(dataset_spec.target_columns)
+        numerical_columns = list(dict.fromkeys(numerical_columns))
+        categorical_columns = list(dict.fromkeys(categorical_columns))
+        overlap = sorted(set(numerical_columns) & set(categorical_columns))
+        if overlap:
+            raise ValueError(f"NFlow DatasetSpec assigns columns to conflicting type roles: {overlap}")
+        undeclared = [
+            column
+            for column in dataset_spec.column_names
+            if column not in numerical_columns and column not in categorical_columns
+        ]
+        if undeclared:
+            raise ValueError(f"NFlow DatasetSpec leaves columns without a numerical/categorical role: {undeclared}")
+        for column in numerical_columns:
+            frame[column] = pd.to_numeric(frame[column], errors="raise")
+            if not np.isfinite(frame[column].to_numpy(dtype=float)).all():
+                raise ValueError(f"NFlow numerical column {column!r} contains non-finite values.")
+        return frame
 
-    def _build_flow(self, num_features: int, spec: RunSpec):
-        from nflows.distributions import StandardNormal
-        from nflows.flows import Flow
-        from nflows.transforms import CompositeTransform, RandomPermutation
-        from nflows.transforms.autoregressive import MaskedAffineAutoregressiveTransform
-
-        num_layers = int(spec.extra.get("num_layers", 4))
-        hidden_features = int(spec.extra.get("hidden_features", 64))
+    def _build_flow(self, num_features: int, recipe: dict[str, Any], api: dict[str, Any]):
         transforms = []
-        for _ in range(num_layers):
-            transforms.append(RandomPermutation(features=num_features))
+        for _ in range(recipe["num_layers"]):
+            transforms.append(api["RandomPermutation"](features=num_features, dim=1))
             transforms.append(
-                MaskedAffineAutoregressiveTransform(
+                api["MaskedAffineAutoregressiveTransform"](
                     features=num_features,
-                    hidden_features=hidden_features,
+                    hidden_features=recipe["hidden_features"],
+                    context_features=None,
+                    num_blocks=recipe["num_blocks"],
+                    use_residual_blocks=True,
+                    random_mask=False,
+                    activation=api["torch"].nn.functional.relu,
+                    dropout_probability=0.0,
+                    use_batch_norm=False,
                 )
             )
-        transform = CompositeTransform(transforms)
-        return Flow(transform, StandardNormal([num_features]))
+        transform = api["CompositeTransform"](transforms)
+        return api["Flow"](transform=transform, distribution=api["StandardNormal"](shape=[num_features]))
+
+    @staticmethod
+    def _state_arrays(flow: Any) -> dict[str, np.ndarray]:
+        arrays: dict[str, np.ndarray] = {}
+        for name, tensor in sorted(flow.state_dict().items()):
+            array = tensor.detach().cpu().numpy().copy()
+            if array.dtype.hasobject:
+                raise ValueError(f"NFlow state tensor {name!r} has an unsafe object dtype.")
+            if np.issubdtype(array.dtype, np.floating) and not np.isfinite(array).all():
+                raise ValueError(f"NFlow state tensor {name!r} contains non-finite values.")
+            arrays[name] = array
+        return arrays
+
+    @staticmethod
+    def _array_sha256(array: np.ndarray) -> str:
+        return hashlib.sha256(np.ascontiguousarray(array).tobytes()).hexdigest()
+
+    @classmethod
+    def _write_weights(cls, path: Path, flow: Any) -> dict[str, Any]:
+        arrays = cls._state_arrays(flow)
+        buffer = io.BytesIO()
+        np.savez(buffer, **arrays)
+        payload = buffer.getvalue()
+        if len(payload) > cls.max_weights_bytes:
+            raise ValueError("NFlow weight archive exceeds the safe checkpoint size limit.")
+        atomic_write_bytes(path, payload)
+        tensors = [
+            {
+                "name": name,
+                "dtype": str(array.dtype),
+                "shape": list(array.shape),
+                "sha256": cls._array_sha256(array),
+            }
+            for name, array in arrays.items()
+        ]
+        return {
+            "filename": path.name,
+            "format": "numpy-npz-no-pickle",
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "tensor_count": len(tensors),
+            "tensors": tensors,
+        }
+
+    @classmethod
+    def _regular_file(cls, path: Path, description: str, *, max_bytes: int) -> Path:
+        if path.is_symlink():
+            raise PermissionError(f"Refusing to read a symlinked {description}: {path}")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_file():
+            raise FileNotFoundError(f"Expected a regular {description}: {resolved}")
+        if resolved.stat().st_size > max_bytes:
+            raise ValueError(f"{description} exceeds the supported size limit.")
+        return resolved
+
+    @classmethod
+    def _load_weights(cls, path: Path, weights: Any, flow: Any, torch: Any) -> dict[str, np.ndarray]:
+        if not isinstance(weights, dict):
+            raise ValueError("NFlow checkpoint weight manifest must be a JSON object.")
+        expected_keys = {"filename", "format", "bytes", "sha256", "tensor_count", "tensors"}
+        if set(weights) != expected_keys or weights.get("format") != "numpy-npz-no-pickle":
+            raise ValueError("NFlow checkpoint weight manifest is not supported.")
+        trusted = cls._regular_file(path, "NFlow NumPy weight archive", max_bytes=cls.max_weights_bytes)
+        if (
+            weights.get("filename") != trusted.name
+            or weights.get("bytes") != trusted.stat().st_size
+            or weights.get("sha256") != sha256_file(trusted)
+        ):
+            raise ValueError("NFlow weight archive identity differs from its checkpoint manifest.")
+        tensor_manifest = weights.get("tensors")
+        if not isinstance(tensor_manifest, list) or weights.get("tensor_count") != len(tensor_manifest):
+            raise ValueError("NFlow checkpoint tensor manifest is invalid.")
+        by_name: dict[str, dict[str, Any]] = {}
+        for item in tensor_manifest:
+            if not isinstance(item, dict) or set(item) != {"name", "dtype", "shape", "sha256"}:
+                raise ValueError("NFlow checkpoint contains an invalid tensor manifest entry.")
+            name = item.get("name")
+            if not isinstance(name, str) or not name or name in by_name or "/" in name or "\\" in name:
+                raise ValueError("NFlow checkpoint contains an unsafe or duplicate tensor name.")
+            by_name[name] = item
+        expected_state = flow.state_dict()
+        if set(by_name) != set(expected_state):
+            raise ValueError("NFlow checkpoint tensor names differ from the declared architecture.")
+        with zipfile.ZipFile(trusted) as archive:
+            infos = archive.infolist()
+            expected_members = {f"{name}.npy" for name in by_name}
+            observed_members = {info.filename for info in infos}
+            if (
+                len(infos) != len(observed_members)
+                or observed_members != expected_members
+                or any(info.is_dir() or info.flag_bits & 0x1 for info in infos)
+                or sum(info.file_size for info in infos) > cls.max_weights_bytes
+            ):
+                raise ValueError("NFlow weight archive members are unsafe or differ from the tensor manifest.")
+        restored: dict[str, Any] = {}
+        arrays: dict[str, np.ndarray] = {}
+        with np.load(trusted, allow_pickle=False) as archive:
+            if set(archive.files) != set(by_name):
+                raise ValueError("NFlow NumPy archive keys differ from the tensor manifest.")
+            for name, expected_tensor in expected_state.items():
+                array = np.asarray(archive[name])
+                item = by_name[name]
+                if (
+                    array.dtype.hasobject
+                    or str(array.dtype) != item.get("dtype")
+                    or list(array.shape) != item.get("shape")
+                    or cls._array_sha256(array) != item.get("sha256")
+                    or tuple(array.shape) != tuple(expected_tensor.shape)
+                    or str(array.dtype) != str(expected_tensor.detach().cpu().numpy().dtype)
+                ):
+                    raise ValueError(f"NFlow checkpoint tensor identity is invalid for {name!r}.")
+                if np.issubdtype(array.dtype, np.floating) and not np.isfinite(array).all():
+                    raise ValueError(f"NFlow checkpoint tensor {name!r} contains non-finite values.")
+                arrays[name] = array.copy()
+                restored[name] = torch.from_numpy(arrays[name])
+        incompatible = flow.load_state_dict(restored, strict=True)
+        if incompatible.missing_keys or incompatible.unexpected_keys:
+            raise ValueError("NFlow checkpoint tensors do not exactly match the declared architecture.")
+        return arrays
+
+    @classmethod
+    def _checkpoint_payload(
+        cls,
+        dataset_spec: DatasetSpec,
+        train_df: pd.DataFrame,
+        preprocessor: NFlowPreprocessor,
+        recipe: dict[str, Any],
+        seed: int,
+        losses: list[float],
+        weights: dict[str, Any],
+    ) -> dict[str, Any]:
+        return {
+            "schema_version": cls.checkpoint_schema_version,
+            "format": "nflows-maf-tabular-recipe-state",
+            "package": {
+                "name": cls.package_name,
+                "version": cls.package_version,
+                "upstream_commit": cls.upstream_commit,
+                "upstream_tree": cls.upstream_tree,
+            },
+            "training": {
+                "seed": seed,
+                "source_rows": len(train_df),
+                "canonical_frame_sha256": hashlib.sha256(train_df.to_csv(index=False).encode("utf-8")).hexdigest(),
+                "task_type": dataset_spec.task_type,
+                "numerical_columns": list(dataset_spec.numerical_columns),
+                "categorical_columns": list(dataset_spec.categorical_columns),
+                "target_columns": list(dataset_spec.target_columns),
+                "recipe": recipe,
+                "epoch_mean_negative_log_likelihood": losses,
+            },
+            "preprocessing": preprocessor.to_payload(),
+            "weights": weights,
+            "privacy": {
+                "contains_row_level_training_data": False,
+                "code_executing_checkpoint": False,
+                "retained_state": "standardization statistics, category levels, and trained flow tensors",
+                "privacy_guarantee": "none",
+                "trained_artifact_access_control_required": True,
+            },
+        }
+
+    def _restore_flow(
+        self,
+        payload: Any,
+        checkpoint_path: Path,
+        dataset_spec: DatasetSpec,
+        api: dict[str, Any],
+    ) -> tuple[Any, NFlowPreprocessor, dict[str, np.ndarray]]:
+        if not isinstance(payload, dict):
+            raise ValueError("NFlow checkpoint must be a JSON object.")
+        if payload.get("schema_version") != self.checkpoint_schema_version:
+            raise ValueError("NFlow checkpoint schema version is not supported.")
+        if payload.get("format") != "nflows-maf-tabular-recipe-state":
+            raise ValueError("NFlow checkpoint format is not supported.")
+        expected_package = {
+            "name": self.package_name,
+            "version": self.package_version,
+            "upstream_commit": self.upstream_commit,
+            "upstream_tree": self.upstream_tree,
+        }
+        if payload.get("package") != expected_package:
+            raise ValueError("NFlow checkpoint package identity differs from the locked official release.")
+        training = payload.get("training")
+        privacy = payload.get("privacy")
+        if not isinstance(training, dict) or not isinstance(privacy, dict):
+            raise ValueError("NFlow checkpoint is missing required state sections.")
+        self._positive_int("checkpoint source_rows", training.get("source_rows"))
+        training_seed = self._validate_seed(training.get("seed"))
+        expected_roles = {
+            "task_type": dataset_spec.task_type,
+            "numerical_columns": list(dataset_spec.numerical_columns),
+            "categorical_columns": list(dataset_spec.categorical_columns),
+            "target_columns": list(dataset_spec.target_columns),
+        }
+        if any(training.get(key) != value for key, value in expected_roles.items()):
+            raise ValueError("NFlow checkpoint training roles differ from the current DatasetSpec.")
+        fingerprint = training.get("canonical_frame_sha256")
+        if (
+            not isinstance(fingerprint, str)
+            or len(fingerprint) != 64
+            or any(character not in "0123456789abcdef" for character in fingerprint)
+        ):
+            raise ValueError("NFlow checkpoint training-frame fingerprint is invalid.")
+        recipe = training.get("recipe")
+        if not isinstance(recipe, dict):
+            raise ValueError("NFlow checkpoint training recipe is invalid.")
+        recipe_spec = RunSpec(
+            model=self.model_name,
+            dataset=dataset_spec.name,
+            output_dir=Path.cwd(),
+            seed=training_seed,
+            extra=recipe,
+        )
+        if recipe != self._recipe_params(recipe_spec):
+            raise ValueError("NFlow checkpoint training recipe differs from the supported declared recipe.")
+        losses = training.get("epoch_mean_negative_log_likelihood")
+        if (
+            not isinstance(losses, list)
+            or len(losses) != recipe["epochs"]
+            or any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in losses)
+            or not np.isfinite(np.asarray(losses, dtype=float)).all()
+        ):
+            raise ValueError("NFlow checkpoint training loss record is invalid.")
+        if (
+            privacy.get("contains_row_level_training_data") is not False
+            or privacy.get("code_executing_checkpoint") is not False
+            or privacy.get("privacy_guarantee") != "none"
+            or privacy.get("trained_artifact_access_control_required") is not True
+        ):
+            raise ValueError("NFlow checkpoint does not satisfy the safe learned-state contract.")
+        preprocessor = NFlowPreprocessor.from_payload(dataset_spec, payload.get("preprocessing"))
+        num_features = len(preprocessor.numeric_columns) + len(preprocessor.categorical_columns)
+        with self._scoped_torch_runtime(api["torch"], training_seed, recipe["num_threads"]):
+            flow = self._build_flow(num_features, recipe, api)
+        weights_path = self._weights_path(checkpoint_path)
+        weights = payload.get("weights")
+        if not isinstance(weights, dict) or weights.get("filename") != weights_path.name:
+            raise ValueError("NFlow checkpoint weight filename is not canonical.")
+        arrays = self._load_weights(weights_path, weights, flow, api["torch"])
+        return flow, preprocessor, arrays
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
-        import torch
-
         self._ensure_output_dir(spec)
+        if spec.device != "cpu":
+            raise ValueError("The validated NFlow recipe is CPU-only; use device='cpu'.")
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
+        seed = self._validate_seed(spec.seed)
+        recipe = self._recipe_params(spec)
+        api = self._import_official_api()
+        torch = api["torch"]
         preprocessor = NFlowPreprocessor(dataset_spec)
         train_array = preprocessor.fit_transform(train_df)
-        flow = self._build_flow(train_array.shape[1], spec)
-        flow.train()
-
-        optimizer = torch.optim.Adam(flow.parameters(), lr=float(spec.extra.get("learning_rate", 1e-3)))
-        batch_size = int(spec.extra.get("batch_size", 512))
-        epochs = int(spec.extra.get("epochs", 10))
-        train_tensor = torch.tensor(train_array, dtype=torch.float32)
-        dataset = torch.utils.data.TensorDataset(train_tensor)
-        loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-        for _ in range(epochs):
-            for (batch,) in loader:
-                optimizer.zero_grad()
-                loss = -flow.log_prob(batch).mean()
-                loss.backward()
-                optimizer.step()
+        losses: list[float] = []
+        with self._scoped_torch_runtime(torch, seed, recipe["num_threads"]):
+            flow = self._build_flow(train_array.shape[1], recipe, api)
+            flow.train()
+            optimizer = torch.optim.Adam(
+                flow.parameters(),
+                lr=recipe["learning_rate"],
+                betas=tuple(recipe["adam_betas"]),
+                eps=recipe["adam_eps"],
+                weight_decay=recipe["weight_decay"],
+                amsgrad=recipe["amsgrad"],
+            )
+            train_tensor = torch.tensor(train_array, dtype=torch.float32)
+            dataset = torch.utils.data.TensorDataset(train_tensor)
+            generator = torch.Generator().manual_seed(seed)
+            loader = torch.utils.data.DataLoader(
+                dataset,
+                batch_size=recipe["batch_size"],
+                shuffle=recipe["shuffle"],
+                generator=generator,
+                num_workers=0,
+                drop_last=False,
+            )
+            for _ in range(recipe["epochs"]):
+                epoch_losses: list[float] = []
+                for (batch,) in loader:
+                    optimizer.zero_grad(set_to_none=True)
+                    loss = -flow.log_prob(batch).mean()
+                    if not bool(torch.isfinite(loss).item()):
+                        raise ValueError("Official nflows training produced a non-finite loss.")
+                    loss.backward()
+                    optimizer.step()
+                    epoch_losses.append(float(loss.detach().cpu().item()))
+                losses.append(float(np.mean(epoch_losses)))
 
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("wb") as handle:
-            pickle.dump({"flow": flow, "preprocessor": preprocessor}, handle)
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        weights_path = self._weights_path(checkpoint_path)
+        weights = self._write_weights(weights_path, flow)
+        payload = self._checkpoint_payload(dataset_spec, train_df, preprocessor, recipe, seed, losses, weights)
+        atomic_write_json(checkpoint_path, payload)
+        atomic_write_json(
+            self._metadata_path(checkpoint_path),
+            {
+                "schema_version": 1,
+                "model": self.model_name,
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "checkpoint_path": str(checkpoint_path),
+                "checkpoint_sha256": sha256_file(checkpoint_path),
+                "weights_path": str(weights_path),
+                "weights_sha256": weights["sha256"],
+                "seed": seed,
+                "source_rows": len(train_df),
+                "columns": dataset_spec.column_names,
+                "safe_json_and_numpy_checkpoint": True,
+                "contains_row_level_training_data": False,
+                "code_executing_checkpoint": False,
+                "privacy_guarantee": "none",
+                "trained_artifact_access_control_required": True,
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
-            notes=[f"Serialized normalizing-flow checkpoint written to {checkpoint_path}."],
+            notes=[
+                f"Saved official nflows {self.package_version} recipe state to {checkpoint_path}.",
+                "The checkpoint uses validated JSON plus non-object NumPy tensors, never executable pickle.",
+            ],
         )
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
-        import torch
-
         self._ensure_output_dir(spec)
+        if spec.device != "cpu":
+            raise ValueError("The validated NFlow recipe is CPU-only; use device='cpu'.")
         dataset_spec = self.resolve_dataset_spec(spec)
+        seed = self._validate_seed(spec.seed)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
-        with trusted_checkpoint.open("rb") as handle:
-            payload = pickle.load(handle)
-        flow = payload["flow"]
-        preprocessor: NFlowPreprocessor = payload["preprocessor"]
-        train_df = self._load_training_frame(dataset_spec)
-        num_samples = spec.num_samples or len(train_df)
+        trusted_checkpoint = self._regular_file(
+            checkpoint_path, "NFlow JSON checkpoint", max_bytes=self.max_checkpoint_bytes
+        )
+        metadata_path = self._regular_file(
+            self._metadata_path(checkpoint_path),
+            "NFlow checkpoint metadata",
+            max_bytes=self.max_checkpoint_bytes,
+        )
+        payload = read_json(trusted_checkpoint)
+        metadata = read_json(metadata_path)
+        if not isinstance(metadata, dict) or metadata.get("checkpoint_sha256") != sha256_file(trusted_checkpoint):
+            raise ValueError("NFlow checkpoint integrity verification failed.")
+        api = self._import_official_api()
+        torch = api["torch"]
+        flow, preprocessor, _ = self._restore_flow(payload, trusted_checkpoint, dataset_spec, api)
+        expected_metadata = {
+            "schema_version": 1,
+            "model": self.model_name,
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "weights_sha256": payload["weights"]["sha256"],
+            "seed": payload["training"]["seed"],
+            "source_rows": payload["training"]["source_rows"],
+            "columns": dataset_spec.column_names,
+            "safe_json_and_numpy_checkpoint": True,
+            "contains_row_level_training_data": False,
+            "code_executing_checkpoint": False,
+            "privacy_guarantee": "none",
+            "trained_artifact_access_control_required": True,
+        }
+        if any(metadata.get(key) != value for key, value in expected_metadata.items()):
+            raise ValueError("NFlow checkpoint metadata differs from the safe learned-state contract.")
+        num_samples = (
+            self._positive_int("checkpoint source_rows", payload["training"]["source_rows"])
+            if spec.num_samples is None
+            else self._positive_int("num_samples", spec.num_samples)
+        )
         flow.eval()
-        with torch.no_grad():
-            samples = flow.sample(num_samples).cpu().numpy()
+        with self._scoped_torch_runtime(torch, seed, payload["training"]["recipe"]["num_threads"]):
+            with torch.no_grad():
+                samples = flow.sample(num_samples).detach().cpu().numpy()
+        if samples.shape != (num_samples, len(dataset_spec.column_names)) or not np.isfinite(samples).all():
+            raise ValueError("Official nflows sampling returned an invalid shape or non-finite values.")
         sample_df = preprocessor.inverse_transform(samples)
+        if len(sample_df) != num_samples or list(sample_df.columns) != dataset_spec.column_names:
+            raise ValueError("NFlow inverse transformation violated the standardized row/column contract.")
+        if bool(sample_df.isna().any().any()):
+            raise ValueError("NFlow produced missing values; refusing to write an invalid sample.")
+        numerical_columns = list(dataset_spec.numerical_columns)
+        if dataset_spec.task_type == "regression":
+            numerical_columns.extend(dataset_spec.target_columns)
+        if numerical_columns and not np.isfinite(sample_df[numerical_columns].to_numpy(dtype=float)).all():
+            raise ValueError("NFlow produced non-finite numerical values.")
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        atomic_write_json(
+            spec.output_dir / "nflow_sample_metadata.json",
+            {
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "seed": seed,
+                "requested_rows": num_samples,
+                "checkpoint_path": str(trusted_checkpoint),
+                "checkpoint_sha256": sha256_file(trusted_checkpoint),
+                "weights_path": str(self._weights_path(trusted_checkpoint)),
+                "weights_sha256": payload["weights"]["sha256"],
+                "raw_sample_sha256": hashlib.sha256(samples.tobytes()).hexdigest(),
+                "sample_path": str(sample_path),
+                "sample_sha256": sha256_file(sample_path),
+                "columns": dataset_spec.column_names,
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
