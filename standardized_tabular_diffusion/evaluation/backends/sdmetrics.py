@@ -99,7 +99,9 @@ def _installed_license_digest() -> str:
     if len(candidates) != 1:
         raise SDMetricsSourceError("Installed SDMetrics distribution must retain exactly one MIT LICENSE")
     try:
-        return hashlib.sha256(Path(str(installed.locate_file(candidates[0]))).read_bytes()).hexdigest()
+        data = Path(str(installed.locate_file(candidates[0]))).read_bytes()
+        normalized = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        return hashlib.sha256(normalized).hexdigest()
     except OSError as exc:
         raise SDMetricsSourceError(f"Cannot attest the installed SDMetrics license: {exc}") from exc
 
