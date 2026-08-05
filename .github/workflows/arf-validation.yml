@@ -1,0 +1,111 @@
+name: ARF Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/arf-validation.yml"
+      - "requirements-arf-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/final_wave_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/arf.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/ARF_VALIDATION*.md"
+      - "docs/evidence/arf/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "docs/model_reproducibility_assessment.md"
+      - "docs/runtime_status.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_arf_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  pull_request:
+    paths:
+      - ".github/workflows/arf-validation.yml"
+      - "requirements-arf-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/final_wave_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/arf.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/ARF_VALIDATION*.md"
+      - "docs/evidence/arf/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "docs/model_reproducibility_assessment.md"
+      - "docs/runtime_status.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_arf_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arf-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / official-package parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-arf-validation.txt
+
+      - name: Install frozen official arfpy environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install -r requirements-arf-validation.txt
+          mkdir -p "$RUNNER_TEMP/arf-sdist"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/arf-sdist/arfpy-0.1.1.tar.gz" \
+            "https://files.pythonhosted.org/packages/95/6f/a61794959d3860e23f5f2de5886b61154d40c246b38eedebf19d22e4cc35/arfpy-0.1.1.tar.gz"
+          echo "88170d5e72638b0dbfec28cfbdfee02e97bd6a06d5a636e960acd5d90d480707  $RUNNER_TEMP/arf-sdist/arfpy-0.1.1.tar.gz" | sha256sum --check
+          python -m pip install \
+            --no-deps \
+            --no-build-isolation \
+            --use-pep517 \
+            "$RUNNER_TEMP/arf-sdist/arfpy-0.1.1.tar.gz"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run real official-package-versus-adapter parity protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.arf \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/arf-validation" \
+            --evidence-path "$RUNNER_TEMP/arf-evidence.json" \
+            --sdist-path "$RUNNER_TEMP/arf-sdist/arfpy-0.1.1.tar.gz"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/arf-evidence.json" ]; then
+            ARF_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("arf-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "arfpy-official-package-parity-v1", "model_id": "arf", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["ARF_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: arf-native-parity-evidence
+          path: ${{ runner.temp }}/arf-evidence.json
+          if-no-files-found: error
+          retention-days: 90

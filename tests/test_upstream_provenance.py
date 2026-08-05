@@ -20,6 +20,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
 
     assert isinstance(components, dict)
     assert set(components) == {
+        "arf",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",

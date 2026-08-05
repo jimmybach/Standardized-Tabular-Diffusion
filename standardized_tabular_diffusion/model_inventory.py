@@ -451,11 +451,13 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
-        repository_url="https://github.com/bips-hb/arf",
+        repository_url="https://github.com/bips-hb/arfpy",
         notes=[
-            "Integrated through the Python arfpy package rather than the original R-first workflow.",
-            "The standardized adapter uses ARF density estimation plus FORGE sampling and fits the shared train/sample/evaluate contract cleanly.",
-            "A strong non-neural baseline with much lower operational overhead than the original R path.",
+            "The adapter targets the method-author official arfpy 0.1.1 package at commit 6f737baa; the PyPI source distribution and runtime files are checksum-locked under MIT.",
+            "Typed missing-free input, CPU-only execution, deterministic seed scopes, FORDE/FORGE controls, and exact package identity are enforced outside upstream source.",
+            "The former pickle has been replaced by safe JSON FORGE state that omits the fitted forest and row-level training data while still calling the official forge method.",
+            "The retained density parameters are not a privacy guarantee and still require trained-artifact access controls.",
+            "Linux/Python 3.11 official-package parity is pending; no cross-language equivalence with the separate R implementation is claimed.",
         ],
     ),
     "tabebm": ModelInventoryEntry(

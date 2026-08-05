@@ -2,7 +2,7 @@
 
 Status: release-preparation record
 Audit date: 2026-08-04
-Scope: the primary TabDDPM, TabDiff, and TabSyn source trees, the TabSyn STaSy and CoDi baseline snapshots, plus official integrations for CTGAN, TVAE, SMOTE, NRGBoost, REaLTabFormer, CTAB-GAN, CTAB-GAN+, and Goggle
+Scope: the primary TabDDPM, TabDiff, and TabSyn source trees, the TabSyn STaSy and CoDi baseline snapshots, plus official integrations for ARF, CTGAN, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, CTAB-GAN, CTAB-GAN+, and Goggle
 
 ## Purpose
 
@@ -26,6 +26,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 
 | Component | Pinned upstream revision | Snapshot relation | Local source treatment | Current official eligibility |
 |---|---|---|---|---|
+| ARF (official Python package) | `6f737baaaa589f7ac3ff59f0d739ce04b0f1381c`, tree `68b6fc5d28578a5c21bef560bd28f4c0d2d6401c` (`arfpy==0.1.1`) | The checksum-pinned PyPI source distribution contains six byte-exact release files from the method-author commit. The repository has no 0.1.1 tag; the distinct R package is recorded separately and is outside this cross-language claim. | No package source is vendored or patched. Typed input, deterministic seed scopes, strict OOB rejection, and a safe JSON FORGE-state checkpoint are adapter-only. The checkpoint omits the forest and row-level training data while sampling still calls the official `forge()` method. Linux/Python 3.11 parity is pending. | Blocked pending official-package parity, central evaluation, dataset admission, runtime, and release gates. No R/Python equivalence is claimed. |
 | CTGAN | `826da23f8f9385ad15fd206ecad691e04cb0ccdc` (`v0.12.1`) | The adapter previously loaded a nested `0.5.2.dev0` snapshot. It now requires the official PyPI wheel whose SHA-256 and trusted-publishing source commit are locked. | Adapter-only package integration; no 0.12.1 source is vendored. Exact native parity passed in run `30910275922`. | Blocked pending BUSL-1.1 review, central evaluation, dataset admission, and release gates. |
 | TVAE | `826da23f8f9385ad15fd206ecad691e04cb0ccdc` (`v0.12.1`) | The former `0.5.2.dev0` subtree matched 39 of 44 shared paths at its closest reviewed history point; TVAE and four other source files were locally modified. | The 47-file legacy subtree and obsolete wrappers were removed. The adapter now uses the unmodified official package API; exact native parity passed in run `30913867621`. | Blocked pending BUSL-1.1 review, central evaluation, dataset admission, and release gates. |
 | SMOTE | `8504e95f0160f61d1b617ca66f779646d2ee609e` (`0.14.2`) | The adapter now requires the checksum-pinned official imbalanced-learn wheel. No source snapshot is vendored. | Adapter-only package integration. Direct DataFrame dispatch selects official SMOTE, SMOTENC, or SMOTEN; all nine exact cases passed in run `30918785254`. | Native parity validated but excluded from joint generative-model ranking; classical-reference admission and release gates remain pending. |

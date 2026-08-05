@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
+import importlib
 import os
 import pickle
 import tempfile
 from dataclasses import dataclass
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
 
@@ -12,7 +15,11 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder, StandardScaler
 
-from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
+from standardized_tabular_diffusion.evaluation.serialization import (
+    atomic_write_json,
+    read_json,
+    sha256_file,
+)
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import (
     SampleFileEvaluatorMixin,
@@ -259,63 +266,491 @@ class GReaTAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
 class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "arf"
-    upstream_dirname = "TabSyn-main"
-    checkpoint_filename = "model.pkl"
+    upstream_dirname = "."
+    checkpoint_filename = "model.arf.json"
+    package_name = "arfpy"
+    package_version = "0.1.1"
+    upstream_commit = "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c"
+    upstream_tree = "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c"
+    checkpoint_schema_version = 1
+    runtime_file_sha256 = {
+        "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "arf.py": "860f49dd232b78eba12d7a56ed88c9c6c814fae6938b9dbf047668874b368898",
+        "utils.py": "391032b116763ed1da0a539a9ae34bed69fbb477026034bbb6f33d44c4ad56f4",
+    }
 
     def _resolve_checkpoint_path(self, spec: RunSpec) -> Path:
         if spec.checkpoint_path is not None:
             return spec.checkpoint_path
         return spec.output_dir / self.checkpoint_filename
 
+    @staticmethod
+    def _metadata_path(checkpoint_path: Path) -> Path:
+        return checkpoint_path.with_name(f"{checkpoint_path.name}.metadata.json")
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _scoped_numpy_seed(seed: int):
+        state = np.random.get_state()
+        try:
+            np.random.seed(seed)
+            yield
+        finally:
+            np.random.set_state(state)
+
+    @staticmethod
+    def _positive_int(name: str, value: Any) -> int:
+        parsed = int(value)
+        if isinstance(value, bool) or parsed < 1:
+            raise ValueError(f"ARF {name} must be a positive integer; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _nonnegative_int(name: str, value: Any) -> int:
+        parsed = int(value)
+        if isinstance(value, bool) or parsed < 0:
+            raise ValueError(f"ARF {name} must be a non-negative integer; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _finite_float(name: str, value: Any) -> float:
+        parsed = float(value)
+        if not np.isfinite(parsed):
+            raise ValueError(f"ARF {name} must be finite; observed {value!r}.")
+        return parsed
+
+    @staticmethod
+    def _boolean(name: str, value: Any) -> bool:
+        if not isinstance(value, bool):
+            raise TypeError(f"ARF {name} must be a boolean; observed {value!r}.")
+        return value
+
+    def _training_params(self, spec: RunSpec) -> dict[str, Any]:
+        delta = self._finite_float("delta", spec.extra.get("delta", 0.0))
+        if not 0 <= delta <= 0.5:
+            raise ValueError(f"ARF delta must lie in [0, 0.5]; observed {delta}.")
+        n_jobs = int(spec.extra.get("n_jobs", 1))
+        if isinstance(spec.extra.get("n_jobs", 1), bool) or n_jobs == 0:
+            raise ValueError(f"ARF n_jobs must be a non-zero integer; observed {n_jobs!r}.")
+        return {
+            "num_trees": self._positive_int("num_trees", spec.extra.get("num_trees", 30)),
+            "delta": delta,
+            "max_iters": self._nonnegative_int("max_iters", spec.extra.get("max_iters", 10)),
+            "early_stop": self._boolean("early_stop", spec.extra.get("early_stop", True)),
+            "verbose": self._boolean("verbose", spec.extra.get("verbose", False)),
+            "min_node_size": self._positive_int(
+                "min_node_size", spec.extra.get("min_node_size", 5)
+            ),
+            "random_state": spec.seed,
+            "n_jobs": n_jobs,
+        }
+
+    def _forde_params(self, spec: RunSpec) -> dict[str, Any]:
+        dist = spec.extra.get("dist", "truncnorm")
+        if dist != "truncnorm":
+            raise ValueError("arfpy 0.1.1 only implements dist='truncnorm'.")
+        oob = self._boolean("oob", spec.extra.get("oob", False))
+        if oob:
+            raise ValueError(
+                "arfpy 0.1.1 has a broken oob=True FORDE path that references unavailable state. "
+                "This adapter refuses to patch the official algorithm silently; use oob=false."
+            )
+        alpha = self._finite_float("alpha", spec.extra.get("alpha", 0.0))
+        if alpha < 0:
+            raise ValueError(f"ARF alpha must be non-negative; observed {alpha}.")
+        return {"dist": dist, "oob": oob, "alpha": alpha}
+
+    def _import_model_cls(self):
+        try:
+            observed_version = version(self.package_name)
+        except PackageNotFoundError as exc:
+            raise ImportError(
+                "ARF requires the checksum-audited official arfpy package. "
+                "Install the project with the 'arf' extra."
+            ) from exc
+        if observed_version != self.package_version:
+            raise ImportError(
+                "ARF requires the exact validated official package version "
+                f"{self.package_name}=={self.package_version}; observed {observed_version}."
+            )
+        module = importlib.import_module("arfpy.arf")
+        package_root = Path(module.__file__).resolve().parent
+        for filename, expected_sha256 in self.runtime_file_sha256.items():
+            path = package_root / filename
+            if path.is_symlink() or not path.is_file():
+                raise ImportError(f"Official arfpy runtime file is missing or unsafe: {path}")
+            observed_sha256 = sha256_file(path)
+            if observed_sha256 != expected_sha256:
+                raise ImportError(
+                    "Installed arfpy runtime source differs from the checksum-locked official 0.1.1 release: "
+                    f"{filename} expected={expected_sha256}, observed={observed_sha256}."
+                )
+        model_cls = getattr(module, "arf", None)
+        if not isinstance(model_cls, type) or model_cls.__module__ != "arfpy.arf":
+            raise ImportError("Installed arfpy package does not expose the official arfpy.arf.arf class.")
+        return model_cls
+
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
         if dataset_spec.train_data_path is None:
             raise FileNotFoundError("arf requires dataset_spec.train_data_path")
-        return pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
+        if len(dataset_spec.column_names) != len(set(dataset_spec.column_names)):
+            raise ValueError("ARF requires unique canonical column names.")
+        raw = pd.read_csv(dataset_spec.train_data_path)
+        missing_columns = [column for column in dataset_spec.column_names if column not in raw.columns]
+        if missing_columns:
+            raise ValueError(f"ARF training data is missing canonical columns: {missing_columns}")
+        frame = raw[dataset_spec.column_names].copy()
+        missing_counts = frame.isna().sum()
+        if bool(missing_counts.any()):
+            observed = {str(column): int(count) for column, count in missing_counts.items() if count}
+            raise ValueError(
+                "ARF does not accept missing values in this benchmark. Run the explicit train-fitted "
+                f"preprocessing module first; observed: {observed}"
+            )
+
+        categorical_columns = list(dataset_spec.categorical_columns)
+        numerical_columns = list(dataset_spec.numerical_columns)
+        if dataset_spec.task_type == "classification":
+            categorical_columns.extend(dataset_spec.target_columns)
+        elif dataset_spec.task_type == "regression":
+            numerical_columns.extend(dataset_spec.target_columns)
+        else:
+            raise ValueError(f"ARF does not support task type {dataset_spec.task_type!r}.")
+        categorical_columns = list(dict.fromkeys(categorical_columns))
+        numerical_columns = list(dict.fromkeys(numerical_columns))
+        overlap = sorted(set(categorical_columns) & set(numerical_columns))
+        if overlap:
+            raise ValueError(f"ARF DatasetSpec assigns columns to conflicting type roles: {overlap}")
+        undeclared = [
+            column
+            for column in dataset_spec.column_names
+            if column not in categorical_columns and column not in numerical_columns
+        ]
+        if undeclared:
+            raise ValueError(f"ARF DatasetSpec leaves columns without a numerical/categorical role: {undeclared}")
+        for column in numerical_columns:
+            frame[column] = pd.to_numeric(frame[column], errors="raise")
+            if not np.isfinite(frame[column].to_numpy(dtype=float)).all():
+                raise ValueError(f"ARF numerical column {column!r} contains non-finite values.")
+        for column in categorical_columns:
+            frame[column] = frame[column].astype("category")
+        return frame
+
+    @classmethod
+    def _encode_value(cls, value: Any) -> Any:
+        if isinstance(value, np.generic):
+            value = value.item()
+        if value is None or isinstance(value, (bool, int, str)):
+            return value
+        if isinstance(value, float):
+            if np.isnan(value):
+                return {"__arf_float__": "nan"}
+            if np.isposinf(value):
+                return {"__arf_float__": "+inf"}
+            if np.isneginf(value):
+                return {"__arf_float__": "-inf"}
+            return value
+        raise TypeError(f"ARF checkpoint cannot safely encode value of type {type(value).__name__}.")
+
+    @classmethod
+    def _decode_value(cls, value: Any) -> Any:
+        if isinstance(value, dict):
+            if set(value) != {"__arf_float__"}:
+                raise ValueError("ARF checkpoint contains an unknown tagged value.")
+            labels = {"nan": float("nan"), "+inf": float("inf"), "-inf": float("-inf")}
+            label = value["__arf_float__"]
+            if label not in labels:
+                raise ValueError(f"ARF checkpoint contains an invalid float tag: {label!r}")
+            return labels[label]
+        if value is None or isinstance(value, (bool, int, float, str)):
+            return value
+        raise ValueError(f"ARF checkpoint contains an unsupported JSON value: {type(value).__name__}")
+
+    @classmethod
+    def _encode_frame(cls, frame: pd.DataFrame) -> dict[str, Any]:
+        return {
+            "columns": [str(column) for column in frame.columns],
+            "dtypes": [str(dtype) for dtype in frame.dtypes],
+            "data": [[cls._encode_value(value) for value in row] for row in frame.itertuples(index=False, name=None)],
+        }
+
+    @classmethod
+    def _decode_frame(cls, payload: Any) -> pd.DataFrame:
+        if not isinstance(payload, dict) or set(payload) != {"columns", "dtypes", "data"}:
+            raise ValueError("ARF checkpoint contains an invalid DataFrame payload.")
+        columns = payload["columns"]
+        dtypes = payload["dtypes"]
+        data = payload["data"]
+        if (
+            not isinstance(columns, list)
+            or any(not isinstance(column, str) for column in columns)
+            or len(columns) != len(set(columns))
+            or not isinstance(dtypes, list)
+            or len(dtypes) != len(columns)
+            or any(not isinstance(dtype, str) for dtype in dtypes)
+            or not isinstance(data, list)
+        ):
+            raise ValueError("ARF checkpoint DataFrame schema is invalid.")
+        decoded_rows = []
+        for row in data:
+            if not isinstance(row, list) or len(row) != len(columns):
+                raise ValueError("ARF checkpoint DataFrame row width is invalid.")
+            decoded_rows.append([cls._decode_value(value) for value in row])
+        frame = pd.DataFrame(decoded_rows, columns=columns)
+        for column, dtype in zip(columns, dtypes, strict=True):
+            if dtype.startswith(("int", "uint", "float")):
+                frame[column] = pd.to_numeric(frame[column], errors="raise").astype(dtype)
+            elif dtype == "bool":
+                frame[column] = frame[column].astype(bool)
+            elif dtype not in {"object", "string"}:
+                raise ValueError(f"ARF checkpoint declares unsupported DataFrame dtype {dtype!r}.")
+        return frame
+
+    @classmethod
+    def _checkpoint_payload(
+        cls,
+        model: Any,
+        dataset_spec: DatasetSpec,
+        train_df: pd.DataFrame,
+        training_params: dict[str, Any],
+        forde_params: dict[str, Any],
+        seed: int,
+    ) -> dict[str, Any]:
+        columns = list(model.orig_colnames)
+        factor_columns = [column for column in columns if bool(model.factor_cols[column])]
+        object_columns = [column for column in columns if bool(model.object_cols[column])]
+        levels = {
+            column: [cls._encode_value(value) for value in model.levels[column].tolist()]
+            for column in factor_columns
+        }
+        return {
+            "schema_version": cls.checkpoint_schema_version,
+            "format": "arfpy-forge-state",
+            "package": {
+                "name": cls.package_name,
+                "version": cls.package_version,
+                "upstream_commit": cls.upstream_commit,
+                "upstream_tree": cls.upstream_tree,
+            },
+            "training": {
+                "seed": seed,
+                "source_rows": len(train_df),
+                "canonical_frame_sha256": hashlib.sha256(
+                    train_df.to_csv(index=False).encode("utf-8")
+                ).hexdigest(),
+                "task_type": dataset_spec.task_type,
+                "numerical_columns": list(dataset_spec.numerical_columns),
+                "categorical_columns": list(dataset_spec.categorical_columns),
+                "target_columns": list(dataset_spec.target_columns),
+                "training_params": training_params,
+                "forde_params": forde_params,
+                "adversarial_oob_accuracy": [cls._encode_value(float(value)) for value in model.acc],
+            },
+            "model": {
+                "p": int(model.p),
+                "num_trees": int(model.num_trees),
+                "orig_colnames": columns,
+                "factor_columns": factor_columns,
+                "object_columns": object_columns,
+                "levels": levels,
+                "dist": str(model.dist),
+                "bnds": cls._encode_frame(model.bnds),
+                "params": cls._encode_frame(model.params),
+                "class_probs": cls._encode_frame(model.class_probs),
+            },
+            "privacy": {
+                "contains_row_level_training_data": False,
+                "contains_random_forest": False,
+                "retained_state": "FORGE density parameters, category levels, and leaf coverage only",
+                "privacy_guarantee": "none",
+                "trained_artifact_access_control_required": True,
+            },
+        }
+
+    @classmethod
+    def _restore_model(cls, model_cls: type, payload: Any, dataset_spec: DatasetSpec) -> Any:
+        if not isinstance(payload, dict):
+            raise ValueError("ARF checkpoint must be a JSON object.")
+        if payload.get("schema_version") != cls.checkpoint_schema_version or payload.get("format") != "arfpy-forge-state":
+            raise ValueError("ARF checkpoint schema or format is not supported.")
+        package = payload.get("package")
+        expected_package = {
+            "name": cls.package_name,
+            "version": cls.package_version,
+            "upstream_commit": cls.upstream_commit,
+            "upstream_tree": cls.upstream_tree,
+        }
+        if package != expected_package:
+            raise ValueError("ARF checkpoint package identity differs from the locked official release.")
+        training = payload.get("training")
+        model_state = payload.get("model")
+        privacy = payload.get("privacy")
+        if not isinstance(training, dict) or not isinstance(model_state, dict) or not isinstance(privacy, dict):
+            raise ValueError("ARF checkpoint is missing required state sections.")
+        if privacy.get("contains_row_level_training_data") is not False or privacy.get("contains_random_forest") is not False:
+            raise ValueError("ARF checkpoint does not satisfy the safe sanitized-state contract.")
+        columns = model_state.get("orig_colnames")
+        if columns != dataset_spec.column_names:
+            raise ValueError(
+                "ARF checkpoint columns differ from the current DatasetSpec: "
+                f"checkpoint={columns}, dataset={dataset_spec.column_names}"
+            )
+        factor_columns = model_state.get("factor_columns")
+        object_columns = model_state.get("object_columns")
+        levels = model_state.get("levels")
+        if (
+            not isinstance(factor_columns, list)
+            or any(column not in columns for column in factor_columns)
+            or not isinstance(object_columns, list)
+            or any(column not in columns for column in object_columns)
+            or not isinstance(levels, dict)
+            or set(levels) != set(factor_columns)
+        ):
+            raise ValueError("ARF checkpoint categorical schema is invalid.")
+        model = model_cls.__new__(model_cls)
+        model.p = int(model_state.get("p"))
+        if model.p != len(columns):
+            raise ValueError("ARF checkpoint feature count does not match its columns.")
+        model.num_trees = cls._positive_int("checkpoint num_trees", model_state.get("num_trees"))
+        model.orig_colnames = list(columns)
+        model.factor_cols = pd.Series(
+            [column in factor_columns for column in columns], index=columns, dtype=bool
+        )
+        model.object_cols = pd.Series(
+            [column in object_columns for column in columns], index=columns, dtype=bool
+        )
+        model.levels = {
+            column: pd.Index([cls._decode_value(value) for value in levels[column]])
+            for column in factor_columns
+        }
+        model.dist = model_state.get("dist")
+        if model.dist != "truncnorm":
+            raise ValueError("ARF checkpoint requests an unsupported density distribution.")
+        model.bnds = cls._decode_frame(model_state.get("bnds"))
+        model.params = cls._decode_frame(model_state.get("params"))
+        model.class_probs = cls._decode_frame(model_state.get("class_probs"))
+        return model
+
+    @staticmethod
+    def _regular_json_file(path: Path, description: str) -> Path:
+        if path.is_symlink():
+            raise PermissionError(f"Refusing to read a symlinked {description}: {path}")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_file():
+            raise FileNotFoundError(f"Expected a regular {description}: {resolved}")
+        return resolved
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
-        from arfpy.arf import arf
-
         self._ensure_output_dir(spec)
+        if spec.device != "cpu":
+            raise ValueError("Official arfpy 0.1.1 is CPU-only; ARF requires device='cpu'.")
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
-        model = arf(
-            train_df,
-            num_trees=int(spec.extra.get("num_trees", 30)),
-            delta=float(spec.extra.get("delta", 0.0)),
-            max_iters=int(spec.extra.get("max_iters", 10)),
-            early_stop=bool(spec.extra.get("early_stop", True)),
-            verbose=bool(spec.extra.get("verbose", False)),
-            min_node_size=int(spec.extra.get("min_node_size", 5)),
-        )
-        model.forde(
-            dist=spec.extra.get("dist", "truncnorm"),
-            oob=bool(spec.extra.get("oob", False)),
-            alpha=float(spec.extra.get("alpha", 0.0)),
-        )
+        model_cls = self._import_model_cls()
+        training_params = self._training_params(spec)
+        forde_params = self._forde_params(spec)
+        with self._scoped_numpy_seed(spec.seed):
+            model = model_cls(train_df.copy(), **training_params)
+            model.forde(**forde_params)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        with checkpoint_path.open("wb") as handle:
-            pickle.dump(model, handle)
+        payload = self._checkpoint_payload(
+            model,
+            dataset_spec,
+            train_df,
+            training_params,
+            forde_params,
+            spec.seed,
+        )
+        atomic_write_json(checkpoint_path, payload)
+        metadata_path = self._metadata_path(checkpoint_path)
+        atomic_write_json(
+            metadata_path,
+            {
+                "schema_version": 1,
+                "model": self.model_name,
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "checkpoint_path": str(checkpoint_path),
+                "checkpoint_sha256": sha256_file(checkpoint_path),
+                "seed": spec.seed,
+                "source_rows": len(train_df),
+                "columns": dataset_spec.column_names,
+                "safe_json_checkpoint": True,
+                "contains_row_level_training_data": False,
+                "contains_random_forest": False,
+                "privacy_guarantee": "none",
+                "trained_artifact_access_control_required": True,
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
-            notes=[f"Serialized ARF checkpoint written to {checkpoint_path}."],
+            notes=[
+                f"Saved official arfpy {self.package_version} FORGE state to {checkpoint_path}.",
+                "The safe JSON checkpoint omits the fitted forest and row-level training data.",
+            ],
         )
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        if spec.device != "cpu":
+            raise ValueError("Official arfpy 0.1.1 is CPU-only; ARF requires device='cpu'.")
         dataset_spec = self.resolve_dataset_spec(spec)
         checkpoint_path = self._resolve_checkpoint_path(spec)
-        trusted_checkpoint = self._validate_trusted_executable_artifact(spec, checkpoint_path, format_name="pickle")
-        with trusted_checkpoint.open("rb") as handle:
-            model = pickle.load(handle)
-        train_df = self._load_training_frame(dataset_spec)
-        num_samples = spec.num_samples or len(train_df)
-        sample_df = model.forge(num_samples)[dataset_spec.column_names].copy()
+        trusted_checkpoint = self._regular_json_file(checkpoint_path, "ARF JSON checkpoint")
+        metadata_path = self._regular_json_file(
+            self._metadata_path(checkpoint_path), "ARF checkpoint metadata"
+        )
+        metadata = read_json(metadata_path)
+        if not isinstance(metadata, dict) or metadata.get("checkpoint_sha256") != sha256_file(trusted_checkpoint):
+            raise ValueError("ARF checkpoint integrity verification failed.")
+        model_cls = self._import_model_cls()
+        payload = read_json(trusted_checkpoint)
+        model = self._restore_model(model_cls, payload, dataset_spec)
+        source_rows = payload["training"].get("source_rows")
+        num_samples = (
+            self._positive_int("checkpoint source_rows", source_rows)
+            if spec.num_samples is None
+            else self._positive_int("num_samples", spec.num_samples)
+        )
+        with self._scoped_numpy_seed(spec.seed):
+            sample_df = model.forge(num_samples)
+        if not isinstance(sample_df, pd.DataFrame):
+            raise TypeError(f"Official ARF forge returned {type(sample_df).__name__}, expected DataFrame.")
+        if list(sample_df.columns) != dataset_spec.column_names:
+            raise ValueError(
+                "Official ARF forge returned non-canonical columns: "
+                f"observed={list(sample_df.columns)}, expected={dataset_spec.column_names}"
+            )
+        sample_df = sample_df[dataset_spec.column_names].copy()
+        if len(sample_df) != num_samples:
+            raise ValueError(f"Official ARF forge returned {len(sample_df)} rows for a request of {num_samples}.")
+        if bool(sample_df.isna().any().any()):
+            raise ValueError("Official ARF forge produced missing values; refusing to write an invalid sample.")
+        numerical = list(dataset_spec.numerical_columns)
+        if dataset_spec.task_type == "regression":
+            numerical.extend(dataset_spec.target_columns)
+        if numerical and not np.isfinite(sample_df[numerical].to_numpy(dtype=float)).all():
+            raise ValueError("Official ARF forge produced non-finite numerical values.")
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        atomic_write_json(
+            spec.output_dir / "arf_sample_metadata.json",
+            {
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "seed": spec.seed,
+                "requested_rows": num_samples,
+                "checkpoint_path": str(trusted_checkpoint),
+                "checkpoint_sha256": sha256_file(trusted_checkpoint),
+                "sample_path": str(sample_path),
+                "sample_sha256": sha256_file(sample_path),
+                "columns": dataset_spec.column_names,
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

@@ -1202,7 +1202,7 @@ def test_great_arf_and_tabebm_checkpoint_conventions(tmp_path: Path) -> None:
     ).to_run_spec()
 
     assert great_adapter._model_root(great_spec).name == "great_model"
-    assert arf_adapter._resolve_checkpoint_path(arf_spec).name == "model.pkl"
+    assert arf_adapter._resolve_checkpoint_path(arf_spec).name == "model.arf.json"
     assert tabebm_adapter._resolve_checkpoint_path(tabebm_spec).name == "model.pkl"
     assert great_adapter._metadata_path(great_adapter._model_root(great_spec)).name == "adapter_metadata.json"
 
@@ -1239,11 +1239,11 @@ def test_tabebm_surrogate_negatives_cover_one_feature_and_are_seeded() -> None:
 
 
 def test_code_executing_checkpoint_loads_fail_closed_outside_output_dir(tmp_path: Path) -> None:
-    adapter = ARFAdapter(tmp_path)
+    adapter = TabEBMAdapter(tmp_path)
     external_checkpoint = tmp_path / "external.pkl"
     external_checkpoint.write_bytes(b"not-loaded")
     config = ExperimentConfig(
-        model="arf",
+        model="tabebm",
         dataset="adult",
         output_dir=str(tmp_path / "artifacts" / "arf"),
         train=TrainConfig(enabled=False),
@@ -1367,10 +1367,10 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         ("tabsds", "tabsds.pkl"),
         ("tabularargn", "tabularargn_workspace"),
         ("tabula", "tabula_model"),
-        ("arf", "model.pkl"),
+        ("arf", "model.arf.json"),
     ]:
         checkpoint = tmp_path / checkpoint_name
-        if checkpoint_name.endswith(".pkl") or checkpoint_name.endswith(".pt"):
+        if checkpoint_name.endswith((".pkl", ".pt", ".json")):
             checkpoint.write_text("stub")
         else:
             checkpoint.mkdir(exist_ok=True)
@@ -1379,6 +1379,8 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
             (tmp_path / "goggle-runtime-config.json").write_text("{}")
         if model_name == "tabularargn":
             (tmp_path / "tabularargn-model-metadata.json").write_text("{}")
+        if model_name == "arf":
+            (tmp_path / "model.arf.json.metadata.json").write_text("{}")
         config = ExperimentConfig(
             model=model_name,
             dataset="adult",
