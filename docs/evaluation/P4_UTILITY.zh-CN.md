@@ -2,9 +2,9 @@
 
 ## 状态与声明边界
 
-P4 已实现，其有限范围诊断门已在 [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769) 上通过，并已留存[机器可读证据](../evidence/evaluation/p4-utility-run-31053624769.json)，SHA-256 为 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`。它仍属于**诊断性 pilot**：尚未协议冻结、尚未达到 release-supported，也不能进入 Official Results。
+P4 已实现，其有限范围诊断门已在 [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769) 上通过，并已留存[工程机器可读证据](../evidence/evaluation/p4-utility-run-31053624769.json)，SHA-256 为 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`。单独的真实 Global 来源运行时 pilot 已在 [run 31057073762](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31057073762) 通过；其[留存证据](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) SHA-256 为 `1ca205c3fbad6c6e80cd275330dae00edda5dfcad7efe229f4fcb285b9d63596`。P4 仍属于**诊断性 pilot**：尚未协议冻结、尚未达到 release-supported，也不能进入 Official Results。
 
-当前实现已经建立从三张不可变解码表，到 Local/Global Utility Atomic Results，再到可自校验最终 bundle 的完整审计路径。但目前不声称与完整 TabEval 预测器运行时达到可执行等价。该声明还需要在 Linux/Python 3.11 上运行锁定的 AutoGluon、XGBoost、KNN 与 TabPFN 栈，审阅运行预算并留存证据。
+当前实现已经建立从三张不可变解码表，到 Local/Global Utility Atomic Results，再到可自校验最终 bundle 的完整审计路径。有限范围 pilot 已在真实训练 XGB、KNN 与 TabPFN 的条件下，对一个分类目标和一个回归目标证明了锁定 TabEval 来源与适配器的聚合值严格一致；它尚未证明完整数据集、多种子稳定性，也不构成 Official Results 准入。
 
 ## 必需输入与数据泄露边界
 
@@ -61,9 +61,11 @@ Global Utility：先对目标等权平均，再对种子等权平均
 
 大于 1 的比率有效，绝不截断。分母为零或非有限值时明确标记 `mathematically_undefined`。只要任一请求的目标/种子比率不可用，诊断性 `global_utility` 就为 null；绝不会静默地重新分配已计算目标的权重。
 
-锁定的低成本预测器身份是 TabEval revision `dba19a4ee7aa391621cbeb464609285fd515dece`、时间戳 `2025-08-09` 的 `UtilityPerFeature`，通过 AutoGluon 配置 XGB、KNN 和 TabPFN。P4 会记录后端实际训练的模型名称和逐模型分数。一个目标只有在 TRTR 与 TSTR 使用相同预测器集合时才能计算比率。禁止未记录地替换模型或缩减 profile。
+锁定的低成本预测器身份是 TabEval revision `dba19a4ee7aa391621cbeb464609285fd515dece`、时间戳 `2025-08-09` 的 `UtilityPerFeature`，通过 AutoGluon 配置 XGB、KNN 和 TabPFN。其 LF 统一换行源码与 Apache-2.0 许可证都已由校验和锁定。上游没有声明 AutoGluon，并且未限制 XGBoost 与 TabPFN 版本，因此不存在可复现的上游官方环境。本 pilot 将 Linux/Python 3.11 CPU 组合——AutoGluon 1.4.0、`xgboost-cpu` 3.0.3、TabPFN 2.1.2 与 PyTorch 2.3.0+cpu——明确标记为基准审批的重建环境，而不是上游官方锁定环境。
 
-锁定的 TabPFN 实现最多支持十个类别。对更高基数的类别目标，AutoGluon 可能按来源行为跳过 TabPFN；P4 会记录 `source-predictor-set-reduced`，并且仅当两条 arm 暴露相同预测器集合时接受比率。这一行为仍需在来源运行时 pilot 中审阅。
+留存运行中，来源与适配器均实际训练了 `CustomTabPFNModel`、`KNeighbors` 和 `XGBoost`。二者的聚合 Balanced Accuracy 都严格为 `0.5416666666666666`，聚合 RMSE 都严格为 `8.979373060535432`；在声明的 `1e-8` 绝对容差门下，两项差值均为零。P4 会记录实际训练的模型名称和逐模型分数。一个目标只有在 TRTR 与 TSTR 使用相同预测器集合时才能计算比率。禁止回退模型或未记录地缩减 profile。
+
+锁定的 TabPFN 实现最多支持十个类别。pilot 已直接执行锁定来源中的保护门，确认十一类别目标会在 TabPFN 模型拟合前被拒绝。AutoGluon 随后可能按来源行为省略失败的模型族；P4 会记录 `source-predictor-set-reduced`，并且仅当两条 arm 暴露相同预测器集合时接受比率。对已审阅数据集目标的完整高基数端到端行为仍属于准入事项。
 
 本库拒绝 TabEval 对恒定合成目标赋值 1 的有利回退。合成目标缺少类别时标记 `insufficient_support`，保留可见，并使严格 Global Utility 汇总不可用。
 
@@ -116,8 +118,8 @@ P4 默认使用种子 `0,1,2,3,4`。诊断运行可以传入 `--evaluator-seeds 
 
 P4 在提升为非诊断用途前，还需要：
 
-1. 在 Linux/Python 3.11 上运行精确的可选 Global 预测器栈；
-2. 留存来源运行时、依赖、模型集合、数值、稳定性和资源证据；
-3. 审阅 Adult 与 Sick pilot 行为，包括高基数目标；
-4. 冻结预测器版本、参数、种子策略和运行预算；
+1. 对 Adult 与 Sick 已审阅目标集合运行具有代表性的 Global pilot；
+2. 测量多种子稳定性、墙钟时间、峰值内存和逐目标失败行为；
+3. 对已审阅高基数目标验证完整 AutoGluon 省略行为和两条 arm 的一致处理；
+4. 冻结预测器版本、参数、检查点身份、种子策略和运行预算；
 5. 单独作出协议冻结与 Official Results 准入决定。

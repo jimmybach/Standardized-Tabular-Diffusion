@@ -2,7 +2,7 @@
   "profile_schema_version": "1.0.0",
   "profile_id": "p4-utility-pilot",
   "profile_version": "0.1.0",
-  "status": "unit-validated-diagnostic",
+  "status": "source-runtime-pilot-validated-diagnostic",
   "official_results_allowed": false,
   "default_evaluator_seeds": [0, 1, 2, 3, 4],
   "local": {
@@ -54,8 +54,10 @@
       "repository": "https://github.com/SilenceX12138/TabEval.git",
       "revision": "dba19a4ee7aa391621cbeb464609285fd515dece",
       "symbol": "tabeval.metrics.eval_structure.UtilityPerFeature",
-      "source_sha256": "edd2ab2ad576e5ef46c55bac01ac3366d8eec91b40398da48bf2e1c061e2d90c"
+      "source_sha256": "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743"
     },
+    "runtime_source_manifest": "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
+    "source_runtime_validation_status": "bounded-pilot-passed",
     "predictors": ["xgb", "knn", "tabpfn"],
     "autogluon_presets": "medium_quality",
     "fit_weighted_ensemble": false,
@@ -71,7 +73,8 @@
     "known_deviations": [
       "The benchmark rejects TabEval's favorable value of one for a constant synthetic target.",
       "The reviewed wrapper forces numerical targets to regression and records failures instead of silently omitting targets.",
-      "Full executable source parity remains pending in the official Linux/Python 3.11 environment."
+      "Upstream published no reproducible dependency lock; the executable Linux/Python 3.11 CPU tuple is a benchmark-approved pilot reconstruction, not an upstream-official environment.",
+      "Bounded classification/regression source-runtime parity passed, while Adult/Sick multi-seed stability, resource-budget review, and Official Results admission remain pending."
     ]
   }
 }

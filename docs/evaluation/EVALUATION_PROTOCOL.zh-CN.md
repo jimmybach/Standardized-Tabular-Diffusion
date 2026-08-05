@@ -230,7 +230,7 @@ global_utility(D) = mean_j utility_j(D)
 
 预测器配置属于指标身份的一部分。TabStruct 的 Full-tuned profile 使用九个调参预测器，Tiny-default profile 使用三个未调参预测器，并被论文实证推荐为成本更低的 Global Utility 选项。锁定的 TabEval 快照实现了三预测器形式。这些 profile 必须使用不同标识，不能混入同一榜单兼容组。
 
-已实现的 P4 诊断候选绑定 TabEval revision `dba19a4ee7aa391621cbeb464609285fd515dece` 中锁定的 `UtilityPerFeature` 来源配置 `XGB + KNN + TabPFN`。缺失依赖成为 `resource_failure`；TRTR 与 TSTR 预测器集合不一致会使该目标 ratio 无效。留存的 P4 证据明确记录 `global_source_runtime.executed: false`，因此可执行来源等价仍待验证。
+已实现的 P4 诊断候选绑定 TabEval revision `dba19a4ee7aa391621cbeb464609285fd515dece` 中锁定的 `UtilityPerFeature` 来源配置 `XGB + KNN + TabPFN`。缺失依赖成为 `resource_failure`；TRTR 与 TSTR 预测器集合不一致会使该目标 ratio 无效。初始工程证据记录 `global_source_runtime.executed: false`；后续单独的[有限范围来源运行时证据](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json)已真实执行三个模型族，并严格通过分类/回归聚合等价。这并不代表已完成数据集规模或 Official Results 准入。
 
 Local Utility 和 Global Utility 是两个独立的正式子榜单。初始协议不将二者合并为单个 Utility 分数。
 
@@ -443,7 +443,7 @@ Native 比较报告最终官方训练成本。Standardized Tuning 比较还要�
 
 首个正式协议冻结前，以下细节需要经验性 pilot 证据：
 
-- 已实现 P4 预测器候选在协议冻结前所需的来源运行时、稳定性、高基数、依赖和预算证据；
+- 已通过来源运行时验证的 P4 预测器候选在协议冻结前仍需的数据集规模稳定性、完整高基数省略与资源预算证据；
 - real-versus-real 保真度重采样；
 - 混合表 C2ST 变换与判别器；
 - 来源忠实与适配版 Column Pair Trends 离散化的选择；
