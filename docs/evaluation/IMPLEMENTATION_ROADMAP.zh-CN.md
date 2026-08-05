@@ -2,8 +2,8 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 与 P2 均已通过，并留存 Linux/Python 3.11 证据
-- 路线图版本：0.2.3
+- 状态：P1 至 P3 已通过各自适用的退出门；权威 Linux/Python 3.11 证据均已留存
+- 路线图版本：0.3.0
 - 最后更新：2026-08-05
 - 主要发布环境：Linux 与 Python 3.11
 
@@ -38,7 +38,7 @@ TabStruct 仅作为指标审阅与公式来源追踪的研究参考材料。其�
 
 ### 3.1 当前执行路径
 
-目前有三条刻意隔离的路径：
+目前有四条刻意隔离的路径：
 
 ~~~text
 旧版兼容路径
@@ -57,9 +57,16 @@ EvaluationRequest + Dataset Profile + 参考表/合成表
                   -> 精确锁定的 SDMetrics Shape/Trend 后端
                   -> 逐列/逐列对 Atomic Result
                   -> 校验和完整的 finalized Run Result bundle
+
+P3 独立有效性评测
+EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
+                  -> 保留内容违规的 P3 结构门禁
+                  -> 逐列/逐约束硬规则评测
+                  -> 不可变输出证据和 benchmark-native 聚合
+                  -> 校验和完整的 finalized Run Result bundle
 ~~~
 
-旧版路径始终只用于诊断。P1 契约路径继续支持 incomplete bundle。独立 P2 路径现已执行首个来源等价指标切片并完成 bundle finalization，且不经过 `evaluation/tabstruct.py`。
+旧版路径始终只用于诊断。P1 契约路径继续支持 incomplete bundle。独立 P2 和 P3 路径分别完成来源等价 Fidelity 与 benchmark-native Validity bundle，均不经过 `evaluation/tabstruct.py`。
 
 ### 3.2 当前代码处置
 
@@ -70,22 +77,25 @@ EvaluationRequest + Dataset Profile + 参考表/合成表
 | [`evaluation/serialization.py`](../../standardized_tabular_diffusion/evaluation/serialization.py) | Canonical JSON、安全结构化加载、哈希和原子替换 | P1 活跃路径；JSON/YAML 重复键和非有限值均采用 fail-closed |
 | [`evaluation/registry.py`](../../standardized_tabular_diffusion/evaluation/registry.py) | 数据驱动 Metric Registry 与累积生命周期校验 | P1 活跃路径；P1 之前的八条记录均明确为 `legacy-diagnostic` 且非正式 |
 | [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | 数据集/协议加载、精确身份和旧元数据导入 | P1 活跃路径；重复身份和不一致的 profile 引用均采用 fail-closed |
-| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | 事务化 Run Result writer、finalizer 与跨文件校验器 | 保留 P1 incomplete bundle；P2 写入校验和并以最后一个原子提交标记发布 finalized 状态 |
-| [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame 规范解析器与结构门禁 | P2 活跃路径；精确列、顺序、逻辑类型、缺失/非有限值与行数均采用 fail-closed |
+| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | 事务化 Run Result writer、finalizer 与跨文件校验器 | 保留 P1 incomplete bundle；P2/P3 重算科学汇总，并以最后一个原子提交标记发布 finalized 状态 |
+| [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame 规范解析器与协议专用结构门禁 | P2 保留严格来源兼容检查；P3 保留可安全表示的内容违规用于 Validity 评分 |
 | [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | 隔离的权威 Shape/Trend 后端 | 要求 SDMetrics `0.28.3.dev0` 以及 commit `ba8842f2...` 的完整 121 文件源码树哈希 |
 | [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) 与 [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result 映射与端到端表评测器 | P2 活跃路径；重建来源聚合且不生成合并 Fidelity 分数 |
+| [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | 封闭硬规则语言、逐列/逐约束 Atomic Result 与 Validity 聚合 | P3 活跃诊断路径；禁止任意代码和推断硬规则，不修复原始输出 |
+| [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | 集中式均值/众数缺失值边界 | 只在真实 train 上拟合；禁止目标/合成数据修复；状态、schema、配置、输入与输出均有指纹 |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议与来源身份资源 | 八个旧记录保持 registered；两个 P2 记录已通过来源等价验证，但仍非正式 |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议与来源身份资源 | 八个旧记录、两个来源等价 P2 记录和两个通过单元验证的 benchmark-native P3 记录均非正式 |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、`evaluate-table` 与旧版命令 | P2 可评测外部解码表并校验 finalized bundle；旧指标描述仍明确为诊断用途 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持向后兼容默认；`--protocol p3-validity` 运行 P3 |
 | [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | P0 在 Linux 上启用并通过；参考代码树不进入默认发现或分发包 |
 | [`tests/evaluation/`](../../tests/evaluation) | 契约、结构、来源等价、Atomic Result、中断、bundle 与 CLI 测试 | P1 回归测试和 P2 直接权威测试按依赖与 marker 边界隔离 |
 
-### 3.3 P2 实现后仍存在的缺口
+### 3.3 P3 实现后仍存在的缺口
 
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
-- P3 有效性、P4 效用、经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
+- P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
+- P4 效用、经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
@@ -155,7 +165,7 @@ tests/evaluation/
 | P0 | 可信开发基线 | 无 | 已通过 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
-| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 未开始 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
+| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
@@ -450,11 +460,12 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-紧接着的增量是 P3：在 finalized P2 bundle 路径之上实现有效性规则和已经批准的显式预处理边界。P3 必须保留 fail-closed 结构行为，把仅在训练集拟合的填补过程保持为独立且显式的步骤，并且不得增加隐藏修复。本工作不修改上游算法、不发布榜单，也不把 TabStruct 参考代码作为实现依赖。
+P3 的权威 Linux/Python 3.11 证据已留存。下一实施阶段是 P4 Local 与 Global Utility。P4 必须使用经过 P3 审阅的不可变模型视图和预处理身份，不得修复生成数据或推断新的硬约束。
 
 ## 12. 相关规范
 
 - [评测协议](EVALUATION_PROTOCOL.zh-CN.md)
+- [P3 有效性与预处理指南](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 - [指标治理](METRIC_GOVERNANCE.zh-CN.md)
 - [指标来源审阅](METRIC_SOURCE_REVIEW.zh-CN.md)
 - [数据集配置规范](DATASET_PROFILE_SPEC.zh-CN.md)

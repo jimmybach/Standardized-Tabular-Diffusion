@@ -11,7 +11,7 @@ import pandas as pd
 from pandas import CategoricalDtype
 
 from standardized_tabular_diffusion.datasets import validate_dataset_name
-from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json, sha256_file
 from standardized_tabular_diffusion.materialization import _build_manifest, _sync_processed_dataset, manifest_path
 
 
@@ -177,8 +177,9 @@ def register_dataset(
     validate_dataset_name(dataset_name)
     repo_root = repo_root or Path(__file__).resolve().parents[1]
     source_path = Path(raw_csv_path)
-    if not source_path.exists():
+    if not source_path.is_file():
         raise FileNotFoundError(f"Raw CSV not found: {source_path}")
+    source_sha256 = sha256_file(source_path)
 
     header = _read_header_arg(has_header)
     frame = pd.read_csv(source_path, header=header)
@@ -217,6 +218,8 @@ def register_dataset(
 
     upload_copy_path = uploaded_dir / source_path.name
     shutil.copy2(source_path, upload_copy_path)
+    if sha256_file(upload_copy_path) != source_sha256:
+        raise OSError("The byte-preserving registration copy differs from the source artifact")
     raw_copy_path = tabdiff_data_dir / "raw.csv"
     atomic_write_bytes(raw_copy_path, cleaned_frame.to_csv(index=False).encode("utf-8"))
 
@@ -255,6 +258,14 @@ def register_dataset(
         "categorical_columns": categorical_columns,
         "target_column": target_column,
         "cleaning_report": cleaning_report,
+        "registration_provenance": {
+            "source_sha256": source_sha256,
+            "upload_copy_sha256": sha256_file(upload_copy_path),
+            "upload_copy_byte_preserving": True,
+            "model_view_serialization_conversion": "pandas canonical CSV with UTF-8 encoding and a header",
+            "rows_dropped": 0,
+            "values_imputed": 0,
+        },
     }
 
 

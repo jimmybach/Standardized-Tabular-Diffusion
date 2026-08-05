@@ -12,8 +12,69 @@
     "source_rights": {"type": "object", "additionalProperties": false, "required": ["canonical_source", "publisher", "source_version", "retrieved_date", "raw_files", "citation", "license", "access_restrictions", "permitted_uses", "redistribution_status", "modification_requirements", "attribution_requirements", "rights_review"], "properties": {"canonical_source": {"type": "string"}, "publisher": {"type": "string"}, "source_version": {"type": "string"}, "retrieved_date": {"type": ["string", "null"], "format": "date"}, "raw_files": {"type": "array", "items": {"type": "object"}}, "citation": {"type": "string"}, "license": {"type": "string"}, "access_restrictions": {"type": "array", "items": {"type": "string"}}, "permitted_uses": {"type": "array", "items": {"type": "string"}}, "redistribution_status": {"enum": ["permitted", "metadata-only", "download-script-only", "restricted", "prohibited", "unknown"]}, "modification_requirements": {"type": "array", "items": {"type": "string"}}, "attribution_requirements": {"type": "array", "items": {"type": "string"}}, "rights_review": {"type": "object"}}},
     "table_contract": {"type": "object"},
     "columns": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["name", "column_id", "semantic_type", "storage_type", "roles", "nullable_raw", "nullable_model_input", "valid_domain", "category_vocabulary_source", "transformation_policy", "inverse_transformation_policy", "description", "unit", "sensitivity", "constraint_refs"], "properties": {"name": {"type": "string"}, "column_id": {"$ref": "#/$defs/id"}, "semantic_type": {"enum": ["continuous", "integer", "categorical", "boolean", "datetime", "string"]}, "storage_type": {"type": "string"}, "roles": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["feature", "primary_target", "secondary_target", "identifier", "sensitive_attribute", "quasi_identifier", "group_attribute", "ignored", "audit_only"]}}, "nullable_raw": {"type": "boolean"}, "nullable_model_input": {"type": "boolean"}, "valid_domain": {"type": ["object", "null"]}, "category_vocabulary_source": {"type": ["string", "null"]}, "transformation_policy": {"type": "string"}, "inverse_transformation_policy": {"type": "string"}, "description": {"type": "string"}, "unit": {"type": ["string", "null"]}, "sensitivity": {"type": "object"}, "constraint_refs": {"type": "array", "items": {"type": "string"}}}}},
-    "preprocessing": {"type": "object"}, "views": {"type": "array", "minItems": 1, "items": {"type": "object"}}, "split": {"type": "object"}, "predictive_tasks": {"type": "array", "items": {"type": "object"}}, "validity": {"type": "object"}, "privacy": {"type": "object"}, "metric_applicability": {"type": "object"}
+    "preprocessing": {"type": "object"}, "views": {"type": "array", "minItems": 1, "items": {"type": "object"}}, "split": {"type": "object"}, "predictive_tasks": {"type": "array", "items": {"type": "object"}},
+    "validity": {"oneOf": [{"$ref": "#/$defs/p3Validity"}, {"type": "object", "not": {"required": ["contract_schema_version"]}}]},
+    "privacy": {"type": "object"}, "metric_applicability": {"type": "object"}
   },
   "allOf": [{"if": {"properties": {"status": {"const": "legacy-imported"}}}, "then": {"properties": {"official_eligible": {"const": false}}}}],
-  "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"}}
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "evidence": {
+      "type": "object", "additionalProperties": false, "required": ["source_type", "reference"],
+      "properties": {
+        "source_type": {"enum": ["authoritative-data-dictionary", "dataset-documentation", "legal-or-policy-requirement", "recorded-human-review"]},
+        "reference": {"type": "string", "minLength": 1}
+      }
+    },
+    "selector": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "column_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "semantic_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["continuous", "integer", "categorical", "boolean", "datetime", "string"]}},
+        "nullable_model_input": {"type": "boolean"},
+        "roles_any": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "valid_domain_keys": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}}
+      }
+    },
+    "hardColumnRule": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rule_id", "rule_type", "selector", "parameters", "evidence", "severity", "version"],
+      "properties": {
+        "rule_id": {"$ref": "#/$defs/id"},
+        "rule_type": {"enum": ["not_null", "finite", "integer", "allowed_values", "bounds", "regex", "length", "unique", "datetime_range"]},
+        "selector": {"$ref": "#/$defs/selector"},
+        "parameters": {"type": "object"},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "severity": {"const": "hard"},
+        "version": {"const": "1.0.0"}
+      }
+    },
+    "crossColumnConstraint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["constraint_id", "constraint_type", "columns", "parameters", "applicability", "missing_behavior", "evidence", "severity", "version"],
+      "properties": {
+        "constraint_id": {"$ref": "#/$defs/id"},
+        "constraint_type": {"enum": ["comparison", "conditional_domain", "mutual_exclusion", "sum_equals", "allowed_combinations", "functional_dependency"]},
+        "columns": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+        "parameters": {"type": "object"},
+        "applicability": {"type": "object"},
+        "missing_behavior": {"enum": ["violation", "not_applicable"]},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "severity": {"const": "hard"},
+        "version": {"const": "1.0.0"}
+      }
+    },
+    "p3Validity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["contract_schema_version", "status", "hard_column_rules", "cross_column_constraints", "soft_diagnostics", "unresolved_reviews"],
+      "properties": {
+        "contract_schema_version": {"const": "1.0.0"},
+        "status": {"enum": ["reviewed-diagnostic", "frozen"]},
+        "hard_column_rules": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/hardColumnRule"}},
+        "cross_column_constraints": {"type": "array", "items": {"$ref": "#/$defs/crossColumnConstraint"}},
+        "soft_diagnostics": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "unresolved_reviews": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    }
+  }
 }

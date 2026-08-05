@@ -13,8 +13,10 @@ from standardized_tabular_diffusion.preprocessing import (
     SplitSchemaError,
     UndefinedImputationStatisticError,
     fit_imputation_state,
+    load_imputation_state,
     preprocess_split_files,
     preprocess_splits,
+    transform_with_imputation_state,
 )
 
 pytestmark = pytest.mark.integration
@@ -67,6 +69,21 @@ def test_categorical_mode_ties_have_a_deterministic_unicode_order() -> None:
     )
 
     assert state.categorical_fill_values == {"category": "a"}
+
+    canonically_equivalent = pd.DataFrame({"x": [1, 2], "category": ["é", "e\u0301"], "target": [0, 1]})
+    reversed_state = fit_imputation_state(
+        canonically_equivalent.iloc[::-1].reset_index(drop=True),
+        numerical_columns=["x"],
+        categorical_columns=["category"],
+        target_columns=["target"],
+    )
+    forward_state = fit_imputation_state(
+        canonically_equivalent,
+        numerical_columns=["x"],
+        categorical_columns=["category"],
+        target_columns=["target"],
+    )
+    assert forward_state.categorical_fill_values == reversed_state.categorical_fill_values
 
 
 @pytest.mark.parametrize("split_name", ["train", "validation", "test"])
@@ -172,6 +189,9 @@ def test_file_workflow_writes_portable_audit_artifacts(tmp_path: Path) -> None:
     assert manifest["inputs"]["train"]["filename"] == "train.csv"
     assert "source" not in json.dumps(manifest["inputs"])
     assert len(manifest["state"]["sha256"]) == 64
+    assert len(manifest["transformed_schema"]["fingerprint"]) == 64
+    assert manifest["identity"]["dataset_view_token"].startswith("imputed-")
+    assert manifest["identity"]["policy_change_requires_new_dataset_view"] is True
     assert state["numerical_fill_values"] == {"age": 30.0}
     assert transformed_test.loc[0, "age"] == 30.0
     assert transformed_test.loc[0, "city"] == "NY"
@@ -182,3 +202,88 @@ def test_policy_rejects_target_and_synthetic_repair_modes() -> None:
         MissingValuePolicy(target_strategy="mean")
     with pytest.raises(PreprocessingError, match="Generated samples"):
         MissingValuePolicy(synthetic_strategy="impute")
+
+
+def test_policy_or_transformed_schema_change_creates_a_new_dataset_view_identity(tmp_path: Path) -> None:
+    train_path = tmp_path / "train.csv"
+    _train_frame().to_csv(train_path, index=False)
+
+    plain = preprocess_split_files(
+        train_path=train_path,
+        output_dir=tmp_path / "plain",
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+    )
+    indicators = preprocess_split_files(
+        train_path=train_path,
+        output_dir=tmp_path / "indicators",
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+        policy=MissingValuePolicy(add_missing_indicators=True),
+    )
+
+    assert plain["identity"]["dataset_view_token"] != indicators["identity"]["dataset_view_token"]
+    assert plain["transformed_schema"]["fingerprint"] != indicators["transformed_schema"]["fingerprint"]
+
+
+def test_portable_imputation_state_loads_safely_and_reproduces_transform(tmp_path: Path) -> None:
+    train_path = tmp_path / "train.csv"
+    _train_frame().to_csv(train_path, index=False)
+    manifest = preprocess_split_files(
+        train_path=train_path,
+        output_dir=tmp_path / "processed",
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+    )
+    state_path = tmp_path / "processed" / "imputation-state.json"
+
+    restored = load_imputation_state(state_path, expected_sha256=manifest["state"]["sha256"])
+    transformed, report = transform_with_imputation_state(
+        pd.DataFrame({"age": [None], "city": [None], "target": [1]}),
+        restored,
+        split_name="future-test",
+    )
+
+    assert restored.fingerprint == manifest["state"]["fingerprint"]
+    assert transformed.loc[0, "age"] == 30.0
+    assert transformed.loc[0, "city"] == "NY"
+    assert report["values_imputed"] == 2
+    with pytest.raises(PreprocessingError, match="checksum"):
+        load_imputation_state(state_path, expected_sha256="0" * 64)
+
+
+def test_imputation_state_rejects_tampered_repair_policy(tmp_path: Path) -> None:
+    state = fit_imputation_state(
+        _train_frame(),
+        numerical_columns=["age"],
+        categorical_columns=["city"],
+        target_columns=["target"],
+    ).to_dict()
+    state["policy"]["synthetic_strategy"] = "impute"
+    path = tmp_path / "tampered.json"
+    path.write_text(json.dumps(state), encoding="utf-8")
+
+    with pytest.raises(PreprocessingError, match="Generated samples"):
+        load_imputation_state(path)
+
+
+def test_preprocessing_refuses_to_overwrite_a_nonempty_output_directory(tmp_path: Path) -> None:
+    train_path = tmp_path / "train.csv"
+    _train_frame().to_csv(train_path, index=False)
+    output = tmp_path / "processed"
+    output.mkdir()
+    (output / "unrelated.txt").write_text("preserve me", encoding="utf-8")
+
+    with pytest.raises(FileExistsError, match="new or empty"):
+        preprocess_split_files(
+            train_path=train_path,
+            output_dir=output,
+            numerical_columns=["age"],
+            categorical_columns=["city"],
+            target_columns=["target"],
+        )
+
+    assert (output / "unrelated.txt").read_text(encoding="utf-8") == "preserve me"

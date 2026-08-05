@@ -163,7 +163,8 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
     reference = Path(args.reference)
     synthetic = Path(args.synthetic)
     dataset = load_dataset_profile(args.dataset_profile)
-    protocol = resolve_protocol("p2-shape-trend", "0.2.0")
+    protocol_versions = {"p2-shape-trend": "0.2.0", "p3-validity": "0.3.0"}
+    protocol = resolve_protocol(args.protocol, protocol_versions[args.protocol])
 
     def media_type(path: Path) -> str:
         suffix = path.suffix.lower()
@@ -313,12 +314,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     evaluate_table_parser = subparsers.add_parser(
         "evaluate-table",
-        help="Run the P2 source-parity Column Shapes and Column Pair Trends evaluation",
+        help="Evaluate a decoded table with a supported versioned protocol",
     )
     evaluate_table_parser.add_argument("--reference", required=True, help="Decoded reference CSV or Parquet table")
     evaluate_table_parser.add_argument("--synthetic", required=True, help="Decoded synthetic CSV or Parquet table")
     evaluate_table_parser.add_argument("--dataset-profile", required=True, help="Reviewed Dataset Profile JSON/YAML")
     evaluate_table_parser.add_argument("--output", required=True, help="New result bundle directory")
+    evaluate_table_parser.add_argument(
+        "--protocol",
+        choices=["p2-shape-trend", "p3-validity"],
+        default="p2-shape-trend",
+        help="Evaluation protocol; the P2 default is retained for CLI backward compatibility",
+    )
     evaluate_table_parser.add_argument(
         "--expected-rows",
         type=int,

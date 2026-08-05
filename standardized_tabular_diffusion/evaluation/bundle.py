@@ -12,7 +12,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from standardized_tabular_diffusion.evaluation.contracts import (
     AtomicResult,
@@ -277,13 +277,16 @@ class IncompleteRunBundleWriter:
     ) -> str:
         if schema_name is not None:
             validate_instance(schema_name, payload)
-        serialized = json.dumps(
-            payload,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            indent=2,
-        ).encode("utf-8") + b"\n"
+        serialized = (
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                allow_nan=False,
+                sort_keys=True,
+                indent=2,
+            ).encode("utf-8")
+            + b"\n"
+        )
         return self.write_bytes(relative, serialized, media_type=media_type, required=required)
 
     def mark_not_applicable(self, relative: str, *, reason_code: str) -> None:
@@ -323,13 +326,16 @@ class IncompleteRunBundleWriter:
         manifest["finalized_at"] = utc_timestamp()
         manifest["finalization_status"] = "finalized"
         validate_instance("manifest", manifest)
-        final_manifest = json.dumps(
-            manifest,
-            ensure_ascii=False,
-            allow_nan=False,
-            sort_keys=True,
-            indent=2,
-        ).encode("utf-8") + b"\n"
+        final_manifest = (
+            json.dumps(
+                manifest,
+                ensure_ascii=False,
+                allow_nan=False,
+                sort_keys=True,
+                indent=2,
+            ).encode("utf-8")
+            + b"\n"
+        )
 
         regular_files = {
             path.relative_to(self.root).as_posix(): path
@@ -342,11 +348,7 @@ class IncompleteRunBundleWriter:
             raise BundleError("Final inventory does not exactly match regular bundle files")
         checksums: list[str] = []
         for relative, path in sorted(regular_files.items()):
-            digest = (
-                hashlib.sha256(final_manifest).hexdigest()
-                if relative == "manifest.json"
-                else sha256_file(path)
-            )
+            digest = hashlib.sha256(final_manifest).hexdigest() if relative == "manifest.json" else sha256_file(path)
             checksums.append(f"{digest}  {relative}")
         atomic_write_bytes(self._path("checksums.sha256"), ("\n".join(checksums) + "\n").encode("utf-8"))
         atomic_write_bytes(self._path("manifest.json"), final_manifest)
@@ -584,8 +586,7 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
         if config is not None:
             request_for_artifacts = EvaluationRequest.from_dict(config)
             external_by_id = {
-                artifact["artifact_id"]: artifact
-                for artifact in _request_external_artifacts(request_for_artifacts)
+                artifact["artifact_id"]: artifact for artifact in _request_external_artifacts(request_for_artifacts)
             }
         for artifact in artifact_index["artifacts"]:
             artifact_id = artifact["artifact_id"]
@@ -596,8 +597,7 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             if relative is None:
                 request_artifact = external_by_id.get(artifact_id)
                 if request_artifact is None or any(
-                    artifact[field] != request_artifact[field]
-                    for field in ("media_type", "sha256")
+                    artifact[field] != request_artifact[field] for field in ("media_type", "sha256")
                 ):
                     raise BundleError(f"External artifact index entry differs from request: {artifact_id}")
                 if artifact["external_uri"] != f"urn:sha256:{artifact['sha256']}":
@@ -615,9 +615,7 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             producer_stage = artifact["producer_stage"]
             if producer_stage is not None:
                 producer_record = stages_by_name.get(producer_stage)
-                if producer_record is None or relative not in {
-                    output["path"] for output in producer_record["outputs"]
-                }:
+                if producer_record is None or relative not in {output["path"] for output in producer_record["outputs"]}:
                     raise BundleError(f"Artifact producer stage does not declare its output: {relative}")
     if inventory_status.get("logs/events.jsonl") == "present":
         _validate_event_log(bundle_root / "logs" / "events.jsonl")
@@ -814,6 +812,224 @@ def _validate_final_atomic_results(
                 raise BundleError(f"Summary {summary_key} is not reproducible from Atomic Results")
         if fidelity.get("combined_score") is not None:
             raise BundleError("P2 finalized bundles must not contain a combined Fidelity score")
+
+    p3_metric_ids = {"std-tabular-column-validity", "std-tabular-constraint-validity"}
+    if requested == {(metric_id, "1.0.0") for metric_id in p3_metric_ids}:
+        validity = summary["validity"]
+        if summary["dimensions"].get("validity") != validity:
+            raise BundleError("P3 dimensions.validity must exactly match the canonical validity summary")
+        p3_column_results = [result for result in results if result.metric_id == "std-tabular-column-validity"]
+        p3_constraint_results = [result for result in results if result.metric_id == "std-tabular-constraint-validity"]
+        expected_column_weight = 1.0 / len(p3_column_results) if p3_column_results else None
+        if expected_column_weight is None or any(
+            result.state.value != "computed"
+            or result.scope_type != "column"
+            or result.dimension != "validity"
+            or result.raw_value is None
+            or not math.isclose(result.weight, expected_column_weight, rel_tol=1e-12, abs_tol=1e-12)
+            or result.n_valid != result.n_synthetic
+            or result.n_excluded != 0
+            for result in p3_column_results
+        ):
+            raise BundleError("P3 column Atomic Results do not implement the equal-column contract")
+        computed_constraint_results = [result for result in p3_constraint_results if result.state.value == "computed"]
+        expected_constraint_weight = 1.0 / len(computed_constraint_results) if computed_constraint_results else 0.0
+        if any(
+            result.scope_type != "dataset"
+            or result.dimension != "validity"
+            or (
+                result.state.value == "computed"
+                and (
+                    result.raw_value is None
+                    or not math.isclose(
+                        result.weight,
+                        expected_constraint_weight,
+                        rel_tol=1e-12,
+                        abs_tol=1e-12,
+                    )
+                )
+            )
+            or (result.state.value == "not_applicable" and result.weight != 0.0)
+            or result.state.value not in {"computed", "not_applicable"}
+            for result in p3_constraint_results
+        ):
+            raise BundleError("P3 constraint Atomic Results do not implement the equal-constraint contract")
+        column_contributions = [
+            result.aggregate_contribution for result in p3_column_results if result.aggregate_contribution is not None
+        ]
+        if not column_contributions:
+            raise BundleError("P3 finalized bundles require computed per-column validity contributions")
+        column_score = sum(column_contributions)
+        constraint_contributions = [
+            result.aggregate_contribution
+            for result in p3_constraint_results
+            if result.aggregate_contribution is not None
+        ]
+        constraint_score = sum(constraint_contributions) if constraint_contributions else None
+        validity_score = 0.5 * column_score + 0.5 * constraint_score if constraint_score is not None else column_score
+        expected_scores = {
+            "column_validity_score": column_score,
+            "constraint_validity_score": constraint_score,
+            "validity_score": validity_score,
+        }
+        for key, expected in expected_scores.items():
+            reported = validity.get(key)
+            if expected is None:
+                if reported is not None:
+                    raise BundleError(f"P3 summary {key} must be null without computed contributions")
+            elif not isinstance(reported, (int, float)) or not math.isclose(
+                expected,
+                float(reported),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            ):
+                raise BundleError(f"P3 summary {key} is not reproducible from Atomic Results")
+        if validity.get("synthetic_repair_applied") is not False:
+            raise BundleError("P3 validity must be computed on the unrepaired decoded synthetic output")
+
+        details_path = path.parent / "artifacts" / "validity-details.json"
+        try:
+            details = read_json(details_path)
+        except (OSError, ValueError, SerializationError) as exc:
+            raise BundleError(f"Cannot validate P3 validity details: {exc}") from exc
+        if not isinstance(details, dict):
+            raise BundleError("P3 validity details must be a JSON object")
+        if (
+            details.get("input_view") != "original-decoded-synthetic-output"
+            or details.get("input_mutated") is not False
+            or details.get("synthetic_repair_applied") is not False
+        ):
+            raise BundleError("P3 validity details do not prove evaluation of the immutable original output")
+        detail_scores = details.get("property_scores")
+        if not isinstance(detail_scores, dict):
+            raise BundleError("P3 validity details lack property_scores")
+        for key, expected in expected_scores.items():
+            observed = detail_scores.get(key)
+            if expected is None:
+                if observed is not None:
+                    raise BundleError(f"P3 detail {key} must be null")
+            elif not isinstance(observed, (int, float)) or not math.isclose(
+                expected, float(observed), rel_tol=1e-12, abs_tol=1e-12
+            ):
+                raise BundleError(f"P3 detail {key} differs from Atomic Results")
+
+        column_results = {result.scope_id: result for result in p3_column_results}
+        column_details = details.get("columns")
+        if not isinstance(column_details, list) or len(column_details) != len(column_results):
+            raise BundleError("P3 detail columns do not cover Atomic Results exactly")
+        seen_column_details: set[str] = set()
+        for detail in column_details:
+            if not isinstance(detail, dict) or not isinstance(detail.get("column_id"), str):
+                raise BundleError("P3 column detail is malformed")
+            column_id = detail["column_id"]
+            if column_id in seen_column_details or column_id not in column_results:
+                raise BundleError("P3 column detail scope is duplicate or unknown")
+            seen_column_details.add(column_id)
+            result = column_results[column_id]
+            observed = detail.get("valid_cell_rate")
+            if (
+                result.raw_value is None
+                or not isinstance(observed, (int, float))
+                or not math.isclose(result.raw_value, float(observed), rel_tol=1e-12, abs_tol=1e-12)
+            ):
+                raise BundleError("P3 column detail rate differs from its Atomic Result")
+            valid_cells, invalid_cells = detail.get("valid_cells"), detail.get("invalid_cells")
+            if (
+                isinstance(valid_cells, bool)
+                or not isinstance(valid_cells, int)
+                or isinstance(invalid_cells, bool)
+                or not isinstance(invalid_cells, int)
+                or valid_cells < 0
+                or invalid_cells < 0
+                or valid_cells + invalid_cells != result.n_synthetic
+            ):
+                raise BundleError("P3 column detail cell counts are inconsistent")
+        if seen_column_details != set(column_results):
+            raise BundleError("P3 detail columns omit Atomic Result scopes")
+
+        constraint_results = {
+            result.scope_id: result for result in p3_constraint_results if result.scope_id != "no-reviewed-constraints"
+        }
+        constraint_details = details.get("cross_column_constraints")
+        if not isinstance(constraint_details, list) or len(constraint_details) != len(constraint_results):
+            raise BundleError("P3 constraint details do not cover reviewed constraint Atomic Results")
+        all_constraint_scopes = {result.scope_id for result in p3_constraint_results}
+        if (constraint_results and "no-reviewed-constraints" in all_constraint_scopes) or (
+            not constraint_results and all_constraint_scopes != {"no-reviewed-constraints"}
+        ):
+            raise BundleError("P3 no-reviewed-constraints sentinel does not match the reviewed constraint set")
+        seen_constraint_details: set[str] = set()
+        for detail in constraint_details:
+            if not isinstance(detail, dict) or not isinstance(detail.get("constraint_id"), str):
+                raise BundleError("P3 constraint detail is malformed")
+            constraint_id = detail["constraint_id"]
+            if constraint_id in seen_constraint_details or constraint_id not in constraint_results:
+                raise BundleError("P3 constraint detail scope is duplicate or unknown")
+            seen_constraint_details.add(constraint_id)
+            result = constraint_results[constraint_id]
+            observed = detail.get("satisfaction_rate")
+            if result.state.value == "computed":
+                if (
+                    result.raw_value is None
+                    or not isinstance(observed, (int, float))
+                    or not math.isclose(result.raw_value, float(observed), rel_tol=1e-12, abs_tol=1e-12)
+                ):
+                    raise BundleError("P3 constraint detail rate differs from its Atomic Result")
+            elif observed is not None:
+                raise BundleError("A non-computed P3 constraint detail must have a null rate")
+            applicable = detail.get("applicable_rows")
+            satisfied = detail.get("satisfied_rows")
+            violating = detail.get("violating_rows")
+            if any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in (applicable, satisfied, violating)
+            ):
+                raise BundleError("P3 constraint detail row counts are inconsistent")
+            applicable_rows = cast(int, applicable)
+            satisfied_rows = cast(int, satisfied)
+            violating_rows = cast(int, violating)
+            if (
+                satisfied_rows + violating_rows != applicable_rows
+                or applicable_rows != result.n_valid
+                or result.n_valid + result.n_excluded != result.n_synthetic
+            ):
+                raise BundleError("P3 constraint detail row counts are inconsistent")
+        if seen_constraint_details != set(constraint_results):
+            raise BundleError("P3 constraint details omit Atomic Result scopes")
+
+        fully_valid_rows = details.get("fully_valid_rows")
+        fully_valid_rate = details.get("fully_valid_row_rate")
+        reported_rate = validity.get("fully_valid_row_rate")
+        synthetic_rows = details.get("rows")
+        if (
+            isinstance(fully_valid_rows, bool)
+            or not isinstance(fully_valid_rows, int)
+            or isinstance(synthetic_rows, bool)
+            or not isinstance(synthetic_rows, int)
+            or synthetic_rows <= 0
+            or not 0 <= fully_valid_rows <= synthetic_rows
+            or not isinstance(fully_valid_rate, (int, float))
+            or not isinstance(reported_rate, (int, float))
+            or not math.isclose(fully_valid_rows / synthetic_rows, float(fully_valid_rate), abs_tol=1e-12)
+            or not math.isclose(float(fully_valid_rate), float(reported_rate), abs_tol=1e-12)
+        ):
+            raise BundleError("P3 fully-valid-row evidence is inconsistent")
+        synthetic_row_count = synthetic_rows
+        fully_valid_row_count = fully_valid_rows
+        expected_denominators = {
+            "requested_columns": len(p3_column_results),
+            "evaluated_columns": len(p3_column_results),
+            "reviewed_cross_column_constraints": len(constraint_results),
+            "computed_cross_column_constraints": len(computed_constraint_results),
+            "synthetic_rows": synthetic_row_count,
+            "fully_valid_rows": fully_valid_row_count,
+        }
+        if (
+            summary.get("denominator_counts") != expected_denominators
+            or metadata.get("coverage", {}).get("denominators") != expected_denominators
+            or any(result.n_synthetic != synthetic_row_count for result in results)
+        ):
+            raise BundleError("P3 denominator evidence is not reproducible from Atomic Results and details")
 
 
 def _validate_final_checksums(bundle_root: Path) -> None:
