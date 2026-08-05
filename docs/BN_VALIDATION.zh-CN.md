@@ -1,6 +1,6 @@
 # BN 验证协议
 
-状态：协议已实现；等待权威 Linux/Python 3.11 证据
+状态：已通过；已保留 Linux/Python 3.11 官方包方案等价性证据
 
 协议 ID：`pgmpy-bn-recipe-parity-v1`
 
@@ -91,4 +91,10 @@ python -m standardized_tabular_diffusion.validation.bn \
 
 `.github/workflows/bn-validation.yml` 执行该命令，并将 JSON 证据保留 90 天。包、依赖、适配器、checkpoint schema 或协议发生任何变化后都必须重新运行。只有 Linux/Python 3.11 产物通过、经检查并原样保留到 `docs/evidence/bn/` 后，状态才允许晋级。
 
-该协议已经通过一次非权威的本地 Python 3.11 预运行，九个案例全部通过。在权威 Linux 证据保留之前，仓库状态仍为 `adapter-complete`。
+## 已保留结果
+
+GitHub Actions 运行 [`30967779298`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298) 已在 Linux 和 Python 3.11.15 环境通过。二分类、多分类、回归及随机种子组合形成的全部九个案例都通过了所有精确比较，包括预处理和离散训练帧、学习到的图边、全部 CPD、JSON 恢复后的官方模型、原始离散样本、最终 DataFrame 和 CSV 字节、产物元数据、安全状态声明以及调用方 NumPy 状态恢复。
+
+经审查的证据已逐字节保留在 `docs/evidence/bn/native-parity-run-30967779298.json`，SHA-256 为 `6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8`。GitHub artifact ID 为 `8915417956`，归档摘要为 `sha256:6dbedd1970b51ab5243e8da35b052d8d8df780cd2c2e81ac2adf756b4cae5654`，source lock 已同时交叉引用这两项记录。
+
+因此，BN 针对“精确官方 pgmpy 包 + 本仓库声明方案”晋级为 `native-parity-validated`。在中央评测、数据集准入、运行资源、治理和发布门槛分别通过前，它仍是 `experimental`、`unsupported`，并排除在 Official Results 之外。本结论不声称论文原生等价性，也不覆盖其他 BN 方案。

@@ -134,8 +134,10 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         install_extra="bn",
         upstream_repository="https://github.com/pgmpy/pgmpy",
         upstream_revision="617cb48af678a7a471aad81d523ca95d2095430f",
-        revision_status="pinned-canonical-package-parity-pending",
+        revision_status="pinned-canonical-package-native-parity-validated",
+        evidence_records=("docs/evidence/bn/native-parity-run-30967779298.json",),
         license_status="MIT; source-and-package-license-verified; transitive-review-pending",
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "codi": _spec(
         "standardized_tabular_diffusion.models.vendored_baselines",

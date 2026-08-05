@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import platform
 from pathlib import Path
 
@@ -15,10 +17,16 @@ from standardized_tabular_diffusion.config import (
 )
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, BNPreprocessor
+from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.runner import validate_action_inputs
 from standardized_tabular_diffusion.validation import bn as bn_validation
 
 pytestmark = pytest.mark.adapter
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "bn" / "native-parity-run-30967779298.json"
+EVIDENCE_SHA256 = "6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def _dataset_spec(tmp_path: Path, *, task_type: str = "classification") -> DatasetSpec:
@@ -67,6 +75,69 @@ def test_bn_protocol_constants_lock_the_official_release() -> None:
     assert len(bn_validation.EXPECTED_GIT_BLOBS) == 10
     assert bn_validation.SEED_CASES == (0, 19, 73)
     assert bn_validation.VARIANTS == ("binary", "multiclass", "regression")
+
+
+def test_bn_retained_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pgmpy-bn-recipe-parity-v1"
+    assert evidence["reproduction_target"] == "official-pgmpy-package-plus-declared-bn-recipe"
+    assert evidence["repository_commit"] == "9397b09677e784376d0e9130e31c403682cc9f38"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["pgmpy"] == "1.1.2"
+    assert evidence["environment"]["platform"].startswith("Linux-")
+    assert evidence["environment_lock"]["sha256"] == (
+        "581f188464223069f815de00a7806bb239ec0e7ef2c0ecec81d67de9cc5a5f4a"
+    )
+    assert evidence["source"]["authority"] == "canonical-library"
+    assert evidence["source"]["wheel"]["wheel_files_verified"] == 649
+    assert evidence["source"]["wheel"]["package_files_verified"] == 636
+    assert len(evidence["source"]["wheel"]["critical_git_blob_matches"]) == 10
+    assert evidence["source"]["installed_distribution"]["wheel_record_hashes_verified"] == 648
+    assert evidence["source_unchanged_after_validation"] is True
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(case["comparisons"]["preprocessing_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["graph_edges_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["cpds_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["restored_model_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["raw_discrete_sample_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["samples"]["frame_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["model_state"]["safe_json_checkpoint"] for case in evidence["cases"])
+
+
+def test_bn_source_lock_and_registry_promote_only_the_validated_recipe() -> None:
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["bn"]
+    spec = get_adapter_spec("bn")
+
+    assert component["authority"] == "canonical-library"
+    assert component["reproduction_target"] == "official-pgmpy-package-plus-declared-bn-recipe"
+    assert component["distribution_form"] == "package"
+    assert component["license"] == "MIT"
+    assert component["patch_sets"] == []
+    assert component["package_lock"]["sha256"] == bn_validation.WHEEL_SHA256
+    assert component["source_package_comparison"]["exact_package_files"] == 636
+    validation = component["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30967779298
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["checkpoint_cpds_exact"] is True
+    assert validation["result_summary"]["safe_json_checkpoint"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
+    assert str(component["official_eligibility"]).startswith("blocked-pending-central-evaluation")
+
+    assert spec.validation_level.value == "native-parity-validated"
+    assert spec.modification_status == "adapter-only"
+    assert spec.revision_status == "pinned-canonical-package-native-parity-validated"
+    assert spec.evidence_records == ("docs/evidence/bn/native-parity-run-30967779298.json",)
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"
 
 
 def test_bn_adapter_validates_declared_types_and_missing_values(tmp_path: Path) -> None:

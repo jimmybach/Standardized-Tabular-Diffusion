@@ -1,6 +1,6 @@
 # BN Validation Protocol
 
-Status: protocol implemented; authoritative Linux/Python 3.11 evidence pending
+Status: passed; retained Linux/Python 3.11 official-package recipe-parity evidence
 
 Protocol ID: `pgmpy-bn-recipe-parity-v1`
 
@@ -103,4 +103,10 @@ python -m standardized_tabular_diffusion.validation.bn \
 
 `.github/workflows/bn-validation.yml` runs this command and retains its JSON artifact for 90 days. Any package, dependency, adapter, checkpoint schema, or protocol change requires a new run. Promotion is permitted only after a passing Linux/Python 3.11 artifact is inspected and retained unchanged under `docs/evidence/bn/`.
 
-The protocol has passed a non-authoritative local Python 3.11 dry run covering all nine cases. The repository status remains `adapter-complete` until the authoritative Linux artifact is retained.
+## Retained result
+
+GitHub Actions run [`30967779298`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298) passed on Linux with Python 3.11.15. All nine binary-classification, multiclass-classification, regression, and seed cases passed every exact comparison. This includes preprocessing and the discrete training frame, learned graph edges, all CPDs, the JSON-restored official model, raw discrete samples, final DataFrames and CSV bytes, artifact metadata, safe-state declarations, and restoration of the caller's NumPy state.
+
+The inspected evidence is retained byte-for-byte at `docs/evidence/bn/native-parity-run-30967779298.json` with SHA-256 `6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8`. The GitHub artifact ID is `8915417956`, its archive digest is `sha256:6dbedd1970b51ab5243e8da35b052d8d8df780cd2c2e81ac2adf756b4cae5654`, and the source lock cross-references both records.
+
+BN is therefore `native-parity-validated` against the exact official pgmpy package plus the repository-declared recipe. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent central-evaluation, dataset-admission, runtime, governance, and release gates pass. No paper-native or alternative-recipe equivalence is claimed.
