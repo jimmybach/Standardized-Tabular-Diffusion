@@ -27,6 +27,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
         "ctab-gan-plus",
         "ctgan",
         "goggle",
+        "nflow",
         "nrgboost",
         "realtabformer",
         "smote",
@@ -526,6 +527,42 @@ def test_nrgboost_package_lock_and_retained_validation_are_exact_and_conservativ
     spec = get_adapter_spec("nrgboost")
     assert spec.validation_level.value == "native-parity-validated"
     assert spec.revision_status == "pinned-canonical-package-native-parity-validated"
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"
+
+
+def test_nflow_source_lock_is_exact_and_waits_for_authoritative_parity() -> None:
+    payload = _load_source_lock()
+    nflow = payload["components"]["nflow"]
+    assert isinstance(nflow, dict)
+
+    assert nflow["authority"] == "canonical-library"
+    assert nflow["distribution_form"] == "package"
+    assert nflow["license"] == "MIT"
+    assert nflow["package_lock"] == {
+        "bytes": 45784,
+        "filename": "nflows-0.14.tar.gz",
+        "format": "sdist",
+        "name": "nflows",
+        "pypi_trusted_publishing": False,
+        "pypi_url": "https://pypi.org/project/nflows/0.14/",
+        "sha256": "6299844a62f9999fcdf2d95cb2d01c091a50136bd17826e303aba646b2d11b55",
+        "url": (
+            "https://files.pythonhosted.org/packages/bd/16/"
+            "a484db41aab28332f42080435c9342fa87cfc9a4fce5495521ea1e80ca27/"
+            "nflows-0.14.tar.gz"
+        ),
+        "version": "0.14",
+    }
+    assert nflow["source_package_comparison"]["exact_package_files"] == 42
+    assert nflow["validation"] == {
+        "level": "adapter-complete",
+        "protocol_id": "nflows-maf-tabular-recipe-parity-v1",
+        "status": "pending-authoritative-linux-python-3.11-run",
+    }
+    spec = get_adapter_spec("nflow")
+    assert spec.validation_level.value == "adapter-complete"
+    assert spec.revision_status == "pinned-canonical-package-parity-protocol-pending"
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
 
