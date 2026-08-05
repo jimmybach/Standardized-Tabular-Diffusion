@@ -51,7 +51,7 @@ The new root package is `standardized_tabular_diffusion/`.
 
 - `interfaces.py`: common run and artifact schemas
 - `models/`: adapters for each upstream model family
-- `evaluation/`: versioned contracts, profile and registry loaders, result-bundle validation, and the isolated legacy path
+- `evaluation/`: versioned contracts, structural validation, source-attested metric backends, Atomic Results, bundle finalization, and the isolated legacy path
 - `comparison.py`: run aggregation utilities
 - `cli.py`: a single entrypoint for listing models, describing metrics, running evaluations, and building comparisons
 
@@ -105,9 +105,9 @@ Each standardized run writes canonical metadata such as:
 
 The P1 evaluation foundation now provides versioned JSON Schemas and strict Python contracts for Evaluation Requests, Dataset Profiles, protocol profiles, Metric Registry entries, Atomic Results, stage records, manifests, metadata, summaries, and artifact indexes.
 
-The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth. TabStruct paper and code materials are research references only; the P1 foundation does not import them, and P2 will not use the legacy `evaluation/tabstruct.py` path as its metric engine.
+The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth. TabStruct paper and code materials are research references only; neither the P1 foundation nor the independent P2 evaluator imports the legacy `evaluation/tabstruct.py` path as its metric engine.
 
-The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P1 can create and validate auditable `incomplete` bundles, but deliberately cannot produce a finalized result. Metric execution and bundle finalization begin with the P2 vertical slice described in the [implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md).
+The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P2 now implements the first complete slice: a Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete per-column/per-pair results, and interruption-safe finalized bundles. P2 passed its [authoritative Linux/Python 3.11 workflow](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), with [machine-readable evidence](docs/evidence/evaluation/p2-shape-trend-run-31025796906.json) retained. The two metrics remain diagnostic pending later protocol and release gates; see the [P2 guide](docs/evaluation/P2_SHAPE_TREND_EVALUATION.md).
 
 P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
@@ -118,6 +118,7 @@ std-tabular-diffusion list-metrics
 std-tabular-diffusion validate-metric-registry
 std-tabular-diffusion list-protocols
 std-tabular-diffusion validate-dataset-profile --profile path/to/profile.json
+std-tabular-diffusion evaluate-table --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_bundle
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
 ~~~
 

@@ -1,0 +1,28 @@
+{
+  "source_manifest_schema_version": "1.0.0",
+  "source_id": "sdmetrics",
+  "repository": "https://github.com/sdv-dev/SDMetrics",
+  "revision": "ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
+  "distribution_version": "0.28.3.dev0",
+  "license_spdx": "MIT",
+  "license_file": "licenses/LICENSE",
+  "license_sha256": "1310119ad2a00b68f05d86309aea0bf1d3853e747d4f5646b1bf60a5a07f09a8",
+  "license_hash_algorithm": "sha256(lf-normalized-license-bytes)",
+  "license_copyright": "Copyright (c) 2020, MIT Data To AI Lab",
+  "python_source_file_count": 121,
+  "python_source_tree_sha256": "784beda5c7a63d5ebb5fe74f98d00db3a2e018a29b2f32f643bf857750a6c2a9",
+  "tree_hash_algorithm": "sha256(length-prefixed-posix-relative-path-and-lf-normalized-file-bytes-for-sorted-python-files)",
+  "implementation_symbols": {
+    "column_shapes": "sdmetrics.reports.single_table._properties.ColumnShapes",
+    "column_pair_trends": "sdmetrics.reports.single_table._properties.ColumnPairTrends",
+    "ks_complement": "sdmetrics.single_column.KSComplement",
+    "tv_complement": "sdmetrics.single_column.TVComplement",
+    "correlation_similarity": "sdmetrics.column_pairs.statistical.CorrelationSimilarity",
+    "contingency_similarity": "sdmetrics.column_pairs.statistical.ContingencySimilarity"
+  },
+  "report_defaults": {
+    "num_rows_subsample": 50000,
+    "real_correlation_threshold": 0.5,
+    "real_association_threshold": 0.3
+  }
+}

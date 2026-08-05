@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0 and P1 passed; P2 is next
+- Status: P0, P1, and P2 passed; authoritative Linux/Python 3.11 evidence is retained
 - Primary environment: Linux and Python 3.11
 - Last updated: 2026-08-05
 
@@ -15,7 +15,7 @@ python -m pip install -e .
 # CSV/dataframe onboarding and comparison support
 python -m pip install -e ".[data]"
 
-# Current legacy evaluation path; not a frozen official evaluator
+# P2 source-parity evaluation path; still diagnostic until later release gates
 python -m pip install -e ".[evaluation]"
 
 # Dependency-light schema, registry, profile, and bundle validation
@@ -93,6 +93,10 @@ Mocked tests demonstrate control flow only. They do not satisfy source-parity, n
 The dedicated `.github/workflows/p1-foundation-validation.yml` workflow runs the P1 contract suite, lint, typing, build, and a machine-readable exit-gate assessment on Linux/Python 3.11. A local or mocked pass is not a scientific metric validation.
 
 P1 passed in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264). The exact [Linux/Python 3.11 evidence](evidence/evaluation/p1-foundation-run-31018595264.json) is retained in the repository; its scope explicitly excludes metric computation, source parity, and bundle finalization.
+
+## P2 Shape and Trend evaluation
+
+P2 adds the standalone `evaluate-table` command, the Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete Atomic Results, Parquet metric storage, terminal stage records, and interruption-safe finalized bundles. It passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), and the exact [Linux/Python 3.11 evidence](evidence/evaluation/p2-shape-trend-run-31025796906.json) is retained. See the [P2 specification and usage guide](evaluation/P2_SHAPE_TREND_EVALUATION.md). These metrics remain diagnostic and cannot affect Official Results until later protocol-freeze and release-support gates pass.
 
 ## CI baseline
 

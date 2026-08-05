@@ -72,6 +72,10 @@ contingency_similarity = 1 - 0.5 × L1(P_real_joint, P_synthetic_joint)
 
 report 会分别为真实与合成连续列生成直方图边界来预处理混合列对。这与直接调用底层 `ContingencySimilarity` 不同；后者可以从真实数据生成十个 bins，再把同一边界应用于两套数据。底层相关指标支持 Spearman，但它不是 report 默认值。
 
+在锁定 revision 上，`QualityReport` 还会应用真实数据 Pearson 绝对相关阈值 `0.5`、真实数据 Cramér's V 关联阈值 `0.3`，以及 `num_rows_subsample=50000`。列对未超过适用的真实数据阈值时会返回非有限分数，也不会进入 property 平均。P2 将此类列对保留为分母可见的 `not_applicable` Atomic Result，并记录原因 `below_source_threshold`，而不是静默省略。
+
+锁定的来源在超过 50,000 行时委托 pandas 抽样，但没有传入 `random_state`。P2 使用请求中唯一且已记录的 evaluator seed 控制这一原始来源路径，对来源调用进行串行化，并在结束后恢复调用方的 NumPy 随机状态。
+
 决定：report 行为是初始来源等价目标。Spearman 和共同 train-fitted bins 属于不同实验变体，即使后续审查认为它们在科学上更合适，也不能混名。
 
 ### 3.3 判别器与 C2ST

@@ -154,6 +154,70 @@ def _validate_result_bundle(path: str) -> dict[str, Any]:
     return {"valid": True, **validate_result_bundle(path).to_dict()}
 
 
+def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest
+    from standardized_tabular_diffusion.evaluation.evaluate_table import evaluate_table_to_bundle
+    from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile, resolve_protocol
+    from standardized_tabular_diffusion.evaluation.serialization import sha256_file
+
+    reference = Path(args.reference)
+    synthetic = Path(args.synthetic)
+    dataset = load_dataset_profile(args.dataset_profile)
+    protocol = resolve_protocol("p2-shape-trend", "0.2.0")
+
+    def media_type(path: Path) -> str:
+        suffix = path.suffix.lower()
+        if suffix == ".csv":
+            return "text/csv"
+        if suffix in {".parquet", ".pq"}:
+            return "application/vnd.apache.parquet"
+        raise ValueError(f"Expected a .csv, .parquet, or .pq table: {path}")
+
+    metric_selections = tuple(
+        {"metric_id": item["metric_id"], "metric_version": item["metric_version"]}
+        for item in protocol.payload["metric_selections"]
+    )
+    request = EvaluationRequest(
+        subject_type="external-synthetic-table",
+        reference_artifact={
+            "artifact_id": "reference-table",
+            "media_type": media_type(reference),
+            "sha256": sha256_file(reference),
+        },
+        sample_artifact={
+            "artifact_id": "synthetic-table",
+            "media_type": media_type(synthetic),
+            "sha256": sha256_file(synthetic),
+            **({"row_count": args.expected_rows} if args.expected_rows is not None else {}),
+        },
+        dataset_profile={
+            "dataset_id": dataset.dataset_id,
+            "dataset_profile_version": dataset.dataset_profile_version,
+            "sha256": dataset.fingerprint,
+        },
+        protocol={
+            "protocol_id": protocol.protocol_id,
+            "protocol_version": protocol.protocol_version,
+            "sha256": protocol.fingerprint,
+        },
+        metrics=metric_selections,
+        comparison_track=args.comparison_track,
+        generation_seed=args.generation_seed,
+        evaluator_seeds=(args.evaluator_seed,),
+        model={"model_id": args.model_id} if args.model_id else None,
+        failure_policy={"structural_gate": "fail-fast", "metric_failure": "partial-bundle"},
+    )
+    report = evaluate_table_to_bundle(
+        reference_path=reference,
+        synthetic_path=synthetic,
+        dataset_profile=dataset.payload,
+        protocol_profile=protocol.payload,
+        request=request,
+        output_dir=args.output,
+    )
+    return {"valid": True, "request_fingerprint": request.fingerprint, **report.to_dict()}
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Standardized interface for tabular diffusion benchmarks")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -246,6 +310,29 @@ def build_parser() -> argparse.ArgumentParser:
         "validate-result", help="Validate an incomplete or finalized result bundle"
     )
     validate_result_parser.add_argument("--bundle", required=True, help="Result bundle directory")
+
+    evaluate_table_parser = subparsers.add_parser(
+        "evaluate-table",
+        help="Run the P2 source-parity Column Shapes and Column Pair Trends evaluation",
+    )
+    evaluate_table_parser.add_argument("--reference", required=True, help="Decoded reference CSV or Parquet table")
+    evaluate_table_parser.add_argument("--synthetic", required=True, help="Decoded synthetic CSV or Parquet table")
+    evaluate_table_parser.add_argument("--dataset-profile", required=True, help="Reviewed Dataset Profile JSON/YAML")
+    evaluate_table_parser.add_argument("--output", required=True, help="New result bundle directory")
+    evaluate_table_parser.add_argument(
+        "--expected-rows",
+        type=int,
+        default=None,
+        help="Required synthetic row count; defaults to the reference row count",
+    )
+    evaluate_table_parser.add_argument(
+        "--comparison-track",
+        choices=["native", "standardized-tuning"],
+        default="native",
+    )
+    evaluate_table_parser.add_argument("--model-id", default=None, help="Optional portable model identity")
+    evaluate_table_parser.add_argument("--generation-seed", type=int, default=0)
+    evaluate_table_parser.add_argument("--evaluator-seed", type=int, default=0)
 
     model_parser = subparsers.add_parser("show-model-inventory", help="Show one researched baseline model entry")
     model_parser.add_argument("--model", required=True, help="Model name")
@@ -507,6 +594,10 @@ def main() -> None:
 
     if args.command == "validate-result":
         print(json.dumps(_validate_result_bundle(args.bundle), indent=2))
+        return
+
+    if args.command == "evaluate-table":
+        print(json.dumps(_evaluate_table(args), indent=2))
         return
 
     if args.command == "describe-config":
