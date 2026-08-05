@@ -26,7 +26,7 @@ The official `torch.save` checkpoint is replaced at the persistence boundary wit
 
 ## Mandatory Parity Cases
 
-The workflow builds an offline one-layer GPT-2 fixture and trains direct official source and adapter paths independently on the same 24-row categorical table for seeds 0, 19, and 73. Each case compares all trained tensors exactly, reloads the safe artifact, independently applies the same exact-row boundary around unchanged official calls with the same encoded target distribution, and requires five-row DataFrame-identical output plus byte-identical CSV.
+The workflow builds an offline one-layer GPT-2 fixture and trains direct official source and adapter paths independently on the same 24-row categorical table for seeds 0, 19, and 73. The tiny model disables early EOS termination so the source's hard-coded full-GPT-2 padding ID is never fed into its deliberately small embedding table; both paths receive the identical fixture. Each case compares all trained tensors exactly, reloads the safe artifact, independently applies the same exact-row boundary around unchanged official calls with the same encoded target distribution, and requires five-row DataFrame-identical output plus byte-identical CSV.
 
 The gate also verifies archive and six-file source identity, unchanged source after execution, exact row count and column order, no missing values, safe artifacts, and restoration of caller RNG/thread state. Sampling exceeding the declared time limit fails with retained diagnostics.
 

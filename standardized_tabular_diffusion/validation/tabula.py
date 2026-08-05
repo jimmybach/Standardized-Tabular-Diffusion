@@ -256,7 +256,10 @@ def run_protocol(
         raise ValueError("TabuLa source manifest identity differs from the lock")
     frame, dataset_spec = _frame()
     tiny_model = output_dir / "tiny-gpt2"
-    tiny = build_tiny_gpt2(tiny_model, _texts(frame))
+    # The source hard-codes GPT-2 padding ID 50256. Disable early EOS only in
+    # this tiny-vocabulary fixture so that the unreachable padding ID is never
+    # fed back into the model; direct and adapter paths use the identical model.
+    tiny = build_tiny_gpt2(tiny_model, _texts(frame), disable_generation_eos=True)
     cases = [
         _run_case(repo_root, source_root, output_dir, tiny_model, dataset_spec, frame, seed) for seed in SEEDS
     ]

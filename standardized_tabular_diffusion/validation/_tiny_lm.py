@@ -5,7 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def build_tiny_gpt2(path: Path, texts: list[str], *, seed: int = 1234) -> dict[str, int]:
+def build_tiny_gpt2(
+    path: Path,
+    texts: list[str],
+    *,
+    seed: int = 1234,
+    disable_generation_eos: bool = False,
+) -> dict[str, int | bool]:
     import torch
     from tokenizers import Tokenizer, models, pre_tokenizers, trainers
     from transformers import GPT2Config, GPT2LMHeadModel, PreTrainedTokenizerFast
@@ -35,14 +41,20 @@ def build_tiny_gpt2(path: Path, texts: list[str], *, seed: int = 1234) -> dict[s
         n_layer=1,
         n_head=1,
         bos_token_id=tokenizer.bos_token_id,
-        eos_token_id=tokenizer.eos_token_id,
+        eos_token_id=None if disable_generation_eos else tokenizer.eos_token_id,
         pad_token_id=tokenizer.pad_token_id,
     )
     with torch.random.fork_rng(devices=[]):
         torch.manual_seed(seed)
         model = GPT2LMHeadModel(config)
     model.save_pretrained(path, safe_serialization=True)
-    return {"vocab_size": len(tokenizer), "parameters": sum(parameter.numel() for parameter in model.parameters())}
+    result: dict[str, int | bool] = {
+        "vocab_size": len(tokenizer),
+        "parameters": sum(parameter.numel() for parameter in model.parameters()),
+    }
+    if disable_generation_eos:
+        result["generation_eos_disabled"] = True
+    return result
 
 
 __all__ = ["build_tiny_gpt2"]

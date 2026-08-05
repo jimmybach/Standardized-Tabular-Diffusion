@@ -115,7 +115,7 @@ def _verify_record() -> dict[str, Any]:
 def _exercise_official_core() -> dict[str, Any]:
     module = importlib.import_module("tabebm.TabEBM")
     official = module.TabEBM
-    logits = np.asarray([[1.0, -0.5], [0.2, 0.7], [-1.0, 2.0]], dtype=np.float64)
+    logits = np.asarray([[1.25, -0.5], [0.2, 1.7], [-1.0, 2.25]], dtype=np.float64)
     observed_energy = official.compute_energy(logits)
     expected_energy = -scipy.special.logsumexp(logits, axis=1)
     np.testing.assert_array_equal(observed_energy, expected_energy)
