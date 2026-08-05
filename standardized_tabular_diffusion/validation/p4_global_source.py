@@ -428,13 +428,25 @@ def _locked_files() -> dict[str, str]:
     paths = (
         ".github/workflows/p4-global-source-validation.yml",
         "THIRD_PARTY_NOTICES.md",
+        "docs/evaluation/EVALUATION_PROTOCOL.md",
+        "docs/evaluation/EVALUATION_PROTOCOL.zh-CN.md",
+        "docs/evaluation/IMPLEMENTATION_ROADMAP.md",
+        "docs/evaluation/IMPLEMENTATION_ROADMAP.zh-CN.md",
+        "docs/evaluation/METRIC_SOURCE_REVIEW.md",
+        "docs/evaluation/METRIC_SOURCE_REVIEW.zh-CN.md",
+        "docs/evaluation/P4_UTILITY.md",
+        "docs/evaluation/P4_UTILITY.zh-CN.md",
+        "docs/evidence/evaluation/p4-global-source-runtime-run-31057073762.json",
         "requirements-p4-global-source-validation.txt",
+        "standardized_tabular_diffusion/evaluation/evaluate_table.py",
         "standardized_tabular_diffusion/evaluation/tabstruct.py",
         "standardized_tabular_diffusion/evaluation/utility.py",
         "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
         "standardized_tabular_diffusion/validation/p4_global_source.py",
         "tests/evaluation/test_p4_global_source_validation.py",
+        "tests/test_p4_global_source_retained_evidence.py",
     )
     return {path: sha256_file(REPO_ROOT / path) for path in paths}
 

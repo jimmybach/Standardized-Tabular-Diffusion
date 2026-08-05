@@ -228,7 +228,7 @@ Targets are weighted equally, and values above one are valid and MUST NOT be cli
 
 Predictor configuration is part of the metric identity. TabStruct's Full-tuned profile uses nine tuned predictors, while its Tiny-default profile uses three untuned predictors and is empirically recommended as a lower-cost Global Utility option. The pinned TabEval snapshot implements a three-predictor form. These profiles MUST have distinct identifiers and MUST NOT be mixed within one leaderboard compatibility group.
 
-The implemented P4 diagnostic candidate binds the pinned TabEval `UtilityPerFeature` source configuration `XGB + KNN + TabPFN` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`. Missing dependencies become `resource_failure`; predictor-set differences between TRTR and TSTR invalidate the target ratio. The retained P4 evidence explicitly records `global_source_runtime.executed: false`, so executable source parity remains pending.
+The implemented P4 diagnostic candidate binds the pinned TabEval `UtilityPerFeature` source configuration `XGB + KNN + TabPFN` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`. Missing dependencies become `resource_failure`; predictor-set differences between TRTR and TSTR invalidate the target ratio. The initial engineering evidence records `global_source_runtime.executed: false`; the separate [bounded source-runtime evidence](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) subsequently executed all three real families and passed exact classification/regression aggregate parity. This does not complete dataset-scale or Official Results admission.
 
 Local Utility and Global Utility are separate official sub-leaderboards. They are not combined into a single Utility score in the initial protocol.
 
@@ -441,7 +441,7 @@ Failed, skipped, inapplicable, and unsupported results MUST remain distinguishab
 
 The following details require empirical pilot evidence before the first official protocol is frozen:
 
-- source-runtime, stability, high-cardinality, dependency, and budget evidence for the implemented P4 predictor candidates before protocol freeze;
+- dataset-scale stability, full high-cardinality omission, and resource-budget evidence for the source-runtime-validated P4 predictor candidate before protocol freeze;
 - real-versus-real fidelity resampling;
 - mixed-table C2ST transformation and discriminator;
 - source-faithful versus adapted Column Pair Trends discretization;

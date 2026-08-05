@@ -160,7 +160,7 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
     if (
         profile["profile_id"] != "p4-utility-pilot"
         or profile["profile_version"] != "0.1.0"
-        or profile["status"] != "unit-validated-diagnostic"
+        or profile["status"] != "source-runtime-pilot-validated-diagnostic"
         or profile["official_results_allowed"] is not False
     ):
         _fail("P4 pilot identity, lifecycle, or diagnostic admission boundary has drifted")
@@ -294,6 +294,8 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
             "profile_version",
             "formula_source",
             "implementation_source",
+            "runtime_source_manifest",
+            "source_runtime_validation_status",
             "predictors",
             "autogluon_presets",
             "fit_weighted_ensemble",
@@ -320,6 +322,10 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
         "profile_version": "2025-08-09-pinned",
         "formula_source": "TabStruct Equation 4",
         "implementation_source": expected_source,
+        "runtime_source_manifest": (
+            "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
+        ),
+        "source_runtime_validation_status": "bounded-pilot-passed",
         "predictors": ["xgb", "knn", "tabpfn"],
         "autogluon_presets": "medium_quality",
         "fit_weighted_ensemble": False,
@@ -1535,6 +1541,10 @@ def evaluate_utility(
                 f"{evaluator_profile['global']['profile_id']}@{evaluator_profile['global']['profile_version']}"
             ),
             "source": evaluator_profile["global"]["implementation_source"],
+            "runtime_source_manifest": evaluator_profile["global"]["runtime_source_manifest"],
+            "source_runtime_validation_status": evaluator_profile["global"][
+                "source_runtime_validation_status"
+            ],
             "source_parity_claimed": False,
         },
     }

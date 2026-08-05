@@ -531,7 +531,7 @@ def _utility_terminal_payloads(
             "test_used_for_fit": False,
         },
         "review": {
-            "status": "unit-validated-p4-development",
+            "status": "source-runtime-pilot-validated-p4-development",
             "official_results_allowed": False,
             "global_source_parity_claimed": False,
         },

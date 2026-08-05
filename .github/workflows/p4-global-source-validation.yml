@@ -5,7 +5,13 @@ on:
     paths:
       - ".github/workflows/p4-global-source-validation.yml"
       - "THIRD_PARTY_NOTICES.md"
+      - "docs/evaluation/EVALUATION_PROTOCOL*.md"
+      - "docs/evaluation/IMPLEMENTATION_ROADMAP*.md"
+      - "docs/evaluation/METRIC_SOURCE_REVIEW*.md"
+      - "docs/evaluation/P4_UTILITY*.md"
+      - "docs/evidence/evaluation/p4-global-source-runtime-*.json"
       - "requirements-p4-global-source-validation.txt"
+      - "standardized_tabular_diffusion/evaluation/evaluate_table.py"
       - "standardized_tabular_diffusion/evaluation/tabstruct.py"
       - "standardized_tabular_diffusion/evaluation/utility.py"
       - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
@@ -13,11 +19,18 @@ on:
       - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
       - "standardized_tabular_diffusion/validation/p4_global_source.py"
       - "tests/evaluation/test_p4_global_source_validation.py"
+      - "tests/test_p4_global_source_retained_evidence.py"
   pull_request:
     paths:
       - ".github/workflows/p4-global-source-validation.yml"
       - "THIRD_PARTY_NOTICES.md"
+      - "docs/evaluation/EVALUATION_PROTOCOL*.md"
+      - "docs/evaluation/IMPLEMENTATION_ROADMAP*.md"
+      - "docs/evaluation/METRIC_SOURCE_REVIEW*.md"
+      - "docs/evaluation/P4_UTILITY*.md"
+      - "docs/evidence/evaluation/p4-global-source-runtime-*.json"
       - "requirements-p4-global-source-validation.txt"
+      - "standardized_tabular_diffusion/evaluation/evaluate_table.py"
       - "standardized_tabular_diffusion/evaluation/tabstruct.py"
       - "standardized_tabular_diffusion/evaluation/utility.py"
       - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
@@ -25,6 +38,7 @@ on:
       - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
       - "standardized_tabular_diffusion/validation/p4_global_source.py"
       - "tests/evaluation/test_p4_global_source_validation.py"
+      - "tests/test_p4_global_source_retained_evidence.py"
   workflow_dispatch:
 
 permissions:
@@ -123,6 +137,7 @@ jobs:
           python -m pytest
           tests/evaluation/test_p4_global_source_validation.py
           tests/evaluation/test_p4_utility.py
+          tests/test_p4_global_source_retained_evidence.py
           -q
 
       - name: Execute exact source and adapter pilot
