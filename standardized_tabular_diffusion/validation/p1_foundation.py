@@ -213,7 +213,10 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
             Draft202012Validator.check_schema(load_schema(schema_name))
 
         registry = load_metric_registry()
-        assert registry and all(record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in registry)
+        legacy_registry = [record for record in registry if record.metric_id.startswith("legacy-")]
+        assert legacy_registry and all(
+            record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in legacy_registry
+        )
         assert all(record.payload["admission"]["official_results_allowed"] is False for record in registry)
 
         protocols = list_protocol_profiles()

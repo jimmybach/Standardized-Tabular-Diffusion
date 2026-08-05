@@ -23,14 +23,18 @@ def test_cli_lists_validated_metric_records(
     monkeypatch.setattr(sys, "argv", ["std-tabular-diffusion", "validate-metric-registry"])
     cli.main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload == {"valid": True, "record_count": 8}
+    assert payload == {"valid": True, "record_count": 10}
 
 
 def test_cli_lists_protocol_profiles(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setattr(sys, "argv", ["std-tabular-diffusion", "list-protocols"])
     cli.main()
     payload = json.loads(capsys.readouterr().out)
-    assert {item["protocol_id"] for item in payload["protocols"]} == {"development-p1", "legacy-tabstruct-aligned"}
+    assert {item["protocol_id"] for item in payload["protocols"]} == {
+        "development-p1",
+        "legacy-tabstruct-aligned",
+        "p2-shape-trend",
+    }
 
 
 def test_cli_validates_dataset_profile_and_result_bundle(

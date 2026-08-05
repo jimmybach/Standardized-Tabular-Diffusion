@@ -30,15 +30,19 @@ data = [
   "pandas==2.2.3",
 ]
 evaluation = [
+  "copulas==0.14.1",
   "jsonschema==4.23.0",
   "numpy==1.26.4; python_version < '3.13'",
   "numpy>=2.1,<2.2; python_version >= '3.13'",
   "pandas==2.2.3",
+  "plotly==6.9.0",
+  "pyarrow==18.1.0",
   "PyYAML==6.0.2",
   "scikit-learn==1.5.2",
   "scipy==1.13.1; python_version < '3.13'",
   "scipy>=1.14,<1.15; python_version >= '3.13'",
-  "sdmetrics==0.11.1; python_version < '3.13'",
+  "sdmetrics @ git+https://github.com/sdv-dev/SDMetrics.git@ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
+  "tqdm==4.69.1",
 ]
 ctgan = [
   "ctgan==0.12.1",
@@ -327,6 +331,7 @@ standardized_tabular_diffusion = [
   "schemas/evaluation/*.json",
   "resources/evaluation/metrics/*.json",
   "resources/evaluation/protocols/*.json",
+  "resources/evaluation/upstream/*.json",
   "resources/upstream/*.json",
 ]
 
@@ -349,6 +354,7 @@ markers = [
   "core: dependency-light package, metadata, configuration, and CLI behavior",
   "integration: repository-owned integration behavior that may require data dependencies",
   "evaluation: evaluation formula, normalization, or reproducibility behavior",
+  "source_parity: tests that execute an exact checksum-locked official upstream source",
   "adapter: model-adapter behavior that requires optional model dependencies",
   "legacy: compatibility behavior for the pre-roadmap implementation",
 ]
@@ -381,10 +387,14 @@ files = [
   "standardized_tabular_diffusion/interfaces.py",
   "standardized_tabular_diffusion/evaluation/bundle.py",
   "standardized_tabular_diffusion/evaluation/contracts.py",
+  "standardized_tabular_diffusion/evaluation/backends/sdmetrics.py",
+  "standardized_tabular_diffusion/evaluation/evaluate_table.py",
   "standardized_tabular_diffusion/evaluation/profiles.py",
   "standardized_tabular_diffusion/evaluation/registry.py",
   "standardized_tabular_diffusion/evaluation/schema.py",
   "standardized_tabular_diffusion/evaluation/serialization.py",
+  "standardized_tabular_diffusion/evaluation/shape_trend.py",
+  "standardized_tabular_diffusion/evaluation/table.py",
   "standardized_tabular_diffusion/materialization.py",
   "standardized_tabular_diffusion/registry.py",
   "standardized_tabular_diffusion/runner.py",

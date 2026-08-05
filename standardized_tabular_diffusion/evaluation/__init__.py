@@ -11,6 +11,8 @@ __all__ = [
     "IncompleteRunBundleWriter",
     "METRIC_DEFINITIONS",
     "MetricState",
+    "evaluate_table_to_bundle",
+    "validate_tables",
     "validate_result_bundle",
 ]
 
@@ -22,6 +24,11 @@ _LAZY_EXPORTS = {
         "IncompleteRunBundleWriter",
     ),
     "MetricState": ("standardized_tabular_diffusion.evaluation.contracts", "MetricState"),
+    "evaluate_table_to_bundle": (
+        "standardized_tabular_diffusion.evaluation.evaluate_table",
+        "evaluate_table_to_bundle",
+    ),
+    "validate_tables": ("standardized_tabular_diffusion.evaluation.table", "validate_tables"),
     "validate_result_bundle": ("standardized_tabular_diffusion.evaluation.bundle", "validate_result_bundle"),
 }
 

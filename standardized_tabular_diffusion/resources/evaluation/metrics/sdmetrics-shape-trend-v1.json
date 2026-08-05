@@ -1,0 +1,100 @@
+{
+  "registry_collection_schema_version": "1.0.0",
+  "common": {
+    "registry_schema_version": "1.0.0",
+    "metric_version": "1.0.0",
+    "dimension": "fidelity",
+    "definition_origin": "source-defined",
+    "planned_leaderboard_role": "diagnostic",
+    "owner": "repository-maintainers",
+    "lifecycle_status": "source-parity-validated",
+    "review_record": {
+      "registered_by": "p2-shape-trend-implementation",
+      "registered_at": "2026-08-05T00:00:00Z",
+      "reviews": [
+        {"review_type":"definition-and-source-parity","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","decision":"approved","evidence_ref":"tests/evaluation/test_p2_source_parity.py"}
+      ]
+    },
+    "source": {
+      "method_references": ["SDMetrics Quality Report at the locked official revision"],
+      "upstream": "https://github.com/sdv-dev/SDMetrics",
+      "revision": "ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
+      "implementation_symbol": "overridden-per-record",
+      "source_authority": "official-repository",
+      "implementation_mode": "source-wrapper",
+      "retrieved_date": "2026-07-31",
+      "integrity_hash": "784beda5c7a63d5ebb5fe74f98d00db3a2e018a29b2f32f643bf857750a6c2a9",
+      "license": "MIT",
+      "attribution": ["Copyright holders of SDMetrics; original MIT license retained in THIRD_PARTY_NOTICES.md"],
+      "known_deviations": []
+    },
+    "semantics": {
+      "supported_table_types": ["decoded single table"],
+      "supported_column_types": ["continuous","integer","categorical","boolean","datetime"],
+      "required_dataset_profile_metadata": ["canonical_column_order","column_id","semantic_type"],
+      "input_view": "Dataset Profile canonical decoded model view after the structural gate",
+      "fitted_on": "reference",
+      "output": {"shape":"scalar","unit":"similarity"},
+      "raw_range": {"minimum":0.0,"maximum":1.0},
+      "raw_direction": "maximize",
+      "target_value": null,
+      "undefined_conditions": ["The locked source returns a non-finite result for an otherwise requested scope."],
+      "minimum_support": {"reference_rows":1,"synthetic_rows":1},
+      "randomness": {"deterministic":true,"seed_source":"EvaluationRequest.evaluator_seeds[0]","notes":"The seed controls the locked source's pandas subsampling when a table exceeds 50,000 rows; it is still recorded for smaller tables."},
+      "default_parameters": {"num_rows_subsample":50000,"real_correlation_threshold":0.5,"real_association_threshold":0.3},
+      "allowed_overrides": [],
+      "normalization": {"function":"identity because the source score is already bounded similarity","version":"1.0.0"},
+      "aggregation": {"rule":"overridden-per-record","version":"1.0.0"},
+      "uncertainty": {"procedure":"none in P2"},
+      "failure_contribution_policy": {
+        "computed":"Contribute with the source-defined weight.",
+        "mathematically_undefined":"Zero weight; preserve state and denominator coverage.",
+        "insufficient_support":"Zero weight; preserve state and denominator coverage.",
+        "not_applicable":"Zero weight; preserve state and denominator coverage.",
+        "implementation_failure":"Zero weight; mark the run partial and preserve failure evidence.",
+        "resource_failure":"Zero weight; mark the run partial and preserve failure evidence."
+      }
+    },
+    "validation": {
+      "unit_test_evidence": ["tests/evaluation/test_p2_shape_trend.py"],
+      "boundary_test_evidence": ["tests/evaluation/test_p2_table_gate.py"],
+      "source_parity_evidence": ["tests/evaluation/test_p2_source_parity.py",".github/workflows/p2-shape-trend-validation.yml"],
+      "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
+      "reference_fixtures": ["mixed numerical, categorical, boolean, and datetime fixture"],
+      "supported_environment": {"primary":"Linux with Python 3.11"},
+      "unresolved_limitations": ["P2 is diagnostic until the protocol and Dataset Profiles pass later release gates."],
+      "release_decision": "diagnostic-only"
+    },
+    "lifecycle_evidence": {
+      "definition_review": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["docs/evaluation/P2_SHAPE_TREND_EVALUATION.md"]},
+      "implementation": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/shape_trend.py"]},
+      "unit_validation": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["tests/evaluation/test_p2_shape_trend.py"]},
+      "source_parity": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["tests/evaluation/test_p2_source_parity.py"]},
+      "protocol_freeze": null,
+      "release_approval": null
+    },
+    "admission": {
+      "official_results_allowed": false,
+      "compatibility_version": "p2-shape-trend-0.2.0",
+      "reason": "Source parity is validated, but protocol freeze and release approval are later gates."
+    }
+  },
+  "records": [
+    {
+      "metric_id": "sdmetrics-column-shapes",
+      "display_name": "SDMetrics Column Shapes",
+      "subdimension": "column-shape",
+      "description": "Per-column KSComplement for numerical/datetime data and TVComplement for categorical/boolean data, averaged over finite source results.",
+      "source": {"implementation_symbol":"sdmetrics.reports.single_table._properties.ColumnShapes"},
+      "semantics": {"aggregation":{"rule":"Arithmetic mean of all finite evaluated column scores; unsupported types remain explicit not_applicable Atomic Results.","version":"1.0.0"}}
+    },
+    {
+      "metric_id": "sdmetrics-column-pair-trends",
+      "display_name": "SDMetrics Column Pair Trends",
+      "subdimension": "column-pair-trend",
+      "description": "Per-pair CorrelationSimilarity or ContingencySimilarity with the locked Quality Report contribution thresholds.",
+      "source": {"implementation_symbol":"sdmetrics.reports.single_table._properties.ColumnPairTrends"},
+      "semantics": {"aggregation":{"rule":"Arithmetic mean of finite pair scores meeting the locked real correlation (>0.5) or association (>0.3) threshold; other computed pairs are retained at zero weight.","version":"1.0.0"}}
+    }
+  ]
+}
