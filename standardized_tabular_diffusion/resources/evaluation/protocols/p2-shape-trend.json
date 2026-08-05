@@ -1,0 +1,26 @@
+{
+  "profile_schema_version": "1.0.0",
+  "protocol_id": "p2-shape-trend",
+  "protocol_version": "0.2.0",
+  "display_name": "P2 source-parity Column Shapes and Column Pair Trends",
+  "status": "draft",
+  "official_results_allowed": false,
+  "comparison_tracks": ["native", "standardized-tuning"],
+  "metric_selections": [
+    {"metric_id":"sdmetrics-column-shapes","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"sdmetrics-column-pair-trends","metric_version":"1.0.0","required":true,"role":"diagnostic"}
+  ],
+  "dataset_suites": ["diagnostic"],
+  "result_schema_versions": {"atomic_result":"1.0.0","manifest":"1.0.0","metadata":"1.0.0","summary":"1.0.0","stage_record":"1.0.0","artifact_index":"1.0.0"},
+  "policies": {
+    "structural_gate": "exact Dataset Profile columns, canonical order, lossless logical types, no missing/nonfinite values, and exact requested synthetic row count",
+    "source": "SDMetrics commit ba8842f2ba04ce914f698cc1cf746ca12338ab0e with full Python source-tree attestation",
+    "randomness": "exactly one evaluator seed controls locked upstream subsampling above 50000 rows; source calls are serialized and caller NumPy state is restored",
+    "atomicity": "one Atomic Result per canonical column and unordered column pair, including explicit noncomputed states",
+    "overall_score": "prohibited in P2",
+    "finalization": "all required files, stage records, provenance, and exact checksums must validate before atomic final status publication"
+  },
+  "owners": ["repository-maintainers"],
+  "review_record": {"status":"source-parity-validated-development","official_admission":"pending later protocol freeze"},
+  "change_log": [{"version":"0.2.0","change":"Implemented the first source-parity-validated, end-to-end table evaluation vertical slice."}]
+}

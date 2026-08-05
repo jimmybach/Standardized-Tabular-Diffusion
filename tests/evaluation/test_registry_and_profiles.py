@@ -29,11 +29,24 @@ pytestmark = [pytest.mark.core, pytest.mark.evaluation]
 
 def test_packaged_legacy_registry_is_explicitly_nonofficial() -> None:
     records = load_metric_registry()
-    assert len(records) == 8
+    assert len(records) == 10
     assert len({record.identity for record in records}) == len(records)
-    assert all(record.payload["lifecycle_status"] == "registered" for record in records)
-    assert all(record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in records)
+    legacy = [record for record in records if record.metric_id.startswith("legacy-")]
+    assert len(legacy) == 8
+    assert all(record.payload["lifecycle_status"] == "registered" for record in legacy)
+    assert all(record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in legacy)
     assert all(not record.payload["admission"]["official_results_allowed"] for record in records)
+
+
+def test_p2_metrics_are_source_parity_validated_but_not_officially_admitted() -> None:
+    records = [record for record in load_metric_registry() if record.metric_id.startswith("sdmetrics-")]
+    assert {record.metric_id for record in records} == {
+        "sdmetrics-column-shapes",
+        "sdmetrics-column-pair-trends",
+    }
+    assert all(record.payload["lifecycle_status"] == "source-parity-validated" for record in records)
+    assert all(record.payload["source"]["known_deviations"] == [] for record in records)
+    assert all(record.payload["admission"]["official_results_allowed"] is False for record in records)
 
 
 def test_lifecycle_cannot_advance_without_cumulative_evidence() -> None:
@@ -145,6 +158,7 @@ def test_packaged_protocols_resolve_exact_versions_and_are_nonofficial() -> None
     assert {profile.identity for profile in profiles} == {
         ("development-p1", "0.1.0"),
         ("legacy-tabstruct-aligned", "1.0.0-legacy"),
+        ("p2-shape-trend", "0.2.0"),
     }
     assert all(not profile.payload["official_results_allowed"] for profile in profiles)
 

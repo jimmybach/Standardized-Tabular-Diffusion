@@ -1,0 +1,125 @@
+name: P2 Shape and Trend Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p2-shape-trend-validation.yml"
+      - "THIRD_PARTY_NOTICES.md"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p2_shape_trend.py"
+      - "tests/evaluation/**"
+  pull_request:
+    paths:
+      - ".github/workflows/p2-shape-trend-validation.yml"
+      - "THIRD_PARTY_NOTICES.md"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p2_shape_trend.py"
+      - "tests/evaluation/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p2-shape-trend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p2-shape-trend:
+    name: Linux / Python 3.11 / locked SDMetrics parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install exact P2 evaluation environment
+        run: |
+          python -m pip install ".[evaluation,dev]"
+          python -m pip check
+
+      - name: Attest locked SDMetrics source tree
+        run: python -c "from standardized_tabular_diffusion.evaluation.backends.sdmetrics import verify_sdmetrics_source; print(verify_sdmetrics_source())"
+
+      - name: Run P2 parity, boundary, and end-to-end tests
+        run: >-
+          python -m pytest
+          tests/evaluation/test_p2_table_gate.py
+          tests/evaluation/test_p2_source_parity.py
+          tests/evaluation/test_p2_shape_trend.py
+          tests/evaluation/test_p2_evaluate_table.py
+          tests/evaluation/test_registry_and_profiles.py
+          tests/evaluation/test_bundle.py
+
+      - name: Lint and type-check evaluation surfaces
+        run: |
+          python -m ruff check standardized_tabular_diffusion/evaluation standardized_tabular_diffusion/validation/p2_shape_trend.py standardized_tabular_diffusion/cli.py tests/evaluation
+          python -m mypy
+
+      - name: Generate P2 exit-gate evidence
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p2_shape_trend
+          --output "${RUNNER_TEMP}/p2-shape-trend-evidence.json"
+          --require-primary-environment
+
+      - name: Preserve pre-protocol failure evidence
+        if: always()
+        shell: bash
+        run: |
+          if [[ ! -f "${RUNNER_TEMP}/p2-shape-trend-evidence.json" ]]; then
+            python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          output = Path(os.environ["RUNNER_TEMP"]) / "p2-shape-trend-evidence.json"
+          output.write_text(
+              json.dumps(
+                  {
+                      "evidence_schema_version": "1.0.0",
+                      "protocol_id": "p2-shape-trend-source-parity-v1",
+                      "phase": "P2",
+                      "status": "fail",
+                      "repository_commit": os.environ.get("GITHUB_SHA", "unknown"),
+                      "error_type": "PreProtocolFailure",
+                      "error": "A required P2 workflow step failed before evidence generation."
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+          fi
+
+      - name: Upload P2 evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: p2-shape-trend-evidence
+          path: ${{ runner.temp }}/p2-shape-trend-evidence.json
+          if-no-files-found: error
+          retention-days: 90
