@@ -204,6 +204,8 @@ Balanced Accuracy, ROC-AUC, PR-AUC, MAE, and R-squared are secondary metrics whe
 
 The evaluator suite represents at least a linear model, a random forest, and a gradient-boosted tree. Exact implementations and frozen hyperparameters are pilot-frozen. Evaluator selection MUST use train and permitted validation data only and MUST be independent of the synthetic-data method being scored.
 
+The implemented P4 diagnostic candidate binds scikit-learn Logistic Regression/Ridge, Random Forest, and Histogram Gradient Boosting through `p4-utility-pilot@0.1.0`, with five default evaluator seeds. This is an implemented pilot identity, not a frozen Official Results profile.
+
 This primary Macro-F1/RMSE panel is a benchmark contract. It MUST NOT be called an exact reproduction of GReaT, which uses classification accuracy and regression MSE with linear or logistic regression, decision tree, and random forest predictors, or TabStruct, whose classification utility uses Balanced Accuracy.
 
 ### 7.3 Global Utility
@@ -225,6 +227,8 @@ global_utility(D) = mean_j utility_j(D)
 Targets are weighted equally, and values above one are valid and MUST NOT be clipped. A zero or non-finite denominator is mathematically undefined unless a future metric version declares and validates a different rule.
 
 Predictor configuration is part of the metric identity. TabStruct's Full-tuned profile uses nine tuned predictors, while its Tiny-default profile uses three untuned predictors and is empirically recommended as a lower-cost Global Utility option. The pinned TabEval snapshot implements a three-predictor form. These profiles MUST have distinct identifiers and MUST NOT be mixed within one leaderboard compatibility group.
+
+The implemented P4 diagnostic candidate binds the pinned TabEval `UtilityPerFeature` source configuration `XGB + KNN + TabPFN` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`. Missing dependencies become `resource_failure`; predictor-set differences between TRTR and TSTR invalidate the target ratio; executable source parity remains pending.
 
 Local Utility and Global Utility are separate official sub-leaderboards. They are not combined into a single Utility score in the initial protocol.
 
@@ -437,7 +441,7 @@ Failed, skipped, inapplicable, and unsupported results MUST remain distinguishab
 
 The following details require empirical pilot evidence before the first official protocol is frozen:
 
-- exact Local and Global Utility predictor implementations and hyperparameters;
+- source-runtime, stability, high-cardinality, dependency, and budget evidence for the implemented P4 predictor candidates before protocol freeze;
 - real-versus-real fidelity resampling;
 - mixed-table C2ST transformation and discriminator;
 - source-faithful versus adapted Column Pair Trends discretization;

@@ -30,6 +30,17 @@
         "row_count": {"type": "integer", "minimum": 0}
       }
     },
+    "real_test_artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["artifact_id", "media_type", "sha256"],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/identifier"},
+        "media_type": {"type": "string", "pattern": "^[^/\\s]+/[^/\\s]+$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "uri": {"type": "string", "minLength": 1},
+        "row_count": {"type": "integer", "minimum": 0}
+      }
+    },
     "dataset_profile": {"$ref": "#/$defs/datasetReference"},
     "protocol": {"$ref": "#/$defs/protocolReference"},
     "metrics": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/metricReference"}},

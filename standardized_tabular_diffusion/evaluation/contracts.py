@@ -150,6 +150,7 @@ class EvaluationRequest:
     generation_seed: int
     evaluator_seeds: tuple[int, ...]
     reference_artifact: dict[str, Any] | None = None
+    real_test_artifact: dict[str, Any] | None = None
     evaluator_profile: dict[str, str] | None = None
     hardware_profile: dict[str, str] | None = None
     model: dict[str, Any] | None = None
@@ -177,6 +178,18 @@ class EvaluationRequest:
             self._validate_artifact("reference_artifact", self.reference_artifact)
             if self.reference_artifact["artifact_id"] == self.sample_artifact["artifact_id"]:
                 raise ContractError("reference and sample artifacts must use different artifact_id values")
+        if self.real_test_artifact is not None:
+            self._validate_artifact("real_test_artifact", self.real_test_artifact)
+            artifact_ids = {
+                self.sample_artifact["artifact_id"],
+                *(
+                    (self.reference_artifact["artifact_id"],)
+                    if self.reference_artifact is not None
+                    else ()
+                ),
+            }
+            if self.real_test_artifact["artifact_id"] in artifact_ids:
+                raise ContractError("real train, real test, and synthetic artifacts require distinct artifact_id values")
         self._validate_identity_ref("dataset_profile", self.dataset_profile, "dataset_id", "dataset_profile_version")
         self._validate_identity_ref("protocol", self.protocol, "protocol_id", "protocol_version")
         if not isinstance(self.metrics, tuple) or not self.metrics:
@@ -263,6 +276,8 @@ class EvaluationRequest:
         payload = asdict(self)
         if self.reference_artifact is None:
             payload.pop("reference_artifact")
+        if self.real_test_artifact is None:
+            payload.pop("real_test_artifact")
         payload["metrics"] = [dict(item) for item in self.metrics]
         payload["evaluator_seeds"] = list(self.evaluator_seeds)
         return payload
@@ -272,7 +287,7 @@ class EvaluationRequest:
         if not isinstance(payload, dict):
             raise ContractError("Evaluation Request must be an object")
         known = set(cls.__dataclass_fields__)
-        missing_allowed = {"reference_artifact"}
+        missing_allowed = {"reference_artifact", "real_test_artifact"}
         unknown = set(payload) - known
         missing = known - set(payload) - missing_allowed
         if missing:

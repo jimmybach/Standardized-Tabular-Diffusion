@@ -1,0 +1,39 @@
+{
+  "profile_schema_version": "1.0.0",
+  "protocol_id": "p4-utility",
+  "protocol_version": "0.4.0",
+  "display_name": "P4 Local and Global Utility diagnostic pilot",
+  "status": "draft",
+  "official_results_allowed": false,
+  "comparison_tracks": ["native", "standardized-tuning"],
+  "metric_selections": [
+    {"metric_id":"std-local-utility-macro-f1","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-roc-auc","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-pr-auc","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-rmse","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-mae","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-r2","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"std-local-utility-retention","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"tabstruct-global-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"tabstruct-global-rmse","metric_version":"1.0.0","required":true,"role":"diagnostic"},
+    {"metric_id":"tabstruct-global-target-utility","metric_version":"1.0.0","required":true,"role":"diagnostic"}
+  ],
+  "dataset_suites": ["diagnostic"],
+  "result_schema_versions": {"atomic_result":"1.0.0","manifest":"1.0.0","metadata":"1.0.0","summary":"1.0.0","stage_record":"1.0.0","artifact_index":"1.0.0"},
+  "policies": {
+    "test_boundary": "One checksum-bound held-out real test table is shared by Dummy, TRTR, and TSTR and is never a fit input.",
+    "local_profile": "std-local-three-family@0.1.0 with Macro-F1 or RMSE primary metrics and five default evaluator seeds",
+    "local_retention": "Unclipped benchmark-derived Dummy-adjusted retention; undefined when TRTR fails to improve on Dummy beyond 1e-12.",
+    "global_profile": "tabeval-tiny-default@2025-08-09-pinned with XGB, KNN, and TabPFN source configuration",
+    "global_formula": "TabStruct Equation 4: categorical TSTR/TRTR Balanced Accuracy, numerical TRTR/TSTR RMSE, equal target mean",
+    "target_coverage": "Every canonical model-view target must be included or excluded with a stable reason; no silent denominator loss.",
+    "failure_semantics": "Missing target support, mathematical undefinedness, implementation failures, and resource failures remain visible Atomic Results.",
+    "clipping": "Local retention and Global Utility ratios are never clipped.",
+    "overall_score": "prohibited",
+    "finalization": "Utility details, raw arms, ratios, Atomic Results, provenance, and exact checksums must cross-validate before finalization."
+  },
+  "owners": ["repository-maintainers"],
+  "review_record": {"status":"unit-validated-development","official_admission":"pending Linux/Python 3.11 source-runtime pilot and profile freeze"},
+  "change_log": [{"version":"0.4.0","change":"Implemented the reviewed P4 diagnostic Local and Global Utility vertical slice."}]
+}
