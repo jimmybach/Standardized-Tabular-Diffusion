@@ -72,6 +72,14 @@ def test_checkpoint_manifest_has_immutable_revisions_and_sha256() -> None:
         assert checkpoint["filename"].endswith(".ckpt")
 
 
+def test_runtime_fixture_keeps_a_continuous_predictor_for_every_rotated_target() -> None:
+    train, test, columns = validation._fixture()
+    assert list(train.columns) == columns == list(test.columns)
+    for target in columns:
+        predictors = [name for name in columns if name != target]
+        assert any(train[name].nunique() > 10 for name in predictors)
+
+
 def test_manifest_is_canonical_json_resource() -> None:
     resource = (
         Path(validation.__file__).resolve().parents[1]
