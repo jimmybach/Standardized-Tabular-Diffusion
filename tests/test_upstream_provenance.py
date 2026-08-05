@@ -73,7 +73,7 @@ def test_source_lock_patch_ids_are_unique_and_classified() -> None:
     assert len(patch_ids) == len(set(patch_ids))
 
 
-def test_tabularargn_release_is_locked_without_premature_parity_claim() -> None:
+def test_tabularargn_release_is_locked_and_parity_validated() -> None:
     payload = _load_source_lock()
     component = payload["components"]["tabularargn"]
     spec = get_adapter_spec("tabularargn")
@@ -84,10 +84,18 @@ def test_tabularargn_release_is_locked_without_premature_parity_claim() -> None:
     assert component["package_lock"]["installed_files_verified"] == 53
     assert component["wheel_source_comparison"]["exact_shared_source_files"] == 50
     assert component["patch_sets"] == []
-    assert "validation" not in component
-    assert spec.validation_level.value == "adapter-complete"
+    validation = component["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30961590047
+    assert validation["protocol_id"] == "tabularargn-official-package-parity-v2"
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["contract_normalized_samples_exact"] is True
+    assert validation["result_summary"]["raw_samples_exact"] is False
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert spec.validation_level.value == "native-parity-validated"
     assert spec.modification_status == "adapter-only"
-    assert spec.revision_status == "pinned-official-package-adapter-complete"
+    assert spec.revision_status == "pinned-official-package-native-parity-validated"
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
 
@@ -105,6 +113,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "tabularargn": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
@@ -120,6 +129,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "stasy",
         "tabddpm",
         "tabdiff",
+        "tabularargn",
         "tabsyn",
         "tvae",
     ):

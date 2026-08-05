@@ -1,6 +1,6 @@
 # TabularARGN Validation Protocol
 
-Status: protocol implemented; mandatory Linux run pending
+Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
 
 Protocol: `tabularargn-official-package-parity-v2`
 
@@ -109,4 +109,8 @@ Protocol v2 makes the distinction in criterion 4 explicit. The official package 
 
 ## Evidence
 
-The formal GitHub Actions job is defined in `.github/workflows/tabularargn-validation.yml`. Until its Linux/Python 3.11 artifact is downloaded, inspected, and retained under `docs/evidence/tabularargn/`, the registry remains `adapter-complete`.
+The protocol passed in [GitHub Actions run 30961590047](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30961590047). The validated PR head was `cdc7a0ce150c22f703448c1fcbe8e3b9b50c07c3`; GitHub executed pull-request merge commit `e5129b8799beb1b792c882a9387dbcc1f13a39ce`. Artifact `8913167756` has digest `sha256:52797918884068f13dcd35644a81e9b5c6bdf736ab76619db4f21fe116bb17f0`.
+
+All nine cases passed. Official checkpoint tensors and files, model-configuration semantics, target statistics, contract-normalized sample values, and generated CSV bytes were exact in every case. The evidence separately records Pandas' native `string` and adapter `str` categorical dtype labels, so unnormalized `DataFrame.equals` is false without hiding the exact values or bytes. Every case produced seven canonical, finite, missing-free, in-domain rows; package files remained unchanged and raw/encoded training rows were absent from the retained adapter artifacts.
+
+The downloaded evidence is retained byte-for-byte at `docs/evidence/tabularargn/native-parity-run-30961590047.json` with SHA-256 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`. Accordingly, the flat single-table unconditional-generation adapter is `native-parity-validated`. It remains `experimental`, `unsupported`, and excluded from Official Results until central evaluation, dataset admission, resource, governance, and release gates pass independently.

@@ -587,7 +587,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="autoregressive",
         paradigm="flexible autoregressive tabular synthesizer",
         covered_by_papers=["tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="partial",
         implementation_quality="high",
         repository_url="https://github.com/mostly-ai/mostlyai-engine",
@@ -595,7 +595,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The adapter targets the checksum-pinned method-author `mostlyai-engine==2.6.2` package at tag commit `0b96f02e`.",
             "All 50 package source files are byte-exact with the tagged source archive; the Apache-2.0 license and 53 RECORD-hashed wheel files are locked.",
             "The old estimator pickle was removed. The adapter retains an integrity-manifested official ModelStore and deletes raw/encoded OriginalData after training.",
-            "The Linux/Python 3.11 native-parity workflow is implemented but has not yet supplied retained passing evidence, so the status remains adapter-complete.",
+            "All nine binary, multiclass, regression, and seed cases passed the retained Linux/Python 3.11 official-package parity protocol in run 30961590047.",
+            "The validated scope is flat single-table unconditional generation; central evaluation and release gates remain pending.",
         ],
     ),
     "mitra": ModelInventoryEntry(
