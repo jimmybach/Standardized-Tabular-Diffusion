@@ -128,23 +128,23 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
         "ctab-gan-plus",
         "ctgan",
         "goggle",
+        "great",
         "nflow",
         "nrgboost",
         "realtabformer",
         "smote",
         "stasy",
+        "tabsds",
         "tabddpm",
         "tabdiff",
         "tabularargn",
+        "tabula",
         "tabsyn",
         "tvae",
     }
     assert all(records[model_id]["validation_level"] == "native-parity-validated" for model_id in validated)
-    assert all(
-        record["validation_level"] == "adapter-complete"
-        for model_id, record in records.items()
-        if model_id not in validated
-    )
+    assert records["tabebm"]["validation_level"] == "smoke-validated"
+    assert set(records) == validated | {"tabebm"}
     assert all(record["benchmark_track"] == "experimental" for record in records.values())
     assert all(record["support_level"] == "unsupported" for record in records.values())
     assert all(MODEL_INVENTORY[name].validation_level == record["validation_level"] for name, record in records.items())

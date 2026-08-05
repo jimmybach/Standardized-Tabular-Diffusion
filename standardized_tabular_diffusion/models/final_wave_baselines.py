@@ -1068,3 +1068,9 @@ class TabEBMAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
     def evaluate(self, spec: RunSpec) -> ArtifactBundle:
         return self._evaluate_from_sample_file(spec)
+
+
+# Backward-compatible imports for callers that used this historical aggregate module.
+# The active implementations live in dedicated, provenance-audited modules.
+from standardized_tabular_diffusion.models.great import GReaTAdapter as GReaTAdapter  # noqa: E402,F811
+from standardized_tabular_diffusion.models.tabebm import TabEBMAdapter as TabEBMAdapter  # noqa: E402,F811

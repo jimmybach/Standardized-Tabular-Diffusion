@@ -1,0 +1,139 @@
+name: TabEBM Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/tabebm-validation.yml"
+      - "requirements-tabebm-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/tabebm.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/tabebm.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/TABEBM_VALIDATION*.md"
+      - "docs/evidence/tabebm/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_tabebm_validation.py"
+      - "tests/test_upstream_provenance.py"
+  pull_request:
+    paths:
+      - ".github/workflows/tabebm-validation.yml"
+      - "requirements-tabebm-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/tabebm.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/tabebm.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/TABEBM_VALIDATION*.md"
+      - "docs/evidence/tabebm/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_tabebm_validation.py"
+      - "tests/test_upstream_provenance.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tabebm-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke-validation:
+    name: Linux / Python 3.11 / gated-aware official-package smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-tabebm-validation.txt
+
+      - name: Initialize diagnostic evidence
+        env:
+          VALIDATION_EVIDENCE_PATH: ${{ runner.temp }}/tabebm-evidence.json
+          VALIDATION_MODEL_ID: tabebm
+          VALIDATION_PROTOCOL_ID: tabebm-official-package-core-validation-v1
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = {
+              "schema_version": 1,
+              "protocol_id": os.environ["VALIDATION_PROTOCOL_ID"],
+              "model_id": os.environ["VALIDATION_MODEL_ID"],
+              "status": "fail",
+              "repository_commit": os.environ["GITHUB_SHA"],
+              "error_type": "PreProtocolFailure",
+              "error": "Validation did not reach or complete the protocol step.",
+          }
+          Path(os.environ["VALIDATION_EVIDENCE_PATH"]).write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+
+      - name: Install frozen official TabEBM environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1" "setuptools==80.10.2"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.3.0"
+          python -m pip install -r requirements-tabebm-validation.txt
+          mkdir -p "$RUNNER_TEMP/tabebm-sdist"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/tabebm-sdist/tabebm-2025.8.19.tar.gz" \
+            "https://files.pythonhosted.org/packages/5d/95/a6f327ed88907ca68a7e49e65c9bebe3d9f35b3a623e1c8b89b15597c094/tabebm-2025.8.19.tar.gz"
+          echo "6111611326747a680f93dfadcbac1d602ce20cb722b9b6cbff1f556b9f48d503  $RUNNER_TEMP/tabebm-sdist/tabebm-2025.8.19.tar.gz" | sha256sum --check
+          python -m pip install \
+            --no-deps \
+            --no-build-isolation \
+            --use-pep517 \
+            "$RUNNER_TEMP/tabebm-sdist/tabebm-2025.8.19.tar.gz"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run locked-package and adapter contract tests
+        env:
+          TABEBM_SDIST_PATH: ${{ runner.temp }}/tabebm-sdist/tabebm-2025.8.19.tar.gz
+        run: |
+          python -m pytest tests/test_tabebm_validation.py tests/test_upstream_provenance.py -q
+
+      - name: Run gated-aware official-package smoke protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.tabebm \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/tabebm-validation" \
+            --evidence-path "$RUNNER_TEMP/tabebm-evidence.json" \
+            --sdist-path "$RUNNER_TEMP/tabebm-sdist/tabebm-2025.8.19.tar.gz"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/tabebm-evidence.json" ]; then
+            TABEBM_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("tabebm-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "tabebm-official-package-core-validation-v1", "model_id": "tabebm", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["TABEBM_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: tabebm-smoke-validation-evidence
+          path: ${{ runner.temp }}/tabebm-evidence.json
+          if-no-files-found: error
+          retention-days: 90

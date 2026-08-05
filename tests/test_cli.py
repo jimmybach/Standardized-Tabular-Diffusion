@@ -139,7 +139,7 @@ def test_cli_show_model_inventory_can_describe_tabula(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabula"
-    assert payload["validation_level"] == "adapter-complete"
+    assert payload["validation_level"] == "native-parity-validated"
     assert payload["family"] == "llm"
 
 
@@ -163,7 +163,7 @@ def test_cli_show_model_inventory_can_describe_tabsds(monkeypatch, capsys) -> No
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabsds"
-    assert payload["validation_level"] == "adapter-complete"
+    assert payload["validation_level"] == "native-parity-validated"
     assert payload["family"] == "traditional"
 
 

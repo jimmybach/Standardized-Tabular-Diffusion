@@ -1,0 +1,129 @@
+{
+  "cases": [
+    {
+      "checkpoint_sha256": "5b489b7e2e77d06a310cf9fc70f015a79560b105a45d206433d585d2ae16b769",
+      "csv_sha256": "ad9dfbe5c733847bf5920d17da1bf5032a1563bc7906b6a6a261cda9dd01fa67",
+      "exact": true,
+      "rows": 53,
+      "seed": 0,
+      "variant": "binary"
+    },
+    {
+      "checkpoint_sha256": "5b489b7e2e77d06a310cf9fc70f015a79560b105a45d206433d585d2ae16b769",
+      "csv_sha256": "de17b6f11cef6daaa4d04d2cd6f40e7553fb300d471a0fac452504347a0f5b33",
+      "exact": true,
+      "rows": 53,
+      "seed": 19,
+      "variant": "binary"
+    },
+    {
+      "checkpoint_sha256": "5b489b7e2e77d06a310cf9fc70f015a79560b105a45d206433d585d2ae16b769",
+      "csv_sha256": "8433ee76e6abc80922a1a635acd224cb2f1a11da28b0ac702494862b95216cd7",
+      "exact": true,
+      "rows": 53,
+      "seed": 73,
+      "variant": "binary"
+    },
+    {
+      "checkpoint_sha256": "f1d554b18b9614c88171411b4d5abadb528120d5df1cf046b3164d1c39c4e5ec",
+      "csv_sha256": "096dbe835f6f99e3f003ba3cc4055f5592e6c14e8c89e3b54b8b497028bf289f",
+      "exact": true,
+      "rows": 53,
+      "seed": 0,
+      "variant": "multiclass"
+    },
+    {
+      "checkpoint_sha256": "f1d554b18b9614c88171411b4d5abadb528120d5df1cf046b3164d1c39c4e5ec",
+      "csv_sha256": "45797a1b5b7de3656cb5dac226906365c2828fe8369a7c931a1b2418d5e6cc9d",
+      "exact": true,
+      "rows": 53,
+      "seed": 19,
+      "variant": "multiclass"
+    },
+    {
+      "checkpoint_sha256": "f1d554b18b9614c88171411b4d5abadb528120d5df1cf046b3164d1c39c4e5ec",
+      "csv_sha256": "681e113d99e6f03ba318735039a93b5973b8636b20e3612d6a1ffc9dd070668e",
+      "exact": true,
+      "rows": 53,
+      "seed": 73,
+      "variant": "multiclass"
+    },
+    {
+      "checkpoint_sha256": "2ad6d9043d5e6d9b90e34223280d8a8278987bfa406589399102f01f9ae5d057",
+      "csv_sha256": "4f59383e9f2b2db8f84766d3533dbc458cf6c1c1ae01df21253909e49ad2efaa",
+      "exact": true,
+      "rows": 53,
+      "seed": 0,
+      "variant": "regression"
+    },
+    {
+      "checkpoint_sha256": "2ad6d9043d5e6d9b90e34223280d8a8278987bfa406589399102f01f9ae5d057",
+      "csv_sha256": "53a1d03a916a70c1c663174a6cbc246a0169ba1faf877093c9021ea45e77f5d8",
+      "exact": true,
+      "rows": 53,
+      "seed": 19,
+      "variant": "regression"
+    },
+    {
+      "checkpoint_sha256": "2ad6d9043d5e6d9b90e34223280d8a8278987bfa406589399102f01f9ae5d057",
+      "csv_sha256": "7c3c1920d3cb305001f07d7096506aca08e216e7075dfb95d7bdb68b4ade620b",
+      "exact": true,
+      "rows": 53,
+      "seed": 73,
+      "variant": "regression"
+    }
+  ],
+  "claim_limit": "Exact parity covers the locked method-author Python simple-shuffle path and the declared exact-row repeat/truncate boundary. The upstream repository has no license and remains release-blocked.",
+  "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "tqdm": "4.66.5"
+  },
+  "model_id": "tabsds",
+  "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+  "protocol_id": "tabsds-official-source-parity-v1",
+  "python": "3.11.15",
+  "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+  "result_summary": {
+    "cases_passed": 9,
+    "cases_total": 9,
+    "requested_rows_per_case": 53,
+    "rng_restored": true,
+    "safe_json_checkpoint": true,
+    "sample_csv_bytes_exact": true,
+    "sample_frames_exact": true,
+    "source_unchanged": true
+  },
+  "schema_version": 1,
+  "source": {
+    "license": {
+      "declared_expression": null,
+      "license_file_present": false,
+      "redistribution_status": "not-authorized",
+      "review_status": "upstream-public-no-license-declared"
+    },
+    "manifest_sha256": "27caf6f930add6607916056094f00174b3d17f85b183e92ff983f9a6418907e5",
+    "model_id": "tabsds",
+    "repository": "https://github.com/echaibub/TabSDS",
+    "runtime_files": [
+      {
+        "bytes": 20329,
+        "path": "utility_functions_additional_for_icml_2025.py",
+        "sha256": "a6f6a12e55728c6b2c65db145c3edef3f7aa32962134ff09c608aa553c8a065f"
+      },
+      {
+        "bytes": 19448,
+        "path": "utility_functions_syn_tab_sjppds_for_icml_2025.py",
+        "sha256": "c8afbb22185a28a67be4bb538cbe11a11821af5d33b19c4e4f16cddd00ddfe43"
+      }
+    ],
+    "runtime_files_verified": 2,
+    "source_dir": "/home/runner/work/_temp/tabsds-source",
+    "upstream_commit": "866501495069c7e1300bdea91c411f1947d19f2f",
+    "upstream_model_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
+    "upstream_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee"
+  },
+  "status": "pass"
+}

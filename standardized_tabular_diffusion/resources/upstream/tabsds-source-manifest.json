@@ -1,0 +1,35 @@
+{
+  "archive": {
+    "bytes": 119407,
+    "format": "zip",
+    "root_prefix": "TabSDS-866501495069c7e1300bdea91c411f1947d19f2f/",
+    "sha256": "292011aab0153ca8f7cc90c21dd4acbcbd2a22da557ab080883555b7ab0cf82a",
+    "url": "https://codeload.github.com/echaibub/TabSDS/zip/866501495069c7e1300bdea91c411f1947d19f2f"
+  },
+  "authority": "method-author",
+  "license": {
+    "declared_expression": null,
+    "license_file_present": false,
+    "redistribution_status": "not-authorized",
+    "review_status": "upstream-public-no-license-declared"
+  },
+  "manifest_schema_version": "1.0.0",
+  "model_id": "tabsds",
+  "repository": "https://github.com/echaibub/TabSDS",
+  "runtime_files": [
+    {
+      "bytes": 20329,
+      "path": "utility_functions_additional_for_icml_2025.py",
+      "sha256": "a6f6a12e55728c6b2c65db145c3edef3f7aa32962134ff09c608aa553c8a065f"
+    },
+    {
+      "bytes": 19448,
+      "path": "utility_functions_syn_tab_sjppds_for_icml_2025.py",
+      "sha256": "c8afbb22185a28a67be4bb538cbe11a11821af5d33b19c4e4f16cddd00ddfe43"
+    }
+  ],
+  "source_hash_normalization": "lf-one-final-newline",
+  "upstream_commit": "866501495069c7e1300bdea91c411f1947d19f2f",
+  "upstream_model_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
+  "upstream_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee"
+}

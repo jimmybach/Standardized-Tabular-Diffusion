@@ -1,0 +1,121 @@
+{
+  "archive": {
+    "bytes": 59173,
+    "members": 21,
+    "regular_files": 17,
+    "sha256": "dfb69d55cf4e669f979325bf10b118a084dde49d680680dcebf7dcdaed024a26",
+    "source_commit": "a7d34a94adee5a269f6807395d0040d936bb0e60"
+  },
+  "cases": [
+    {
+      "csv_sha256": "909f90c49032ca1c15d4686ae2d0bf31b6cdd77aae80f96161ef30fd3935024c",
+      "exact": true,
+      "integrity_sha256": "962fd287a6e9ff93e11f5ccedd65709fddf3461a1ae7bb5f301f66880afb2723",
+      "sample_rows": 5,
+      "seed": 0,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    },
+    {
+      "csv_sha256": "8c6c4a5c09300491e15408a05c771363fabb1e0ac9423c98dca17469ceff02d7",
+      "exact": true,
+      "integrity_sha256": "369487efea84e764cd0d8ff89170860bb63043ece20a3469195a9b67691a995f",
+      "sample_rows": 5,
+      "seed": 19,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    },
+    {
+      "csv_sha256": "078a9b59d5e3860a825f0e4bdc8bf5d9670313d6551ac442e528d4629f193260",
+      "exact": true,
+      "integrity_sha256": "8d08ed9cf1d3a277a0392731f5bd2cf73adeb675290c4c60cdf93a6ba7fe7127",
+      "sample_rows": 5,
+      "seed": 73,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    }
+  ],
+  "claim_limit": "Parity covers the locked method-author TabuLa source with a deterministic offline tiny GPT-2 config. The upstream repository has no declared license, so redistribution, Official Results, and release support remain blocked regardless of technical parity.",
+  "environment": {
+    "accelerate": "1.1.1",
+    "datasets": "3.1.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "safetensors": "0.4.5",
+    "scikit-learn": "1.5.2",
+    "torch": "2.3.0+cpu",
+    "transformers": "4.46.3"
+  },
+  "model_id": "tabula",
+  "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+  "protocol_id": "tabula-method-author-source-parity-v1",
+  "python": "3.11.15",
+  "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+  "result_summary": {
+    "cases_passed": 3,
+    "cases_total": 3,
+    "official_fit_executed": true,
+    "official_sample_executed": true,
+    "rng_and_thread_state_restored": true,
+    "safe_safetensors_checkpoint": true,
+    "sample_csv_bytes_exact": true,
+    "sample_frames_exact": true,
+    "source_unchanged": true,
+    "state_tensors_exact": true
+  },
+  "schema_version": 1,
+  "source": {
+    "license": {
+      "declared_expression": null,
+      "license_file_present": false,
+      "redistribution_status": "not-authorized",
+      "review_status": "upstream-public-no-license-declared"
+    },
+    "manifest_sha256": "ed8fb830c632167d3b687026ec21e8ceb49576ad52a27ff56f209966a62080e5",
+    "model_id": "tabula",
+    "repository": "https://github.com/zhao-zilong/Tabula",
+    "runtime_files": [
+      {
+        "bytes": 27,
+        "path": "tabula/__init__.py",
+        "sha256": "bf09bc44e4a04e10e7d1ec7d3af15bb46cce4cbd5a4c312ba22c624df0a5f388"
+      },
+      {
+        "bytes": 18402,
+        "path": "tabula/tabula.py",
+        "sha256": "6d054a6adf91ce05f94a1b303d1b5fba4e4f7a9ec132fdcefcf2ba3a5b4bc0b1"
+      },
+      {
+        "bytes": 2184,
+        "path": "tabula/tabula_dataset.py",
+        "sha256": "ee2fc85682351d46d137e1b37a19cfd97453b18ad102c4ea9910f19c6b239b6a"
+      },
+      {
+        "bytes": 5243,
+        "path": "tabula/tabula_start.py",
+        "sha256": "5fb50e9ced708eec4cced0eba032e42d2928af8fefc132f0a817285f75ffa79b"
+      },
+      {
+        "bytes": 1394,
+        "path": "tabula/tabula_trainer.py",
+        "sha256": "6557b7ef26ddd9b218b22a894f547b4a67bcc762397eb957e4ce5ded7ab049c7"
+      },
+      {
+        "bytes": 3366,
+        "path": "tabula/tabula_utils.py",
+        "sha256": "e24fb5d843df7a340ae3ac99c0d97fa218c7183f39873c3eff8c90b9a5c358e3"
+      }
+    ],
+    "runtime_files_verified": 6,
+    "source_dir": "/home/runner/work/_temp/tabula-source",
+    "upstream_commit": "a7d34a94adee5a269f6807395d0040d936bb0e60",
+    "upstream_model_tree": "6ee7614b3fb60930a41440e242fdade3145ab5b2",
+    "upstream_tree": "dd7d61fbbb071c240f13b6ba3bd05fdf69d25a13"
+  },
+  "status": "pass",
+  "tiny_offline_checkpoint": {
+    "generation_eos_disabled": true,
+    "parameters": 17152,
+    "vocab_size": 9
+  }
+}
