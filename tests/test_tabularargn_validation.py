@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
+from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.validation.tabularargn import (
     PROTOCOL_ID,
     SAMPLE_ROWS,
@@ -22,6 +25,8 @@ from standardized_tabular_diffusion.validation.tabularargn import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabularargn" / "native-parity-run-30961590047.json"
+EVIDENCE_SHA256 = "411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec"
 
 
 def test_locked_release_manifest_and_protocol_scope_are_exact() -> None:
@@ -34,6 +39,47 @@ def test_locked_release_manifest_and_protocol_scope_are_exact() -> None:
     assert SEED_CASES == (0, 19, 73)
     assert VARIANTS == ("binary", "multiclass", "regression")
     assert SAMPLE_ROWS == 7
+
+
+def test_retained_native_parity_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == PROTOCOL_ID
+    assert evidence["repository_commit"] == "e5129b8799beb1b792c882a9387dbcc1f13a39ce"
+    assert evidence["seed_cases"] == list(SEED_CASES)
+    assert evidence["variants"] == list(VARIANTS)
+    assert evidence["package_unchanged_after_validation"] is True
+    assert evidence["compatibility_boundary"]["source_patches"] == []
+    assert len(evidence["cases"]) == 9
+
+    for case in evidence["cases"]:
+        comparisons = case["comparisons"]
+        assert case["status"] == "pass"
+        assert comparisons["checkpoint"]["keys_exact"] is True
+        assert comparisons["checkpoint"]["tensors_exact"] is True
+        assert comparisons["checkpoint"]["file_bytes_exact"] is True
+        assert comparisons["model_config_semantics_exact"] is True
+        assert comparisons["target_stats_semantics_exact"] is True
+        assert comparisons["contract_normalized_samples_exact"] is True
+        assert comparisons["raw_samples_exact"] is False
+        assert comparisons["raw_sample_dtypes"]["native"]["group"] == "string"
+        assert comparisons["raw_sample_dtypes"]["adapter"]["group"] == "str"
+        assert comparisons["sample_bytes_exact"] is True
+        assert comparisons["sample_rows"] == SAMPLE_ROWS
+        assert comparisons["missing_values"] == 0
+        assert comparisons["finite_numerical_output"] is True
+        assert comparisons["categorical_domains_valid"] is True
+        assert comparisons["adapter_metadata_valid"] is True
+        assert comparisons["raw_and_encoded_training_data_pruned"] is True
+        assert comparisons["checkpoint_output_local"] is True
+
+    spec = get_adapter_spec("tabularargn")
+    assert spec.validation_level.value == "native-parity-validated"
+    assert str(EVIDENCE_PATH.relative_to(REPO_ROOT)).replace("\\", "/") in spec.evidence_records
 
 
 @pytest.mark.parametrize("variant", VARIANTS)

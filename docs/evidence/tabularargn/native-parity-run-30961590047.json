@@ -1,0 +1,1008 @@
+{
+  "cases": [
+    {
+      "case": 1,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "65f269d992fde8c4782ecd5f6d9e3cb3cc07692c023553a9e1259dbf291c3b68",
+          "adapter_state_sha256": "89683bf9b3d78d48e1e664f449df04e0960abd72a5b8ec4453b457b5b9323f85",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "65f269d992fde8c4782ecd5f6d9e3cb3cc07692c023553a9e1259dbf291c3b68",
+          "native_state_sha256": "89683bf9b3d78d48e1e664f449df04e0960abd72a5b8ec4453b457b5b9323f85",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "2330aef3737f61bf10d1ad48b96463739d3b8ab642772f05e0ab1babec950bd0",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "binary"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 2,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "99169fc84f166e907e802129c4c7fd319822fba52388affaedee3fb50b2e4a2f",
+          "adapter_state_sha256": "6986c62a03524058a0473a00fe39e6e1a180ac828620e7e3e9bd9e0bb926dc12",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "99169fc84f166e907e802129c4c7fd319822fba52388affaedee3fb50b2e4a2f",
+          "native_state_sha256": "6986c62a03524058a0473a00fe39e6e1a180ac828620e7e3e9bd9e0bb926dc12",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "496330b85108d40e1eaeb9071ba886c3f46f2c47c829bd132964b06b13dd1fa7",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "binary"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 3,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "245b65746b950ede9963d5382ce019e803fcd20a7ae6bc5e8721f7ac29dc6f85",
+          "adapter_state_sha256": "56ca5127ca96cd1ac453046d6fa2b9017a9f2ec9ef7826323c7ee44c7536ab17",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "245b65746b950ede9963d5382ce019e803fcd20a7ae6bc5e8721f7ac29dc6f85",
+          "native_state_sha256": "56ca5127ca96cd1ac453046d6fa2b9017a9f2ec9ef7826323c7ee44c7536ab17",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "7543e6eb806f93a6382ff9a963c031a3c8f85c2beb2e1336e5a22e1aeb4736f0",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "binary"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 4,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "b71d65ff562997f2582f130d4565bfa5a640497f23a049a0d22cff7341dc403c",
+          "adapter_state_sha256": "f839a27e09a1f35d48dc85d22a637c618ff111a66589e2dbd14ac32ba8305e84",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "b71d65ff562997f2582f130d4565bfa5a640497f23a049a0d22cff7341dc403c",
+          "native_state_sha256": "f839a27e09a1f35d48dc85d22a637c618ff111a66589e2dbd14ac32ba8305e84",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "a14bd2fa3e03589dfc015ddd55ef222fde52f36287450f1d51a529c08ec87ebd",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "multiclass"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 5,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "a9af1110c4a874d8c8b71e1f0161cdd522896a3bdbcf39aabe59a6fc6bcb3de9",
+          "adapter_state_sha256": "562e4a48c9aab120175419591115a2bdbb8e5743470d85177d23e2141e8d7359",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "a9af1110c4a874d8c8b71e1f0161cdd522896a3bdbcf39aabe59a6fc6bcb3de9",
+          "native_state_sha256": "562e4a48c9aab120175419591115a2bdbb8e5743470d85177d23e2141e8d7359",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "daffd13f7013a2b035dbd5f39f9541201a3a1bf54b7212735b7a8c679080d7ca",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "multiclass"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 6,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "00338ccab06dcb5f6e844d4de416c874947b4be26275f2bf7c9b908f9613404c",
+          "adapter_state_sha256": "88be0e00860f0440291fe638173aa123cf441ac1fe681bab3458f27e4dee0629",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "00338ccab06dcb5f6e844d4de416c874947b4be26275f2bf7c9b908f9613404c",
+          "native_state_sha256": "88be0e00860f0440291fe638173aa123cf441ac1fe681bab3458f27e4dee0629",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "str"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "string"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "d8159ee46052ff116c9638429e5d7a8f2c59fae2b5c15be8132d246b5bf91fd8",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "training_rows": 48,
+        "variant": "multiclass"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 7,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "3e609ab09fbbc35b1b3ebfdb5f758d03733a6750a3be52deb9c8729d413055c9",
+          "adapter_state_sha256": "2a5f946fc482b2d9508ed655b243f22f22e2cb2066c9dbc86febd6d3fdc37c3b",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "3e609ab09fbbc35b1b3ebfdb5f758d03733a6750a3be52deb9c8729d413055c9",
+          "native_state_sha256": "2a5f946fc482b2d9508ed655b243f22f22e2cb2066c9dbc86febd6d3fdc37c3b",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "Float64"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "Float64"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "256edebdb130706e4b50608f631ee8f9c140fdab9465dc36060e279eec9fc748",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 48,
+        "variant": "regression"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 8,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "d6c549ca8ef39c22abdac3401d0d0dbe7bdc3066be3c2ca0a85fd4e435782e67",
+          "adapter_state_sha256": "56c3bee8230806a897d5a8ae52ae1944427868e4c1929ad78048bd19862e284d",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "d6c549ca8ef39c22abdac3401d0d0dbe7bdc3066be3c2ca0a85fd4e435782e67",
+          "native_state_sha256": "56c3bee8230806a897d5a8ae52ae1944427868e4c1929ad78048bd19862e284d",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "Float64"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "Float64"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "fc824600c6831a20cc55e73f7c8633b06a6e622ae31a5e0aa4977d37d63191d5",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 48,
+        "variant": "regression"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 9,
+      "comparisons": {
+        "adapter_metadata_valid": true,
+        "categorical_domains_valid": true,
+        "checkpoint": {
+          "adapter_file_sha256": "f4770736a2b10e9c5dc980893d8ff14f4d3dd87577eb82967e697b57936f1b60",
+          "adapter_state_sha256": "3ca5c5adeb462fc0e928ffe21f1a2c0194a18fa16246d1f8a950b8829a163a23",
+          "file_bytes_exact": true,
+          "keys_exact": true,
+          "native_file_sha256": "f4770736a2b10e9c5dc980893d8ff14f4d3dd87577eb82967e697b57936f1b60",
+          "native_state_sha256": "3ca5c5adeb462fc0e928ffe21f1a2c0194a18fa16246d1f8a950b8829a163a23",
+          "tensor_count": 25,
+          "tensors_exact": true
+        },
+        "checkpoint_output_local": true,
+        "contract_normalized_samples_exact": true,
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "model_config_semantics_exact": true,
+        "raw_and_encoded_training_data_pruned": true,
+        "raw_sample_dtypes": {
+          "adapter": {
+            "first": "Float64",
+            "group": "str",
+            "second": "Int64",
+            "target": "Float64"
+          },
+          "native": {
+            "first": "Float64",
+            "group": "string",
+            "second": "Int64",
+            "target": "Float64"
+          }
+        },
+        "raw_samples_exact": false,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_rows": 7,
+        "sample_sha256": "a4d4a03e3fa8a9150a6fe1f361dbb8e513c229aac714a4edf414b050af797170",
+        "target_stats_semantics_exact": true
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "training_rows": 48,
+        "variant": "regression"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "compatibility_boundary": {
+    "categorical_domain": "adapter and native control select official rare_category_replacement_method=SAMPLE",
+    "declared_type_coercion": "DatasetSpec categorical roles are strings in adapter and native control",
+    "output_workspace": "official workspace_dir is placed beneath output_dir",
+    "persistent_artifact": "OriginalData is removed; official ModelStore is integrity-manifested and official weights_only load is used",
+    "sampling_rng_reset": "adapter and native control call the official set_random_state function",
+    "source_patches": []
+  },
+  "environment": {
+    "accelerate": "1.12.0",
+    "datasets": "4.6.1",
+    "huggingface-hub": "1.12.2",
+    "joblib": "1.5.3",
+    "json-repair": "0.58.1",
+    "mostlyai-engine": "2.6.2",
+    "numpy": "2.2.6",
+    "opacus": "1.6.0",
+    "pandas": "3.0.2",
+    "peft": "0.19.1",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "psutil": "5.9.8",
+    "pyarrow": "23.0.1",
+    "python": "3.11.15",
+    "scikit-learn": "1.8.0",
+    "setuptools": "80.10.2",
+    "tokenizers": "0.22.2",
+    "torch": "2.11.0",
+    "torchaudio": "2.11.0",
+    "torchvision": "0.26.0",
+    "transformers": "5.7.0",
+    "xgrammar": "0.1.33"
+  },
+  "environment_lock": {
+    "path": "requirements-tabularargn-validation.txt",
+    "sha256": "3af2ad2c9748dceeb5e8aaf80cc7b208b980a1b4baf938cca3432f4e0b08c877"
+  },
+  "model_id": "tabularargn",
+  "package": {
+    "authority": "method-author",
+    "distribution_form": "package",
+    "installed_distribution": {
+      "authority": "method-author",
+      "distribution_form": "package",
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "installed_files": [
+        {
+          "bytes": 1411,
+          "path": "mostlyai/engine/__init__.py",
+          "sha256": "8f777c6d15ab4849fc4bbc7a8095f42d90791f5132e5c8735a14f4c96459633b"
+        },
+        {
+          "bytes": 41445,
+          "path": "mostlyai/engine/_common.py",
+          "sha256": "b60254221d214ef23526f60548bc6237e629793daa0e96f2c1bac085112f8d67"
+        },
+        {
+          "bytes": 1814,
+          "path": "mostlyai/engine/_dtypes.py",
+          "sha256": "1f2509dc1ef9a8d4e267bd52bf96dfff22d07186ee267cb5690fcd35d2b0491b"
+        },
+        {
+          "bytes": 1901,
+          "path": "mostlyai/engine/_memory.py",
+          "sha256": "e2d373a43d28a9d9adcf44a13154bb7e1e88b7b1d970bf0214b7d93d8bbd217e"
+        },
+        {
+          "bytes": 6232,
+          "path": "mostlyai/engine/_training_utils.py",
+          "sha256": "534659492c8f348038eb197a5b6d97e5a819a0d356e890d8e58510480c3175d3"
+        },
+        {
+          "bytes": 8163,
+          "path": "mostlyai/engine/_workspace.py",
+          "sha256": "6c03dccea7a78529f9398da0b6d582e90add6c9d6cb86770844f0577521bc0bd"
+        },
+        {
+          "bytes": 27550,
+          "path": "mostlyai/engine/analysis.py",
+          "sha256": "d1458c55e74e350e019dbbf25e6d43a674b04d8a99b95d9fbee7e8ab92f83483"
+        },
+        {
+          "bytes": 7828,
+          "path": "mostlyai/engine/domain.py",
+          "sha256": "bf8beaf5e6eb60fbc47280c977cfcaf85d2649a86518755643e8f8904b2f9f17"
+        },
+        {
+          "bytes": 1706,
+          "path": "mostlyai/engine/encoding.py",
+          "sha256": "e34daf139e5ec459906a3e51788dd4488dff2741febd9288c52736d4c0dde7bb"
+        },
+        {
+          "bytes": 4535,
+          "path": "mostlyai/engine/generation.py",
+          "sha256": "dfbdd4104eb8f3277f653cab31926e376db157badede481d72729aabdc92b44d"
+        },
+        {
+          "bytes": 1541,
+          "path": "mostlyai/engine/logging.py",
+          "sha256": "432cdbd0ae93396d877c338146e8617e2d84be9ef1ae6facd5c165844fc7cdde"
+        },
+        {
+          "bytes": 1621,
+          "path": "mostlyai/engine/random_state.py",
+          "sha256": "bfa3c01175dd6b7f20f3b9e6a425128fc360d941231f72a69782b8a97ed08673"
+        },
+        {
+          "bytes": 11740,
+          "path": "mostlyai/engine/splitting.py",
+          "sha256": "0a9f6f5f12224094eb4e9c6648b17726a48a5aca0e0e3c4911a7503069a04558"
+        },
+        {
+          "bytes": 5483,
+          "path": "mostlyai/engine/training.py",
+          "sha256": "226c6d92cc41b79cdb2aa61043c77fe1959b2980617b2f1ba768b6fd1e6908bf"
+        },
+        {
+          "bytes": 573,
+          "path": "mostlyai/engine/_encoding_types/__init__.py",
+          "sha256": "2980f72f2c25ca27fe85ea91f651cc8df12eb28f9333560fe8508f5da8fb01cb"
+        },
+        {
+          "bytes": 573,
+          "path": "mostlyai/engine/_encoding_types/language/__init__.py",
+          "sha256": "2980f72f2c25ca27fe85ea91f651cc8df12eb28f9333560fe8508f5da8fb01cb"
+        },
+        {
+          "bytes": 2319,
+          "path": "mostlyai/engine/_encoding_types/language/categorical.py",
+          "sha256": "16377e3763ac9b32de903ff2b3824e8c21e01d91b655777ea7b2d5d0bdd6fbb7"
+        },
+        {
+          "bytes": 6324,
+          "path": "mostlyai/engine/_encoding_types/language/datetime.py",
+          "sha256": "7975ffa5a037d43dfbf6a635ace8e6f2958404f8b1af7bd67de6e6fd04ac438c"
+        },
+        {
+          "bytes": 5857,
+          "path": "mostlyai/engine/_encoding_types/language/numeric.py",
+          "sha256": "bae0bca2b7b4b47fd3da84f22223d323acf3c465f26690d86aadf24dc54eb47c"
+        },
+        {
+          "bytes": 1650,
+          "path": "mostlyai/engine/_encoding_types/language/text.py",
+          "sha256": "6dbabdfcd8e15e710118026dc40df89d16ae5afbe14e64809e9a471afea3979a"
+        },
+        {
+          "bytes": 573,
+          "path": "mostlyai/engine/_encoding_types/tabular/__init__.py",
+          "sha256": "2980f72f2c25ca27fe85ea91f651cc8df12eb28f9333560fe8508f5da8fb01cb"
+        },
+        {
+          "bytes": 5240,
+          "path": "mostlyai/engine/_encoding_types/tabular/categorical.py",
+          "sha256": "60fcb0fc5005b3f86d331a73e1caf45d66662c5bb5d199d432432525ad9245aa"
+        },
+        {
+          "bytes": 6854,
+          "path": "mostlyai/engine/_encoding_types/tabular/character.py",
+          "sha256": "c90513b5867997b22bb59a4b75f38fedd1fd934ca2c4a84b7092373f4a5a5a97"
+        },
+        {
+          "bytes": 12544,
+          "path": "mostlyai/engine/_encoding_types/tabular/datetime.py",
+          "sha256": "d9f5fe84315c0087c95d5ef3c033630984d85196b8773492861c48cfa120dd42"
+        },
+        {
+          "bytes": 16888,
+          "path": "mostlyai/engine/_encoding_types/tabular/itt.py",
+          "sha256": "3412ea2ac1958b85fe981d604de85cba54cca0493001b9b83ea1464cc0262b19"
+        },
+        {
+          "bytes": 14586,
+          "path": "mostlyai/engine/_encoding_types/tabular/lat_long.py",
+          "sha256": "7f19145a33127d246970473a34099bb662a62bd4c50e8d467ce3c42aec3c39ee"
+        },
+        {
+          "bytes": 25563,
+          "path": "mostlyai/engine/_encoding_types/tabular/numeric.py",
+          "sha256": "c1cf5bfab066e5835822e56423737223ad49fc7755cfefc4dbf3b5504287cb24"
+        },
+        {
+          "bytes": 851,
+          "path": "mostlyai/engine/_language/__init__.py",
+          "sha256": "91b27c4613a98b76222f2dded1ab8028ba60ec1a028a692639d3ba755ca712e8"
+        },
+        {
+          "bytes": 6127,
+          "path": "mostlyai/engine/_language/common.py",
+          "sha256": "d1fc35cb1359164ac75e64410d2dcc81568f2781362b4ec286666e3282e12f1e"
+        },
+        {
+          "bytes": 7824,
+          "path": "mostlyai/engine/_language/encoding.py",
+          "sha256": "143ed3998d0098feffe2c9c8d4bcf4ad0aa8bdda4ab26af0d5b3934b953bc88c"
+        },
+        {
+          "bytes": 16475,
+          "path": "mostlyai/engine/_language/generation.py",
+          "sha256": "900b5672ac57d726cd110ae0156b77d506ac7b34fd89fc8a1a15c1e62ed98a5b"
+        },
+        {
+          "bytes": 12944,
+          "path": "mostlyai/engine/_language/interface.py",
+          "sha256": "81a2c798829249595e7c0cc568ca9fe68669f44bab497d0ec917c11260b06e32"
+        },
+        {
+          "bytes": 7398,
+          "path": "mostlyai/engine/_language/lstm.py",
+          "sha256": "36cbfe577519324265fb6da4ffaf0d1b2b50bcc6be4bf63d0d8040200c33e649"
+        },
+        {
+          "bytes": 6483,
+          "path": "mostlyai/engine/_language/tokenizer_utils.py",
+          "sha256": "5c3b934a80008dc1f1cd335102b4f3936cd6a5e0f37e49f2ed6bc4fe49c58888"
+        },
+        {
+          "bytes": 40770,
+          "path": "mostlyai/engine/_language/training.py",
+          "sha256": "f89e3ad2711a67ecb32deff8f01f5afc7bd6e9220d88f64db84126bc08446acf"
+        },
+        {
+          "bytes": 2966,
+          "path": "mostlyai/engine/_language/xgrammar_hf_logits.py",
+          "sha256": "f5d3a9d4f9b7e6a44daabbfa14e3b4156f85b4c3e8342160525cf99035afad80"
+        },
+        {
+          "bytes": 7280,
+          "path": "mostlyai/engine/_language/xgrammar_utils.py",
+          "sha256": "4ce212f2b3a639d0861254e98e6350cebe775127b003b2c050ec479b35947f83"
+        },
+        {
+          "bytes": 573,
+          "path": "mostlyai/engine/_language/engine/__init__.py",
+          "sha256": "2980f72f2c25ca27fe85ea91f651cc8df12eb28f9333560fe8508f5da8fb01cb"
+        },
+        {
+          "bytes": 1998,
+          "path": "mostlyai/engine/_language/engine/base.py",
+          "sha256": "4344f12f1ba5ea26c7fc04af37c191085e5ce0dde4c454ad01851d46ae0f4a2e"
+        },
+        {
+          "bytes": 5302,
+          "path": "mostlyai/engine/_language/engine/hf_engine.py",
+          "sha256": "0e295c45530626d0b8ab10e55da2609b4123c7ab5bade659cb4d6baf9ff624fc"
+        },
+        {
+          "bytes": 6624,
+          "path": "mostlyai/engine/_language/engine/vllm_engine.py",
+          "sha256": "5b79a92be96883f673ef3194751368a75487de00d5d1fdd965e19a110bc9a630"
+        },
+        {
+          "bytes": 573,
+          "path": "mostlyai/engine/_tabular/__init__.py",
+          "sha256": "2980f72f2c25ca27fe85ea91f651cc8df12eb28f9333560fe8508f5da8fb01cb"
+        },
+        {
+          "bytes": 59104,
+          "path": "mostlyai/engine/_tabular/argn.py",
+          "sha256": "724e6e6467e85a61485f7916d361c11a1a6375e3edcff7671dde4bf45638c3f5"
+        },
+        {
+          "bytes": 11702,
+          "path": "mostlyai/engine/_tabular/common.py",
+          "sha256": "b8d86352cde3f0c8f47d95d2d468beb11f8036189bbb230611550f0b8144f34a"
+        },
+        {
+          "bytes": 17412,
+          "path": "mostlyai/engine/_tabular/encoding.py",
+          "sha256": "60c250a1b3c4727f23faa88d140e9b71b920bfb2852a4cef6f3b28f2c1f487a8"
+        },
+        {
+          "bytes": 9646,
+          "path": "mostlyai/engine/_tabular/fairness.py",
+          "sha256": "a040d3ebe243b47c8121b788b6f651481f0d74cda31c200d98cde0dbc084672b"
+        },
+        {
+          "bytes": 57223,
+          "path": "mostlyai/engine/_tabular/generation.py",
+          "sha256": "c154dbe9f71b648c2fed782f8e13d4523e081b4169e4447b986d4e2e87298230"
+        },
+        {
+          "bytes": 32656,
+          "path": "mostlyai/engine/_tabular/interface.py",
+          "sha256": "4c8882dea4d415a405b86dcaadfc5af8273858aa2b430bf6becc73ca07833691"
+        },
+        {
+          "bytes": 23198,
+          "path": "mostlyai/engine/_tabular/probability.py",
+          "sha256": "3bc603977f2263bdbc3fd105726dbe701091e20ebf50a10a376019ed57b3410e"
+        },
+        {
+          "bytes": 40824,
+          "path": "mostlyai/engine/_tabular/training.py",
+          "sha256": "5e2d7d3633c0eb2a0a12bdaca8b4fdad7db0a542ec89117f464621eb38dc4b3d"
+        },
+        {
+          "bytes": 12257,
+          "path": "mostlyai_engine-2.6.2.dist-info/METADATA",
+          "sha256": "bc45318a19aba8c30fb8844c011e2a1cbac58f19ca1a610d119556f3bb0197a8"
+        },
+        {
+          "bytes": 87,
+          "path": "mostlyai_engine-2.6.2.dist-info/WHEEL",
+          "sha256": "41c708c5adba6e097513ab8ccb9f1d7865a2fb469e22491a9e01dcc64da459fc"
+        },
+        {
+          "bytes": 11357,
+          "path": "mostlyai_engine-2.6.2.dist-info/licenses/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ],
+      "installed_files_verified": 53,
+      "license": "Apache-2.0",
+      "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "manifest_path": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/standardized_tabular_diffusion/resources/upstream/tabularargn-wheel-manifest.json",
+      "manifest_sha256": "f76ab560efaa9b1361549e69d640ebea1c432a8c3e9920e1efecfc713d70c0d8",
+      "package_name": "mostlyai-engine",
+      "package_version": "2.6.2",
+      "repository": "https://github.com/mostly-ai/mostlyai-engine",
+      "runtime_versions": {
+        "accelerate": "1.12.0",
+        "datasets": "4.6.1",
+        "huggingface-hub": "1.12.2",
+        "joblib": "1.5.3",
+        "json-repair": "0.58.1",
+        "mostlyai-engine": "2.6.2",
+        "numpy": "2.2.6",
+        "opacus": "1.6.0",
+        "pandas": "3.0.2",
+        "peft": "0.19.1",
+        "psutil": "5.9.8",
+        "pyarrow": "23.0.1",
+        "scikit-learn": "1.8.0",
+        "setuptools": "80.10.2",
+        "tokenizers": "0.22.2",
+        "torch": "2.11.0",
+        "torchaudio": "2.11.0",
+        "torchvision": "0.26.0",
+        "transformers": "5.7.0",
+        "xgrammar": "0.1.33"
+      },
+      "tag": "2.6.2",
+      "upstream_commit": "0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+      "upstream_tree": "199a4085315e601261898007b0dd4ac532d355fe",
+      "wheel_bytes": 185077,
+      "wheel_filename": "mostlyai_engine-2.6.2-py3-none-any.whl",
+      "wheel_sha256": "3ead3770c936919f8fce4e1f9fffd271ffdd490f0292c2ab9a42cb4bafe3caea"
+    },
+    "repository": "https://github.com/mostly-ai/mostlyai-engine",
+    "source_archive": {
+      "archive_members": 176,
+      "bytes": 671861,
+      "exact_shared_package_source_files": 50,
+      "filename": "mostlyai-engine-0b96f02.zip",
+      "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "sha256": "d80cd89b14cdf793e07a2e5b53abe36b5824376d6aa73ae63c56052cf9043c66",
+      "shared_package_source_files": 50
+    },
+    "tag": "2.6.2",
+    "upstream_commit": "0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+    "upstream_tree": "199a4085315e601261898007b0dd4ac532d355fe",
+    "wheel": {
+      "archive_members": 54,
+      "bytes": 185077,
+      "filename": "mostlyai_engine-2.6.2-py3-none-any.whl",
+      "license": "Apache-2.0",
+      "license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "record_hashed_files": 53,
+      "record_rows": 54,
+      "sha256": "3ead3770c936919f8fce4e1f9fffd271ffdd490f0292c2ab9a42cb4bafe3caea"
+    }
+  },
+  "package_unchanged_after_validation": true,
+  "protocol_id": "tabularargn-official-package-parity-v2",
+  "repository_commit": "e5129b8799beb1b792c882a9387dbcc1f13a39ce",
+  "reproduction_target": "method-author-official-flat-tabular-package",
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "status": "pass",
+  "validated_scope": {
+    "conditional_generation_prediction_imputation": "outside-current-generation-adapter",
+    "differential_privacy": "outside-this-parity-protocol",
+    "mode": "flat-single-table-unconditional-generation",
+    "model": "MOSTLY_AI/Small",
+    "sequential_and_relational_modes": "outside-current-single-table-contract",
+    "tasks": [
+      "binary-classification",
+      "multiclass-classification",
+      "regression"
+    ],
+    "value_protection": true
+  },
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

@@ -1,6 +1,6 @@
 # TabularARGN 验证协议
 
-状态：协议已实现；等待 Linux 强制验证
+状态：已在 Linux/Python 3.11 通过；适配器为 `native-parity-validated`
 
 协议：`tabularargn-official-package-parity-v2`
 
@@ -109,4 +109,8 @@ wheel 中的 50 个包源码文件与方法作者标签归档逐字节一致，�
 
 ## 证据
 
-正式 GitHub Actions 任务位于 `.github/workflows/tabularargn-validation.yml`。在 Linux/Python 3.11 制品被下载、检查并永久保留到 `docs/evidence/tabularargn/` 之前，registry 状态保持为 `adapter-complete`。
+协议已在 [GitHub Actions 运行 30961590047](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30961590047) 中通过。通过验证的 PR head 为 `cdc7a0ce150c22f703448c1fcbe8e3b9b50c07c3`；GitHub 实际执行的 pull-request merge 提交为 `e5129b8799beb1b792c882a9387dbcc1f13a39ce`。制品 `8913167756` 的摘要为 `sha256:52797918884068f13dcd35644a81e9b5c6bdf736ab76619db4f21fe116bb17f0`。
+
+9 个用例全部通过。每个用例中的官方检查点张量与文件、模型配置语义、目标统计量、按契约规范化后的样本值和生成 CSV 字节均完全一致。证据分别记录了 Pandas 原生路径的类别 dtype 标签 `string` 与适配器路径的 `str`，因此未规范化的 `DataFrame.equals` 为 false，但这没有掩盖完全一致的值和字节。每个用例都生成 7 行列顺序规范、数值有限、无缺失且类别不超出训练域的数据；官方包文件保持不变，保留的适配器制品不含原始或编码训练行。
+
+下载后的证据已逐字节保留在 `docs/evidence/tabularargn/native-parity-run-30961590047.json`，SHA-256 为 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`。因此，扁平单表无条件生成适配器现为 `native-parity-validated`。在中心评测、数据集准入、资源、治理和发布门槛分别通过之前，它仍为 `experimental`、`unsupported`，且不得进入 Official Results。
