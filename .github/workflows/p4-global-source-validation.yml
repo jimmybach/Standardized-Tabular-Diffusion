@@ -1,0 +1,143 @@
+name: P4 Global Source Runtime Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p4-global-source-validation.yml"
+      - "THIRD_PARTY_NOTICES.md"
+      - "requirements-p4-global-source-validation.txt"
+      - "standardized_tabular_diffusion/evaluation/tabstruct.py"
+      - "standardized_tabular_diffusion/evaluation/utility.py"
+      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
+      - "standardized_tabular_diffusion/validation/p4_global_source.py"
+      - "tests/evaluation/test_p4_global_source_validation.py"
+  pull_request:
+    paths:
+      - ".github/workflows/p4-global-source-validation.yml"
+      - "THIRD_PARTY_NOTICES.md"
+      - "requirements-p4-global-source-validation.txt"
+      - "standardized_tabular_diffusion/evaluation/tabstruct.py"
+      - "standardized_tabular_diffusion/evaluation/utility.py"
+      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
+      - "standardized_tabular_diffusion/validation/p4_global_source.py"
+      - "tests/evaluation/test_p4_global_source_validation.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p4-global-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p4-global-source:
+    name: Linux / Python 3.11 / real XGB, KNN, and TabPFN
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
+      STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN: "1"
+      TABPFN_MODEL_CACHE_DIR: ${{ runner.temp }}/p4-tabpfn-models
+      XDG_CACHE_HOME: ${{ runner.temp }}/p4-xdg-cache
+      P4_TABEVAL_SOURCE_PATH: ${{ runner.temp }}/tabeval/eval_structure.py
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-p4-global-source-validation.txt
+
+      - name: Initialize failure evidence
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = {
+              "evidence_schema_version": "1.0.0",
+              "protocol_id": "p4-global-source-runtime-pilot-v1",
+              "phase": "P4 Global source-runtime pilot",
+              "status": "fail",
+              "repository_commit": os.environ["GITHUB_SHA"],
+              "error_type": "PreProtocolFailure",
+              "error": "A required workflow step failed before the validation protocol completed.",
+          }
+          (Path(os.environ["RUNNER_TEMP"]) / "p4-global-source-evidence.json").write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+
+      - name: Install the frozen CPU source runtime
+        run: |
+          python -m pip install --upgrade "pip==25.1.1" "setuptools==80.10.2"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.3.0"
+          python -m pip install -r requirements-p4-global-source-validation.txt
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Acquire and attest the exact TabEval source and license
+        run: |
+          mkdir -p "$RUNNER_TEMP/tabeval"
+          curl --fail --location --proto '=https' --proto-redir '=https' \
+            --output "$RUNNER_TEMP/tabeval/eval_structure.py" \
+            "https://raw.githubusercontent.com/SilenceX12138/TabEval/dba19a4ee7aa391621cbeb464609285fd515dece/src/tabeval/metrics/eval_structure.py"
+          curl --fail --location --proto '=https' --proto-redir '=https' \
+            --output "$RUNNER_TEMP/tabeval/LICENSE" \
+            "https://raw.githubusercontent.com/SilenceX12138/TabEval/dba19a4ee7aa391621cbeb464609285fd515dece/LICENSE"
+          echo "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743  $RUNNER_TEMP/tabeval/eval_structure.py" | sha256sum --check
+          echo "11d68d4f6040e19f06cfce52c85f1f64d9a2d2d8cc67567daf53377f7b8358a7  $RUNNER_TEMP/tabeval/LICENSE" | sha256sum --check
+
+      - name: Acquire immutable TabPFN-v2 classifier and regressor checkpoints
+        run: |
+          mkdir -p "$TABPFN_MODEL_CACHE_DIR"
+          curl --fail --location --proto '=https' --proto-redir '=https' \
+            --output "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt" \
+            "https://huggingface.co/Prior-Labs/TabPFN-v2-clf/resolve/f851f2a3c941544733b712d8c0f96dfae9b28862/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt?download=true"
+          curl --fail --location --proto '=https' --proto-redir '=https' \
+            --output "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-regressor.ckpt" \
+            "https://huggingface.co/Prior-Labs/TabPFN-v2-reg/resolve/4972a65a1b30806315c6f92499959ffbfc69a673/tabpfn-v2-regressor.ckpt?download=true"
+          echo "cf8c519c01eaf1613ee91239006d57b1c806ff5f23ac1aeb1315ba1015210e49  $TABPFN_MODEL_CACHE_DIR/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt" | sha256sum --check
+          echo "2ab5a07d5c41dfe6db9aa7ae106fc6de898326c2765be66505a07e2868c10736  $TABPFN_MODEL_CACHE_DIR/tabpfn-v2-regressor.ckpt" | sha256sum --check
+
+      - name: Run source identity and import tests
+        run: >-
+          python -m pytest
+          tests/evaluation/test_p4_global_source_validation.py
+          tests/evaluation/test_p4_utility.py
+          -q
+
+      - name: Execute exact source and adapter pilot
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p4_global_source
+          --output "$RUNNER_TEMP/p4-global-source-evidence.json"
+          --source-path "$P4_TABEVAL_SOURCE_PATH"
+          --license-path "$RUNNER_TEMP/tabeval/LICENSE"
+          --classifier-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt"
+          --regressor-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-regressor.ckpt"
+          --time-limit-seconds 120
+          --require-primary-environment
+
+      - name: Upload source-runtime evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: p4-global-source-runtime-evidence
+          path: ${{ runner.temp }}/p4-global-source-evidence.json
+          if-no-files-found: error
+          retention-days: 90

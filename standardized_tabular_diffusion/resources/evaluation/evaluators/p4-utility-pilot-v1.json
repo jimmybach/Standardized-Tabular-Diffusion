@@ -54,7 +54,7 @@
       "repository": "https://github.com/SilenceX12138/TabEval.git",
       "revision": "dba19a4ee7aa391621cbeb464609285fd515dece",
       "symbol": "tabeval.metrics.eval_structure.UtilityPerFeature",
-      "source_sha256": "edd2ab2ad576e5ef46c55bac01ac3366d8eec91b40398da48bf2e1c061e2d90c"
+      "source_sha256": "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743"
     },
     "predictors": ["xgb", "knn", "tabpfn"],
     "autogluon_presets": "medium_quality",
