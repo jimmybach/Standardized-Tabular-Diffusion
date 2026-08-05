@@ -1,0 +1,107 @@
+name: BN Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/bn-validation.yml"
+      - "requirements-bn-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/structured_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/bn.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/BN_VALIDATION*.md"
+      - "docs/evidence/bn/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "docs/model_reproducibility_assessment.md"
+      - "docs/runtime_status.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_bn_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  pull_request:
+    paths:
+      - ".github/workflows/bn-validation.yml"
+      - "requirements-bn-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/structured_baselines.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/bn.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/BN_VALIDATION*.md"
+      - "docs/evidence/bn/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "docs/model_reproducibility_assessment.md"
+      - "docs/runtime_status.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_bn_validation.py"
+      - "tests/test_upstream_provenance.py"
+      - "tests/test_adapters.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bn-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / official-package recipe parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-bn-validation.txt
+
+      - name: Install frozen official pgmpy environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install -r requirements-bn-validation.txt
+          mkdir -p "$RUNNER_TEMP/pgmpy-wheel"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/pgmpy-wheel/pgmpy-1.1.2-py3-none-any.whl" \
+            "https://files.pythonhosted.org/packages/c6/5d/d03634ed296986abad834a69b0df21510cc9b6c40fb8afaed5df1c4b6074/pgmpy-1.1.2-py3-none-any.whl"
+          echo "e55c78763a4a45dd644a13b250cea86af0c7e08590cf35de489624f34a4d9a0b  $RUNNER_TEMP/pgmpy-wheel/pgmpy-1.1.2-py3-none-any.whl" | sha256sum --check
+          python -m pip install --no-deps "$RUNNER_TEMP/pgmpy-wheel/pgmpy-1.1.2-py3-none-any.whl"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run direct-package-versus-adapter parity protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.bn \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/bn-validation" \
+            --evidence-path "$RUNNER_TEMP/bn-evidence.json" \
+            --wheel-path "$RUNNER_TEMP/pgmpy-wheel/pgmpy-1.1.2-py3-none-any.whl"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/bn-evidence.json" ]; then
+            BN_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("bn-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "pgmpy-bn-recipe-parity-v1", "model_id": "bn", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["BN_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: bn-native-parity-evidence
+          path: ${{ runner.temp }}/bn-evidence.json
+          if-no-files-found: error
+          retention-days: 90

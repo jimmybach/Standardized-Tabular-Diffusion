@@ -122,6 +122,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
     assert set(records) == set(registry.list_models())
     validated = {
         "arf",
+        "bn",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",

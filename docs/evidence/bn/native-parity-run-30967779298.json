@@ -1,0 +1,2643 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/binary/seed-0/adapter/model.bn.json",
+        "checkpoint_sha256": "545179336769ab35055556e4cc02dd240b6266cca980817844aa3b349e52c236",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/binary/seed-0/adapter/samples.csv",
+        "sample_sha256": "00b02659fd3605889a26afe23cffee4bf413b1cda177ebda0ea4f050add03421"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.22820512820512823,
+                0.10512820512820513
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.10512820512820513,
+                0.22820512820512823
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.5
+              ],
+              [
+                0.5
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 2
+          }
+        ],
+        "discrete_sample_sha256": "166ad7f8713d713eadbccf8aae99628b68995490cf2ef4bf1efe9c27e0785d70",
+        "discrete_training_sha256": "a51ec9facd3be6abdd1f91a97efe9f34e3b36d26532b1347154da0a8e09d226d",
+        "edges": [
+          [
+            "segment",
+            "linked_value"
+          ],
+          [
+            "target",
+            "continuous"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "00b02659fd3605889a26afe23cffee4bf413b1cda177ebda0ea4f050add03421"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/binary/seed-19/adapter/model.bn.json",
+        "checkpoint_sha256": "55a11e5a6eabb9d6b2218e86c7656f9dec6c85510cb818b0d996d5d407b9a232",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/binary/seed-19/adapter/samples.csv",
+        "sample_sha256": "69addb32ecd983948c51c47407b611999470419b4e74ae63cd35545bffd48f3a"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.22820512820512823,
+                0.10512820512820513
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.10512820512820513,
+                0.22820512820512823
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.5
+              ],
+              [
+                0.5
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 2
+          }
+        ],
+        "discrete_sample_sha256": "f95d99bbdebd4dd3d9824f9c12a9e6fb784cbab820811392b1c56c692eb8c169",
+        "discrete_training_sha256": "a51ec9facd3be6abdd1f91a97efe9f34e3b36d26532b1347154da0a8e09d226d",
+        "edges": [
+          [
+            "segment",
+            "linked_value"
+          ],
+          [
+            "target",
+            "continuous"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "69addb32ecd983948c51c47407b611999470419b4e74ae63cd35545bffd48f3a"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/binary/seed-73/adapter/model.bn.json",
+        "checkpoint_sha256": "557c03e6c86cfe1a29ee34ad874dc1f4b11569151d09f0363e25fbd05c364d46",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/binary/seed-73/adapter/samples.csv",
+        "sample_sha256": "19fc6cd565af2e56d53f078fe97b96f8dd7d5eb67ecd695e21336700d4e65160"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              2
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.22820512820512823,
+                0.10512820512820513
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.012820512820512822,
+                0.3205128205128205
+              ],
+              [
+                0.3205128205128205,
+                0.012820512820512822
+              ],
+              [
+                0.10512820512820513,
+                0.22820512820512823
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "target": [
+                "no",
+                "yes"
+              ]
+            },
+            "values": [
+              [
+                0.5
+              ],
+              [
+                0.5
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 2
+          }
+        ],
+        "discrete_sample_sha256": "5b7e2ed9ee18592ae6423f3e852f10b02bb8b17f9494ebca72ed8a7d94c25e0c",
+        "discrete_training_sha256": "a51ec9facd3be6abdd1f91a97efe9f34e3b36d26532b1347154da0a8e09d226d",
+        "edges": [
+          [
+            "segment",
+            "linked_value"
+          ],
+          [
+            "target",
+            "continuous"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "19fc6cd565af2e56d53f078fe97b96f8dd7d5eb67ecd695e21336700d4e65160"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-0/adapter/model.bn.json",
+        "checkpoint_sha256": "c5db7407842e110e4321f78e77785b9ec5ee83b5731fa68e988c4357b9670aba",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-0/adapter/samples.csv",
+        "sample_sha256": "86a4001b8a58fa03ef3144edc7975c8c5d42f6f11b7b58cf5774d9ddd3507ad6"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.47692307692307684,
+                0.015384615384615384
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.02564102564102564,
+                0.025641025641025637,
+                0.9487179487179486
+              ],
+              [
+                0.02564102564102564,
+                0.9487179487179486,
+                0.025641025641025637
+              ],
+              [
+                0.9487179487179488,
+                0.025641025641025637,
+                0.025641025641025637
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 3
+          }
+        ],
+        "discrete_sample_sha256": "8a740d6925bd6ff5eacfb63ae8843303ce88ae9f95438be2b9f397237db73177",
+        "discrete_training_sha256": "7af14d0df3f9d9c2098d7f2c17ed2191f7aee5698b1986e51370ce818ff3ef6f",
+        "edges": [
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "target"
+          ],
+          [
+            "target",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "86a4001b8a58fa03ef3144edc7975c8c5d42f6f11b7b58cf5774d9ddd3507ad6"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-19/adapter/model.bn.json",
+        "checkpoint_sha256": "9e7e1a28a11e193ca0e347e01dcf918785aabcebbd0b5fa2eb636e4c4269ef89",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-19/adapter/samples.csv",
+        "sample_sha256": "ece53a7d0a5039f32d9ca5128e542a19197b197d23809b64708d28544ffa0926"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.47692307692307684,
+                0.015384615384615384
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.02564102564102564,
+                0.025641025641025637,
+                0.9487179487179486
+              ],
+              [
+                0.02564102564102564,
+                0.9487179487179486,
+                0.025641025641025637
+              ],
+              [
+                0.9487179487179488,
+                0.025641025641025637,
+                0.025641025641025637
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 3
+          }
+        ],
+        "discrete_sample_sha256": "c9d9a895fb1ddeaaf7dd83848f27113a8a316f222d53226880c52db473736f0c",
+        "discrete_training_sha256": "7af14d0df3f9d9c2098d7f2c17ed2191f7aee5698b1986e51370ce818ff3ef6f",
+        "edges": [
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "target"
+          ],
+          [
+            "target",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "ece53a7d0a5039f32d9ca5128e542a19197b197d23809b64708d28544ffa0926"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-73/adapter/model.bn.json",
+        "checkpoint_sha256": "98c82afa6fe5ead3cedc0f9c66788df1668fea3d0ca97851f03214b245f0d908",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/multiclass/seed-73/adapter/samples.csv",
+        "sample_sha256": "fe8035de4921dcf2d12f5b9c5c097b573f37fe869c77062bd9e20b560e78b676"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "target"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.47692307692307684,
+                0.015384615384615384
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ],
+              "target": [
+                "blue",
+                "green",
+                "red"
+              ]
+            },
+            "values": [
+              [
+                0.02564102564102564,
+                0.025641025641025637,
+                0.9487179487179486
+              ],
+              [
+                0.02564102564102564,
+                0.9487179487179486,
+                0.025641025641025637
+              ],
+              [
+                0.9487179487179488,
+                0.025641025641025637,
+                0.025641025641025637
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 3
+          }
+        ],
+        "discrete_sample_sha256": "c7a92d31a9988ca5b070c51b374ab8241fc5326d949eb7278f3af20b5f2ba168",
+        "discrete_training_sha256": "7af14d0df3f9d9c2098d7f2c17ed2191f7aee5698b1986e51370ce818ff3ef6f",
+        "edges": [
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "target"
+          ],
+          [
+            "target",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "fe8035de4921dcf2d12f5b9c5c097b573f37fe869c77062bd9e20b560e78b676"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/regression/seed-0/adapter/model.bn.json",
+        "checkpoint_sha256": "fc68831b945650a458d004d62e0ab7e7777babf55bb254dac09240eb37e66e25",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/regression/seed-0/adapter/samples.csv",
+        "sample_sha256": "5523d3d9e6455e903192d22566501a83fcf637e57e6122a5f89c4dcb8a45a86a"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "continuous"
+            ],
+            "evidence_card": [
+              6
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            },
+            "values": [
+              [
+                0.9358974358974357,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.7512820512820512,
+                0.19743589743589743,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.1974358974358974,
+                0.4743589743589744,
+                0.2897435897435897,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.2897435897435897,
+                0.658974358974359,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.7512820512820513,
+                0.19743589743589743
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.19743589743589743,
+                0.7512820512820513
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 6
+          }
+        ],
+        "discrete_sample_sha256": "b15ec5bac188ddd997802ff0f11b8270d7475f233e06471150e1bc0efeadd366",
+        "discrete_training_sha256": "898593c16917815d06d700970164190b6bb9d0bc3d14bdcb5fd9f75e4122178e",
+        "edges": [
+          [
+            "continuous",
+            "target"
+          ],
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "5523d3d9e6455e903192d22566501a83fcf637e57e6122a5f89c4dcb8a45a86a"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/regression/seed-19/adapter/model.bn.json",
+        "checkpoint_sha256": "6fdc37b39dce202ed41f0d6b078057771787d07d30b1507aa6df33aa38ac1b1d",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/regression/seed-19/adapter/samples.csv",
+        "sample_sha256": "400cb88f32621e3e37b844665ef7302c38dce76866490b3d2ae9c26607038c91"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "continuous"
+            ],
+            "evidence_card": [
+              6
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            },
+            "values": [
+              [
+                0.9358974358974357,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.7512820512820512,
+                0.19743589743589743,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.1974358974358974,
+                0.4743589743589744,
+                0.2897435897435897,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.2897435897435897,
+                0.658974358974359,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.7512820512820513,
+                0.19743589743589743
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.19743589743589743,
+                0.7512820512820513
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 6
+          }
+        ],
+        "discrete_sample_sha256": "4474a635aa5d0de5155c530f317bb24002075277c628b5808a8cac1cb002be7b",
+        "discrete_training_sha256": "898593c16917815d06d700970164190b6bb9d0bc3d14bdcb5fd9f75e4122178e",
+        "edges": [
+          [
+            "continuous",
+            "target"
+          ],
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "400cb88f32621e3e37b844665ef7302c38dce76866490b3d2ae9c26607038c91"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/bn-validation/regression/seed-73/adapter/model.bn.json",
+        "checkpoint_sha256": "0eacc91c679e706020ddcd50c5cd5853fddd336f9c8bab297bb6aada25e8021e",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/bn-validation/regression/seed-73/adapter/samples.csv",
+        "sample_sha256": "bdf89fe6ac0e0021fcbb85cb084303b9bd0464b6f325f4b2fc0ca65c4d2b066d"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "cpds_exact": true,
+        "discrete_training_exact": true,
+        "graph_edges_exact": true,
+        "model_state": {
+          "artifact_access_control_required": true,
+          "privacy_not_overclaimed": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_global_numpy_state_unchanged": true,
+        "preprocessing_exact": true,
+        "raw_discrete_sample_exact": true,
+        "restored_model_exact": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "constant_numeric_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "numeric_ranges_valid": true,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "cpds": [
+          {
+            "evidence": [
+              "linked_value"
+            ],
+            "evidence_card": [
+              5
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "values": [
+              [
+                0.4696969696969698,
+                0.196969696969697,
+                0.2878787878787879,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.015151515151515154,
+                0.4696969696969698,
+                0.4696969696969698,
+                0.01515151515151515,
+                0.007936507936507936
+              ],
+              [
+                0.3787878787878789,
+                0.2878787878787879,
+                0.015151515151515154,
+                0.10606060606060606,
+                0.10317460317460317
+              ],
+              [
+                0.10606060606060609,
+                0.015151515151515154,
+                0.196969696969697,
+                0.37878787878787884,
+                0.15079365079365079
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.01515151515151515,
+                0.4841269841269841
+              ],
+              [
+                0.015151515151515154,
+                0.015151515151515154,
+                0.015151515151515154,
+                0.4696969696969697,
+                0.24603174603174605
+              ]
+            ],
+            "variable": "continuous",
+            "variable_card": 6
+          },
+          {
+            "evidence": [
+              "segment"
+            ],
+            "evidence_card": [
+              3
+            ],
+            "state_names": {
+              "linked_value": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ],
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.01538461538461538,
+                0.47692307692307695
+              ],
+              [
+                0.47692307692307695,
+                0.01538461538461538,
+                0.015384615384615384
+              ],
+              [
+                0.015384615384615384,
+                0.47692307692307684,
+                0.47692307692307695
+              ]
+            ],
+            "variable": "linked_value",
+            "variable_card": 5
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "constant_value": [
+                "0"
+              ]
+            },
+            "values": [
+              [
+                1.0
+              ]
+            ],
+            "variable": "constant_value",
+            "variable_card": 1
+          },
+          {
+            "evidence": [],
+            "evidence_card": [],
+            "state_names": {
+              "segment": [
+                "alpha",
+                "beta",
+                "gamma"
+              ]
+            },
+            "values": [
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ],
+              [
+                0.33333333333333337
+              ]
+            ],
+            "variable": "segment",
+            "variable_card": 3
+          },
+          {
+            "evidence": [
+              "continuous"
+            ],
+            "evidence_card": [
+              6
+            ],
+            "state_names": {
+              "continuous": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ],
+              "target": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            },
+            "values": [
+              [
+                0.9358974358974357,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.7512820512820512,
+                0.19743589743589743,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.1974358974358974,
+                0.4743589743589744,
+                0.2897435897435897,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.2897435897435897,
+                0.658974358974359,
+                0.01282051282051282,
+                0.01282051282051282
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.7512820512820513,
+                0.19743589743589743
+              ],
+              [
+                0.012820512820512818,
+                0.012820512820512818,
+                0.01282051282051282,
+                0.01282051282051282,
+                0.19743589743589743,
+                0.7512820512820513
+              ]
+            ],
+            "variable": "target",
+            "variable_card": 6
+          }
+        ],
+        "discrete_sample_sha256": "4a9e00cb00c6c4a299893670c47762378b196b1d2553c1546b54d2dce2743fe1",
+        "discrete_training_sha256": "898593c16917815d06d700970164190b6bb9d0bc3d14bdcb5fd9f75e4122178e",
+        "edges": [
+          [
+            "continuous",
+            "target"
+          ],
+          [
+            "linked_value",
+            "continuous"
+          ],
+          [
+            "segment",
+            "linked_value"
+          ]
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_sha256": "bdf89fe6ac0e0021fcbb85cb084303b9bd0464b6f325f4b2fc0ca65c4d2b066d"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "claim_boundary": "Exact parity with direct calls to official pgmpy 1.1.2 for the repository-declared discretized BIC hill-climb and BDeu Bayesian-network recipe. This is not a paper-native implementation, does not validate alternative BN recipes, and does not establish benchmark eligibility or release support.",
+  "environment": {
+    "PyYAML": "6.0.3",
+    "anyio": "4.14.2",
+    "certifi": "2026.7.22",
+    "click": "8.4.2",
+    "filelock": "3.32.2",
+    "fsspec": "2026.7.0",
+    "h11": "0.16.0",
+    "hf-xet": "1.6.0",
+    "httpcore": "1.0.9",
+    "httpx": "0.28.1",
+    "huggingface-hub": "1.26.0",
+    "idna": "3.18",
+    "joblib": "1.5.3",
+    "narwhals": "2.24.0",
+    "networkx": "3.6.1",
+    "numpy": "2.4.6",
+    "opt-einsum": "3.4.0",
+    "packaging": "26.3",
+    "pandas": "3.0.5",
+    "patsy": "1.0.2",
+    "pgmpy": "1.1.2",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "pyparsing": "3.3.2",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "scikit-base": "1.1.0",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.17.1",
+    "setuptools": "80.10.2",
+    "six": "1.17.0",
+    "statsmodels": "0.14.6",
+    "threadpoolctl": "3.6.0",
+    "tqdm": "4.70.0",
+    "typing-extensions": "4.16.0",
+    "tzdata": "2026.3",
+    "wheel": "0.45.1"
+  },
+  "environment_lock": {
+    "path": "requirements-bn-validation.txt",
+    "sha256": "581f188464223069f815de00a7806bb239ec0e7ef2c0ecec81d67de9cc5a5f4a"
+  },
+  "fixtures": [
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "constant_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value",
+        "constant_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "classification",
+      "train_csv_sha256": "164863b970a90f4ca12ef0d94f72c0ece6ba972d1ccf838bed2467bcd99b5ef6",
+      "variant": "binary"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "constant_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value",
+        "constant_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "classification",
+      "train_csv_sha256": "3c7f3248e0a1821df26c3307d7243f8fa90975228aff4b8a61fca310ef608b38",
+      "variant": "multiclass"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "constant_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value",
+        "constant_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "regression",
+      "train_csv_sha256": "b0d4547080cc466e695c261c9aa38928e8143b6383f60a9f25cda4ad7bb2716c",
+      "variant": "regression"
+    }
+  ],
+  "model_id": "bn",
+  "protocol_id": "pgmpy-bn-recipe-parity-v1",
+  "repository_commit": "9397b09677e784376d0e9130e31c403682cc9f38",
+  "reproduction_target": "official-pgmpy-package-plus-declared-bn-recipe",
+  "runtime_config": {
+    "recipe": {
+      "epsilon": 0.0001,
+      "equivalent_sample_size": 5.0,
+      "max_indegree": 2,
+      "max_iter": 100,
+      "n_jobs": 1,
+      "num_bins": 6,
+      "prior_type": "BDeu",
+      "quantile_method": "averaged_inverted_cdf",
+      "return_type": "dag",
+      "scoring_method": "bic-d",
+      "subsample": null,
+      "tabu_length": 20
+    },
+    "safe_checkpoint": "JSON graph, CPD, and preprocessing state without executable pickle or rows",
+    "sample_rows": 13
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "canonical-library",
+    "distribution_form": "package-wheel",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license": "MIT",
+      "license_sha256": "89171dcc8977530b0c101fbbb1c1d34caee998fc7def9eded629753cd2616a15",
+      "package_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/pgmpy",
+      "public_classes": {
+        "BayesianModelSampling": "pgmpy.sampling.Sampling.BayesianModelSampling",
+        "DiscreteBayesianEstimator": "pgmpy.parameter_estimator.discrete_bayesian.DiscreteBayesianEstimator",
+        "DiscreteBayesianNetwork": "pgmpy.models.DiscreteBayesianNetwork.DiscreteBayesianNetwork",
+        "HillClimbSearch": "pgmpy.causal_discovery.HillClimbSearch.HillClimbSearch",
+        "TabularCPD": "pgmpy.factors.discrete.CPD.TabularCPD"
+      },
+      "runtime_file_sha256": {
+        "__init__.py": "9101323f3d2a90053a876c27d8c59ce1c5b8aa2639f35a44069af0ef4028a093",
+        "causal_discovery/HillClimbSearch.py": "5434e891f61a9c8c008555c4395f0cf3d239cb185250a905b6ad6f03278952a9",
+        "causal_discovery/_base.py": "6212ae1ed122646b61e4e690518f2e5c6b97dbb6e3215223b64b17278aad6087",
+        "factors/discrete/CPD.py": "b8a546710c5a5c779836a683c9dd600832508b00e5c1da4a1830c09536741812",
+        "models/DiscreteBayesianNetwork.py": "3502fc66983b2b2075c0c6cddb217e598dc9845e0d494a98e10370fd421d275c",
+        "parameter_estimator/discrete_bayesian.py": "c5b1ae4f69e8b755712680a352ffb9efa08831703e8fcc9d679983f09179fe98",
+        "sampling/Sampling.py": "55f3a9ccd20aa47a1f93ee1983ae0f222d04691fbb5a372148ffd49ebc9c2258",
+        "structure_score/bic.py": "e696aef70d8c911fb8e2cfe1f1d752cb904aebcc482cbf6c9c077a1708c31ee8",
+        "structure_score/log_likelihood.py": "b414f8df40b3e4ee04a55cc006f20a45c4c045ddff06b618fd343fcb5ba0cd9e"
+      },
+      "version": "1.1.2",
+      "wheel_record_hashes_verified": 648,
+      "wheel_record_rows_verified": 649
+    },
+    "license": "MIT",
+    "repository": "https://github.com/pgmpy/pgmpy",
+    "reproduction_target": "official-pgmpy-package-plus-declared-bn-recipe",
+    "wheel": {
+      "audited_source_relation": "All 636 pgmpy files are byte-exact across the wheel, source distribution, and locked Git tag.",
+      "bytes": 2446383,
+      "critical_git_blob_matches": {
+        "pgmpy-1.1.2.dist-info/licenses/LICENSE": "03ecd36bef85c9ec40fbb2c7bc9cb84a755c96af",
+        "pgmpy/__init__.py": "7589aa93784ec90a0cfa173caa548fbc6d7a0a59",
+        "pgmpy/causal_discovery/HillClimbSearch.py": "6271ab19fdbd5f130e2917ccf112701ae9aba5e3",
+        "pgmpy/causal_discovery/_base.py": "fce2baf91a37aea3e215900b5fafa0d7083215c9",
+        "pgmpy/factors/discrete/CPD.py": "e4b49b42fa08c2dba4aacf9faa8efd35fadf00fc",
+        "pgmpy/models/DiscreteBayesianNetwork.py": "80469c7c3682f225b534416805df804e647b7825",
+        "pgmpy/parameter_estimator/discrete_bayesian.py": "68b18bacde998f39162c7797e1357050085ed40a",
+        "pgmpy/sampling/Sampling.py": "e11b39194668c0b800a14993439bc6305641abda",
+        "pgmpy/structure_score/bic.py": "a22aeff0a50be20800c5d907fb168aded93ff3a0",
+        "pgmpy/structure_score/log_likelihood.py": "1acb6a3f1e9ce798dec050a3fd9c145149b7ec20"
+      },
+      "filename": "pgmpy-1.1.2-py3-none-any.whl",
+      "license": "MIT",
+      "license_sha256": "89171dcc8977530b0c101fbbb1c1d34caee998fc7def9eded629753cd2616a15",
+      "package_files_verified": 636,
+      "requirements": [
+        "huggingface_hub>=0.23",
+        "networkx>=3.0",
+        "numpy>=2.0",
+        "scipy>=1.10",
+        "scikit-learn>=1.2",
+        "pandas>=1.5",
+        "statsmodels>=0.14.5",
+        "tqdm>=4.64",
+        "pyparsing>=3.0",
+        "joblib>=1.2",
+        "opt_einsum>=3.3",
+        "scikit-base>=0.12.4",
+        "torch>=2.5; extra == \"torch\"",
+        "pyro-ppl>=1.9.1; extra == \"torch\"",
+        "pgmpy[torch]; extra == \"optional\"",
+        "daft-pgm>=0.1.4; extra == \"optional\"",
+        "xgboost>=2.0.3; extra == \"optional\"",
+        "litellm>=1.61.15; extra == \"optional\"",
+        "pygraphviz; extra == \"optional\"",
+        "xdoctest>=0.11.0; extra == \"tests\"",
+        "pytest>=3.3.1; extra == \"tests\"",
+        "pytest-cov; extra == \"tests\"",
+        "pytest-split; extra == \"tests\"",
+        "pytest-xdist; extra == \"tests\"",
+        "coverage>=4.3.4; extra == \"tests\"",
+        "mock; extra == \"tests\"",
+        "black; extra == \"tests\"",
+        "pre-commit; extra == \"tests\"",
+        "jsonschema; extra == \"tests\"",
+        "sempler; extra == \"tests\"",
+        "sphinx>=5.0; extra == \"docs\"",
+        "ipython; extra == \"docs\"",
+        "nbsphinx; extra == \"docs\"",
+        "numpydoc; extra == \"docs\"",
+        "pydata-sphinx-theme; extra == \"docs\"",
+        "sphinx-copybutton; extra == \"docs\"",
+        "sphinx-design; extra == \"docs\"",
+        "sphinxext-opengraph; extra == \"docs\"",
+        "sphinx_sitemap; extra == \"docs\"",
+        "myst_parser; extra == \"docs\"",
+        "pgmpy[docs,optional,tests]; extra == \"all\""
+      ],
+      "requires_python": "<3.15,>=3.10",
+      "sha256": "e55c78763a4a45dd644a13b250cea86af0c7e08590cf35de489624f34a4d9a0b",
+      "source_commit": "617cb48af678a7a471aad81d523ca95d2095430f",
+      "source_tag": "v1.1.2",
+      "source_tag_object": "ff663f9203c5075b2367707917016efafed03593",
+      "source_tree": "6c7adc00a479f540b2215889b1fac99a7b0b8a9c",
+      "trusted_publishing": "PyPI provenance binds both 1.1.2 distributions to the locked tag commit.",
+      "wheel_files_verified": 649
+    }
+  },
+  "source_unchanged_after_validation": true,
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

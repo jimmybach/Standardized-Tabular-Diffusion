@@ -285,15 +285,26 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pt")
         if config.model == "arf":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.arf.json")
+        if config.model == "bn":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.bn.json")
         if config.model == "tabsds":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
-        record_user_checkpoint(checkpoint_path, code_executing=config.model != "arf")
+        record_user_checkpoint(checkpoint_path, code_executing=config.model not in {"arf", "bn"})
 
     if action == "sample" and config.model == "arf":
         arf_checkpoint_path = Path(
             config.sample.checkpoint_path or str(Path(config.output_dir) / "model.arf.json")
         )
         metadata_path = arf_checkpoint_path.with_name(f"{arf_checkpoint_path.name}.metadata.json")
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+
+    if action == "sample" and config.model == "bn":
+        bn_checkpoint_path = Path(
+            config.sample.checkpoint_path or str(Path(config.output_dir) / "model.bn.json")
+        )
+        metadata_path = bn_checkpoint_path.with_name(f"{bn_checkpoint_path.name}.metadata.json")
         checked["checkpoint_metadata_path"] = str(metadata_path)
         if not metadata_path.exists():
             missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
