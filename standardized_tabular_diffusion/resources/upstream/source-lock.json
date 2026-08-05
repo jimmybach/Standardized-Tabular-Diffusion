@@ -140,6 +140,98 @@
         "workflow_run_id": 30964711614
       }
     },
+    "bn": {
+      "adapter_ids": [
+        "bn"
+      ],
+      "authoritative_repository": "https://github.com/pgmpy/pgmpy",
+      "authority": "canonical-library",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "bn-declared-types-and-missing-values-v1",
+          "reason": "CSV inference alone does not preserve benchmark-declared numerical, categorical, and target roles, and the validated recipe does not define missing-value handling.",
+          "semantic_effect": "The adapter applies the DatasetSpec roles, checks numerical finiteness, and rejects missing values before calling unchanged official package APIs. Missing values must first pass through the train-fitted benchmark preprocessing module."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "bn-deterministic-discretization-v1",
+          "reason": "The official Bayesian-network classes operate on discrete states, while the standardized datasets can contain numerical columns.",
+          "semantic_effect": "Numerical variables use the declared scikit-learn quantile recipe and constant variables use one explicit state. The boundaries and state names are persisted and compared exactly with an independent direct-package path."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "bn-complete-node-set-v1",
+          "reason": "A learned edge list does not by itself represent isolated variables, including constant columns.",
+          "semantic_effect": "Every canonical column is added as an official DiscreteBayesianNetwork node before the learned edges and unchanged official parameter estimation are applied; no fallback sample column is fabricated."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "bn-safe-json-state-v1",
+          "reason": "Persisting a complete Python model with pickle creates a code-execution boundary and is unnecessary for graph-and-CPD sampling.",
+          "semantic_effect": "Typed JSON stores package identity, preprocessing state, graph edges, and CPDs, then reconstructs official pgmpy objects and calls check_model() before unchanged official sampling. No row-level training frame is stored."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "bn-scoped-random-state-v1",
+          "reason": "Official sampling interacts with NumPy random state while the benchmark must not mutate the caller's process-global state.",
+          "semantic_effect": "The standardized seed is applied to the unchanged official sampler inside a scoped NumPy state and the caller's prior state is restored afterward."
+        }
+      ],
+      "component_id": "bn",
+      "dependency_resolution": {
+        "declared_requirement": "pgmpy 1.1.2 Requires-Dist metadata verified against the official wheel",
+        "validation_environment_lock": "requirements-bn-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/pgmpy/pgmpy/blob/617cb48af678a7a471aad81d523ca95d2095430f/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "bytes": 2446383,
+        "filename": "pgmpy-1.1.2-py3-none-any.whl",
+        "format": "wheel",
+        "name": "pgmpy",
+        "pypi_url": "https://pypi.org/project/pgmpy/1.1.2/",
+        "sha256": "e55c78763a4a45dd644a13b250cea86af0c7e08590cf35de489624f34a4d9a0b",
+        "url": "https://files.pythonhosted.org/packages/c6/5d/d03634ed296986abad834a69b0df21510cc9b6c40fb8afaed5df1c4b6074/pgmpy-1.1.2-py3-none-any.whl",
+        "version": "1.1.2"
+      },
+      "patch_sets": [],
+      "release": {
+        "git_tag": "v1.1.2",
+        "git_tag_object": "ff663f9203c5075b2367707917016efafed03593",
+        "published_at": "2026-04-30T14:09:50Z",
+        "source_commit": "617cb48af678a7a471aad81d523ca95d2095430f",
+        "source_tree": "6c7adc00a479f540b2215889b1fac99a7b0b8a9c",
+        "tag_signature": "unsigned"
+      },
+      "reproduction_target": "official-pgmpy-package-plus-declared-bn-recipe",
+      "source_package_comparison": {
+        "exact_package_files": 636,
+        "git_only_files": 12,
+        "relation": "All pgmpy package files in the official wheel are byte-exact with both the PyPI source distribution and locked Git tag. PyPI Trusted Publishing provenance binds version 1.1.2 to the locked tag commit."
+      },
+      "source_license_sha256": "89171dcc8977530b0c101fbbb1c1d34caee998fc7def9eded629753cd2616a15",
+      "upstream_commit": "617cb48af678a7a471aad81d523ca95d2095430f",
+      "upstream_tree": "6c7adc00a479f540b2215889b1fac99a7b0b8a9c",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "pgmpy-bn-recipe-parity-v1",
+        "status": "pending-authoritative-linux-python-3.11-evidence",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free",
+          "implementation": "official-pgmpy-package-plus-declared-bn-recipe",
+          "paper_native_equivalence": "not-claimed"
+        },
+        "variants": [
+          "binary",
+          "multiclass",
+          "regression"
+        ]
+      }
+    },
     "codi": {
       "adapter_ids": [
         "codi"

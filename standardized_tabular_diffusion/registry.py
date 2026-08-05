@@ -127,9 +127,15 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
     "bn": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",
         "BNAdapter",
-        authority="local",
-        distribution="hybrid",
-        modification="semantic-patched",
+        authority="canonical-library",
+        distribution="package",
+        target="official-pgmpy-package-plus-declared-bn-recipe",
+        modification="adapter-only",
+        install_extra="bn",
+        upstream_repository="https://github.com/pgmpy/pgmpy",
+        upstream_revision="617cb48af678a7a471aad81d523ca95d2095430f",
+        revision_status="pinned-canonical-package-parity-pending",
+        license_status="MIT; source-and-package-license-verified; transitive-review-pending",
     ),
     "codi": _spec(
         "standardized_tabular_diffusion.models.vendored_baselines",
