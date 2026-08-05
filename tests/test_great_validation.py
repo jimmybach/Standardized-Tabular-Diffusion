@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 
@@ -16,6 +18,11 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.validation import great as great_validation
 
 pytestmark = pytest.mark.core
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "great" / "native-parity-run-30974574472.json"
+EVIDENCE_SHA256 = "c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def test_great_authority_and_protocol_are_locked() -> None:
@@ -48,3 +55,18 @@ def test_great_integrity_manifest_rejects_executable_files(tmp_path: Path) -> No
     GReaTAdapter._write_integrity_manifest(model_root)
     with pytest.raises(ValueError, match="forbidden"):
         GReaTAdapter._validate_safe_model_root(model_root)
+
+
+def test_great_retained_native_parity_evidence_is_exact() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert len(evidence["cases"]) == 3
+    assert evidence["result_summary"]["state_tensors_exact"] is True
+    assert evidence["result_summary"]["sample_csv_bytes_exact"] is True
+    validation = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["great"]["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["workflow_run_id"] == 30974574472
+    assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
+    assert get_adapter_spec("great").validation_level.value == "native-parity-validated"

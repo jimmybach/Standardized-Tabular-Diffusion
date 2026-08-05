@@ -1,6 +1,6 @@
 # TabEBM 验证协议
 
-状态：等待考虑门控依赖的权威冒烟运行
+状态：已提升为 `smoke-validated`；未执行受门控的完整 TabPFN 生成
 
 协议：`tabebm-official-package-core-validation-v1`
 
@@ -39,4 +39,4 @@ TabEBM 只支持分类。适配器要求一个目标、至少两个目标类别�
 
 ## 证据
 
-只有强制 GitHub Actions 冒烟工作流通过后，才会补入永久证据记录。
+GitHub Actions 运行 [`30974574544`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544) 已在 Linux、Python 3.11.15 环境通过。该运行验证了锁定源码分发物与安装包，执行了可确定运行的官方核心辅助函数，并通过二分类和多分类的安全状态/调用委托边界用例。经审阅的 JSON 已逐字节保留在 `docs/evidence/tabebm/smoke-validation-run-30974574544.json`，SHA-256 为 `8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc`，且明确记录 `full_tabpfn_generation_executed=false`。该证据只支持 `smoke-validated`，不支持原生等价声明。

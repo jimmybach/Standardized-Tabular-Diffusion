@@ -1,0 +1,73 @@
+{
+  "adapter_cases": [
+    {
+      "checkpoint_sha256": "c82e814a9a58dc2c7d95276b7243ccd39c393f510f40da0b071f5f52a7db7d75",
+      "csv_sha256": "1445179f595434a825435e105d70ce7b568bb4475ab41e909dd3e446aaead669",
+      "official_generate_called": true,
+      "rows": 13,
+      "variant": "binary"
+    },
+    {
+      "checkpoint_sha256": "4cf2aa7c59b649693c3114383c9e4d7adc741ca59aa24a5a1a0673b1cdb10fa8",
+      "csv_sha256": "1e49a2c1fe93cf14ce3b28c0183ab7219e1e5d2d110b5b0a1a3da5be44f450dc",
+      "official_generate_called": true,
+      "rows": 13,
+      "variant": "multiclass"
+    }
+  ],
+  "claim_limit": "This is smoke validation, not native parity. The installed official package, pure deterministic core, safe preprocessing state, and generate delegation boundary are validated. Full generation is not run because TabPFN-v2 model access requires external accepted terms and credentials.",
+  "environment": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "tabebm": "2025.8.19",
+    "tabpfn": "2.1.2",
+    "torch": "2.3.0+cpu"
+  },
+  "installed_package": {
+    "name": "tabebm",
+    "record_hashed_files_present": 9,
+    "record_rows": 12,
+    "runtime_files": {
+      "tabebm/TabEBM.py": "e5ed68e8af8e4b4362485471931718356b6a9d2760472719d3d8245688840f4a",
+      "tabebm/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runtime_files_verified": 2,
+    "sdist_sha256": "6111611326747a680f93dfadcbac1d602ce20cb722b9b6cbff1f556b9f48d503",
+    "upstream_commit": "72eb78dab896c7a8f39c4dcc288c834fd72eff2b",
+    "upstream_model_tree": "5df0517922b9b03d29c5d84e46af3423537d801f",
+    "upstream_tree": "627af984e9447bf1a88f1d13e4c766704738ec28",
+    "version": "2025.8.19"
+  },
+  "model_id": "tabebm",
+  "official_core": {
+    "energy_exact": true,
+    "full_train_split_exercised": true,
+    "surrogate_negatives_seeded": true
+  },
+  "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+  "protocol_id": "tabebm-official-package-core-validation-v1",
+  "python": "3.11.15",
+  "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+  "result_summary": {
+    "adapter_cases_passed": 2,
+    "full_tabpfn_generation_executed": false,
+    "official_generate_delegation_exercised_with_test_double": true,
+    "official_pure_core_exercised": true,
+    "package_unchanged": true,
+    "safe_json_checkpoint": true
+  },
+  "schema_version": 1,
+  "source_distribution": {
+    "bytes": 19178,
+    "critical_files_verified": 4,
+    "filename": "tabebm-2025.8.19.tar.gz",
+    "license": "Apache-2.0",
+    "regular_files_verified": 12,
+    "sha256": "6111611326747a680f93dfadcbac1d602ce20cb722b9b6cbff1f556b9f48d503",
+    "source_commit": "72eb78dab896c7a8f39c4dcc288c834fd72eff2b"
+  },
+  "status": "pass",
+  "validation_level": "smoke-validated"
+}

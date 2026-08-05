@@ -1,6 +1,6 @@
 # TabuLa Validation Protocol
 
-Status: authoritative Linux run pending
+Status: `native-parity-validated` by a retained authoritative Linux run
 
 Protocol: `tabula-method-author-source-parity-v1`
 
@@ -39,4 +39,4 @@ The gate also verifies archive and six-file source identity, unchanged source af
 
 ## Evidence
 
-The mandatory GitHub Actions run and permanent byte-for-byte evidence record will be added only after the authoritative workflow passes.
+GitHub Actions run [`30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505) passed on Linux with Python 3.11.15. All three seeds matched every trained tensor, exact-row sample DataFrame, and CSV byte; source identity and immutability, safe persistence, bounded sampling, and caller-state restoration also passed. The inspected JSON is retained byte-for-byte at `docs/evidence/tabula/native-parity-run-30974574505.json` with SHA-256 `35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c` and is cross-linked from the source lock. The absent upstream license still blocks redistribution and release.

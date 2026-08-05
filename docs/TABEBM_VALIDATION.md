@@ -1,6 +1,6 @@
 # TabEBM Validation Protocol
 
-Status: authoritative gated-aware smoke run pending
+Status: `smoke-validated`; full gated TabPFN generation was not executed
 
 Protocol: `tabebm-official-package-core-validation-v1`
 
@@ -39,4 +39,4 @@ Promotion beyond `smoke-validated` requires a separately authorized Linux run wi
 
 ## Evidence
 
-The mandatory GitHub Actions smoke run and permanent evidence record will be added only after the authoritative workflow passes.
+GitHub Actions run [`30974574544`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544) passed on Linux with Python 3.11.15. It verified the locked distribution and installed package, executed deterministic official core helpers, and passed binary and multiclass safe-state/delegation boundary cases. The inspected JSON is retained byte-for-byte at `docs/evidence/tabebm/smoke-validation-run-30974574544.json` with SHA-256 `8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc` and explicitly records `full_tabpfn_generation_executed=false`. This evidence supports `smoke-validated`, not native parity.

@@ -2,7 +2,7 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, 17 adapters are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. GReaT, TabuLa, and TabSDS now target checksum-locked official packages or method-author source rather than local compatibility implementations; their mandatory authoritative parity runs are pending. TabEBM targets the official package but can reach only `smoke-validated` in public CI because full generation requires explicit acceptance of gated TabPFN-v2 terms and model access. Benchmark eligibility and release support remain independent gates for every adapter.
+At the current release-preparation baseline, 20 adapters are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. GReaT, TabuLa, and TabSDS now target checksum-locked official packages or method-author source rather than local compatibility implementations, and their authoritative parity runs have passed. TabEBM is `smoke-validated` against the official package but cannot claim native parity from public CI because full generation requires explicit acceptance of gated TabPFN-v2 terms and model access. Benchmark eligibility and release support remain independent gates for every adapter.
 
 BN targets the checksum-locked official `pgmpy==1.1.2` wheel plus an explicit quantile/BIC/BDeu recipe. Its adapter includes every canonical node, fails closed on missing data and unsupported recipe changes, and stores safe JSON graph/CPD state rather than pickle. All nine exact cases passed in retained Linux/Python 3.11 run `30967779298`, so its adapter status is `native-parity-validated`. This target is recipe parity with a canonical library, not a paper-native implementation claim; Official Results and release support remain separate gates.
 
@@ -35,6 +35,10 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `stasy`: passed all nine binary, multiclass, regression, and seed cases in `stasy-tabsyn-snapshot-parity-v1` GitHub Actions run `30936275831`; checkpoint state and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
 - `codi`: passed all nine binary, multiclass, regression, and seed cases in `codi-tabsyn-snapshot-parity-v1` GitHub Actions run `30941940893`; both checkpoint states and generated CSV bytes matched exactly. The permanent evidence validates the TabSyn snapshot only, not the distinct method-author source.
 - `goggle`: passed all nine binary, multiclass, regression, and seed cases in `goggle-method-author-native-parity-v1` GitHub Actions run `30945676747`; checkpoint tensors and files, raw core samples, and final frames/CSV bytes matched exactly. The permanent evidence validates the unmodified method-author GCN core only; SAGE, heterogeneous decoding, Official Results, and release gates remain pending.
+- `great`: passed all three seed cases in `be-great-official-package-parity-v1` GitHub Actions run `30974574472`; trained tensors, guided samples, CSV bytes, safe restoration, and caller-state restoration matched exactly. Full-scale pretrained-model quality, Official Results, and release gates remain outside the claim.
+- `tabula`: passed all three seed cases in `tabula-method-author-source-parity-v1` GitHub Actions run `30974574505`; trained tensors, exact-row samples, CSV bytes, safe restoration, and caller-state restoration matched exactly. The absent upstream license independently blocks redistribution and release.
+- `tabsds`: passed all nine binary, multiclass, regression, and seed cases in `tabsds-official-source-parity-v1` GitHub Actions run `30974574593`; direct-source and adapter DataFrames and CSV bytes matched exactly, including the repeat/truncate boundary. The absent upstream license independently blocks redistribution and release.
+- `tabebm`: passed `tabebm-official-package-core-validation-v1` GitHub Actions run `30974574544`; package identity, deterministic official core helpers, safe state, and the adapter delegation boundary were validated. Full gated TabPFN generation did not execute, so the claim stops at `smoke-validated`.
 
 ## Previously Reported Local End-to-End Executions
 
@@ -53,14 +57,14 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 - `stasy`
 - `codi`
 
-These models were reported to have completed at least one local path through the shared CLI. ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, NFlow, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, TabDDPM, TabDiff, TabSyn, and STaSy now have separate retained native-parity evidence; all other historical entries remain useful engineering observations but do not currently satisfy the formal smoke-validation gate.
+These models were reported to have completed at least one local path through the shared CLI. All 20 adapters except TabEBM now have separate retained native-parity evidence. TabEBM has retained smoke evidence with an explicit gated-generation limitation. Historical local executions remain engineering observations rather than independent release claims.
 
 ## Final Four Integration Status
 
-- `great`: official `be-great==0.0.14` wheel, installed runtime hashes, safe safetensors/JSON artifact, and three-seed direct-package parity gate are implemented; authoritative evidence is pending.
-- `tabula`: six method-author files are acquired on demand and never patched. Safe persistence and a bounded Linux sampling boundary replace the former local reimplementation; authoritative three-seed parity is pending. The absent upstream license blocks release independently.
-- `tabsds`: the former approximation is replaced by the two official notebook helper files. All nine local binary/multiclass/regression and seed cases pass exact source-versus-adapter CSV comparison; authoritative Linux evidence is pending. The absent upstream license blocks release independently.
-- `tabebm`: official package identity, safe preprocessing state, explicit gated opt-in, and exact-row assembly are implemented. Public CI validates deterministic official helpers and delegation only; real TabPFN-backed generation requires a separately authorized run.
+- `great`: official `be-great==0.0.14` wheel, installed runtime hashes, safe safetensors/JSON artifact, and three-seed direct-package parity passed in retained run `30974574472`.
+- `tabula`: six method-author files are acquired on demand and never patched. Safe persistence and a bounded, exact-row Linux sampling boundary replace the former local reimplementation; three-seed parity passed in retained run `30974574505`. The absent upstream license blocks release independently.
+- `tabsds`: the former approximation is replaced by the two official notebook helper files. All nine binary/multiclass/regression and seed cases passed exact source-versus-adapter comparison in retained run `30974574593`. The absent upstream license blocks release independently.
+- `tabebm`: official package identity, safe preprocessing state, explicit gated opt-in, and exact-row assembly are implemented. Retained run `30974574544` validates deterministic official helpers and delegation only; real TabPFN-backed generation requires a separately authorized run.
 
 ## Historical Environment Caveats
 
@@ -72,5 +76,5 @@ These models were reported to have completed at least one local path through the
 ## Current Interpretation
 
 - Treat every current adapter as an experimental engineering integration until its evidence record says otherwise.
-- GReaT, TabuLa, and TabSDS remain `adapter-complete` until mandatory retained parity evidence exists; TabEBM cannot exceed `smoke-validated` without a separately authorized real TabPFN run.
+- GReaT, TabuLa, and TabSDS are `native-parity-validated` for their precisely scoped official targets; TabEBM cannot exceed `smoke-validated` without a separately authorized real TabPFN run.
 - The `tabebm` gated-sample preset may be used only on machines whose users have accepted the applicable model terms and configured access.

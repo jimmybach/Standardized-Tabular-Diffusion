@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 
@@ -12,6 +14,11 @@ from standardized_tabular_diffusion.upstream_sources import load_source_manifest
 from standardized_tabular_diffusion.validation import tabula as tabula_validation
 
 pytestmark = pytest.mark.core
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabula" / "native-parity-run-30974574505.json"
+EVIDENCE_SHA256 = "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def test_tabula_method_author_source_lock_and_protocol() -> None:
@@ -96,3 +103,18 @@ def test_tabula_exact_row_boundary_rejects_repeated_empty_batches() -> None:
             device="cpu",
             max_empty_batches=2,
         )
+
+
+def test_tabula_retained_native_parity_evidence_is_exact() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert len(evidence["cases"]) == 3
+    assert evidence["result_summary"]["state_tensors_exact"] is True
+    assert evidence["result_summary"]["sample_csv_bytes_exact"] is True
+    validation = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tabula"]["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["workflow_run_id"] == 30974574505
+    assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
+    assert get_adapter_spec("tabula").validation_level.value == "native-parity-validated"

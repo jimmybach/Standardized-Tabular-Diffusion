@@ -1,6 +1,6 @@
 # TabSDS Validation Protocol
 
-Status: local protocol passed; authoritative Linux run pending
+Status: `native-parity-validated` by a retained authoritative Linux run
 
 Protocol: `tabsds-official-source-parity-v1`
 
@@ -35,4 +35,4 @@ Binary classification, multiclass classification, and regression fixtures are ea
 
 ## Evidence
 
-The protocol passes locally for all nine cases. Promotion waits for the mandatory GitHub Actions run and its permanently retained evidence artifact.
+GitHub Actions run [`30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) passed on Linux with Python 3.11.15. All nine binary, multiclass, regression, and seed cases produced identical DataFrames and CSV bytes across direct-source and adapter paths while exercising the 53-from-37 repeat/truncate boundary. The inspected JSON is retained byte-for-byte at `docs/evidence/tabsds/native-parity-run-30974574593.json` with SHA-256 `11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66` and is cross-linked from the source lock. The absent upstream license still blocks redistribution and release.

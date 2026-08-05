@@ -1,0 +1,97 @@
+{
+  "cases": [
+    {
+      "csv_sha256": "c3e731cb4aad5564e9ed9c608d1eeae85aed905a73ea09d4d5b1f39428d5b10b",
+      "exact": true,
+      "integrity_sha256": "0f1661e444284cfd4849c9ae1a2da93c320bb77451e7a267f25afd732226b894",
+      "sample_rows": 7,
+      "seed": 0,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    },
+    {
+      "csv_sha256": "a0494b1ceb096ab1568115da6f328e73211962f4c349aa779a50012a79fec40f",
+      "exact": true,
+      "integrity_sha256": "262e018fafc95267908bac7f1b67ca20e51a33f41b1a35118c6481fbf3823466",
+      "sample_rows": 7,
+      "seed": 19,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    },
+    {
+      "csv_sha256": "0e2f4ce049b35aa3c559e6c665c19a48973fee2375c7e6c6a6e4696b21d6eb6d",
+      "exact": true,
+      "integrity_sha256": "cce9ff59866f3c079006754ea4bb4dbbc7ad57872decd0b8369c1085f9dc1702",
+      "sample_rows": 7,
+      "seed": 73,
+      "state_tensors_exact": 17,
+      "train_rows": 24
+    }
+  ],
+  "claim_limit": "Parity covers the unchanged be-great 0.0.14 package with a deterministic offline tiny GPT-2 checkpoint and guided categorical sampling. Full-scale pretrained-model quality, central evaluation, privacy, runtime budgets, Official Results, and release support remain separate gates.",
+  "environment": {
+    "accelerate": "1.1.1",
+    "be-great": "0.0.14",
+    "chugchug": "0.1.3",
+    "datasets": "3.1.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "safetensors": "0.4.5",
+    "scikit-learn": "1.5.2",
+    "torch": "2.3.0+cpu",
+    "transformers": "4.46.3"
+  },
+  "installed_package": {
+    "name": "be-great",
+    "runtime_files": {
+      "be_great/__init__.py": "646351494b2987471e18df8ee225c3e920cf96396a6a83ac674084b562c8186e",
+      "be_great/great.py": "58c12342f9fff0b1811ec08ed85e71803f4a06990cd56b43e33118b2800fd536",
+      "be_great/great_constrained.py": "ec747abd355fc93661c18e335c3e6223218169110ee1e9c85d5de21b77d8ecd7",
+      "be_great/great_dataset.py": "5a98ad598480af392667a1dba6bf625fb6a19f39eeb8429a93d957ba2da6490a",
+      "be_great/great_mock_datasets.py": "05af9ed53bbca11d67e6d66393c75d493e2e0a665a1b82798544ca311ff30fa8",
+      "be_great/great_start.py": "2f8b150c3fb9b46528335ca0b3ab09a21ddef66122c9c7e852d6e22a272d68f9",
+      "be_great/great_trainer.py": "b67afb0731c7161853390e0469fc9ff991cd66195c1ce0db6e29ef0f7d77deec",
+      "be_great/great_utils.py": "4622e2a911575f846235ce402994f9fee9477853024a9f7342b9ef955f2f7dd2"
+    },
+    "runtime_files_verified": 8,
+    "sdist_sha256": "5f84487e958349d5aaf31ecc8368779664af7be500f8f3719007c1e9c47b1045",
+    "upstream_commit": "b300f6123cf1d9590b76ea45cc23298df944a319",
+    "upstream_model_tree": "b2f1799f00557ca2021f4b73c9d3962d33ada806",
+    "upstream_tree": "82eccd92deb18d6138a4fd96a8e0eb097b38babb",
+    "version": "0.0.14",
+    "wheel_sha256": "4f6384ec4a736177ae2d1e6146951cfdfc764b1cc041ae5c2b155a99dd18cb74"
+  },
+  "model_id": "great",
+  "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+  "protocol_id": "be-great-official-package-parity-v1",
+  "python": "3.11.15",
+  "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+  "result_summary": {
+    "cases_passed": 3,
+    "cases_total": 3,
+    "official_fit_executed": true,
+    "official_guided_sample_executed": true,
+    "package_unchanged": true,
+    "rng_and_thread_state_restored": true,
+    "safe_safetensors_checkpoint": true,
+    "sample_csv_bytes_exact": true,
+    "sample_frames_exact": true,
+    "state_tensors_exact": true
+  },
+  "schema_version": 1,
+  "status": "pass",
+  "tiny_offline_checkpoint": {
+    "parameters": 17312,
+    "vocab_size": 14
+  },
+  "wheel": {
+    "bytes": 54019,
+    "filename": "be_great-0.0.14-py3-none-any.whl",
+    "license": "MIT",
+    "package_aggregate_sha256": "3e98e1e0e68ce614b62d425c8fcf559ab0387cbf85dd0e27166c22b360fcfaca",
+    "package_files_verified": 14,
+    "sha256": "4f6384ec4a736177ae2d1e6146951cfdfc764b1cc041ae5c2b155a99dd18cb74",
+    "source_commit": "b300f6123cf1d9590b76ea45cc23298df944a319",
+    "wheel_files_verified": 19
+  }
+}

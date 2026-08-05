@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -12,6 +14,11 @@ from standardized_tabular_diffusion.upstream_sources import load_source_manifest
 from standardized_tabular_diffusion.validation import tabsds as tabsds_validation
 
 pytestmark = pytest.mark.core
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsds" / "native-parity-run-30974574593.json"
+EVIDENCE_SHA256 = "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def test_tabsds_method_author_source_lock_and_protocol() -> None:
@@ -50,3 +57,17 @@ def test_tabsds_rejects_missing_values(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="imputed"):
         TabSDSAdapter(tmp_path)._load_training_frame(dataset)
+
+
+def test_tabsds_retained_native_parity_evidence_is_exact() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert len(evidence["cases"]) == 9
+    assert evidence["result_summary"]["sample_csv_bytes_exact"] is True
+    validation = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tabsds"]["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["workflow_run_id"] == 30974574593
+    assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
+    assert get_adapter_spec("tabsds").validation_level.value == "native-parity-validated"

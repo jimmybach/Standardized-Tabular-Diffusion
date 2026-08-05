@@ -1,6 +1,6 @@
 # TabuLa 验证协议
 
-状态：等待 Linux 权威运行
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
 
 协议：`tabula-method-author-source-parity-v1`
 
@@ -39,4 +39,4 @@
 
 ## 证据
 
-只有权威 GitHub Actions 工作流通过后，才会补入运行链接和永久保留的逐字节证据文件。
+GitHub Actions 运行 [`30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505) 已在 Linux、Python 3.11.15 环境通过。三个种子的全部训练张量、精确行数样本 DataFrame 与 CSV 字节均一致，源码身份与运行前后不变、安全持久化、受限采样和调用者状态恢复也全部通过。经审阅的 JSON 已逐字节保留在 `docs/evidence/tabula/native-parity-run-30974574505.json`，SHA-256 为 `35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c`，并已从 source lock 交叉引用。上游许可证缺失仍然阻止再分发与发布。

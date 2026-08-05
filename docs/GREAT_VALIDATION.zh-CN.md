@@ -1,6 +1,6 @@
 # GReaT 验证协议
 
-状态：等待 Linux 权威运行
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
 
 协议：`be-great-official-package-parity-v1`
 
@@ -39,4 +39,4 @@ wheel 中 14 个包文件与标签源码分发物逐字节一致，确定性聚�
 
 ## 证据
 
-只有权威 GitHub Actions 工作流通过后，才会补入运行链接和永久保留的逐字节证据文件。
+GitHub Actions 运行 [`30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472) 已在 Linux、Python 3.11.15 环境通过。三个种子的全部训练张量、guided sampling DataFrame 与 CSV 字节均精确一致，包身份、安全持久化和调用者状态恢复也全部通过。经审阅的 JSON 已逐字节保留在 `docs/evidence/great/native-parity-run-30974574472.json`，SHA-256 为 `c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf`，并已从 source lock 交叉引用。

@@ -1776,7 +1776,7 @@
       "license": "MIT",
       "license_url": "https://github.com/tabularis-ai/be_great/blob/b300f6123cf1d9590b76ea45cc23298df944a319/LICENSE",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "package_lock": {
         "bytes": 54019,
         "filename": "be_great-0.0.14-py3-none-any.whl",
@@ -1798,9 +1798,59 @@
       "upstream_model_tree": "b2f1799f00557ca2021f4b73c9d3962d33ada806",
       "upstream_tree": "82eccd92deb18d6138a4fd96a8e0eb097b38babb",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:cd6837498b6a20d45315ea887cfa69b75d12f17b181e749fecfcd924f5297c2e",
+          "artifact_id": 8917788372,
+          "downloaded_evidence_sha256": "c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf",
+          "evidence_file_sha256": "c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "great-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/great/native-parity-run-30974574472.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "be-great": "0.0.14",
+          "chugchug": "0.1.3",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "safetensors": "0.4.5",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "8667dbd7f2ac67eec6a8b573a54a13ce54527abcfa4fd5bbaca085d42203cfdd",
+        "level": "native-parity-validated",
         "protocol_id": "be-great-official-package-parity-v1",
-        "status": "pending-authoritative-linux-run"
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 3,
+          "cases_total": 3,
+          "official_fit_executed": true,
+          "official_guided_sample_executed": true,
+          "package_unchanged": true,
+          "rng_and_thread_state_restored": true,
+          "safe_safetensors_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "state_tensors_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:16:03Z",
+        "validated_scope": {
+          "data": "flat-single-table-categorical-classification-missing-free",
+          "implementation": "method-author-official-be-great-package",
+          "pretrained_model_quality": "not-claimed"
+        },
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472/job/92205832162",
+        "workflow_run_id": 30974574472
       }
     },
     "tabula": {
@@ -1825,9 +1875,15 @@
         },
         {
           "classification": "adapter-only",
+          "id": "tabula-exact-row-boundary-v1",
+          "reason": "The official categorical-domain check runs after its internal row-count loop and can reduce the returned table below the requested count.",
+          "semantic_effect": "The adapter repeats unchanged official calls for only the remaining count, preserves their RNG stream and order, truncates only the final boundary, and fails after repeated zero-row batches."
+        },
+        {
+          "classification": "adapter-only",
           "id": "tabula-safe-transformers-checkpoint-v1",
           "reason": "The official save/load path uses torch.save and torch.load.",
-          "semantic_effect": "Official model tensors use safetensors and label-encoder/model state uses typed JSON protected by a complete directory integrity manifest."
+          "semantic_effect": "Official model tensors use safetensors and label-encoder/model state uses typed JSON protected by a complete directory integrity manifest; restore preserves the method-author load path's training-mode semantics."
         }
       ],
       "dependency_resolution": {
@@ -1841,7 +1897,7 @@
         "redistribution_status": "not-authorized"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-no-upstream-license-and-pending-native-parity",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-admission-runtime-and-release-gates",
       "patch_sets": [],
       "reproduction_target": "method-author-original-source",
       "selected_runtime_files": 6,
@@ -1850,9 +1906,57 @@
       "upstream_model_tree": "6ee7614b3fb60930a41440e242fdade3145ab5b2",
       "upstream_tree": "dd7d61fbbb071c240f13b6ba3bd05fdf69d25a13",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:7873df0e48931ebafeced5789da66c84bde0e07c20b97abe1758d692e8f20f38",
+          "artifact_id": 8917787656,
+          "downloaded_evidence_sha256": "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c",
+          "evidence_file_sha256": "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabula-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabula/native-parity-run-30974574505.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "safetensors": "0.4.5",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "0f7339014d4ca23cabfce9cd85a363801bb39c5b7e7b7f4911348202f5d2b521",
+        "level": "native-parity-validated",
         "protocol_id": "tabula-method-author-source-parity-v1",
-        "status": "pending-authoritative-linux-run"
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 3,
+          "cases_total": 3,
+          "official_fit_executed": true,
+          "official_sample_executed": true,
+          "rng_and_thread_state_restored": true,
+          "safe_safetensors_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "source_unchanged": true,
+          "state_tensors_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:16:05Z",
+        "validated_scope": {
+          "data": "flat-single-table-categorical-classification-missing-free",
+          "implementation": "method-author-original-source",
+          "upstream_license": "none-declared-release-blocked"
+        },
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505/job/92205832208",
+        "workflow_run_id": 30974574505
       }
     },
     "tabsds": {
@@ -1893,7 +1997,7 @@
         "redistribution_status": "not-authorized"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-no-upstream-license-and-pending-native-parity",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-admission-runtime-and-release-gates",
       "patch_sets": [],
       "reproduction_target": "method-author-python-simple-shuffle-path",
       "selected_runtime_files": 2,
@@ -1902,9 +2006,53 @@
       "upstream_model_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
       "upstream_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:3a3dbeef48583ea27f1ec45c063946b085d2d72a53e32024131125cb037d4e52",
+          "artifact_id": 8917776020,
+          "downloaded_evidence_sha256": "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66",
+          "evidence_file_sha256": "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabsds-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabsds/native-parity-run-30974574593.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "d03d355188ff0037407241a8b4573d368d25b27ee1f82d1d85fe6252a0f524d9",
+        "level": "native-parity-validated",
         "protocol_id": "tabsds-official-source-parity-v1",
-        "status": "pending-authoritative-linux-run"
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 9,
+          "cases_total": 9,
+          "requested_rows_per_case": 53,
+          "rng_restored": true,
+          "safe_json_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "source_unchanged": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:15:15Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free",
+          "implementation": "method-author-python-simple-shuffle-path",
+          "upstream_license": "none-declared-release-blocked"
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593/job/92205832345",
+        "workflow_run_id": 30974574593
       }
     },
     "tabebm": {
@@ -1963,9 +2111,52 @@
       "upstream_model_tree": "5df0517922b9b03d29c5d84e46af3423537d801f",
       "upstream_tree": "627af984e9447bf1a88f1d13e4c766704738ec28",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:5feb79b9441151d1efe72682fa326b9d987b70f5cc7ab61ccee87241d342a313",
+          "artifact_id": 8917783934,
+          "downloaded_evidence_sha256": "8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc",
+          "evidence_file_sha256": "8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabebm-smoke-validation-evidence",
+          "permanent_evidence_path": "docs/evidence/tabebm/smoke-validation-run-30974574544.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "tabebm": "2025.8.19",
+          "tabpfn": "2.1.2",
+          "torch": "2.3.0+cpu"
+        },
+        "environment_lock_sha256": "af5fd5698667997857cb2196f846d7966dcc7c7b88d1e93f034541fbc065b2f3",
+        "level": "smoke-validated",
         "protocol_id": "tabebm-official-package-core-validation-v1",
-        "status": "pending-authoritative-linux-run"
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "adapter_cases_passed": 2,
+          "full_tabpfn_generation_executed": false,
+          "official_generate_delegation_exercised_with_test_double": true,
+          "official_pure_core_exercised": true,
+          "package_unchanged": true,
+          "safe_json_checkpoint": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544",
+        "status": "pass",
+        "validated_at": "2026-08-05T04:15:45Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free-classification",
+          "full_tabpfn_generation": "not-executed-gated",
+          "implementation": "method-author-official-tabebm-package-core"
+        },
+        "variants": ["binary", "multiclass"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544/job/92205832115",
+        "workflow_run_id": 30974574544
       }
     }
   },

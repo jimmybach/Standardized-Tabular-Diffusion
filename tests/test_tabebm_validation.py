@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 from pathlib import Path
 
@@ -17,6 +19,11 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.validation import tabebm as tabebm_validation
 
 pytestmark = pytest.mark.core
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabebm" / "smoke-validation-run-30974574544.json"
+EVIDENCE_SHA256 = "8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def test_tabebm_package_lock_and_claim_boundary() -> None:
@@ -50,3 +57,20 @@ def test_tabebm_round_robin_requires_exact_capacity() -> None:
     assert labels.tolist() == [0, 1, 0]
     with pytest.raises(RuntimeError, match="too few rows"):
         TabEBMAdapter._round_robin({0: np.asarray([[0.0]])}, requested=2)
+
+
+def test_tabebm_retained_smoke_evidence_preserves_claim_boundary() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert evidence["validation_level"] == "smoke-validated"
+    assert evidence["result_summary"]["full_tabpfn_generation_executed"] is False
+    validation = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tabebm"]["validation"]
+    assert validation["level"] == "smoke-validated"
+    assert validation["workflow_run_id"] == 30974574544
+    assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
+    spec = get_adapter_spec("tabebm")
+    assert spec.validation_level.value == "smoke-validated"
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"

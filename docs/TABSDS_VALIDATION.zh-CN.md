@@ -1,6 +1,6 @@
 # TabSDS 验证协议
 
-状态：本地协议已通过；等待 Linux 权威运行
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
 
 协议：`tabsds-official-source-parity-v1`
 
@@ -35,4 +35,4 @@
 
 ## 证据
 
-本地协议的 9 个用例均已通过。只有强制 GitHub Actions 运行通过并永久保留证据后才会提升状态。
+GitHub Actions 运行 [`30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) 已在 Linux、Python 3.11.15 环境通过。二分类、多分类、回归与三个种子组成的 9 个用例，在官方直接路径和适配器路径间获得完全一致的 DataFrame 与 CSV 字节，并实际覆盖从 37 行训练表请求 53 行的重复/截断边界。经审阅的 JSON 已逐字节保留在 `docs/evidence/tabsds/native-parity-run-30974574593.json`，SHA-256 为 `11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66`，并已从 source lock 交叉引用。上游许可证缺失仍然阻止再分发与发布。
