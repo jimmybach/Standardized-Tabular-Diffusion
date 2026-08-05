@@ -1,6 +1,6 @@
 # P2 Shape and Trend Evaluation
 
-- Status: implementation complete; authoritative Linux/Python 3.11 validation pending
+- Status: passed on authoritative Linux/Python 3.11; diagnostic protocol only
 - Protocol: `p2-shape-trend@0.2.0` (draft, diagnostic)
 - Metric identities: `sdmetrics-column-shapes@1.0.0` and `sdmetrics-column-pair-trends@1.0.0`
 - Official Results admission: no
@@ -94,3 +94,5 @@ std-tabular-diffusion validate-result --bundle artifacts/evaluation/run-001
 The dedicated workflow installs the exact official source on Linux/Python 3.11, attests the complete source tree, compares wrapper scores and detail DataFrames against direct authoritative calls, exercises numerical/categorical/Boolean/datetime/mixed and boundary inputs, repeats a seeded 50,001-row source-subsampling case exactly, checks denominator-complete Atomic Results, builds two semantically equivalent finalized bundles for one request, tests failure short-circuiting and interruption safety, lints, type-checks, and generates machine-readable evidence.
 
 Passing P2 advances these two records only to `source-parity-validated`. Protocol freeze, Dataset Suite admission, Official Results eligibility, overall Fidelity definition, and repository release support remain later, independent gates.
+
+The P2 exit gate passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906). Its exact [machine-readable evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json) is retained in the repository.

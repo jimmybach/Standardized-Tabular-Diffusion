@@ -2,8 +2,8 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 passed; P2 implementation is complete and awaiting authoritative Linux validation
-- Roadmap version: 0.2.2
+- Status: P1 and P2 passed with retained Linux/Python 3.11 evidence
+- Roadmap version: 0.2.3
 - Last updated: 2026-08-05
 - Primary release environment: Linux and Python 3.11
 
@@ -83,7 +83,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 
 ### 3.3 Remaining gaps after P2 implementation
 
-- Authoritative Linux/Python 3.11 workflow evidence must pass and be retained before P2 is declared complete.
+- P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
 - P3 validity, P4 utility, approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
@@ -154,7 +154,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 |---|---|---|---|---|
 | P0 | Trustworthy development baseline | None | Passed | Core tests collect in a minimal environment; repository and reference tests are isolated |
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
-| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Implemented; authoritative Linux validation pending | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
+| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Not started | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
@@ -432,11 +432,11 @@ These are not reasons to invent temporary official defaults. Until approved, the
 
 ### M1 — evaluation foundation
 
-P0 and P1 pass. M1 retains its Linux/Python 3.11 evidence. The P2 implementation now exposes two non-official source-parity-validated metric records; authoritative P2 Linux evidence is the remaining M2 gate.
+P0 and P1 pass, and M1 retains its Linux/Python 3.11 evidence. P2 now also has retained authoritative evidence for two non-official source-parity-validated metric records.
 
 ### M2 — trustworthy first report
 
-P2 passes. A user can evaluate a compatible synthetic table and receive a finalized, validated bundle containing structural validation, Shape, and Trend evidence. This is the first public-preview-capable evaluation slice, subject to repository-wide release gates.
+P2 passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906). A user can evaluate a compatible synthetic table and receive a finalized, validated bundle containing structural validation, Shape, and Trend evidence. This is the first public-preview-capable evaluation slice, subject to repository-wide release gates.
 
 ### M3 — benchmark dimensions
 
@@ -450,7 +450,7 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-The immediate increment is to run the dedicated P2 workflow on Linux/Python 3.11, retain its machine-readable evidence, and reconcile any platform findings. Only after that exit gate passes should P3 begin with validity rules and the already approved explicit preprocessing boundary. This work does not modify upstream algorithms, publish a leaderboard, or treat TabStruct reference code as an implementation dependency.
+The immediate increment is P3: implement validity rules and the already approved explicit preprocessing boundary on top of the finalized P2 bundle path. P3 must preserve fail-closed structural behavior, keep train-fitted imputation separate and explicit, and add no hidden repair. This work does not modify upstream algorithms, publish a leaderboard, or treat TabStruct reference code as an implementation dependency.
 
 ## 12. Related specifications
 

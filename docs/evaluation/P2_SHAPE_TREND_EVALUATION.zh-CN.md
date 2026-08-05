@@ -1,6 +1,6 @@
 # P2 Shape 与 Trend 评测
 
-- 状态：实现已完成；等待 Linux/Python 3.11 权威验证
+- 状态：已通过 Linux/Python 3.11 权威验证；仍仅为诊断协议
 - 协议：`p2-shape-trend@0.2.0`（draft、诊断用途）
 - 指标身份：`sdmetrics-column-shapes@1.0.0` 与 `sdmetrics-column-pair-trends@1.0.0`
 - Official Results 准入：否
@@ -94,3 +94,5 @@ std-tabular-diffusion validate-result --bundle artifacts/evaluation/run-001
 专用 workflow 会在 Linux/Python 3.11 上安装精确官方来源、证明完整源码树身份、比较 wrapper 与直接权威调用的分数和明细 DataFrame、覆盖数值/类别/布尔/日期时间/混合与边界输入、精确重复一个带种子的 50,001 行来源抽样案例、检查分母完整的 Atomic Result、对同一请求构建两个语义等价的 finalized bundle、测试失败短路与中断安全、执行 lint 和类型检查，并生成机器可读证据。
 
 P2 通过后，这两个记录只推进到 `source-parity-validated`。协议冻结、Dataset Suite 准入、Official Results 资格、总体 Fidelity 定义和仓库 release support 仍然是后续相互独立的门槛。
+
+P2 退出门槛已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906) 通过；仓库已留存其精确的[机器可读证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)。
