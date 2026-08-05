@@ -82,20 +82,22 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | 隔离的权威 Shape/Trend 后端 | 要求 SDMetrics `0.28.3.dev0` 以及 commit `ba8842f2...` 的完整 121 文件源码树哈希 |
 | [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) 与 [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result 映射与端到端表评测器 | P2 活跃路径；重建来源聚合且不生成合并 Fidelity 分数 |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | 封闭硬规则语言、逐列/逐约束 Atomic Result 与 Validity 聚合 | P3 活跃诊断路径；禁止任意代码和推断硬规则，不修复原始输出 |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | P4 诊断工程门已在 Linux/Python 3.11 上通过；TabEval 可执行运行时等价仍待验证 |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | 集中式均值/众数缺失值边界 | 只在真实 train 上拟合；禁止目标/合成数据修复；状态、schema、配置、输入与输出均有指纹 |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议与来源身份资源 | 八个旧记录、两个来源等价 P2 记录和两个通过单元验证的 benchmark-native P3 记录均非正式 |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 八个旧记录、两个 P2、两个 P3 和十一个 P4 记录均非正式 |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持向后兼容默认；`--protocol p3-validity` 运行 P3 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持默认；P3/P4 显式选择，P4 必须提供 `--real-test` |
 | [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | P0 在 Linux 上启用并通过；参考代码树不进入默认发现或分发包 |
 | [`tests/evaluation/`](../../tests/evaluation) | 契约、结构、来源等价、Atomic Result、中断、bundle 与 CLI 测试 | P1 回归测试和 P2 直接权威测试按依赖与 marker 边界隔离 |
 
-### 3.3 P3 实现后仍存在的缺口
+### 3.3 P4 实现后仍存在的缺口
 
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
-- P4 效用、经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
+- P4 Local/Global Utility 已通过有限范围诊断工作流，并留存 [Linux/Python 3.11 证据](../evidence/evaluation/p4-utility-run-31053624769.json)。该证据明确不包含真实可选 TabEval 预测器运行时；其资源预算、稳定性 pilot 与来源等价证据仍需在协议冻结前完成。
+- 经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
@@ -166,7 +168,7 @@ tests/evaluation/
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
+| P4 | Local 与 Global Utility | P1、P3 | 诊断门已通过；[Linux 证据已留存](../evidence/evaluation/p4-utility-run-31053624769.json)；来源运行时 pilot 待完成 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
@@ -460,12 +462,13 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P3 的权威 Linux/Python 3.11 证据已留存。下一实施阶段是 P4 Local 与 Global Utility。P4 必须使用经过 P3 审阅的不可变模型视图和预处理身份，不得修复生成数据或推断新的硬约束。
+P4 现在使用经过 P3 审阅的不可变模型视图，以及单独由校验和绑定的 held-out real test。下一道门是 P4 Linux/Python 3.11 来源运行时 pilot：运行锁定的可选 XGB/KNN/TabPFN profile，审阅高基数行为和运行预算，留存证据，并决定该 profile 是否可以冻结。P5 不得把尚未完成的 P4 诊断 profile 当成 Official Results 组件。
 
 ## 12. 相关规范
 
 - [评测协议](EVALUATION_PROTOCOL.zh-CN.md)
 - [P3 有效性与预处理指南](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
+- [P4 Local 与 Global Utility 指南](P4_UTILITY.zh-CN.md)
 - [指标治理](METRIC_GOVERNANCE.zh-CN.md)
 - [指标来源审阅](METRIC_SOURCE_REVIEW.zh-CN.md)
 - [数据集配置规范](DATASET_PROFILE_SPEC.zh-CN.md)

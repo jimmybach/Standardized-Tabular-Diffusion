@@ -289,6 +289,8 @@ Train 用于拟合，Validation 仅用于允许的模型选择，Test 仅用于�
 
 目标必须反映有文档的数据集任务或经审查科学目的。不得在比较生成器结果后选择。
 
+已审阅的 Adult 与 Sick 诊断 profile 现在绑定主要分类目标、正类、标签映射、Macro-F1 与辅助指标、支持声明、Dummy 策略和 `p4-utility-pilot@0.1.0` 身份。这记录了 P4 pilot 契约，但不会使任何数据集自动获得正式资格。
+
 ## 12. Global Utility profile
 
 Global Utility 默认包括每个可评测的非标识符列，并轮换作为目标。
@@ -306,6 +308,8 @@ Profile 声明：
 - 聚合权重。
 
 对 TabStruct 兼容 profile，每个类别目标使用 Balanced-Accuracy TSTR/TRTR ratio，每个数值目标使用 RMSE TRTR/TSTR ratio，所有目标等权。不同归一化或预测器 profile 会形成不同的指标身份和兼容组。禁止因为模型表现差而排除目标。
+
+Adult 与 Sick 在 P4 诊断 Global Utility 声明中枚举了每个 canonical model-view 列。Audit-only 和标识符列仍处于 canonical view 之外；没有目标被静默省略。
 
 ## 13. Validity profile
 

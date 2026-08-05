@@ -1,0 +1,89 @@
+{
+  "registry_collection_schema_version": "1.0.0",
+  "common": {
+    "registry_schema_version": "1.0.0",
+    "metric_version": "1.0.0",
+    "dimension": "local-utility",
+    "definition_origin": "benchmark-native",
+    "planned_leaderboard_role": "diagnostic",
+    "owner": "repository-maintainers",
+    "lifecycle_status": "unit-validated",
+    "review_record": {
+      "registered_by": "p4-utility-implementation",
+      "registered_at": "2026-08-05T00:00:00Z",
+      "reviews": [{"review_type":"definition-and-implementation","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","decision":"approved","evidence_ref":"docs/evaluation/P4_UTILITY.md"}]
+    },
+    "source": {
+      "method_references": ["Standardized Tabular Diffusion Evaluation Protocol section 7"],
+      "upstream": "https://github.com/jimmybach/Standardized-Tabular-Diffusion",
+      "revision": "p4-utility-contract-1.0.0",
+      "implementation_symbol": "standardized_tabular_diffusion.evaluation.utility.evaluate_utility",
+      "source_authority": "local",
+      "implementation_mode": "local-reimplementation",
+      "retrieved_date": "2026-08-05",
+      "integrity_hash": null,
+      "license": "Repository license",
+      "attribution": ["Local raw metrics use official scikit-learn package implementations under a frozen benchmark profile."],
+      "known_deviations": []
+    },
+    "semantics": {
+      "supported_table_types": ["decoded single real-train, real-test, and synthetic model views"],
+      "supported_column_types": ["continuous","integer","categorical","boolean"],
+      "required_dataset_profile_metadata": ["utility.contract_schema_version","predictive_tasks","split.split_id"],
+      "input_view": "Strict canonical model view after P3-reviewed preprocessing; no synthetic repair",
+      "fitted_on": "train",
+      "output": {"shape":"scalar","unit":"score"},
+      "raw_range": null,
+      "raw_direction": "maximize",
+      "target_value": null,
+      "undefined_conditions": ["The task-specific metric is mathematically undefined.","A required raw arm or denominator is unavailable."],
+      "minimum_support": {"real_train_rows":1,"real_test_rows":1,"synthetic_rows":1},
+      "randomness": {"deterministic_given_seed":true,"seed_source":"Evaluation Request evaluator_seeds"},
+      "default_parameters": {"evaluator_profile":"p4-utility-pilot@0.1.0","default_evaluator_seeds":[0,1,2,3,4]},
+      "allowed_overrides": ["diagnostic evaluator seeds","global per-target time limit"],
+      "normalization": {"function":"identity unless overridden per record","version":"1.0.0"},
+      "aggregation": {"rule":"Raw arms have zero aggregation weight; derived records override this rule.","version":"1.0.0"},
+      "uncertainty": {"procedure":"retain every seed; interval policy deferred to P7"},
+      "failure_contribution_policy": {
+        "computed":"Contribute only for an explicitly derived metric with a declared weight.",
+        "mathematically_undefined":"Zero weight; preserve the failed denominator.",
+        "insufficient_support":"Zero weight; preserve the missing target support.",
+        "not_applicable":"Zero weight; preserve the applicability decision.",
+        "implementation_failure":"Zero weight; finalize a partial diagnostic bundle.",
+        "resource_failure":"Zero weight; finalize a partial diagnostic bundle without substituting predictors."
+      }
+    },
+    "validation": {
+      "unit_test_evidence": ["tests/evaluation/test_p4_utility.py"],
+      "boundary_test_evidence": ["tests/evaluation/test_p4_evaluate_table.py"],
+      "source_parity_evidence": [],
+      "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
+      "reference_fixtures": ["hand-computable binary, multiclass, regression, weak-baseline, and denominator fixtures"],
+      "supported_environment": {"primary":"Linux with Python 3.11"},
+      "unresolved_limitations": ["Official Global Utility executable source parity and runtime budget remain pending."],
+      "release_decision": "diagnostic-only"
+    },
+    "lifecycle_evidence": {
+      "definition_review": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["docs/evaluation/EVALUATION_PROTOCOL.md","docs/evaluation/P4_UTILITY.md"]},
+      "implementation": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/utility.py"]},
+      "unit_validation": {"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-05T00:00:00Z","evidence_refs":["tests/evaluation/test_p4_utility.py","tests/evaluation/test_p4_evaluate_table.py"]},
+      "source_parity": null,
+      "protocol_freeze": null,
+      "release_approval": null
+    },
+    "admission": {"official_results_allowed":false,"compatibility_version":"p4-utility-0.4.0","reason":"P4 is a unit-validated diagnostic pilot; source-runtime parity and protocol freeze remain pending."}
+  },
+  "records": [
+    {"metric_id":"std-local-utility-macro-f1","display_name":"Local Utility Macro-F1","subdimension":"raw-classification","description":"Macro-F1 for one Dummy, TRTR, or TSTR arm."},
+    {"metric_id":"std-local-utility-balanced-accuracy","display_name":"Local Utility Balanced Accuracy","subdimension":"raw-classification","description":"Secondary Balanced Accuracy for one Local Utility arm."},
+    {"metric_id":"std-local-utility-roc-auc","display_name":"Local Utility ROC-AUC","subdimension":"raw-classification","description":"Secondary binary or macro one-vs-rest ROC-AUC where defined."},
+    {"metric_id":"std-local-utility-pr-auc","display_name":"Local Utility PR-AUC","subdimension":"raw-classification","description":"Secondary binary or macro average precision where defined."},
+    {"metric_id":"std-local-utility-rmse","display_name":"Local Utility RMSE","subdimension":"raw-regression","description":"Root mean squared error for one Local Utility arm.","semantics":{"raw_direction":"minimize","output":{"shape":"scalar","unit":"target-unit"}}},
+    {"metric_id":"std-local-utility-mae","display_name":"Local Utility MAE","subdimension":"raw-regression","description":"Secondary mean absolute error for one Local Utility arm.","semantics":{"raw_direction":"minimize","output":{"shape":"scalar","unit":"target-unit"}}},
+    {"metric_id":"std-local-utility-r2","display_name":"Local Utility R-squared","subdimension":"raw-regression","description":"Secondary coefficient of determination where defined."},
+    {"metric_id":"std-local-utility-retention","display_name":"Baseline-adjusted Local Utility Retention","subdimension":"retention","description":"Unclipped benchmark-derived retention reconstructed from Dummy, TRTR, and TSTR primary raw values.","definition_origin":"benchmark-derived","semantics":{"output":{"shape":"scalar","unit":"ratio"},"normalization":{"function":"higher: (TSTR-Dummy)/(TRTR-Dummy); lower: (Dummy-TSTR)/(Dummy-TRTR), no clipping","version":"1.0.0"},"aggregation":{"rule":"Equal evaluator and seed mean only when every requested retention computes.","version":"1.0.0"}}},
+    {"metric_id":"tabstruct-global-balanced-accuracy","display_name":"TabStruct-profile Global Raw Balanced Accuracy","dimension":"global-utility","subdimension":"raw-classification","description":"Mean source-profile Balanced Accuracy for one target, seed, and TRTR/TSTR arm.","definition_origin":"source-parameterized","source":{"method_references":["TabStruct Equation 4","TabEval UtilityPerFeature at dba19a4ee7aa391621cbeb464609285fd515dece"],"upstream":"https://github.com/SilenceX12138/TabEval.git","revision":"dba19a4ee7aa391621cbeb464609285fd515dece","implementation_symbol":"standardized_tabular_diffusion.evaluation.utility._default_global_scorer","source_authority":"official-repository","implementation_mode":"source-wrapper","integrity_hash":"edd2ab2ad576e5ef46c55bac01ac3366d8eec91b40398da48bf2e1c061e2d90c","license":"Apache-2.0","attribution":["TabStruct and TabEval authors"],"known_deviations":["Executable source parity remains pending."]}},
+    {"metric_id":"tabstruct-global-rmse","display_name":"TabStruct-profile Global Raw RMSE","dimension":"global-utility","subdimension":"raw-regression","description":"Mean source-profile RMSE for one target, seed, and TRTR/TSTR arm.","definition_origin":"source-parameterized","source":{"method_references":["TabStruct Equation 4","TabEval UtilityPerFeature at dba19a4ee7aa391621cbeb464609285fd515dece"],"upstream":"https://github.com/SilenceX12138/TabEval.git","revision":"dba19a4ee7aa391621cbeb464609285fd515dece","implementation_symbol":"standardized_tabular_diffusion.evaluation.utility._default_global_scorer","source_authority":"official-repository","implementation_mode":"source-wrapper","integrity_hash":"edd2ab2ad576e5ef46c55bac01ac3366d8eec91b40398da48bf2e1c061e2d90c","license":"Apache-2.0","attribution":["TabStruct and TabEval authors"],"known_deviations":["Executable source parity remains pending."]},"semantics":{"raw_direction":"minimize","output":{"shape":"scalar","unit":"target-unit"}}},
+    {"metric_id":"tabstruct-global-target-utility","display_name":"TabStruct Global Utility Target Ratio","dimension":"global-utility","subdimension":"per-target-ratio","description":"Unclipped TabStruct Equation 4 target ratio; equal target and seed contributions reconstruct Global Utility.","definition_origin":"source-defined","source":{"method_references":["TabStruct Equation 4"],"upstream":"https://github.com/SilenceX12138/TabStruct.git","revision":"501f48942f890c92a796edf236e670cdc270ad9f","implementation_symbol":"standardized_tabular_diffusion.evaluation.utility.global_target_ratio","source_authority":"official-repository","implementation_mode":"source-wrapper","integrity_hash":null,"license":"Apache-2.0","attribution":["TabStruct authors"],"known_deviations":["Constant synthetic targets are explicit insufficient_support rather than TabEval's favorable fallback."]},"semantics":{"output":{"shape":"scalar","unit":"ratio"},"normalization":{"function":"categorical TSTR/TRTR Balanced Accuracy; numerical TRTR/TSTR RMSE; no clipping","version":"1.0.0"},"aggregation":{"rule":"Equal target mean within seed, then equal seed mean; strict all-target denominator.","version":"1.0.0"}}}
+  ]
+}

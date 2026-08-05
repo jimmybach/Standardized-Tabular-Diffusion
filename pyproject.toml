@@ -52,6 +52,17 @@ validity = [
   "pyarrow==18.1.0",
   "PyYAML==6.0.2",
 ]
+utility = [
+  "jsonschema==4.23.0",
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "pyarrow==18.1.0",
+  "PyYAML==6.0.2",
+  "scikit-learn==1.5.2",
+  "scipy==1.13.1; python_version < '3.13'",
+  "scipy>=1.14,<1.15; python_version >= '3.13'",
+]
 ctgan = [
   "ctgan==0.12.1",
   "rdt==1.20.0",
@@ -339,6 +350,7 @@ standardized_tabular_diffusion = [
   "schemas/evaluation/*.json",
   "resources/evaluation/metrics/*.json",
   "resources/evaluation/protocols/*.json",
+  "resources/evaluation/evaluators/*.json",
   "resources/evaluation/upstream/*.json",
   "resources/upstream/*.json",
 ]
@@ -403,6 +415,7 @@ files = [
   "standardized_tabular_diffusion/evaluation/serialization.py",
   "standardized_tabular_diffusion/evaluation/shape_trend.py",
   "standardized_tabular_diffusion/evaluation/table.py",
+  "standardized_tabular_diffusion/evaluation/utility.py",
   "standardized_tabular_diffusion/evaluation/validity.py",
   "standardized_tabular_diffusion/preprocessing.py",
   "standardized_tabular_diffusion/materialization.py",

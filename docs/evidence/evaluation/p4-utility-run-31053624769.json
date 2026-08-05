@@ -1,0 +1,46 @@
+{
+  "claim_boundary": "Validates P4 formulas, local official-package boundary, held-out-test isolation, Atomic Result coverage, and the pinned Global backend call contract. The real AutoGluon/XGB/KNN/TabPFN source runtime was not executed.",
+  "environment": {
+    "pandas": "2.2.3",
+    "platform": "Linux / x86_64",
+    "primary_environment_required": true,
+    "pyarrow": "18.1.0",
+    "python": "3.11.15",
+    "scikit-learn": "1.5.2"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "all_target_global_formula": "pass",
+    "diagnostic_admission_only": "pass",
+    "held_out_test_boundary": "pass",
+    "raw_arms_and_retention": "pass",
+    "three_local_families": "pass",
+    "unclipped_formulas": "pass"
+  },
+  "global_source_runtime": {
+    "executed": false,
+    "profile": "tabeval-tiny-default",
+    "reason": "CI diagnostic evidence uses a deterministic call-boundary stub; source-runtime parity is a separate gate.",
+    "revision": "dba19a4ee7aa391621cbeb464609285fd515dece"
+  },
+  "locked_files": {
+    "configs/datasets/adult-uci-2-v1.json": "316734b41504e6a78354bc4dce61c4310d37ca898af8ed6453bbe9a4570a2e0c",
+    "configs/datasets/sick-uci-102-v1.json": "f4938c42e13ecff3e03a1645218f4a8b11214ea8100d951d56abc605f822cfb7",
+    "standardized_tabular_diffusion/evaluation/utility.py": "301aae36612567ca2d976c796e038ee7a9f9ea9ec492c115ff8b9500d5157c01",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json": "c6d113eb270fa232b784a082235397c59cd9b46900d374bbb6f7803ea2e859bd",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json": "f4d04dcbd7adc39f4e2968219fb24bbaf444b067d8dcad95624234db793a4203",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/p4-utility.json": "bd03142b4169bb917c44d2f7f2be8e1c640434a80f5259c1717b902e6aa5599e",
+    "tests/evaluation/test_p4_evaluate_table.py": "362cc93afcde671543993e3adbea972638038688581f6fa45b1461b5ac31f8cc",
+    "tests/evaluation/test_p4_utility.py": "2176710516ba7b3c09c4ab3741763f4b15890037c81c56cb51fd50081d1857b5"
+  },
+  "phase": "P4",
+  "protocol_id": "p4-utility-diagnostic-v1",
+  "result_summary": {
+    "atomic_results": 84,
+    "global_target_ratios": 15,
+    "global_utility": 0.77,
+    "local_retentions": 3,
+    "official_results_allowed": false
+  },
+  "status": "pass"
+}

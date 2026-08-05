@@ -7,6 +7,7 @@ import pytest
 
 from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest
 from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile, resolve_protocol
+from standardized_tabular_diffusion.evaluation.utility import p4_evaluator_profile_reference
 
 
 @pytest.fixture
@@ -22,6 +23,11 @@ def p2_protocol():
 @pytest.fixture
 def p3_protocol():
     return resolve_protocol("p3-validity", "0.3.0")
+
+
+@pytest.fixture
+def p4_protocol():
+    return resolve_protocol("p4-utility", "0.4.0")
 
 
 @pytest.fixture
@@ -113,5 +119,52 @@ def p3_request(adult_profile, p3_protocol):
         generation_seed=17,
         evaluator_seeds=(23,),
         model={"model_id": "fixture-model"},
+        failure_policy={"structural_gate": "fail-fast", "metric_failure": "partial-bundle"},
+    )
+
+
+@pytest.fixture
+def p4_request(adult_profile, p4_protocol):
+    metrics = tuple(
+        {"metric_id": item["metric_id"], "metric_version": item["metric_version"]}
+        for item in p4_protocol.payload["metric_selections"]
+    )
+    return EvaluationRequest(
+        subject_type="external-synthetic-table",
+        reference_artifact={
+            "artifact_id": "reference-table",
+            "media_type": "text/csv",
+            "sha256": "0" * 64,
+            "row_count": 20,
+        },
+        real_test_artifact={
+            "artifact_id": "real-test-table",
+            "media_type": "text/csv",
+            "sha256": "2" * 64,
+            "row_count": 20,
+        },
+        sample_artifact={
+            "artifact_id": "synthetic-table",
+            "media_type": "text/csv",
+            "sha256": "1" * 64,
+            "row_count": 20,
+        },
+        dataset_profile={
+            "dataset_id": adult_profile.dataset_id,
+            "dataset_profile_version": adult_profile.dataset_profile_version,
+            "sha256": adult_profile.fingerprint,
+        },
+        protocol={
+            "protocol_id": p4_protocol.protocol_id,
+            "protocol_version": p4_protocol.protocol_version,
+            "sha256": p4_protocol.fingerprint,
+        },
+        metrics=metrics,
+        comparison_track="native",
+        generation_seed=17,
+        evaluator_seeds=(23,),
+        evaluator_profile=p4_evaluator_profile_reference(),
+        model={"model_id": "fixture-model"},
+        resource_limits={"global_time_limit_per_target_seconds": 1},
         failure_policy={"structural_gate": "fail-fast", "metric_failure": "partial-bundle"},
     )

@@ -1,0 +1,97 @@
+name: P4 Utility Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p4-utility-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p4_utility.py"
+      - "tests/evaluation/**"
+  pull_request:
+    paths:
+      - ".github/workflows/p4-utility-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p4_utility.py"
+      - "tests/evaluation/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p4-utility-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p4-utility:
+    name: Linux / Python 3.11 / Local and Global Utility diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install exact P4 diagnostic environment
+        run: |
+          python -m pip install ".[utility,dev]"
+          python -m pip check
+
+      - name: Run P4 formula, failure, bundle, profile, registry, and CLI tests
+        run: >-
+          python -m pytest
+          tests/evaluation/test_p4_utility.py
+          tests/evaluation/test_p4_evaluate_table.py
+          tests/evaluation/test_registry_and_profiles.py
+          tests/evaluation/test_contracts_and_schemas.py
+          tests/evaluation/test_bundle.py
+          tests/evaluation/test_cli_contracts.py
+
+      - name: Lint and type-check P4 surfaces
+        run: |
+          python -m ruff check standardized_tabular_diffusion tests/evaluation
+          python -m mypy
+
+      - name: Generate bounded P4 diagnostic evidence
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p4_utility
+          --output "${RUNNER_TEMP}/p4-utility-evidence.json"
+          --require-primary-environment
+
+      - name: Build and inspect the distribution artifact
+        run: |
+          python -m build
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          cd "${RUNNER_TEMP}"
+          std-tabular-diffusion list-protocols > p4-packaged-protocols.json
+          python -c "from standardized_tabular_diffusion.evaluation.utility import load_p4_evaluator_profile; print(load_p4_evaluator_profile()['profile_id'])"
+
+      - name: Upload P4 diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: p4-utility-diagnostic-evidence
+          path: ${{ runner.temp }}/p4-utility-evidence.json
+          if-no-files-found: error
+          retention-days: 90
