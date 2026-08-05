@@ -45,9 +45,6 @@ jobs:
       MKL_NUM_THREADS: "1"
       NUMEXPR_NUM_THREADS: "1"
       STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN: "1"
-      TABPFN_MODEL_CACHE_DIR: ${{ runner.temp }}/p4-tabpfn-models
-      XDG_CACHE_HOME: ${{ runner.temp }}/p4-xdg-cache
-      P4_TABEVAL_SOURCE_PATH: ${{ runner.temp }}/tabeval/eval_structure.py
 
     steps:
       - name: Check out repository
@@ -61,6 +58,12 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: requirements-p4-global-source-validation.txt
+
+      - name: Configure isolated runtime paths
+        run: |
+          echo "TABPFN_MODEL_CACHE_DIR=$RUNNER_TEMP/p4-tabpfn-models" >> "$GITHUB_ENV"
+          echo "XDG_CACHE_HOME=$RUNNER_TEMP/p4-xdg-cache" >> "$GITHUB_ENV"
+          echo "P4_TABEVAL_SOURCE_PATH=$RUNNER_TEMP/tabeval/eval_structure.py" >> "$GITHUB_ENV"
 
       - name: Initialize failure evidence
         run: |
