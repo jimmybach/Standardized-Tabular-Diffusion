@@ -12,19 +12,22 @@
     "model_id": {"$ref": "#/$defs/id"}, "comparison_track": {"enum": ["native", "standardized-tuning"]}, "generation_seed": {"type": "integer"},
     "metric_id": {"$ref": "#/$defs/id"}, "metric_version": {"$ref": "#/$defs/id"}, "dimension": {"$ref": "#/$defs/id"},
     "scope_type": {"enum": ["column", "pair", "target", "evaluator", "attack", "group", "phase", "dataset"]}, "scope_id": {"$ref": "#/$defs/id"},
-    "evaluator_id": {"type": ["string", "null"]}, "evaluator_version": {"type": ["string", "null"]}, "task_type": {"enum": ["classification", "regression", null]},
+    "evaluator_id": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/id"}]}, "evaluator_version": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/id"}]}, "task_type": {"enum": ["classification", "regression", null]},
     "state": {"enum": ["computed", "mathematically_undefined", "insufficient_support", "not_applicable", "implementation_failure", "resource_failure"]},
     "raw_value": {"$ref": "#/$defs/nullableNumber"}, "normalized_value": {"$ref": "#/$defs/nullableNumber"}, "aggregate_contribution": {"$ref": "#/$defs/nullableNumber"}, "reference_value": {"$ref": "#/$defs/nullableNumber"},
     "unit": {"type": ["string", "null"]}, "raw_direction": {"enum": ["maximize", "minimize", "target", "distributional", "descriptive"]},
     "weight": {"type": "number", "minimum": 0}, "n_reference": {"type": "integer", "minimum": 0}, "n_synthetic": {"type": "integer", "minimum": 0}, "n_valid": {"type": "integer", "minimum": 0}, "n_excluded": {"type": "integer", "minimum": 0},
     "reason_code": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/reason"}]}, "reason_detail": {"type": ["string", "null"]},
-    "warning_codes": {"type": "array", "items": {"$ref": "#/$defs/reason"}},
+    "warning_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/reason"}},
     "artifact_ref": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/relativePath"}]},
     "computed_at": {"type": "string", "format": "date-time"}
   },
   "allOf": [
-    {"if": {"properties": {"state": {"const": "computed"}}}, "then": {"properties": {"reason_code": {"type": "null"}, "reason_detail": {"type": "null"}}, "anyOf": [{"required": ["raw_value"], "properties": {"raw_value": {"type": "number"}}}, {"required": ["artifact_ref"], "properties": {"artifact_ref": {"$ref": "#/$defs/relativePath"}}}]}},
-    {"if": {"properties": {"state": {"not": {"const": "computed"}}}}, "then": {"properties": {"raw_value": {"type": "null"}, "normalized_value": {"type": "null"}, "aggregate_contribution": {"type": "null"}, "reason_code": {"$ref": "#/$defs/reason"}, "reason_detail": {"type": "string", "minLength": 1}}}}
+    {"if": {"properties": {"state": {"const": "computed"}}}, "then": {"properties": {"reason_code": {"type": "null"}, "reason_detail": {"type": "null"}, "n_valid": {"type": "integer", "minimum": 1}}, "anyOf": [{"required": ["raw_value"], "properties": {"raw_value": {"type": "number"}}}, {"required": ["artifact_ref"], "properties": {"artifact_ref": {"$ref": "#/$defs/relativePath"}}}]}},
+    {"if": {"properties": {"state": {"not": {"const": "computed"}}}}, "then": {"properties": {"raw_value": {"type": "null"}, "normalized_value": {"type": "null"}, "aggregate_contribution": {"type": "null"}, "reason_code": {"$ref": "#/$defs/reason"}, "reason_detail": {"type": "string", "minLength": 1}}}},
+    {"if": {"properties": {"aggregate_contribution": {"type": "number"}}}, "then": {"properties": {"normalized_value": {"type": "number"}}}},
+    {"if": {"properties": {"state": {"const": "computed"}, "raw_direction": {"const": "target"}}, "required": ["state", "raw_direction"]}, "then": {"properties": {"reference_value": {"type": "number"}}}},
+    {"if": {"properties": {"evaluator_id": {"type": "null"}}}, "then": {"properties": {"evaluator_version": {"type": "null"}}}, "else": {"properties": {"evaluator_version": {"$ref": "#/$defs/id"}}}}
   ],
   "$defs": {
     "id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},

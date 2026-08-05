@@ -120,22 +120,17 @@ def _validate_dataset_profile(path: str) -> dict[str, Any]:
 
 
 def _list_dataset_profiles(profile_dir: str) -> list[dict[str, Any]]:
-    from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile
+    from standardized_tabular_diffusion.evaluation.profiles import list_dataset_profiles
 
-    root = Path(profile_dir)
-    if not root.is_dir():
-        raise ValueError(f"Dataset Profile directory does not exist: {root}")
-    paths = sorted((*root.glob("*.json"), *root.glob("*.yaml"), *root.glob("*.yml")))
     return [
         {
             "dataset_id": profile.dataset_id,
             "dataset_profile_version": profile.dataset_profile_version,
             "sha256": profile.fingerprint,
             "official_eligible": profile.payload["official_eligible"],
-            "source": str(path),
+            "source": profile.source,
         }
-        for path in paths
-        for profile in [load_dataset_profile(path)]
+        for profile in list_dataset_profiles(profile_dir)
     ]
 
 
@@ -204,7 +199,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers.add_parser("list-datasets", help="List canonical datasets from the root registry")
     subparsers.add_parser("list-dataset-sources", help="List checksum-pinned public dataset sources")
-    subparsers.add_parser("describe-metrics", help="Print the shared TabStruct-aligned metric schema")
+    subparsers.add_parser(
+        "describe-metrics",
+        help="Print the legacy pre-P1 diagnostic metric schema (not the new evaluation contract)",
+    )
     subparsers.add_parser("describe-config", help="Print the shared experiment config schema as an example JSON")
 
     list_metrics_parser = subparsers.add_parser("list-metrics", help="List versioned Metric Registry records")

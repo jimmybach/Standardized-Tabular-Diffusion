@@ -2,9 +2,9 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：实施基线
-- 路线图版本：0.1.0
-- 最后更新：2026-08-03
+- 状态：P1 已通过；下一实施阶段为 P2
+- 路线图版本：0.2.1
+- 最后更新：2026-08-05
 - 主要发布环境：Linux 与 Python 3.11
 
 ## 1. 目的
@@ -30,54 +30,56 @@
 11. 只有同时达到 `protocol-frozen` 和 `release-supported` 的指标才能影响 Official Results。
 12. 第一个端到端实现切片是结构校验加来源等价的 Column Shapes 与 Column Pair Trends。只有该切片能够生成有效的 finalized result bundle 后，才扩展指标广度。
 
+TabStruct 仅作为指标审阅与公式来源追踪的研究参考材料。其论文和提取出的参考代码不定义新评测子系统的运行时架构。P1 之前的 `evaluation/tabstruct.py` 路径只作为旧版诊断兼容路径保留；未经独立的生命周期审阅，不得将它升级、改名或包装为正式指标。
+
 ## 3. 当前实现审计
+
+本节取代 2026-08-03 的 P0 之前审计。历史失败仍可作为迁移证据，但已经不再描述当前代码树。
 
 ### 3.1 当前执行路径
 
-当前路径为：
+目前有两条刻意隔离的路径：
 
 ~~~text
-ExperimentConfig
-    -> runner.run_action / runner.run_pipeline
-    -> model_adapter.evaluate
-    -> evaluation.tabstruct.normalize_*
-    -> standardized_summary.json
-    -> comparison.compare_summaries
+旧版兼容路径
+ExperimentConfig -> model_adapter.evaluate -> evaluation.tabstruct.normalize_*
+                 -> standardized_summary.json -> comparison.compare_summaries
+
+P1 评测基础
+EvaluationRequest -> 严格契约/schema 校验
+                  -> registry/profile 身份解析
+                  -> IncompleteRunBundleWriter
+                  -> manifest/metadata/config/environment/summary/event-log 校验
 ~~~
 
-该路径可以生成紧凑的对比表，但尚未实现已批准的 prepare/train/sample/validate/evaluate/aggregate/report 生命周期、Metric Registry、Dataset Profile 契约、Atomic Result、兼容性分组、finalized bundle 或榜单准入检查。
+旧版路径始终只用于诊断。P1 路径不计算任何指标，也不能 finalization 结果 bundle。P2 将增加首条独立指标执行路径，并且不会经由 `evaluation/tabstruct.py`。
 
-### 3.2 代码处置映射
+### 3.2 当前代码处置
 
-| 当前位置 | 当前作用 | 处置方案 |
+| 当前位置 | 当前作用 | 当前决定 |
 |---|---|---|
-| [`evaluation/tabstruct.py`](../../standardized_tabular_diffusion/evaluation/tabstruct.py) | 在单个模块中同时承担静态指标描述、上游指标调用、Structural Utility、异常处理和旧摘要写入 | 冻结为 legacy 行为、拆分职责，并在保持迁移等价后移出新的正式路径 |
-| [`models/base.py`](../../standardized_tabular_diffusion/models/base.py) | 适配器接口和 artifact manifest 写入 | 保留 train/sample 适配器边界；将评测路由到独立引擎，并用 bundle 引用替代临时 artifact manifest |
-| [`models/tabdiff.py`](../../standardized_tabular_diffusion/models/tabdiff.py)、[`models/tabsyn.py`](../../standardized_tabular_diffusion/models/tabsyn.py) 和 [`models/sample_baselines.py`](../../standardized_tabular_diffusion/models/sample_baselines.py) | 调用相同的样本文件 normalizer | 复用样本路径发现；用 `EvaluationRequest` 替换直接指标调用 |
-| [`models/tabddpm.py`](../../standardized_tabular_diffusion/models/tabddpm.py) | 规范化已有的上游 JSON 指标文件 | 保留明确标注的 legacy 导入路径；正式评测必须使用规范解码样本和公共引擎 |
-| [`config.py`](../../standardized_tabular_diffusion/config.py) | 带评测布尔开关和无类型 `extra` 字典的 dataclass | 保留兼容加载器；引入有版本的协议、指标配置、数据集配置、种子、失败政策和硬件配置身份 |
-| [`interfaces.py`](../../standardized_tabular_diffusion/interfaces.py) | 最小化 `DatasetSpec`、`RunSpec` 和 `ArtifactBundle` | 临时保留适配器兼容类型；新增严格评测契约，而不是继续扩展 `extra` |
-| [`datasets.py`](../../standardized_tabular_diffusion/datasets.py) | 从上游 `info.json` 发现数据集元数据 | 仅作为把旧元数据导入待审 Dataset Profile 的工具；不得把上游元数据当作正式资格证据 |
-| [`dataset_onboarding.py`](../../standardized_tabular_diffusion/dataset_onboarding.py) | 注册 CSV 并静默清理缺失值 | 分离注册、画像、预处理和物化；弃用静默删行和隐式插入缺失标记 |
-| [`materialization.py`](../../standardized_tabular_diffusion/materialization.py) | 运行上游处理、复制数据并写入基于路径的 manifest | 增加 source/view/split 身份、校验和、预处理血缘和原子发布；不能把复制目录本身当作身份 |
-| [`runner.py`](../../standardized_tabular_diffusion/runner.py) | 执行 train、sample 和 evaluate 阶段 | 保留为高层模型工作流；把评测生命周期、恢复和结果 finalization 委托给评测 orchestrator |
-| [`comparison.py`](../../standardized_tabular_diffusion/comparison.py) | 把旧摘要展平成记录 | 正式用途改为 schema 校验、兼容性分组、覆盖率核算、不确定性和政策感知聚合 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | 提供元数据、三个运行 action 和旧摘要对比 | 增加 profile/registry/result 校验和独立评测命令；在迁移窗口内保留已弃用命令 |
-| [`requirements-benchmark-stack.txt`](../../requirements-benchmark-stack.txt) | 为模型和指标提供一个庞大的共享环境 | 拆分 core、evaluation、model 和 development 依赖组；锁定正式 Linux/Python 3.11 评测环境 |
-| [`tests/`](../../tests) | 51 个仓库测试函数，主要覆盖适配器、CLI、注册和字节稳定性 | 保留有用的适配器测试；新增评测测试金字塔，不能再把 mock 测试或旧摘要字节稳定性当作科学验证 |
+| [`evaluation/tabstruct.py`](../../standardized_tabular_diffusion/evaluation/tabstruct.py) | P1 之前的兼容评测器 | 冻结为旧版诊断路径；TabStruct 是研究参考，不是新引擎或指标权威来源 |
+| [`evaluation/contracts.py`](../../standardized_tabular_diffusion/evaluation/contracts.py) | Evaluation Request、Atomic Result、阶段与生命周期契约 | P1 活跃路径；严格执行有限值、状态、支持计数、聚合、时间戳、身份和路径不变量 |
+| [`evaluation/serialization.py`](../../standardized_tabular_diffusion/evaluation/serialization.py) | Canonical JSON、安全结构化加载、哈希和原子替换 | P1 活跃路径；JSON/YAML 重复键和非有限值均采用 fail-closed |
+| [`evaluation/registry.py`](../../standardized_tabular_diffusion/evaluation/registry.py) | 数据驱动 Metric Registry 与累积生命周期校验 | P1 活跃路径；P1 之前的八条记录均明确为 `legacy-diagnostic` 且非正式 |
+| [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | 数据集/协议加载、精确身份和旧元数据导入 | P1 活跃路径；重复身份和不一致的 profile 引用均采用 fail-closed |
+| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | 可审计 incomplete Run Result writer 与跨文件校验器 | P1 活跃路径；每次尝试有不同 ID，manifest 是允许清单，中断的事件更新保持 incomplete |
+| [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 旧指标记录和非正式协议 profile | P1 身份资源；尚无指标通过来源等价验证或被准入 Official Results |
+| [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查与校验，以及旧版命令 | P1 校验命令已启用；旧指标描述已明确标注为诊断用途 |
+| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | P0 在 Linux 上启用并通过；参考代码树不进入默认发现或分发包 |
+| [`tests/evaluation/`](../../tests/evaluation) | 契约、schema、身份、registry/profile、bundle 与 CLI 测试 | P1 专属测试集；mock 测试不作科学验证或来源等价声明 |
 
-### 3.3 已确认的缺口与风险
+### 3.3 P1 之后仍存在的缺口
 
-- `METRIC_DEFINITIONS` 是 Python 常量而不是经过校验的 registry，并仍使用旧的 `tabstruct-aligned-v1` 身份。
-- 每指标的 `EvaluationConfig` 开关没有以完整、可执行的指标请求传入 normalizer。
-- 宽泛异常捕获可能把实现缺陷转换为缺失值，却没有稳定状态或原因代码。
-- Structural Utility 可能从均值中静默排除未定义目标；当前对合成数据恒定目标的处理与已批准的失败政策不兼容。
-- Predictor 组合会随已安装软件包或环境变量而变化，因此当前 Structural Utility 输出没有唯一稳定的指标身份。
-- 旧摘要 schema 缺少每列、每列对、每目标、每种子的 Atomic Result，也缺少校验和、兼容性身份、覆盖率和 finalization 状态。
-- 数据注册当前会在注册时改变数据，导致无法清晰审计原始输入、预处理和所得 dataset view。
-- 包导入时会提前加载模型模块以及 PyTorch 等可选重依赖，导致最小环境无法运行核心元数据和数据测试。
-- 根目录没有 `pyproject.toml`、pytest 发现边界或仓库 CI workflow。
-- 在 2026-08-03 的审计机器上，不受限制的 `pytest -q` 收集了上游和研究参考材料中的测试套件，并因 105 个收集错误而停止；即使只运行本仓库的 onboarding 测试，也会因提前导入 PyTorch 而无法收集。这是基线证据，不是可接受的测试状态。
+- 新评测引擎尚未执行任何科学指标；当前只有旧版诊断评测。
+- 新 registry 中没有指标超过 `registered`，任何指标都不得影响 Official Results。
+- 尚无 `evaluate-table` 命令、规范表解析器、结构门或逐列/逐列对执行。
+- P1 只写入并校验 incomplete bundle；指标存储、最后写校验和以及不可变 finalized bundle 属于 P2。
+- Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
+- Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
+- 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
 
 ## 4. 目标架构
 
@@ -98,7 +100,7 @@ standardized_tabular_diffusion/evaluation/
     validity/
     privacy/
     efficiency/
-  backends/             # SDMetrics、TabStruct 等隔离 wrapper
+  backends/             # 经批准的权威指标来源隔离 wrapper
 
 schemas/evaluation/     # 签入仓库的 JSON Schema
 configs/evaluation/
@@ -139,17 +141,17 @@ tests/evaluation/
 
 ## 5. 交付顺序与依赖门
 
-| 阶段 | 交付物 | 依赖 | 退出门槛 |
-|---|---|---|---|
-| P0 | 可信开发基线 | 无 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
-| P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
-| P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
-| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
-| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
-| P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 阶段核算和复用完整性在声明的硬件配置下通过 |
-| P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 不兼容结果无法合并；覆盖率和发布门通过 |
-| P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 所声明发布类别的 public-preview 或 official-release 门通过 |
+| 阶段 | 交付物 | 依赖 | 当前状态 | 退出门槛 |
+|---|---|---|---|---|
+| P0 | 可信开发基线 | 无 | 已通过 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
+| P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
+| P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 未开始 | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
+| P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 未开始 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
+| P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
+| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
+| P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
+| P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
+| P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
 
 依赖稳定后，P3、P4、P5 和 P6 的部分工作可以并行。每个参与指标和数据集分别通过准入门之前，P7 不能用于发布排名。
 
@@ -193,6 +195,8 @@ tests/evaluation/
 - 等价请求具有相同 fingerprint，科学上不同的请求具有不同 fingerprint；
 - 中断的 writer 留下可审计 incomplete bundle，而不会留下假的 finalized bundle；以及
 - 缺少必需证据字段时不能推进 registry 生命周期状态。
+
+完成证据（2026-08-05）：以上 P1 表面均已实现。专用只读 workflow 已在 Linux x86-64 与 Python 3.11.15 上通过，见 [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264)；其[机器可读证据](../evidence/evaluation/p1-foundation-run-31018595264.json)已留存，SHA-256 为 `3013e913c58adf0c03c6ec30118879c522a87f4682d1cceb99f8778115c7da5a`。该证据只验证工程契约，没有执行科学指标，也不作来源等价声明。
 
 ### 6.3 P2 — 首个端到端垂直切片
 
@@ -256,7 +260,7 @@ Local Utility 任务：
 
 Global Utility 任务：
 
-- 在聚合层精确实现 TabStruct Equation 4：分类目标用 Balanced Accuracy ratio，数值目标用逆 RMSE ratio，最后进行等目标均值。
+- 在聚合层实现经审阅、由 TabStruct Equation 4 描述的 Global Utility ratio 公式：分类目标使用 Balanced Accuracy ratio，数值目标使用逆 RMSE ratio，最后进行等目标均值。该论文只作为公式来源，不是运行时或代码依赖。
 - 把 Full-tuned、Tiny-default 和任何锁定 TabEval predictor profile 保持为不同指标身份和兼容组。
 - 默认排除 identifier；其他每个目标排除都必须在 Dataset Profile 中给出理由。
 - 绝不裁剪大于一的 ratio，也绝不静默省略零或非有限分母。
@@ -419,7 +423,7 @@ Golden fixture 必须小型、合成、可再分发、可人工检查且有版�
 
 ### M1 — 评测基础
 
-P0 和 P1 通过。契约和工具可用，但此时尚无指标被宣传为 source-parity-validated。
+P0 和 P1 通过。契约和工具可用，但此时尚无指标被宣传为 source-parity-validated。当前状态：M1 已凭留存的 Linux/Python 3.11 证据通过；下一阶段为 P2。
 
 ### M2 — 首份可信报告
 
@@ -435,17 +439,18 @@ P2 通过。用户可以评测兼容的合成表，并获得包含结构校验�
 
 代码存在、mock 测试通过或一台机器生成表格都不代表实施完成。只有适用阶段退出门、生命周期证据、兼容性检查、文档和发布评估全部完成，才算完成。
 
-## 11. 紧接着的首个实现增量
+## 11. 紧接着的实现增量
 
-第一个实现增量应仅包含：
+P1 的权威证据留存后，下一个增量是 P2 的窄垂直切片：
 
-1. 根打包配置和 pytest 发现边界；
-2. 轻量可选依赖导入；
-3. metric record、Atomic Result、Evaluation Request 和 incomplete bundle 的 schema 与契约骨架；
-4. legacy 身份和弃用标记，不改变指标值；以及
-5. Linux/Python 3.11 的 core CI。
+1. 定义隔离且锁定的 SDMetrics 依赖配置和权威调用等价性 fixture；
+2. 把外部 CSV、Parquet 和 DataFrame 输入解析为无损的规范表；
+3. 实现结构门，以及分母完备的逐列/逐列对 Atomic Result；
+4. 包装 Column Shapes 和 Column Pair Trends，不使用旧版 `evaluation/tabstruct.py` 路径；
+5. 实现最后写校验和的 finalization 和独立 `evaluate-table` CLI；以及
+6. 在增加其他指标族之前，先在 Linux/Python 3.11 上验证完整切片。
 
-该增量暂时不修改上游算法、不选择插补策略、不发布榜单，也不重写指标公式。它的目的，是建立一个可信表面，以便实现和审阅 Shape/Trend 垂直切片。
+该增量不修改上游算法、不选择插补策略、不发布榜单，也不把 TabStruct 参考代码作为实现依赖。任何上游补丁或语义偏离仍是必须先讨论的审阅检查点。
 
 ## 12. 相关规范
 

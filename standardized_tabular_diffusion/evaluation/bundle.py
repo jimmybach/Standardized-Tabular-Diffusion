@@ -3,18 +3,21 @@
 from __future__ import annotations
 
 import copy
-import json
-import os
 import re
+import uuid
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest, utc_timestamp
 from standardized_tabular_diffusion.evaluation.schema import validate_instance
 from standardized_tabular_diffusion.evaluation.serialization import (
+    SerializationError,
+    atomic_write_bytes,
     atomic_write_json,
     canonical_json_bytes,
+    parse_json_text,
     read_json,
     read_yaml_safe,
     sha256_file,
@@ -87,7 +90,7 @@ def _redact(value: Any) -> Any:
     secret = re.compile(r"(?:password|secret|token|api[_-]?key|credential)", re.IGNORECASE)
     if isinstance(value, dict):
         return {key: "<redacted>" if secret.search(str(key)) else _redact(item) for key, item in value.items()}
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_redact(item) for item in value]
     return value
 
@@ -138,7 +141,7 @@ class IncompleteRunBundleWriter:
             self._path(directory + "/.placeholder").parent.mkdir(exist_ok=True)
 
         fingerprint = request.fingerprint
-        run_id = f"run-{fingerprint[:24]}"
+        run_id = f"run-{uuid.uuid4().hex}"
         created_at = utc_timestamp()
         producer_record = producer or {
             "repository": "https://github.com/jimmybach/Standardized-Tabular-Diffusion",
@@ -176,7 +179,7 @@ class IncompleteRunBundleWriter:
 
         atomic_write_json(self._path("metadata.json"), metadata)
         atomic_write_json(self._path("config.yaml"), request.to_dict())
-        atomic_write_json(self._path("environment.json"), environment)
+        atomic_write_json(self._path("environment.json"), _redact(environment))
         atomic_write_json(self._path("summary.json"), summary)
         atomic_write_json(self._path("artifacts/index.json"), artifact_index)
         self.append_event(
@@ -237,15 +240,26 @@ class IncompleteRunBundleWriter:
             if loaded_manifest.get("finalization_status") != "incomplete":
                 raise BundleError("Events cannot be appended after bundle finalization")
             manifest = loaded_manifest
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("ab") as handle:
-            handle.write(payload)
-            handle.flush()
-            os.fsync(handle.fileno())
         if manifest is not None:
             for item in manifest.get("files", []):
-                if item.get("path") == "logs/events.jsonl" and item.get("status") == "present":
+                if item.get("path") == "logs/events.jsonl":
+                    item["status"] = "pending"
+                    item["sha256"] = None
+                    item["reason_code"] = "event_log_updating"
+                    validate_instance("manifest", manifest)
+                    atomic_write_json(manifest_path, manifest)
+                    break
+            else:
+                raise BundleError("manifest.json does not inventory logs/events.jsonl")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        existing = path.read_bytes() if path.exists() else b""
+        atomic_write_bytes(path, existing + payload)
+        if manifest is not None:
+            for item in manifest["files"]:
+                if item["path"] == "logs/events.jsonl":
+                    item["status"] = "present"
                     item["sha256"] = sha256_file(path)
+                    item["reason_code"] = None
                     validate_instance("manifest", manifest)
                     atomic_write_json(manifest_path, manifest)
                     break
@@ -326,6 +340,16 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
     if not manifest_path.is_file() or manifest_path.is_symlink():
         raise BundleError("Result bundle is missing a regular manifest.json")
     manifest = _load_json_object(manifest_path, "manifest")
+    if manifest["bundle_id"] != manifest["identity"]["run_id"]:
+        raise BundleError("manifest bundle_id does not match identity.run_id")
+
+    actual_files: set[str] = set()
+    for path in bundle_root.rglob("*"):
+        relative = path.relative_to(bundle_root).as_posix()
+        if path.is_symlink():
+            raise BundleError(f"Symlinks are prohibited inside result bundles: {relative}")
+        if path.is_file():
+            actual_files.add(relative)
 
     seen: set[str] = set()
     inventory_status: dict[str, str] = {}
@@ -341,16 +365,26 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
         if item["status"] == "present":
             if not path.is_file() or path.is_symlink():
                 raise BundleError(f"Manifest marks missing or unsafe file as present: {relative}")
+            if relative != "manifest.json" and item["sha256"] is None:
+                raise BundleError(f"Present inventory item requires a checksum: {relative}")
+            if item["reason_code"] is not None:
+                raise BundleError(f"Present inventory item cannot carry reason_code: {relative}")
             if item["sha256"] is not None and sha256_file(path) != item["sha256"]:
                 raise BundleError(f"Checksum mismatch for {relative}")
-        elif item["status"] == "not-applicable" and not item["reason_code"]:
-            raise BundleError(f"Not-applicable inventory item requires reason_code: {relative}")
+        else:
+            if item["sha256"] is not None:
+                raise BundleError(f"Non-present inventory item cannot carry a checksum: {relative}")
+            if not item["reason_code"]:
+                raise BundleError(f"{item['status']} inventory item requires reason_code: {relative}")
         if item["required"] and item["status"] == "not-applicable":
             raise BundleError(f"Required inventory item cannot be not-applicable: {relative}")
 
     required_inventory = {path for path, *_ in _INVENTORY_TEMPLATE}
     if not required_inventory.issubset(seen):
         raise BundleError(f"Manifest inventory is incomplete: {sorted(required_inventory - seen)}")
+    unexpected_files = actual_files - seen
+    if unexpected_files:
+        raise BundleError(f"Result bundle contains files absent from the manifest: {sorted(unexpected_files)}")
 
     config_path = bundle_root / "config.yaml"
     metadata_path = bundle_root / "metadata.json"
@@ -370,6 +404,10 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
         summary = _load_json_object(summary_path, "summary")
     if inventory_status.get("artifacts/index.json") == "present":
         _load_json_object(artifact_index_path, "artifact-index")
+    if inventory_status.get("environment.json") == "present":
+        environment = read_json(bundle_root / "environment.json")
+        if not isinstance(environment, dict):
+            raise BundleError("environment.json must be a JSON object")
     for stage_name in ("prepare", "train", "sample", "validate", "evaluate", "aggregate", "report"):
         relative = f"stages/{stage_name}.json"
         if inventory_status.get(relative) == "present":
@@ -388,6 +426,19 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             raise BundleError("summary identity does not match manifest")
         if metadata["comparison_track"] != request.comparison_track:
             raise BundleError("metadata comparison_track does not match config")
+        if metadata["protocol"] != request.protocol:
+            raise BundleError("metadata protocol does not match config")
+        if metadata["dataset"] != request.dataset_profile:
+            raise BundleError("metadata dataset does not match config")
+        if metadata["seeds"] != {
+            "generation": request.generation_seed,
+            "evaluators": list(request.evaluator_seeds),
+        }:
+            raise BundleError("metadata seeds do not match config")
+        if metadata["coverage"].get("requested_metrics") != list(request.metrics):
+            raise BundleError("metadata requested metrics do not match config")
+        if manifest["external_artifacts"] != [request.sample_artifact]:
+            raise BundleError("manifest external artifact does not match config")
 
     if manifest["finalization_status"] == "finalized":
         if counts["pending"]:
@@ -418,8 +469,8 @@ def _validate_event_log(path: Path) -> None:
         if not line:
             raise BundleError(f"events.jsonl contains an empty record at line {line_number}")
         try:
-            event = json.loads(line, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
-        except (json.JSONDecodeError, ValueError) as exc:
+            event = parse_json_text(line, source=f"events.jsonl line {line_number}")
+        except SerializationError as exc:
             raise BundleError(f"events.jsonl line {line_number} is invalid JSON") from exc
         if not isinstance(event, dict) or set(event) != required:
             raise BundleError(f"events.jsonl line {line_number} has an invalid event contract")
@@ -431,6 +482,17 @@ def _validate_event_log(path: Path) -> None:
             "critical",
         }:
             raise BundleError(f"events.jsonl line {line_number} has an invalid version or severity")
+        if any(
+            not isinstance(event[field], str) or not event[field].strip()
+            for field in ("timestamp", "stage", "component", "event_code")
+        ) or not isinstance(event["details"], dict):
+            raise BundleError(f"events.jsonl line {line_number} has invalid field types")
+        try:
+            timestamp = datetime.fromisoformat(event["timestamp"].replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise BundleError(f"events.jsonl line {line_number} has an invalid timestamp") from exc
+        if timestamp.tzinfo is None or timestamp.utcoffset() != timezone.utc.utcoffset(timestamp):
+            raise BundleError(f"events.jsonl line {line_number} timestamp must identify UTC")
         canonical_json_bytes(event)
 
 
