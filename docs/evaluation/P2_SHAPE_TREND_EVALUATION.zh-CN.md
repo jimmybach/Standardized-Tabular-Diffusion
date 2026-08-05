@@ -12,7 +12,7 @@ P2 是本仓库第一条完整评测路径。它接收解码后的参考表和�
 
 该运行时路径绝不导入 `evaluation/tabstruct.py`。TabStruct 仍然只是研究参考材料，P1 之前的评测器仍然只是旧版诊断兼容路径。
 
-选定来源为官方 [SDMetrics 仓库](https://github.com/sdv-dev/SDMetrics/tree/ba8842f2ba04ce914f698cc1cf746ca12338ab0e) commit `ba8842f2ba04ce914f698cc1cf746ca12338ab0e`，发行版本 `0.28.3.dev0`，许可证为 MIT。后端会对已安装包全部 121 个 Python 源文件经 LF 换行规范化后的字节计算哈希，并要求源码树摘要为 `784beda5c7a63d5ebb5fe74f98d00db3a2e018a29b2f32f643bf857750a6c2a9`；同时要求已安装 MIT 许可证摘要为 `bd0e9ac3a8d0343ea371d392c6c13ff43a3b032ef75a5c9ec76ba93cec0d0b98`。该规范化消除不同 checkout 换行方式的影响，但不会忽略任何可执行差异。版本、源码树或许可证不一致时，评测会在报告任何指标前停止。
+选定来源为官方 [SDMetrics 仓库](https://github.com/sdv-dev/SDMetrics/tree/ba8842f2ba04ce914f698cc1cf746ca12338ab0e) commit `ba8842f2ba04ce914f698cc1cf746ca12338ab0e`，发行版本 `0.28.3.dev0`，许可证为 MIT。后端会对已安装包全部 121 个 Python 源文件经 LF 换行规范化后的字节计算哈希，并要求源码树摘要为 `784beda5c7a63d5ebb5fe74f98d00db3a2e018a29b2f32f643bf857750a6c2a9`；同时要求经 LF 规范化的已安装 MIT 许可证摘要为 `1310119ad2a00b68f05d86309aea0bf1d3853e747d4f5646b1bf60a5a07f09a8`。该规范化消除不同 checkout 或 wheel 构建换行策略的影响，但不会忽略任何可执行内容或法律文本差异。版本、源码树或许可证不一致时，评测会在报告任何指标前停止。
 
 ## 结构门禁
 
