@@ -1,6 +1,6 @@
 # NFlow 验证协议
 
-状态：协议已实现；尚待 Linux/Python 3.11 权威证据
+状态：已通过；已保留 Linux/Python 3.11 官方包配方等价性证据
 
 协议 ID：`nflows-maf-tabular-recipe-parity-v1`
 
@@ -105,6 +105,10 @@ python -m standardized_tabular_diffusion.validation.nflow \
 
 `.github/workflows/nflow-validation.yml` 执行该命令并将 JSON artifact 保留 90 天。包、依赖、适配器、checkpoint schema、预处理、架构、优化器或协议发生任何变化都必须重新运行。只有 Linux/Python 3.11 结果通过、人工检查完毕，并将原始证据不变地保存在 `docs/evidence/nflow/` 后，才允许晋级。
 
-## 当前结果
+## 已保留结果
 
-协议与工作流已经实现，但尚未保留权威 artifact。因此，`nflow` 当前仍为 `adapter-complete`、`experimental`、`unsupported`，并且在所需运行通过、证据完成审阅并提交之前继续排除在 Official Results 之外。
+GitHub Actions 运行 [`30970260840`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840) 已在 Linux、Python 3.11.15 和 CPU-only PyTorch 2.3.0 环境通过。二分类、多分类、回归及三个 seed 组成的九个案例全部通过精确比较，包括仅由训练集拟合的预处理状态、每个 epoch 的 loss、全部官方 flow state tensor、重新加载后的原始连续样本、最终 DataFrame 和 CSV 字节、artifact 元数据、不可执行状态声明，以及调用者 PyTorch RNG/线程状态的恢复。
+
+来源协议验证了 96 个归档成员、80 个源码发行包普通文件、与锁定 Git tree 一致的全部 42 个包文件、9 个关键运行文件、48 个已安装 `RECORD` 哈希，并确认全部案例结束后安装源码仍未改变。经审阅的证据原样保存在 `docs/evidence/nflow/native-parity-run-30970260840.json`，SHA-256 为 `940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923`。GitHub artifact ID 为 `8916246279`，归档摘要为 `sha256:635028a4962884284e8592144e5fa2b77272bafa4c4279f54d421650552ec044`。
+
+因此，NFlow 已针对“精确官方 nflows 包 + 本仓库声明的混合类型 MAF 配方”达到 `native-parity-validated`。在独立的中心评测、数据集准入、运行时、治理与发布门槛全部通过之前，它仍为 `experimental`、`unsupported`，并继续排除在 Official Results 之外。本结果不声明论文原生等价性或其他配方等价性。

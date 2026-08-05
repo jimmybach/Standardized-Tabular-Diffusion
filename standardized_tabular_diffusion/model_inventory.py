@@ -436,7 +436,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="flow",
         paradigm="normalizing flow",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/bayesiains/nflows",
@@ -445,7 +445,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "NFlow is a declared package-plus-recipe target rather than a paper-native tabular synthesizer: numerical standardization, ordinal categorical coordinates, architecture, optimizer, and decoding are specified explicitly.",
             "Missing/non-finite values, unsupported recipe changes, non-CPU execution, and ambiguous DatasetSpec roles fail closed; PyTorch RNG and thread state are restored after each operation.",
             "The former executable pickle has been replaced by integrity-checked JSON plus allow_pickle=False NumPy tensors with strict architecture/state reconstruction and conservative privacy declarations.",
-            "The Linux/Python 3.11 nine-case parity protocol is implemented but authoritative retained evidence is still pending, so the status remains adapter-complete.",
+            "All nine binary, multiclass, regression, and seed cases passed exact official-package recipe parity in retained Linux/Python 3.11 run 30970260840.",
+            "The validated claim remains limited to the canonical library plus declared recipe; central evaluation, dataset admission, runtime, and release gates remain pending.",
         ],
     ),
     "arf": ModelInventoryEntry(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import platform
 from pathlib import Path
@@ -15,6 +16,10 @@ from standardized_tabular_diffusion.runner import validate_action_inputs
 from standardized_tabular_diffusion.validation import nflow as nflow_validation
 
 pytestmark = pytest.mark.adapter
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "nflow" / "native-parity-run-30970260840.json"
+EVIDENCE_SHA256 = "940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923"
 
 
 def _dataset_spec(tmp_path: Path, *, task_type: str = "classification") -> DatasetSpec:
@@ -59,6 +64,41 @@ def test_nflow_protocol_constants_lock_the_official_release_and_declared_recipe(
     assert nflow_validation.RECIPE["transform_order"] == (
         "random-permutation-then-masked-affine-autoregressive"
     )
+
+
+def test_nflow_retained_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "nflows-maf-tabular-recipe-parity-v1"
+    assert evidence["reproduction_target"] == "official-nflows-package-plus-declared-tabular-maf-recipe"
+    assert evidence["repository_commit"] == "37e9234f7160cd4c9f2f6c1ae2beb7eef96aaf35"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["distributions"]["nflows"] == "0.14"
+    assert evidence["environment"]["distributions"]["torch"] == "2.3.0+cpu"
+    assert evidence["environment"]["platform"].startswith("Linux-")
+    assert evidence["environment_lock"]["sha256"] == (
+        "a05b0c1a8c3f14ec2c285038ede6c9d61c327400ce0986aa05361c970fbbc319"
+    )
+    assert evidence["source"]["authority"] == "canonical-library"
+    assert evidence["source"]["source_distribution"]["archive_members_verified"] == 96
+    assert evidence["source"]["source_distribution"]["package_files_verified"] == 42
+    assert evidence["source"]["source_distribution"]["license_file_in_sdist"] is False
+    assert evidence["source"]["installed_distribution"]["record_hashes_verified"] == 48
+    assert evidence["source_unchanged_after_validation"] is True
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(case["comparisons"]["preprocessing_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["losses_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["state_tensors_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["raw_samples_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["safe_json_numpy_checkpoint"] for case in evidence["cases"])
+    assert all(case["comparisons"]["row_level_training_data_absent"] for case in evidence["cases"])
+    assert all(case["comparisons"]["privacy_not_overclaimed"] for case in evidence["cases"])
 
 
 def test_nflow_preprocessor_safe_payload_round_trip_is_exact(tmp_path: Path) -> None:

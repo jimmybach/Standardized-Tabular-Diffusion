@@ -168,6 +168,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
         "goggle": "docs/evidence/goggle/native-parity-run-30945676747.json",
+        "nflow": "docs/evidence/nflow/native-parity-run-30970260840.json",
         "nrgboost": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
         "realtabformer": "docs/evidence/realtabformer/native-parity-run-30950369908.json",
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
@@ -186,6 +187,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "ctab-gan-plus",
         "ctgan",
         "goggle",
+        "nflow",
         "nrgboost",
         "realtabformer",
         "smote",
@@ -531,7 +533,7 @@ def test_nrgboost_package_lock_and_retained_validation_are_exact_and_conservativ
     assert spec.support_level == "unsupported"
 
 
-def test_nflow_source_lock_is_exact_and_waits_for_authoritative_parity() -> None:
+def test_nflow_source_lock_and_retained_validation_are_exact_and_conservatively_gated() -> None:
     payload = _load_source_lock()
     nflow = payload["components"]["nflow"]
     assert isinstance(nflow, dict)
@@ -555,14 +557,27 @@ def test_nflow_source_lock_is_exact_and_waits_for_authoritative_parity() -> None
         "version": "0.14",
     }
     assert nflow["source_package_comparison"]["exact_package_files"] == 42
-    assert nflow["validation"] == {
-        "level": "adapter-complete",
-        "protocol_id": "nflows-maf-tabular-recipe-parity-v1",
-        "status": "pending-authoritative-linux-python-3.11-run",
-    }
+    validation = nflow["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30970260840
+    assert validation["repository_commit"] == "37e9234f7160cd4c9f2f6c1ae2beb7eef96aaf35"
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["state_tensors_exact"] is True
+    assert validation["result_summary"]["safe_non_executable_checkpoint"] is True
+    assert validation["artifact"]["evidence_file_sha256"] == (
+        "940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923"
+    )
+    evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
+    assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == validation["artifact"][
+        "evidence_file_sha256"
+    ]
+    assert nflow["official_eligibility"] == (
+        "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates"
+    )
     spec = get_adapter_spec("nflow")
-    assert spec.validation_level.value == "adapter-complete"
-    assert spec.revision_status == "pinned-canonical-package-parity-protocol-pending"
+    assert spec.validation_level.value == "native-parity-validated"
+    assert spec.revision_status == "pinned-canonical-package-native-parity-validated"
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
 
