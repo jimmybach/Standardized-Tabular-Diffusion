@@ -1,0 +1,55 @@
+{
+  "archive": {
+    "bytes": 59173,
+    "format": "zip",
+    "root_prefix": "Tabula-a7d34a94adee5a269f6807395d0040d936bb0e60/",
+    "sha256": "dfb69d55cf4e669f979325bf10b118a084dde49d680680dcebf7dcdaed024a26",
+    "url": "https://codeload.github.com/zhao-zilong/Tabula/zip/a7d34a94adee5a269f6807395d0040d936bb0e60"
+  },
+  "authority": "method-author",
+  "license": {
+    "declared_expression": null,
+    "license_file_present": false,
+    "redistribution_status": "not-authorized",
+    "review_status": "upstream-public-no-license-declared"
+  },
+  "manifest_schema_version": "1.0.0",
+  "model_id": "tabula",
+  "repository": "https://github.com/zhao-zilong/Tabula",
+  "runtime_files": [
+    {
+      "bytes": 27,
+      "path": "tabula/__init__.py",
+      "sha256": "bf09bc44e4a04e10e7d1ec7d3af15bb46cce4cbd5a4c312ba22c624df0a5f388"
+    },
+    {
+      "bytes": 18402,
+      "path": "tabula/tabula.py",
+      "sha256": "6d054a6adf91ce05f94a1b303d1b5fba4e4f7a9ec132fdcefcf2ba3a5b4bc0b1"
+    },
+    {
+      "bytes": 2184,
+      "path": "tabula/tabula_dataset.py",
+      "sha256": "ee2fc85682351d46d137e1b37a19cfd97453b18ad102c4ea9910f19c6b239b6a"
+    },
+    {
+      "bytes": 5243,
+      "path": "tabula/tabula_start.py",
+      "sha256": "5fb50e9ced708eec4cced0eba032e42d2928af8fefc132f0a817285f75ffa79b"
+    },
+    {
+      "bytes": 1394,
+      "path": "tabula/tabula_trainer.py",
+      "sha256": "6557b7ef26ddd9b218b22a894f547b4a67bcc762397eb957e4ce5ded7ab049c7"
+    },
+    {
+      "bytes": 3366,
+      "path": "tabula/tabula_utils.py",
+      "sha256": "e24fb5d843df7a340ae3ac99c0d97fa218c7183f39873c3eff8c90b9a5c358e3"
+    }
+  ],
+  "source_hash_normalization": "lf-one-final-newline",
+  "upstream_commit": "a7d34a94adee5a269f6807395d0040d936bb0e60",
+  "upstream_model_tree": "6ee7614b3fb60930a41440e242fdade3145ab5b2",
+  "upstream_tree": "dd7d61fbbb071c240f13b6ba3bd05fdf69d25a13"
+}

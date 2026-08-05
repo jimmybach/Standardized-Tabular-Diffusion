@@ -1,0 +1,122 @@
+name: TabuLa Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/tabula-validation.yml"
+      - "requirements-tabula-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/tabula.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/upstream_sources.py"
+      - "standardized_tabular_diffusion/validation/tabula.py"
+      - "standardized_tabular_diffusion/validation/_tiny_lm.py"
+      - "standardized_tabular_diffusion/resources/upstream/tabula-source-manifest.json"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/TABULA_VALIDATION*.md"
+      - "docs/evidence/tabula/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_tabula_validation.py"
+      - "tests/test_upstream_sources.py"
+      - "tests/test_upstream_provenance.py"
+  pull_request:
+    paths:
+      - ".github/workflows/tabula-validation.yml"
+      - "requirements-tabula-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/tabula.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/upstream_sources.py"
+      - "standardized_tabular_diffusion/validation/tabula.py"
+      - "standardized_tabular_diffusion/validation/_tiny_lm.py"
+      - "standardized_tabular_diffusion/resources/upstream/tabula-source-manifest.json"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/TABULA_VALIDATION*.md"
+      - "docs/evidence/tabula/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_tabula_validation.py"
+      - "tests/test_upstream_sources.py"
+      - "tests/test_upstream_provenance.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tabula-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / method-author source parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-tabula-validation.txt
+
+      - name: Install frozen TabuLa validation environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.3.0"
+          python -m pip install -r requirements-tabula-validation.txt
+          python -m pip install --no-deps .
+          python -m pip check
+          mkdir -p "$RUNNER_TEMP/tabula-archive"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/tabula-archive/tabula-a7d34a94.zip" \
+            "https://codeload.github.com/zhao-zilong/Tabula/zip/a7d34a94adee5a269f6807395d0040d936bb0e60"
+          echo "dfb69d55cf4e669f979325bf10b118a084dde49d680680dcebf7dcdaed024a26  $RUNNER_TEMP/tabula-archive/tabula-a7d34a94.zip" | sha256sum --check
+          python -m standardized_tabular_diffusion.cli materialize-model-source \
+            --model tabula \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --destination "$RUNNER_TEMP/tabula-source"
+
+      - name: Run source and adapter contract tests
+        env:
+          TABULA_ARCHIVE_PATH: ${{ runner.temp }}/tabula-archive/tabula-a7d34a94.zip
+        run: |
+          python -m pytest tests/test_tabula_validation.py tests/test_upstream_sources.py tests/test_upstream_provenance.py -q
+
+      - name: Run real direct-source-versus-adapter parity protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.tabula \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --source-root "$RUNNER_TEMP/tabula-source" \
+            --archive-path "$RUNNER_TEMP/tabula-archive/tabula-a7d34a94.zip" \
+            --output-dir "$RUNNER_TEMP/tabula-validation" \
+            --evidence-path "$RUNNER_TEMP/tabula-evidence.json"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/tabula-evidence.json" ]; then
+            TABULA_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("tabula-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "tabula-method-author-source-parity-v1", "model_id": "tabula", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["TABULA_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: tabula-native-parity-evidence
+          path: ${{ runner.temp }}/tabula-evidence.json
+          if-no-files-found: error
+          retention-days: 90

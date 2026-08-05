@@ -108,13 +108,12 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         validation_level="adapter-complete",
         runnable_recommendation="yes",
         implementation_quality="high",
-        repository_url="https://github.com/kathrinse/greaT",
+        repository_url="https://github.com/tabularis-ai/be_great",
         notes=[
-            "Integrated through the vendored TabSyn baseline implementation and exposed through the standardized adapter registry.",
-            "Still has a heavy Hugging Face dependency footprint compared with classical baselines.",
-            "Runtime depends on access to a pretrained causal LM checkpoint such as distilgpt2.",
-            "Training is reproducible through the shared CLI, and stronger ordered-column distilgpt2 runs now produce parseable samples.",
-            "Tiny CPU smoke checkpoints still struggle to generate enough parseable rows for reliable sample validation.",
+            "The former benchmark-vendored implementation has been replaced by the checksum-locked method-author be-great 0.0.14 package.",
+            "Typed missing-free input, scoped randomness, exact-row postconditions, and safe safetensors-plus-JSON checkpoints are enforced outside unchanged package APIs.",
+            "A mandatory Linux/Python 3.11 package-versus-adapter parity workflow is defined; promotion remains pending its retained evidence.",
+            "Pretrained-model quality, benchmark evaluation, resource budgets, privacy, and release support remain separate gates.",
         ],
     ),
     "tabicl": ModelInventoryEntry(
@@ -214,7 +213,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         covered_by_papers=[],
         validation_level="registered",
         runnable_recommendation="partial",
-        implementation_quality="medium",
+        implementation_quality="high",
         repository_url="https://github.com/microsoft/ticl",
         notes=[
             "Official implementation is available through Microsoft's Tabular In-Context Learning repository.",
@@ -279,8 +278,9 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         notes=[
             "Official repository exists for the generative model TabuLa: Harnessing Language Models for Tabular Data Synthesis.",
             "Method is directly relevant to this repository's generative benchmark scope.",
-            "This repository now exposes a local standardized TabuLa-compatible adapter built on top of Transformers rather than depending on the upstream notebook flow directly.",
-            "The standardized path is practical but should be treated as a compatibility implementation inspired by the paper's training recipe rather than a bit-for-bit wrapper of the original repository.",
+            "The local compatibility reimplementation has been replaced by six checksum-locked files from method-author commit a7d34a94.",
+            "The adapter calls unchanged official fit/sample code and adds only source validation, typed input checks, scoped randomness, bounded Linux sampling, and safe checkpoint persistence.",
+            "The repository declares no license, so redistribution, Official Results, and release support remain blocked even if parity passes.",
         ],
     ),
     "transtab": ModelInventoryEntry(
@@ -373,7 +373,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         covered_by_papers=[],
         validation_level="native-parity-validated",
         runnable_recommendation="yes",
-        implementation_quality="medium",
+        implementation_quality="high",
         repository_url="https://github.com/Team-TUD/CTAB-GAN",
         notes=[
             "The former 15-file embedded implementation was a semantic fork: seven of nine shared paths differed from the latest official source after line-ending normalization.",
@@ -477,9 +477,9 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         implementation_quality="medium",
         repository_url="https://github.com/andreimargeloiu/TabEBM",
         notes=[
-            "Integrated as a classification-only adapter with class-conditional sampling semantics.",
-            "Runtime still depends on a working TabPFN setup and accepted gated-model terms from Prior Labs on Hugging Face.",
-            "More operationally fragile than the other implemented baselines because it sits on top of a gated foundation-model dependency.",
+            "The adapter now targets the checksum-locked official tabebm 2025.8.19 source distribution and preserves classification-only official generation semantics.",
+            "Mixed-table preprocessing, safe JSON state, explicit gated-model opt-in, scoped randomness, and deterministic exact-row assembly are adapter boundaries.",
+            "Full native parity cannot be claimed without executing the external TabPFN-v2 model; the defined public CI gate therefore validates only package identity, deterministic official core helpers, and the adapter delegation boundary.",
         ],
     ),
     "nrgboost": ModelInventoryEntry(
@@ -489,7 +489,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
         validation_level="native-parity-validated",
         runnable_recommendation="yes",
-        implementation_quality="medium",
+        implementation_quality="high",
         repository_url="https://github.com/Ajoo/nrgboost",
         notes=[
             "The method-author v0.0.3 commit and official CPython 3.11 Linux wheel are checksum-locked; no upstream source is vendored or patched.",
@@ -544,8 +544,9 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         repository_url="https://github.com/echaibub/TabSDS",
         notes=[
             "Official R and Python implementations are linked from the ICML 2025 paper and OpenReview page.",
-            "This repository now exposes a local lightweight compatibility adapter inspired by the TabSDS method.",
-            "The current adapter is practical and runnable, but it should be treated as an approximation rather than a bit-for-bit wrapper around the official upstream implementation.",
+            "The local approximation has been replaced by the two checksum-locked method-author Python notebook helper files at commit 86650149.",
+            "The adapter reconstructs the notebook namespace without source edits, calls the unchanged simple-shuffle function, and stores only safe recipe metadata.",
+            "The mandatory parity protocol covers binary, multiclass, and regression fixtures across three seeds; upstream licensing still blocks redistribution and release.",
         ],
     ),
     "cdtd": ModelInventoryEntry(

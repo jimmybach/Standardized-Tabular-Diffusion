@@ -22,6 +22,8 @@ _MANIFESTS = {
     "ctab-gan-plus": _RESOURCE_ROOT / "ctabgan-plus-source-manifest.json",
     "goggle": _RESOURCE_ROOT / "goggle-source-manifest.json",
     "stasy": _RESOURCE_ROOT / "stasy-source-manifest.json",
+    "tabsds": _RESOURCE_ROOT / "tabsds-source-manifest.json",
+    "tabula": _RESOURCE_ROOT / "tabula-source-manifest.json",
 }
 _INSTALL_RECORD = ".standardized-source.json"
 _MAX_ARCHIVE_BYTES = 16 * 1024 * 1024

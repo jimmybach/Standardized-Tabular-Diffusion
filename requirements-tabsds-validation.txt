@@ -1,0 +1,9 @@
+# Frozen direct runtime for the checksum-locked method-author TabSDS Python path.
+numpy==1.26.4
+pandas==2.2.3
+pytest==8.3.5
+PyYAML==6.0.2
+scikit-learn==1.5.2
+scipy==1.13.1
+threadpoolctl==3.6.0
+tqdm==4.66.5

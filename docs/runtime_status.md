@@ -2,7 +2,7 @@
 
 This document preserves historical local execution observations. It is not the model status source of truth and must not be used to claim benchmark eligibility or release support. Machine-readable current status is available through `std-tabular-diffusion list-models --details`.
 
-At the current release-preparation baseline, ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, NFlow, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, TabDDPM, TabDiff, TabSyn, and STaSy are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. ARF's claim is limited to the official Python package and does not establish R/Python equivalence; BN and NFlow claims are limited to their canonical packages plus declared recipes and are not paper-native; CoDi and STaSy claims are limited to their TabSyn benchmark snapshots; Goggle's claim is limited to the method-author GCN core; REaLTabFormer's claim is limited to official tabular training with `n_critic=0`; TabularARGN's claim is limited to flat single-table unconditional generation. Other runnable adapters on this branch remain conservatively recorded as `adapter-complete`, `experimental`, and `unsupported`. Earlier local executions were not accompanied by the complete evidence required for `smoke-validated`: a supported Linux/Python 3.11 environment, immutable dependency/source identity, artifact integrity checks, and a retained evidence record.
+At the current release-preparation baseline, 17 adapters are `native-parity-validated`, `experimental`, and `unsupported` based on retained Linux/Python 3.11 evidence. GReaT, TabuLa, and TabSDS now target checksum-locked official packages or method-author source rather than local compatibility implementations; their mandatory authoritative parity runs are pending. TabEBM targets the official package but can reach only `smoke-validated` in public CI because full generation requires explicit acceptance of gated TabPFN-v2 terms and model access. Benchmark eligibility and release support remain independent gates for every adapter.
 
 BN targets the checksum-locked official `pgmpy==1.1.2` wheel plus an explicit quantile/BIC/BDeu recipe. Its adapter includes every canonical node, fails closed on missing data and unsupported recipe changes, and stores safe JSON graph/CPD state rather than pickle. All nine exact cases passed in retained Linux/Python 3.11 run `30967779298`, so its adapter status is `native-parity-validated`. This target is recipe parity with a canonical library, not a paper-native implementation claim; Official Results and release support remain separate gates.
 
@@ -55,37 +55,22 @@ TVAE has now been moved to `ctgan.TVAE` from the same official wheel. The locall
 
 These models were reported to have completed at least one local path through the shared CLI. ARF, BN, CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, NFlow, TVAE, SMOTE, NRGBoost, REaLTabFormer, TabularARGN, TabDDPM, TabDiff, TabSyn, and STaSy now have separate retained native-parity evidence; all other historical entries remain useful engineering observations but do not currently satisfy the formal smoke-validation gate.
 
-## Previously Reported Train and Sample Paths with Fragile Environments
+## Final Four Integration Status
 
-- `tabsds`
-- `tabula`
-
-These adapters were reported as runnable in a prior environment, but they depend on brittle stacks and require fresh supported-environment evidence:
-
-- `tabsds`: local lightweight compatibility implementation inspired by the TabSDS method, not yet smoke-validated against the official upstream code.
-- `tabula`: local Transformers-based compatibility adapter; integrated into the shared CLI, but not yet smoke-validated against the original upstream workflow.
-
-## Previously Reported Training Path, Sampling Guarded
-
-- `great`
-
-`great` was reported to import and train through the standardized adapter. Ordered-column training plus a first-column start prompt improved parseability in those experiments, while tiny CPU presets did not reliably emit parseable rows. These observations require fresh evidence and native-parity review before any stronger claim.
-
-## Runtime-Gated by External Model Access
-
-- `tabebm`
-
-`tabebm` is standardized in code and its train action completes, but sample generation depends on Prior Labs' gated TabPFN model access via Hugging Face. The standardized runner now treats sampling as an explicit opt-in path through `sample.extra.allow_gated_model=true`; without that plus accepted terms and authentication, it exits with a clear runtime error.
+- `great`: official `be-great==0.0.14` wheel, installed runtime hashes, safe safetensors/JSON artifact, and three-seed direct-package parity gate are implemented; authoritative evidence is pending.
+- `tabula`: six method-author files are acquired on demand and never patched. Safe persistence and a bounded Linux sampling boundary replace the former local reimplementation; authoritative three-seed parity is pending. The absent upstream license blocks release independently.
+- `tabsds`: the former approximation is replaced by the two official notebook helper files. All nine local binary/multiclass/regression and seed cases pass exact source-versus-adapter CSV comparison; authoritative Linux evidence is pending. The absent upstream license blocks release independently.
+- `tabebm`: official package identity, safe preprocessing state, explicit gated opt-in, and exact-row assembly are implemented. Public CI validates deterministic official helpers and delegation only; real TabPFN-backed generation requires a separately authorized run.
 
 ## Historical Environment Caveats
 
 - `torch==2.3.0` is the current pinned runtime in the benchmark stack requirements.
-- `transformers==4.46.3` and `tokenizers==0.20.3` are pinned because the vendored `great` code is happier on that surface than on the newer 4.57 series.
+- `transformers==4.46.3` and `tokenizers==0.20.3` are frozen for the official GReaT and TabuLa validation environments.
 - Goggle's validated GCN path uses `dgl==1.1.3` and `torch-geometric==2.5.3` without requiring the unused heterogeneous `torch-sparse` path. Requesting the heterogeneous decoder still fails closed unless its official extension stack is available; that path has no parity claim.
 - TabDDPM vendors the byte-exact runtime modules from the official `libzero==0.0.8` wheel; TabSyn installs that same distribution without its stale dependency metadata. The similarly named `zero` distribution is unrelated, and neither path uses the former local compatibility substitutes.
 
 ## Current Interpretation
 
 - Treat every current adapter as an experimental engineering integration until its evidence record says otherwise.
-- Local compatibility implementations (`tabsds`, `tabula`, and the current `tabebm` path) are excluded from the future official track unless replaced by or validated against an approved authoritative implementation.
+- GReaT, TabuLa, and TabSDS remain `adapter-complete` until mandatory retained parity evidence exists; TabEBM cannot exceed `smoke-validated` without a separately authorized real TabPFN run.
 - The `tabebm` gated-sample preset may be used only on machines whose users have accepted the applicable model terms and configured access.

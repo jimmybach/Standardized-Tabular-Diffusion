@@ -1,0 +1,29 @@
+# Frozen non-gated validation runtime for tabebm 2025.8.19 and TabPFN 2.1.2.
+# PyTorch 2.3.0 (CPU) and the checksum-pinned tabebm sdist are installed separately.
+annotated-types==0.7.0
+contourpy==1.3.1
+cycler==0.12.1
+einops==0.8.1
+eval-type-backport==0.2.2
+fonttools==4.55.3
+huggingface-hub==0.26.5
+kiwisolver==1.4.7
+matplotlib==3.9.2
+matplotlib-inline==0.1.7
+numpy==1.26.4
+packaging==24.2
+pandas==2.2.3
+pillow==11.0.0
+pydantic==2.10.4
+pydantic-core==2.27.2
+pydantic-settings==2.7.0
+pyparsing==3.2.0
+pytest==8.3.5
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+scikit-learn==1.5.2
+scipy==1.13.1
+six==1.17.0
+tabpfn==2.1.2
+threadpoolctl==3.6.0
+typing-extensions==4.12.2

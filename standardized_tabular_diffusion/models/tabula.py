@@ -1,376 +1,500 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
+import contextlib
+import importlib
+import json
+import os
+import random
+import signal
+from pathlib import Path, PurePosixPath
+from typing import Any, Iterator
 
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
-from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json, sha256_file
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import (
     SampleFileEvaluatorMixin,
     disable_torchvision_for_transformers,
+    isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
-
-
-class _TokenizedTextDataset:
-    def __init__(self, tokenizer, texts: list[str], max_length: int) -> None:
-        tokenized = tokenizer(
-            texts,
-            truncation=True,
-            padding="max_length",
-            max_length=max_length,
-            return_tensors="pt",
-        )
-        self.input_ids = tokenized["input_ids"]
-        self.attention_mask = tokenized["attention_mask"]
-
-    def __len__(self) -> int:
-        return int(self.input_ids.shape[0])
-
-    def __getitem__(self, idx: int) -> dict[str, Any]:
-        input_ids = self.input_ids[idx]
-        return {
-            "input_ids": input_ids,
-            "attention_mask": self.attention_mask[idx],
-            "labels": input_ids.clone(),
-        }
-
-
-@dataclass
-class _TabulaImports:
-    AutoConfig: Any
-    AutoModelForCausalLM: Any
-    AutoTokenizer: Any
-    Trainer: Any
-    TrainingArguments: Any
-    default_data_collator: Any
+from standardized_tabular_diffusion.upstream_sources import validate_upstream_source
 
 
 class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
+    """Strict adapter around the checksum-locked method-author TabuLa source."""
+
     model_name = "tabula"
     upstream_dirname = "."
+    checkpoint_dirname = "tabula_model"
+    source_environment_variable = "STANDARDIZED_TABULAR_DIFFUSION_TABULA_SOURCE"
+    upstream_commit = "a7d34a94adee5a269f6807395d0040d936bb0e60"
+    protocol_id = "tabula-method-author-source-parity-v1"
 
     def _model_root(self, spec: RunSpec) -> Path:
-        if spec.checkpoint_path is not None:
-            return spec.checkpoint_path
-        return spec.output_dir / "tabula_model"
+        return spec.checkpoint_path or spec.output_dir / self.checkpoint_dirname
 
-    def _metadata_path(self, model_root: Path) -> Path:
-        return model_root / "adapter_metadata.json"
+    @staticmethod
+    def _state_path(model_root: Path) -> Path:
+        return model_root / "tabula-state.json"
+
+    @staticmethod
+    def _integrity_path(model_root: Path) -> Path:
+        return model_root / "tabula-integrity.json"
+
+    def _resolve_source_root(self, spec: RunSpec) -> tuple[Path, dict[str, Any]]:
+        configured = spec.extra.get("source_dir") or os.environ.get(self.source_environment_variable)
+        source_root = (
+            Path(configured)
+            if configured is not None
+            else self.repo_root / ".cache" / "upstream-sources" / self.model_name / self.upstream_commit
+        )
+        try:
+            source = validate_upstream_source(self.model_name, source_root)
+        except (FileNotFoundError, RuntimeError) as exc:
+            raise RuntimeError(
+                "TabuLa requires the checksum-locked method-author source. Run "
+                "`python -m standardized_tabular_diffusion.cli materialize-model-source --model tabula`, "
+                f"or provide spec.extra['source_dir']; underlying error: {exc}"
+            ) from exc
+        if source["upstream_commit"] != self.upstream_commit:
+            raise RuntimeError("TabuLa source validation returned an unexpected commit")
+        return source_root.resolve(), source
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _official_class(source_root: Path) -> Iterator[type[Any]]:
+        with disable_torchvision_for_transformers(), isolated_module_tree(source_root, "tabula"):
+            module = importlib.import_module("tabula.tabula")
+            yield module.Tabula
+
+    @staticmethod
+    def _positive_int(name: str, value: Any) -> int:
+        if isinstance(value, bool):
+            raise ValueError(f"TabuLa {name} must be a positive integer")
+        parsed = int(value)
+        if parsed < 1:
+            raise ValueError(f"TabuLa {name} must be a positive integer")
+        return parsed
+
+    @staticmethod
+    def _positive_float(name: str, value: Any) -> float:
+        parsed = float(value)
+        if not np.isfinite(parsed) or parsed <= 0:
+            raise ValueError(f"TabuLa {name} must be finite and positive")
+        return parsed
+
+    @staticmethod
+    def _roles(dataset_spec: DatasetSpec) -> tuple[list[str], list[str]]:
+        if len(dataset_spec.target_columns) != 1:
+            raise ValueError("TabuLa requires exactly one target column")
+        numerical = list(dataset_spec.numerical_columns)
+        categorical = list(dataset_spec.categorical_columns)
+        target = dataset_spec.target_columns[0]
+        if target not in numerical and target not in categorical:
+            (categorical if dataset_spec.task_type == "classification" else numerical).append(target)
+        if set(numerical) & set(categorical) or set(numerical) | set(categorical) != set(dataset_spec.column_names):
+            raise ValueError("TabuLa requires disjoint and complete declared column roles")
+        return numerical, categorical
 
     def _load_training_frame(self, dataset_spec: DatasetSpec) -> pd.DataFrame:
         if dataset_spec.train_data_path is None:
-            raise FileNotFoundError("tabula requires dataset_spec.train_data_path")
-        return pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
-
-    def _limit_training_frame(self, train_df: pd.DataFrame, spec: RunSpec) -> pd.DataFrame:
-        max_train_rows = spec.extra.get("max_train_rows")
-        if max_train_rows is None or len(train_df) <= int(max_train_rows):
-            return train_df
-        return train_df.sample(n=int(max_train_rows), random_state=spec.seed).reset_index(drop=True)
-
-    def _import_transformer_bits(self) -> _TabulaImports:
-        with disable_torchvision_for_transformers():
-            from transformers import (
-                AutoConfig,
-                AutoModelForCausalLM,
-                AutoTokenizer,
-                Trainer,
-                TrainingArguments,
-                default_data_collator,
+            raise FileNotFoundError("TabuLa requires dataset_spec.train_data_path")
+        if any(
+            " " in column or "," in column or "\n" in column or "\r" in column
+            for column in dataset_spec.column_names
+        ):
+            raise ValueError("TabuLa official parsing requires column names without spaces, commas, or newlines")
+        frame = pd.read_csv(dataset_spec.train_data_path)[dataset_spec.column_names].copy()
+        if frame.empty:
+            raise ValueError("TabuLa cannot train on an empty table")
+        missing = frame.isna().sum()
+        if bool(missing.any()):
+            observed = {str(column): int(count) for column, count in missing.items() if count}
+            raise ValueError(
+                "TabuLa requires missing values to be imputed by the train-fitted preprocessing module; "
+                f"observed: {observed}"
             )
-
-        return _TabulaImports(
-            AutoConfig=AutoConfig,
-            AutoModelForCausalLM=AutoModelForCausalLM,
-            AutoTokenizer=AutoTokenizer,
-            Trainer=Trainer,
-            TrainingArguments=TrainingArguments,
-            default_data_collator=default_data_collator,
-        )
+        numerical, categorical = self._roles(dataset_spec)
+        for column in numerical:
+            values = pd.to_numeric(frame[column], errors="raise").to_numpy(dtype=float)
+            if not bool(np.isfinite(values).all()):
+                raise ValueError(f"TabuLa numerical column {column!r} contains non-finite values")
+            frame[column] = values
+        for column in categorical:
+            frame[column] = frame[column].astype(str)
+        return frame
 
     @staticmethod
-    def _special_tokens() -> dict[str, str]:
+    def _limit_training_frame(frame: pd.DataFrame, spec: RunSpec) -> pd.DataFrame:
+        limit = spec.extra.get("max_train_rows")
+        if limit is None:
+            return frame
+        parsed = TabulaAdapter._positive_int("max_train_rows", limit)
+        if len(frame) <= parsed:
+            return frame
+        return frame.sample(n=parsed, random_state=spec.seed).reset_index(drop=True)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _scoped_randomness(seed: int, num_threads: int) -> Iterator[None]:
+        import torch
+
+        python_state = random.getstate()
+        numpy_state = np.random.get_state()
+        previous_threads = torch.get_num_threads()
+        devices = list(range(torch.cuda.device_count())) if torch.cuda.is_available() else []
+        try:
+            with torch.random.fork_rng(devices=devices):
+                random.seed(seed)
+                np.random.seed(seed)
+                torch.manual_seed(seed)
+                if torch.cuda.is_available():
+                    torch.cuda.manual_seed_all(seed)
+                torch.set_num_threads(num_threads)
+                yield
+        finally:
+            random.setstate(python_state)
+            np.random.set_state(numpy_state)
+            torch.set_num_threads(previous_threads)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _sampling_timeout(seconds: int, *, allow_unbounded: bool) -> Iterator[None]:
+        if os.name != "posix":
+            if not allow_unbounded:
+                raise RuntimeError(
+                    "Bounded TabuLa sampling is supported in the official Linux environment. On other systems, "
+                    "set allow_unbounded_sampling=true only if you accept that the upstream loop has no retry bound."
+                )
+            yield
+            return
+        previous = signal.getsignal(signal.SIGALRM)
+
+        def timeout_handler(_signum: int, _frame: Any) -> None:
+            raise TimeoutError("Official TabuLa sampling exceeded the configured timeout")
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, previous)
+
+    @staticmethod
+    def _training_parameters(spec: RunSpec, categorical_columns: list[str]) -> dict[str, Any]:
+        allowed = {
+            "learning_rate",
+            "weight_decay",
+            "logging_steps",
+            "disable_tqdm",
+            "dataloader_num_workers",
+            "gradient_accumulation_steps",
+            "warmup_steps",
+            "seed",
+            "data_seed",
+            "report_to",
+        }
+        train_kwargs = dict(spec.extra.get("train_kwargs", {}))
+        unknown = sorted(set(train_kwargs) - allowed)
+        if unknown:
+            raise ValueError(f"TabuLa unsupported train_kwargs: {unknown}")
+        train_kwargs.setdefault("disable_tqdm", True)
+        train_kwargs.setdefault("seed", spec.seed)
+        train_kwargs.setdefault("data_seed", spec.seed)
+        train_kwargs.setdefault("report_to", [])
         return {
-            "column_sep": "<|col|>",
-            "row_end": "<|endrow|>",
+            "llm": str(spec.extra.get("llm", "distilgpt2")),
+            "epochs": TabulaAdapter._positive_int("epochs", spec.extra.get("epochs", 5)),
+            "batch_size": TabulaAdapter._positive_int("batch_size", spec.extra.get("batch_size", 8)),
+            "categorical_columns": categorical_columns,
+            "conditional_col": spec.extra.get("conditional_col"),
+            "num_threads": TabulaAdapter._positive_int("num_threads", spec.extra.get("num_threads", 1)),
+            "train_kwargs": train_kwargs,
         }
 
     @staticmethod
-    def _normalize_cell(value: Any) -> str:
-        text = str(value)
-        return text.replace("\n", " ").replace("\r", " ").strip()
-
-    def _row_to_text(self, row: pd.Series, column_order: list[str], *, column_sep: str, row_end: str) -> str:
-        cells = [f"{column}={self._normalize_cell(row[column])}" for column in column_order]
-        return column_sep.join(cells) + row_end
-
-    def _build_training_texts(
-        self, train_df: pd.DataFrame, dataset_spec: DatasetSpec, *, column_sep: str, row_end: str
-    ) -> list[str]:
-        return [
-            self._row_to_text(row, dataset_spec.column_names, column_sep=column_sep, row_end=row_end)
-            for _, row in train_df.iterrows()
-        ]
-
-    def _build_tokenizer(self, imports: _TabulaImports, spec: RunSpec):
-        tokenizer = imports.AutoTokenizer.from_pretrained(spec.extra.get("llm", "distilgpt2"))
-        if getattr(tokenizer, "pad_token", None) is None:
-            tokenizer.pad_token = tokenizer.eos_token
-        tokenizer.add_special_tokens(
-            {
-                "additional_special_tokens": [
-                    self._special_tokens()["column_sep"],
-                    self._special_tokens()["row_end"],
-                ]
-            }
-        )
-        return tokenizer
-
-    def _build_model(self, imports: _TabulaImports, tokenizer, spec: RunSpec):
-        model_name = spec.extra.get("llm", "distilgpt2")
-        from_scratch = bool(spec.extra.get("from_scratch", False))
-        if from_scratch:
-            config = imports.AutoConfig.from_pretrained(model_name)
-            for field in ("n_layer", "n_head", "n_embd", "n_positions", "n_ctx"):
-                if spec.extra.get(field) is not None and hasattr(config, field):
-                    setattr(config, field, int(spec.extra[field]))
-            model = imports.AutoModelForCausalLM.from_config(config)
-        else:
-            model = imports.AutoModelForCausalLM.from_pretrained(model_name)
-        model.resize_token_embeddings(len(tokenizer))
-        return model
+    def _label_encoder_state(model: Any) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for item in getattr(model, "label_encoder_list", []):
+            result.append(
+                {
+                    "column": str(item["column"]),
+                    "classes": [str(value) for value in item["label_encoder"].classes_.tolist()],
+                }
+            )
+        return result
 
     @staticmethod
-    def _training_args(imports: _TabulaImports, spec: RunSpec) -> Any:
-        return imports.TrainingArguments(
-            output_dir=str(spec.output_dir / "tabula_trainer"),
-            overwrite_output_dir=True,
-            num_train_epochs=float(spec.extra.get("epochs", 5)),
-            per_device_train_batch_size=int(spec.extra.get("batch_size", 8)),
-            gradient_accumulation_steps=int(spec.extra.get("gradient_accumulation_steps", 1)),
-            learning_rate=float(spec.extra.get("learning_rate", 5e-5)),
-            weight_decay=float(spec.extra.get("weight_decay", 0.0)),
-            logging_steps=int(spec.extra.get("logging_steps", 50)),
-            save_strategy="no",
-            report_to=spec.extra.get("report_to", "none"),
-            remove_unused_columns=False,
-            no_cuda=spec.device == "cpu",
-            seed=spec.seed,
-        )
-
-    def _build_training_metadata(
-        self,
-        train_df: pd.DataFrame,
-        dataset_spec: DatasetSpec,
-        tokenizer,
-        texts: list[str],
-        spec: RunSpec,
-    ) -> dict[str, Any]:
-        sample_size = min(len(texts), 256)
-        token_lengths: list[int] = []
-        for text in texts[:sample_size]:
-            token_lengths.append(len(tokenizer(text)["input_ids"]))
-        observed_max = max(token_lengths, default=64)
-        observed_p95 = int(np.percentile(token_lengths, 95)) if token_lengths else observed_max
-        recommended_max_length = max(128, min(2048, observed_p95 + 32))
-        return {
-            "column_names": list(dataset_spec.column_names),
-            "numerical_columns": list(dataset_spec.numerical_columns),
-            "categorical_columns": list(dataset_spec.categorical_columns),
-            "target_columns": list(dataset_spec.target_columns),
-            "task_type": dataset_spec.task_type,
-            "column_sep": self._special_tokens()["column_sep"],
-            "row_end": self._special_tokens()["row_end"],
-            "recommended_start_col": dataset_spec.column_names[0],
-            "recommended_temperature": float(spec.extra.get("temperature", 0.8)),
-            "recommended_max_length": recommended_max_length,
-            "observed_token_length_max": observed_max,
-            "observed_token_length_p95": observed_p95,
-            "from_scratch": bool(spec.extra.get("from_scratch", False)),
-            "llm": spec.extra.get("llm", "distilgpt2"),
-            "max_train_rows": None if spec.extra.get("max_train_rows") is None else int(spec.extra["max_train_rows"]),
-        }
-
-    @staticmethod
-    def _load_training_metadata(model_root: Path) -> dict[str, Any]:
-        metadata_path = model_root / "adapter_metadata.json"
-        if not metadata_path.exists():
-            return {}
-        return read_json(metadata_path)
-
-    @staticmethod
-    def _coerce_value(column: str, value: str, metadata: dict[str, Any]) -> Any:
-        if column in metadata.get("numerical_columns", []):
-            return pd.to_numeric(value, errors="coerce")
-        return value
-
-    def _parse_generated_row(self, text: str, metadata: dict[str, Any]) -> dict[str, Any] | None:
-        row_end = metadata["row_end"]
-        column_sep = metadata["column_sep"]
-        if row_end in text:
-            text = text.split(row_end, 1)[0]
-        pieces = [piece.strip() for piece in text.split(column_sep) if piece.strip()]
-        values: dict[str, Any] = {}
-        for piece in pieces:
-            if "=" not in piece:
+    def _write_integrity_manifest(model_root: Path) -> dict[str, Any]:
+        files: dict[str, dict[str, Any]] = {}
+        total = 0
+        for path in sorted(model_root.rglob("*")):
+            if path == TabulaAdapter._integrity_path(model_root):
                 continue
-            column, raw_value = piece.split("=", 1)
-            column = column.strip()
-            raw_value = raw_value.strip()
-            if column in metadata["column_names"] and column not in values:
-                values[column] = self._coerce_value(column, raw_value, metadata)
-        if any(column not in values for column in metadata["column_names"]):
-            return None
-        row = {column: values[column] for column in metadata["column_names"]}
-        for column in metadata.get("numerical_columns", []):
-            if pd.isna(row[column]):
-                return None
-        return row
+            if path.is_symlink():
+                raise RuntimeError(f"Refusing symlinked TabuLa artifact: {path}")
+            if path.is_file():
+                relative = path.relative_to(model_root).as_posix()
+                size = path.stat().st_size
+                total += size
+                files[relative] = {"bytes": size, "sha256": sha256_file(path)}
+        manifest = {
+            "schema_version": 1,
+            "format": "tabula-safe-transformers-directory",
+            "files": files,
+            "file_count": len(files),
+            "total_bytes": total,
+        }
+        atomic_write_json(TabulaAdapter._integrity_path(model_root), manifest)
+        return manifest
 
     @staticmethod
-    def _resolve_start_distribution(train_df: pd.DataFrame, start_col: str) -> dict[str, float] | list[Any]:
-        series = train_df[start_col]
-        if pd.api.types.is_numeric_dtype(series):
-            return series.tolist()
-        return series.astype(str).value_counts(normalize=True).to_dict()
-
-    @staticmethod
-    def _sample_start_value(start_dist: dict[str, float] | list[Any], seed: int) -> str:
-        rng = np.random.default_rng(seed)
-        if isinstance(start_dist, dict):
-            keys = list(start_dist)
-            probs = np.array([start_dist[key] for key in keys], dtype=float)
-            probs = probs / probs.sum()
-            return str(rng.choice(keys, p=probs))
-        return str(start_dist[int(rng.integers(0, len(start_dist)))])
+    def _validate_safe_model_root(model_root: Path) -> dict[str, Any]:
+        if model_root.is_symlink() or not model_root.is_dir():
+            raise FileNotFoundError(f"Missing safe TabuLa model directory: {model_root}")
+        manifest = read_json(TabulaAdapter._integrity_path(model_root))
+        if set(manifest) != {"schema_version", "format", "files", "file_count", "total_bytes"}:
+            raise ValueError("Malformed TabuLa integrity manifest")
+        if manifest["schema_version"] != 1 or manifest["format"] != "tabula-safe-transformers-directory":
+            raise ValueError("Unsupported TabuLa integrity manifest")
+        files = manifest["files"]
+        if not isinstance(files, dict) or len(files) != manifest["file_count"] or len(files) > 64:
+            raise ValueError("Invalid TabuLa artifact inventory")
+        total = 0
+        for name, record in files.items():
+            relative = PurePosixPath(name)
+            if relative.is_absolute() or ".." in relative.parts or "\\" in name:
+                raise ValueError(f"Unsafe TabuLa artifact path: {name!r}")
+            if relative.suffix.lower() in {".bin", ".pt", ".pth", ".pkl", ".pickle", ".joblib"}:
+                raise ValueError(f"Executable TabuLa checkpoint format is forbidden: {name}")
+            path = model_root.joinpath(*relative.parts)
+            if path.is_symlink() or not path.is_file():
+                raise ValueError(f"Missing or unsafe TabuLa artifact: {name}")
+            if set(record) != {"bytes", "sha256"} or path.stat().st_size != record["bytes"]:
+                raise ValueError(f"TabuLa artifact size mismatch: {name}")
+            if sha256_file(path) != record["sha256"]:
+                raise ValueError(f"TabuLa artifact digest mismatch: {name}")
+            total += path.stat().st_size
+        actual = {
+            path.relative_to(model_root).as_posix()
+            for path in model_root.rglob("*")
+            if path.is_file() and path != TabulaAdapter._integrity_path(model_root)
+        }
+        if actual != set(files) or total != manifest["total_bytes"] or total > 5 * 1024**3:
+            raise ValueError("TabuLa model directory differs from its integrity manifest")
+        return manifest
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
-        train_df = self._limit_training_frame(self._load_training_frame(dataset_spec), spec)
-        imports = self._import_transformer_bits()
-        tokenizer = self._build_tokenizer(imports, spec)
-        model = self._build_model(imports, tokenizer, spec)
-        texts = self._build_training_texts(
-            train_df,
-            dataset_spec,
-            column_sep=self._special_tokens()["column_sep"],
-            row_end=self._special_tokens()["row_end"],
-        )
-        max_length = int(spec.extra.get("max_length", 256))
-        dataset = _TokenizedTextDataset(tokenizer, texts, max_length=max_length)
-        trainer = imports.Trainer(
-            model=model,
-            args=self._training_args(imports, spec),
-            train_dataset=dataset,
-            data_collator=imports.default_data_collator,
-        )
-        trainer.train()
+        frame = self._limit_training_frame(self._load_training_frame(dataset_spec), spec)
+        source_root, source = self._resolve_source_root(spec)
+        parameters = self._training_parameters(spec, self._roles(dataset_spec)[1])
+        conditional_col = parameters["conditional_col"]
+        if conditional_col is not None and conditional_col not in dataset_spec.column_names:
+            raise ValueError(f"TabuLa conditional_col is unknown: {conditional_col!r}")
+        with self._official_class(source_root) as model_class, self._scoped_randomness(
+            spec.seed, parameters["num_threads"]
+        ):
+            model = model_class(
+                parameters["llm"],
+                experiment_dir=str(spec.output_dir / "tabula_trainer"),
+                epochs=parameters["epochs"],
+                batch_size=parameters["batch_size"],
+                categorical_columns=parameters["categorical_columns"],
+                **parameters["train_kwargs"],
+            )
+            model.fit(frame.copy(), conditional_col=conditional_col)
         model_root = self._model_root(spec)
-        model_root.mkdir(parents=True, exist_ok=True)
-        model.save_pretrained(str(model_root))
-        tokenizer.save_pretrained(str(model_root))
-        metadata = self._build_training_metadata(train_df, dataset_spec, tokenizer, texts, spec)
-        atomic_write_json(self._metadata_path(model_root), metadata)
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            notes=[
-                f"Saved TabuLa-compatible artifacts under {model_root}.",
-                f"Recorded adapter metadata with recommended max_length={metadata['recommended_max_length']} and start_col={metadata['recommended_start_col']}.",
-            ],
+        if model_root.exists() and any(model_root.iterdir()):
+            raise FileExistsError(f"Refusing to overwrite non-empty TabuLa model directory: {model_root}")
+        transformer_root = model_root / "transformer"
+        transformer_root.mkdir(parents=True, exist_ok=True)
+        model.model.save_pretrained(str(transformer_root), safe_serialization=True)
+        model.tokenizer.save_pretrained(str(transformer_root))
+        state = {
+            "schema_version": 1,
+            "format": "tabula-method-author-safe-state",
+            "model_id": self.model_name,
+            "protocol_id": self.protocol_id,
+            "upstream_commit": self.upstream_commit,
+            "source_manifest_sha256": source["manifest_sha256"],
+            "column_names": list(dataset_spec.column_names),
+            "numerical_columns": self._roles(dataset_spec)[0],
+            "categorical_columns": self._roles(dataset_spec)[1],
+            "target_columns": list(dataset_spec.target_columns),
+            "task_type": dataset_spec.task_type,
+            "official_state": {
+                "columns": list(model.columns),
+                "num_cols": list(model.num_cols),
+                "conditional_col": model.conditional_col,
+                "conditional_col_dist": (
+                    model.conditional_col_dist.tolist()
+                    if isinstance(model.conditional_col_dist, np.ndarray)
+                    else model.conditional_col_dist
+                ),
+                "categorical_columns": list(model.categorical_columns),
+                "label_encoders": self._label_encoder_state(model),
+            },
+            "training_parameters": json.loads(json.dumps(parameters, allow_nan=False)),
+            "privacy_guarantee": False,
+        }
+        atomic_write_json(self._state_path(model_root), state)
+        integrity = self._write_integrity_manifest(model_root)
+        self._validate_safe_model_root(model_root)
+        validate_upstream_source(self.model_name, source_root)
+        return self._write_bundle(
+            ArtifactBundle(
+                model=self.model_name,
+                dataset=spec.dataset,
+                output_dir=spec.output_dir,
+                upstream_workdir=source_root,
+                notes=[
+                    f"Stored {integrity['file_count']} integrity-checked TabuLa artifacts under {model_root}.",
+                    "The upstream repository has no declared license; release and Official Results remain blocked.",
+                ],
+            )
         )
-        return self._write_bundle(bundle)
+
+    def _restore_model(
+        self,
+        model_root: Path,
+        dataset_spec: DatasetSpec,
+        source_root: Path,
+        source: dict[str, Any],
+    ) -> tuple[Any, dict[str, Any], contextlib.AbstractContextManager[type[Any]]]:
+        self._validate_safe_model_root(model_root)
+        state = read_json(self._state_path(model_root))
+        required = {
+            "schema_version",
+            "format",
+            "model_id",
+            "protocol_id",
+            "upstream_commit",
+            "source_manifest_sha256",
+            "column_names",
+            "numerical_columns",
+            "categorical_columns",
+            "target_columns",
+            "task_type",
+            "official_state",
+            "training_parameters",
+            "privacy_guarantee",
+        }
+        if set(state) != required or state.get("format") != "tabula-method-author-safe-state":
+            raise ValueError("Malformed TabuLa state")
+        roles = self._roles(dataset_spec)
+        if (
+            state["upstream_commit"] != self.upstream_commit
+            or state["source_manifest_sha256"] != source["manifest_sha256"]
+            or state["column_names"] != dataset_spec.column_names
+            or state["numerical_columns"] != roles[0]
+            or state["categorical_columns"] != roles[1]
+            or state["target_columns"] != dataset_spec.target_columns
+            or state["task_type"] != dataset_spec.task_type
+        ):
+            raise ValueError("TabuLa checkpoint source or dataset contract mismatch")
+        manager = self._official_class(source_root)
+        model_class = manager.__enter__()
+        try:
+            transformer_root = model_root / "transformer"
+            model = model_class(
+                str(transformer_root),
+                categorical_columns=state["official_state"]["categorical_columns"],
+            )
+            with disable_torchvision_for_transformers():
+                transformers = importlib.import_module("transformers")
+            model.model = transformers.AutoModelForCausalLM.from_pretrained(
+                str(transformer_root), trust_remote_code=False
+            )
+            for name in ("columns", "num_cols", "conditional_col", "conditional_col_dist", "categorical_columns"):
+                setattr(model, name, state["official_state"][name])
+            encoders: list[dict[str, Any]] = []
+            for item in state["official_state"]["label_encoders"]:
+                encoder = LabelEncoder()
+                encoder.classes_ = np.asarray(item["classes"], dtype=str)
+                encoders.append({"column": item["column"], "label_encoder": encoder})
+            model.label_encoder_list = encoders
+        except Exception:
+            manager.__exit__(None, None, None)
+            raise
+        return model, state, manager
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
-        import torch
-
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
-        train_df = self._load_training_frame(dataset_spec)
-        imports = self._import_transformer_bits()
         model_root = self._model_root(spec)
-        metadata = self._load_training_metadata(model_root)
-        trusted_model_root = self._validate_trusted_executable_artifact(
-            spec,
-            model_root,
-            format_name="TabuLa model directory",
-            allow_directory=True,
-        )
-        tokenizer = imports.AutoTokenizer.from_pretrained(str(trusted_model_root))
-        model = imports.AutoModelForCausalLM.from_pretrained(str(trusted_model_root))
-        if spec.device != "cpu" and torch.cuda.is_available():
-            model = model.to(spec.device)
-        model.eval()
-
-        num_samples = spec.num_samples or len(train_df)
-        start_col = spec.extra.get("start_col", metadata.get("recommended_start_col", dataset_spec.column_names[0]))
-        start_dist = self._resolve_start_distribution(train_df, start_col)
-        column_sep = metadata["column_sep"]
-        row_end = metadata["row_end"]
-        max_new_tokens = int(spec.extra.get("max_new_tokens", metadata.get("recommended_max_length", 256)))
-        temperature = float(spec.extra.get("temperature", metadata.get("recommended_temperature", 0.8)))
-        top_p = float(spec.extra.get("top_p", 0.95))
-        max_tries = int(spec.extra.get("max_tries", max(100, num_samples * 10)))
-
-        rows: list[dict[str, Any]] = []
-        notes: list[str] = []
-        attempts = 0
-        while len(rows) < num_samples and attempts < max_tries:
-            attempts += 1
-            start_value = self._sample_start_value(start_dist, spec.seed + attempts)
-            prompt = f"{start_col}={start_value}{column_sep}"
-            tokenized = tokenizer(prompt, return_tensors="pt")
-            normalized_inputs: dict[str, torch.Tensor] = {}
-            for key, value in tokenized.items():
-                tensor = value if isinstance(value, torch.Tensor) else torch.tensor([value], dtype=torch.long)
-                normalized_inputs[key] = tensor.to(model.device)
-            with torch.no_grad():
-                generated = model.generate(
-                    **normalized_inputs,
-                    do_sample=True,
+        source_root, source = self._resolve_source_root(spec)
+        model, state, manager = self._restore_model(model_root, dataset_spec, source_root, source)
+        requested = spec.num_samples or int(spec.extra.get("num_samples", 0))
+        if requested < 1:
+            manager.__exit__(None, None, None)
+            raise ValueError("TabuLa sample requires a positive num_samples")
+        temperature = self._positive_float("temperature", spec.extra.get("temperature", 0.7))
+        k = self._positive_int("k", spec.extra.get("k", min(100, max(8, requested))))
+        max_length = self._positive_int("max_length", spec.extra.get("max_length", 256))
+        num_threads = self._positive_int("num_threads", spec.extra.get("num_threads", 1))
+        timeout_seconds = self._positive_int("timeout_seconds", spec.extra.get("timeout_seconds", 900))
+        start_col = spec.extra.get("start_col", "")
+        start_dist = spec.extra.get("start_col_dist")
+        if start_col and start_col not in dataset_spec.column_names:
+            manager.__exit__(None, None, None)
+            raise ValueError(f"TabuLa start_col is unknown: {start_col!r}")
+        try:
+            with self._scoped_randomness(spec.seed, num_threads), self._sampling_timeout(
+                timeout_seconds,
+                allow_unbounded=bool(spec.extra.get("allow_unbounded_sampling", False)),
+            ):
+                sample_df = model.sample(
+                    n_samples=requested,
+                    start_col=start_col,
+                    start_col_dist=start_dist,
                     temperature=temperature,
-                    top_p=top_p,
-                    max_new_tokens=max_new_tokens,
-                    pad_token_id=tokenizer.pad_token_id,
-                    eos_token_id=tokenizer.convert_tokens_to_ids(row_end)
-                    if hasattr(tokenizer, "convert_tokens_to_ids")
-                    else None,
+                    k=k,
+                    max_length=max_length,
+                    device=spec.device,
                 )
-            text = tokenizer.decode(generated[0], skip_special_tokens=False)
-            parsed = self._parse_generated_row(text, metadata)
-            if parsed is None:
-                continue
-            rows.append(parsed)
-
-        if len(rows) < num_samples:
-            raise RuntimeError(
-                f"TabuLa sampling generated only {len(rows)} valid rows out of the requested {num_samples}. "
-                "Try increasing epochs, max_new_tokens, or max_tries."
-            )
-
-        sample_df = pd.DataFrame(rows, columns=dataset_spec.column_names)
+        finally:
+            manager.__exit__(None, None, None)
+        if not isinstance(sample_df, pd.DataFrame) or len(sample_df) != requested:
+            observed = None if not isinstance(sample_df, pd.DataFrame) else len(sample_df)
+            raise RuntimeError(f"Official TabuLa sampling returned {observed} rows; expected exactly {requested}")
+        sample_df = sample_df[dataset_spec.column_names].copy()
+        if bool(sample_df.isna().any().any()):
+            raise RuntimeError("Official TabuLa sampling returned missing values")
+        numerical, categorical = self._roles(dataset_spec)
+        for column in numerical:
+            sample_df[column] = pd.to_numeric(sample_df[column], errors="raise")
+            if not bool(np.isfinite(sample_df[column].to_numpy(dtype=float)).all()):
+                raise RuntimeError(f"Official TabuLa sampling returned non-finite values in {column!r}")
+        for column in categorical:
+            sample_df[column] = sample_df[column].astype(str)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        notes.append(
-            f"TabuLa sampling succeeded with start_col={start_col}, temperature={temperature}, top_p={top_p}, max_new_tokens={max_new_tokens}, attempts={attempts}."
+        self._validate_safe_model_root(model_root)
+        validate_upstream_source(self.model_name, source_root)
+        return self._write_bundle(
+            ArtifactBundle(
+                model=self.model_name,
+                dataset=spec.dataset,
+                output_dir=spec.output_dir,
+                upstream_workdir=source_root,
+                generated_sample_path=sample_path,
+                notes=[
+                    f"Generated exactly {requested} rows through the locked method-author TabuLa source.",
+                    f"Sampling was bounded to {timeout_seconds} seconds in the supported Linux environment.",
+                    "No privacy guarantee is implied; model artifacts require access control.",
+                ],
+            )
         )
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            generated_sample_path=sample_path,
-            notes=notes,
-        )
-        return self._write_bundle(bundle)
 
     def evaluate(self, spec: RunSpec) -> ArtifactBundle:
         return self._evaluate_from_sample_file(spec)
+
+
+__all__ = ["TabulaAdapter"]
