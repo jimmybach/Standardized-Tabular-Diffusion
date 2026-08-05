@@ -101,8 +101,65 @@ def test_tabularargn_release_is_locked_and_parity_validated() -> None:
     assert spec.support_level == "unsupported"
 
 
+def test_arf_official_package_and_retained_validation_are_exact_and_conservatively_gated() -> None:
+    payload = _load_source_lock()
+    component = payload["components"]["arf"]
+    spec = get_adapter_spec("arf")
+
+    assert component["authority"] == "method-author"
+    assert component["reproduction_target"] == "method-author-official-python-package"
+    assert component["distribution_form"] == "package"
+    assert component["license"] == "MIT"
+    assert component["package_lock"] == {
+        "bytes": 11841,
+        "filename": "arfpy-0.1.1.tar.gz",
+        "format": "source-distribution",
+        "name": "arfpy",
+        "pypi_url": "https://pypi.org/project/arfpy/0.1.1/",
+        "sha256": "88170d5e72638b0dbfec28cfbdfee02e97bd6a06d5a636e960acd5d90d480707",
+        "url": (
+            "https://files.pythonhosted.org/packages/95/6f/"
+            "a61794959d3860e23f5f2de5886b61154d40c246b38eedebf19d22e4cc35/"
+            "arfpy-0.1.1.tar.gz"
+        ),
+        "version": "0.1.1",
+    }
+    assert component["source_package_comparison"]["exact_git_blob_files"] == 6
+    assert component["patch_sets"] == []
+
+    validation = component["validation"]
+    assert validation["level"] == "native-parity-validated"
+    assert validation["status"] == "pass"
+    assert validation["workflow_run_id"] == 30964711614
+    assert validation["pull_request_head_commit"] == "51ff5fbd67cb167c72ff15ea8596626a3e4d1b22"
+    assert validation["repository_commit"] == "1a6bb669796f1f5a01e6599b9373b1d4e0c33b4a"
+    assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["checkpoint_forge_state_exact"] is True
+    assert validation["result_summary"]["safe_json_checkpoint"] is True
+    assert validation["result_summary"]["sample_bytes_exact"] is True
+    assert validation["validated_scope"]["r_cross_language_equivalence"] == "not-claimed"
+
+    artifact = validation["artifact"]
+    assert artifact["evidence_file_sha256"] == (
+        "959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f"
+    )
+    assert artifact["evidence_file_sha256"] == artifact["downloaded_evidence_sha256"]
+    evidence_path = REPO_ROOT / artifact["permanent_evidence_path"]
+    evidence_bytes = evidence_path.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == artifact["evidence_file_sha256"]
+    assert evidence_bytes.endswith(b"\n")
+
+    assert spec.validation_level.value == "native-parity-validated"
+    assert spec.modification_status == "adapter-only"
+    assert spec.revision_status == "pinned-official-package-native-parity-validated"
+    assert spec.benchmark_track == "experimental"
+    assert spec.support_level == "unsupported"
+    assert str(component["official_eligibility"]).startswith("blocked-pending-central-evaluation")
+
+
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
+        "arf": "docs/evidence/arf/native-parity-run-30964711614.json",
         "codi": "docs/evidence/codi/native-parity-run-30941940893.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
@@ -119,6 +176,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
     }
     for model_id in (
+        "arf",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",

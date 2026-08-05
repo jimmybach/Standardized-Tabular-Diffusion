@@ -448,7 +448,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         family="tree",
         paradigm="adversarial random forest",
         covered_by_papers=["tabstruct-2026", "tabforge-2026"],
-        validation_level="adapter-complete",
+        validation_level="native-parity-validated",
         runnable_recommendation="yes",
         implementation_quality="high",
         repository_url="https://github.com/bips-hb/arfpy",
@@ -457,7 +457,8 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "Typed missing-free input, CPU-only execution, deterministic seed scopes, FORDE/FORGE controls, and exact package identity are enforced outside upstream source.",
             "The former pickle has been replaced by safe JSON FORGE state that omits the fitted forest and row-level training data while still calling the official forge method.",
             "The retained density parameters are not a privacy guarantee and still require trained-artifact access controls.",
-            "Linux/Python 3.11 official-package parity is pending; no cross-language equivalence with the separate R implementation is claimed.",
+            "All nine binary, multiclass, regression, and seed cases passed exact official-package parity in retained Linux/Python 3.11 run 30964711614.",
+            "The validated claim is limited to the official Python package; no cross-language equivalence with the separate R implementation is claimed, and benchmark/release gates remain pending.",
         ],
     ),
     "tabebm": ModelInventoryEntry(

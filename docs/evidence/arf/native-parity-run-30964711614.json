@@ -1,0 +1,666 @@
+{
+  "cases": [
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/binary/seed-0/adapter/model.arf.json",
+        "checkpoint_sha256": "027bb1425bd8c62dd49f88555c52dfcd11891fc9c9b204729d0f777a8416c8c1",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-0/adapter/samples.csv",
+        "sample_sha256": "b0c817ec69f1e68758f32ea7d43a100aeb4ab90974b1a623e8091c38123d60f1"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.6916666666666667,
+          0.2833333333333333
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-0/native/samples.csv",
+        "sample_sha256": "b0c817ec69f1e68758f32ea7d43a100aeb4ab90974b1a623e8091c38123d60f1"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/binary/seed-19/adapter/model.arf.json",
+        "checkpoint_sha256": "983929406bedfda5fadffee1b7ec6cbb5c0b7252abb5fe7ebbab42eaf62d1f00",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-19/adapter/samples.csv",
+        "sample_sha256": "606a13fabbd37d05c4ba437fecd53f3d277294dbc086abba9ac5d4be0340bb4a"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.625,
+          0.3333333333333333
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-19/native/samples.csv",
+        "sample_sha256": "606a13fabbd37d05c4ba437fecd53f3d277294dbc086abba9ac5d4be0340bb4a"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/binary/seed-73/adapter/model.arf.json",
+        "checkpoint_sha256": "32a65d27efbe42473eb20fb2706885c460dd4ef6dbf56bb910d93cfdaf0a9ab0",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-73/adapter/samples.csv",
+        "sample_sha256": "701bca4023bbafa35a2f717477f2f046a8baefe3bd4bab73239259cbf542dfe2"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.6166666666666667,
+          0.45
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/binary/seed-73/native/samples.csv",
+        "sample_sha256": "701bca4023bbafa35a2f717477f2f046a8baefe3bd4bab73239259cbf542dfe2"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-0/adapter/model.arf.json",
+        "checkpoint_sha256": "eeeac96b8dd0cd26c7d7272165e691181d26e25c82ff5b1fa4bb2bd8375c0289",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-0/adapter/samples.csv",
+        "sample_sha256": "26efaad4b2ab3fc37d096a18a645df39d5bf355db60503b792c99c7d2757b270"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.775,
+          0.35833333333333334
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-0/native/samples.csv",
+        "sample_sha256": "26efaad4b2ab3fc37d096a18a645df39d5bf355db60503b792c99c7d2757b270"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-19/adapter/model.arf.json",
+        "checkpoint_sha256": "129799f4235eb3540d56d7e38ae3595945b64ee4b86e51f727e9ad79c5715e24",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-19/adapter/samples.csv",
+        "sample_sha256": "54bf3fb751e21f8c4909c10ffdf238e317029554c22eed5eccd74f7e084ea324"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.7,
+          0.25
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-19/native/samples.csv",
+        "sample_sha256": "54bf3fb751e21f8c4909c10ffdf238e317029554c22eed5eccd74f7e084ea324"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-73/adapter/model.arf.json",
+        "checkpoint_sha256": "d9ba13f7565078e8ecd1d13ded112001036758e98a20eda8badf08bcc6515066",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-73/adapter/samples.csv",
+        "sample_sha256": "ef78b488d91f19ccdd703ce59c704b2178015bddfede46e702d6fc2dde4207c6"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.7833333333333333,
+          0.35833333333333334
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/multiclass/seed-73/native/samples.csv",
+        "sample_sha256": "ef78b488d91f19ccdd703ce59c704b2178015bddfede46e702d6fc2dde4207c6"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/regression/seed-0/adapter/model.arf.json",
+        "checkpoint_sha256": "32e923ddc1aac77df9085cc859a00d2bf49bb519a04add9fe8057071f6d21ddc",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-0/adapter/samples.csv",
+        "sample_sha256": "795800797382957083e433101c030bc618ac3ff4ac40d7f91d881cabc44c1e1a"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.7916666666666666,
+          0.35833333333333334
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-0/native/samples.csv",
+        "sample_sha256": "795800797382957083e433101c030bc618ac3ff4ac40d7f91d881cabc44c1e1a"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/regression/seed-19/adapter/model.arf.json",
+        "checkpoint_sha256": "42b9c48897468f06a22de4bc18f52b58bc7184ed16af16066ac881ef7e04e52e",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-19/adapter/samples.csv",
+        "sample_sha256": "ddac89da51434ccce73cbf5f97958050b0b0f6566b5882ffcb2c8b639d8d1572"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.7916666666666666,
+          0.2916666666666667
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-19/native/samples.csv",
+        "sample_sha256": "ddac89da51434ccce73cbf5f97958050b0b0f6566b5882ffcb2c8b639d8d1572"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "adapter_artifacts": {
+        "checkpoint_path": "/home/runner/work/_temp/arf-validation/regression/seed-73/adapter/model.arf.json",
+        "checkpoint_sha256": "cff81820a6d18c54c4d5d9fa30e0ca9d0793ab274f69228eeeb7d581ce8f6269",
+        "global_numpy_state_unchanged": true,
+        "manifests_valid": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-73/adapter/samples.csv",
+        "sample_sha256": "dee2b14b2f3be25686e399626cc533e254fe00c979231931f83e3e2dafc074e0"
+      },
+      "comparisons": {
+        "adapter_global_numpy_state_unchanged": true,
+        "adapter_manifests_valid": true,
+        "checkpoint_metadata_valid": true,
+        "forge_state": {
+          "adversarial_oob_accuracy_exact": true,
+          "artifact_access_control_required": true,
+          "attributes_exact": true,
+          "bnds_exact": true,
+          "class_probs_exact": true,
+          "levels_exact": true,
+          "params_exact": true,
+          "privacy_not_overclaimed": true,
+          "random_forest_absent": true,
+          "row_level_training_data_absent": true,
+          "safe_json_checkpoint": true
+        },
+        "native_adversarial_loop_exercised": true,
+        "native_global_numpy_state_unchanged": true,
+        "sample_bytes_exact": true,
+        "sample_metadata_valid": true,
+        "samples": {
+          "categorical_domains_valid": true,
+          "columns_exact": true,
+          "finite_numerical": true,
+          "frame_exact": true,
+          "missing_values": 0,
+          "rows": 13
+        }
+      },
+      "native_artifacts": {
+        "adversarial_loop_exercised": true,
+        "adversarial_oob_accuracy": [
+          0.825,
+          0.2833333333333333
+        ],
+        "global_numpy_state_unchanged": true,
+        "sample_path": "/home/runner/work/_temp/arf-validation/regression/seed-73/native/samples.csv",
+        "sample_sha256": "dee2b14b2f3be25686e399626cc533e254fe00c979231931f83e3e2dafc074e0"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "claim_boundary": "Exact parity with the official method-author arfpy 0.1.1 Python package for mixed-type, missing-free, flat single-table FORDE/FORGE generation. This does not establish cross-language equivalence with the separate R package, benchmark eligibility, Official Results, or release support.",
+  "environment": {
+    "arfpy": "0.1.1",
+    "joblib": "1.5.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.3.post1",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "setuptools": "80.10.2",
+    "six": "1.17.0",
+    "threadpoolctl": "3.6.0",
+    "tzdata": "2026.3",
+    "wheel": "0.45.1"
+  },
+  "environment_lock": {
+    "path": "requirements-arf-validation.txt",
+    "sha256": "5ed951e5aee424e46a27329e826af5863a2e79e648bd46398b4e6d8c3f497fe8"
+  },
+  "fixtures": [
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "classification",
+      "train_csv_sha256": "2693991504bed5fe923bfb5bbfb22d316937acc83e90effddf3ea353d9d8130f",
+      "variant": "binary"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "classification",
+      "train_csv_sha256": "5fa032c1f0991a151328e61fa429d895efe44f2f05ec0e9d1a0411d5394e3934",
+      "variant": "multiclass"
+    },
+    {
+      "categorical_columns": [
+        "segment"
+      ],
+      "columns": [
+        "continuous",
+        "linked_value",
+        "segment",
+        "target"
+      ],
+      "missing_values": 0,
+      "numerical_columns": [
+        "continuous",
+        "linked_value"
+      ],
+      "rows": 60,
+      "target_columns": [
+        "target"
+      ],
+      "task_type": "regression",
+      "train_csv_sha256": "4fc0ece7b01611904c902ea9047f42d45c43554a1dbf9cd4c1c18f3a239de88d",
+      "variant": "regression"
+    }
+  ],
+  "model_id": "arf",
+  "protocol_id": "arfpy-official-package-parity-v1",
+  "repository_commit": "1a6bb669796f1f5a01e6599b9373b1d4e0c33b4a",
+  "reproduction_target": "method-author-official-python-package",
+  "runtime_config": {
+    "forde_params": {
+      "alpha": 0.0,
+      "dist": "truncnorm",
+      "oob": false
+    },
+    "safe_checkpoint": "arfpy-forge-state JSON without forest or row-level training data",
+    "sample_rows": 13,
+    "training_params": {
+      "delta": 0.0,
+      "early_stop": false,
+      "max_iters": 1,
+      "min_node_size": 2,
+      "n_jobs": 1,
+      "num_trees": 20,
+      "verbose": false
+    }
+  },
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "authority": "method-author",
+    "distribution_form": "package-source-distribution",
+    "installed_distribution": {
+      "distribution_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages",
+      "license": "MIT",
+      "license_sha256": "8f97b1e0e6c2a7c7b539e63e8a5c81c85d040556940a07b348596cd9674283ec",
+      "package_root": "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages/arfpy",
+      "public_class": "arfpy.arf.arf",
+      "record_hashes_verified": 10,
+      "runtime_file_sha256": {
+        "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "arf.py": "860f49dd232b78eba12d7a56ed88c9c6c814fae6938b9dbf047668874b368898",
+        "utils.py": "391032b116763ed1da0a539a9ae34bed69fbb477026034bbb6f33d44c4ad56f4"
+      },
+      "version": "0.1.1"
+    },
+    "license": "MIT",
+    "method_repository": "https://github.com/bips-hb/arf",
+    "release_provenance": "The PyPI 0.1.1 source distribution contains byte-exact release files from the locked method-author commit; the repository has no release tag.",
+    "repository": "https://github.com/bips-hb/arfpy",
+    "reproduction_target": "method-author-official-python-package",
+    "source_distribution": {
+      "archive_members": 20,
+      "bytes": 11841,
+      "filename": "arfpy-0.1.1.tar.gz",
+      "git_blob_matches": {
+        "LICENSE": "b4d4d1b1b589f798c1cab65fec7efac6a55ca60e",
+        "README.md": "13bd2f89ca2165d5ea93ce5af090a174fd1cda5b",
+        "arfpy/__init__.py": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "arfpy/arf.py": "c763d1cadb0344bc6457f1adb7741c52c686ed17",
+        "arfpy/utils.py": "0fd7a4339e8cbe24473fb42ddba603cb518eedf7",
+        "setup.py": "6267bec23bac24fafd922c3bb283bd208096f492"
+      },
+      "metadata": {
+        "home_page": "https://github.com/bips-hb/arfpy",
+        "license": "MIT",
+        "name": "arfpy",
+        "python_3_11_classifier": true,
+        "requirements": [
+          "numpy>=1.20.3",
+          "pandas>=1.5",
+          "scikit-learn>=0.24",
+          "scipy>=1.4"
+        ],
+        "requires_python": null,
+        "version": "0.1.1"
+      },
+      "regular_files_verified": 16,
+      "sha256": "88170d5e72638b0dbfec28cfbdfee02e97bd6a06d5a636e960acd5d90d480707",
+      "source_commit": "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
+      "source_relation": "All six recorded release files are byte-exact Git blobs from the locked commit.",
+      "source_tree": "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c"
+    },
+    "upstream_commit": "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
+    "upstream_tree": "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c"
+  },
+  "source_unchanged_after_validation": true,
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

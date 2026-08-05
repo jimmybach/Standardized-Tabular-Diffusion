@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import platform
 from pathlib import Path
@@ -20,6 +21,10 @@ from standardized_tabular_diffusion.runner import validate_action_inputs
 from standardized_tabular_diffusion.validation import arf as arf_validation
 
 pytestmark = pytest.mark.adapter
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "arf" / "native-parity-run-30964711614.json"
+EVIDENCE_SHA256 = "959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f"
 
 
 def _dataset_spec(tmp_path: Path) -> DatasetSpec:
@@ -60,6 +65,40 @@ def test_arf_protocol_constants_lock_the_official_release() -> None:
     assert arf_validation.VARIANTS == ("binary", "multiclass", "regression")
     assert len(arf_validation.EXPECTED_ARCHIVE_FILES) == 16
     assert len(arf_validation.EXPECTED_GIT_BLOBS) == 6
+
+
+def test_arf_retained_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "arfpy-official-package-parity-v1"
+    assert evidence["reproduction_target"] == "method-author-official-python-package"
+    assert evidence["repository_commit"] == "1a6bb669796f1f5a01e6599b9373b1d4e0c33b4a"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["arfpy"] == "0.1.1"
+    assert evidence["environment"]["platform"].startswith("Linux-")
+    assert evidence["environment_lock"]["sha256"] == (
+        "5ed951e5aee424e46a27329e826af5863a2e79e648bd46398b4e6d8c3f497fe8"
+    )
+    assert evidence["source"]["authority"] == "method-author"
+    assert evidence["source"]["source_distribution"]["regular_files_verified"] == 16
+    assert len(evidence["source"]["source_distribution"]["git_blob_matches"]) == 6
+    assert evidence["source"]["installed_distribution"]["record_hashes_verified"] == 10
+    assert evidence["source_unchanged_after_validation"] is True
+    assert len(evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["samples"]["frame_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["attributes_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["bnds_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["params_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["class_probs_exact"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["safe_json_checkpoint"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["row_level_training_data_absent"] for case in evidence["cases"])
+    assert all(case["comparisons"]["forge_state"]["random_forest_absent"] for case in evidence["cases"])
 
 
 def test_arf_checkpoint_codec_round_trips_nonfinite_bounds_without_pickle() -> None:

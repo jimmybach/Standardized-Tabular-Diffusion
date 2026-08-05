@@ -1,6 +1,6 @@
 # ARF Validation Protocol
 
-Status: protocol implemented; authoritative Linux/Python 3.11 result pending
+Status: passed; retained Linux/Python 3.11 official-package parity evidence
 
 Protocol ID: `arfpy-official-package-parity-v1`
 
@@ -102,4 +102,6 @@ python -m standardized_tabular_diffusion.validation.arf \
 
 ## Retained result
 
-Pending. Until a passing workflow artifact is retained and cross-linked from the source lock, ARF remains `adapter-complete`, `experimental`, `unsupported`, and excluded from Official Results.
+GitHub Actions run [`30964711614`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614) passed on Linux with Python 3.11.15. All nine binary-classification, multiclass-classification, regression, and seed cases passed every exact comparison, including restored FORGE state and generated CSV bytes. The inspected evidence is retained byte-for-byte at `docs/evidence/arf/native-parity-run-30964711614.json` with SHA-256 `959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f` and is cross-linked from the source lock.
+
+ARF is therefore `native-parity-validated` against the exact official Python package. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent benchmark, dataset, runtime, governance, and release gates pass. No R/Python cross-language equivalence is claimed.
