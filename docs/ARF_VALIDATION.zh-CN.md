@@ -1,6 +1,6 @@
 # ARF 验证协议
 
-状态：协议已实现；等待 Linux/Python 3.11 权威运行结果
+状态：已通过；已保留 Linux/Python 3.11 官方包等价性证据
 
 协议 ID：`arfpy-official-package-parity-v1`
 
@@ -102,4 +102,6 @@ python -m standardized_tabular_diffusion.validation.arf \
 
 ## 已保留结果
 
-等待运行。在通过的工作流证据被永久保留并从 source lock 交叉引用之前，ARF 仍为 `adapter-complete`、`experimental`、`unsupported`，并排除在 Official Results 之外。
+GitHub Actions 运行 [`30964711614`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614) 已在 Linux 和 Python 3.11.15 环境通过。二分类、多分类、回归与随机种子组合形成的全部九个案例均通过所有精确比较，其中包括恢复后的 FORGE 状态和生成 CSV 字节。经审阅的证据已逐字节保留在 `docs/evidence/arf/native-parity-run-30964711614.json`，其 SHA-256 为 `959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f`，并已从 source lock 交叉引用。
+
+因此，ARF 针对这一精确官方 Python 包的状态已晋级为 `native-parity-validated`。在独立的 benchmark、数据集、运行资源、治理和发布门槛通过前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。本结论不声称 R/Python 跨语言等价性。

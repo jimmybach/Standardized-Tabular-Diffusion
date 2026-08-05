@@ -42,7 +42,7 @@
       "license_url": "https://github.com/bips-hb/arfpy/blob/6f737baaaa589f7ac3ff59f0d739ce04b0f1381c/LICENSE",
       "method_repository": "https://github.com/bips-hb/arf",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "package_lock": {
         "bytes": 11841,
         "filename": "arfpy-0.1.1.tar.gz",
@@ -77,16 +77,67 @@
       "upstream_commit": "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
       "upstream_tree": "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:f10b7d8ff08e7b14fc314ab9837192c648e8b321865aa2a5ba1faf2e96d33c09",
+          "artifact_id": 8914278416,
+          "downloaded_evidence_sha256": "959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f",
+          "evidence_file_sha256": "959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f",
+          "expires_at": "2026-11-03T00:53:13Z",
+          "name": "arf-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/arf/native-parity-run-30964711614.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "arfpy": "0.1.1",
+          "joblib": "1.5.3",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1"
+        },
+        "environment_lock_sha256": "5ed951e5aee424e46a27329e826af5863a2e79e648bd46398b4e6d8c3f497fe8",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "51ff5fbd67cb167c72ff15ea8596626a3e4d1b22",
         "protocol_id": "arfpy-official-package-parity-v1",
-        "status": "pending",
-        "target_environment": "Linux / Python 3.11",
-        "target_cases": 9,
-        "target_variants": [
+        "repository_commit": "1a6bb669796f1f5a01e6599b9373b1d4e0c33b4a",
+        "result_summary": {
+          "adversarial_loop_exercised": true,
+          "adapter_manifests_valid": true,
+          "checkpoint_forge_state_exact": true,
+          "git_blob_files_exact": 6,
+          "installed_record_hashes_verified": 10,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "requested_rows_per_case": 13,
+          "safe_json_checkpoint": true,
+          "sample_bytes_exact": true,
+          "source_distribution_files_verified": 16
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614",
+        "seed_cases": [
+          0,
+          19,
+          73
+        ],
+        "status": "pass",
+        "validated_at": "2026-08-05T00:54:05Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free",
+          "forde_oob": false,
+          "implementation": "method-author-official-python-package",
+          "r_cross_language_equivalence": "not-claimed"
+        },
+        "variants": [
           "binary",
           "multiclass",
           "regression"
-        ]
+        ],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614/job/92176072429",
+        "workflow_run_id": 30964711614
       }
     },
     "codi": {
