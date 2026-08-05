@@ -1,6 +1,6 @@
 # NFlow Validation Protocol
 
-Status: protocol implemented; authoritative Linux/Python 3.11 evidence pending
+Status: passed; retained Linux/Python 3.11 official-package recipe-parity evidence
 
 Protocol ID: `nflows-maf-tabular-recipe-parity-v1`
 
@@ -118,6 +118,10 @@ python -m standardized_tabular_diffusion.validation.nflow \
 
 `.github/workflows/nflow-validation.yml` runs this command and retains its JSON artifact for 90 days. Any package, dependency, adapter, checkpoint schema, preprocessing, architecture, optimizer, or protocol change requires a new run. Promotion is permitted only after a passing Linux/Python 3.11 artifact is inspected and retained unchanged under `docs/evidence/nflow/`.
 
-## Current result
+## Retained result
 
-The protocol and workflow are implemented, but no authoritative artifact has yet been retained. `nflow` therefore remains `adapter-complete`, `experimental`, `unsupported`, and excluded from Official Results until the required run passes and its evidence is reviewed and committed.
+GitHub Actions run [`30970260840`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840) passed on Linux with Python 3.11.15 and CPU-only PyTorch 2.3.0. All nine binary-classification, multiclass-classification, regression, and seed cases passed every exact comparison. This includes train-fitted preprocessing, epoch losses, all official flow state tensors, reloaded raw continuous samples, final frames and CSV bytes, artifact metadata, non-executable state declarations, and restoration of caller PyTorch RNG/thread state.
+
+The source protocol verified 96 archive members, 80 regular source-distribution files, all 42 package files against the locked Git tree, nine critical runtime files, 48 installed `RECORD` hashes, and unchanged installed source after all cases. The inspected evidence is retained byte-for-byte at `docs/evidence/nflow/native-parity-run-30970260840.json` with SHA-256 `940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923`. The GitHub artifact ID is `8916246279`, and its archive digest is `sha256:635028a4962884284e8592144e5fa2b77272bafa4c4279f54d421650552ec044`.
+
+NFlow is therefore `native-parity-validated` against the exact official nflows package plus the repository-declared mixed-type MAF recipe. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent central-evaluation, dataset-admission, runtime, governance, and release gates pass. No paper-native or alternative-recipe equivalence is claimed.

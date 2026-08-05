@@ -128,6 +128,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
         "ctab-gan-plus",
         "ctgan",
         "goggle",
+        "nflow",
         "nrgboost",
         "realtabformer",
         "smote",
