@@ -187,7 +187,7 @@
       "license": "MIT",
       "license_url": "https://github.com/pgmpy/pgmpy/blob/617cb48af678a7a471aad81d523ca95d2095430f/LICENSE",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
       "package_lock": {
         "bytes": 2446383,
         "filename": "pgmpy-1.1.2-py3-none-any.whl",
@@ -202,7 +202,7 @@
       "release": {
         "git_tag": "v1.1.2",
         "git_tag_object": "ff663f9203c5075b2367707917016efafed03593",
-        "published_at": "2026-04-30T14:09:50Z",
+        "published_at": "2026-04-30T11:34:47.189802Z",
         "source_commit": "617cb48af678a7a471aad81d523ca95d2095430f",
         "source_tree": "6c7adc00a479f540b2215889b1fac99a7b0b8a9c",
         "tag_signature": "unsigned"
@@ -217,9 +217,57 @@
       "upstream_commit": "617cb48af678a7a471aad81d523ca95d2095430f",
       "upstream_tree": "6c7adc00a479f540b2215889b1fac99a7b0b8a9c",
       "validation": {
-        "level": "adapter-complete",
+        "artifact": {
+          "artifact_digest": "sha256:6dbedd1970b51ab5243e8da35b052d8d8df780cd2c2e81ac2adf756b4cae5654",
+          "artifact_id": 8915417956,
+          "downloaded_evidence_sha256": "6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8",
+          "evidence_file_sha256": "6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8",
+          "expires_at": "2026-11-03T01:54:27Z",
+          "name": "bn-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/bn/native-parity-run-30967779298.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "numpy": "2.4.6",
+          "pandas": "3.0.5",
+          "pgmpy": "1.1.2",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.9.0",
+          "scipy": "1.17.1"
+        },
+        "environment_lock_sha256": "581f188464223069f815de00a7806bb239ec0e7ef2c0ecec81d67de9cc5a5f4a",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "f9fe86c616ec0f4faee4e0bd55093cccf4ca3587",
         "protocol_id": "pgmpy-bn-recipe-parity-v1",
-        "status": "pending-authoritative-linux-python-3.11-evidence",
+        "repository_commit": "9397b09677e784376d0e9130e31c403682cc9f38",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "checkpoint_cpds_exact": true,
+          "checkpoint_graph_exact": true,
+          "checkpoint_preprocessing_exact": true,
+          "installed_record_hashes_verified": 648,
+          "package_files_verified": 636,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_discrete_samples_exact": true,
+          "requested_rows_per_case": 13,
+          "restored_official_model_exact": true,
+          "safe_json_checkpoint": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "wheel_files_verified": 649
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298",
+        "seed_cases": [
+          0,
+          19,
+          73
+        ],
+        "status": "pass",
+        "validated_at": "2026-08-05T01:56:20Z",
         "validated_scope": {
           "data": "flat-single-table-mixed-type-missing-free",
           "implementation": "official-pgmpy-package-plus-declared-bn-recipe",
@@ -229,7 +277,9 @@
           "binary",
           "multiclass",
           "regression"
-        ]
+        ],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298/job/92185376267",
+        "workflow_run_id": 30967779298
       }
     },
     "codi": {
