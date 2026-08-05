@@ -287,6 +287,8 @@ Optional secondary targets use the same complete declaration. They are reported 
 
 The target MUST reflect a documented dataset task or a reviewed scientific purpose. It MUST NOT be chosen after comparing generator results.
 
+The reviewed Adult and Sick diagnostic profiles now bind their primary classification targets, positive classes, label mappings, Macro-F1 and secondary metrics, support declarations, Dummy strategy, and `p4-utility-pilot@0.1.0` identity. This records the P4 pilot contract without making either dataset official-eligible.
+
 ## 12. Global Utility profile
 
 Global Utility includes every evaluable non-identifier column as a rotated target by default.
@@ -304,6 +306,8 @@ The profile declares:
 - aggregation weights.
 
 For the TabStruct-compatible profile, each categorical target uses the Balanced-Accuracy TSTR/TRTR ratio, each numerical target uses the RMSE TRTR/TSTR ratio, and targets are equally weighted. A different normalization or predictor profile creates a distinct metric identity and compatibility group. Exclusion because a model performs poorly is prohibited.
+
+Adult and Sick enumerate every canonical model-view column in their P4 diagnostic Global Utility declaration. Audit-only and identifier columns remain outside the canonical view; no target is silently omitted.
 
 ## 13. Validity profile
 

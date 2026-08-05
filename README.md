@@ -111,6 +111,8 @@ The approved result design uses one structured Atomic Result per metric scope, p
 
 P3 adds benchmark-native per-column and reviewed cross-column Validity, original-output evidence, a closed declarative rule language, and the explicit train-only mean/mode preprocessing boundary. Generated data is never silently repaired. Current observed numerical ranges and unresolved semantic or medical constraints are not promoted to hard rules. P3 passed its [authoritative Linux/Python 3.11 workflow](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043), with [machine-readable evidence](docs/evidence/evaluation/p3-validity-run-31036844043.json) retained; it remains diagnostic and outside Official Results. See the [P3 guide](docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.md).
 
+P4 adds checksum-bound real-train, held-out real-test, and synthetic-train inputs; three-family Local Utility with raw Dummy/TRTR/TSTR arms and unclipped baseline-adjusted retention; and TabStruct Equation 4 Global Utility with every target, raw arm, predictor set, seed, denominator, and failure state retained. Its bounded diagnostic workflow passed on [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769), with [machine-readable evidence](docs/evidence/evaluation/p4-utility-run-31053624769.json) retained. This is not an Official Results protocol or an executable TabEval source-parity claim: the evidence explicitly records that the optional XGB/KNN/TabPFN runtime was not executed. That source-runtime pilot and profile freeze remain as described in the [P4 guide](docs/evaluation/P4_UTILITY.md).
+
 P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
 Useful contract commands include:
@@ -122,6 +124,7 @@ std-tabular-diffusion list-protocols
 std-tabular-diffusion validate-dataset-profile --profile path/to/profile.json
 std-tabular-diffusion evaluate-table --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_bundle
 std-tabular-diffusion evaluate-table --protocol p3-validity --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_validity_bundle
+std-tabular-diffusion evaluate-table --protocol p4-utility --reference real_train.csv --real-test real_test.csv --synthetic synthetic_train.csv --dataset-profile path/to/profile.json --output path/to/new_utility_bundle
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
 ~~~
 

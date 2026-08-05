@@ -206,6 +206,8 @@ fidelity_score =
 
 评测器套件至少代表线性模型、随机森林和梯度提升树。具体实现和冻结超参数经 pilot 冻结。评测器选择只能使用 train 和允许的 validation 数据，并且必须独立于正在评分的合成数据方法。
 
+已实现的 P4 诊断候选通过 `p4-utility-pilot@0.1.0` 绑定 scikit-learn Logistic Regression/Ridge、Random Forest 和 Histogram Gradient Boosting，并默认使用五个评测种子。其有限范围工程门已经通过，并留存 [Linux/Python 3.11 证据](../evidence/evaluation/p4-utility-run-31053624769.json)。这是已实现的 pilot 身份，不是已冻结的 Official Results profile。
+
 这一以 Macro-F1/RMSE 为主的面板属于本基准契约。它不得称为 GReaT 的精确复现——GReaT 使用分类 accuracy、回归 MSE，以及线性或逻辑回归、决策树和随机森林；也不得称为 TabStruct 的精确复现——TabStruct 的分类效用使用 Balanced Accuracy。
 
 ### 7.3 Global Utility
@@ -227,6 +229,8 @@ global_utility(D) = mean_j utility_j(D)
 所有目标等权。大于一的值有效，不得截断。分母为零或非有限值时结果在数学上未定义，除非未来指标版本声明并验证其他规则。
 
 预测器配置属于指标身份的一部分。TabStruct 的 Full-tuned profile 使用九个调参预测器，Tiny-default profile 使用三个未调参预测器，并被论文实证推荐为成本更低的 Global Utility 选项。锁定的 TabEval 快照实现了三预测器形式。这些 profile 必须使用不同标识，不能混入同一榜单兼容组。
+
+已实现的 P4 诊断候选绑定 TabEval revision `dba19a4ee7aa391621cbeb464609285fd515dece` 中锁定的 `UtilityPerFeature` 来源配置 `XGB + KNN + TabPFN`。缺失依赖成为 `resource_failure`；TRTR 与 TSTR 预测器集合不一致会使该目标 ratio 无效。留存的 P4 证据明确记录 `global_source_runtime.executed: false`，因此可执行来源等价仍待验证。
 
 Local Utility 和 Global Utility 是两个独立的正式子榜单。初始协议不将二者合并为单个 Utility 分数。
 
@@ -439,7 +443,7 @@ Native 比较报告最终官方训练成本。Standardized Tuning 比较还要�
 
 首个正式协议冻结前，以下细节需要经验性 pilot 证据：
 
-- Local 与 Global Utility 预测器的具体实现和超参数；
+- 已实现 P4 预测器候选在协议冻结前所需的来源运行时、稳定性、高基数、依赖和预算证据；
 - real-versus-real 保真度重采样；
 - 混合表 C2ST 变换与判别器；
 - 来源忠实与适配版 Column Pair Trends 离散化的选择；

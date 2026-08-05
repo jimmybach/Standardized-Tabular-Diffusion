@@ -82,20 +82,22 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 | [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
 | [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 active path; source aggregates are reconstructed and no combined Fidelity score is emitted |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | Closed hard-rule language, per-column/per-constraint Atomic Results, and Validity aggregation | P3 active diagnostic path; arbitrary code and inferred hard rules are prohibited, original output is not repaired |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | Held-out-test Local/Global Utility, raw arms, support states, and strict ratio aggregation | P4 diagnostic engineering gates passed on Linux/Python 3.11; executable TabEval runtime parity remains pending |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | Central mean/mode missing-value boundary | Fits real train only; target/synthetic repair is prohibited; state, schema, configuration, inputs, and outputs are fingerprinted |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | Ten Draft 2020-12 wire schemas | P1 canonical wire validators, packaged in the wheel |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, and source identity resources | Eight legacy, two source-parity P2, and two benchmark-native unit-validated P3 records remain non-official |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Eight legacy, two P2, two P3, and eleven P4 records remain non-official |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the backward-compatible default; `--protocol p3-validity` runs the P3 path |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3 and P4 are selected explicitly, and P4 requires `--real-test` |
 | [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | P0 active and passing on Linux; reference trees are excluded from default discovery and distribution |
 | [`tests/evaluation/`](../../tests/evaluation) | Contract, structural, source-parity, Atomic Result, interruption, bundle, and CLI tests | P1 regression tests and P2 direct-authoritative tests are separated by dependency and marker boundaries |
 
-### 3.3 Remaining gaps after P3 implementation
+### 3.3 Remaining gaps after P4 implementation
 
 - P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
 - P3 passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p3-validity-run-31036844043.json), but remains diagnostic pending protocol freeze and release approval.
-- P4 utility, approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
+- P4 Local/Global Utility passed its bounded diagnostic workflow with retained [Linux/Python 3.11 evidence](../evidence/evaluation/p4-utility-run-31053624769.json). The evidence explicitly excludes the real optional TabEval predictor runtime; its resource budget, stability pilot, and source-parity evidence remain pending before protocol freeze.
+- Approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
@@ -166,7 +168,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
-| P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
+| P4 | Local and Global Utility | P1, P3 | Diagnostic gates passed; [Linux evidence retained](../evidence/evaluation/p4-utility-run-31053624769.json); source-runtime pilot pending | Raw arms, state semantics, profile identity, and source/formula validation pass |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
@@ -460,12 +462,13 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-P3's authoritative Linux/Python 3.11 evidence is retained. The next implementation phase is P4 Local and Global Utility. P4 must consume the P3-reviewed immutable model view and preprocessing identity; it must not repair generated data or infer new hard constraints.
+P4 now consumes the P3-reviewed immutable model view and a separately checksum-bound held-out real test table. The next gate is the P4 Linux/Python 3.11 source-runtime pilot: run the pinned optional XGB/KNN/TabPFN profile, review high-cardinality behavior and runtime budgets, retain evidence, and decide whether the profile can be frozen. P5 must not turn an unfinished P4 diagnostic profile into an Official Results component.
 
 ## 12. Related specifications
 
 - [Evaluation Protocol](EVALUATION_PROTOCOL.md)
 - [P3 Validity and Preprocessing Guide](P3_VALIDITY_AND_PREPROCESSING.md)
+- [P4 Local and Global Utility Guide](P4_UTILITY.md)
 - [Metric Governance](METRIC_GOVERNANCE.md)
 - [Metric Source Review](METRIC_SOURCE_REVIEW.md)
 - [Dataset Profile Specification](DATASET_PROFILE_SPEC.md)
