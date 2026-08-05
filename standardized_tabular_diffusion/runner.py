@@ -287,9 +287,11 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.arf.json")
         if config.model == "bn":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.bn.json")
+        if config.model == "nflow":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nflow.json")
         if config.model == "tabsds":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
-        record_user_checkpoint(checkpoint_path, code_executing=config.model not in {"arf", "bn"})
+        record_user_checkpoint(checkpoint_path, code_executing=config.model not in {"arf", "bn", "nflow"})
 
     if action == "sample" and config.model == "arf":
         arf_checkpoint_path = Path(
@@ -308,6 +310,19 @@ def validate_action_inputs(
         checked["checkpoint_metadata_path"] = str(metadata_path)
         if not metadata_path.exists():
             missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+
+    if action == "sample" and config.model == "nflow":
+        nflow_checkpoint_path = Path(
+            config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nflow.json")
+        )
+        metadata_path = nflow_checkpoint_path.with_name(f"{nflow_checkpoint_path.name}.metadata.json")
+        weights_path = nflow_checkpoint_path.with_name(f"{nflow_checkpoint_path.stem}.weights.npz")
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        checked["checkpoint_weights_path"] = str(weights_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+        if not weights_path.exists():
+            missing.append(f"checkpoint_weights_path missing: {weights_path}")
 
     if action == "sample" and config.model == "goggle":
         metadata_path = Path(config.output_dir) / "goggle-model-metadata.json"
