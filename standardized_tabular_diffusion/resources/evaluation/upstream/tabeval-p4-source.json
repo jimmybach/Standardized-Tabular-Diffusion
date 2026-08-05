@@ -1,0 +1,53 @@
+{
+  "source_manifest_schema_version": "1.0.0",
+  "source_id": "tabeval-p4-utility-per-feature",
+  "repository": "https://github.com/SilenceX12138/TabEval",
+  "revision": "dba19a4ee7aa391621cbeb464609285fd515dece",
+  "release_version": "2026.03.04",
+  "source_path": "src/tabeval/metrics/eval_structure.py",
+  "source_sha256": "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743",
+  "source_hash_algorithm": "sha256(lf-normalized-source-bytes)",
+  "license_spdx": "Apache-2.0",
+  "license_path": "LICENSE",
+  "license_sha256": "11d68d4f6040e19f06cfce52c85f1f64d9a2d2d8cc67567daf53377f7b8358a7",
+  "license_hash_algorithm": "sha256(lf-normalized-license-bytes)",
+  "implementation_symbols": {
+    "evaluator": "tabeval.metrics.eval_structure.UtilityPerFeature",
+    "tabpfn_model": "tabeval.metrics.eval_structure.CustomTabPFNModel"
+  },
+  "upstream_dependency_disclosure": {
+    "status": "not-reproducibly-locked",
+    "autogluon_declared": false,
+    "xgboost_constraint": "unbounded",
+    "tabpfn_constraint": "unbounded"
+  },
+  "approved_pilot_runtime": {
+    "status": "benchmark-approved-not-upstream-official",
+    "selection_basis": "Stable releases available when the current XGB/KNN/TabPFN UtilityPerFeature configuration first appeared at TabEval revision 3a98b39977b43ae97151b4eb01a41d876829d9d0 on 2025-08-10.",
+    "python": "3.11",
+    "platform": "Linux x86_64 CPU",
+    "autogluon.common": "1.4.0",
+    "autogluon.core": "1.4.0",
+    "autogluon.features": "1.4.0",
+    "autogluon.tabular": "1.4.0",
+    "xgboost_distribution": "xgboost-cpu",
+    "xgboost": "3.0.3",
+    "tabpfn": "2.1.2",
+    "torch": "2.3.0+cpu"
+  },
+  "tabpfn_checkpoints": {
+    "classifier": {
+      "repository": "Prior-Labs/TabPFN-v2-clf",
+      "revision": "f851f2a3c941544733b712d8c0f96dfae9b28862",
+      "filename": "tabpfn-v2-classifier-finetuned-zk73skhh.ckpt",
+      "sha256": "cf8c519c01eaf1613ee91239006d57b1c806ff5f23ac1aeb1315ba1015210e49"
+    },
+    "regressor": {
+      "repository": "Prior-Labs/TabPFN-v2-reg",
+      "revision": "4972a65a1b30806315c6f92499959ffbfc69a673",
+      "filename": "tabpfn-v2-regressor.ckpt",
+      "sha256": "2ab5a07d5c41dfe6db9aa7ae106fc6de898326c2765be66505a07e2868c10736"
+    }
+  },
+  "claim_boundary": "The source identity is official TabEval. The executable dependency and checkpoint tuple is a benchmark-approved pilot reconstruction because upstream did not publish a reproducible environment lock."
+}

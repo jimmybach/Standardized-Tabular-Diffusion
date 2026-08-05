@@ -2,9 +2,9 @@
 
 ## Status and claim boundary
 
-P4 is implemented and its bounded diagnostic gates passed on [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769), with [machine-readable evidence](../evidence/evaluation/p4-utility-run-31053624769.json) retained at SHA-256 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`. It remains a **diagnostic pilot**: it is not protocol-frozen, release-supported, or eligible for Official Results.
+P4 is implemented and its bounded diagnostic gates passed on [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769), with [machine-readable engineering evidence](../evidence/evaluation/p4-utility-run-31053624769.json) retained at SHA-256 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`. The separate real Global source-runtime pilot passed in [run 31057073762](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31057073762); its [retained evidence](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) has SHA-256 `1ca205c3fbad6c6e80cd275330dae00edda5dfcad7efe229f4fcb285b9d63596`. P4 remains a **diagnostic pilot**: it is not protocol-frozen, release-supported, or eligible for Official Results.
 
-The implementation establishes the complete auditable path from three immutable decoded tables to Local and Global Utility Atomic Results and a finalized result bundle. It does not claim executable parity with the full TabEval predictor runtime. That claim requires a separate Linux/Python 3.11 run with the pinned AutoGluon, XGBoost, KNN, and TabPFN stack, reviewed runtime budgets, and retained evidence.
+The implementation establishes the complete auditable path from three immutable decoded tables to Local and Global Utility Atomic Results and a finalized result bundle. The bounded pilot now establishes exact aggregate parity between the locked TabEval source and the adapter for one classification target and one regression target with real XGB, KNN, and TabPFN training. It does not establish full-dataset, multi-seed stability or Official Results admission.
 
 ## Required inputs and leakage boundary
 
@@ -61,9 +61,11 @@ global utility:     equal mean over targets, then equal mean over seeds
 
 Ratios above one are valid and are never clipped. A zero or non-finite denominator is explicit `mathematically_undefined`. The published diagnostic `global_utility` is null if any requested target/seed ratio is unavailable; computed targets are never silently reweighted.
 
-The pinned low-cost predictor identity is TabEval `UtilityPerFeature` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`, timestamp `2025-08-09`, configured with XGB, KNN, and TabPFN through AutoGluon. P4 records the exact trained model names and per-model scores returned by the backend. It requires matching TRTR and TSTR predictor sets for a target. No fallback model or reduced unrecorded profile is permitted.
+The pinned low-cost predictor identity is TabEval `UtilityPerFeature` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`, timestamp `2025-08-09`, configured with XGB, KNN, and TabPFN through AutoGluon. The LF-normalized source and Apache-2.0 license are checksum-locked. Upstream did not declare AutoGluon and left XGBoost and TabPFN unbounded, so no reproducible upstream-official environment exists. The pilot therefore labels its Linux/Python 3.11 CPU tuple—AutoGluon 1.4.0, `xgboost-cpu` 3.0.3, TabPFN 2.1.2, and PyTorch 2.3.0+cpu—as a benchmark-approved reconstruction rather than an upstream-official lock.
 
-The pinned TabPFN implementation supports at most ten classes. For a higher-cardinality categorical target, AutoGluon may source-faithfully omit TabPFN; P4 records `source-predictor-set-reduced` and accepts the ratio only when both arms expose the same predictor set. This behavior remains part of the pending source-runtime pilot.
+In the retained run, both source and adapter trained `CustomTabPFNModel`, `KNeighbors`, and `XGBoost`. Their aggregate Balanced Accuracy was exactly `0.5416666666666666`; their aggregate RMSE was exactly `8.979373060535432`; both absolute source/adapter differences were zero under the declared `1e-8` gate. P4 records exact trained model names and per-model scores and requires matching TRTR/TSTR predictor sets for a target. No fallback model or unrecorded reduced profile is permitted.
+
+The pinned TabPFN implementation supports at most ten classes. The pilot directly executed the locked source guard and confirmed that an eleven-class target is rejected before TabPFN model fitting. AutoGluon may then source-faithfully omit the failed family; P4 records `source-predictor-set-reduced` and accepts a ratio only when both arms expose the same predictor set. End-to-end high-cardinality behavior on reviewed dataset targets remains an admission item.
 
 TabEval's favorable value of one for a constant synthetic target is rejected. Missing synthetic target classes produce `insufficient_support`, remain visible, and prevent a strict Global Utility summary.
 
@@ -116,8 +118,8 @@ P4 defaults to evaluator seeds `0,1,2,3,4`. A diagnostic run may provide `--eval
 
 Before P4 can advance beyond diagnostic use:
 
-1. run the exact optional Global predictor stack on Linux/Python 3.11;
-2. retain source-runtime, dependency, model-set, numerical, stability, and resource evidence;
-3. review Adult and Sick pilot behavior, including high-cardinality targets;
-4. freeze predictor versions, parameters, seed policy, and runtime budgets; and
+1. run representative Adult and Sick Global pilots across their reviewed target sets;
+2. measure multi-seed stability, wall time, peak memory, and target-level failure behavior;
+3. validate full AutoGluon omission and equal-arm handling for reviewed high-cardinality targets;
+4. freeze predictor versions, parameters, checkpoint identities, seed policy, and runtime budgets; and
 5. issue a separate protocol-freeze and Official Results admission decision.

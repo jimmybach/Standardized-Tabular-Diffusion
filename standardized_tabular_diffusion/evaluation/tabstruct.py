@@ -86,15 +86,18 @@ def _temporary_env(updates: dict[str, str]) -> Any:
 def _quiet_benchmark_context() -> Any:
     cache_root = Path(tempfile.gettempdir()) / "standardized-tabular-diffusion"
     cache_root.mkdir(parents=True, exist_ok=True)
+    tabpfn_cache = Path(os.environ.get("TABPFN_MODEL_CACHE_DIR", cache_root / "tabpfn-cache"))
+    mpl_cache = Path(os.environ.get("MPLCONFIGDIR", cache_root / "mplconfig"))
+    xdg_cache = Path(os.environ.get("XDG_CACHE_HOME", cache_root / "xdg-cache"))
     env_updates = {
         "DO_NOT_TRACK": "1",
         "DISABLE_TELEMETRY": "1",
         "POSTHOG_DISABLED": "1",
         "HF_HUB_DISABLE_TELEMETRY": "1",
         "TOKENIZERS_PARALLELISM": "false",
-        "MPLCONFIGDIR": str(cache_root / "mplconfig"),
-        "TABPFN_MODEL_CACHE_DIR": str(cache_root / "tabpfn-cache"),
-        "XDG_CACHE_HOME": str(cache_root / "xdg-cache"),
+        "MPLCONFIGDIR": str(mpl_cache),
+        "TABPFN_MODEL_CACHE_DIR": str(tabpfn_cache),
+        "XDG_CACHE_HOME": str(xdg_cache),
     }
     Path(env_updates["MPLCONFIGDIR"]).mkdir(parents=True, exist_ok=True)
     Path(env_updates["TABPFN_MODEL_CACHE_DIR"]).mkdir(parents=True, exist_ok=True)
@@ -114,14 +117,27 @@ def _quiet_benchmark_context() -> Any:
 def _seeded_benchmark_context(seed: int = DEFAULT_BENCHMARK_SEED) -> Any:
     random_state = random.getstate()
     numpy_state = np.random.get_state()
+    torch_module = None
+    torch_state = None
+    try:
+        import torch
+
+        torch_module = torch
+        torch_state = torch.random.get_rng_state()
+    except (ImportError, OSError):
+        pass
     try:
         random.seed(seed)
         np.random.seed(seed)
+        if torch_module is not None:
+            torch_module.manual_seed(seed)
         with _quiet_benchmark_context():
             yield
     finally:
         random.setstate(random_state)
         np.random.set_state(numpy_state)
+        if torch_module is not None and torch_state is not None:
+            torch_module.random.set_rng_state(torch_state)
 
 
 def _try_import_autogluon() -> tuple[Any, Any]:
@@ -161,20 +177,19 @@ if _AUTOGLUON_ABSTRACT_MODEL is not None:
             if X.shape[0] > 10000:
                 X = X.sample(n=10000, random_state=42)
                 y = y.loc[X.index]
-            with _seeded_benchmark_context():
-                from tabpfn import TabPFNClassifier, TabPFNRegressor
+            from tabpfn import TabPFNClassifier, TabPFNRegressor
 
-                if self.problem_type in ["regression", "softclass"]:
-                    model_cls = TabPFNRegressor
-                else:
-                    model_cls = TabPFNClassifier
-                    if len(y.unique()) > 10:
-                        raise ValueError("TabPFN only supports up to 10 classes.")
+            if self.problem_type in ["regression", "softclass"]:
+                model_cls = TabPFNRegressor
+            else:
+                model_cls = TabPFNClassifier
+                if len(y.unique()) > 10:
+                    raise ValueError("TabPFN only supports up to 10 classes.")
 
-                X = self.preprocess(X, is_train=True)
-                params = self._get_model_params()
-                self.model = model_cls(**params)
-                self.model.fit(X, y)
+            X = self.preprocess(X, is_train=True)
+            params = self._get_model_params()
+            self.model = model_cls(**params)
+            self.model.fit(X, y)
 
         def _set_default_params(self) -> None:
             self._set_default_param_value("n_estimators", 1)
