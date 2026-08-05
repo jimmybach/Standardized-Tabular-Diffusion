@@ -113,8 +113,16 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
     "arf": _spec(
         "standardized_tabular_diffusion.models.final_wave_baselines",
         "ARFAdapter",
-        authority="third-party",
+        authority="method-author",
         distribution="package",
+        target="method-author-official-python-package",
+        install_extra="arf",
+        upstream_repository="https://github.com/bips-hb/arfpy",
+        upstream_revision="6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
+        revision_status="pinned-official-package-native-parity-validated",
+        evidence_records=("docs/evidence/arf/native-parity-run-30964711614.json",),
+        license_status="MIT; source-and-package-license-verified; transitive-review-pending",
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "bn": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",

@@ -99,7 +99,7 @@ def test_missing_adapter_dependency_has_actionable_error(monkeypatch: pytest.Mon
     message = str(exc_info.value)
     assert "arf" in message
     assert "optional_runtime" in message
-    assert "standardized-tabular-diffusion[models]" in message
+    assert "standardized-tabular-diffusion[arf]" in message
 
 
 def test_source_backed_adapter_requires_complete_repository_checkout(tmp_path: Path) -> None:
@@ -121,6 +121,7 @@ def test_adapter_registry_reports_conservative_independent_status_dimensions() -
 
     assert set(records) == set(registry.list_models())
     validated = {
+        "arf",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",

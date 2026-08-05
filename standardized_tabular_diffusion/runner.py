@@ -164,17 +164,30 @@ def validate_action_inputs(
     missing: list[str] = []
     checked: dict[str, Any] = {}
 
-    def record_user_checkpoint(checkpoint_path: str) -> None:
+    def record_user_checkpoint(
+        checkpoint_path: str,
+        *,
+        code_executing: bool = True,
+        allow_directory: bool = False,
+    ) -> None:
         checked["checkpoint_path"] = checkpoint_path
         path = Path(checkpoint_path)
         if not path.exists():
             missing.append(f"checkpoint_path missing: {checkpoint_path}")
             return
+        if path.is_symlink():
+            missing.append(f"checkpoint_path is a prohibited symlink: {checkpoint_path}")
+            return
+        if not path.is_file() and not (allow_directory and path.is_dir()):
+            expected = "file or directory" if allow_directory else "regular file"
+            missing.append(f"checkpoint_path is not a {expected}: {checkpoint_path}")
+            return
         resolved_checkpoint = path.resolve()
         output_root = Path(config.output_dir).resolve()
         allow_external = bool(config.sample.extra.get("allow_unsafe_external_checkpoint", False))
         checked["allow_unsafe_external_checkpoint"] = allow_external
-        if not resolved_checkpoint.is_relative_to(output_root) and not allow_external:
+        checked["checkpoint_code_executing"] = code_executing
+        if code_executing and not resolved_checkpoint.is_relative_to(output_root) and not allow_external:
             missing.append(
                 "external checkpoint loading is blocked for code-executing model formats; "
                 "move the checkpoint under output_dir or explicitly set "
@@ -270,9 +283,20 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nrgboost")
         if config.model == "goggle":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pt")
+        if config.model == "arf":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.arf.json")
         if config.model == "tabsds":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
-        record_user_checkpoint(checkpoint_path)
+        record_user_checkpoint(checkpoint_path, code_executing=config.model != "arf")
+
+    if action == "sample" and config.model == "arf":
+        arf_checkpoint_path = Path(
+            config.sample.checkpoint_path or str(Path(config.output_dir) / "model.arf.json")
+        )
+        metadata_path = arf_checkpoint_path.with_name(f"{arf_checkpoint_path.name}.metadata.json")
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
 
     if action == "sample" and config.model == "goggle":
         metadata_path = Path(config.output_dir) / "goggle-model-metadata.json"
@@ -319,15 +343,15 @@ def validate_action_inputs(
 
     if action == "sample" and config.model == "great":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "great_model")
-        record_user_checkpoint(checkpoint_path)
+        record_user_checkpoint(checkpoint_path, allow_directory=True)
 
     if action == "sample" and config.model == "tabula":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabula_model")
-        record_user_checkpoint(checkpoint_path)
+        record_user_checkpoint(checkpoint_path, allow_directory=True)
 
     if action == "sample" and config.model == "realtabformer":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "realtabformer_model")
-        record_user_checkpoint(checkpoint_path)
+        record_user_checkpoint(checkpoint_path, allow_directory=True)
         metadata_path = Path(
             config.sample.extra.get(
                 "checkpoint_metadata_path",
@@ -340,7 +364,7 @@ def validate_action_inputs(
 
     if action == "sample" and config.model == "tabularargn":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn_workspace")
-        record_user_checkpoint(checkpoint_path)
+        record_user_checkpoint(checkpoint_path, allow_directory=True)
         metadata_path = Path(
             config.sample.extra.get(
                 "checkpoint_metadata_path",
