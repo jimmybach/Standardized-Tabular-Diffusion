@@ -17,7 +17,11 @@ if TYPE_CHECKING:
     from standardized_tabular_diffusion.datasets import get_dataset_spec
     from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
     from standardized_tabular_diffusion.official_datasets import materialize_official_adult, materialize_official_sick
-    from standardized_tabular_diffusion.preprocessing import MissingValuePolicy, preprocess_splits
+    from standardized_tabular_diffusion.preprocessing import (
+        MissingValuePolicy,
+        load_imputation_state,
+        preprocess_splits,
+    )
     from standardized_tabular_diffusion.registry import get_adapter, list_datasets, list_models
     from standardized_tabular_diffusion.runner import build_run_context, run_action, run_pipeline
 
@@ -54,6 +58,7 @@ _LAZY_EXPORTS: dict[str, tuple[str, str]] = {
     ),
     "register_dataset": ("standardized_tabular_diffusion.dataset_onboarding", "register_dataset"),
     "MissingValuePolicy": ("standardized_tabular_diffusion.preprocessing", "MissingValuePolicy"),
+    "load_imputation_state": ("standardized_tabular_diffusion.preprocessing", "load_imputation_state"),
     "preprocess_splits": ("standardized_tabular_diffusion.preprocessing", "preprocess_splits"),
     "run_action": ("standardized_tabular_diffusion.runner", "run_action"),
     "run_pipeline": ("standardized_tabular_diffusion.runner", "run_pipeline"),

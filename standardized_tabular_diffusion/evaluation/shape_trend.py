@@ -17,7 +17,7 @@ from standardized_tabular_diffusion.evaluation.contracts import (
     RawDirection,
     utc_timestamp,
 )
-from standardized_tabular_diffusion.evaluation.table import ValidatedTables
+from standardized_tabular_diffusion.evaluation.table import ValidatedTables, model_view_column_specs
 
 COLUMN_SHAPES_METRIC_ID = "sdmetrics-column-shapes"
 COLUMN_PAIR_TRENDS_METRIC_ID = "sdmetrics-column-pair-trends"
@@ -205,7 +205,8 @@ def evaluate_shape_trend(
     shape_rows = {row["Column"]: row for row in shapes.to_dict("records")}
     shape_computed = sum(_finite(row.get("Score")) for row in shape_rows.values())
     shape_weight = 1.0 / shape_computed if shape_computed else 0.0
-    for spec in dataset_profile["columns"]:
+    model_columns = model_view_column_specs(dataset_profile)
+    for spec in model_columns:
         name = spec["name"]
         valid, excluded = _counts_for_column(tables, name)
         row = shape_rows.get(name)
@@ -250,15 +251,10 @@ def evaluate_shape_trend(
         )
 
     trends = upstream.column_pair_trends_details
-    trend_rows = {
-        (row["Column 1"], row["Column 2"]): row for row in trends.to_dict("records")
-    }
-    contributing = sum(
-        _finite(row.get("Score")) and bool(row.get("Meets Threshold?"))
-        for row in trend_rows.values()
-    )
+    trend_rows = {(row["Column 1"], row["Column 2"]): row for row in trends.to_dict("records")}
+    contributing = sum(_finite(row.get("Score")) and bool(row.get("Meets Threshold?")) for row in trend_rows.values())
     trend_weight = 1.0 / contributing if contributing else 0.0
-    for first, second in itertools.combinations(dataset_profile["columns"], 2):
+    for first, second in itertools.combinations(model_columns, 2):
         first_name, second_name = first["name"], second["name"]
         valid, excluded = _counts_for_pair(tables, first_name, second_name)
         row = trend_rows.get((first_name, second_name))
@@ -313,11 +309,7 @@ def evaluate_shape_trend(
         else math.nan
     )
     trend_contribution = (
-        sum(
-            atom.aggregate_contribution or 0.0
-            for atom in atoms
-            if atom.metric_id == COLUMN_PAIR_TRENDS_METRIC_ID
-        )
+        sum(atom.aggregate_contribution or 0.0 for atom in atoms if atom.metric_id == COLUMN_PAIR_TRENDS_METRIC_ID)
         if contributing
         else math.nan
     )
@@ -341,10 +333,10 @@ def evaluate_shape_trend(
         atomic_results=tuple(atoms),
         property_scores=property_scores,
         denominator_counts={
-            "requested_columns": len(dataset_profile["columns"]),
+            "requested_columns": len(model_columns),
             "source_evaluated_columns": len(shape_rows),
             "shape_contributing_columns": shape_computed,
-            "requested_column_pairs": len(dataset_profile["columns"]) * (len(dataset_profile["columns"]) - 1) // 2,
+            "requested_column_pairs": len(model_columns) * (len(model_columns) - 1) // 2,
             "source_evaluated_column_pairs": len(trend_rows),
             "trend_contributing_column_pairs": contributing,
         },

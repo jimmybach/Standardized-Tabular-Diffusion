@@ -1,6 +1,6 @@
 {
   "profile_schema_version": "1.0.0",
-  "dataset_profile_version": "1.0.0-reviewed",
+  "dataset_profile_version": "1.1.0-reviewed",
   "dataset_id": "sick",
   "display_name": "UCI Thyroid Disease — Sick",
   "dataset_version": "uci-102-a0982569a744",
@@ -17,6 +17,10 @@
     {
       "version": "1.0.0-reviewed",
       "change": "Replaced the unverified 2,205-row derivative with the checksum-pinned official UCI train/test files."
+    },
+    {
+      "version": "1.1.0-reviewed",
+      "change": "Added the machine-readable P3 hard column validity contract while leaving medical ranges and semantic constraints unresolved."
     }
   ],
   "suite_membership": ["diagnostic"],
@@ -159,14 +163,40 @@
     {"task_id":"predict-sick-class","target_column_id":"class","task_type":"classification","status":"reviewed","primary_metric_review":"pending evaluation-protocol implementation"}
   ],
   "validity": {
-    "status": "partially-reviewed",
-    "constraints": [
-      {"constraint_id":"tbg-all-missing","rule":"TBG is absent from the model view because every official value is missing."},
-      {"constraint_id":"unique-within-and-disjoint-across-splits","rule":"Parsed record IDs are unique within each split and disjoint across train and test."},
-      {"constraint_id":"official-model-row-overlap","rule":"The fixed official split contains 11 unique model rows in both train and test; preserve and disclose them rather than silently changing the source split."},
-      {"constraint_id":"declared-categorical-domains","rule":"Categorical values must match sick.names."}
+    "contract_schema_version": "1.0.0",
+    "status": "reviewed-diagnostic",
+    "hard_column_rules": [
+      {
+        "rule_id": "model-input-not-null",
+        "rule_type": "not_null",
+        "selector": {"nullable_model_input": false},
+        "parameters": {},
+        "evidence": {"source_type": "recorded-human-review", "reference": "Dataset Profile model-input contract reviewed on 2026-08-03."},
+        "severity": "hard",
+        "version": "1.0.0"
+      },
+      {
+        "rule_id": "finite-numerical-output",
+        "rule_type": "finite",
+        "selector": {"semantic_types": ["continuous", "integer"]},
+        "parameters": {},
+        "evidence": {"source_type": "recorded-human-review", "reference": "Canonical decoded numerical model outputs must be finite."},
+        "severity": "hard",
+        "version": "1.0.0"
+      },
+      {
+        "rule_id": "declared-category-vocabulary",
+        "rule_type": "allowed_values",
+        "selector": {"semantic_types": ["categorical", "boolean"], "valid_domain_keys": ["values"]},
+        "parameters": {"source": "valid_domain.values"},
+        "evidence": {"source_type": "dataset-documentation", "reference": "Checksum-pinned UCI Thyroid Disease sick.names categorical vocabularies."},
+        "severity": "hard",
+        "version": "1.0.0"
+      }
     ],
-    "domain_range_review": "pending medical-domain review"
+    "cross_column_constraints": [],
+    "soft_diagnostics": ["observed-range-exceedance", "official-model-row-overlap"],
+    "unresolved_reviews": ["medical-domain-numerical-bounds", "medical-cross-column-constraints", "privacy-role-review"]
   },
   "privacy": {
     "status": "review-required",

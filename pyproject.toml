@@ -44,6 +44,14 @@ evaluation = [
   "sdmetrics @ git+https://github.com/sdv-dev/SDMetrics.git@ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
   "tqdm==4.69.1",
 ]
+validity = [
+  "jsonschema==4.23.0",
+  "numpy==1.26.4; python_version < '3.13'",
+  "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "pandas==2.2.3",
+  "pyarrow==18.1.0",
+  "PyYAML==6.0.2",
+]
 ctgan = [
   "ctgan==0.12.1",
   "rdt==1.20.0",
@@ -395,6 +403,8 @@ files = [
   "standardized_tabular_diffusion/evaluation/serialization.py",
   "standardized_tabular_diffusion/evaluation/shape_trend.py",
   "standardized_tabular_diffusion/evaluation/table.py",
+  "standardized_tabular_diffusion/evaluation/validity.py",
+  "standardized_tabular_diffusion/preprocessing.py",
   "standardized_tabular_diffusion/materialization.py",
   "standardized_tabular_diffusion/registry.py",
   "standardized_tabular_diffusion/runner.py",

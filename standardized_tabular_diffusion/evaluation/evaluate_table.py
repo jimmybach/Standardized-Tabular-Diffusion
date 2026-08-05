@@ -1,4 +1,4 @@
-"""End-to-end P2 evaluation of a decoded synthetic table."""
+"""End-to-end protocol evaluation of a decoded synthetic table."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import time
 from collections import Counter
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pandas as pd
 
@@ -37,15 +37,23 @@ from standardized_tabular_diffusion.evaluation.serialization import (
 )
 from standardized_tabular_diffusion.evaluation.shape_trend import (
     DETAILS_ARTIFACT_PATH,
+    P2_METRICS,
     ShapeTrendError,
     ShapeTrendOutcome,
     evaluate_shape_trend,
 )
 from standardized_tabular_diffusion.evaluation.table import TableValidationError, validate_tables
+from standardized_tabular_diffusion.evaluation.validity import (
+    P3_METRICS,
+    VALIDITY_DETAILS_ARTIFACT_PATH,
+    ValidityError,
+    ValidityOutcome,
+    evaluate_validity,
+)
 
 
 class TableEvaluationError(RuntimeError):
-    """Raised when a P2 request cannot produce a trustworthy bundle."""
+    """Raised when a table request cannot produce a trustworthy bundle."""
 
 
 def _stage(
@@ -168,7 +176,7 @@ def _artifact(
     }
 
 
-def _atomic_parquet(outcome: ShapeTrendOutcome) -> bytes:
+def _atomic_parquet(outcome: ShapeTrendOutcome | ValidityOutcome) -> bytes:
     records = [result.to_dict() for result in outcome.atomic_results]
     for record in records:
         validate_instance("atomic-result", record)
@@ -177,7 +185,7 @@ def _atomic_parquet(outcome: ShapeTrendOutcome) -> bytes:
     try:
         frame.to_parquet(buffer, engine="pyarrow", compression="zstd", index=False)
     except ImportError as exc:
-        raise TableEvaluationError("P2 bundle output requires the pinned pyarrow dependency") from exc
+        raise TableEvaluationError("Finalized table bundles require the pinned pyarrow dependency") from exc
     return buffer.getvalue()
 
 
@@ -194,7 +202,9 @@ def _terminal_payloads(
     artifact_refs: list[str],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     state_counts = Counter(result.state.value for result in outcome.atomic_results)
-    noncomputed = [result for result in outcome.atomic_results if result.state.value not in {"computed", "not_applicable"}]
+    noncomputed = [
+        result for result in outcome.atomic_results if result.state.value not in {"computed", "not_applicable"}
+    ]
     terminal_status = (
         "success"
         if not noncomputed and all(value is not None for value in outcome.property_scores.values())
@@ -288,6 +298,118 @@ def _terminal_payloads(
     return summary, metadata
 
 
+def _validity_terminal_payloads(
+    request: EvaluationRequest,
+    profile: dict[str, Any],
+    outcome: ValidityOutcome,
+    *,
+    run_id: str,
+    started_at: str,
+    ended_at: str,
+    reference_rows: int,
+    synthetic_rows: int,
+    artifact_refs: list[str],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    state_counts = Counter(result.state.value for result in outcome.atomic_results)
+    noncomputed = [
+        result for result in outcome.atomic_results if result.state.value not in {"computed", "not_applicable"}
+    ]
+    terminal_status = "success" if not noncomputed else "partial"
+    validity = {
+        "structural_gate": "passed",
+        "input_view": "original-decoded-synthetic-output",
+        "synthetic_repair_applied": False,
+        **outcome.property_scores,
+        "aggregation": {
+            "column_validity": "equal-column mean",
+            "constraint_validity": "equal-reviewed-applicable-constraint mean or null",
+            "overall": "equal 0.5 components when constraints apply; otherwise column validity",
+            "fully_valid_row_rate": "reported only because it is width-sensitive",
+        },
+    }
+    summary = {
+        "summary_schema_version": "1.0.0",
+        "identity": {"run_id": run_id, "request_fingerprint": request.fingerprint},
+        "terminal_status": terminal_status,
+        "validity": validity,
+        "dimensions": {"validity": validity},
+        "local_utility": {},
+        "global_utility": {},
+        "privacy_risk": {},
+        "efficiency": {},
+        "metric_state_counts": dict(sorted(state_counts.items())),
+        "denominator_counts": outcome.denominator_counts,
+        "warnings": sorted({warning for result in outcome.atomic_results for warning in result.warning_codes}),
+        "failures": [
+            {
+                "metric_id": result.metric_id,
+                "scope_id": result.scope_id,
+                "state": result.state.value,
+                "reason_code": result.reason_code,
+                "reason_detail": result.reason_detail,
+            }
+            for result in noncomputed
+        ],
+        "atomic_result_refs": [f"metrics.parquet#row={index}" for index in range(len(outcome.atomic_results))],
+        "aggregation": {
+            "implementation": "benchmark-native-validity-from-atomic-contributions",
+            "version": "1.0.0",
+            "reproducible_from_atomic_results": True,
+        },
+        "dataset_aggregation_eligible": False,
+    }
+    metadata = {
+        "metadata_schema_version": "1.0.0",
+        "identity": {"run_id": run_id, "request_fingerprint": request.fingerprint},
+        "protocol": request.protocol,
+        "dataset": request.dataset_profile,
+        "model": request.model or {"subject_type": request.subject_type, "model_id": "external"},
+        "implementation": {
+            "evaluation_subsystem": "p3-validity-and-preprocessing-boundary",
+            "metrics_executed": True,
+            "source": outcome.source,
+        },
+        "comparison_track": request.comparison_track,
+        "seeds": {"generation": request.generation_seed, "evaluators": list(request.evaluator_seeds)},
+        "evaluator": {"profile": request.evaluator_profile, "hardware_profile": request.hardware_profile},
+        "execution": {
+            "requested_action": "evaluate-table",
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "terminal_phase": "report",
+            "run_status": terminal_status,
+            "requested_synthetic_rows": request.sample_artifact.get("row_count", reference_rows),
+            "actual_synthetic_rows": synthetic_rows,
+            "resource_limits": request.resource_limits,
+            "interrupted": False,
+            "resume_ancestry": [],
+            "warning_codes": summary["warnings"],
+            "failure_category": None,
+            "failure_reason_code": None,
+            "artifact_refs": artifact_refs,
+        },
+        "coverage": {
+            "requested_metrics": list(request.metrics),
+            "computed": state_counts.get("computed", 0),
+            "states": dict(sorted(state_counts.items())),
+            "denominators": outcome.denominator_counts,
+        },
+        "provenance": {
+            "reference_artifact": request.reference_artifact,
+            "sample_artifact": request.sample_artifact,
+            "reference_rows": reference_rows,
+            "dataset_profile_status": profile["status"],
+            "original_synthetic_output_preserved": True,
+            "evaluation_repair_applied": False,
+        },
+        "review": {"status": "unit-validated-p3-development", "official_results_allowed": False},
+        "status": "finalized",
+    }
+    validate_instance("summary", summary)
+    validate_instance("metadata", metadata)
+    return summary, metadata
+
+
 def evaluate_table_to_bundle(
     *,
     reference_path: str | Path,
@@ -319,6 +441,19 @@ def evaluate_table_to_bundle(
     ]
     if protocol_metrics != list(request.metrics):
         raise TableEvaluationError("Protocol metric selections differ from the Evaluation Request")
+    requested_metrics = {(item["metric_id"], item["metric_version"]) for item in request.metrics}
+    p2_metrics = {(item["metric_id"], item["metric_version"]) for item in P2_METRICS}
+    p3_metrics = {(item["metric_id"], item["metric_version"]) for item in P3_METRICS}
+    if requested_metrics == p2_metrics:
+        phase: Literal["p2", "p3"] = "p2"
+        content_mode: Literal["strict", "preserve"] = "strict"
+    elif requested_metrics == p3_metrics:
+        phase = "p3"
+        content_mode = "preserve"
+    else:
+        raise TableEvaluationError(
+            "evaluate-table supports exactly the registered P2 Shape/Trend or P3 Validity protocol metric set"
+        )
 
     writer = IncompleteRunBundleWriter(output_dir)
     writer.create(request, environment=_environment(), producer=_producer())
@@ -361,6 +496,7 @@ def evaluate_table_to_bundle(
             synthetic_path,
             dataset_profile,
             expected_synthetic_rows=request.sample_artifact.get("row_count"),
+            content_mode=content_mode,
         )
     except TableValidationError as exc:
         failed = _stage(
@@ -372,7 +508,7 @@ def evaluate_table_to_bundle(
                 "reference-table": request.reference_artifact["sha256"],
                 "synthetic-table": request.sample_artifact["sha256"],
             },
-            action="apply the P2 structural validation gate",
+            action=f"apply the {phase.upper()} structural validation gate",
             started_at=stage_start,
             ended_at=utc_timestamp(),
             elapsed_seconds=time.perf_counter() - timer,
@@ -383,7 +519,7 @@ def evaluate_table_to_bundle(
         writer.append_event(
             severity="error",
             stage="validate",
-            component="p2-structural-gate",
+            component=f"{phase}-structural-gate",
             event_code="validation.failed",
             details={"reason_code": exc.reason_code, "detail": exc.detail},
         )
@@ -404,25 +540,41 @@ def evaluate_table_to_bundle(
             "reference-table": request.reference_artifact["sha256"],
             "synthetic-table": request.sample_artifact["sha256"],
         },
-        action="apply the P2 structural validation gate",
+        action=f"apply the {phase.upper()} structural validation gate",
         started_at=stage_start,
         ended_at=utc_timestamp(),
         elapsed_seconds=time.perf_counter() - timer,
-        outputs=(
-            _output("artifacts/structural-validation.json", "application/json", structural_hash),
-        ),
+        outputs=(_output("artifacts/structural-validation.json", "application/json", structural_hash),),
     )
     _write_stage(writer, validate_record)
 
     stage_start = utc_timestamp()
     timer = time.perf_counter()
+    outcome: ShapeTrendOutcome | ValidityOutcome
     try:
-        outcome = evaluate_shape_trend(request, dataset_profile, tables, run_id=run_id)
-    except (SDMetricsBackendError, ShapeTrendError, ContractError) as exc:
+        if phase == "p2":
+            shape_outcome = evaluate_shape_trend(request, dataset_profile, tables, run_id=run_id)
+            outcome = shape_outcome
+            details_path = DETAILS_ARTIFACT_PATH
+            details_payload = shape_outcome.source_details
+            evaluation_action = "run pinned SDMetrics properties and map every scope to Atomic Result"
+            source_input = shape_outcome.source["python_source_tree_sha256"]
+            source_input_name = "sdmetrics-source"
+        else:
+            validity_outcome = evaluate_validity(request, dataset_profile, tables, run_id=run_id)
+            outcome = validity_outcome
+            details_path = VALIDITY_DETAILS_ARTIFACT_PATH
+            details_payload = validity_outcome.details
+            evaluation_action = "evaluate reviewed hard column rules and cross-column constraints"
+            source_input = validity_outcome.source["dataset_validity_contract_sha256"]
+            source_input_name = "validity-contract"
+    except (SDMetricsBackendError, ShapeTrendError, ValidityError, ContractError) as exc:
         if isinstance(exc, SDMetricsSourceError):
             reason_code = "source_attestation_failure"
         elif isinstance(exc, SDMetricsBackendError):
             reason_code = "upstream_metric_execution_failure"
+        elif isinstance(exc, ValidityError):
+            reason_code = "validity_contract_failure"
         else:
             reason_code = "metric_contract_failure"
         failed = _stage(
@@ -430,7 +582,11 @@ def evaluate_table_to_bundle(
             status=StageStatus.FAILED,
             dependencies=("validate",),
             inputs={"structural-validation": structural_hash},
-            action="run pinned SDMetrics properties and map every scope to Atomic Result",
+            action=(
+                "run pinned SDMetrics properties and map every scope to Atomic Result"
+                if phase == "p2"
+                else "evaluate reviewed hard column rules and cross-column constraints"
+            ),
             started_at=stage_start,
             ended_at=utc_timestamp(),
             elapsed_seconds=time.perf_counter() - timer,
@@ -441,14 +597,14 @@ def evaluate_table_to_bundle(
         writer.append_event(
             severity="error",
             stage="evaluate",
-            component="p2-shape-trend",
+            component=f"{phase}-evaluation",
             event_code="evaluation.failed",
             details={"reason_code": reason_code, "detail": str(exc)},
         )
         raise TableEvaluationError(
             f"Metric evaluation failed ({reason_code}): {exc}; incomplete evidence bundle: {output_dir}"
         ) from exc
-    details_hash = writer.write_json(DETAILS_ARTIFACT_PATH, outcome.source_details, required=True)
+    details_hash = writer.write_json(details_path, details_payload, required=True)
     metrics_hash = writer.write_bytes(
         "metrics.parquet",
         _atomic_parquet(outcome),
@@ -461,36 +617,49 @@ def evaluate_table_to_bundle(
         dependencies=("validate",),
         inputs={
             "structural-validation": structural_hash,
-            "sdmetrics-source": outcome.source["python_source_tree_sha256"],
+            source_input_name: source_input,
         },
-        action="run pinned SDMetrics properties and map every scope to Atomic Result",
+        action=evaluation_action,
         started_at=stage_start,
         ended_at=utc_timestamp(),
         elapsed_seconds=time.perf_counter() - timer,
         outputs=(
             _output("metrics.parquet", "application/vnd.apache.parquet", metrics_hash),
-            _output(DETAILS_ARTIFACT_PATH, "application/json", details_hash),
+            _output(details_path, "application/json", details_hash),
         ),
     )
     _write_stage(writer, evaluate_record)
 
     artifact_refs = [
         "artifacts/structural-validation.json",
-        DETAILS_ARTIFACT_PATH,
+        details_path,
         "metrics.parquet",
     ]
     run_ended = utc_timestamp()
-    summary, metadata = _terminal_payloads(
-        request,
-        dataset_profile,
-        outcome,
-        run_id=run_id,
-        started_at=run_started,
-        ended_at=run_ended,
-        reference_rows=len(tables.reference),
-        synthetic_rows=len(tables.synthetic),
-        artifact_refs=artifact_refs,
-    )
+    if isinstance(outcome, ShapeTrendOutcome):
+        summary, metadata = _terminal_payloads(
+            request,
+            dataset_profile,
+            outcome,
+            run_id=run_id,
+            started_at=run_started,
+            ended_at=run_ended,
+            reference_rows=len(tables.reference),
+            synthetic_rows=len(tables.synthetic),
+            artifact_refs=artifact_refs,
+        )
+    else:
+        summary, metadata = _validity_terminal_payloads(
+            request,
+            dataset_profile,
+            outcome,
+            run_id=run_id,
+            started_at=run_started,
+            ended_at=run_ended,
+            reference_rows=len(tables.reference),
+            synthetic_rows=len(tables.synthetic),
+            artifact_refs=artifact_refs,
+        )
     stage_start = utc_timestamp()
     timer = time.perf_counter()
     summary_hash = writer.write_json("summary.json", summary, schema_name="summary")
@@ -499,7 +668,11 @@ def evaluate_table_to_bundle(
         status=StageStatus.SUCCEEDED,
         dependencies=("evaluate",),
         inputs={"atomic-results": metrics_hash},
-        action="reproduce source property scores from Atomic Result contributions",
+        action=(
+            "reproduce source property scores from Atomic Result contributions"
+            if phase == "p2"
+            else "reproduce validity component scores from Atomic Result contributions"
+        ),
         started_at=stage_start,
         ended_at=utc_timestamp(),
         elapsed_seconds=time.perf_counter() - timer,
@@ -550,16 +723,18 @@ def evaluate_table_to_bundle(
                 rights_classification="benchmark-generated",
             ),
             _artifact(
-                "sdmetrics-details",
-                "verbatim source metric details",
+                "sdmetrics-details" if phase == "p2" else "validity-details",
+                "verbatim source metric details" if phase == "p2" else "hard-rule validity evidence",
                 "application/json",
-                path=DETAILS_ARTIFACT_PATH,
+                path=details_path,
                 external_uri=None,
-                byte_size=(Path(output_dir) / DETAILS_ARTIFACT_PATH).stat().st_size,
+                byte_size=(Path(output_dir) / details_path).stat().st_size,
                 sha256=details_hash,
                 producer_stage="evaluate",
                 publication_class="bundle-public",
-                rights_classification="benchmark-generated-from-source-output",
+                rights_classification=(
+                    "benchmark-generated-from-source-output" if phase == "p2" else "benchmark-generated"
+                ),
             ),
             _artifact(
                 "atomic-results",
@@ -594,11 +769,11 @@ def evaluate_table_to_bundle(
     writer.append_event(
         severity="info",
         stage="report",
-        component="p2-evaluate-table",
+        component=f"{phase}-evaluate-table",
         event_code="evaluation.completed",
         details={"run_id": run_id, "terminal_status": summary["terminal_status"]},
     )
     try:
         return writer.finalize()
     except BundleError as exc:
-        raise TableEvaluationError(f"P2 bundle finalization failed: {exc}") from exc
+        raise TableEvaluationError(f"{phase.upper()} bundle finalization failed: {exc}") from exc

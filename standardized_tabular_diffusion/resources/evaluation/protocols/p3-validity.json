@@ -1,0 +1,29 @@
+{
+  "profile_schema_version": "1.0.0",
+  "protocol_id": "p3-validity",
+  "protocol_version": "0.3.0",
+  "display_name": "P3 benchmark-native validity and explicit preprocessing boundary",
+  "status": "draft",
+  "official_results_allowed": false,
+  "comparison_tracks": ["native", "standardized-tuning"],
+  "metric_selections": [
+    {"metric_id": "std-tabular-column-validity", "metric_version": "1.0.0", "required": true, "role": "diagnostic"},
+    {"metric_id": "std-tabular-constraint-validity", "metric_version": "1.0.0", "required": true, "role": "diagnostic"}
+  ],
+  "dataset_suites": ["diagnostic"],
+  "result_schema_versions": {"atomic_result": "1.0.0", "manifest": "1.0.0", "metadata": "1.0.0", "summary": "1.0.0", "stage_record": "1.0.0", "artifact_index": "1.0.0"},
+  "policies": {
+    "structural_gate": "exact canonical model-view columns, readable serialization, safe base-type conversion, and exact requested synthetic row count",
+    "column_validity": "all reviewed hard rules are intersected per cell and canonical columns receive equal weight",
+    "constraint_validity": "reviewed applicable cross-column constraints receive equal weight; no reviewed applicable constraint yields not_applicable",
+    "validity_aggregation": "0.5 column plus 0.5 constraint when the constraint component computes; otherwise column validity only",
+    "fully_valid_row_rate": "reported separately and excluded from aggregation because it is width-sensitive",
+    "preprocessing": "missing-value state is fitted on real train only; policy and transformed schema are versioned and checksummed",
+    "synthetic_repair": "prohibited; original decoded output is immutable and scored as observed",
+    "overall_score": "prohibited",
+    "finalization": "Atomic Results, rule details, provenance, stages, inventory, and exact checksums must validate before final status publication"
+  },
+  "owners": ["repository-maintainers"],
+  "review_record": {"status": "unit-validated-development", "official_admission": "pending later protocol freeze"},
+  "change_log": [{"version": "0.3.0", "change": "Implemented deterministic reviewed validity rules and the explicit train-only preprocessing boundary."}]
+}
