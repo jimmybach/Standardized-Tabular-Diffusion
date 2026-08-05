@@ -32,7 +32,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
     CTABGANPlusAdapter,
     NRGBoostAdapter,
 )
-from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter, TabularARGNAdapter
+from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
@@ -185,17 +185,6 @@ class FakeTrainer:
 
     def train(self):
         return None
-
-
-class FakeTabularARGN:
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-
-    def fit(self, df):
-        self.train_df = df.copy()
-
-    def sample(self, n_samples):
-        return pd.DataFrame({"x": [11] * n_samples, "y": [1] * n_samples})
 
 
 def test_tabsyn_train_uses_unmodified_official_stages_and_does_not_reuse_checkpoints(
@@ -811,7 +800,9 @@ def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, mo
 
     @contextlib.contextmanager
     def fake_runtime(source_path):
-        yield PickleableFakeCTABGAN, object(), {name: expected for name, expected in adapter.expected_versions.items()}
+        yield PickleableFakeCTABGAN, object(), {
+            name: expected for name, expected in adapter.expected_versions.items()
+        }
 
     @contextlib.contextmanager
     def fake_seeded(seed, torch_module, num_threads):
@@ -1015,54 +1006,6 @@ def test_tabsds_train_and_sample_round_trip(tmp_path: Path) -> None:
     sampled = pd.read_csv(sample_bundle.generated_sample_path)
     assert list(sampled.columns) == ["age", "city", "label"]
     assert len(sampled) == 3
-
-
-def test_tabularargn_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
-    adapter = TabularARGNAdapter(tmp_path)
-    fake_engine = types.ModuleType("mostlyai.engine")
-    fake_engine.TabularARGN = FakeTabularARGN
-    monkeypatch.setitem(sys.modules, "mostlyai.engine", fake_engine)
-
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["x", "y"],
-        numerical_columns=["x"],
-        categorical_columns=[],
-        target_columns=["y"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("x,y\n1,0\n2,1\n")
-    dataset_spec.test_data_path.write_text("x,y\n3,1\n")
-
-    train_config = ExperimentConfig(
-        model="tabularargn",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabularargn"),
-        train=TrainConfig(enabled=True),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-    sample_config = ExperimentConfig(
-        model="tabularargn",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabularargn"),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, num_samples=2),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
-    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
-
-    checkpoint_path = Path(train_config.output_dir) / "tabularargn.pkl"
-    assert train_bundle.output_dir == Path(train_config.output_dir)
-    assert checkpoint_path.exists()
-    assert sample_bundle.generated_sample_path is not None
-    assert pd.read_csv(sample_bundle.generated_sample_path).shape == (2, 2)
 
 
 def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypatch) -> None:
@@ -1355,9 +1298,7 @@ def test_ctabgan_train_and_sample_use_locked_official_checkpoint(tmp_path: Path,
 
     @contextlib.contextmanager
     def fake_runtime(source_path):
-        yield PickleableFakeCTABGAN, object(), {
-            name: expected for name, expected in adapter.expected_versions.items()
-        }
+        yield PickleableFakeCTABGAN, object(), {name: expected for name, expected in adapter.expected_versions.items()}
 
     @contextlib.contextmanager
     def fake_seeded(seed, torch_module, num_threads):
@@ -1424,7 +1365,7 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         ("goggle", "model.pt"),
         ("great", "great_model"),
         ("tabsds", "tabsds.pkl"),
-        ("tabularargn", "tabularargn.pkl"),
+        ("tabularargn", "tabularargn_workspace"),
         ("tabula", "tabula_model"),
         ("arf", "model.pkl"),
     ]:
@@ -1436,6 +1377,8 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         if model_name == "goggle":
             (tmp_path / "goggle-model-metadata.json").write_text("{}")
             (tmp_path / "goggle-runtime-config.json").write_text("{}")
+        if model_name == "tabularargn":
+            (tmp_path / "tabularargn-model-metadata.json").write_text("{}")
         config = ExperimentConfig(
             model=model_name,
             dataset="adult",

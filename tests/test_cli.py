@@ -175,7 +175,7 @@ def test_cli_show_model_inventory_can_describe_tabularargn(monkeypatch, capsys) 
     payload = json.loads(captured.out)
 
     assert payload["name"] == "tabularargn"
-    assert payload["validation_level"] == "adapter-complete"
+    assert payload["validation_level"] == "native-parity-validated"
     assert payload["family"] == "autoregressive"
 
 
