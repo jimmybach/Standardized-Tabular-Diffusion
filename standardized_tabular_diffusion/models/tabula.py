@@ -425,6 +425,48 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             raise
         return model, state, manager
 
+    @staticmethod
+    def _sample_exact_rows(
+        model: Any,
+        *,
+        requested: int,
+        start_col: str,
+        start_dist: Any,
+        temperature: float,
+        k: int,
+        max_length: int,
+        device: str,
+        max_empty_batches: int,
+    ) -> pd.DataFrame:
+        """Complete the public exact-row contract with unchanged official calls."""
+
+        batches: list[pd.DataFrame] = []
+        remaining = requested
+        empty_batches = 0
+        while remaining:
+            batch = model.sample(
+                n_samples=remaining,
+                start_col=start_col,
+                start_col_dist=start_dist,
+                temperature=temperature,
+                k=k,
+                max_length=max_length,
+                device=device,
+            )
+            if not isinstance(batch, pd.DataFrame):
+                raise RuntimeError("Official TabuLa sampling did not return a DataFrame")
+            if len(batch) > remaining:
+                raise RuntimeError("Official TabuLa sampling returned more rows than requested for a batch")
+            if batch.empty:
+                empty_batches += 1
+                if empty_batches >= max_empty_batches:
+                    raise RuntimeError("Official TabuLa sampling repeatedly returned zero usable categorical rows")
+                continue
+            empty_batches = 0
+            batches.append(batch)
+            remaining -= len(batch)
+        return pd.concat(batches, ignore_index=True).head(requested)
+
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
@@ -440,6 +482,9 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         max_length = self._positive_int("max_length", spec.extra.get("max_length", 256))
         num_threads = self._positive_int("num_threads", spec.extra.get("num_threads", 1))
         timeout_seconds = self._positive_int("timeout_seconds", spec.extra.get("timeout_seconds", 900))
+        max_empty_batches = self._positive_int(
+            "max_empty_batches", spec.extra.get("max_empty_batches", 8)
+        )
         start_col = spec.extra.get("start_col", "")
         start_dist = spec.extra.get("start_col_dist")
         if start_col and start_col not in dataset_spec.column_names:
@@ -450,14 +495,16 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 timeout_seconds,
                 allow_unbounded=bool(spec.extra.get("allow_unbounded_sampling", False)),
             ):
-                sample_df = model.sample(
-                    n_samples=requested,
+                sample_df = self._sample_exact_rows(
+                    model,
+                    requested=requested,
                     start_col=start_col,
-                    start_col_dist=start_dist,
+                    start_dist=start_dist,
                     temperature=temperature,
                     k=k,
                     max_length=max_length,
                     device=spec.device,
+                    max_empty_batches=max_empty_batches,
                 )
         finally:
             manager.__exit__(None, None, None)

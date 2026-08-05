@@ -20,13 +20,13 @@ The authority is [zhao-zilong/Tabula](https://github.com/zhao-zilong/Tabula) at 
 
 The adapter accepts one missing-free table with one target, complete disjoint roles, finite numerical values, and parser-safe column names. Categorical features and classification targets are converted to strings before the unchanged official label encoders. Missing values must first use the central train-fitted imputer.
 
-Official construction, label encoding, row-text training, and sampling remain unchanged calls. The adapter scopes Python, NumPy, and PyTorch randomness, isolates official imports, places trainer files below `output_dir`, and applies an external Linux alarm because the official sample loop has no retry bound. Non-Linux unbounded sampling requires explicit opt-in.
+Official construction, label encoding, row-text training, and sampling remain unchanged calls. The official sampler checks categorical domains only after its internal row-count loop and can consequently return fewer usable rows than requested. The adapter therefore repeats unchanged official calls for the remaining count, preserves their order and RNG stream, and truncates only the final boundary. Repeated zero-row batches fail explicitly. The adapter also scopes Python, NumPy, and PyTorch randomness, isolates official imports, places trainer files below `output_dir`, and applies an external Linux alarm because the official sample loop has no retry bound. Non-Linux unbounded sampling requires explicit opt-in.
 
 The official `torch.save` checkpoint is replaced at the persistence boundary with safetensors, typed JSON label-encoder/state data, and a complete file-integrity manifest. The adapter reconstructs the official class and continues through its unchanged `sample()` method; executable checkpoint extensions, symlinks, unlisted files, or altered bytes are rejected.
 
 ## Mandatory Parity Cases
 
-The workflow builds an offline one-layer GPT-2 fixture and trains direct official source and adapter paths independently on the same 24-row categorical table for seeds 0, 19, and 73. Each case compares all trained tensors exactly, reloads the safe artifact, calls the official sampler for five rows with the same encoded target distribution, and requires DataFrame-identical output plus byte-identical CSV.
+The workflow builds an offline one-layer GPT-2 fixture and trains direct official source and adapter paths independently on the same 24-row categorical table for seeds 0, 19, and 73. Each case compares all trained tensors exactly, reloads the safe artifact, independently applies the same exact-row boundary around unchanged official calls with the same encoded target distribution, and requires five-row DataFrame-identical output plus byte-identical CSV.
 
 The gate also verifies archive and six-file source identity, unchanged source after execution, exact row count and column order, no missing values, safe artifacts, and restoration of caller RNG/thread state. Sampling exceeding the declared time limit fails with retained diagnostics.
 

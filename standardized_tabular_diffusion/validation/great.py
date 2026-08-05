@@ -243,7 +243,9 @@ def _run_case(
         },
     )
     bundle = adapter.sample(sample_spec)
-    observed = pd.read_csv(bundle.generated_sample_path, dtype=str)
+    # Preserve an empty categorical token. Pandas otherwise reinterprets it as
+    # missing when the adapter CSV is read back across the serialization boundary.
+    observed = pd.read_csv(bundle.generated_sample_path, dtype=str, keep_default_na=False)
     expected = direct_sample[dataset_spec.column_names].astype(str).reset_index(drop=True)
     pd.testing.assert_frame_equal(observed, expected, check_dtype=False, check_exact=True)
     if bundle.generated_sample_path.read_bytes() != expected.to_csv(index=False).encode("utf-8"):

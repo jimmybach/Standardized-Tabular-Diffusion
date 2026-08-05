@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
@@ -44,3 +45,54 @@ def test_tabula_integrity_manifest_rejects_tampering(tmp_path: Path) -> None:
     state.write_text('{"changed": true}', encoding="utf-8")
     with pytest.raises(ValueError, match="mismatch"):
         TabulaAdapter._validate_safe_model_root(model_root)
+
+
+def test_tabula_exact_row_boundary_repeats_filtered_official_batches() -> None:
+    class FilteredOfficialSampler:
+        def __init__(self) -> None:
+            self.requests: list[int] = []
+            self.outputs = [
+                pd.DataFrame({"value": ["a", "b"]}),
+                pd.DataFrame({"value": []}),
+                pd.DataFrame({"value": ["c"]}),
+                pd.DataFrame({"value": ["d", "e"]}),
+            ]
+
+        def sample(self, *, n_samples: int, **_kwargs: object) -> pd.DataFrame:
+            self.requests.append(n_samples)
+            return self.outputs.pop(0)
+
+    sampler = FilteredOfficialSampler()
+    result = TabulaAdapter._sample_exact_rows(
+        sampler,
+        requested=5,
+        start_col="target",
+        start_dist={"0": 0.5, "1": 0.5},
+        temperature=0.5,
+        k=5,
+        max_length=64,
+        device="cpu",
+        max_empty_batches=3,
+    )
+    assert sampler.requests == [5, 3, 3, 2]
+    assert result["value"].tolist() == ["a", "b", "c", "d", "e"]
+
+
+def test_tabula_exact_row_boundary_rejects_repeated_empty_batches() -> None:
+    class EmptyOfficialSampler:
+        @staticmethod
+        def sample(**_kwargs: object) -> pd.DataFrame:
+            return pd.DataFrame({"value": []})
+
+    with pytest.raises(RuntimeError, match="repeatedly returned zero"):
+        TabulaAdapter._sample_exact_rows(
+            EmptyOfficialSampler(),
+            requested=1,
+            start_col="",
+            start_dist=None,
+            temperature=0.5,
+            k=1,
+            max_length=64,
+            device="cpu",
+            max_empty_batches=2,
+        )

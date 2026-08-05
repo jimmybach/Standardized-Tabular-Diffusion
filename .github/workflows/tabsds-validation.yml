@@ -69,6 +69,31 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-tabsds-validation.txt
 
+      - name: Initialize diagnostic evidence
+        env:
+          VALIDATION_EVIDENCE_PATH: ${{ runner.temp }}/tabsds-evidence.json
+          VALIDATION_MODEL_ID: tabsds
+          VALIDATION_PROTOCOL_ID: tabsds-official-source-parity-v1
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = {
+              "schema_version": 1,
+              "protocol_id": os.environ["VALIDATION_PROTOCOL_ID"],
+              "model_id": os.environ["VALIDATION_MODEL_ID"],
+              "status": "fail",
+              "repository_commit": os.environ["GITHUB_SHA"],
+              "error_type": "PreProtocolFailure",
+              "error": "Validation did not reach or complete the protocol step.",
+          }
+          Path(os.environ["VALIDATION_EVIDENCE_PATH"]).write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+
       - name: Install frozen TabSDS validation environment
         run: |
           python -m pip install --upgrade "pip==25.1.1"

@@ -182,15 +182,30 @@ def _run_case(
     _assert_state_exact(direct_state, _state_dict(reloaded))
     start_dist = {str(index): 1.0 / 2.0 for index in range(2)}
     with adapter._scoped_randomness(seed, 1), adapter._sampling_timeout(300, allow_unbounded=False):
-        direct_sample = direct.sample(
-            n_samples=SAMPLE_ROWS,
-            start_col="target",
-            start_col_dist=start_dist,
-            temperature=0.5,
-            k=SAMPLE_ROWS,
-            max_length=64,
-            device="cpu",
-        )
+        direct_batches: list[pd.DataFrame] = []
+        direct_remaining = SAMPLE_ROWS
+        direct_empty_batches = 0
+        while direct_remaining:
+            direct_batch = direct.sample(
+                n_samples=direct_remaining,
+                start_col="target",
+                start_col_dist=start_dist,
+                temperature=0.5,
+                k=SAMPLE_ROWS,
+                max_length=64,
+                device="cpu",
+            )
+            if not isinstance(direct_batch, pd.DataFrame) or len(direct_batch) > direct_remaining:
+                raise AssertionError("Direct TabuLa source violated its per-call row boundary")
+            if direct_batch.empty:
+                direct_empty_batches += 1
+                if direct_empty_batches >= 8:
+                    raise AssertionError("Direct TabuLa source repeatedly returned zero usable rows")
+                continue
+            direct_empty_batches = 0
+            direct_batches.append(direct_batch)
+            direct_remaining -= len(direct_batch)
+        direct_sample = pd.concat(direct_batches, ignore_index=True).head(SAMPLE_ROWS)
     sample_spec = RunSpec(
         model="tabula",
         dataset=dataset_spec.name,
@@ -208,10 +223,11 @@ def _run_case(
             "max_length": 64,
             "timeout_seconds": 300,
             "num_threads": 1,
+            "max_empty_batches": 8,
         },
     )
     bundle = adapter.sample(sample_spec)
-    observed = pd.read_csv(bundle.generated_sample_path, dtype=str)
+    observed = pd.read_csv(bundle.generated_sample_path, dtype=str, keep_default_na=False)
     expected = direct_sample[dataset_spec.column_names].astype(str).reset_index(drop=True)
     pd.testing.assert_frame_equal(observed, expected, check_dtype=False, check_exact=True)
     if bundle.generated_sample_path.read_bytes() != expected.to_csv(index=False).encode("utf-8"):
