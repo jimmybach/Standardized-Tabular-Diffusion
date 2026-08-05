@@ -8,6 +8,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+pytest.importorskip("pyarrow")
+
 from standardized_tabular_diffusion import cli
 from standardized_tabular_diffusion.evaluation.bundle import (
     BundleError,
