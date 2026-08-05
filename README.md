@@ -109,6 +109,8 @@ The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility.
 
 The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P1 can create and validate auditable `incomplete` bundles, but deliberately cannot produce a finalized result. Metric execution and bundle finalization begin with the P2 vertical slice described in the [implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md).
 
+P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
+
 Useful contract commands include:
 
 ~~~bash

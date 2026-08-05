@@ -2,8 +2,8 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 完成候选；等待权威 Linux 证据
-- 路线图版本：0.2.0
+- 状态：P1 已通过；下一实施阶段为 P2
+- 路线图版本：0.2.1
 - 最后更新：2026-08-05
 - 主要发布环境：Linux 与 Python 3.11
 
@@ -144,7 +144,7 @@ tests/evaluation/
 | 阶段 | 交付物 | 依赖 | 当前状态 | 退出门槛 |
 |---|---|---|---|---|
 | P0 | 可信开发基线 | 无 | 已通过 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
-| P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 完成候选；等待权威 Linux 证据 | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
+| P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 未开始 | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 未开始 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
@@ -196,7 +196,7 @@ tests/evaluation/
 - 中断的 writer 留下可审计 incomplete bundle，而不会留下假的 finalized bundle；以及
 - 缺少必需证据字段时不能推进 registry 生命周期状态。
 
-当前实施说明（2026-08-05）：以上 P1 表面均已实现。在专用只读 Linux/Python 3.11 workflow 通过且机器可读证据 artifact 被留存之前，P1 仍为完成候选。该证据只验证工程契约，不执行科学指标，也不作来源等价声明。
+完成证据（2026-08-05）：以上 P1 表面均已实现。专用只读 workflow 已在 Linux x86-64 与 Python 3.11.15 上通过，见 [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264)；其[机器可读证据](../evidence/evaluation/p1-foundation-run-31018595264.json)已留存，SHA-256 为 `3013e913c58adf0c03c6ec30118879c522a87f4682d1cceb99f8778115c7da5a`。该证据只验证工程契约，没有执行科学指标，也不作来源等价声明。
 
 ### 6.3 P2 — 首个端到端垂直切片
 
@@ -423,7 +423,7 @@ Golden fixture 必须小型、合成、可再分发、可人工检查且有版�
 
 ### M1 — 评测基础
 
-P0 和 P1 通过。契约和工具可用，但此时尚无指标被宣传为 source-parity-validated。当前状态：P0 已通过；P1 是等待留存 Linux/Python 3.11 证据的完成候选。
+P0 和 P1 通过。契约和工具可用，但此时尚无指标被宣传为 source-parity-validated。当前状态：M1 已凭留存的 Linux/Python 3.11 证据通过；下一阶段为 P2。
 
 ### M2 — 首份可信报告
 

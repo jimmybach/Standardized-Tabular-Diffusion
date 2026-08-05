@@ -1,0 +1,89 @@
+{
+  "claim_boundary": "Validates contracts, identity, registry/profile loading, and incomplete-bundle safety only. It executes no scientific metric, claims no source parity, and does not finalize a result bundle. TabStruct remains research reference material and a clearly isolated legacy diagnostic path.",
+  "environment": {
+    "jsonschema": "4.23.0",
+    "platform": "Linux / x86_64",
+    "primary_environment_required": true,
+    "python": "3.11.15",
+    "pyyaml": "6.0.2"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "identity_fingerprints": "pass",
+    "interruption_safe_incomplete_bundle": "pass",
+    "invalid_contracts_fail_deterministically": "pass",
+    "registry_lifecycle_fail_closed": "pass",
+    "schema_and_round_trip_tests": "pass"
+  },
+  "locked_files": {
+    ".github/workflows/p1-foundation-validation.yml": "ea1e0ba1d4ec67e31a738738f9405d2e6320d967d9e43c9d2bfde6533cf04ed1",
+    "configs/datasets/adult-uci-2-v1.json": "5344e7286e666e12ad6bf4d70f4028b8153225e086f534b25f9155e9d7aed052",
+    "configs/datasets/sick-uci-102-v1.json": "621cc225177892a179e0fe265ad68c659c7d4fcbc92f38cdce891cd6aab3f10e",
+    "pyproject.toml": "e275c31f19524b8959f3a880b8447f1b1b1c5abb97260dbad8efb305d7ddb467",
+    "standardized_tabular_diffusion/cli.py": "cf7427d728b3c1ea5d71d5bcecce2b55879513d006a36bf743772988da07dc26",
+    "standardized_tabular_diffusion/evaluation/__init__.py": "cf5afeadab0305dc49a58d791f825daa9f801a065255cfcdc54224ad2da9544e",
+    "standardized_tabular_diffusion/evaluation/bundle.py": "687ee7fdca84218a2b4c86a93639e391948acb0f976831bf6bc57e0e9219270a",
+    "standardized_tabular_diffusion/evaluation/contracts.py": "2b6e6f212c43778e5266434ad67ebb6eadd3318b7c5f8f310f3bd60d0c07a3d5",
+    "standardized_tabular_diffusion/evaluation/profiles.py": "91a256688e7d0ea64057bbaced937dfe8cfe47d12869a4924ed1d1817b6f0669",
+    "standardized_tabular_diffusion/evaluation/registry.py": "a49c4ca213549b076b98efe21d399b4893f3b26c62b79c4780f7c290bd2028bd",
+    "standardized_tabular_diffusion/evaluation/schema.py": "e78d2dca1cb7330265b4c9b5212ad688ce62ce02c2ac5446b8bcbb0f6ee785b6",
+    "standardized_tabular_diffusion/evaluation/serialization.py": "493fe751cadd0ab95d5203e681e2f25b8daf487ea13c14d9cfde5d6f842ea58e",
+    "standardized_tabular_diffusion/resources/evaluation/__init__.py": "1f87455c4bc955413e48029fd3eab4465e1a7efe41076b8450f6bad0e0f6b2f3",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/__init__.py": "15db5109b47ec35a9748cba11f0598e5f88db7e517a6bdb5caba531846e2b944",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/legacy-tabstruct-aligned-v1.json": "817f52bae402fbc74f3a02c2e5b53f000400b633e31165d4d07c03bcbeae486b",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/__init__.py": "1bcd92a616465a2abf0596e05be368a4add8a456fe82fed5514689f67934a822",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/development-p1.json": "e356d3a9260f5af8207fa47ee2a879c07a97110c637391c41aa7d830fb4743f0",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/legacy-tabstruct-aligned-v1.json": "f59458a821558ef4ae8f851a158181812fa321774f794f8086a4d798154f087a",
+    "standardized_tabular_diffusion/schemas/evaluation/__init__.py": "7fc2543cfef54c15635884ebb2572352c29915386e320a93153220ec15dbab83",
+    "standardized_tabular_diffusion/schemas/evaluation/artifact-index.schema.json": "04d0548f9aa85e1e677b27d0207cdfc7ab446b653749470bc8258c26e270a3c2",
+    "standardized_tabular_diffusion/schemas/evaluation/atomic-result.schema.json": "e8dd17a65db8c0e182bb10faa9e2f991fe9551a6f1c928667aad2fec26feb62f",
+    "standardized_tabular_diffusion/schemas/evaluation/dataset-profile.schema.json": "04d0edaeaee3cca663f63b9a2e5f7874a67554ed24f59dbf5e736eb4fe427045",
+    "standardized_tabular_diffusion/schemas/evaluation/evaluation-request.schema.json": "b582d777f407607651d8e10210e5d00c4feb1a726ef690912249e646912f07e6",
+    "standardized_tabular_diffusion/schemas/evaluation/manifest.schema.json": "e082aa04d5e6981ba2632c2e1f5fffdcf4ada427724f7435069b86db8f07b870",
+    "standardized_tabular_diffusion/schemas/evaluation/metadata.schema.json": "06a4909965b715367034c94c63db2e8e4f77870fbb5f09658558cbe024a429d2",
+    "standardized_tabular_diffusion/schemas/evaluation/metric-registry-entry.schema.json": "36f62e8498a178cf14fd070d4592f0c889b5e674021931a1cd221b6f06f1bc86",
+    "standardized_tabular_diffusion/schemas/evaluation/protocol-profile.schema.json": "c7a10ff1f1e92ffe2183b4446cca42e9d91590560e81d7a63c235cc251052cfb",
+    "standardized_tabular_diffusion/schemas/evaluation/stage-record.schema.json": "8b955bddfcff9208c14f99256c2bbf7578724a091ac5d2a46e48e35a7a9f7fd9",
+    "standardized_tabular_diffusion/schemas/evaluation/summary.schema.json": "55bf20f608d685d4cbcd42a67c698196317bcffb69a6bd9f15650529d62c39f9",
+    "standardized_tabular_diffusion/validation/p1_foundation.py": "b3c1523e3f4173b90479af45300f6d2a28526dde9d2a65ac464b92ebc51281b1",
+    "tests/evaluation/test_bundle.py": "96ad74d814879caa680050548431d3d62011bbde8ba843486b4434ee1e4b99d7",
+    "tests/evaluation/test_cli_contracts.py": "ab213272ef5719a7894dab525d5ef8544c03d5e34fd1b8f189b157f4d5863ea0",
+    "tests/evaluation/test_contracts_and_schemas.py": "8648df3db6fdbb0fb486a8dfd131c09a4e41ab3a6ea7f9b3293783e5c3db0ecd",
+    "tests/evaluation/test_p1_foundation.py": "97d3e6421d9095a61188c164a7e1855e6401cf366fe5238deb8ec7133765d617",
+    "tests/evaluation/test_registry_and_profiles.py": "1a3b4c6a3eb06ef0087b47b31eebe83a45aa44905dfe28b122f668a7e08e4d3c"
+  },
+  "phase": "P1",
+  "protocol_id": "p1-contracts-identity-foundation-v1",
+  "repository_commit": "86f4251e0142484ef7379772a178d10d88c5d9bf",
+  "result_summary": {
+    "dataset_profiles_validated": 2,
+    "duplicate_key_rejection": {
+      "json": true,
+      "yaml": true
+    },
+    "equivalent_request_fingerprints_equal": true,
+    "finalized_bundle_created": false,
+    "incomplete_bundles_valid": true,
+    "metric_records_validated": 8,
+    "metric_states_validated": [
+      "computed",
+      "mathematically_undefined",
+      "insufficient_support",
+      "not_applicable",
+      "implementation_failure",
+      "resource_failure"
+    ],
+    "protocol_profiles_validated": 2,
+    "repeated_attempt_run_ids_distinct": true,
+    "schemas_validated": 10,
+    "scientific_metrics_executed": false,
+    "scientifically_distinct_request_fingerprints_different": true
+  },
+  "status": "pass",
+  "workflow_preconditions": [
+    "python -m pytest tests/evaluation",
+    "python -m ruff check standardized_tabular_diffusion/evaluation standardized_tabular_diffusion/cli.py standardized_tabular_diffusion/validation/p1_foundation.py tests/evaluation",
+    "python -m mypy",
+    "python -m build"
+  ]
+}
