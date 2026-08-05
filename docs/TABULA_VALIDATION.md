@@ -22,7 +22,7 @@ The adapter accepts one missing-free table with one target, complete disjoint ro
 
 Official construction, label encoding, row-text training, and sampling remain unchanged calls. The official sampler checks categorical domains only after its internal row-count loop and can consequently return fewer usable rows than requested. The adapter therefore repeats unchanged official calls for the remaining count, preserves their order and RNG stream, and truncates only the final boundary. Repeated zero-row batches fail explicitly. The adapter also scopes Python, NumPy, and PyTorch randomness, isolates official imports, places trainer files below `output_dir`, and applies an external Linux alarm because the official sample loop has no retry bound. Non-Linux unbounded sampling requires explicit opt-in.
 
-The official `torch.save` checkpoint is replaced at the persistence boundary with safetensors, typed JSON label-encoder/state data, and a complete file-integrity manifest. The adapter reconstructs the official class and continues through its unchanged `sample()` method; executable checkpoint extensions, symlinks, unlisted files, or altered bytes are rejected.
+The official `torch.save` checkpoint is replaced at the persistence boundary with safetensors, typed JSON label-encoder/state data, and a complete file-integrity manifest. The adapter reconstructs the official class, restores the training mode retained by the method-author `load_from_dir()` path, and continues through its unchanged `sample()` method; executable checkpoint extensions, symlinks, unlisted files, or altered bytes are rejected.
 
 ## Mandatory Parity Cases
 

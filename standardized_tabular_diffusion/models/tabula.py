@@ -412,6 +412,11 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             model.model = transformers.AutoModelForCausalLM.from_pretrained(
                 str(transformer_root), trust_remote_code=False
             )
+            # Method-author load_from_dir() constructs a fresh module and loads
+            # its state dict without switching to eval mode. Transformers'
+            # from_pretrained() does switch modes, so restore the official
+            # sampling semantics explicitly after safe deserialization.
+            model.model.train()
             for name in ("columns", "num_cols", "conditional_col", "conditional_col_dist", "categorical_columns"):
                 setattr(model, name, state["official_state"][name])
             encoders: list[dict[str, Any]] = []
