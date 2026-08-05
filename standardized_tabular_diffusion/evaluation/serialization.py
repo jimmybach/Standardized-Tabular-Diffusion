@@ -87,13 +87,42 @@ def validate_bundle_relative_path(value: str) -> str:
 def read_json(path: str | Path) -> Any:
     source = Path(path)
     try:
-        return json.loads(source.read_text(encoding="utf-8"), parse_constant=_reject_json_constant)
+        return json.loads(
+            source.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_object_keys,
+            parse_constant=_reject_json_constant,
+        )
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise SerializationError(f"Cannot read valid UTF-8 JSON from {source}: {exc}") from exc
 
 
 def _reject_json_constant(value: str) -> None:
     raise SerializationError(f"Non-finite JSON number is prohibited: {value}")
+
+
+def _reject_duplicate_object_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build one JSON object while rejecting literal and NFC-equivalent keys."""
+
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        normalized_key = unicodedata.normalize("NFC", key)
+        if normalized_key in result:
+            raise SerializationError(f"Duplicate JSON object key after Unicode normalization: {normalized_key!r}")
+        result[normalized_key] = value
+    return result
+
+
+def parse_json_text(text: str, *, source: str = "JSON text") -> Any:
+    """Parse strict RFC 8259 JSON while rejecting duplicate and non-finite values."""
+
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_object_keys,
+            parse_constant=_reject_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise SerializationError(f"Cannot read valid JSON from {source}: {exc}") from exc
 
 
 def read_yaml_safe(path: str | Path) -> Any:
@@ -106,7 +135,11 @@ def read_yaml_safe(path: str | Path) -> Any:
         raise SerializationError(f"Cannot read UTF-8 configuration from {source}: {exc}") from exc
 
     try:
-        return json.loads(text, parse_constant=_reject_json_constant)
+        return json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_object_keys,
+            parse_constant=_reject_json_constant,
+        )
     except json.JSONDecodeError:
         pass
 
@@ -116,8 +149,29 @@ def read_yaml_safe(path: str | Path) -> Any:
         raise SerializationError(
             "YAML input requires the optional 'contracts' dependency; JSON remains supported without PyYAML"
         ) from exc
+    class UniqueKeySafeLoader(yaml.SafeLoader):
+        """Safe YAML loader whose mappings have JSON-compatible unique string keys."""
+
+    def construct_unique_mapping(loader: UniqueKeySafeLoader, node: Any, deep: bool = False) -> dict[str, Any]:
+        pairs = loader.construct_pairs(node, deep=deep)
+        result: dict[str, Any] = {}
+        for key, item in pairs:
+            if not isinstance(key, str):
+                raise SerializationError(f"YAML object key is not a string: {key!r}")
+            normalized_key = unicodedata.normalize("NFC", key)
+            if normalized_key in result:
+                raise SerializationError(
+                    f"Duplicate YAML object key after Unicode normalization: {normalized_key!r}"
+                )
+            result[normalized_key] = item
+        return result
+
+    UniqueKeySafeLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_unique_mapping,
+    )
     try:
-        value = yaml.safe_load(text)
+        value = yaml.load(text, Loader=UniqueKeySafeLoader)
     except yaml.YAMLError as exc:
         raise SerializationError(f"Cannot safely load YAML from {source}: {exc}") from exc
     _canonicalize(value)

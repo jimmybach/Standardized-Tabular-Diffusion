@@ -2,9 +2,9 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: implementation baseline
-- Roadmap version: 0.1.0
-- Last updated: 2026-08-03
+- Status: P1 completion candidate; authoritative Linux evidence pending
+- Roadmap version: 0.2.0
+- Last updated: 2026-08-05
 - Primary release environment: Linux and Python 3.11
 
 ## 1. Purpose
@@ -30,54 +30,56 @@ The implementation MUST follow these decisions:
 11. Only metrics that are both `protocol-frozen` and `release-supported` may affect Official Results.
 12. The first end-to-end implementation slice is structural validation plus source-parity Column Shapes and Column Pair Trends. Breadth is added only after this slice produces a valid finalized result bundle.
 
+TabStruct is research reference material for metric review and formula provenance. Its paper and extracted reference code do not define the runtime architecture of the new evaluation subsystem. The pre-P1 `evaluation/tabstruct.py` path is retained only as a legacy diagnostic compatibility path and cannot be promoted, renamed, or wrapped into an official metric without an independent lifecycle review.
+
 ## 3. Current implementation audit
 
-### 3.1 Current execution path
+This section supersedes the 2026-08-03 pre-P0 audit. Historical failures remain useful migration evidence, but they are no longer descriptions of the current tree.
 
-The current path is:
+### 3.1 Current execution paths
+
+Two deliberately separate paths now exist:
 
 ~~~text
-ExperimentConfig
-    -> runner.run_action / runner.run_pipeline
-    -> model_adapter.evaluate
-    -> evaluation.tabstruct.normalize_*
-    -> standardized_summary.json
-    -> comparison.compare_summaries
+Legacy compatibility path
+ExperimentConfig -> model_adapter.evaluate -> evaluation.tabstruct.normalize_*
+                 -> standardized_summary.json -> comparison.compare_summaries
+
+P1 evaluation foundation
+EvaluationRequest -> strict contract/schema validation
+                  -> registry/profile identity resolution
+                  -> IncompleteRunBundleWriter
+                  -> manifest/metadata/config/environment/summary/event-log validation
 ~~~
 
-This path can produce a compact comparison table, but it does not implement the approved prepare/train/sample/validate/evaluate/aggregate/report lifecycle, metric registry, Dataset Profile contract, Atomic Results, compatibility groups, finalized bundles, or leaderboard admission checks.
+The legacy path remains diagnostic-only. The P1 path performs no metric computation and cannot finalize a result bundle. P2 will add the first standalone metric-execution path without routing through `evaluation/tabstruct.py`.
 
-### 3.2 Code disposition map
+### 3.2 Current code disposition
 
-| Current location | Current role | Disposition |
+| Current location | Current role | Current decision |
 |---|---|---|
-| [`evaluation/tabstruct.py`](../../standardized_tabular_diffusion/evaluation/tabstruct.py) | Static metric descriptions, upstream metric invocation, structural utility, exception handling, and old summary writing in one module | Freeze as legacy behavior, split responsibilities, and remove it from the new official path after parity-preserving migration |
-| [`models/base.py`](../../standardized_tabular_diffusion/models/base.py) | Adapter interface and artifact manifest writing | Retain train/sample adapter boundary; route evaluation through the standalone engine and replace ad hoc artifact manifests with bundle references |
-| [`models/tabdiff.py`](../../standardized_tabular_diffusion/models/tabdiff.py), [`models/tabsyn.py`](../../standardized_tabular_diffusion/models/tabsyn.py), and [`models/sample_baselines.py`](../../standardized_tabular_diffusion/models/sample_baselines.py) | Call the same sample-file normalizer | Reuse sample-path discovery; replace direct metric calls with an `EvaluationRequest` |
-| [`models/tabddpm.py`](../../standardized_tabular_diffusion/models/tabddpm.py) | Normalizes pre-existing upstream JSON metric files | Keep a clearly labeled legacy-import path; official evaluation must use canonical decoded samples and the common engine |
-| [`config.py`](../../standardized_tabular_diffusion/config.py) | Dataclasses with evaluation Boolean flags and an untyped `extra` map | Preserve a compatibility loader; introduce versioned protocol, metric-profile, dataset-profile, seed, failure-policy, and hardware-profile identities |
-| [`interfaces.py`](../../standardized_tabular_diffusion/interfaces.py) | Minimal `DatasetSpec`, `RunSpec`, and `ArtifactBundle` | Retain temporary adapter compatibility types; add strict evaluation contracts instead of expanding `extra` |
-| [`datasets.py`](../../standardized_tabular_diffusion/datasets.py) | Discovers dataset metadata from upstream `info.json` files | Use only as a legacy importer into reviewed Dataset Profiles; do not treat upstream metadata as official eligibility evidence |
-| [`dataset_onboarding.py`](../../standardized_tabular_diffusion/dataset_onboarding.py) | Registers CSV data and silently sanitizes missing values | Separate registration, profiling, preprocessing, and materialization; deprecate silent row deletion and implicit missing-token insertion |
-| [`materialization.py`](../../standardized_tabular_diffusion/materialization.py) | Runs upstream processing, copies data, and writes path-based manifests | Add source/view/split identities, checksums, preprocessing lineage, and atomic publication; avoid copied directories as identity |
-| [`runner.py`](../../standardized_tabular_diffusion/runner.py) | Runs train, sample, and evaluate phases | Retain as a high-level model workflow; delegate evaluation lifecycle, resume, and result finalization to the evaluation orchestrator |
-| [`comparison.py`](../../standardized_tabular_diffusion/comparison.py) | Flattens old summaries into rows | Replace official use with schema validation, compatibility grouping, coverage accounting, uncertainty, and policy-aware aggregation |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Exposes metadata, three run actions, and old summary comparison | Add profile/registry/result validation and standalone evaluation commands; keep deprecated commands through the migration window |
-| [`requirements-benchmark-stack.txt`](../../requirements-benchmark-stack.txt) | One broad environment for models and metrics | Split core, evaluation, model, and development dependency groups; lock the official Linux/Python 3.11 evaluation environment |
-| [`tests/`](../../tests) | 51 repository test functions, mainly adapter, CLI, onboarding, and byte-stability checks | Preserve useful adapter tests; add an evaluation-specific test pyramid and stop treating mocked or byte-stable old summaries as scientific validation |
+| [`evaluation/tabstruct.py`](../../standardized_tabular_diffusion/evaluation/tabstruct.py) | Pre-P1 compatibility evaluator | Frozen legacy diagnostic only; TabStruct is a research reference, not the new engine or metric authority |
+| [`evaluation/contracts.py`](../../standardized_tabular_diffusion/evaluation/contracts.py) | Evaluation Request, Atomic Result, stage and lifecycle contracts | P1 active path; strict finite-value, state, support, aggregation, timestamp, identity and path invariants |
+| [`evaluation/serialization.py`](../../standardized_tabular_diffusion/evaluation/serialization.py) | Canonical JSON, safe structured loading, hashing and atomic replacement | P1 active path; JSON/YAML duplicate keys and non-finite values fail closed |
+| [`evaluation/registry.py`](../../standardized_tabular_diffusion/evaluation/registry.py) | Data-driven Metric Registry and cumulative lifecycle validation | P1 active path; the eight pre-P1 records are explicitly `legacy-diagnostic` and non-official |
+| [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | Dataset/protocol loading, exact identity and legacy metadata import | P1 active path; duplicate identities and inconsistent profile references fail closed |
+| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | Auditable incomplete Run Result writer and cross-file validator | P1 active path; attempt IDs are distinct, manifests are allowlists, and interrupted event updates remain incomplete |
+| [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | Ten Draft 2020-12 wire schemas | P1 canonical wire validators, packaged in the wheel |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Legacy metric records and non-official protocol profiles | P1 identity resources; no metric is source-parity validated or admitted to Official Results |
+| [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection and validation plus legacy commands | P1 validation commands are active; legacy metric description is labeled diagnostic |
+| [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | P0 active and passing on Linux; reference trees are excluded from default discovery and distribution |
+| [`tests/evaluation/`](../../tests/evaluation) | Contract, schema, identity, registry/profile, bundle and CLI tests | P1-owned test suite; mocked tests make no scientific or source-parity claim |
 
-### 3.3 Confirmed gaps and hazards
+### 3.3 Remaining gaps after P1
 
-- `METRIC_DEFINITIONS` is a Python constant, not a validated registry, and it uses the old `tabstruct-aligned-v1` identity.
-- Per-metric `EvaluationConfig` flags are not carried as a complete, enforceable metric request into the normalizers.
-- Broad exception handling can convert implementation defects into missing values without a stable state or reason code.
-- Structural Utility may silently omit undefined targets from its mean, and constant synthetic targets currently receive behavior that is incompatible with the approved failure policy.
-- Predictor composition can change with installed packages or an environment variable, so current structural-utility outputs do not have one stable metric identity.
-- The old summary schema lacks atomic per-column, per-pair, per-target, and per-seed records, checksums, compatibility identity, coverage, and finalization state.
-- Dataset registration currently changes data while registering it. This prevents a clean audit of raw input, preprocessing, and resulting dataset view.
-- Package import eagerly loads model modules and optional heavy dependencies such as PyTorch, preventing core metadata and data tests from running in a minimal environment.
-- No root `pyproject.toml`, root pytest discovery boundary, or repository CI workflow is present.
-- On the 2026-08-03 audit machine, unrestricted `pytest -q` collected upstream and research-reference test suites and stopped with 105 collection errors. Even a repository-only onboarding test could not collect because PyTorch was imported eagerly. This is baseline evidence, not an accepted test state.
+- No new evaluation engine executes a scientific metric; only legacy diagnostic evaluation exists.
+- No metric in the new registry is beyond `registered`, and no metric may affect Official Results.
+- No `evaluate-table` command, canonical table resolver, structural gate, or per-column/per-pair execution exists yet.
+- P1 writes and validates incomplete bundles only; metric storage, checksums-last finalization, and immutable finalized bundles belong to P2.
+- Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
+- Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
+- Model parity evidence does not by itself grant benchmark eligibility or release support.
 
 ## 4. Target architecture
 
@@ -98,7 +100,7 @@ standardized_tabular_diffusion/evaluation/
     validity/
     privacy/
     efficiency/
-  backends/             # isolated wrappers for SDMetrics, TabStruct, etc.
+  backends/             # isolated wrappers for approved authoritative metric sources
 
 schemas/evaluation/     # checked-in JSON Schemas
 configs/evaluation/
@@ -139,17 +141,17 @@ A node records its content-addressed inputs, outputs, implementation version, se
 
 ## 5. Delivery sequence and dependency gates
 
-| Phase | Deliverable | Depends on | Exit gate |
-|---|---|---|---|
-| P0 | Trustworthy development baseline | None | Core tests collect in a minimal environment; repository and reference tests are isolated |
-| P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Invalid contracts fail deterministically; round-trip and schema tests pass |
-| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
-| P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | No hidden repair or missing-value mutation; rule and failure tests pass |
-| P4 | Local and Global Utility | P1, P3 | Raw arms, state semantics, profile identity, and source/formula validation pass |
-| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Only resolved and approved metrics advance; blocked metrics remain excluded |
-| P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Phase accounting and reuse integrity pass under declared hardware profiles |
-| P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Incompatible results cannot be merged; coverage and publication gates pass |
-| P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Public-preview or official-release gate passes for the claimed release class |
+| Phase | Deliverable | Depends on | Current state | Exit gate |
+|---|---|---|---|---|
+| P0 | Trustworthy development baseline | None | Passed | Core tests collect in a minimal environment; repository and reference tests are isolated |
+| P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Completion candidate; authoritative Linux evidence pending | Invalid contracts fail deterministically; round-trip and schema tests pass |
+| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Not started | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
+| P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Not started | No hidden repair or missing-value mutation; rule and failure tests pass |
+| P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
+| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
+| P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
+| P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
+| P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
 
 P3, P4, P5, and parts of P6 may proceed concurrently after their dependencies are stable. P7 must not be used to publish rankings before each contributing metric and dataset independently passes its admission gate.
 
@@ -193,6 +195,8 @@ Exit evidence:
 - equivalent requests have identical fingerprints and scientifically different requests do not;
 - an interrupted writer leaves an auditable incomplete bundle, never a false finalized bundle; and
 - registry lifecycle status cannot be advanced without its required evidence fields.
+
+Current implementation note (2026-08-05): all listed P1 surfaces are implemented. The phase remains a completion candidate until the dedicated read-only Linux/Python 3.11 workflow passes and its machine-readable evidence artifact is retained. This evidence validates engineering contracts only; it executes no scientific metric and makes no source-parity claim.
 
 ### 6.3 P2 — first end-to-end vertical slice
 
@@ -256,7 +260,7 @@ Local Utility tasks:
 
 Global Utility tasks:
 
-- Implement TabStruct Equation 4 exactly at the aggregation layer: Balanced Accuracy ratio for categorical targets, inverse RMSE ratio for numerical targets, and equal-target mean.
+- Implement the reviewed global-utility ratio formula described in TabStruct Equation 4 at the aggregation layer: Balanced Accuracy ratio for categorical targets, inverse RMSE ratio for numerical targets, and equal-target mean. The paper is formula provenance, not a runtime or code dependency.
 - Keep Full-tuned, Tiny-default, and any pinned TabEval predictor profiles as different metric identities and compatibility groups.
 - Exclude identifiers by default and require a Dataset Profile reason for every other target exclusion.
 - Never clip ratios above one and never omit zero/non-finite denominators silently.
@@ -419,7 +423,7 @@ These are not reasons to invent temporary official defaults. Until approved, the
 
 ### M1 — evaluation foundation
 
-P0 and P1 pass. Contracts and tooling are usable, but no metric is yet advertised as source-parity validated.
+P0 and P1 pass. Contracts and tooling are usable, but no metric is yet advertised as source-parity validated. Current state: P0 has passed; P1 is a completion candidate pending retained Linux/Python 3.11 evidence.
 
 ### M2 — trustworthy first report
 
@@ -437,15 +441,16 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-The first implementation increment should contain only:
+After P1's authoritative evidence is retained, the next increment is P2's narrow vertical slice:
 
-1. root packaging and pytest discovery boundaries;
-2. lightweight optional-dependency imports;
-3. schema and contract skeletons for metric records, Atomic Results, Evaluation Requests, and incomplete bundles;
-4. legacy identity and deprecation markers without changing metric values; and
-5. core CI for Linux/Python 3.11.
+1. define the isolated, pinned SDMetrics dependency profile and authoritative-call parity fixtures;
+2. resolve external CSV, Parquet, and DataFrame inputs into a lossless canonical table;
+3. implement the structural gate and denominator-complete per-column/per-pair Atomic Results;
+4. wrap Column Shapes and Column Pair Trends without using the legacy `evaluation/tabstruct.py` path;
+5. implement checksums-last finalization and the standalone `evaluate-table` CLI; and
+6. validate the complete slice on Linux/Python 3.11 before adding another metric family.
 
-It should not yet modify upstream algorithms, choose imputation strategies, publish a leaderboard, or rewrite metric formulas. Its purpose is to create a trustworthy surface on which the Shape/Trend vertical slice can be implemented and reviewed.
+This increment does not modify upstream algorithms, select imputation strategies, publish a leaderboard, or treat TabStruct reference code as an implementation dependency. Any upstream patch or semantic deviation remains a mandatory discussion checkpoint.
 
 ## 12. Related specifications
 

@@ -8,7 +8,7 @@
     "profile_schema_version": {"const": "1.0.0"}, "protocol_id": {"$ref": "#/$defs/id"}, "protocol_version": {"$ref": "#/$defs/id"}, "display_name": {"type": "string", "minLength": 1},
     "status": {"enum": ["draft", "frozen", "deprecated", "legacy"]}, "official_results_allowed": {"type": "boolean"}, "comparison_tracks": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["native", "standardized-tuning"]}},
     "metric_selections": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["metric_id", "metric_version", "required", "role"], "properties": {"metric_id": {"$ref": "#/$defs/id"}, "metric_version": {"$ref": "#/$defs/id"}, "required": {"type": "boolean"}, "role": {"enum": ["official-component", "diagnostic", "excluded", "legacy-diagnostic"]}}}},
-    "dataset_suites": {"type": "array", "items": {"enum": ["universal-core", "extended-catalog", "diagnostic"]}},
+    "dataset_suites": {"type": "array", "uniqueItems": true, "items": {"enum": ["universal-core", "extended-catalog", "diagnostic"]}},
     "result_schema_versions": {"type": "object", "additionalProperties": false, "required": ["atomic_result", "manifest", "metadata", "summary", "stage_record", "artifact_index"], "properties": {"atomic_result": {"$ref": "#/$defs/id"}, "manifest": {"$ref": "#/$defs/id"}, "metadata": {"$ref": "#/$defs/id"}, "summary": {"$ref": "#/$defs/id"}, "stage_record": {"$ref": "#/$defs/id"}, "artifact_index": {"$ref": "#/$defs/id"}}},
     "policies": {"type": "object"}, "owners": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "review_record": {"type": "object"}, "change_log": {"type": "array", "items": {"type": "object"}}
   },

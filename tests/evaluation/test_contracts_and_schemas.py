@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -23,6 +24,8 @@ from standardized_tabular_diffusion.evaluation.schema import (
 from standardized_tabular_diffusion.evaluation.serialization import (
     SerializationError,
     canonical_json_bytes,
+    read_json,
+    read_yaml_safe,
     validate_bundle_relative_path,
 )
 
@@ -113,6 +116,48 @@ def test_request_round_trip_and_fingerprint_are_deterministic() -> None:
     assert make_request(generation_seed=43).fingerprint != request.fingerprint
 
 
+def test_request_fingerprint_normalizes_set_like_metric_and_seed_order() -> None:
+    first = make_request(
+        metrics=(
+            {"metric_id": "fixture-trend", "metric_version": "1.0.0"},
+            {"metric_id": "fixture-shape", "metric_version": "1.0.0"},
+        ),
+        evaluator_seeds=(11, 7),
+    )
+    second = make_request(
+        metrics=tuple(reversed(first.metrics)),
+        evaluator_seeds=tuple(reversed(first.evaluator_seeds)),
+    )
+    assert first.to_dict() != second.to_dict()
+    assert first.fingerprint == second.fingerprint
+
+
+def test_request_rejects_duplicate_seeds_missing_wire_fields_and_unbound_adapter_run() -> None:
+    with pytest.raises(ContractError, match="duplicates"):
+        make_request(evaluator_seeds=(7, 7))
+    with pytest.raises(ContractError, match="model provenance"):
+        make_request(subject_type="adapter-run")
+    with pytest.raises(ContractError, match="Missing"):
+        EvaluationRequest.from_dict({key: value for key, value in make_request().to_dict().items() if key != "model"})
+
+
+def test_request_accepts_audited_row_count_and_rejects_nonfinite_nested_policy() -> None:
+    request = make_request(
+        sample_artifact={
+            "artifact_id": "sample",
+            "media_type": "text/csv",
+            "sha256": SHA256,
+            "row_count": 0,
+        }
+    )
+    validate_instance("evaluation-request", request.to_dict())
+    with pytest.raises(ContractError, match="canonically serializable"):
+        make_request(resource_limits={"timeout_seconds": math.inf})
+    invalid_artifact = {"artifact_id": 7, "media_type": "text/csv", "sha256": SHA256}
+    with pytest.raises(ContractError, match="portable identifier"):
+        make_request(sample_artifact=invalid_artifact)
+
+
 def test_request_unknown_field_and_version_fail_closed() -> None:
     payload = make_request().to_dict()
     payload["surprise"] = True
@@ -160,6 +205,17 @@ def test_every_noncomputed_state_requires_null_values_and_reason(state: MetricSt
     validate_instance("atomic-result", result.to_dict())
 
 
+def test_noncomputed_target_result_does_not_require_an_unavailable_reference() -> None:
+    result = make_atomic_result(
+        state=MetricState.RESOURCE_FAILURE,
+        raw_direction=RawDirection.TARGET,
+        raw_value=None,
+        reason_code="resource_unavailable",
+        reason_detail="The evaluator did not start, so no reference was observed.",
+    )
+    validate_instance("atomic-result", result.to_dict())
+
+
 def test_atomic_result_rejects_nonfinite_and_state_value_conflation() -> None:
     for nonfinite in (math.nan, math.inf, -math.inf):
         with pytest.raises(ContractError, match="finite"):
@@ -197,6 +253,23 @@ def test_atomic_result_round_trip_preserves_raw_and_derived_fields() -> None:
     assert restored.aggregate_contribution == 0.4
 
 
+def test_atomic_result_enforces_support_direction_and_aggregation_invariants() -> None:
+    with pytest.raises(ContractError, match="valid observation"):
+        make_atomic_result(n_valid=0)
+    with pytest.raises(ContractError, match="cannot exceed"):
+        make_atomic_result(n_reference=1, n_synthetic=1, n_valid=2, n_excluded=1)
+    with pytest.raises(ContractError, match="normalized_value"):
+        make_atomic_result(aggregate_contribution=0.5)
+    with pytest.raises(ContractError, match="reference_value"):
+        make_atomic_result(raw_direction=RawDirection.TARGET)
+    with pytest.raises(ContractError, match="both be set"):
+        make_atomic_result(evaluator_id="fixture-evaluator")
+    payload = make_atomic_result().to_dict()
+    payload["warning_codes"] = [7]
+    with pytest.raises(ContractError, match="reason code"):
+        AtomicResult.from_dict(payload)
+
+
 def test_skipped_stage_requires_a_stable_reason() -> None:
     values = {
         "stage_name": "evaluate",
@@ -223,3 +296,56 @@ def test_skipped_stage_requires_a_stable_reason() -> None:
     values["failure_reason_code"] = "not_requested"
     record = StageRecord(**values)  # type: ignore[arg-type]
     validate_instance("stage-record", record.to_dict())
+
+
+def test_stage_record_round_trip_and_terminal_state_invariants() -> None:
+    record = StageRecord(
+        stage_name="evaluate",
+        stage_version="1.0.0",
+        status=StageStatus.SUCCEEDED,
+        dependency_stage_ids=("validate",),
+        input_fingerprints={"request": SHA256},
+        resolved_action="evaluate diagnostic fixture",
+        started_at="2026-08-03T12:00:00Z",
+        ended_at="2026-08-03T12:00:01Z",
+        elapsed_seconds=1.0,
+        process_exit_code=0,
+        log_refs=("logs/events.jsonl",),
+        outputs=({"path": "artifacts/result.json", "media_type": "application/json", "sha256": SHA256},),
+        warning_codes=(),
+        failure_category=None,
+        failure_reason_code=None,
+        cache_decision="miss",
+        retry_count=0,
+        resume_ancestry=(),
+    )
+    restored = StageRecord.from_dict(record.to_dict())
+    assert restored == record
+    validate_instance("stage-record", restored.to_dict())
+
+    with pytest.raises(ContractError, match="complete timing"):
+        StageRecord.from_dict({**record.to_dict(), "ended_at": None})
+    with pytest.raises(ContractError, match="lowercase SHA-256"):
+        StageRecord.from_dict({**record.to_dict(), "input_fingerprints": {"request": "bad"}})
+    with pytest.raises(ContractError, match="input_fingerprints"):
+        StageRecord.from_dict({**record.to_dict(), "input_fingerprints": []})
+    invalid_output = [{"path": 7, "media_type": "application/json", "sha256": SHA256}]
+    with pytest.raises(SerializationError, match="path"):
+        StageRecord.from_dict({**record.to_dict(), "outputs": invalid_output})
+
+
+def test_structured_loaders_reject_duplicate_and_unicode_equivalent_keys(tmp_path: Path) -> None:
+    duplicate_json = tmp_path / "duplicate.json"
+    duplicate_json.write_text('{"metric": 1, "metric": 2}\n', encoding="utf-8")
+    with pytest.raises(SerializationError, match="Duplicate JSON"):
+        read_json(duplicate_json)
+
+    unicode_json = tmp_path / "unicode-duplicate.json"
+    unicode_json.write_text('{"é": 1, "é": 2}\n', encoding="utf-8")
+    with pytest.raises(SerializationError, match="Unicode normalization"):
+        read_json(unicode_json)
+
+    duplicate_yaml = tmp_path / "duplicate.yaml"
+    duplicate_yaml.write_text("metric: 1\nmetric: 2\n", encoding="utf-8")
+    with pytest.raises(SerializationError, match="Duplicate YAML"):
+        read_yaml_safe(duplicate_yaml)

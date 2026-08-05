@@ -1,8 +1,8 @@
 # Development Baseline
 
-- Status: P0 engineering baseline and P1 evaluation-contract foundation
+- Status: P0 passed; P1 completion candidate pending authoritative Linux evidence
 - Primary environment: Linux and Python 3.11
-- Last updated: 2026-08-03
+- Last updated: 2026-08-05
 
 ## Installation surfaces
 
@@ -78,7 +78,7 @@ std-tabular-diffusion validate-result --bundle path/to/result_bundle
 std-tabular-diffusion import-legacy-dataset-profile --dataset adult --output adult.legacy-profile.json
 ~~~
 
-JSON Schema files under `standardized_tabular_diffusion/schemas/evaluation/` are the canonical wire validators. Python contracts enforce additional finite-number, result-state, lifecycle-evidence, path-safety, and cross-file invariants. JSON is canonical for hashing; configuration YAML is accepted only through a safe loader.
+JSON Schema files under `standardized_tabular_diffusion/schemas/evaluation/` are the canonical wire validators. Python contracts enforce additional finite-number, result-state, lifecycle-evidence, path-safety, and cross-file invariants. JSON is canonical for hashing; configuration YAML is accepted only through a safe loader that rejects duplicate keys. TabStruct is research reference material only: the P1 foundation does not import it, and its pre-P1 evaluator remains a legacy diagnostic compatibility path.
 
 ## Quality commands
 
@@ -89,6 +89,8 @@ python -m build
 ~~~
 
 Mocked tests demonstrate control flow only. They do not satisfy source-parity, native-parity, real-smoke, scientific-validation, or release-support gates.
+
+The dedicated `.github/workflows/p1-foundation-validation.yml` workflow runs the P1 contract suite, lint, typing, build, and a machine-readable exit-gate assessment on Linux/Python 3.11. A local or mocked pass is not a scientific metric validation.
 
 ## CI baseline
 

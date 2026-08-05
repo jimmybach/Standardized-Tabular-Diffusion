@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from standardized_tabular_diffusion.evaluation.serialization import (
+    SerializationError,
     content_fingerprint,
     validate_bundle_relative_path,
 )
@@ -86,8 +87,13 @@ def _require_identifier(name: str, value: str) -> None:
 
 
 def _require_sha256(name: str, value: str) -> None:
-    if not _SHA256.fullmatch(value):
+    if not isinstance(value, str) or not _SHA256.fullmatch(value):
         raise ContractError(f"{name} must be a lowercase SHA-256 digest")
+
+
+def _require_reason_code(name: str, value: str) -> None:
+    if not isinstance(value, str) or not _REASON_CODE.fullmatch(value):
+        raise ContractError(f"{name} must be a stable lowercase reason code")
 
 
 def _require_finite(name: str, value: float | None) -> None:
@@ -95,6 +101,27 @@ def _require_finite(name: str, value: float | None) -> None:
         isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
     ):
         raise ContractError(f"{name} must be a finite number or null")
+
+
+def _require_exact_fields(record_name: str, payload: dict[str, Any], expected: set[str]) -> None:
+    missing = expected - set(payload)
+    unknown = set(payload) - expected
+    if missing:
+        raise ContractError(f"Missing {record_name} fields: {sorted(missing)}")
+    if unknown:
+        raise ContractError(f"Unknown {record_name} fields: {sorted(unknown)}")
+
+
+def _parse_utc_timestamp(name: str, value: str) -> datetime:
+    if not isinstance(value, str):
+        raise ContractError(f"{name} must be an ISO 8601 UTC timestamp")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ContractError(f"{name} must be an ISO 8601 UTC timestamp") from exc
+    if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
+        raise ContractError(f"{name} must identify UTC")
+    return parsed
 
 
 def _reject_embedded_secrets(value: Any, location: str = "request") -> None:
@@ -138,17 +165,21 @@ class EvaluationRequest:
             raise ContractError(f"Unsupported comparison_track: {self.comparison_track!r}")
         if isinstance(self.generation_seed, bool) or not isinstance(self.generation_seed, int):
             raise ContractError("generation_seed must be an integer")
-        if not self.evaluator_seeds or any(
+        if not isinstance(self.evaluator_seeds, tuple) or not self.evaluator_seeds or any(
             isinstance(seed, bool) or not isinstance(seed, int) for seed in self.evaluator_seeds
         ):
             raise ContractError("evaluator_seeds must contain at least one integer")
+        if len(set(self.evaluator_seeds)) != len(self.evaluator_seeds):
+            raise ContractError("evaluator_seeds must not contain duplicates")
         self._validate_artifact()
         self._validate_identity_ref("dataset_profile", self.dataset_profile, "dataset_id", "dataset_profile_version")
         self._validate_identity_ref("protocol", self.protocol, "protocol_id", "protocol_version")
-        if not self.metrics:
+        if not isinstance(self.metrics, tuple) or not self.metrics:
             raise ContractError("metrics must contain at least one exact metric identity")
         seen: set[tuple[str, str]] = set()
         for metric in self.metrics:
+            if not isinstance(metric, dict):
+                raise ContractError("Each metric selection must be an object")
             if set(metric) != {"metric_id", "metric_version"}:
                 raise ContractError("Each metric selection must contain only metric_id and metric_version")
             _require_identifier("metric_id", metric["metric_id"])
@@ -157,24 +188,46 @@ class EvaluationRequest:
             if identity in seen:
                 raise ContractError(f"Duplicate metric selection: {identity[0]}@{identity[1]}")
             seen.add(identity)
+        if self.model is not None:
+            if not isinstance(self.model, dict) or not self.model:
+                raise ContractError("model must be a non-empty object when present")
+            model_id = self.model.get("model_id")
+            if model_id is not None:
+                _require_identifier("model.model_id", model_id)
+        if self.subject_type == "adapter-run" and (self.model is None or "model_id" not in self.model):
+            raise ContractError("adapter-run requests require model provenance with model_id")
         for name, reference in (
             ("evaluator_profile", self.evaluator_profile),
             ("hardware_profile", self.hardware_profile),
         ):
             if reference is not None:
+                if not isinstance(reference, dict):
+                    raise ContractError(f"{name} must be an object or null")
                 if set(reference) != {"profile_id", "profile_version", "sha256"}:
                     raise ContractError(f"{name} must contain profile_id, profile_version, and sha256")
                 _require_identifier(f"{name}.profile_id", reference["profile_id"])
                 _require_identifier(f"{name}.profile_version", reference["profile_version"])
                 _require_sha256(f"{name}.sha256", reference["sha256"])
-        _reject_embedded_secrets(self.to_dict())
+        if not isinstance(self.resource_limits, dict) or not isinstance(self.failure_policy, dict):
+            raise ContractError("resource_limits and failure_policy must be objects")
+        payload = self.to_dict()
+        _reject_embedded_secrets(payload)
+        try:
+            content_fingerprint(payload)
+        except SerializationError as exc:
+            raise ContractError(f"Evaluation Request is not canonically serializable: {exc}") from exc
 
     def _validate_artifact(self) -> None:
+        if not isinstance(self.sample_artifact, dict):
+            raise ContractError("sample_artifact must be an object")
         required = {"artifact_id", "media_type", "sha256"}
-        if not required.issubset(self.sample_artifact) or not set(self.sample_artifact).issubset(required | {"uri"}):
-            raise ContractError("sample_artifact requires artifact_id, media_type, sha256, and optional uri")
-        _require_identifier("sample_artifact.artifact_id", str(self.sample_artifact["artifact_id"]))
-        _require_sha256("sample_artifact.sha256", str(self.sample_artifact["sha256"]))
+        optional = {"uri", "row_count"}
+        if not required.issubset(self.sample_artifact) or not set(self.sample_artifact).issubset(required | optional):
+            raise ContractError(
+                "sample_artifact requires artifact_id, media_type, sha256, and optional uri or row_count"
+            )
+        _require_identifier("sample_artifact.artifact_id", self.sample_artifact["artifact_id"])
+        _require_sha256("sample_artifact.sha256", self.sample_artifact["sha256"])
         if not isinstance(self.sample_artifact["media_type"], str) or "/" not in self.sample_artifact["media_type"]:
             raise ContractError("sample_artifact.media_type must be an Internet media type")
         uri = self.sample_artifact.get("uri")
@@ -184,9 +237,16 @@ class EvaluationRequest:
             parsed = urlsplit(uri)
             if not parsed.scheme or parsed.scheme.lower() == "file" or parsed.username or parsed.password:
                 raise ContractError("sample_artifact.uri must be a credential-free, non-file URI")
+        row_count = self.sample_artifact.get("row_count")
+        if row_count is not None and (
+            isinstance(row_count, bool) or not isinstance(row_count, int) or row_count < 0
+        ):
+            raise ContractError("sample_artifact.row_count must be a non-negative integer when present")
 
     @staticmethod
     def _validate_identity_ref(name: str, reference: dict[str, str], id_key: str, version_key: str) -> None:
+        if not isinstance(reference, dict):
+            raise ContractError(f"{name} must be an object")
         if set(reference) != {id_key, version_key, "sha256"}:
             raise ContractError(f"{name} must contain {id_key}, {version_key}, and sha256")
         _require_identifier(f"{name}.{id_key}", reference[id_key])
@@ -201,18 +261,27 @@ class EvaluationRequest:
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> EvaluationRequest:
-        known = {field.name for field in cls.__dataclass_fields__.values()}
-        unknown = set(payload) - known
-        if unknown:
-            raise ContractError(f"Unknown Evaluation Request fields: {sorted(unknown)}")
+        if not isinstance(payload, dict):
+            raise ContractError("Evaluation Request must be an object")
+        known = set(cls.__dataclass_fields__)
+        _require_exact_fields("Evaluation Request", payload, known)
         converted = dict(payload)
-        converted["metrics"] = tuple(dict(item) for item in payload.get("metrics", ()))
-        converted["evaluator_seeds"] = tuple(payload.get("evaluator_seeds", ()))
+        try:
+            converted["metrics"] = tuple(dict(item) for item in payload["metrics"])
+            converted["evaluator_seeds"] = tuple(payload["evaluator_seeds"])
+        except (TypeError, ValueError) as exc:
+            raise ContractError("Evaluation Request metrics and evaluator_seeds must be arrays") from exc
         return cls(**converted)
 
     @property
     def fingerprint(self) -> str:
-        return content_fingerprint(self.to_dict())
+        payload = self.to_dict()
+        payload["metrics"] = sorted(
+            payload["metrics"],
+            key=lambda item: (item["metric_id"], item["metric_version"]),
+        )
+        payload["evaluator_seeds"] = sorted(payload["evaluator_seeds"])
+        return content_fingerprint(payload)
 
 
 @dataclass(frozen=True)
@@ -280,6 +349,11 @@ class AtomicResult:
             raise ContractError(f"Unsupported scope_type: {self.scope_type!r}")
         if self.task_type not in {None, "classification", "regression"}:
             raise ContractError(f"Unsupported task_type: {self.task_type!r}")
+        if (self.evaluator_id is None) != (self.evaluator_version is None):
+            raise ContractError("evaluator_id and evaluator_version must either both be set or both be null")
+        if self.evaluator_id is not None:
+            _require_identifier("evaluator_id", self.evaluator_id)
+            _require_identifier("evaluator_version", self.evaluator_version or "")
         if isinstance(self.generation_seed, bool) or not isinstance(self.generation_seed, int):
             raise ContractError("generation_seed must be an integer")
         for name in ("weight", "raw_value", "normalized_value", "aggregate_contribution", "reference_value"):
@@ -290,29 +364,41 @@ class AtomicResult:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ContractError(f"{name} must be a non-negative integer")
-        try:
-            parsed = datetime.fromisoformat(self.computed_at.replace("Z", "+00:00"))
-        except ValueError as exc:
-            raise ContractError("computed_at must be an ISO 8601 timestamp") from exc
-        if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
-            raise ContractError("computed_at must identify UTC")
+        _parse_utc_timestamp("computed_at", self.computed_at)
+        if not isinstance(self.warning_codes, tuple):
+            raise ContractError("warning_codes must be a tuple of stable reason codes")
         for warning in self.warning_codes:
-            if not _REASON_CODE.fullmatch(warning):
-                raise ContractError(f"Invalid warning code: {warning!r}")
+            _require_reason_code("warning code", warning)
+        if len(set(self.warning_codes)) != len(self.warning_codes):
+            raise ContractError("warning_codes must not contain duplicates")
         if self.artifact_ref is not None:
             validate_bundle_relative_path(self.artifact_ref)
+        if self.unit is not None and (not isinstance(self.unit, str) or not self.unit.strip()):
+            raise ContractError("unit must be a non-empty string or null")
+        total_observations = self.n_reference + self.n_synthetic
+        if self.n_valid + self.n_excluded > total_observations:
+            raise ContractError("n_valid plus n_excluded cannot exceed total reference and synthetic observations")
 
         if self.state is MetricState.COMPUTED:
             if self.raw_value is None and self.artifact_ref is None:
                 raise ContractError("computed state requires raw_value or a structured artifact_ref")
             if self.reason_code is not None or self.reason_detail is not None:
                 raise ContractError("computed state cannot carry a failure reason")
+            if self.n_valid == 0:
+                raise ContractError("computed state requires at least one valid observation")
+            if self.aggregate_contribution is not None and self.normalized_value is None:
+                raise ContractError("aggregate_contribution requires a separately recorded normalized_value")
+            if self.weight == 0 and self.aggregate_contribution not in {None, 0, 0.0}:
+                raise ContractError("zero-weight results cannot have a non-zero aggregate contribution")
+            if self.raw_direction is RawDirection.TARGET and self.reference_value is None:
+                raise ContractError("target-direction results require a reference_value")
         else:
             if any(value is not None for value in (self.raw_value, self.normalized_value, self.aggregate_contribution)):
                 raise ContractError("non-computed states require null raw, normalized, and aggregate values")
-            if self.reason_code is None or not _REASON_CODE.fullmatch(self.reason_code):
+            if self.reason_code is None:
                 raise ContractError("non-computed state requires a stable lowercase reason_code")
-            if self.reason_detail is None or not self.reason_detail.strip():
+            _require_reason_code("reason_code", self.reason_code)
+            if not isinstance(self.reason_detail, str) or not self.reason_detail.strip():
                 raise ContractError("non-computed state requires a human-readable reason_detail")
 
     def to_dict(self) -> dict[str, Any]:
@@ -322,14 +408,20 @@ class AtomicResult:
 
     @classmethod
     def from_dict(cls, payload: dict[str, Any]) -> AtomicResult:
-        known = {field.name for field in cls.__dataclass_fields__.values()}
-        unknown = set(payload) - known
-        if unknown:
-            raise ContractError(f"Unknown Atomic Result fields: {sorted(unknown)}")
+        if not isinstance(payload, dict):
+            raise ContractError("Atomic Result must be an object")
+        known = set(cls.__dataclass_fields__)
+        _require_exact_fields("Atomic Result", payload, known)
         converted = dict(payload)
-        converted["state"] = MetricState(payload["state"])
-        converted["raw_direction"] = RawDirection(payload["raw_direction"])
-        converted["warning_codes"] = tuple(payload.get("warning_codes", ()))
+        try:
+            converted["state"] = MetricState(payload["state"])
+            converted["raw_direction"] = RawDirection(payload["raw_direction"])
+        except (TypeError, ValueError) as exc:
+            raise ContractError(f"Atomic Result contains an unsupported enum value: {exc}") from exc
+        try:
+            converted["warning_codes"] = tuple(payload["warning_codes"])
+        except TypeError as exc:
+            raise ContractError("Atomic Result warning_codes must be an array") from exc
         return cls(**converted)
 
 
@@ -360,23 +452,92 @@ class StageRecord:
             raise ContractError(f"Unsupported Stage Record schema: {self.stage_schema_version}")
         if not isinstance(self.status, StageStatus):
             raise ContractError("status must be a StageStatus value")
+        for name in ("dependency_stage_ids", "log_refs", "outputs", "warning_codes", "resume_ancestry"):
+            if not isinstance(getattr(self, name), tuple):
+                raise ContractError(f"{name} must be a tuple")
+        if not isinstance(self.input_fingerprints, dict):
+            raise ContractError("input_fingerprints must be an object")
         _require_identifier("stage_name", self.stage_name)
         _require_identifier("stage_version", self.stage_version)
+        for dependency in self.dependency_stage_ids:
+            _require_identifier("dependency_stage_ids item", dependency)
+        if len(set(self.dependency_stage_ids)) != len(self.dependency_stage_ids):
+            raise ContractError("dependency_stage_ids must not contain duplicates")
+        for input_name, fingerprint in self.input_fingerprints.items():
+            _require_identifier("input_fingerprints key", input_name)
+            _require_sha256(f"input_fingerprints.{input_name}", fingerprint)
+        if not isinstance(self.resolved_action, str) or not self.resolved_action.strip():
+            raise ContractError("resolved_action must be a non-empty string")
         if self.elapsed_seconds is not None:
             _require_finite("elapsed_seconds", self.elapsed_seconds)
             if self.elapsed_seconds < 0:
                 raise ContractError("elapsed_seconds must be non-negative")
         if isinstance(self.retry_count, bool) or not isinstance(self.retry_count, int) or self.retry_count < 0:
             raise ContractError("retry_count must be a non-negative integer")
+        if self.process_exit_code is not None and (
+            isinstance(self.process_exit_code, bool) or not isinstance(self.process_exit_code, int)
+        ):
+            raise ContractError("process_exit_code must be an integer or null")
+        if self.cache_decision not in {"not-requested", "miss", "hit", "bypassed", "invalid"}:
+            raise ContractError(f"Unsupported cache_decision: {self.cache_decision!r}")
+        if self.failure_category is not None and (
+            not isinstance(self.failure_category, str) or not self.failure_category.strip()
+        ):
+            raise ContractError("failure_category must be a non-empty string or null")
         if self.status is StageStatus.SKIPPED and not self.failure_reason_code:
             raise ContractError("A skipped stage requires a stable reason code")
-        if self.failure_reason_code is not None and not _REASON_CODE.fullmatch(self.failure_reason_code):
-            raise ContractError("Invalid failure_reason_code")
+        if self.failure_reason_code is not None:
+            _require_reason_code("failure_reason_code", self.failure_reason_code)
+        for warning in self.warning_codes:
+            _require_reason_code("warning code", warning)
+        if len(set(self.warning_codes)) != len(self.warning_codes):
+            raise ContractError("warning_codes must not contain duplicates")
         for path in self.log_refs:
             validate_bundle_relative_path(path)
+        if len(set(self.log_refs)) != len(self.log_refs):
+            raise ContractError("log_refs must not contain duplicates")
+        output_paths: set[str] = set()
         for output in self.outputs:
-            if "path" in output:
-                validate_bundle_relative_path(str(output["path"]))
+            if not isinstance(output, dict):
+                raise ContractError("Each stage output must be an object")
+            if set(output) != {"path", "media_type", "sha256"}:
+                raise ContractError("Each stage output must contain only path, media_type, and sha256")
+            path = validate_bundle_relative_path(output["path"])
+            if path in output_paths:
+                raise ContractError(f"Duplicate stage output path: {path}")
+            output_paths.add(path)
+            if not isinstance(output["media_type"], str) or "/" not in output["media_type"]:
+                raise ContractError("Stage output media_type must be an Internet media type")
+            _require_sha256(f"outputs.{path}.sha256", output["sha256"])
+        for ancestor in self.resume_ancestry:
+            _require_identifier("resume_ancestry item", ancestor)
+        if len(set(self.resume_ancestry)) != len(self.resume_ancestry):
+            raise ContractError("resume_ancestry must not contain duplicates")
+
+        started = _parse_utc_timestamp("started_at", self.started_at) if self.started_at is not None else None
+        ended = _parse_utc_timestamp("ended_at", self.ended_at) if self.ended_at is not None else None
+        if started is not None and ended is not None and ended < started:
+            raise ContractError("ended_at cannot precede started_at")
+
+        if self.status is StageStatus.PENDING:
+            if any(value is not None for value in (started, ended, self.elapsed_seconds, self.process_exit_code)):
+                raise ContractError("pending stages cannot declare timing or process outcome")
+        elif self.status is StageStatus.RUNNING:
+            if started is None or any(value is not None for value in (ended, self.elapsed_seconds, self.process_exit_code)):
+                raise ContractError("running stages require started_at and no terminal outcome")
+        elif self.status is StageStatus.SUCCEEDED:
+            if started is None or ended is None or self.elapsed_seconds is None:
+                raise ContractError("succeeded stages require complete timing")
+            if self.process_exit_code not in {None, 0}:
+                raise ContractError("succeeded stages cannot carry a non-zero process exit code")
+        elif self.status in {StageStatus.FAILED, StageStatus.CANCELLED, StageStatus.INVALIDATED}:
+            if ended is None or self.failure_reason_code is None or self.failure_category is None:
+                raise ContractError(f"{self.status.value} stages require end time, failure category, and reason code")
+
+        if self.status in {StageStatus.PENDING, StageStatus.RUNNING, StageStatus.SUCCEEDED} and (
+            self.failure_category is not None or self.failure_reason_code is not None
+        ):
+            raise ContractError(f"{self.status.value} stages cannot carry failure fields")
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -389,3 +550,22 @@ class StageRecord:
         ):
             payload[name] = list(payload[name])
         return payload
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> StageRecord:
+        if not isinstance(payload, dict):
+            raise ContractError("Stage Record must be an object")
+        known = set(cls.__dataclass_fields__)
+        _require_exact_fields("Stage Record", payload, known)
+        converted = dict(payload)
+        try:
+            converted["status"] = StageStatus(payload["status"])
+        except (TypeError, ValueError) as exc:
+            raise ContractError(f"Stage Record contains an unsupported status: {payload['status']!r}") from exc
+        try:
+            for name in ("dependency_stage_ids", "log_refs", "warning_codes", "resume_ancestry"):
+                converted[name] = tuple(payload[name])
+            converted["outputs"] = tuple(dict(item) for item in payload["outputs"])
+        except (TypeError, ValueError) as exc:
+            raise ContractError("Stage Record array fields must contain values of the declared shape") from exc
+        return cls(**converted)
