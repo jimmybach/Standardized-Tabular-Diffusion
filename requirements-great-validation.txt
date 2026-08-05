@@ -1,0 +1,21 @@
+# Frozen direct runtime for the official be-great 0.0.14 parity gate on Linux / Python 3.11.
+# PyTorch 2.3.0 (CPU) and the checksum-pinned be-great wheel are installed separately.
+accelerate==1.1.1
+chugchug==0.1.3
+datasets==3.1.0
+dill==0.3.8
+fsspec==2024.9.0
+huggingface-hub==0.26.5
+multiprocess==0.70.16
+numpy==1.26.4
+pandas==2.2.3
+pyarrow==18.1.0
+pytest==8.3.5
+PyYAML==6.0.2
+safetensors==0.4.5
+scikit-learn==1.5.2
+scipy==1.13.1
+tokenizers==0.20.3
+tqdm==4.66.5
+transformers==4.46.3
+xxhash==3.5.0

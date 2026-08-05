@@ -1740,6 +1740,424 @@
       },
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+    },
+    "great": {
+      "adapter_ids": [
+        "great"
+      ],
+      "authoritative_repository": "https://github.com/tabularis-ai/be_great",
+      "authority": "method-author",
+      "component_id": "great",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "great-declared-types-and-missing-values-v1",
+          "reason": "CSV inference does not preserve benchmark-declared roles and the official package does not define centralized missing-value imputation.",
+          "semantic_effect": "The adapter orders columns from DatasetSpec, validates finite numerical data, casts declared categoricals to strings, and rejects missing values before unchanged official APIs."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "great-scoped-random-state-v1",
+          "reason": "The official implementation consumes Python, NumPy, and PyTorch process-global random state.",
+          "semantic_effect": "The standardized seed and thread count are scoped around unchanged construction, fit, and sample calls, and caller state is restored afterward."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "great-safe-transformers-checkpoint-v1",
+          "reason": "The official model.pt checkpoint uses torch.load and is an executable deserialization boundary.",
+          "semantic_effect": "The fitted official model is persisted with Hugging Face safetensors plus typed JSON state and a file-level integrity manifest; executable checkpoint extensions are rejected."
+        }
+      ],
+      "dependency_resolution": {
+        "declared_requirement": "be-great 0.0.14 Requires-Dist metadata verified from the locked wheel",
+        "validation_environment_lock": "requirements-great-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/tabularis-ai/be_great/blob/b300f6123cf1d9590b76ea45cc23298df944a319/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "bytes": 54019,
+        "filename": "be_great-0.0.14-py3-none-any.whl",
+        "format": "wheel",
+        "name": "be-great",
+        "pypi_url": "https://pypi.org/project/be-great/0.0.14/",
+        "sha256": "4f6384ec4a736177ae2d1e6146951cfdfc764b1cc041ae5c2b155a99dd18cb74",
+        "url": "https://files.pythonhosted.org/packages/45/21/6e4a8b6ed6de892b27328979220b5c8df5ceac70df45fd744307c4075978/be_great-0.0.14-py3-none-any.whl",
+        "version": "0.0.14"
+      },
+      "patch_sets": [],
+      "reproduction_target": "method-author-official-be-great-package",
+      "source_package_comparison": {
+        "exact_package_files": 14,
+        "package_aggregate_sha256": "3e98e1e0e68ce614b62d425c8fcf559ab0387cbf85dd0e27166c22b360fcfaca",
+        "relation": "All 14 be_great package files in the wheel are byte-exact with the locked source tag and source distribution."
+      },
+      "upstream_commit": "b300f6123cf1d9590b76ea45cc23298df944a319",
+      "upstream_model_tree": "b2f1799f00557ca2021f4b73c9d3962d33ada806",
+      "upstream_tree": "82eccd92deb18d6138a4fd96a8e0eb097b38babb",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:cd6837498b6a20d45315ea887cfa69b75d12f17b181e749fecfcd924f5297c2e",
+          "artifact_id": 8917788372,
+          "downloaded_evidence_sha256": "c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf",
+          "evidence_file_sha256": "c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "great-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/great/native-parity-run-30974574472.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "be-great": "0.0.14",
+          "chugchug": "0.1.3",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "safetensors": "0.4.5",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "8667dbd7f2ac67eec6a8b573a54a13ce54527abcfa4fd5bbaca085d42203cfdd",
+        "level": "native-parity-validated",
+        "protocol_id": "be-great-official-package-parity-v1",
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 3,
+          "cases_total": 3,
+          "official_fit_executed": true,
+          "official_guided_sample_executed": true,
+          "package_unchanged": true,
+          "rng_and_thread_state_restored": true,
+          "safe_safetensors_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "state_tensors_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:16:03Z",
+        "validated_scope": {
+          "data": "flat-single-table-categorical-classification-missing-free",
+          "implementation": "method-author-official-be-great-package",
+          "pretrained_model_quality": "not-claimed"
+        },
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472/job/92205832162",
+        "workflow_run_id": 30974574472
+      }
+    },
+    "tabula": {
+      "adapter_ids": [
+        "tabula"
+      ],
+      "authoritative_repository": "https://github.com/zhao-zilong/Tabula",
+      "authority": "method-author",
+      "component_id": "tabula",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabula-declared-types-and-missing-values-v1",
+          "reason": "The upstream notebook flow does not receive DatasetSpec roles or centralized imputation state.",
+          "semantic_effect": "The adapter validates complete roles, finite numerical values, unambiguous column names, and missing-free input before unchanged source calls."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabula-bounded-sampling-v1",
+          "reason": "The official sample loop has no retry limit when generated rows repeatedly fail parsing.",
+          "semantic_effect": "Linux execution applies an external wall-clock alarm without changing the loop body; unsupported platforms fail closed unless unbounded execution is explicitly accepted."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabula-exact-row-boundary-v1",
+          "reason": "The official categorical-domain check runs after its internal row-count loop and can reduce the returned table below the requested count.",
+          "semantic_effect": "The adapter repeats unchanged official calls for only the remaining count, preserves their RNG stream and order, truncates only the final boundary, and fails after repeated zero-row batches."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabula-safe-transformers-checkpoint-v1",
+          "reason": "The official save/load path uses torch.save and torch.load.",
+          "semantic_effect": "Official model tensors use safetensors and label-encoder/model state uses typed JSON protected by a complete directory integrity manifest; restore preserves the method-author load path's training-mode semantics."
+        }
+      ],
+      "dependency_resolution": {
+        "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabula-source-manifest.json",
+        "validation_environment_lock": "requirements-tabula-validation.txt"
+      },
+      "distribution_form": "source-on-demand",
+      "license": "NONE-DECLARED",
+      "license_review": {
+        "license_file_present": false,
+        "redistribution_status": "not-authorized"
+      },
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "patch_sets": [],
+      "reproduction_target": "method-author-original-source",
+      "selected_runtime_files": 6,
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabula-source-manifest.json",
+      "upstream_commit": "a7d34a94adee5a269f6807395d0040d936bb0e60",
+      "upstream_model_tree": "6ee7614b3fb60930a41440e242fdade3145ab5b2",
+      "upstream_tree": "dd7d61fbbb071c240f13b6ba3bd05fdf69d25a13",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:7873df0e48931ebafeced5789da66c84bde0e07c20b97abe1758d692e8f20f38",
+          "artifact_id": 8917787656,
+          "downloaded_evidence_sha256": "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c",
+          "evidence_file_sha256": "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabula-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabula/native-parity-run-30974574505.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "accelerate": "1.1.1",
+          "datasets": "3.1.0",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "safetensors": "0.4.5",
+          "scikit-learn": "1.5.2",
+          "torch": "2.3.0+cpu",
+          "transformers": "4.46.3"
+        },
+        "environment_lock_sha256": "0f7339014d4ca23cabfce9cd85a363801bb39c5b7e7b7f4911348202f5d2b521",
+        "level": "native-parity-validated",
+        "protocol_id": "tabula-method-author-source-parity-v1",
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 3,
+          "cases_total": 3,
+          "official_fit_executed": true,
+          "official_sample_executed": true,
+          "rng_and_thread_state_restored": true,
+          "safe_safetensors_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "source_unchanged": true,
+          "state_tensors_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:16:05Z",
+        "validated_scope": {
+          "data": "flat-single-table-categorical-classification-missing-free",
+          "implementation": "method-author-original-source",
+          "upstream_license": "none-declared-release-blocked"
+        },
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505/job/92205832208",
+        "workflow_run_id": 30974574505
+      }
+    },
+    "tabsds": {
+      "adapter_ids": [
+        "tabsds"
+      ],
+      "authoritative_repository": "https://github.com/echaibub/TabSDS",
+      "authority": "method-author",
+      "component_id": "tabsds",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabsds-notebook-import-boundary-v1",
+          "reason": "The official Python helpers are notebook support files and one file assumes NumPy and pandas names already exist in its global namespace.",
+          "semantic_effect": "The adapter reconstructs that notebook namespace before executing the byte-exact source; no upstream statement or algorithm parameter is changed."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabsds-exact-row-boundary-v1",
+          "reason": "The official function always returns one table with the same row count as its input, while the benchmark accepts an arbitrary positive request count.",
+          "semantic_effect": "Requests are fulfilled by repeated unchanged same-size calls and deterministic truncation of only the final block."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabsds-safe-recipe-state-v1",
+          "reason": "TabSDS is non-parametric and does not require an executable fitted-object checkpoint.",
+          "semantic_effect": "Typed JSON stores only source, schema, recipe, row-count, and training-file digest identity; no row-level table is persisted."
+        }
+      ],
+      "dependency_resolution": {
+        "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabsds-source-manifest.json",
+        "validation_environment_lock": "requirements-tabsds-validation.txt"
+      },
+      "distribution_form": "source-on-demand",
+      "license": "NONE-DECLARED",
+      "license_review": {
+        "license_file_present": false,
+        "redistribution_status": "not-authorized"
+      },
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "patch_sets": [],
+      "reproduction_target": "method-author-python-simple-shuffle-path",
+      "selected_runtime_files": 2,
+      "source_manifest": "standardized_tabular_diffusion/resources/upstream/tabsds-source-manifest.json",
+      "upstream_commit": "866501495069c7e1300bdea91c411f1947d19f2f",
+      "upstream_model_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
+      "upstream_tree": "0f237c7b4fa02e06c525f29d1d83ff5c460816ee",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:3a3dbeef48583ea27f1ec45c063946b085d2d72a53e32024131125cb037d4e52",
+          "artifact_id": 8917776020,
+          "downloaded_evidence_sha256": "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66",
+          "evidence_file_sha256": "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabsds-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/tabsds/native-parity-run-30974574593.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "d03d355188ff0037407241a8b4573d368d25b27ee1f82d1d85fe6252a0f524d9",
+        "level": "native-parity-validated",
+        "protocol_id": "tabsds-official-source-parity-v1",
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "cases_passed": 9,
+          "cases_total": 9,
+          "requested_rows_per_case": 53,
+          "rng_restored": true,
+          "safe_json_checkpoint": true,
+          "sample_csv_bytes_exact": true,
+          "sample_frames_exact": true,
+          "source_unchanged": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T04:15:15Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free",
+          "implementation": "method-author-python-simple-shuffle-path",
+          "upstream_license": "none-declared-release-blocked"
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593/job/92205832345",
+        "workflow_run_id": 30974574593
+      }
+    },
+    "tabebm": {
+      "adapter_ids": [
+        "tabebm"
+      ],
+      "authoritative_repository": "https://github.com/andreimargeloiu/TabEBM",
+      "authority": "method-author",
+      "component_id": "tabebm",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabebm-declared-preprocessor-v1",
+          "reason": "Official generate expects a finite numerical matrix and integer class labels, while benchmark inputs are typed mixed tables.",
+          "semantic_effect": "Training-split numerical standardization, categorical ordinal coding, and target label coding are deterministic, persisted without rows, and inverted after unchanged official generation."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabebm-explicit-gated-model-boundary-v1",
+          "reason": "Full official generation downloads TabPFN-v2 weights subject to external terms and credentials.",
+          "semantic_effect": "Sampling fails closed unless the caller explicitly accepts the gated dependency; validation without credentials never pretends that full generation ran."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabebm-exact-row-boundary-v1",
+          "reason": "Official generation returns an equal block for every class rather than a single exact-size table.",
+          "semantic_effect": "The adapter requests ceiling(N/classes) per class and uses deterministic class-sorted round-robin truncation to exactly N rows."
+        }
+      ],
+      "dependency_resolution": {
+        "declared_requirement": "tabebm 2025.8.19 sdist metadata plus tabpfn 2.1.2",
+        "validation_environment_lock": "requirements-tabebm-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/andreimargeloiu/TabEBM/blob/72eb78dab896c7a8f39c4dcc288c834fd72eff2b/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-gated-tabpfn-full-generation-not-yet-validated",
+      "package_lock": {
+        "bytes": 19178,
+        "filename": "tabebm-2025.8.19.tar.gz",
+        "format": "source-distribution",
+        "name": "tabebm",
+        "pypi_url": "https://pypi.org/project/tabebm/2025.8.19/",
+        "sha256": "6111611326747a680f93dfadcbac1d602ce20cb722b9b6cbff1f556b9f48d503",
+        "url": "https://files.pythonhosted.org/packages/5d/95/a6f327ed88907ca68a7e49e65c9bebe3d9f35b3a623e1c8b89b15597c094/tabebm-2025.8.19.tar.gz",
+        "version": "2025.8.19"
+      },
+      "patch_sets": [],
+      "reproduction_target": "method-author-official-tabebm-package",
+      "source_package_comparison": {
+        "exact_runtime_files": 2,
+        "relation": "The PyPI source distribution runtime is byte-exact with the locked method-author tag."
+      },
+      "upstream_commit": "72eb78dab896c7a8f39c4dcc288c834fd72eff2b",
+      "upstream_model_tree": "5df0517922b9b03d29c5d84e46af3423537d801f",
+      "upstream_tree": "627af984e9447bf1a88f1d13e4c766704738ec28",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:5feb79b9441151d1efe72682fa326b9d987b70f5cc7ab61ccee87241d342a313",
+          "artifact_id": 8917783934,
+          "downloaded_evidence_sha256": "8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc",
+          "evidence_file_sha256": "8d461e440440d73213f31efe1b8086e9c78fed299822da2fe203ea62af3c21dc",
+          "expires_at": "2026-11-03T04:14:37Z",
+          "name": "tabebm-smoke-validation-evidence",
+          "permanent_evidence_path": "docs/evidence/tabebm/smoke-validation-run-30974574544.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "tabebm": "2025.8.19",
+          "tabpfn": "2.1.2",
+          "torch": "2.3.0+cpu"
+        },
+        "environment_lock_sha256": "af5fd5698667997857cb2196f846d7966dcc7c7b88d1e93f034541fbc065b2f3",
+        "level": "smoke-validated",
+        "protocol_id": "tabebm-official-package-core-validation-v1",
+        "pull_request_head_commit": "602e0dd01f6a9d8d8a3d424749d73427ac3667a8",
+        "repository_commit": "47b3a91a7b3493592232e236b03dba204126a1eb",
+        "result_summary": {
+          "adapter_cases_passed": 2,
+          "full_tabpfn_generation_executed": false,
+          "official_generate_delegation_exercised_with_test_double": true,
+          "official_pure_core_exercised": true,
+          "package_unchanged": true,
+          "safe_json_checkpoint": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544",
+        "status": "pass",
+        "validated_at": "2026-08-05T04:15:45Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free-classification",
+          "full_tabpfn_generation": "not-executed-gated",
+          "implementation": "method-author-official-tabebm-package-core"
+        },
+        "variants": ["binary", "multiclass"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544/job/92205832115",
+        "workflow_run_id": 30974574544
+      }
     }
   },
   "generated_date": "2026-08-04",

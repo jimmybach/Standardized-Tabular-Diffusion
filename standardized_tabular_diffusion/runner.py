@@ -261,6 +261,26 @@ def validate_action_inputs(
                 "or provide the same verified source_dir for train and sample"
             )
 
+    if config.model in {"tabsds", "tabula"} and action in {"train", "sample"}:
+        action_extra = config.train.extra if action == "train" else config.sample.extra
+        environment_name = (
+            "STANDARDIZED_TABULAR_DIFFUSION_TABSDS_SOURCE"
+            if config.model == "tabsds"
+            else "STANDARDIZED_TABULAR_DIFFUSION_TABULA_SOURCE"
+        )
+        status = source_status(
+            config.model,
+            repo_root=resolved_root,
+            source_dir=action_extra.get("source_dir") or os.environ.get(environment_name),
+        )
+        checked["model_source"] = status
+        if status["status"] != "ready":
+            missing.append(
+                f"checksum-locked method-author {config.model} source is not ready; run "
+                f"`python -m standardized_tabular_diffusion.cli materialize-model-source --model {config.model}` "
+                "or provide the same verified source_dir for train and sample"
+            )
+
     if action == "sample" and config.model in {
         "ctgan",
         "tvae",
@@ -290,8 +310,13 @@ def validate_action_inputs(
         if config.model == "nflow":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.nflow.json")
         if config.model == "tabsds":
-            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
-        record_user_checkpoint(checkpoint_path, code_executing=config.model not in {"arf", "bn", "nflow"})
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.tabsds.json")
+        if config.model == "tabebm":
+            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.tabebm.json")
+        record_user_checkpoint(
+            checkpoint_path,
+            code_executing=config.model not in {"arf", "bn", "nflow", "tabebm", "tabsds"},
+        )
 
     if action == "sample" and config.model == "arf":
         arf_checkpoint_path = Path(
@@ -369,11 +394,17 @@ def validate_action_inputs(
 
     if action == "sample" and config.model == "great":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "great_model")
-        record_user_checkpoint(checkpoint_path, allow_directory=True)
+        record_user_checkpoint(checkpoint_path, code_executing=False, allow_directory=True)
+        checked["checkpoint_integrity_path"] = str(Path(checkpoint_path) / "great-integrity.json")
+        if not (Path(checkpoint_path) / "great-integrity.json").is_file():
+            missing.append(f"checkpoint integrity manifest missing: {Path(checkpoint_path) / 'great-integrity.json'}")
 
     if action == "sample" and config.model == "tabula":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabula_model")
-        record_user_checkpoint(checkpoint_path, allow_directory=True)
+        record_user_checkpoint(checkpoint_path, code_executing=False, allow_directory=True)
+        checked["checkpoint_integrity_path"] = str(Path(checkpoint_path) / "tabula-integrity.json")
+        if not (Path(checkpoint_path) / "tabula-integrity.json").is_file():
+            missing.append(f"checkpoint integrity manifest missing: {Path(checkpoint_path) / 'tabula-integrity.json'}")
 
     if action == "sample" and config.model == "realtabformer":
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "realtabformer_model")

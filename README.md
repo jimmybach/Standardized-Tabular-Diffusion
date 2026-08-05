@@ -17,7 +17,9 @@ The goal is to preserve authoritative implementations whenever possible, record 
 
 The standardized layer is the preferred integration boundary. The vendored source trees are not assumed to be pristine until their revisions and local diffs have been audited.
 
-Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. At this stage, adapters remain experimental and unsupported. CoDi, CTAB-GAN, CTAB-GAN+, CTGAN, Goggle, TVAE, NRGBoost, REaLTabFormer, TabDDPM, TabDiff, TabSyn, STaSy, and SMOTE have passed separate Linux/Python 3.11 native-parity protocols, but that evidence does not make them benchmark-eligible or release-supported.
+Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. All 21 registered adapters now have retained Linux/Python 3.11 validation evidence: 20 are `native-parity-validated`, while TabEBM is deliberately limited to `smoke-validated` because real generation requires externally gated TabPFN-v2 access. Every adapter remains experimental, unsupported, and outside Official Results until the separate evaluation, dataset, runtime, governance, and release gates pass.
+
+The final validation wave promoted GReaT in [run `30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472), TabuLa in [run `30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505), and TabSDS in [run `30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) after exact official-package/source comparisons. TabEBM [run `30974574544`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544) verified the locked official package, deterministic core, safe state, and delegation boundary but explicitly records that full TabPFN generation did not run. TabuLa and TabSDS remain release-blocked because their public upstream repositories declare no license.
 
 STaSy now targets the checksum-locked baseline snapshot distributed by TabSyn at commit `cb5ac0f`, not the materially different method-author repository. All nine binary, multiclass, regression, and seed parity cases passed exactly in [run `30936275831`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831). This establishes `native-parity-validated` status only for the TabSyn snapshot; original-method, Official Results, benchmark-eligibility, and release-support claims remain blocked. See the [STaSy validation protocol](docs/STASY_VALIDATION.md) and [Chinese translation](docs/STASY_VALIDATION.zh-CN.md).
 
@@ -157,9 +159,9 @@ The current known-good reference stack is pinned in:
 Important current caveats:
 
 - `torch==2.3.0` is the current pinned benchmark runtime.
-- `transformers==4.46.3` is intentionally pinned because the vendored `great` code is more compatible there than on the newer 4.57 line.
+- `transformers==4.46.3` is intentionally pinned in the separate GReaT and TabuLa validation environments used for their retained official-package/source parity evidence.
 - `realtabformer` uses the checksum-pinned official 0.2.4 package. Its recorded adapter boundary disables unused torchvision probing during import, isolates official output paths, constrains state-dict loading, and works around the official `full_save_dir` JSON serialization defect without changing model state.
-- `tabula` uses a local Transformers-based compatibility adapter rather than the original notebook-driven upstream workflow.
+- `tabula` acquires six checksum-locked method-author files on demand and calls them unchanged; the standardized adapter supplies typed input, bounded/exact-row sampling, scoped randomness, and safe persistence boundaries.
 - `goggle` uses a frozen Python 3.11 validation stack and checksum-locked method-author source acquired on demand; only the GCN core has retained native-parity evidence, while SAGE and heterogeneous decoding remain unvalidated.
 - `tabebm` sample generation is intentionally opt-in and requires accepted Prior Labs TabPFN model terms plus authentication before it can run.
 

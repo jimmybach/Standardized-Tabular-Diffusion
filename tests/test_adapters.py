@@ -22,6 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import standardized_tabular_diffusion.models.paper_gap_baselines as paper_gap_baselines
 import standardized_tabular_diffusion.models.sample_baselines as sample_baselines
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
@@ -953,11 +954,29 @@ def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
     ).to_run_spec()
 
     assert adapter._model_root(spec).name == "tabula_model"
-    assert adapter._metadata_path(adapter._model_root(spec)).name == "adapter_metadata.json"
+    assert adapter._state_path(adapter._model_root(spec)).name == "tabula-state.json"
+    assert adapter._integrity_path(adapter._model_root(spec)).name == "tabula-integrity.json"
 
 
-def test_tabsds_train_and_sample_round_trip(tmp_path: Path) -> None:
+def test_tabsds_train_and_sample_round_trip(tmp_path: Path, monkeypatch) -> None:
     adapter = TabSDSAdapter(tmp_path)
+    source_root = tmp_path / "official-tabsds"
+    source_root.mkdir()
+    source = {
+        "upstream_commit": adapter.upstream_commit,
+        "manifest_sha256": "a" * 64,
+        "source_dir": str(source_root),
+    }
+
+    class FakeOfficialWrapper:
+        @staticmethod
+        def tab_sjppds(dat, **kwargs):
+            assert kwargs["shuffle_type"] == "simple"
+            return dat.sample(frac=1.0).reset_index(drop=True)
+
+    monkeypatch.setattr(adapter, "_resolve_source_root", lambda spec: (source_root, source))
+    monkeypatch.setattr(adapter, "_official_functions", lambda root: (object(), FakeOfficialWrapper))
+    monkeypatch.setattr(paper_gap_baselines, "validate_upstream_source", lambda *args: source)
     dataset_spec = DatasetSpec(
         name="adult",
         task_type="classification",
@@ -999,9 +1018,10 @@ def test_tabsds_train_and_sample_round_trip(tmp_path: Path) -> None:
     train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
     sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
-    checkpoint_path = Path(train_config.output_dir) / "tabsds.pkl"
+    checkpoint_path = Path(train_config.output_dir) / "model.tabsds.json"
     assert train_bundle.output_dir == Path(train_config.output_dir)
     assert checkpoint_path.exists()
+    assert checkpoint_path.with_name("model.tabsds.json.metadata.json").exists()
     assert sample_bundle.generated_sample_path is not None
     sampled = pd.read_csv(sample_bundle.generated_sample_path)
     assert list(sampled.columns) == ["age", "city", "label"]
@@ -1206,39 +1226,21 @@ def test_great_arf_and_tabebm_checkpoint_conventions(tmp_path: Path) -> None:
 
     assert great_adapter._model_root(great_spec).name == "great_model"
     assert arf_adapter._resolve_checkpoint_path(arf_spec).name == "model.arf.json"
-    assert tabebm_adapter._resolve_checkpoint_path(tabebm_spec).name == "model.pkl"
-    assert great_adapter._metadata_path(great_adapter._model_root(great_spec)).name == "adapter_metadata.json"
+    assert tabebm_adapter._resolve_checkpoint_path(tabebm_spec).name == "model.tabebm.json"
+    assert great_adapter._state_path(great_adapter._model_root(great_spec)).name == "great-state.json"
+    assert great_adapter._integrity_path(great_adapter._model_root(great_spec)).name == "great-integrity.json"
 
 
-def test_tabebm_surrogate_negatives_cover_one_feature_and_are_seeded() -> None:
-    one_feature = np.array([[0.1], [0.2]], dtype=np.float64)
-    augmented, labels = TabEBMAdapter._add_surrogate_negative_samples(
-        one_feature,
-        5.0,
-        rng=np.random.default_rng(7),
-    )
-    assert augmented.shape == (4, 1)
-    assert labels.tolist() == [0, 0, 1, 1]
-
-    multi_feature = np.zeros((2, 4), dtype=np.float64)
-    first, _ = TabEBMAdapter._add_surrogate_negative_samples(
-        multi_feature,
-        5.0,
-        rng=np.random.default_rng(11),
-    )
-    second, _ = TabEBMAdapter._add_surrogate_negative_samples(
-        multi_feature,
-        5.0,
-        rng=np.random.default_rng(11),
-    )
-    np.testing.assert_array_equal(first, second)
-
-    with pytest.raises(ValueError, match="at least one feature"):
-        TabEBMAdapter._add_surrogate_negative_samples(
-            np.empty((2, 0)),
-            5.0,
-            rng=np.random.default_rng(1),
-        )
+def test_tabebm_exact_row_boundary_is_deterministic() -> None:
+    blocks = {
+        0: np.asarray([[0.0], [1.0], [2.0]]),
+        1: np.asarray([[10.0], [11.0], [12.0]]),
+    }
+    rows, labels = TabEBMAdapter._round_robin(blocks, requested=5)
+    np.testing.assert_array_equal(rows[:, 0], np.asarray([0.0, 10.0, 1.0, 11.0, 2.0]))
+    assert labels.tolist() == [0, 1, 0, 1, 0]
+    with pytest.raises(RuntimeError, match="too few rows"):
+        TabEBMAdapter._round_robin({0: np.asarray([[0.0]])}, requested=2)
 
 
 def test_code_executing_checkpoint_loads_fail_closed_outside_output_dir(tmp_path: Path) -> None:
@@ -1367,7 +1369,7 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         ("nflow", "model.nflow.json"),
         ("goggle", "model.pt"),
         ("great", "great_model"),
-        ("tabsds", "tabsds.pkl"),
+        ("tabsds", "model.tabsds.json"),
         ("tabularargn", "tabularargn_workspace"),
         ("tabula", "tabula_model"),
         ("arf", "model.arf.json"),
@@ -1389,6 +1391,10 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         if model_name == "nflow":
             (tmp_path / "model.nflow.json.metadata.json").write_text("{}")
             (tmp_path / "model.nflow.weights.npz").write_text("stub")
+        if model_name == "great":
+            (checkpoint / "great-integrity.json").write_text("{}")
+        if model_name == "tabula":
+            (checkpoint / "tabula-integrity.json").write_text("{}")
         config = ExperimentConfig(
             model=model_name,
             dataset="adult",
@@ -1427,7 +1433,7 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
         ready = validate_action_inputs(config, "sample", dataset_spec=dataset_spec)
         assert ready["ready"] is True
 
-    tabebm_checkpoint = tmp_path / "model.pkl"
+    tabebm_checkpoint = tmp_path / "model.tabebm.json"
     tabebm_checkpoint.write_text("stub")
     tabebm_config = ExperimentConfig(
         model="tabebm",
@@ -1457,7 +1463,7 @@ def test_validate_action_inputs_rejects_tabebm_sample_without_opt_in(tmp_path: P
     dataset_spec.metadata_path.write_text("{}")
     dataset_spec.train_data_path.write_text("x\n1\n")
     dataset_spec.test_data_path.write_text("x\n1\n")
-    checkpoint = tmp_path / "model.pkl"
+    checkpoint = tmp_path / "model.tabebm.json"
     checkpoint.write_text("stub")
 
     config = ExperimentConfig(

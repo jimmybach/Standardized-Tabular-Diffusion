@@ -1,0 +1,137 @@
+name: GReaT Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/great-validation.yml"
+      - "requirements-great-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/great.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/great.py"
+      - "standardized_tabular_diffusion/validation/_tiny_lm.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/GREAT_VALIDATION*.md"
+      - "docs/evidence/great/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_great_validation.py"
+      - "tests/test_upstream_provenance.py"
+  pull_request:
+    paths:
+      - ".github/workflows/great-validation.yml"
+      - "requirements-great-validation.txt"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/models/great.py"
+      - "standardized_tabular_diffusion/models/__init__.py"
+      - "standardized_tabular_diffusion/registry.py"
+      - "standardized_tabular_diffusion/model_inventory.py"
+      - "standardized_tabular_diffusion/runner.py"
+      - "standardized_tabular_diffusion/validation/great.py"
+      - "standardized_tabular_diffusion/validation/_tiny_lm.py"
+      - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
+      - "docs/GREAT_VALIDATION*.md"
+      - "docs/evidence/great/**"
+      - "docs/UPSTREAM_SOURCE_AUDIT.md"
+      - "THIRD_PARTY_NOTICES.md"
+      - "tests/test_great_validation.py"
+      - "tests/test_upstream_provenance.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: great-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-parity:
+    name: Linux / Python 3.11 / official-package parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-great-validation.txt
+
+      - name: Initialize diagnostic evidence
+        env:
+          VALIDATION_EVIDENCE_PATH: ${{ runner.temp }}/great-evidence.json
+          VALIDATION_MODEL_ID: great
+          VALIDATION_PROTOCOL_ID: be-great-official-package-parity-v1
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = {
+              "schema_version": 1,
+              "protocol_id": os.environ["VALIDATION_PROTOCOL_ID"],
+              "model_id": os.environ["VALIDATION_MODEL_ID"],
+              "status": "fail",
+              "repository_commit": os.environ["GITHUB_SHA"],
+              "error_type": "PreProtocolFailure",
+              "error": "Validation did not reach or complete the protocol step.",
+          }
+          Path(os.environ["VALIDATION_EVIDENCE_PATH"]).write_text(
+              json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+
+      - name: Install frozen official GReaT environment
+        run: |
+          python -m pip install --upgrade "pip==25.1.1"
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.3.0"
+          python -m pip install -r requirements-great-validation.txt
+          mkdir -p "$RUNNER_TEMP/great-wheel"
+          curl --fail --location --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/great-wheel/be_great-0.0.14-py3-none-any.whl" \
+            "https://files.pythonhosted.org/packages/45/21/6e4a8b6ed6de892b27328979220b5c8df5ceac70df45fd744307c4075978/be_great-0.0.14-py3-none-any.whl"
+          echo "4f6384ec4a736177ae2d1e6146951cfdfc764b1cc041ae5c2b155a99dd18cb74  $RUNNER_TEMP/great-wheel/be_great-0.0.14-py3-none-any.whl" | sha256sum --check
+          python -m pip install --no-deps "$RUNNER_TEMP/great-wheel/be_great-0.0.14-py3-none-any.whl"
+          python -m pip install --no-deps .
+          python -m pip check
+
+      - name: Run locked-package contract tests
+        env:
+          GREAT_WHEEL_PATH: ${{ runner.temp }}/great-wheel/be_great-0.0.14-py3-none-any.whl
+        run: |
+          python -m pytest tests/test_great_validation.py tests/test_upstream_provenance.py -q
+
+      - name: Run real official-package-versus-adapter parity protocol
+        run: |
+          set +e
+          python -m standardized_tabular_diffusion.validation.great \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --output-dir "$RUNNER_TEMP/great-validation" \
+            --evidence-path "$RUNNER_TEMP/great-evidence.json" \
+            --wheel-path "$RUNNER_TEMP/great-wheel/be_great-0.0.14-py3-none-any.whl"
+          validation_status=$?
+          set -e
+          if [ "$validation_status" -ne 0 ] && [ ! -f "$RUNNER_TEMP/great-evidence.json" ]; then
+            GREAT_VALIDATION_STATUS="$validation_status" python -c 'import json, os, pathlib; pathlib.Path(os.environ["RUNNER_TEMP"]).joinpath("great-evidence.json").write_text(json.dumps({"schema_version": 1, "protocol_id": "be-great-official-package-parity-v1", "model_id": "great", "status": "fail", "repository_commit": os.environ["GITHUB_SHA"], "error_type": "PreProtocolFailure", "error": "The validation process exited before its internal diagnostic handler completed.", "process_exit_status": int(os.environ["GREAT_VALIDATION_STATUS"])}, indent=2, sort_keys=True) + "\n", encoding="utf-8")'
+          fi
+          exit "$validation_status"
+
+      - name: Retain validation evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: great-native-parity-evidence
+          path: ${{ runner.temp }}/great-evidence.json
+          if-no-files-found: error
+          retention-days: 90
