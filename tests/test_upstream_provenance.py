@@ -21,6 +21,7 @@ def test_source_lock_matches_primary_adapter_registry() -> None:
     assert isinstance(components, dict)
     assert set(components) == {
         "arf",
+        "bn",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",
@@ -160,6 +161,7 @@ def test_arf_official_package_and_retained_validation_are_exact_and_conservative
 def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
         "arf": "docs/evidence/arf/native-parity-run-30964711614.json",
+        "bn": "docs/evidence/bn/native-parity-run-30967779298.json",
         "codi": "docs/evidence/codi/native-parity-run-30941940893.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
@@ -177,6 +179,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     }
     for model_id in (
         "arf",
+        "bn",
         "codi",
         "ctab-gan",
         "ctab-gan-plus",
