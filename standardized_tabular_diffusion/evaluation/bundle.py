@@ -3,14 +3,23 @@
 from __future__ import annotations
 
 import copy
+import hashlib
+import json
+import math
 import re
 import uuid
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest, utc_timestamp
+from standardized_tabular_diffusion.evaluation.contracts import (
+    AtomicResult,
+    ContractError,
+    EvaluationRequest,
+    utc_timestamp,
+)
 from standardized_tabular_diffusion.evaluation.schema import validate_instance
 from standardized_tabular_diffusion.evaluation.serialization import (
     SerializationError,
@@ -95,13 +104,16 @@ def _redact(value: Any) -> Any:
     return value
 
 
-class IncompleteRunBundleWriter:
-    """Create and update only incomplete P1 bundles.
+def _request_external_artifacts(request: EvaluationRequest) -> list[dict[str, Any]]:
+    artifacts: list[dict[str, Any]] = []
+    if request.reference_artifact is not None:
+        artifacts.append(copy.deepcopy(request.reference_artifact))
+    artifacts.append(copy.deepcopy(request.sample_artifact))
+    return artifacts
 
-    Finalization belongs to the P2 vertical slice. This writer first publishes a
-    valid incomplete manifest, so a later interruption cannot leave a bundle
-    marked as finalized.
-    """
+
+class IncompleteRunBundleWriter:
+    """Transactionally build a Run Result and atomically publish final status."""
 
     def __init__(self, root: str | Path) -> None:
         self.root = Path(root)
@@ -161,7 +173,7 @@ class IncompleteRunBundleWriter:
             "finalization_status": "incomplete",
             "identity": {"request_fingerprint": fingerprint, "run_id": run_id},
             "files": inventory,
-            "external_artifacts": [copy.deepcopy(request.sample_artifact)],
+            "external_artifacts": _request_external_artifacts(request),
             "supersedes": [],
             "invalidates": [],
             "producer": copy.deepcopy(producer_record),
@@ -205,6 +217,139 @@ class IncompleteRunBundleWriter:
                 item["sha256"] = sha256_file(self._path(item["path"]))
         validate_instance("manifest", manifest)
         atomic_write_json(self._path("manifest.json"), manifest)
+        return validate_result_bundle(self.root)
+
+    def _load_incomplete_manifest(self) -> dict[str, Any]:
+        manifest = read_json(self._path("manifest.json"))
+        if not isinstance(manifest, dict) or manifest.get("finalization_status") != "incomplete":
+            raise BundleError("Bundle mutation requires a valid incomplete manifest")
+        return manifest
+
+    @staticmethod
+    def _inventory_item(manifest: dict[str, Any], relative: str) -> dict[str, Any] | None:
+        return next((item for item in manifest["files"] if item["path"] == relative), None)
+
+    def write_bytes(
+        self,
+        relative: str,
+        payload: bytes,
+        *,
+        media_type: str,
+        required: bool = True,
+    ) -> str:
+        """Publish one inventoried file without exposing a false present state."""
+
+        if relative in {"manifest.json", "checksums.sha256"}:
+            raise BundleError(f"Reserved bundle file requires dedicated handling: {relative}")
+        destination = self._path(relative)
+        manifest = self._load_incomplete_manifest()
+        item = self._inventory_item(manifest, relative)
+        if item is None:
+            item = {
+                "path": relative,
+                "required": required,
+                "status": "pending",
+                "media_type": media_type,
+                "sha256": None,
+                "reason_code": "file_write_in_progress",
+            }
+            manifest["files"].append(item)
+        else:
+            if item["required"] != required or item["media_type"] != media_type:
+                raise BundleError(f"Inventory contract differs for {relative}")
+            item.update(status="pending", sha256=None, reason_code="file_write_in_progress")
+        validate_instance("manifest", manifest)
+        atomic_write_json(self._path("manifest.json"), manifest)
+        atomic_write_bytes(destination, payload)
+        item.update(status="present", sha256=sha256_file(destination), reason_code=None)
+        validate_instance("manifest", manifest)
+        atomic_write_json(self._path("manifest.json"), manifest)
+        return item["sha256"]
+
+    def write_json(
+        self,
+        relative: str,
+        payload: Any,
+        *,
+        media_type: str = "application/json",
+        required: bool = True,
+        schema_name: str | None = None,
+    ) -> str:
+        if schema_name is not None:
+            validate_instance(schema_name, payload)
+        serialized = json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            indent=2,
+        ).encode("utf-8") + b"\n"
+        return self.write_bytes(relative, serialized, media_type=media_type, required=required)
+
+    def mark_not_applicable(self, relative: str, *, reason_code: str) -> None:
+        manifest = self._load_incomplete_manifest()
+        item = self._inventory_item(manifest, relative)
+        if item is None:
+            raise BundleError(f"Cannot resolve an absent inventory path: {relative}")
+        if item["required"]:
+            raise BundleError(f"Required bundle file cannot be not-applicable: {relative}")
+        path = self._path(relative)
+        if path.exists():
+            raise BundleError(f"Cannot mark an existing file not-applicable: {relative}")
+        item.update(status="not-applicable", sha256=None, reason_code=reason_code)
+        validate_instance("manifest", manifest)
+        atomic_write_json(self._path("manifest.json"), manifest)
+
+    def finalize(self) -> BundleValidationReport:
+        """Commit final checksums and the final manifest as the last atomic marker."""
+
+        validate_result_bundle(self.root)
+        manifest = self._load_incomplete_manifest()
+        unresolved = [
+            item["path"]
+            for item in manifest["files"]
+            if item["path"] not in {"checksums.sha256"} and item["status"] == "pending"
+        ]
+        if unresolved:
+            raise BundleError(f"Cannot finalize with unresolved inventory items: {sorted(unresolved)}")
+        checksum_item = self._inventory_item(manifest, "checksums.sha256")
+        if checksum_item is None:
+            raise BundleError("Manifest does not inventory checksums.sha256")
+        checksum_item.update(status="present", sha256=None, reason_code=None)
+        manifest_item = self._inventory_item(manifest, "manifest.json")
+        if manifest_item is None:
+            raise BundleError("Manifest does not inventory itself")
+        manifest_item.update(status="present", sha256=None, reason_code=None)
+        manifest["finalized_at"] = utc_timestamp()
+        manifest["finalization_status"] = "finalized"
+        validate_instance("manifest", manifest)
+        final_manifest = json.dumps(
+            manifest,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            indent=2,
+        ).encode("utf-8") + b"\n"
+
+        regular_files = {
+            path.relative_to(self.root).as_posix(): path
+            for path in self.root.rglob("*")
+            if path.is_file() and not path.is_symlink() and path.name != "checksums.sha256"
+        }
+        if set(regular_files) != {item["path"] for item in manifest["files"] if item["status"] == "present"} - {
+            "checksums.sha256"
+        }:
+            raise BundleError("Final inventory does not exactly match regular bundle files")
+        checksums: list[str] = []
+        for relative, path in sorted(regular_files.items()):
+            digest = (
+                hashlib.sha256(final_manifest).hexdigest()
+                if relative == "manifest.json"
+                else sha256_file(path)
+            )
+            checksums.append(f"{digest}  {relative}")
+        atomic_write_bytes(self._path("checksums.sha256"), ("\n".join(checksums) + "\n").encode("utf-8"))
+        atomic_write_bytes(self._path("manifest.json"), final_manifest)
         return validate_result_bundle(self.root)
 
     def append_event(
@@ -297,7 +442,10 @@ def _build_metadata(request: EvaluationRequest, run_id: str, created_at: str) ->
             "artifact_refs": [],
         },
         "coverage": {"requested_metrics": [copy.deepcopy(metric) for metric in request.metrics], "computed": 0},
-        "provenance": {"sample_artifact": copy.deepcopy(request.sample_artifact)},
+        "provenance": {
+            "reference_artifact": copy.deepcopy(request.reference_artifact),
+            "sample_artifact": copy.deepcopy(request.sample_artifact),
+        },
         "review": {"status": "not-reviewed"},
         "status": "incomplete",
     }
@@ -353,6 +501,8 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
 
     seen: set[str] = set()
     inventory_status: dict[str, str] = {}
+    inventory_checksum: dict[str, str | None] = {}
+    inventory_media_type: dict[str, str] = {}
     counts = {"present": 0, "pending": 0, "not-applicable": 0}
     for item in manifest["files"]:
         relative = validate_bundle_relative_path(item["path"])
@@ -360,12 +510,14 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             raise BundleError(f"Duplicate manifest path: {relative}")
         seen.add(relative)
         inventory_status[relative] = item["status"]
+        inventory_checksum[relative] = item["sha256"]
+        inventory_media_type[relative] = item["media_type"]
         counts[item["status"]] += 1
         path = bundle_root.joinpath(*relative.split("/"))
         if item["status"] == "present":
             if not path.is_file() or path.is_symlink():
                 raise BundleError(f"Manifest marks missing or unsafe file as present: {relative}")
-            if relative != "manifest.json" and item["sha256"] is None:
+            if relative not in {"manifest.json", "checksums.sha256"} and item["sha256"] is None:
                 raise BundleError(f"Present inventory item requires a checksum: {relative}")
             if item["reason_code"] is not None:
                 raise BundleError(f"Present inventory item cannot carry reason_code: {relative}")
@@ -393,6 +545,7 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
     config: dict[str, Any] | None = None
     metadata: dict[str, Any] | None = None
     summary: dict[str, Any] | None = None
+    artifact_index: dict[str, Any] | None = None
     if inventory_status.get("config.yaml") == "present":
         config = read_yaml_safe(config_path)
         if not isinstance(config, dict):
@@ -403,15 +556,69 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
     if inventory_status.get("summary.json") == "present":
         summary = _load_json_object(summary_path, "summary")
     if inventory_status.get("artifacts/index.json") == "present":
-        _load_json_object(artifact_index_path, "artifact-index")
+        artifact_index = _load_json_object(artifact_index_path, "artifact-index")
     if inventory_status.get("environment.json") == "present":
         environment = read_json(bundle_root / "environment.json")
         if not isinstance(environment, dict):
             raise BundleError("environment.json must be a JSON object")
+    stage_records: list[dict[str, Any]] = []
     for stage_name in ("prepare", "train", "sample", "validate", "evaluate", "aggregate", "report"):
         relative = f"stages/{stage_name}.json"
         if inventory_status.get(relative) == "present":
-            _load_json_object(bundle_root / "stages" / f"{stage_name}.json", "stage-record")
+            stage = _load_json_object(bundle_root / "stages" / f"{stage_name}.json", "stage-record")
+            if stage["stage_name"] != stage_name:
+                raise BundleError(f"Stage record name does not match path: {relative}")
+            stage_records.append(stage)
+    for stage in stage_records:
+        for output in stage["outputs"]:
+            relative = output["path"]
+            if inventory_status.get(relative) != "present":
+                raise BundleError(f"Stage output is not a present inventory item: {relative}")
+            if inventory_checksum.get(relative) != output["sha256"]:
+                raise BundleError(f"Stage output checksum differs from manifest: {relative}")
+
+    if artifact_index is not None:
+        indexed_ids: set[str] = set()
+        stages_by_name = {stage["stage_name"]: stage for stage in stage_records}
+        external_by_id: dict[str, dict[str, Any]] = {}
+        if config is not None:
+            request_for_artifacts = EvaluationRequest.from_dict(config)
+            external_by_id = {
+                artifact["artifact_id"]: artifact
+                for artifact in _request_external_artifacts(request_for_artifacts)
+            }
+        for artifact in artifact_index["artifacts"]:
+            artifact_id = artifact["artifact_id"]
+            if artifact_id in indexed_ids:
+                raise BundleError(f"Duplicate artifact index identity: {artifact_id}")
+            indexed_ids.add(artifact_id)
+            relative = artifact["path"]
+            if relative is None:
+                request_artifact = external_by_id.get(artifact_id)
+                if request_artifact is None or any(
+                    artifact[field] != request_artifact[field]
+                    for field in ("media_type", "sha256")
+                ):
+                    raise BundleError(f"External artifact index entry differs from request: {artifact_id}")
+                if artifact["external_uri"] != f"urn:sha256:{artifact['sha256']}":
+                    raise BundleError(f"External artifact URI is not content-addressed: {artifact_id}")
+                continue
+            if inventory_status.get(relative) != "present":
+                raise BundleError(f"Indexed local artifact is not present in the manifest: {relative}")
+            path = bundle_root.joinpath(*relative.split("/"))
+            if artifact["sha256"] != inventory_checksum.get(relative):
+                raise BundleError(f"Artifact index checksum differs from manifest: {relative}")
+            if artifact["media_type"] != inventory_media_type.get(relative):
+                raise BundleError(f"Artifact index media type differs from manifest: {relative}")
+            if artifact["byte_size"] != path.stat().st_size:
+                raise BundleError(f"Artifact index byte_size differs from file: {relative}")
+            producer_stage = artifact["producer_stage"]
+            if producer_stage is not None:
+                producer_record = stages_by_name.get(producer_stage)
+                if producer_record is None or relative not in {
+                    output["path"] for output in producer_record["outputs"]
+                }:
+                    raise BundleError(f"Artifact producer stage does not declare its output: {relative}")
     if inventory_status.get("logs/events.jsonl") == "present":
         _validate_event_log(bundle_root / "logs" / "events.jsonl")
 
@@ -437,7 +644,11 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             raise BundleError("metadata seeds do not match config")
         if metadata["coverage"].get("requested_metrics") != list(request.metrics):
             raise BundleError("metadata requested metrics do not match config")
-        if manifest["external_artifacts"] != [request.sample_artifact]:
+        if metadata["provenance"].get("reference_artifact") != request.reference_artifact:
+            raise BundleError("metadata reference provenance does not match config")
+        if metadata["provenance"].get("sample_artifact") != request.sample_artifact:
+            raise BundleError("metadata sample provenance does not match config")
+        if manifest["external_artifacts"] != _request_external_artifacts(request):
             raise BundleError("manifest external artifact does not match config")
 
     if manifest["finalization_status"] == "finalized":
@@ -445,6 +656,20 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             raise BundleError("A finalized bundle cannot contain pending inventory items")
         if not (bundle_root / "checksums.sha256").is_file():
             raise BundleError("A finalized bundle requires checksums.sha256")
+        if metadata is None or metadata["status"] != "finalized" or metadata["execution"]["ended_at"] is None:
+            raise BundleError("A finalized bundle requires terminal finalized metadata")
+        if summary is None or summary["terminal_status"] == "pending":
+            raise BundleError("A finalized bundle requires a terminal summary")
+        _validate_parquet_magic(bundle_root / "metrics.parquet")
+        if config is None or metadata is None:
+            raise BundleError("A finalized bundle requires config and metadata")
+        _validate_final_atomic_results(
+            bundle_root / "metrics.parquet",
+            manifest=manifest,
+            request=EvaluationRequest.from_dict(config),
+            metadata=metadata,
+            summary=summary,
+        )
         _validate_final_checksums(bundle_root)
     elif manifest["finalized_at"] is not None:
         raise BundleError("A non-finalized bundle cannot declare finalized_at")
@@ -494,6 +719,101 @@ def _validate_event_log(path: Path) -> None:
         if timestamp.tzinfo is None or timestamp.utcoffset() != timezone.utc.utcoffset(timestamp):
             raise BundleError(f"events.jsonl line {line_number} timestamp must identify UTC")
         canonical_json_bytes(event)
+
+
+def _validate_parquet_magic(path: Path) -> None:
+    try:
+        if path.stat().st_size < 8:
+            raise BundleError("metrics.parquet is too short to be a Parquet file")
+        with path.open("rb") as stream:
+            prefix = stream.read(4)
+            stream.seek(-4, 2)
+            suffix = stream.read(4)
+    except OSError as exc:
+        raise BundleError(f"Cannot inspect metrics.parquet: {exc}") from exc
+    if prefix != b"PAR1" or suffix != b"PAR1":
+        raise BundleError("metrics.parquet is not a structurally valid Parquet file")
+
+
+def _validate_final_atomic_results(
+    path: Path,
+    *,
+    manifest: dict[str, Any],
+    request: EvaluationRequest,
+    metadata: dict[str, Any],
+    summary: dict[str, Any],
+) -> None:
+    try:
+        import pyarrow.parquet as parquet
+    except ImportError as exc:
+        raise BundleError("Finalized bundle validation requires pyarrow") from exc
+    try:
+        records = parquet.read_table(path).to_pylist()
+        results = [AtomicResult.from_dict(record) for record in records]
+    except (OSError, ValueError, TypeError, ContractError) as exc:
+        raise BundleError(f"metrics.parquet contains invalid Atomic Results: {exc}") from exc
+    if not results:
+        raise BundleError("A finalized metrics.parquet must contain at least one Atomic Result")
+
+    requested = {(item["metric_id"], item["metric_version"]) for item in request.metrics}
+    model_id = (request.model or {}).get("model_id", "external")
+    seen_scopes: set[tuple[str, str, str]] = set()
+    for result in results:
+        if (result.metric_id, result.metric_version) not in requested:
+            raise BundleError(f"Atomic Result uses an unrequested metric: {result.metric_id}")
+        if (
+            result.run_id != manifest["bundle_id"]
+            or result.protocol_version != request.protocol["protocol_version"]
+            or result.dataset_id != request.dataset_profile["dataset_id"]
+            or result.model_id != model_id
+            or result.comparison_track != request.comparison_track
+            or result.generation_seed != request.generation_seed
+        ):
+            raise BundleError("Atomic Result scientific identity differs from the bundle request")
+        scope = (result.metric_id, result.scope_type, result.scope_id)
+        if scope in seen_scopes:
+            raise BundleError(f"Duplicate Atomic Result scope: {scope}")
+        seen_scopes.add(scope)
+
+    states = dict(sorted(Counter(result.state.value for result in results).items()))
+    warnings = sorted({warning for result in results for warning in result.warning_codes})
+    if summary["metric_state_counts"] != states:
+        raise BundleError("Summary metric_state_counts do not match metrics.parquet")
+    if summary["warnings"] != warnings:
+        raise BundleError("Summary warnings do not match metrics.parquet")
+    if summary["atomic_result_refs"] != [f"metrics.parquet#row={index}" for index in range(len(results))]:
+        raise BundleError("Summary Atomic Result references do not cover metrics.parquet exactly")
+    if metadata["coverage"].get("states") != states:
+        raise BundleError("Metadata state coverage does not match metrics.parquet")
+    if metadata["coverage"].get("computed") != states.get("computed", 0):
+        raise BundleError("Metadata computed coverage does not match metrics.parquet")
+
+    p2_summary_keys = {
+        "sdmetrics-column-shapes": "column_shapes",
+        "sdmetrics-column-pair-trends": "column_pair_trends",
+    }
+    fidelity = summary["dimensions"].get("fidelity", {})
+    if requested == {(metric_id, "1.0.0") for metric_id in p2_summary_keys}:
+        for metric_id, summary_key in p2_summary_keys.items():
+            contributions = [
+                result.aggregate_contribution
+                for result in results
+                if result.metric_id == metric_id and result.aggregate_contribution is not None
+            ]
+            reconstructed = sum(contributions) if contributions else None
+            reported = fidelity.get(summary_key)
+            if reconstructed is None:
+                if reported is not None:
+                    raise BundleError(f"Summary {summary_key} must be null without contributions")
+            elif not isinstance(reported, (int, float)) or not math.isclose(
+                reconstructed,
+                float(reported),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            ):
+                raise BundleError(f"Summary {summary_key} is not reproducible from Atomic Results")
+        if fidelity.get("combined_score") is not None:
+            raise BundleError("P2 finalized bundles must not contain a combined Fidelity score")
 
 
 def _validate_final_checksums(bundle_root: Path) -> None:

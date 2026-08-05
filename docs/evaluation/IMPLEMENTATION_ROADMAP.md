@@ -2,8 +2,8 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 passed; P2 is the next implementation phase
-- Roadmap version: 0.2.1
+- Status: P1 and P2 passed with retained Linux/Python 3.11 evidence
+- Roadmap version: 0.2.3
 - Last updated: 2026-08-05
 - Primary release environment: Linux and Python 3.11
 
@@ -38,7 +38,7 @@ This section supersedes the 2026-08-03 pre-P0 audit. Historical failures remain 
 
 ### 3.1 Current execution paths
 
-Two deliberately separate paths now exist:
+Three deliberately separate paths now exist:
 
 ~~~text
 Legacy compatibility path
@@ -50,9 +50,16 @@ EvaluationRequest -> strict contract/schema validation
                   -> registry/profile identity resolution
                   -> IncompleteRunBundleWriter
                   -> manifest/metadata/config/environment/summary/event-log validation
+
+P2 standalone table evaluation
+EvaluationRequest + Dataset Profile + reference/synthetic table
+                  -> canonical structural gate
+                  -> exact pinned SDMetrics Shape/Trend backend
+                  -> per-column/per-pair Atomic Results
+                  -> checksum-complete finalized Run Result bundle
 ~~~
 
-The legacy path remains diagnostic-only. The P1 path performs no metric computation and cannot finalize a result bundle. P2 will add the first standalone metric-execution path without routing through `evaluation/tabstruct.py`.
+The legacy path remains diagnostic-only. The P1 contract path remains available for incomplete-bundle construction. The independent P2 path now executes the first source-parity metric slice and finalizes bundles without routing through `evaluation/tabstruct.py`.
 
 ### 3.2 Current code disposition
 
@@ -63,20 +70,22 @@ The legacy path remains diagnostic-only. The P1 path performs no metric computat
 | [`evaluation/serialization.py`](../../standardized_tabular_diffusion/evaluation/serialization.py) | Canonical JSON, safe structured loading, hashing and atomic replacement | P1 active path; JSON/YAML duplicate keys and non-finite values fail closed |
 | [`evaluation/registry.py`](../../standardized_tabular_diffusion/evaluation/registry.py) | Data-driven Metric Registry and cumulative lifecycle validation | P1 active path; the eight pre-P1 records are explicitly `legacy-diagnostic` and non-official |
 | [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | Dataset/protocol loading, exact identity and legacy metadata import | P1 active path; duplicate identities and inconsistent profile references fail closed |
-| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | Auditable incomplete Run Result writer and cross-file validator | P1 active path; attempt IDs are distinct, manifests are allowlists, and interrupted event updates remain incomplete |
+| [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | Transactional Run Result writer, finalizer, and cross-file validator | P1 incomplete bundles remain supported; P2 writes checksums and publishes finalized status as the last atomic commit marker |
+| [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame canonical resolver and structural gate | P2 active path; exact columns, order, logical types, non-missing/nonfinite values, and row count fail closed |
+| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
+| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 active path; source aggregates are reconstructed and no combined Fidelity score is emitted |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | Ten Draft 2020-12 wire schemas | P1 canonical wire validators, packaged in the wheel |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Legacy metric records and non-official protocol profiles | P1 identity resources; no metric is source-parity validated or admitted to Official Results |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, and source identity resources | Eight legacy records remain registered; two P2 records are source-parity-validated but remain non-official |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection and validation plus legacy commands | P1 validation commands are active; legacy metric description is labeled diagnostic |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, `evaluate-table`, and legacy commands | P2 can evaluate external decoded tables and validate finalized bundles; legacy metric description remains diagnostic |
 | [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | P0 active and passing on Linux; reference trees are excluded from default discovery and distribution |
-| [`tests/evaluation/`](../../tests/evaluation) | Contract, schema, identity, registry/profile, bundle and CLI tests | P1-owned test suite; mocked tests make no scientific or source-parity claim |
+| [`tests/evaluation/`](../../tests/evaluation) | Contract, structural, source-parity, Atomic Result, interruption, bundle, and CLI tests | P1 regression tests and P2 direct-authoritative tests are separated by dependency and marker boundaries |
 
-### 3.3 Remaining gaps after P1
+### 3.3 Remaining gaps after P2 implementation
 
-- No new evaluation engine executes a scientific metric; only legacy diagnostic evaluation exists.
-- No metric in the new registry is beyond `registered`, and no metric may affect Official Results.
-- No `evaluate-table` command, canonical table resolver, structural gate, or per-column/per-pair execution exists yet.
-- P1 writes and validates incomplete bundles only; metric storage, checksums-last finalization, and immutable finalized bundles belong to P2.
+- P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
+- The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
+- P3 validity, P4 utility, approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
@@ -145,7 +154,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 |---|---|---|---|---|
 | P0 | Trustworthy development baseline | None | Passed | Core tests collect in a minimal environment; repository and reference tests are isolated |
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
-| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Not started | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
+| P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Not started | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
@@ -423,11 +432,11 @@ These are not reasons to invent temporary official defaults. Until approved, the
 
 ### M1 — evaluation foundation
 
-P0 and P1 pass. Contracts and tooling are usable, but no metric is yet advertised as source-parity validated. Current state: M1 passed with retained Linux/Python 3.11 evidence; P2 is the next phase.
+P0 and P1 pass, and M1 retains its Linux/Python 3.11 evidence. P2 now also has retained authoritative evidence for two non-official source-parity-validated metric records.
 
 ### M2 — trustworthy first report
 
-P2 passes. A user can evaluate a compatible synthetic table and receive a finalized, validated bundle containing structural validation, Shape, and Trend evidence. This is the first public-preview-capable evaluation slice, subject to repository-wide release gates.
+P2 passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906). A user can evaluate a compatible synthetic table and receive a finalized, validated bundle containing structural validation, Shape, and Trend evidence. This is the first public-preview-capable evaluation slice, subject to repository-wide release gates.
 
 ### M3 — benchmark dimensions
 
@@ -441,16 +450,7 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-After P1's authoritative evidence is retained, the next increment is P2's narrow vertical slice:
-
-1. define the isolated, pinned SDMetrics dependency profile and authoritative-call parity fixtures;
-2. resolve external CSV, Parquet, and DataFrame inputs into a lossless canonical table;
-3. implement the structural gate and denominator-complete per-column/per-pair Atomic Results;
-4. wrap Column Shapes and Column Pair Trends without using the legacy `evaluation/tabstruct.py` path;
-5. implement checksums-last finalization and the standalone `evaluate-table` CLI; and
-6. validate the complete slice on Linux/Python 3.11 before adding another metric family.
-
-This increment does not modify upstream algorithms, select imputation strategies, publish a leaderboard, or treat TabStruct reference code as an implementation dependency. Any upstream patch or semantic deviation remains a mandatory discussion checkpoint.
+The immediate increment is P3: implement validity rules and the already approved explicit preprocessing boundary on top of the finalized P2 bundle path. P3 must preserve fail-closed structural behavior, keep train-fitted imputation separate and explicit, and add no hidden repair. This work does not modify upstream algorithms, publish a leaderboard, or treat TabStruct reference code as an implementation dependency.
 
 ## 12. Related specifications
 

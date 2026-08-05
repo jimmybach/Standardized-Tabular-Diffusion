@@ -149,6 +149,7 @@ class EvaluationRequest:
     comparison_track: str
     generation_seed: int
     evaluator_seeds: tuple[int, ...]
+    reference_artifact: dict[str, Any] | None = None
     evaluator_profile: dict[str, str] | None = None
     hardware_profile: dict[str, str] | None = None
     model: dict[str, Any] | None = None
@@ -171,7 +172,11 @@ class EvaluationRequest:
             raise ContractError("evaluator_seeds must contain at least one integer")
         if len(set(self.evaluator_seeds)) != len(self.evaluator_seeds):
             raise ContractError("evaluator_seeds must not contain duplicates")
-        self._validate_artifact()
+        self._validate_artifact("sample_artifact", self.sample_artifact)
+        if self.reference_artifact is not None:
+            self._validate_artifact("reference_artifact", self.reference_artifact)
+            if self.reference_artifact["artifact_id"] == self.sample_artifact["artifact_id"]:
+                raise ContractError("reference and sample artifacts must use different artifact_id values")
         self._validate_identity_ref("dataset_profile", self.dataset_profile, "dataset_id", "dataset_profile_version")
         self._validate_identity_ref("protocol", self.protocol, "protocol_id", "protocol_version")
         if not isinstance(self.metrics, tuple) or not self.metrics:
@@ -217,31 +222,32 @@ class EvaluationRequest:
         except SerializationError as exc:
             raise ContractError(f"Evaluation Request is not canonically serializable: {exc}") from exc
 
-    def _validate_artifact(self) -> None:
-        if not isinstance(self.sample_artifact, dict):
-            raise ContractError("sample_artifact must be an object")
+    @staticmethod
+    def _validate_artifact(name: str, artifact: dict[str, Any]) -> None:
+        if not isinstance(artifact, dict):
+            raise ContractError(f"{name} must be an object")
         required = {"artifact_id", "media_type", "sha256"}
         optional = {"uri", "row_count"}
-        if not required.issubset(self.sample_artifact) or not set(self.sample_artifact).issubset(required | optional):
+        if not required.issubset(artifact) or not set(artifact).issubset(required | optional):
             raise ContractError(
-                "sample_artifact requires artifact_id, media_type, sha256, and optional uri or row_count"
+                f"{name} requires artifact_id, media_type, sha256, and optional uri or row_count"
             )
-        _require_identifier("sample_artifact.artifact_id", self.sample_artifact["artifact_id"])
-        _require_sha256("sample_artifact.sha256", self.sample_artifact["sha256"])
-        if not isinstance(self.sample_artifact["media_type"], str) or "/" not in self.sample_artifact["media_type"]:
-            raise ContractError("sample_artifact.media_type must be an Internet media type")
-        uri = self.sample_artifact.get("uri")
+        _require_identifier(f"{name}.artifact_id", artifact["artifact_id"])
+        _require_sha256(f"{name}.sha256", artifact["sha256"])
+        if not isinstance(artifact["media_type"], str) or "/" not in artifact["media_type"]:
+            raise ContractError(f"{name}.media_type must be an Internet media type")
+        uri = artifact.get("uri")
         if uri is not None and (not isinstance(uri, str) or not uri):
-            raise ContractError("sample_artifact.uri must be a non-empty string when present")
+            raise ContractError(f"{name}.uri must be a non-empty string when present")
         if uri is not None:
             parsed = urlsplit(uri)
             if not parsed.scheme or parsed.scheme.lower() == "file" or parsed.username or parsed.password:
-                raise ContractError("sample_artifact.uri must be a credential-free, non-file URI")
-        row_count = self.sample_artifact.get("row_count")
+                raise ContractError(f"{name}.uri must be a credential-free, non-file URI")
+        row_count = artifact.get("row_count")
         if row_count is not None and (
             isinstance(row_count, bool) or not isinstance(row_count, int) or row_count < 0
         ):
-            raise ContractError("sample_artifact.row_count must be a non-negative integer when present")
+            raise ContractError(f"{name}.row_count must be a non-negative integer when present")
 
     @staticmethod
     def _validate_identity_ref(name: str, reference: dict[str, str], id_key: str, version_key: str) -> None:
@@ -255,6 +261,8 @@ class EvaluationRequest:
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
+        if self.reference_artifact is None:
+            payload.pop("reference_artifact")
         payload["metrics"] = [dict(item) for item in self.metrics]
         payload["evaluator_seeds"] = list(self.evaluator_seeds)
         return payload
@@ -264,7 +272,13 @@ class EvaluationRequest:
         if not isinstance(payload, dict):
             raise ContractError("Evaluation Request must be an object")
         known = set(cls.__dataclass_fields__)
-        _require_exact_fields("Evaluation Request", payload, known)
+        missing_allowed = {"reference_artifact"}
+        unknown = set(payload) - known
+        missing = known - set(payload) - missing_allowed
+        if missing:
+            raise ContractError(f"Missing Evaluation Request fields: {sorted(missing)}")
+        if unknown:
+            raise ContractError(f"Unknown Evaluation Request fields: {sorted(unknown)}")
         converted = dict(payload)
         try:
             converted["metrics"] = tuple(dict(item) for item in payload["metrics"])

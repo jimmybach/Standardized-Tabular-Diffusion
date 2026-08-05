@@ -72,6 +72,10 @@ contingency_similarity = 1 - 0.5 × L1(P_real_joint, P_synthetic_joint)
 
 The report preprocesses a mixed pair by deriving histogram edges independently for the real and synthetic continuous columns. This differs from a direct lower-level `ContingencySimilarity` call, which can derive ten bins from real data and apply the same edges to both datasets. Spearman is supported by the lower-level correlation metric but is not the report default.
 
+At the pinned revision, `QualityReport` also applies an absolute real Pearson-correlation threshold of `0.5`, a real Cramér's-V association threshold of `0.3`, and `num_rows_subsample=50000`. A pair at or below its applicable real-data threshold returns a non-finite score and does not enter the property mean. P2 preserves such a pair as a denominator-visible `not_applicable` Atomic Result with reason `below_source_threshold`; it does not silently omit it.
+
+The pinned source delegates subsampling above 50,000 rows to pandas without passing `random_state`. P2 controls that exact source path with the single recorded evaluator seed, serializes source calls, and restores the caller's NumPy random state.
+
 Decision: the report behavior is the initial source-parity target. Spearman and common train-fitted bins are distinct experimental variants, even if later review finds them scientifically preferable.
 
 ### 3.3 Discriminator and C2ST
