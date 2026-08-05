@@ -1112,6 +1112,137 @@
         "status": "passed-native-parity-validated"
       }
     },
+    "tabularargn": {
+      "adapter_ids": [
+        "tabularargn"
+      ],
+      "authoritative_repository": "https://github.com/mostly-ai/mostlyai-engine",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabularargn-output-workspace-v1",
+          "reason": "The official estimator defaults to a temporary workspace whose lifetime is tied to the in-process object.",
+          "semantic_effect": "The unchanged official workspace_dir argument is placed beneath output_dir so the method-author ModelStore persists across standardized train and sample actions."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabularargn-declared-types-v1",
+          "reason": "CSV inference can represent declared categorical targets and features as integers even though DatasetSpec marks them categorical.",
+          "semantic_effect": "Declared categorical features and classification targets are converted to strings before the unchanged official fit path; declared numerical roles are checked for finite numeric values."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabularargn-sampling-seed-v1",
+          "reason": "The official estimator applies random_state during fit but its sample method does not reset process-global generators for a later independent sample action.",
+          "semantic_effect": "The official public set_random_state function receives the standardized sample seed immediately before the unchanged public generate function."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabularargn-safe-persistent-artifact-v1",
+          "reason": "The legacy adapter pickled the estimator and retained the complete official workspace, including raw and encoded training rows.",
+          "semantic_effect": "The adapter persists only the official ModelStore workspace, removes OriginalData after fit, and verifies every retained file before generation. Official 2.6.2 loads model weights with torch weights_only=True; no package source or model state is changed."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabularargn-benchmark-category-domain-v1",
+          "reason": "The package default may emit its synthetic _RARE_ sentinel, while the benchmark output contract forbids categories outside the training domain.",
+          "semantic_effect": "The official rare_category_replacement_method=SAMPLE option is the standardized default. It suppresses the sentinel through the method-author sampler without changing training or source."
+        }
+      ],
+      "component_id": "tabularargn",
+      "dependency_resolution": {
+        "declared_requirement": "Python >=3.11,<3.14 with mostlyai-engine 2.6.2 direct dependencies",
+        "method_author_lock": "mostly-ai/mostlyai-engine uv.lock at tag 2.6.2",
+        "validation_environment_lock": "requirements-tabularargn-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "Apache-2.0",
+      "license_url": "https://github.com/mostly-ai/mostlyai-engine/blob/2.6.2/LICENSE",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-resource-and-release-gates",
+      "package_lock": {
+        "bytes": 185077,
+        "filename": "mostlyai_engine-2.6.2-py3-none-any.whl",
+        "installed_files_verified": 53,
+        "manifest": "standardized_tabular_diffusion/resources/upstream/tabularargn-wheel-manifest.json",
+        "name": "mostlyai-engine",
+        "pypi_url": "https://pypi.org/project/mostlyai-engine/2.6.2/",
+        "sha256": "3ead3770c936919f8fce4e1f9fffd271ffdd490f0292c2ab9a42cb4bafe3caea",
+        "version": "2.6.2",
+        "wheel_license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+      },
+      "patch_sets": [],
+      "release": {
+        "published_at": "2026-05-08T12:13:31.234355Z",
+        "tag": "2.6.2",
+        "tag_commit": "0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+        "tag_tree": "199a4085315e601261898007b0dd4ac532d355fe"
+      },
+      "reproduction_target": "method-author-official-flat-tabular-package",
+      "source_archive_lock": {
+        "bytes": 671861,
+        "sha256": "d80cd89b14cdf793e07a2e5b53abe36b5824376d6aa73ae63c56052cf9043c66",
+        "url": "https://codeload.github.com/mostly-ai/mostlyai-engine/zip/0b96f02e4fad47c7c19c985fda4311230e20bbb5"
+      },
+      "source_license_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "upstream_commit": "0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+      "upstream_tree": "199a4085315e601261898007b0dd4ac532d355fe",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:52797918884068f13dcd35644a81e9b5c6bdf736ab76619db4f21fe116bb17f0",
+          "artifact_id": 8913167756,
+          "evidence_file_sha256": "411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec",
+          "permanent_evidence_path": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
+          "retention_days": 90
+        },
+        "environment": {
+          "mostlyai_engine": "2.6.2",
+          "numpy": "2.2.6",
+          "pandas": "3.0.2",
+          "platform": "Linux-6.17.0-1020-azure-x86_64-with-glibc2.39",
+          "python": "3.11.15",
+          "scikit_learn": "1.8.0",
+          "torch": "2.11.0"
+        },
+        "environment_lock_sha256": "3af2ad2c9748dceeb5e8aaf80cc7b208b980a1b4baf938cca3432f4e0b08c877",
+        "job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30961590047/job/92166481714",
+        "level": "native-parity-validated",
+        "protocol_id": "tabularargn-official-package-parity-v2",
+        "pull_request_head_commit": "cdc7a0ce150c22f703448c1fcbe8e3b9b50c07c3",
+        "repository_commit": "e5129b8799beb1b792c882a9387dbcc1f13a39ce",
+        "result_summary": {
+          "adapter_metadata_valid": true,
+          "categorical_domains_valid": true,
+          "checkpoint_file_bytes_exact": true,
+          "checkpoint_tensor_values_exact": true,
+          "contract_normalized_samples_exact": true,
+          "finite_numerical_output": true,
+          "missing_values": 0,
+          "model_config_semantics_exact": true,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_and_encoded_training_data_pruned": true,
+          "raw_dtype_difference_recorded": true,
+          "raw_samples_exact": false,
+          "requested_rows_exact": true,
+          "sample_bytes_exact": true,
+          "seed_cases": [0, 19, 73],
+          "target_stats_semantics_exact": true,
+          "variants": ["binary", "multiclass", "regression"]
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30961590047",
+        "status": "pass",
+        "workflow_run_id": 30961590047
+      },
+      "wheel_source_comparison": {
+        "exact_shared_source_files": 50,
+        "shared_source_files": 50,
+        "tag_only_package_source_files": [],
+        "wheel_only_source_files": []
+      }
+    },
     "tabsyn": {
       "adapter_ids": [
         "tabsyn"

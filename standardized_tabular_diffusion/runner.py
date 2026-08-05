@@ -238,8 +238,7 @@ def validate_action_inputs(
         status = source_status(
             "goggle",
             repo_root=resolved_root,
-            source_dir=action_extra.get("source_dir")
-            or os.environ.get("STANDARDIZED_TABULAR_DIFFUSION_GOGGLE_SOURCE"),
+            source_dir=action_extra.get("source_dir") or os.environ.get("STANDARDIZED_TABULAR_DIFFUSION_GOGGLE_SOURCE"),
         )
         checked["model_source"] = status
         if status["status"] != "ready":
@@ -261,7 +260,6 @@ def validate_action_inputs(
         "arf",
         "tabebm",
         "tabsds",
-        "tabularargn",
     }:
         checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pkl")
         if config.model == "ctab-gan-plus":
@@ -274,8 +272,6 @@ def validate_action_inputs(
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "model.pt")
         if config.model == "tabsds":
             checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabsds.pkl")
-        if config.model == "tabularargn":
-            checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn.pkl")
         record_user_checkpoint(checkpoint_path)
 
     if action == "sample" and config.model == "goggle":
@@ -290,9 +286,7 @@ def validate_action_inputs(
 
     if action == "sample" and config.model in {"stasy", "codi"}:
         if config.model == "stasy":
-            stasy_checkpoint_path = (
-                Path(config.output_dir) / "ckpt" / config.dataset / "model.pth"
-            )
+            stasy_checkpoint_path = Path(config.output_dir) / "ckpt" / config.dataset / "model.pth"
             stasy_metadata_path = Path(config.output_dir) / "stasy-model-metadata.json"
             checked["checkpoint_path"] = str(stasy_checkpoint_path)
             checked["checkpoint_metadata_path"] = str(stasy_metadata_path)
@@ -338,6 +332,19 @@ def validate_action_inputs(
             config.sample.extra.get(
                 "checkpoint_metadata_path",
                 Path(config.output_dir) / "realtabformer-model-metadata.json",
+            )
+        )
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        if not metadata_path.exists():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+
+    if action == "sample" and config.model == "tabularargn":
+        checkpoint_path = config.sample.checkpoint_path or str(Path(config.output_dir) / "tabularargn_workspace")
+        record_user_checkpoint(checkpoint_path)
+        metadata_path = Path(
+            config.sample.extra.get(
+                "checkpoint_metadata_path",
+                Path(config.output_dir) / "tabularargn-model-metadata.json",
             )
         )
         checked["checkpoint_metadata_path"] = str(metadata_path)
