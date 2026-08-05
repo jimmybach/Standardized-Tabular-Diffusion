@@ -1,6 +1,6 @@
 {
   "profile_schema_version": "1.0.0",
-  "dataset_profile_version": "1.0.0-reviewed",
+  "dataset_profile_version": "1.1.0-reviewed",
   "dataset_id": "adult",
   "display_name": "UCI Adult",
   "dataset_version": "uci-2-7537312dd56c",
@@ -17,6 +17,10 @@
     {
       "version": "1.0.0-reviewed",
       "change": "Replaced unbound tracked derivatives with the checksum-pinned official UCI Adult train/test split and train-fitted preprocessing."
+    },
+    {
+      "version": "1.1.0-reviewed",
+      "change": "Added the machine-readable P3 hard column validity contract without promoting observed numerical ranges or pending semantic constraints."
     }
   ],
   "suite_membership": ["diagnostic"],
@@ -110,16 +114,49 @@
     {"task_id":"predict-income-class","target_column_id":"income","task_type":"classification","status":"reviewed","primary_metric_review":"pending evaluation-protocol implementation"}
   ],
   "validity": {
-    "status": "partially-reviewed",
-    "constraints": [
-      {"constraint_id":"observed-integer-ranges","rule":"Official source integers must stay within the checksum-bound observed ranges during parsing; generative validity policy remains subject to protocol review."},
-      {"constraint_id":"declared-categorical-domains","rule":"Categorical source values must match adult.names, with ? accepted only in the three declared nullable features."},
-      {"constraint_id":"train-only-imputation","rule":"All missing-value statistics are fitted on adult.data and applied unchanged to adult.test."},
-      {"constraint_id":"official-row-overlap","rule":"Preserve the official split despite 23 raw and 24 processed unique rows appearing in both train and test."},
-      {"constraint_id":"education-consistency-pending","rule":"The semantic relation between education and education.num requires an explicit validity implementation before scoring."},
-      {"constraint_id":"fairness-review-pending","rule":"Fairness and subgroup reporting must be reviewed before Official Results admission."}
+    "contract_schema_version": "1.0.0",
+    "status": "reviewed-diagnostic",
+    "hard_column_rules": [
+      {
+        "rule_id": "model-input-not-null",
+        "rule_type": "not_null",
+        "selector": {"nullable_model_input": false},
+        "parameters": {},
+        "evidence": {"source_type": "recorded-human-review", "reference": "Dataset Profile model-input contract reviewed on 2026-08-03."},
+        "severity": "hard",
+        "version": "1.0.0"
+      },
+      {
+        "rule_id": "finite-numerical-output",
+        "rule_type": "finite",
+        "selector": {"semantic_types": ["continuous", "integer"]},
+        "parameters": {},
+        "evidence": {"source_type": "recorded-human-review", "reference": "Canonical decoded numerical model outputs must be finite."},
+        "severity": "hard",
+        "version": "1.0.0"
+      },
+      {
+        "rule_id": "integer-semantics",
+        "rule_type": "integer",
+        "selector": {"semantic_types": ["integer"]},
+        "parameters": {},
+        "evidence": {"source_type": "dataset-documentation", "reference": "UCI Adult adult.names declares these fields as integer-valued continuous attributes."},
+        "severity": "hard",
+        "version": "1.0.0"
+      },
+      {
+        "rule_id": "declared-category-vocabulary",
+        "rule_type": "allowed_values",
+        "selector": {"semantic_types": ["categorical", "boolean"], "valid_domain_keys": ["values"]},
+        "parameters": {"source": "valid_domain.values"},
+        "evidence": {"source_type": "dataset-documentation", "reference": "Checksum-pinned UCI Adult adult.names categorical vocabularies."},
+        "severity": "hard",
+        "version": "1.0.0"
+      }
     ],
-    "domain_range_review": "source parsing reviewed; generative semantic constraints pending"
+    "cross_column_constraints": [],
+    "soft_diagnostics": ["observed-range-exceedance", "official-row-overlap"],
+    "unresolved_reviews": ["authoritative-numerical-bounds", "education-to-education-num-consistency", "fairness-and-subgroup-reporting"]
   },
   "privacy": {
     "status": "review-required",

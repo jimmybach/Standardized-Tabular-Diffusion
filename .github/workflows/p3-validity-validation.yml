@@ -1,0 +1,143 @@
+name: P3 Validity and Preprocessing Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p3-validity-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p3-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/__init__.py"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/dataset_onboarding.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/preprocessing.py"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p3_validity.py"
+      - "tests/evaluation/**"
+      - "tests/test_dataset_onboarding.py"
+      - "tests/test_preprocessing.py"
+  pull_request:
+    paths:
+      - ".github/workflows/p3-validity-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p3-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/__init__.py"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/dataset_onboarding.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/preprocessing.py"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p3_validity.py"
+      - "tests/evaluation/**"
+      - "tests/test_dataset_onboarding.py"
+      - "tests/test_preprocessing.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p3-validity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p3-validity:
+    name: Linux / Python 3.11 / validity and preprocessing boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install exact P3 environment
+        run: |
+          python -m pip install ".[validity,dev]"
+          python -m pip check
+
+      - name: Run P3 rule, preprocessing, bundle, registry, and CLI tests
+        run: >-
+          python -m pytest
+          tests/evaluation/test_p3_validity.py
+          tests/evaluation/test_p3_evaluate_table.py
+          tests/evaluation/test_registry_and_profiles.py
+          tests/evaluation/test_contracts_and_schemas.py
+          tests/evaluation/test_bundle.py
+          tests/test_preprocessing.py
+          tests/test_dataset_onboarding.py
+          tests/test_p3_retained_evidence.py
+
+      - name: Lint and type-check P3 surfaces
+        run: |
+          python -m ruff check standardized_tabular_diffusion tests/evaluation tests/test_preprocessing.py tests/test_dataset_onboarding.py
+          python -m mypy
+
+      - name: Generate P3 exit-gate evidence
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p3_validity
+          --output "${RUNNER_TEMP}/p3-validity-evidence.json"
+          --require-primary-environment
+
+      - name: Build and install the distribution artifact
+        shell: bash
+        run: |
+          python -m build
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          cd "${RUNNER_TEMP}"
+          std-tabular-diffusion list-protocols > p3-packaged-protocols.json
+          python -c "from standardized_tabular_diffusion.evaluation.validity import validate_validity_profile; print(validate_validity_profile)"
+
+      - name: Preserve pre-protocol failure evidence
+        if: always()
+        shell: bash
+        run: |
+          if [[ ! -f "${RUNNER_TEMP}/p3-validity-evidence.json" ]]; then
+            python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          output = Path(os.environ["RUNNER_TEMP"]) / "p3-validity-evidence.json"
+          output.write_text(
+              json.dumps(
+                  {
+                      "evidence_schema_version": "1.0.0",
+                      "protocol_id": "p3-validity-and-preprocessing-v1",
+                      "phase": "P3",
+                      "status": "fail",
+                      "repository_commit": os.environ.get("GITHUB_SHA", "unknown"),
+                      "error_type": "PreProtocolFailure",
+                      "error": "A required P3 workflow step failed before evidence generation."
+                  },
+                  indent=2,
+                  sort_keys=True,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+          fi
+
+      - name: Upload P3 evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: p3-validity-evidence
+          path: ${{ runner.temp }}/p3-validity-evidence.json
+          if-no-files-found: error
+          retention-days: 90

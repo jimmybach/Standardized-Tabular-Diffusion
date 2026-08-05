@@ -1,0 +1,106 @@
+{
+  "registry_collection_schema_version": "1.0.0",
+  "common": {
+    "registry_schema_version": "1.0.0",
+    "metric_version": "1.0.0",
+    "dimension": "validity",
+    "definition_origin": "benchmark-native",
+    "planned_leaderboard_role": "diagnostic",
+    "owner": "repository-maintainers",
+    "lifecycle_status": "unit-validated",
+    "review_record": {
+      "registered_by": "p3-validity-implementation",
+      "registered_at": "2026-08-05T00:00:00Z",
+      "reviews": [
+        {
+          "review_type": "definition-and-implementation",
+          "reviewer": "repository-maintainers",
+          "reviewed_at": "2026-08-05T00:00:00Z",
+          "decision": "approved",
+          "evidence_ref": "docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.md"
+        }
+      ]
+    },
+    "source": {
+      "method_references": ["Standardized Tabular Diffusion Evaluation Protocol section 8"],
+      "upstream": "https://github.com/jimmybach/Standardized-Tabular-Diffusion",
+      "revision": "p3-validity-contract-1.0.0",
+      "implementation_symbol": "overridden-per-record",
+      "source_authority": "local",
+      "implementation_mode": "local-reimplementation",
+      "retrieved_date": "2026-08-05",
+      "integrity_hash": null,
+      "license": "Repository license",
+      "attribution": ["Benchmark-native definition; do not attribute its formulas to PAFT or SDMetrics."],
+      "known_deviations": []
+    },
+    "semantics": {
+      "supported_table_types": ["decoded single table"],
+      "supported_column_types": ["continuous", "integer", "categorical", "boolean", "datetime", "string"],
+      "required_dataset_profile_metadata": ["validity.contract_schema_version", "validity.hard_column_rules", "validity.cross_column_constraints"],
+      "input_view": "Immutable original decoded synthetic output after the P3 structural gate; no evaluator repair",
+      "fitted_on": "none",
+      "output": {"shape": "scalar", "unit": "satisfaction-rate"},
+      "raw_range": {"minimum": 0.0, "maximum": 1.0},
+      "raw_direction": "maximize",
+      "target_value": null,
+      "undefined_conditions": ["A reviewed constraint has no applicable synthetic rows."],
+      "minimum_support": {"synthetic_rows": 1},
+      "randomness": {"deterministic": true, "seed_source": "recorded but unused"},
+      "default_parameters": {"evaluation_repair_applied": false},
+      "allowed_overrides": [],
+      "normalization": {"function": "identity", "version": "1.0.0"},
+      "aggregation": {"rule": "overridden-per-record", "version": "1.0.0"},
+      "uncertainty": {"procedure": "none in P3"},
+      "failure_contribution_policy": {
+        "computed": "Contribute with the protocol-defined equal weight.",
+        "mathematically_undefined": "Zero weight; preserve state.",
+        "insufficient_support": "Zero weight; preserve state.",
+        "not_applicable": "Zero weight; preserve state and denominator coverage.",
+        "implementation_failure": "Zero weight; mark the run partial and preserve evidence.",
+        "resource_failure": "Zero weight; mark the run partial and preserve evidence."
+      }
+    },
+    "validation": {
+      "unit_test_evidence": ["tests/evaluation/test_p3_validity.py"],
+      "boundary_test_evidence": ["tests/evaluation/test_p3_evaluate_table.py", "tests/test_preprocessing.py"],
+      "source_parity_evidence": [],
+      "numerical_tolerance": {"relative": 1e-12, "absolute": 1e-12},
+      "reference_fixtures": ["hand-computable mixed-type and cross-column fixtures"],
+      "supported_environment": {"primary": "Linux with Python 3.11"},
+      "unresolved_limitations": ["Current reviewed dataset profiles do not promote pending numerical ranges or cross-column relationships to hard constraints."],
+      "release_decision": "diagnostic-only"
+    },
+    "lifecycle_evidence": {
+      "definition_review": {"decision": "approved", "reviewer": "repository-maintainers", "reviewed_at": "2026-08-05T00:00:00Z", "evidence_refs": ["docs/evaluation/EVALUATION_PROTOCOL.md", "docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.md"]},
+      "implementation": {"decision": "approved", "reviewer": "repository-maintainers", "reviewed_at": "2026-08-05T00:00:00Z", "evidence_refs": ["standardized_tabular_diffusion/evaluation/validity.py"]},
+      "unit_validation": {"decision": "approved", "reviewer": "repository-maintainers", "reviewed_at": "2026-08-05T00:00:00Z", "evidence_refs": ["tests/evaluation/test_p3_validity.py", "tests/evaluation/test_p3_evaluate_table.py"]},
+      "source_parity": null,
+      "protocol_freeze": null,
+      "release_approval": null
+    },
+    "admission": {
+      "official_results_allowed": false,
+      "compatibility_version": "p3-validity-0.3.0",
+      "reason": "P3 is unit-validated diagnostic infrastructure; protocol freeze and release approval remain later gates."
+    }
+  },
+  "records": [
+    {
+      "metric_id": "std-tabular-column-validity",
+      "display_name": "Standardized Tabular Column Validity",
+      "subdimension": "column-validity",
+      "description": "The per-column rate of synthetic cells satisfying every reviewed hard rule, aggregated as an equal-column mean.",
+      "source": {"implementation_symbol": "standardized_tabular_diffusion.evaluation.validity.evaluate_validity"},
+      "semantics": {"aggregation": {"rule": "Equal mean across all canonical model-view columns.", "version": "1.0.0"}}
+    },
+    {
+      "metric_id": "std-tabular-constraint-validity",
+      "display_name": "Standardized Tabular Cross-Column Constraint Validity",
+      "subdimension": "cross-column-constraint-validity",
+      "description": "The per-constraint rate of applicable synthetic rows satisfying a reviewed hard cross-column constraint.",
+      "source": {"implementation_symbol": "standardized_tabular_diffusion.evaluation.validity.evaluate_validity"},
+      "semantics": {"aggregation": {"rule": "Equal mean across reviewed constraints with at least one applicable row; not applicable when none compute.", "version": "1.0.0"}}
+    }
+  ]
+}

@@ -109,6 +109,8 @@ The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility.
 
 The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P2 now implements the first complete slice: a Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete per-column/per-pair results, and interruption-safe finalized bundles. P2 passed its [authoritative Linux/Python 3.11 workflow](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), with [machine-readable evidence](docs/evidence/evaluation/p2-shape-trend-run-31025796906.json) retained. The two metrics remain diagnostic pending later protocol and release gates; see the [P2 guide](docs/evaluation/P2_SHAPE_TREND_EVALUATION.md).
 
+P3 adds benchmark-native per-column and reviewed cross-column Validity, original-output evidence, a closed declarative rule language, and the explicit train-only mean/mode preprocessing boundary. Generated data is never silently repaired. Current observed numerical ranges and unresolved semantic or medical constraints are not promoted to hard rules. P3 passed its [authoritative Linux/Python 3.11 workflow](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043), with [machine-readable evidence](docs/evidence/evaluation/p3-validity-run-31036844043.json) retained; it remains diagnostic and outside Official Results. See the [P3 guide](docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.md).
+
 P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
 Useful contract commands include:
@@ -119,6 +121,7 @@ std-tabular-diffusion validate-metric-registry
 std-tabular-diffusion list-protocols
 std-tabular-diffusion validate-dataset-profile --profile path/to/profile.json
 std-tabular-diffusion evaluate-table --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_bundle
+std-tabular-diffusion evaluate-table --protocol p3-validity --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_validity_bundle
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
 ~~~
 

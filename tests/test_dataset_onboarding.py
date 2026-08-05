@@ -59,6 +59,11 @@ def test_register_dataset_writes_registry_files_and_copies_raw_csv(tmp_path: Pat
     assert saved_info["cat_col_idx"] == [1]
     assert saved_info["target_col_idx"] == [2]
     assert saved_info["data_path"] == "data/customer_churn/raw.csv"
+    assert payload["registration_provenance"]["upload_copy_byte_preserving"] is True
+    assert (
+        payload["registration_provenance"]["source_sha256"] == payload["registration_provenance"]["upload_copy_sha256"]
+    )
+    assert Path(payload["upload_copy_path"]).read_bytes() == raw_csv_path.read_bytes()
 
 
 def test_register_dataset_infers_pandas_string_dtype_as_categorical(tmp_path: Path) -> None:
