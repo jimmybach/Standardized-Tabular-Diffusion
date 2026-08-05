@@ -1,0 +1,77 @@
+{
+  "profile_schema_version": "1.0.0",
+  "profile_id": "p4-utility-pilot",
+  "profile_version": "0.1.0",
+  "status": "unit-validated-diagnostic",
+  "official_results_allowed": false,
+  "default_evaluator_seeds": [0, 1, 2, 3, 4],
+  "local": {
+    "profile_id": "std-local-three-family",
+    "profile_version": "0.1.0",
+    "fit_boundary": "Fit feature transformation state on real train features only; apply the identical frozen state to real train, synthetic train, and real test.",
+    "categorical_encoding": {
+      "implementation": "sklearn.preprocessing.OneHotEncoder",
+      "handle_unknown": "ignore",
+      "sparse_output": false,
+      "maximum_real_train_cardinality": 256
+    },
+    "numeric_scaling": {
+      "implementation": "sklearn.preprocessing.StandardScaler",
+      "with_mean": true,
+      "with_std": true
+    },
+    "classification": {
+      "primary_metric": "macro-f1",
+      "secondary_metrics": ["balanced-accuracy", "roc-auc", "pr-auc"],
+      "dummy": {"implementation": "sklearn.dummy.DummyClassifier", "strategy": "most_frequent"},
+      "evaluators": [
+        {"evaluator_id": "logistic-regression", "implementation": "sklearn.linear_model.LogisticRegression", "parameters": {"C": 1.0, "solver": "lbfgs", "max_iter": 1000, "class_weight": null}},
+        {"evaluator_id": "random-forest", "implementation": "sklearn.ensemble.RandomForestClassifier", "parameters": {"n_estimators": 200, "max_depth": null, "min_samples_leaf": 1, "class_weight": null, "n_jobs": 1}},
+        {"evaluator_id": "hist-gradient-boosting", "implementation": "sklearn.ensemble.HistGradientBoostingClassifier", "parameters": {"learning_rate": 0.1, "max_iter": 100, "max_leaf_nodes": 31, "l2_regularization": 0.0}}
+      ]
+    },
+    "regression": {
+      "primary_metric": "rmse",
+      "secondary_metrics": ["mae", "r2"],
+      "dummy": {"implementation": "sklearn.dummy.DummyRegressor", "strategy": "mean"},
+      "evaluators": [
+        {"evaluator_id": "ridge", "implementation": "sklearn.linear_model.Ridge", "parameters": {"alpha": 1.0}},
+        {"evaluator_id": "random-forest", "implementation": "sklearn.ensemble.RandomForestRegressor", "parameters": {"n_estimators": 200, "max_depth": null, "min_samples_leaf": 1, "n_jobs": 1}},
+        {"evaluator_id": "hist-gradient-boosting", "implementation": "sklearn.ensemble.HistGradientBoostingRegressor", "parameters": {"learning_rate": 0.1, "max_iter": 100, "max_leaf_nodes": 31, "l2_regularization": 0.0}}
+      ]
+    },
+    "retention": {
+      "metric_version": "1.0.0",
+      "denominator_absolute_tolerance": 1e-12,
+      "clipping": "none"
+    }
+  },
+  "global": {
+    "profile_id": "tabeval-tiny-default",
+    "profile_version": "2025-08-09-pinned",
+    "formula_source": "TabStruct Equation 4",
+    "implementation_source": {
+      "repository": "https://github.com/SilenceX12138/TabEval.git",
+      "revision": "dba19a4ee7aa391621cbeb464609285fd515dece",
+      "symbol": "tabeval.metrics.eval_structure.UtilityPerFeature",
+      "source_sha256": "edd2ab2ad576e5ef46c55bac01ac3366d8eec91b40398da48bf2e1c061e2d90c"
+    },
+    "predictors": ["xgb", "knn", "tabpfn"],
+    "autogluon_presets": "medium_quality",
+    "fit_weighted_ensemble": false,
+    "default_time_limit_per_target_seconds": 300,
+    "classification_metric": "balanced-accuracy",
+    "regression_metric": "rmse",
+    "target_weighting": "equal",
+    "seed_weighting": "equal",
+    "ratio_clipping": "none",
+    "constant_synthetic_target_policy": "insufficient_support",
+    "dependency_failure_policy": "resource_failure-no-substitution",
+    "source_parity_claimed": false,
+    "known_deviations": [
+      "The benchmark rejects TabEval's favorable value of one for a constant synthetic target.",
+      "The reviewed wrapper forces numerical targets to regression and records failures instead of silently omitting targets.",
+      "Full executable source parity remains pending in the official Linux/Python 3.11 environment."
+    ]
+  }
+}

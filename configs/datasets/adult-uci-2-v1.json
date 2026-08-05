@@ -1,6 +1,6 @@
 {
   "profile_schema_version": "1.0.0",
-  "dataset_profile_version": "1.1.0-reviewed",
+  "dataset_profile_version": "1.2.0-reviewed",
   "dataset_id": "adult",
   "display_name": "UCI Adult",
   "dataset_version": "uci-2-7537312dd56c",
@@ -21,6 +21,10 @@
     {
       "version": "1.1.0-reviewed",
       "change": "Added the machine-readable P3 hard column validity contract without promoting observed numerical ranges or pending semantic constraints."
+    },
+    {
+      "version": "1.2.0-reviewed",
+      "change": "Added the reviewed diagnostic P4 Local and Global Utility declarations."
     }
   ],
   "suite_membership": ["diagnostic"],
@@ -111,8 +115,32 @@
     "validation_split": null
   },
   "predictive_tasks": [
-    {"task_id":"predict-income-class","target_column_id":"income","task_type":"classification","status":"reviewed","primary_metric_review":"pending evaluation-protocol implementation"}
+    {
+      "task_id":"predict-income-class",
+      "target_column_id":"income",
+      "task_type":"classification",
+      "status":"reviewed",
+      "positive_class":">50K",
+      "label_mapping":{"<=50K":0,">50K":1},
+      "primary_metric":"macro-f1",
+      "secondary_metrics":["balanced-accuracy","roc-auc","pr-auc"],
+      "minimum_support":{"real_train_classes":2,"synthetic_train_classes":2,"real_test_classes":2},
+      "dummy_strategy":"most-frequent",
+      "retention_metric_id":"std-local-utility-retention",
+      "retention_metric_version":"1.0.0"
+    }
   ],
+  "utility": {
+    "contract_schema_version": "1.0.0",
+    "status": "reviewed-diagnostic",
+    "local": {"primary_task_id":"predict-income-class","evaluator_profile_id":"p4-utility-pilot","evaluator_profile_version":"0.1.0"},
+    "global": {
+      "included_target_column_ids": ["age","workclass","fnlwgt","education","education-num","marital-status","occupation","relationship","race","sex","capital-gain","capital-loss","hours-per-week","native-country","income"],
+      "excluded_targets": [],
+      "evaluator_profile_id": "p4-utility-pilot",
+      "evaluator_profile_version": "0.1.0"
+    }
+  },
   "validity": {
     "contract_schema_version": "1.0.0",
     "status": "reviewed-diagnostic",

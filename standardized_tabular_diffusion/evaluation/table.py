@@ -32,6 +32,18 @@ class ValidatedTables:
     report: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class ValidatedUtilityTables:
+    """Canonical P4 real-train, real-test, and synthetic model views."""
+
+    real_train: pd.DataFrame
+    real_test: pd.DataFrame
+    synthetic: pd.DataFrame
+    column_specs: tuple[dict[str, Any], ...]
+    column_ids: dict[str, str]
+    report: dict[str, Any]
+
+
 def _fail(reason_code: str, detail: str) -> NoReturn:
     raise TableValidationError(reason_code, detail)
 
@@ -333,6 +345,91 @@ def validate_tables(
         reference=real,
         synthetic=synth,
         metadata=metadata,
+        column_ids={spec["name"]: spec["column_id"] for spec in columns},
+        report=report,
+    )
+
+
+def validate_utility_tables(
+    real_train: str | Path | pd.DataFrame,
+    real_test: str | Path | pd.DataFrame,
+    synthetic: str | Path | pd.DataFrame,
+    dataset_profile: dict[str, Any],
+    *,
+    expected_synthetic_rows: int | None = None,
+) -> ValidatedUtilityTables:
+    """Apply one strict structural gate to all three P4 table arms.
+
+    The held-out real test table is loaded exactly once and is never used to
+    fit transformations or predictors. P4 accepts only the reviewed model
+    view: generated missing values, non-finite numerics, and lossy logical
+    types fail before any utility model runs.
+    """
+
+    columns = model_view_column_specs(dataset_profile)
+    expected = [column["name"] for column in columns]
+    frames = {
+        "real_train": load_table(real_train),
+        "real_test": load_table(real_test),
+        "synthetic": load_table(synthetic),
+    }
+    for table_name, frame in frames.items():
+        _validate_columns(frame, expected, table_name)
+        if len(frame) == 0:
+            _fail("empty_table", f"{table_name} must contain at least one row")
+
+    requested_rows = len(frames["real_train"]) if expected_synthetic_rows is None else expected_synthetic_rows
+    if isinstance(requested_rows, bool) or not isinstance(requested_rows, int) or requested_rows <= 0:
+        _fail("invalid_row_count", "expected_synthetic_rows must be a positive integer")
+    if len(frames["synthetic"]) != requested_rows:
+        _fail(
+            "row_count_mismatch",
+            f"Synthetic row count is {len(frames['synthetic'])}, expected {requested_rows}",
+        )
+
+    canonical: dict[str, pd.DataFrame] = {}
+    for table_name, frame in frames.items():
+        converted = frame.loc[:, expected].copy()
+        for spec in columns:
+            converted[spec["name"]] = _canonicalize_column(
+                converted[spec["name"]],
+                spec,
+                table_name,
+                preserve_content_violations=False,
+            )
+        canonical[table_name] = converted
+
+    report = {
+        "validation_schema_version": "1.0.0",
+        "status": "passed",
+        "phase": "p4-utility",
+        "dataset_id": dataset_profile["dataset_id"],
+        "dataset_profile_version": dataset_profile["dataset_profile_version"],
+        "canonical_column_order": expected,
+        "column_count": len(expected),
+        "rows": {name: len(frame) for name, frame in canonical.items()},
+        "expected_synthetic_rows": requested_rows,
+        "missing_values": {
+            name: int(frame.isna().sum().sum()) for name, frame in canonical.items()
+        },
+        "test_is_fit_input": False,
+        "synthetic_repair_applied": False,
+        "checks": [
+            "unique_columns",
+            "exact_column_set",
+            "canonical_column_order",
+            "lossless_logical_types",
+            "nonfinite_values",
+            "missing_values",
+            "synthetic_row_count",
+            "held_out_test_boundary",
+        ],
+    }
+    return ValidatedUtilityTables(
+        real_train=canonical["real_train"],
+        real_test=canonical["real_test"],
+        synthetic=canonical["synthetic"],
+        column_specs=tuple(columns),
         column_ids={spec["name"]: spec["column_id"] for spec in columns},
         report=report,
     )

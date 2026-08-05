@@ -108,6 +108,8 @@ def _request_external_artifacts(request: EvaluationRequest) -> list[dict[str, An
     artifacts: list[dict[str, Any]] = []
     if request.reference_artifact is not None:
         artifacts.append(copy.deepcopy(request.reference_artifact))
+    if request.real_test_artifact is not None:
+        artifacts.append(copy.deepcopy(request.real_test_artifact))
     artifacts.append(copy.deepcopy(request.sample_artifact))
     return artifacts
 
@@ -446,6 +448,7 @@ def _build_metadata(request: EvaluationRequest, run_id: str, created_at: str) ->
         "coverage": {"requested_metrics": [copy.deepcopy(metric) for metric in request.metrics], "computed": 0},
         "provenance": {
             "reference_artifact": copy.deepcopy(request.reference_artifact),
+            "real_test_artifact": copy.deepcopy(request.real_test_artifact),
             "sample_artifact": copy.deepcopy(request.sample_artifact),
         },
         "review": {"status": "not-reviewed"},
@@ -644,6 +647,8 @@ def validate_result_bundle(root: str | Path) -> BundleValidationReport:
             raise BundleError("metadata requested metrics do not match config")
         if metadata["provenance"].get("reference_artifact") != request.reference_artifact:
             raise BundleError("metadata reference provenance does not match config")
+        if metadata["provenance"].get("real_test_artifact") != request.real_test_artifact:
+            raise BundleError("metadata real-test provenance does not match config")
         if metadata["provenance"].get("sample_artifact") != request.sample_artifact:
             raise BundleError("metadata sample provenance does not match config")
         if manifest["external_artifacts"] != _request_external_artifacts(request):
@@ -1030,6 +1035,237 @@ def _validate_final_atomic_results(
             or any(result.n_synthetic != synthetic_row_count for result in results)
         ):
             raise BundleError("P3 denominator evidence is not reproducible from Atomic Results and details")
+
+    from standardized_tabular_diffusion.evaluation.utility import (
+        GLOBAL_TARGET_RATIO_METRIC_ID,
+        LOCAL_METRIC_IDS,
+        LOCAL_RETENTION_METRIC_ID,
+        P4_METRICS,
+        global_target_ratio,
+        local_retention,
+    )
+
+    p4_requested = {(item["metric_id"], item["metric_version"]) for item in P4_METRICS}
+    if requested == p4_requested:
+        local_summary = summary["local_utility"]
+        global_summary = summary["global_utility"]
+        if summary["dimensions"].get("local-utility") != local_summary or summary["dimensions"].get(
+            "global-utility"
+        ) != global_summary:
+            raise BundleError("P4 canonical Local/Global Utility summaries differ from dimensions")
+        if request.real_test_artifact is None:
+            raise BundleError("P4 finalized bundles require a checksum-bound held-out real test artifact")
+        details_path = path.parent / "artifacts" / "utility-details.json"
+        try:
+            details = read_json(details_path)
+        except (OSError, ValueError, SerializationError) as exc:
+            raise BundleError(f"Cannot validate P4 utility details: {exc}") from exc
+        if not isinstance(details, dict) or details.get("utility_details_schema_version") != "1.0.0":
+            raise BundleError("P4 utility details use an invalid contract")
+        boundary = details.get("input_boundary")
+        if not isinstance(boundary, dict) or boundary != {
+            "real_train_fit_allowed": True,
+            "synthetic_train_fit_allowed_only_for_tstr": True,
+            "real_test_fit_allowed": False,
+            "same_real_test_for_all_arms": True,
+            "synthetic_repair_applied": False,
+        }:
+            raise BundleError("P4 utility details do not prove the held-out-test boundary")
+        profile_ref = details.get("evaluator_profile")
+        if not isinstance(profile_ref, dict) or {
+            key: profile_ref.get(key) for key in ("profile_id", "profile_version", "sha256")
+        } != request.evaluator_profile:
+            raise BundleError("P4 details evaluator profile differs from the immutable request")
+
+        local_runs = details.get("local_runs")
+        global_runs = details.get("global_runs")
+        if not isinstance(local_runs, list) or not local_runs or not isinstance(global_runs, list) or not global_runs:
+            raise BundleError("P4 details must preserve every Local and Global raw-arm run")
+        by_metric_scope = {(result.metric_id, result.scope_id): result for result in results}
+        primary_name = local_summary.get("primary_metric")
+        primary_metric_id = LOCAL_METRIC_IDS.get(primary_name)
+        if primary_metric_id is None:
+            raise BundleError("P4 Local Utility summary declares an unknown primary metric")
+        test_fingerprints = {run.get("test_fingerprint") for run in local_runs}
+        if test_fingerprints != {request.real_test_artifact["sha256"]}:
+            raise BundleError(
+                "P4 Local arms do not attest the checksum-bound held-out real test artifact"
+            )
+        computed_local_retentions: list[AtomicResult] = []
+        for run in local_runs:
+            required_run = {
+                "task_id",
+                "target_column_id",
+                "task_type",
+                "evaluator_id",
+                "seed",
+                "primary_metric",
+                "raw_arms",
+                "retention",
+                "retention_state",
+                "retention_reason_code",
+                "test_fingerprint",
+            }
+            if not isinstance(run, dict) or set(run) != required_run or run["primary_metric"] != primary_name:
+                raise BundleError("P4 Local run detail is malformed")
+            seed_text = f"neg-{abs(run['seed'])}" if run["seed"] < 0 else str(run["seed"])
+            base = f"{run['task_id']}--{run['evaluator_id']}--seed-{seed_text}"
+            raw_arms = run["raw_arms"]
+            if not isinstance(raw_arms, dict) or set(raw_arms) != {"dummy", "trtr", "tstr"}:
+                raise BundleError("P4 Local run does not retain exactly Dummy, TRTR, and TSTR")
+            for arm, detail_value in raw_arms.items():
+                atom = by_metric_scope.get((primary_metric_id, f"{base}--{arm}"))
+                if atom is None:
+                    raise BundleError("P4 Local detail omits a primary raw-arm Atomic Result")
+                if atom.weight != 0 or atom.aggregate_contribution is not None:
+                    raise BundleError("P4 raw Local arms must not contribute directly to aggregation")
+                if atom.state.value == "computed":
+                    if detail_value is None or atom.raw_value is None or not math.isclose(
+                        float(detail_value), atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                    ):
+                        raise BundleError("P4 Local raw-arm detail differs from its Atomic Result")
+                elif detail_value is not None:
+                    raise BundleError("A non-computed P4 Local raw arm must have a null detail value")
+            retention_atom = by_metric_scope.get((LOCAL_RETENTION_METRIC_ID, base))
+            if retention_atom is None or retention_atom.state.value != run["retention_state"]:
+                raise BundleError("P4 Local retention detail differs from its Atomic Result state")
+            if retention_atom.state.value == "computed":
+                try:
+                    reconstructed = local_retention(
+                        float(raw_arms["dummy"]),
+                        float(raw_arms["trtr"]),
+                        float(raw_arms["tstr"]),
+                        higher_is_better=run["task_type"] == "classification",
+                        tolerance=1e-12,
+                    )
+                except (TypeError, ValueError, ZeroDivisionError) as exc:
+                    raise BundleError(f"Cannot reconstruct P4 Local retention: {exc}") from exc
+                if retention_atom.raw_value is None or not math.isclose(
+                    reconstructed, retention_atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                ):
+                    raise BundleError("P4 Local retention is not reproducible from raw arms")
+                if run["retention"] is None or not math.isclose(
+                    float(run["retention"]), retention_atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                ):
+                    raise BundleError("P4 Local retention detail differs from its Atomic Result")
+                computed_local_retentions.append(retention_atom)
+            elif run["retention"] is not None:
+                raise BundleError("A non-computed P4 Local retention must have a null detail value")
+
+        expected_local = local_summary.get("expected_retentions")
+        computed_local = local_summary.get("computed_retentions")
+        if expected_local != len(local_runs) or computed_local != len(computed_local_retentions):
+            raise BundleError("P4 Local retention denominator counts are inconsistent")
+        if computed_local == expected_local:
+            expected_weight = 1.0 / expected_local
+            local_contributions: list[float] = []
+            for atom in computed_local_retentions:
+                if atom.raw_value is None or atom.aggregate_contribution is None:
+                    raise BundleError("A computed P4 Local retention lacks a value or contribution")
+                if (
+                    not math.isclose(atom.weight, expected_weight, rel_tol=1e-12, abs_tol=1e-12)
+                    or atom.normalized_value != atom.raw_value
+                    or not math.isclose(
+                        atom.aggregate_contribution,
+                        atom.raw_value * expected_weight,
+                        rel_tol=1e-12,
+                        abs_tol=1e-12,
+                    )
+                ):
+                    raise BundleError("P4 Local retention weights or contributions violate the equal-run contract")
+                local_contributions.append(atom.aggregate_contribution)
+            reconstructed_local = sum(local_contributions)
+            if local_summary.get("retention") is None or not math.isclose(
+                reconstructed_local, float(local_summary["retention"]), rel_tol=1e-12, abs_tol=1e-12
+            ):
+                raise BundleError("P4 Local summary is not reproducible from Atomic Results")
+        elif local_summary.get("retention") is not None:
+            raise BundleError("P4 strict Local summary must be null when any requested retention is unavailable")
+
+        computed_global_ratios: list[AtomicResult] = []
+        for run in global_runs:
+            if not isinstance(run, dict) or set(run) != {
+                "target_column_id",
+                "target_name",
+                "task_type",
+                "seed",
+                "trtr",
+                "tstr",
+                "ratio",
+                "state",
+                "reason_code",
+                "predictors",
+                "predictor_scores",
+            }:
+                raise BundleError("P4 Global run detail is malformed")
+            seed_text = f"neg-{abs(run['seed'])}" if run["seed"] < 0 else str(run["seed"])
+            base = f"{run['target_column_id']}--seed-{seed_text}"
+            ratio_atom = by_metric_scope.get((GLOBAL_TARGET_RATIO_METRIC_ID, base))
+            if ratio_atom is None or ratio_atom.state.value != run["state"]:
+                raise BundleError("P4 Global ratio detail differs from its Atomic Result state")
+            if ratio_atom.state.value == "computed":
+                try:
+                    reconstructed = global_target_ratio(
+                        float(run["trtr"]), float(run["tstr"]), task_type=run["task_type"]
+                    )
+                except (TypeError, ValueError, ZeroDivisionError) as exc:
+                    raise BundleError(f"Cannot reconstruct P4 Global target ratio: {exc}") from exc
+                if ratio_atom.raw_value is None or not math.isclose(
+                    reconstructed, ratio_atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                ):
+                    raise BundleError("P4 Global target ratio is not reproducible from raw arms")
+                if run["ratio"] is None or not math.isclose(
+                    float(run["ratio"]), ratio_atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                ):
+                    raise BundleError("P4 Global ratio detail differs from its Atomic Result")
+                computed_global_ratios.append(ratio_atom)
+            elif run["ratio"] is not None:
+                raise BundleError("A non-computed P4 Global ratio must have a null detail value")
+
+        expected_global = global_summary.get("expected_target_seed_ratios")
+        computed_global = global_summary.get("computed_target_seed_ratios")
+        if expected_global != len(global_runs) or computed_global != len(computed_global_ratios):
+            raise BundleError("P4 Global target denominator counts are inconsistent")
+        if computed_global == expected_global:
+            expected_weight = 1.0 / expected_global
+            global_contributions: list[float] = []
+            for atom in computed_global_ratios:
+                if atom.raw_value is None or atom.aggregate_contribution is None:
+                    raise BundleError("A computed P4 Global ratio lacks a value or contribution")
+                if (
+                    not math.isclose(atom.weight, expected_weight, rel_tol=1e-12, abs_tol=1e-12)
+                    or atom.normalized_value != atom.raw_value
+                    or not math.isclose(
+                        atom.aggregate_contribution,
+                        atom.raw_value * expected_weight,
+                        rel_tol=1e-12,
+                        abs_tol=1e-12,
+                    )
+                ):
+                    raise BundleError("P4 Global ratio weights violate equal target/seed aggregation")
+                global_contributions.append(atom.aggregate_contribution)
+            reconstructed_global = sum(global_contributions)
+            if global_summary.get("global_utility") is None or not math.isclose(
+                reconstructed_global,
+                float(global_summary["global_utility"]),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            ):
+                raise BundleError("P4 Global summary is not reproducible from Atomic Results")
+        elif global_summary.get("global_utility") is not None:
+            raise BundleError("P4 strict Global Utility must be null when any target/seed ratio is unavailable")
+        if local_summary.get("retention_clipped") is not False or global_summary.get("ratio_clipped") is not False:
+            raise BundleError("P4 finalized bundles must retain unclipped Local and Global values")
+        denominator_counts = details.get("denominator_counts")
+        if (
+            denominator_counts != summary.get("denominator_counts")
+            or denominator_counts != metadata.get("coverage", {}).get("denominators")
+            or denominator_counts.get("local_requested_task_evaluator_seeds") != expected_local
+            or denominator_counts.get("local_computed_retentions") != computed_local
+            or denominator_counts.get("global_requested_target_seeds") != expected_global
+            or denominator_counts.get("global_computed_target_seed_ratios") != computed_global
+        ):
+            raise BundleError("P4 denominator evidence differs across Atomic Results, details, summary, or metadata")
 
 
 def _validate_final_checksums(bundle_root: Path) -> None:
