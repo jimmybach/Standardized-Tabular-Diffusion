@@ -282,19 +282,21 @@ def _controlled_runtime(seed: int) -> Iterator[None]:
 
 
 def _fixture() -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
-    columns = ["binary_target", "numeric_target"]
+    columns = ["binary_target", "numeric_target", "numeric_feature"]
     train_rows = 64
     test_rows = 32
     train = pd.DataFrame(
         {
             "binary_target": [index % 2 for index in range(train_rows)],
             "numeric_target": [float((index % 29) + (index % 2) * 0.25) for index in range(train_rows)],
+            "numeric_feature": [float(((index * 7) % 31) + index / 1000) for index in range(train_rows)],
         }
     )
     test = pd.DataFrame(
         {
             "binary_target": [index % 2 for index in range(test_rows)],
             "numeric_target": [float(((index * 3) % 29) + (index % 2) * 0.25) for index in range(test_rows)],
+            "numeric_feature": [float(((index * 11) % 31) + index / 1000) for index in range(test_rows)],
         }
     )
     return train, test, columns
@@ -473,6 +475,7 @@ def run_validation(
         if require_primary_environment:
             _assert_primary_environment()
         source = verify_tabeval_source(source_path, license_path)
+        evidence["source"] = source
         manifest = _manifest()
         checkpoints = {
             "classifier": _verify_checkpoint(
@@ -482,7 +485,9 @@ def run_validation(
                 regressor_checkpoint, manifest["tabpfn_checkpoints"]["regressor"]
             ),
         }
+        evidence["checkpoints"] = checkpoints
         runtime = verify_pilot_runtime()
+        evidence["runtime"] = runtime
         module = load_tabeval_source_module(source_path)
         traces: list[dict[str, Any]] = []
         _instrument_source(module, traces)
@@ -500,6 +505,12 @@ def run_validation(
                     time_limit_seconds,
                 )
             source_seconds = time.perf_counter() - source_started
+            evidence["source_execution"] = {
+                "completed": True,
+                "results": _json_compatible(source_result),
+                "predictor_traces": _json_compatible(traces),
+                "elapsed_seconds": source_seconds,
+            }
             guard = _source_high_cardinality_guard(module, workspace / "guard")
 
             from standardized_tabular_diffusion.evaluation.utility import _default_global_scorer
@@ -555,9 +566,6 @@ def run_validation(
                 raise P4GlobalSourceValidationError(f"Exact source omitted a required trained family: {models}")
         evidence.update(
             {
-                "source": source,
-                "runtime": runtime,
-                "checkpoints": checkpoints,
                 "execution": {
                     "exact_source_evaluate_completed": True,
                     "source_results": _json_compatible(source_result),
