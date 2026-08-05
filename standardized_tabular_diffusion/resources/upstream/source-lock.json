@@ -1,5 +1,94 @@
 {
   "components": {
+    "arf": {
+      "adapter_ids": [
+        "arf"
+      ],
+      "authoritative_repository": "https://github.com/bips-hb/arfpy",
+      "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "arf-declared-types-and-missing-values-v1",
+          "reason": "CSV inference does not retain benchmark-declared categorical roles, while arfpy distinguishes categorical and continuous variables from pandas dtypes and does not define missing-value handling.",
+          "semantic_effect": "Declared categorical features and classification targets are converted to pandas category dtype, declared numerical values are checked for finite numeric data, and missing values are rejected before the unchanged official constructor."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "arf-scoped-random-state-v1",
+          "reason": "arfpy uses process-global NumPy randomness in its pandas shuffles and FORGE sampling while separately forwarding random_state to scikit-learn only when the caller supplies it.",
+          "semantic_effect": "The standardized seed is scoped around the unchanged official constructor, FORDE, and FORGE calls and is passed to RandomForestClassifier; the caller's global NumPy state is restored afterward."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "arf-safe-forge-state-v1",
+          "reason": "arfpy 0.1.1 provides no save/load API; pickling the full object executes code when loaded and retains both the fitted forest and encoded row-level training data even though FORGE needs neither.",
+          "semantic_effect": "Only the exact post-FORDE attributes consumed by the unchanged official forge() method are stored in typed JSON and restored on an uninitialized official arfpy.arf.arf instance. The fitted forest and row-level x_real are omitted; native-parity validation compares every retained state table and generated CSV."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "arf-oob-fail-closed-v1",
+          "reason": "The official 0.1.1 forde(oob=True) path references self.x, which the constructor never defines, and therefore cannot run without an upstream-source patch.",
+          "semantic_effect": "The adapter rejects oob=true with an actionable error rather than silently patching or reimplementing the official algorithm; the supported path preserves the official default oob=false."
+        }
+      ],
+      "component_id": "arf",
+      "dependency_resolution": {
+        "declared_requirement": "numpy>=1.20.3, pandas>=1.5, scikit-learn>=0.24, scipy>=1.4",
+        "validation_environment_lock": "requirements-arf-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_url": "https://github.com/bips-hb/arfpy/blob/6f737baaaa589f7ac3ff59f0d739ce04b0f1381c/LICENSE",
+      "method_repository": "https://github.com/bips-hb/arf",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-native-parity-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "bytes": 11841,
+        "filename": "arfpy-0.1.1.tar.gz",
+        "format": "source-distribution",
+        "name": "arfpy",
+        "pypi_url": "https://pypi.org/project/arfpy/0.1.1/",
+        "sha256": "88170d5e72638b0dbfec28cfbdfee02e97bd6a06d5a636e960acd5d90d480707",
+        "url": "https://files.pythonhosted.org/packages/95/6f/a61794959d3860e23f5f2de5886b61154d40c246b38eedebf19d22e4cc35/arfpy-0.1.1.tar.gz",
+        "version": "0.1.1"
+      },
+      "patch_sets": [],
+      "release": {
+        "git_tag": null,
+        "published_at": "2023-09-22T06:56:19.600314Z",
+        "source_commit": "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
+        "source_tree": "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c"
+      },
+      "reproduction_target": "method-author-official-python-package",
+      "source_package_comparison": {
+        "exact_git_blob_files": 6,
+        "git_blob_paths": [
+          "LICENSE",
+          "README.md",
+          "arfpy/__init__.py",
+          "arfpy/arf.py",
+          "arfpy/utils.py",
+          "setup.py"
+        ],
+        "relation": "Every release file shared with the locked commit is byte-exact. PyPI 0.1.1 was uploaded approximately fourteen minutes after that commit and the repository has no tags or GitHub releases."
+      },
+      "source_license_sha256": "8f97b1e0e6c2a7c7b539e63e8a5c81c85d040556940a07b348596cd9674283ec",
+      "upstream_commit": "6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
+      "upstream_tree": "68b6fc5d28578a5c21bef560bd28f4c0d2d6401c",
+      "validation": {
+        "level": "adapter-complete",
+        "protocol_id": "arfpy-official-package-parity-v1",
+        "status": "pending",
+        "target_environment": "Linux / Python 3.11",
+        "target_cases": 9,
+        "target_variants": [
+          "binary",
+          "multiclass",
+          "regression"
+        ]
+      }
+    },
     "codi": {
       "adapter_ids": [
         "codi"
