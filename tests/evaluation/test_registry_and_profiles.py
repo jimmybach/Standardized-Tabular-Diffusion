@@ -9,6 +9,7 @@ import pytest
 from standardized_tabular_diffusion.evaluation.profiles import (
     ProfileError,
     import_legacy_dataset_spec,
+    list_dataset_profiles,
     list_protocol_profiles,
     load_dataset_profile,
     load_protocol_profile,
@@ -104,6 +105,34 @@ def test_dataset_profile_unknown_top_level_field_fails_closed(tmp_path: Path) ->
         load_dataset_profile(path)
 
 
+def test_dataset_profile_semantic_identity_checks_fail_closed(tmp_path: Path) -> None:
+    profile = import_legacy_dataset_spec(_legacy_spec(tmp_path)).to_dict()
+    profile["columns"][1]["column_id"] = profile["columns"][0]["column_id"]
+    path = tmp_path / "duplicate-column-id.json"
+    path.write_text(json.dumps(profile), encoding="utf-8")
+    with pytest.raises(ProfileError, match="column_id"):
+        load_dataset_profile(path)
+
+    profile = import_legacy_dataset_spec(_legacy_spec(tmp_path)).to_dict()
+    profile["table_contract"]["canonical_column_order"] = list(reversed(profile["table_contract"]["canonical_column_order"]))
+    path = tmp_path / "wrong-column-order.json"
+    path.write_text(json.dumps(profile), encoding="utf-8")
+    with pytest.raises(ProfileError, match="canonical_column_order"):
+        load_dataset_profile(path)
+
+
+def test_dataset_profile_directory_rejects_duplicate_exact_identities(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    source_root.mkdir()
+    profile = import_legacy_dataset_spec(_legacy_spec(source_root))
+    profiles = tmp_path / "profiles"
+    profiles.mkdir()
+    write_dataset_profile(profile, profiles / "first.json")
+    write_dataset_profile(profile, profiles / "second.json")
+    with pytest.raises(ProfileError, match="Duplicate dataset identity"):
+        list_dataset_profiles(profiles)
+
+
 def test_safe_yaml_loader_rejects_executable_constructor(tmp_path: Path) -> None:
     path = tmp_path / "unsafe.yaml"
     path.write_text("!!python/object/apply:os.system ['echo unsafe']\n", encoding="utf-8")
@@ -126,4 +155,22 @@ def test_draft_protocol_cannot_claim_official_results(tmp_path: Path) -> None:
     path = tmp_path / "invalid-protocol.json"
     path.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises((SchemaValidationError, ProfileError)):
+        load_protocol_profile(path)
+
+
+def test_protocol_rejects_duplicate_metric_identities_and_unknown_schema_versions(tmp_path: Path) -> None:
+    payload = copy.deepcopy(list_protocol_profiles()[1].to_dict())
+    duplicate = copy.deepcopy(payload["metric_selections"][0])
+    duplicate["required"] = not duplicate["required"]
+    payload["metric_selections"].append(duplicate)
+    path = tmp_path / "duplicate-metric.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ProfileError, match="unique metric identities"):
+        load_protocol_profile(path)
+
+    payload = copy.deepcopy(list_protocol_profiles()[0].to_dict())
+    payload["result_schema_versions"]["atomic_result"] = "2.0.0"
+    path = tmp_path / "unsupported-schema.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ProfileError, match="unsupported result schema"):
         load_protocol_profile(path)

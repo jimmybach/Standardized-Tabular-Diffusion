@@ -105,9 +105,11 @@ Each standardized run writes canonical metadata such as:
 
 The P1 evaluation foundation now provides versioned JSON Schemas and strict Python contracts for Evaluation Requests, Dataset Profiles, protocol profiles, Metric Registry entries, Atomic Results, stage records, manifests, metadata, summaries, and artifact indexes.
 
-The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth.
+The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth. TabStruct paper and code materials are research references only; the P1 foundation does not import them, and P2 will not use the legacy `evaluation/tabstruct.py` path as its metric engine.
 
 The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P1 can create and validate auditable `incomplete` bundles, but deliberately cannot produce a finalized result. Metric execution and bundle finalization begin with the P2 vertical slice described in the [implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md).
+
+P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
 Useful contract commands include:
 
@@ -119,9 +121,9 @@ std-tabular-diffusion validate-dataset-profile --profile path/to/profile.json
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
 ~~~
 
-## Benchmark Policy
+## Legacy Diagnostic Benchmark Policy
 
-The benchmark layer now makes a few explicit policy choices so results are easier to compare and reproduce:
+The pre-P1 diagnostic layer makes the following compatibility choices. They describe legacy summaries only and are not the approved official protocol:
 
 - Dataset-level inputs are resolved through a canonical dataset registry in `standardized_tabular_diffusion/datasets.py`.
 - Materialized datasets override raw upstream paths when available.
@@ -131,9 +133,9 @@ The benchmark layer now makes a few explicit policy choices so results are easie
 - `TabPFN` is disabled by default and only enabled when `STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN=1` is set.
 - When `TabPFN` is enabled, it is still treated as optional if it is unavailable because of gated-model access, unsupported class counts, or missing dependencies.
 
-## Reproducibility
+## Legacy Diagnostic Reproducibility
 
-The standardized evaluation path now uses a benchmark-oriented deterministic configuration:
+The legacy standardized evaluation path uses a benchmark-oriented deterministic configuration:
 
 - fixed benchmark seeds in the MLE evaluator and structural-fidelity layer
 - deterministic train/validation splitting in the upstream MLE path
