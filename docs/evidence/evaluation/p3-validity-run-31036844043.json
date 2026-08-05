@@ -1,0 +1,70 @@
+{
+  "claim_boundary": "Validates benchmark-native hard validity rules, immutable original-output scoring, exact Atomic Result aggregation, finalized bundles, and train-only mean/mode preprocessing. It does not freeze an Official Results protocol or approve unresolved dataset constraints.",
+  "environment": {
+    "pandas": "2.2.3",
+    "platform": "Linux / x86_64",
+    "primary_environment_required": true,
+    "pyarrow": "18.1.0",
+    "python": "3.11.15"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "atomic_aggregation_reproduced": "pass",
+    "bundle_finalization_and_checksums": "pass",
+    "hand_computable_rules": "pass",
+    "no_constraint_state": "pass",
+    "no_hidden_repair": "pass",
+    "reviewed_rule_contract": "pass",
+    "train_only_preprocessing": "pass",
+    "width_sensitive_diagnostic_excluded": "pass"
+  },
+  "locked_files": {
+    ".github/workflows/p3-validity-validation.yml": "b5275ad443355a4bde299f18fa9fb9f98eb8793cbfe03c0eab46ee9657a9bcb6",
+    "configs/datasets/adult-uci-2-v1.json": "c05fbd115bfd998f765137476dbfb7c0da350a5647ace7fea6772e742844b4d4",
+    "configs/datasets/sick-uci-102-v1.json": "291ffc017b428059544cf8be051c7e61f6a931e21b05ff7658256a053e18691b",
+    "docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.md": "e80ccb8163453d953573a87787edf36366c5ea189a63270056720b5cd5d05c6f",
+    "docs/evaluation/P3_VALIDITY_AND_PREPROCESSING.zh-CN.md": "e5e1252c7181278f948125b83127a92514e53658f021dabfc43ff0dfaec49f95",
+    "pyproject.toml": "629fb0cb2bcc736e3c4261ec6b7174c5e0e38dd727cb735e342f0969ec736e1e",
+    "standardized_tabular_diffusion/__init__.py": "fa8bf639f570312561f2f9fddcfdb0f5f983433ace0a4136abfe21391b20df7c",
+    "standardized_tabular_diffusion/cli.py": "aa4fd0e51ba005ef043f478006254b351b8247a9e4256a3e474ee1a9174f8cca",
+    "standardized_tabular_diffusion/dataset_onboarding.py": "b7896dc7a0479f49c6c0697021a004b74473d7230734a908c7abd7198cd7d428",
+    "standardized_tabular_diffusion/evaluation/__init__.py": "3f0a1e4f2c7227d1ce5efba4b4a38e517f2f639fe8b63ccadd35dfb3ab261be0",
+    "standardized_tabular_diffusion/evaluation/bundle.py": "81eb1d2e1825847f188245c1dbd26df16ad758f6654ee6769f73a5a9bdc2bf8a",
+    "standardized_tabular_diffusion/evaluation/evaluate_table.py": "80b7276934244d7c551dd03c4b09a25966673f041ef9590a13926a37ce904df7",
+    "standardized_tabular_diffusion/evaluation/table.py": "059f58028fc668c1739f18bf2259414d7d1c51b971262d1097a55ad96babacfd",
+    "standardized_tabular_diffusion/evaluation/validity.py": "41b0198f79fd897378fc453d730d7ca4ff6fb1e2aa23cfbc25c58864295d62f6",
+    "standardized_tabular_diffusion/preprocessing.py": "e55fe35507afcbfbe26e4ebe02826018314b2b26f497c9d200e68d47880b9d75",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/validity-v1.json": "16138e5af810f546ba1dbfe376e473e85ce288a029c5e5a8ec6a7b3c883b5cb8",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/p3-validity.json": "f69ca5dad517d7b2a6be1aa469b40ca7c1f3541f69460babd80f923f6ea14604",
+    "standardized_tabular_diffusion/schemas/evaluation/dataset-profile.schema.json": "f2cbea17ef49550912354a819d6e72f520e7e8c7307cbbe5bb286ed51f79374f",
+    "standardized_tabular_diffusion/validation/p3_validity.py": "63398a2f73d7c2036da60d7f43cdabd308d6a6068217eca14bba37e474d2d877",
+    "tests/evaluation/test_p3_evaluate_table.py": "c4b0b4001375f0b83914f22d11da27bf379a96a9de61776e5a49835a84ffc953",
+    "tests/evaluation/test_p3_validity.py": "af7199deff8e937e26a223f237b6a1d73b01dc19582736f32f79ded165c1d9eb",
+    "tests/test_dataset_onboarding.py": "2460672ca1b6cd5eed0f576f67190c9c085e0ea0f28a6be2d89a83f845b879da",
+    "tests/test_preprocessing.py": "d6fb3246369b0a3aff57d762322b803ed5cb62b509e5cb740240142f8bfb4e3a"
+  },
+  "phase": "P3",
+  "preprocessing_boundary": {
+    "categorical_fill": "b",
+    "numerical_fill": 15.0,
+    "state_fingerprint": "082286b326f9cd9406adb342f4eef5d2249444f38de3fd4070f16068ca4d656e",
+    "synthetic_repair_policy": "reject",
+    "train_only_state_equal_under_test_changes": true
+  },
+  "protocol_id": "p3-validity-and-preprocessing-v1",
+  "repository_commit": "681cb2cc7a3360d89bafa24c4b5595309869a913",
+  "result_summary": {
+    "atomic_results": 16,
+    "column_validity_score": 0.99,
+    "constraint_validity_score": null,
+    "expected_atomic_results": 16,
+    "finalized_bundles_created": 2,
+    "fully_valid_row_rate": 0.95,
+    "official_results_allowed": false,
+    "request_fingerprint": "8f781d9411fdfa2936aa035d9499e6aa6b86be47fc97785634470eed7f495164",
+    "scientific_metrics_executed": true,
+    "semantic_summaries_equal": true,
+    "synthetic_repair_applied": false
+  },
+  "status": "pass"
+}

@@ -2,7 +2,7 @@
 
 Chinese translation: [P3_VALIDITY_AND_PREPROCESSING.zh-CN.md](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 
-- Status: unit-validated diagnostic implementation
+- Status: Linux/Python 3.11 validated diagnostic implementation
 - Protocol: `p3-validity@0.3.0`
 - Metric versions: `1.0.0`
 - Primary environment: Linux and Python 3.11
@@ -180,4 +180,4 @@ std-tabular-diffusion preprocess-missing-values `
 
 Both P3 metrics are `unit-validated`, benchmark-native, and diagnostic. They are not source-parity metrics because no upstream implementation defines these repository formulas. They are not `protocol-frozen`, `release-supported`, or eligible for Official Results.
 
-The dedicated P3 CI gate covers hand-computable rules, malformed profiles, no-constraint behavior, applicability, width sensitivity, no hidden repair, train-only preprocessing, schema and policy identity, registration preservation, bundle reconstruction, CLI execution, Linux/Python 3.11 packaging, lint, and typing. Authoritative retained CI evidence is added only after the remote workflow passes.
+The dedicated P3 CI gate covers hand-computable rules, malformed profiles, no-constraint behavior, applicability, width sensitivity, no hidden repair, train-only preprocessing, schema and policy identity, registration preservation, bundle reconstruction, CLI execution, Linux/Python 3.11 packaging, lint, and typing. It passed in [GitHub Actions run 31036844043](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043); the exact [machine-readable evidence](../evidence/evaluation/p3-validity-run-31036844043.json) is retained with SHA-256 `bc63a2df553036ee7e161ce81c6f264dace950f3fe414ba2f8195d8e557e401d`.

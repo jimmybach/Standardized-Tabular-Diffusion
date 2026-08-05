@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0, P1, and P2 passed; P3 implementation and local exit gates passed, with Linux/Python 3.11 evidence pending
+- Status: P0 through P3 passed their applicable engineering exit gates; all authoritative evidence is retained
 - Primary environment: Linux and Python 3.11
 - Last updated: 2026-08-05
 
@@ -105,7 +105,7 @@ P2 adds the standalone `evaluate-table` command, the Dataset Profile structural 
 
 P3 adds a protocol-selectable Validity path with one Atomic Result per canonical model-view column and per reviewed cross-column constraint. Its closed rule language covers nullability, finiteness, integer semantics, reviewed bounds and vocabularies, formats, lengths, uniqueness, datetime ranges, comparisons, conditional domains, mutual exclusion, totals, allowed combinations, and functional dependencies. It preserves the original decoded output and never applies evaluator-side repair.
 
-The centralized missing-value workflow fits numerical means and categorical modes on the real training split only, rejects missing targets and all-missing training features, fingerprints learned state and transformed schema, and changes the dataset-view token when policy or schema changes. See the [P3 guide](evaluation/P3_VALIDITY_AND_PREPROCESSING.md). P3 has passed local exit gates; the dedicated Linux/Python 3.11 CI evidence is pending.
+The centralized missing-value workflow fits numerical means and categorical modes on the real training split only, rejects missing targets and all-missing training features, fingerprints learned state and transformed schema, and changes the dataset-view token when policy or schema changes. See the [P3 guide](evaluation/P3_VALIDITY_AND_PREPROCESSING.md). P3 passed in [GitHub Actions run 31036844043](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043), and the exact [Linux/Python 3.11 evidence](evidence/evaluation/p3-validity-run-31036844043.json) is retained. This validates the diagnostic P3 implementation; it does not freeze a protocol or admit Official Results.
 
 ## CI baseline
 

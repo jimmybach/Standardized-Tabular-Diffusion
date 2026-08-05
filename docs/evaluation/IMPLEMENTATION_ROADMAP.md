@@ -2,7 +2,7 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 and P2 passed; P3 implementation and local exit gates passed, with Linux/Python 3.11 evidence pending
+- Status: P1 through P3 passed their applicable exit gates; authoritative Linux/Python 3.11 evidence is retained
 - Roadmap version: 0.3.0
 - Last updated: 2026-08-05
 - Primary release environment: Linux and Python 3.11
@@ -94,7 +94,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 
 - P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
-- P3 is implemented and locally unit-validated but remains diagnostic pending its retained Linux/Python 3.11 exit evidence, protocol freeze, and release approval.
+- P3 passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p3-validity-run-31036844043.json), but remains diagnostic pending protocol freeze and release approval.
 - P4 utility, approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
@@ -165,7 +165,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P0 | Trustworthy development baseline | None | Passed | Core tests collect in a minimal environment; repository and reference tests are isolated |
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
-| P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Implementation complete; local exit gates passed, Linux evidence pending | No hidden repair or missing-value mutation; rule and failure tests pass |
+| P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Not started | Raw arms, state semantics, profile identity, and source/formula validation pass |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
@@ -460,7 +460,7 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-The immediate gate is to retain authoritative Linux/Python 3.11 P3 evidence. After that gate passes, the next implementation phase is P4 Local and Global Utility. P4 must consume the P3-reviewed immutable model view and preprocessing identity; it must not repair generated data or infer new hard constraints.
+P3's authoritative Linux/Python 3.11 evidence is retained. The next implementation phase is P4 Local and Global Utility. P4 must consume the P3-reviewed immutable model view and preprocessing identity; it must not repair generated data or infer new hard constraints.
 
 ## 12. Related specifications
 
