@@ -2,7 +2,7 @@
 
 ## Status and claim boundary
 
-P4 is implemented and unit-validated as a **diagnostic pilot**. It is not protocol-frozen, release-supported, or eligible for Official Results.
+P4 is implemented and its bounded diagnostic gates passed on [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769), with [machine-readable evidence](../evidence/evaluation/p4-utility-run-31053624769.json) retained at SHA-256 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`. It remains a **diagnostic pilot**: it is not protocol-frozen, release-supported, or eligible for Official Results.
 
 The implementation establishes the complete auditable path from three immutable decoded tables to Local and Global Utility Atomic Results and a finalized result bundle. It does not claim executable parity with the full TabEval predictor runtime. That claim requires a separate Linux/Python 3.11 run with the pinned AutoGluon, XGBoost, KNN, and TabPFN stack, reviewed runtime budgets, and retained evidence.
 

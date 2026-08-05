@@ -2,7 +2,7 @@
 
 ## 状态与声明边界
 
-P4 已实现并通过单元验证，当前属于**诊断性 pilot**。它尚未协议冻结、尚未达到 release-supported，也不能进入 Official Results。
+P4 已实现，其有限范围诊断门已在 [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769) 上通过，并已留存[机器可读证据](../evidence/evaluation/p4-utility-run-31053624769.json)，SHA-256 为 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`。它仍属于**诊断性 pilot**：尚未协议冻结、尚未达到 release-supported，也不能进入 Official Results。
 
 当前实现已经建立从三张不可变解码表，到 Local/Global Utility Atomic Results，再到可自校验最终 bundle 的完整审计路径。但目前不声称与完整 TabEval 预测器运行时达到可执行等价。该声明还需要在 Linux/Python 3.11 上运行锁定的 AutoGluon、XGBoost、KNN 与 TabPFN 栈，审阅运行预算并留存证据。
 
