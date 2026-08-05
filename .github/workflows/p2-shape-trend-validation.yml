@@ -7,6 +7,7 @@ on:
       - "THIRD_PARTY_NOTICES.md"
       - "configs/datasets/**"
       - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p2-*.json"
       - "pyproject.toml"
       - "standardized_tabular_diffusion/cli.py"
       - "standardized_tabular_diffusion/evaluation/**"
@@ -14,12 +15,14 @@ on:
       - "standardized_tabular_diffusion/schemas/evaluation/**"
       - "standardized_tabular_diffusion/validation/p2_shape_trend.py"
       - "tests/evaluation/**"
+      - "tests/test_p2_retained_evidence.py"
   pull_request:
     paths:
       - ".github/workflows/p2-shape-trend-validation.yml"
       - "THIRD_PARTY_NOTICES.md"
       - "configs/datasets/**"
       - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p2-*.json"
       - "pyproject.toml"
       - "standardized_tabular_diffusion/cli.py"
       - "standardized_tabular_diffusion/evaluation/**"
@@ -27,6 +30,7 @@ on:
       - "standardized_tabular_diffusion/schemas/evaluation/**"
       - "standardized_tabular_diffusion/validation/p2_shape_trend.py"
       - "tests/evaluation/**"
+      - "tests/test_p2_retained_evidence.py"
   workflow_dispatch:
 
 permissions:
@@ -72,6 +76,7 @@ jobs:
           tests/evaluation/test_p2_evaluate_table.py
           tests/evaluation/test_registry_and_profiles.py
           tests/evaluation/test_bundle.py
+          tests/test_p2_retained_evidence.py
 
       - name: Lint and type-check evaluation surfaces
         run: |

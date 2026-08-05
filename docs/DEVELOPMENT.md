@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0 and P1 passed; P2 is implemented and awaiting authoritative Linux validation
+- Status: P0, P1, and P2 passed; authoritative Linux/Python 3.11 evidence is retained
 - Primary environment: Linux and Python 3.11
 - Last updated: 2026-08-05
 
@@ -96,7 +96,7 @@ P1 passed in [GitHub Actions run 31018595264](https://github.com/jimmybach/Stand
 
 ## P2 Shape and Trend evaluation
 
-P2 adds the standalone `evaluate-table` command, the Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete Atomic Results, Parquet metric storage, terminal stage records, and interruption-safe finalized bundles. See the [P2 specification and usage guide](evaluation/P2_SHAPE_TREND_EVALUATION.md). These metrics remain diagnostic and cannot affect Official Results until later protocol-freeze and release-support gates pass.
+P2 adds the standalone `evaluate-table` command, the Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete Atomic Results, Parquet metric storage, terminal stage records, and interruption-safe finalized bundles. It passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), and the exact [Linux/Python 3.11 evidence](evidence/evaluation/p2-shape-trend-run-31025796906.json) is retained. See the [P2 specification and usage guide](evaluation/P2_SHAPE_TREND_EVALUATION.md). These metrics remain diagnostic and cannot affect Official Results until later protocol-freeze and release-support gates pass.
 
 ## CI baseline
 

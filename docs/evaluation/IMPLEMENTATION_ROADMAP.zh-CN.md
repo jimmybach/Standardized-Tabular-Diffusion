@@ -2,8 +2,8 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 已通过；P2 实现已完成，等待 Linux 权威验证
-- 路线图版本：0.2.2
+- 状态：P1 与 P2 均已通过，并留存 Linux/Python 3.11 证据
+- 路线图版本：0.2.3
 - 最后更新：2026-08-05
 - 主要发布环境：Linux 与 Python 3.11
 
@@ -83,7 +83,7 @@ EvaluationRequest + Dataset Profile + 参考表/合成表
 
 ### 3.3 P2 实现后仍存在的缺口
 
-- 在正式宣布 P2 完成前，必须通过并留存 Linux/Python 3.11 权威 workflow 证据。
+- P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 有效性、P4 效用、经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
@@ -154,7 +154,7 @@ tests/evaluation/
 |---|---|---|---|---|
 | P0 | 可信开发基线 | 无 | 已通过 | 核心测试可在最小环境收集；仓库测试与参考测试已隔离 |
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
-| P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已实现；等待 Linux 权威验证 | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
+| P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 未开始 | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 未开始 | 原始 arms、状态语义、profile 身份和来源/公式验证通过 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
@@ -432,11 +432,11 @@ Golden fixture 必须小型、合成、可再分发、可人工检查且有版�
 
 ### M1 — 评测基础
 
-P0 和 P1 已通过，M1 的 Linux/Python 3.11 证据已留存。P2 实现现已公开两个非正式的 source-parity-validated 指标记录；权威 P2 Linux 证据是剩余的 M2 门槛。
+P0 和 P1 已通过，M1 的 Linux/Python 3.11 证据已留存。P2 现在也为两个非正式的 source-parity-validated 指标记录留存了权威证据。
 
 ### M2 — 首份可信报告
 
-P2 通过。用户可以评测兼容的合成表，并获得包含结构校验、Shape 和 Trend 证据的 finalized、validated bundle。在仓库级发布门也通过的前提下，这是第一个可以支持 public preview 的评测切片。
+P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906) 通过。用户可以评测兼容的合成表，并获得包含结构校验、Shape 和 Trend 证据的 finalized、validated bundle。在仓库级发布门也通过的前提下，这是第一个可以支持 public preview 的评测切片。
 
 ### M3 — 基准维度
 
@@ -450,7 +450,7 @@ P2 通过。用户可以评测兼容的合成表，并获得包含结构校验�
 
 ## 11. 紧接着的实现增量
 
-紧接着的增量是在 Linux/Python 3.11 上运行 P2 专用 workflow、留存机器可读证据，并处理任何平台差异。只有该退出门槛通过后，才应开始 P3 的有效性规则和已经批准的显式预处理边界。本工作不修改上游算法、不发布榜单，也不把 TabStruct 参考代码作为实现依赖。
+紧接着的增量是 P3：在 finalized P2 bundle 路径之上实现有效性规则和已经批准的显式预处理边界。P3 必须保留 fail-closed 结构行为，把仅在训练集拟合的填补过程保持为独立且显式的步骤，并且不得增加隐藏修复。本工作不修改上游算法、不发布榜单，也不把 TabStruct 参考代码作为实现依赖。
 
 ## 12. 相关规范
 
