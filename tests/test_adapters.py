@@ -1132,7 +1132,7 @@ def test_nrgboost_rejects_missing_values_and_invalid_controls(tmp_path: Path) ->
         adapter._training_params(RunSpec(**{**spec.__dict__, "extra": {"splitter": "unsupported"}}))
 
 
-def test_bn_uses_safe_json_and_nflow_keeps_default_pickle_checkpoint(tmp_path: Path) -> None:
+def test_bn_and_nflow_use_non_executable_checkpoint_formats(tmp_path: Path) -> None:
     bn_adapter = BNAdapter(tmp_path)
     nflow_adapter = NFlowAdapter(tmp_path)
 
@@ -1154,7 +1154,10 @@ def test_bn_uses_safe_json_and_nflow_keeps_default_pickle_checkpoint(tmp_path: P
     ).to_run_spec()
 
     assert bn_adapter._resolve_checkpoint_path(bn_spec).name == "model.bn.json"
-    assert nflow_adapter._resolve_checkpoint_path(nflow_spec).name == "model.pkl"
+    assert nflow_adapter._resolve_checkpoint_path(nflow_spec).name == "model.nflow.json"
+    assert nflow_adapter._weights_path(nflow_adapter._resolve_checkpoint_path(nflow_spec)).name == (
+        "model.nflow.weights.npz"
+    )
 
 
 def test_goggle_uses_model_pt_checkpoint_name(tmp_path: Path) -> None:
@@ -1361,7 +1364,7 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
     for model_name, checkpoint_name in [
         ("bn", "model.bn.json"),
         ("ctab-gan", "ctabgan.pkl"),
-        ("nflow", "model.pkl"),
+        ("nflow", "model.nflow.json"),
         ("goggle", "model.pt"),
         ("great", "great_model"),
         ("tabsds", "tabsds.pkl"),
@@ -1383,6 +1386,9 @@ def test_validate_action_inputs_accepts_extended_baseline_sample_contracts(tmp_p
             (tmp_path / "model.arf.json.metadata.json").write_text("{}")
         if model_name == "bn":
             (tmp_path / "model.bn.json.metadata.json").write_text("{}")
+        if model_name == "nflow":
+            (tmp_path / "model.nflow.json.metadata.json").write_text("{}")
+            (tmp_path / "model.nflow.weights.npz").write_text("stub")
         config = ExperimentConfig(
             model=model_name,
             dataset="adult",

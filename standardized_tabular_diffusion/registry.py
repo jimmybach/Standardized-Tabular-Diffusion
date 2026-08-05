@@ -278,9 +278,26 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
     "nflow": _spec(
         "standardized_tabular_diffusion.models.structured_baselines",
         "NFlowAdapter",
-        authority="local",
-        distribution="hybrid",
-        modification="semantic-patched",
+        authority="canonical-library",
+        distribution="package",
+        target="official-nflows-package-plus-declared-tabular-maf-recipe",
+        modification="adapter-only",
+        install_extra="nflow",
+        upstream_repository="https://github.com/bayesiains/nflows",
+        upstream_revision="64b856c081e5f07521b32be99da262e8338fbfe8",
+        revision_status="pinned-canonical-package-native-parity-validated",
+        license_status=(
+            "MIT in source tag and package metadata; PyPI sdist omits license file; "
+            "native parity passed; central evaluation, dataset, runtime, and release gates pending"
+        ),
+        evidence_records=(
+            "docs/UPSTREAM_SOURCE_AUDIT.md",
+            "docs/NFLOW_VALIDATION.md",
+            "docs/evidence/nflow/native-parity-run-30970260840.json",
+            "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+            ".github/workflows/nflow-validation.yml",
+        ),
+        validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
     "realtabformer": _spec(
         "standardized_tabular_diffusion.models.realtabformer",

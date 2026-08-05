@@ -788,6 +788,137 @@
         "workflow_run_id": 30945676747
       }
     },
+    "nflow": {
+      "adapter_ids": [
+        "nflow"
+      ],
+      "authoritative_repository": "https://github.com/bayesiains/nflows",
+      "authority": "canonical-library",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "nflow-declared-tabular-preprocessing-v1",
+          "reason": "nflows is a continuous density-estimation toolkit and does not prescribe a standardized mixed-type tabular representation.",
+          "semantic_effect": "The benchmark explicitly standardizes declared numerical coordinates, ordinal-encodes declared categorical coordinates from training data only, and rounds/clips categorical samples back to the fitted domain. This is a declared recipe, not an upstream or paper-native claim."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "nflow-deterministic-runtime-v1",
+          "reason": "Official construction, DataLoader shuffling, and sampling consume PyTorch randomness while the standardized runner must be reproducible and must not mutate caller state.",
+          "semantic_effect": "The adapter uses the standardized seed, an explicit DataLoader generator, CPU single-thread execution, and scoped restoration of process-global PyTorch RNG and thread state without changing nflows source."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "nflow-safe-json-numpy-state-v1",
+          "reason": "The former pickle checkpoint was code-executing and unnecessary for a known fixed architecture.",
+          "semantic_effect": "Typed JSON records the recipe and preprocessing state; allow_pickle=False NumPy stores only tensors. File/member/tensor hashes, names, shapes, dtypes, finiteness, and size limits are checked before strict loading into a reconstructed official Flow."
+        }
+      ],
+      "component_id": "nflow",
+      "dependency_resolution": {
+        "declared_requirements": [
+          "matplotlib",
+          "numpy",
+          "tensorboard",
+          "torch",
+          "tqdm"
+        ],
+        "validation_environment_lock": "requirements-nflow-validation.txt"
+      },
+      "distribution_form": "package",
+      "license": "MIT",
+      "license_note": "The locked Git tag contains LICENSE.md, but the PyPI source distribution omits the license file and declares MIT only in metadata.",
+      "license_url": "https://github.com/bayesiains/nflows/blob/64b856c081e5f07521b32be99da262e8338fbfe8/LICENSE.md",
+      "modification_status": "adapter-only",
+      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "package_lock": {
+        "bytes": 45784,
+        "filename": "nflows-0.14.tar.gz",
+        "format": "sdist",
+        "name": "nflows",
+        "pypi_trusted_publishing": false,
+        "pypi_url": "https://pypi.org/project/nflows/0.14/",
+        "sha256": "6299844a62f9999fcdf2d95cb2d01c091a50136bd17826e303aba646b2d11b55",
+        "url": "https://files.pythonhosted.org/packages/bd/16/a484db41aab28332f42080435c9342fa87cfc9a4fce5495521ea1e80ca27/nflows-0.14.tar.gz",
+        "version": "0.14"
+      },
+      "patch_sets": [],
+      "release": {
+        "git_tag": "v0.14",
+        "published_at": "2020-12-02T11:55:56.545223Z",
+        "source_commit": "64b856c081e5f07521b32be99da262e8338fbfe8",
+        "source_tree": "83057958f8773e35044e3aa5c13ac9c06c4a3994",
+        "tag_signature": "unsigned-lightweight-tag"
+      },
+      "reproduction_target": "official-nflows-package-plus-declared-tabular-maf-recipe",
+      "source_package_comparison": {
+        "exact_package_files": 42,
+        "package_aggregate_sha256": "e87ed4bf20415a470c531592945e662a8026f4632d892cfa9d9de58a03766721",
+        "relation": "All 42 nflows package files in the PyPI source distribution are byte-exact with the locked v0.14 Git tree."
+      },
+      "source_license_git_blob": "785b65b6b446af620425caf7b27b3e1585a74720",
+      "source_license_sha256": "74a24abd8e13ac55286f5a8396a88c20da9f67a64cbc5daa8999f31843a8b948",
+      "upstream_commit": "64b856c081e5f07521b32be99da262e8338fbfe8",
+      "upstream_tree": "83057958f8773e35044e3aa5c13ac9c06c4a3994",
+      "validation": {
+        "artifact": {
+          "artifact_digest": "sha256:635028a4962884284e8592144e5fa2b77272bafa4c4279f54d421650552ec044",
+          "artifact_id": 8916246279,
+          "downloaded_evidence_sha256": "940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923",
+          "evidence_file_sha256": "940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923",
+          "expires_at": "2026-11-03T02:45:15Z",
+          "name": "nflow-native-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/nflow/native-parity-run-30970260840.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "environment": {
+          "matplotlib": "3.9.2",
+          "nflows": "0.14",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "python": "3.11.15",
+          "scikit-learn": "1.5.2",
+          "scipy": "1.13.1",
+          "tensorboard": "2.18.0",
+          "torch": "2.3.0+cpu",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "a05b0c1a8c3f14ec2c285038ede6c9d61c327400ce0986aa05361c970fbbc319",
+        "level": "native-parity-validated",
+        "pull_request_head_commit": "37e9234f7160cd4c9f2f6c1ae2beb7eef96aaf35",
+        "protocol_id": "nflows-maf-tabular-recipe-parity-v1",
+        "repository_commit": "37e9234f7160cd4c9f2f6c1ae2beb7eef96aaf35",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "archive_members_verified": 96,
+          "installed_record_hashes_verified": 48,
+          "package_files_verified": 42,
+          "package_unchanged_after_validation": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_samples_exact": true,
+          "requested_rows_per_case": 13,
+          "safe_non_executable_checkpoint": true,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true,
+          "state_tensors_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-05T02:46:29Z",
+        "validated_scope": {
+          "data": "flat-single-table-mixed-type-missing-free",
+          "implementation": "official-nflows-package-plus-declared-tabular-maf-recipe",
+          "paper_native_equivalence": "not-claimed"
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840/job/92192839468",
+        "workflow_run_id": 30970260840
+      }
+    },
     "nrgboost": {
       "adapter_ids": [
         "nrgboost"
