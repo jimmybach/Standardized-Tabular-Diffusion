@@ -40,6 +40,10 @@ class DatasetProfile:
         return str(self.payload["dataset_profile_version"])
 
     @property
+    def identity(self) -> tuple[str, str]:
+        return self.dataset_id, self.dataset_profile_version
+
+    @property
     def fingerprint(self) -> str:
         return content_fingerprint(self.payload)
 
@@ -86,6 +90,7 @@ def load_dataset_profile(path: str | Path) -> DatasetProfile:
     if not isinstance(payload, dict):
         raise ProfileError(f"Dataset Profile must be an object: {source}")
     validate_instance("dataset-profile", payload)
+    _validate_dataset_semantics(payload)
     if payload["official_eligible"] and payload["status"] != "frozen":
         raise ProfileError("Only a frozen Dataset Profile can claim official eligibility")
     if payload["official_eligible"] and payload["source_rights"]["redistribution_status"] == "unknown":
@@ -99,9 +104,84 @@ def load_protocol_profile(path: str | Path) -> ProtocolProfile:
     if not isinstance(payload, dict):
         raise ProfileError(f"Protocol Profile must be an object: {source}")
     validate_instance("protocol-profile", payload)
+    _validate_protocol_semantics(payload)
     if payload["official_results_allowed"] and payload["status"] != "frozen":
         raise ProfileError("Only a frozen protocol can allow Official Results")
     return ProtocolProfile(copy.deepcopy(payload), str(source))
+
+
+def _validate_dataset_semantics(payload: dict[str, Any]) -> None:
+    columns = payload["columns"]
+    column_names = [str(column["name"]) for column in columns]
+    column_ids = [str(column["column_id"]) for column in columns]
+    if len(set(column_names)) != len(column_names):
+        raise ProfileError("Dataset Profile column names must be unique")
+    if len(set(column_ids)) != len(column_ids):
+        raise ProfileError("Dataset Profile column_id values must be unique")
+    if any(len(set(column["roles"])) != len(column["roles"]) for column in columns):
+        raise ProfileError("Dataset Profile column roles must not contain duplicates")
+
+    table_contract = payload["table_contract"]
+    declared_order = table_contract.get("canonical_column_order")
+    canonical_names = [
+        str(column["name"])
+        for column in columns
+        if "audit_only" not in column["roles"] and "ignored" not in column["roles"]
+    ]
+    if declared_order is not None and declared_order != canonical_names:
+        raise ProfileError(
+            "table_contract.canonical_column_order must exactly match non-audit, non-ignored columns"
+        )
+    if table_contract.get("unique_column_names") is False:
+        raise ProfileError("A valid Dataset Profile cannot declare non-unique column names")
+    declared_targets = table_contract.get("target_presence", [])
+    if any(target not in column_names for target in declared_targets):
+        raise ProfileError("table_contract.target_presence references an unknown column")
+
+    views = payload["views"]
+    view_ids = [view.get("view_id") for view in views]
+    if any(not isinstance(view_id, str) for view_id in view_ids) or len(set(view_ids)) != len(view_ids):
+        raise ProfileError("Dataset Profile views require unique string view_id values")
+    if payload["dataset_view"] not in view_ids:
+        raise ProfileError("dataset_view must resolve to exactly one declared view")
+
+    columns_by_id = {str(column["column_id"]): column for column in columns}
+    task_ids: set[str] = set()
+    for task in payload["predictive_tasks"]:
+        task_id = task.get("task_id")
+        target_id = task.get("target_column_id")
+        if not isinstance(task_id, str) or task_id in task_ids:
+            raise ProfileError("predictive_tasks require unique string task_id values")
+        task_ids.add(task_id)
+        if target_id not in columns_by_id:
+            raise ProfileError(f"Predictive task {task_id!r} references an unknown target column")
+        if not {"primary_target", "secondary_target"} & set(columns_by_id[str(target_id)]["roles"]):
+            raise ProfileError(f"Predictive task {task_id!r} must reference a declared target role")
+
+    if payload["official_eligible"]:
+        if payload["split"].get("frozen") is not True:
+            raise ProfileError("An official-eligible Dataset Profile requires a frozen split")
+        if payload["source_rights"]["rights_review"].get("decision") != "approved":
+            raise ProfileError("An official-eligible Dataset Profile requires approved rights review")
+
+
+def _validate_protocol_semantics(payload: dict[str, Any]) -> None:
+    selections = payload["metric_selections"]
+    identities = [(item["metric_id"], item["metric_version"]) for item in selections]
+    if len(set(identities)) != len(identities):
+        raise ProfileError("Protocol metric selections must have unique metric identities")
+    if len(set(payload["dataset_suites"])) != len(payload["dataset_suites"]):
+        raise ProfileError("Protocol dataset_suites must not contain duplicates")
+    supported_versions = {
+        "atomic_result": "1.0.0",
+        "manifest": "1.0.0",
+        "metadata": "1.0.0",
+        "summary": "1.0.0",
+        "stage_record": "1.0.0",
+        "artifact_index": "1.0.0",
+    }
+    if payload["result_schema_versions"] != supported_versions:
+        raise ProfileError("Protocol references unsupported result schema versions")
 
 
 def _packaged_protocols() -> Iterable[ProtocolProfile]:
@@ -124,6 +204,24 @@ def list_protocol_profiles(directory: str | Path | None = None) -> tuple[Protoco
     for profile in profiles:
         if profile.identity in indexed:
             raise ProfileError(f"Duplicate protocol identity: {profile.protocol_id}@{profile.protocol_version}")
+        indexed[profile.identity] = profile
+    return tuple(indexed[key] for key in sorted(indexed))
+
+
+def list_dataset_profiles(directory: str | Path) -> tuple[DatasetProfile, ...]:
+    root = Path(directory)
+    if not root.is_dir():
+        raise ProfileError(f"Dataset Profile directory does not exist: {root}")
+    paths = sorted((*root.glob("*.json"), *root.glob("*.yaml"), *root.glob("*.yml")))
+    indexed: dict[tuple[str, str], DatasetProfile] = {}
+    for path in paths:
+        profile = load_dataset_profile(path)
+        if profile.identity in indexed:
+            previous = indexed[profile.identity]
+            raise ProfileError(
+                f"Duplicate dataset identity {profile.dataset_id}@{profile.dataset_profile_version} "
+                f"in {previous.source} and {path}"
+            )
         indexed[profile.identity] = profile
     return tuple(indexed[key] for key in sorted(indexed))
 
