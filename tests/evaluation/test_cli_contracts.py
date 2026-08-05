@@ -23,7 +23,7 @@ def test_cli_lists_validated_metric_records(
     monkeypatch.setattr(sys, "argv", ["std-tabular-diffusion", "validate-metric-registry"])
     cli.main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload == {"valid": True, "record_count": 10}
+    assert payload == {"valid": True, "record_count": 12}
 
 
 def test_cli_lists_protocol_profiles(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
@@ -34,6 +34,7 @@ def test_cli_lists_protocol_profiles(monkeypatch: pytest.MonkeyPatch, capsys: py
         "development-p1",
         "legacy-tabstruct-aligned",
         "p2-shape-trend",
+        "p3-validity",
     }
 
 

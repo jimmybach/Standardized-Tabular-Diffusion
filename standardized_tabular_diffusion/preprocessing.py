@@ -10,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import math
 import unicodedata
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -20,6 +20,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
     atomic_write_bytes,
     atomic_write_json,
     content_fingerprint,
+    read_json,
     sha256_file,
 )
 
@@ -63,11 +64,25 @@ class MissingValuePolicy:
             raise PreprocessingError("Target imputation is prohibited; target_strategy must be 'error'")
         if self.synthetic_strategy != "reject":
             raise PreprocessingError("Generated samples may not be repaired; synthetic_strategy must be 'reject'")
+        if not isinstance(self.add_missing_indicators, bool):
+            raise PreprocessingError("add_missing_indicators must be Boolean")
         if len(set(self.missing_markers)) != len(self.missing_markers):
             raise PreprocessingError("missing_markers contains duplicate values")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> MissingValuePolicy:
+        expected = {field.name for field in fields(cls)}
+        if not isinstance(payload, dict) or set(payload) != expected:
+            raise PreprocessingError("MissingValuePolicy payload fields differ from the v1 contract")
+        converted = dict(payload)
+        markers = converted.get("missing_markers")
+        if not isinstance(markers, (list, tuple)) or not all(isinstance(item, str) for item in markers):
+            raise PreprocessingError("MissingValuePolicy missing_markers must be an array of strings")
+        converted["missing_markers"] = tuple(markers)
+        return cls(**converted)
 
 
 @dataclass(frozen=True)
@@ -97,6 +112,77 @@ class ImputationState:
     @property
     def fingerprint(self) -> str:
         return content_fingerprint(self.to_dict())
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> ImputationState:
+        expected = {field.name for field in fields(cls)}
+        if not isinstance(payload, dict) or set(payload) != expected:
+            raise PreprocessingError("ImputationState payload fields differ from the v1 contract")
+        converted = dict(payload)
+        if converted["state_schema_version"] != "1.0.0":
+            raise PreprocessingError("Unsupported ImputationState schema version")
+        if converted["implementation_version"] != PREPROCESSING_IMPLEMENTATION_VERSION:
+            raise PreprocessingError("ImputationState implementation version differs from this runtime")
+        if converted["fitted_on_split"] != "train":
+            raise PreprocessingError("ImputationState must be fitted on train")
+        if isinstance(converted["training_rows"], bool) or not isinstance(converted["training_rows"], int):
+            raise PreprocessingError("ImputationState training_rows must be an integer")
+        tuple_fields = {
+            "feature_columns",
+            "numerical_columns",
+            "categorical_columns",
+            "target_columns",
+            "input_column_order",
+            "output_column_order",
+        }
+        for name in tuple_fields:
+            value = converted[name]
+            if not isinstance(value, (list, tuple)) or not all(isinstance(item, str) for item in value):
+                raise PreprocessingError(f"ImputationState {name} must be an array of strings")
+            converted[name] = tuple(value)
+        if not isinstance(converted["policy"], dict):
+            raise PreprocessingError("ImputationState policy must be an object")
+        for name in ("numerical_fill_values", "categorical_fill_values", "training_missing_counts"):
+            if not isinstance(converted[name], dict) or not all(isinstance(key, str) for key in converted[name]):
+                raise PreprocessingError(f"ImputationState {name} must be an object with string keys")
+        converted["policy"] = MissingValuePolicy.from_dict(converted["policy"])
+        state = cls(**converted)
+        if state.training_rows <= 0:
+            raise PreprocessingError("ImputationState training_rows must be positive")
+        groups = (state.numerical_columns, state.categorical_columns, state.target_columns)
+        if any(len(group) != len(set(group)) for group in groups):
+            raise PreprocessingError("ImputationState column-role groups must be unique")
+        if len(state.input_column_order) != len(set(state.input_column_order)) or len(state.output_column_order) != len(
+            set(state.output_column_order)
+        ):
+            raise PreprocessingError("ImputationState input/output column orders must be unique")
+        role_sets = [set(group) for group in groups]
+        if any(role_sets[left] & role_sets[right] for left in range(3) for right in range(left + 1, 3)):
+            raise PreprocessingError("ImputationState column roles overlap")
+        if set(state.feature_columns) != set(state.numerical_columns) | set(state.categorical_columns):
+            raise PreprocessingError("ImputationState feature columns differ from numerical/categorical roles")
+        if set(state.input_column_order) != set(state.feature_columns) | set(state.target_columns):
+            raise PreprocessingError("ImputationState input columns differ from declared roles")
+        if set(state.numerical_fill_values) != set(state.numerical_columns) or any(
+            isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value))
+            for value in state.numerical_fill_values.values()
+        ):
+            raise PreprocessingError("ImputationState numerical fill values are invalid")
+        if set(state.categorical_fill_values) != set(state.categorical_columns) or not all(
+            isinstance(value, str) for value in state.categorical_fill_values.values()
+        ):
+            raise PreprocessingError("ImputationState categorical fill values are invalid")
+        if set(state.training_missing_counts) != set(state.input_column_order) or any(
+            isinstance(value, bool) or not isinstance(value, int) or value < 0
+            for value in state.training_missing_counts.values()
+        ):
+            raise PreprocessingError("ImputationState training missing counts are invalid")
+        expected_output = list(state.input_column_order)
+        if state.policy.add_missing_indicators:
+            expected_output.extend(f"{column}__missing" for column in state.feature_columns)
+        if list(state.output_column_order) != expected_output:
+            raise PreprocessingError("ImputationState output column order differs from its policy")
+        return state
 
 
 @dataclass(frozen=True)
@@ -205,7 +291,7 @@ def _most_frequent_value(series: pd.Series, column: str) -> str:
     counts = observed.value_counts(sort=False)
     maximum = int(counts.max())
     candidates = [str(value) for value, count in counts.items() if int(count) == maximum]
-    return min(candidates, key=lambda value: unicodedata.normalize("NFC", value))
+    return min(candidates, key=lambda value: (unicodedata.normalize("NFC", value), value))
 
 
 def fit_imputation_state(
@@ -219,6 +305,8 @@ def fit_imputation_state(
     """Fit means and modes on the real training split only."""
 
     policy = policy or MissingValuePolicy()
+    if train.empty:
+        raise PreprocessingError("The real training split must contain at least one row")
     numerical_columns = tuple(numerical_columns)
     categorical_columns = tuple(categorical_columns)
     target_columns = tuple(target_columns)
@@ -301,10 +389,10 @@ def transform_with_imputation_state(
         for column in state.feature_columns:
             prepared[f"{column}__missing"] = prepared[column].isna().astype("int8")
 
-    for column, value in state.numerical_fill_values.items():
-        prepared[column] = prepared[column].fillna(value).astype("float64")
-    for column, value in state.categorical_fill_values.items():
-        prepared[column] = prepared[column].fillna(value).astype("string")
+    for column, numerical_fill in state.numerical_fill_values.items():
+        prepared[column] = prepared[column].fillna(numerical_fill).astype("float64")
+    for column, categorical_fill in state.categorical_fill_values.items():
+        prepared[column] = prepared[column].fillna(categorical_fill).astype("string")
 
     prepared = prepared.loc[:, list(state.output_column_order)]
     remaining = {column: int(prepared[column].isna().sum()) for column in prepared.columns}
@@ -365,6 +453,24 @@ def _frame_sha256(frame: pd.DataFrame) -> str:
     return hashlib.sha256(_frame_bytes(frame)).hexdigest()
 
 
+def _schema_contract(frame: pd.DataFrame) -> dict[str, Any]:
+    fields = [{"name": str(column), "dtype": str(frame[column].dtype)} for column in frame.columns]
+    payload = {"schema_contract_version": "1.0.0", "fields": fields}
+    return {**payload, "fingerprint": content_fingerprint(payload)}
+
+
+def load_imputation_state(path: str | Path, *, expected_sha256: str | None = None) -> ImputationState:
+    """Load a portable frozen state, optionally enforcing its external checksum."""
+
+    source = Path(path)
+    if expected_sha256 is not None and sha256_file(source) != expected_sha256:
+        raise PreprocessingError("ImputationState checksum differs from the expected artifact")
+    payload = read_json(source)
+    if not isinstance(payload, dict):
+        raise PreprocessingError("ImputationState file must contain a JSON object")
+    return ImputationState.from_dict(payload)
+
+
 def preprocess_split_files(
     *,
     train_path: str | Path,
@@ -399,6 +505,9 @@ def preprocess_split_files(
     )
 
     destination = Path(output_dir)
+    if destination.exists():
+        if not destination.is_dir() or any(destination.iterdir()):
+            raise FileExistsError(f"Preprocessing output directory must be new or empty: {destination}")
     destination.mkdir(parents=True, exist_ok=True)
     state_path = destination / "imputation-state.json"
     atomic_write_json(state_path, result.state.to_dict())
@@ -422,11 +531,29 @@ def preprocess_split_files(
             "rows": int(len(frame)),
         }
 
+    transformed_schema = _schema_contract(result.train)
+    configuration = {
+        "implementation_version": PREPROCESSING_IMPLEMENTATION_VERSION,
+        "policy": result.state.policy.to_dict(),
+        "input_column_order": list(result.state.input_column_order),
+        "output_column_order": list(result.state.output_column_order),
+        "numerical_columns": list(result.state.numerical_columns),
+        "categorical_columns": list(result.state.categorical_columns),
+        "target_columns": list(result.state.target_columns),
+        "transformed_schema_fingerprint": transformed_schema["fingerprint"],
+    }
+    configuration_fingerprint = content_fingerprint(configuration)
     manifest = {
         "manifest_schema_version": "1.0.0",
         "implementation_version": PREPROCESSING_IMPLEMENTATION_VERSION,
         "fitted_on_split": "train",
         "train_only_fitting": True,
+        "identity": {
+            "configuration_fingerprint": configuration_fingerprint,
+            "dataset_view_token": f"imputed-{configuration_fingerprint[:16]}",
+            "policy_change_requires_new_dataset_view": True,
+        },
+        "transformed_schema": transformed_schema,
         "state": {
             "path": state_path.name,
             "sha256": sha256_file(state_path),

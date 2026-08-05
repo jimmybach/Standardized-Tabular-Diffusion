@@ -29,7 +29,7 @@ pytestmark = [pytest.mark.core, pytest.mark.evaluation]
 
 def test_packaged_legacy_registry_is_explicitly_nonofficial() -> None:
     records = load_metric_registry()
-    assert len(records) == 10
+    assert len(records) == 12
     assert len({record.identity for record in records}) == len(records)
     legacy = [record for record in records if record.metric_id.startswith("legacy-")]
     assert len(legacy) == 8
@@ -46,6 +46,18 @@ def test_p2_metrics_are_source_parity_validated_but_not_officially_admitted() ->
     }
     assert all(record.payload["lifecycle_status"] == "source-parity-validated" for record in records)
     assert all(record.payload["source"]["known_deviations"] == [] for record in records)
+    assert all(record.payload["admission"]["official_results_allowed"] is False for record in records)
+
+
+def test_p3_metrics_are_benchmark_native_unit_validated_and_nonofficial() -> None:
+    records = [record for record in load_metric_registry() if record.metric_id.startswith("std-tabular-")]
+    assert {record.metric_id for record in records} == {
+        "std-tabular-column-validity",
+        "std-tabular-constraint-validity",
+    }
+    assert all(record.payload["definition_origin"] == "benchmark-native" for record in records)
+    assert all(record.payload["lifecycle_status"] == "unit-validated" for record in records)
+    assert all(record.payload["validation"]["source_parity_evidence"] == [] for record in records)
     assert all(record.payload["admission"]["official_results_allowed"] is False for record in records)
 
 
@@ -127,7 +139,9 @@ def test_dataset_profile_semantic_identity_checks_fail_closed(tmp_path: Path) ->
         load_dataset_profile(path)
 
     profile = import_legacy_dataset_spec(_legacy_spec(tmp_path)).to_dict()
-    profile["table_contract"]["canonical_column_order"] = list(reversed(profile["table_contract"]["canonical_column_order"]))
+    profile["table_contract"]["canonical_column_order"] = list(
+        reversed(profile["table_contract"]["canonical_column_order"])
+    )
     path = tmp_path / "wrong-column-order.json"
     path.write_text(json.dumps(profile), encoding="utf-8")
     with pytest.raises(ProfileError, match="canonical_column_order"):
@@ -159,6 +173,7 @@ def test_packaged_protocols_resolve_exact_versions_and_are_nonofficial() -> None
         ("development-p1", "0.1.0"),
         ("legacy-tabstruct-aligned", "1.0.0-legacy"),
         ("p2-shape-trend", "0.2.0"),
+        ("p3-validity", "0.3.0"),
     }
     assert all(not profile.payload["official_results_allowed"] for profile in profiles)
 

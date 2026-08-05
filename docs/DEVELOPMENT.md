@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0, P1, and P2 passed; authoritative Linux/Python 3.11 evidence is retained
+- Status: P0, P1, and P2 passed; P3 implementation and local exit gates passed, with Linux/Python 3.11 evidence pending
 - Primary environment: Linux and Python 3.11
 - Last updated: 2026-08-05
 
@@ -17,6 +17,9 @@ python -m pip install -e ".[data]"
 
 # P2 source-parity evaluation path; still diagnostic until later release gates
 python -m pip install -e ".[evaluation]"
+
+# Dependency-isolated P3 Validity and preprocessing path
+python -m pip install -e ".[validity]"
 
 # Dependency-light schema, registry, profile, and bundle validation
 python -m pip install -e ".[contracts]"
@@ -97,6 +100,12 @@ P1 passed in [GitHub Actions run 31018595264](https://github.com/jimmybach/Stand
 ## P2 Shape and Trend evaluation
 
 P2 adds the standalone `evaluate-table` command, the Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete Atomic Results, Parquet metric storage, terminal stage records, and interruption-safe finalized bundles. It passed in [GitHub Actions run 31025796906](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), and the exact [Linux/Python 3.11 evidence](evidence/evaluation/p2-shape-trend-run-31025796906.json) is retained. See the [P2 specification and usage guide](evaluation/P2_SHAPE_TREND_EVALUATION.md). These metrics remain diagnostic and cannot affect Official Results until later protocol-freeze and release-support gates pass.
+
+## P3 Validity and preprocessing boundary
+
+P3 adds a protocol-selectable Validity path with one Atomic Result per canonical model-view column and per reviewed cross-column constraint. Its closed rule language covers nullability, finiteness, integer semantics, reviewed bounds and vocabularies, formats, lengths, uniqueness, datetime ranges, comparisons, conditional domains, mutual exclusion, totals, allowed combinations, and functional dependencies. It preserves the original decoded output and never applies evaluator-side repair.
+
+The centralized missing-value workflow fits numerical means and categorical modes on the real training split only, rejects missing targets and all-missing training features, fingerprints learned state and transformed schema, and changes the dataset-view token when policy or schema changes. See the [P3 guide](evaluation/P3_VALIDITY_AND_PREPROCESSING.md). P3 has passed local exit gates; the dedicated Linux/Python 3.11 CI evidence is pending.
 
 ## CI baseline
 
