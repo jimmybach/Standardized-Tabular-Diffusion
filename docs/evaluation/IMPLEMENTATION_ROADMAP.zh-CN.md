@@ -82,7 +82,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | 隔离的权威 Shape/Trend 后端 | 要求 SDMetrics `0.28.3.dev0` 以及 commit `ba8842f2...` 的完整 121 文件源码树哈希 |
 | [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) 与 [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result 映射与端到端表评测器 | P2 活跃路径；重建来源聚合且不生成合并 Fidelity 分数 |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | 封闭硬规则语言、逐列/逐约束 Atomic Result 与 Validity 聚合 | P3 活跃诊断路径；禁止任意代码和推断硬规则，不修复原始输出 |
-| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | P4 诊断工程门与有限范围真实 TabEval XGB/KNN/TabPFN 来源运行时等价 pilot 已在 Linux/Python 3.11 上通过；完整数据集准入仍待完成 |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | P4 诊断工程门和有限范围来源运行时等价门已通过；首次预注册完整数据集准入失败，P4 仍为诊断状态 |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | 集中式均值/众数缺失值边界 | 只在真实 train 上拟合；禁止目标/合成数据修复；状态、schema、配置、输入与输出均有指纹 |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 八个旧记录、两个 P2、两个 P3 和十一个 P4 记录均非正式 |
@@ -96,7 +96,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
-- P4 Local/Global Utility 已通过有限范围诊断工作流，并留存[工程证据](../evidence/evaluation/p4-utility-run-31053624769.json)。单独的[真实来源运行时 pilot](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) 使用校验和锁定的 TabPFN 检查点，直接执行精确锁定的 TabEval 文件与真实 AutoGluon XGB/KNN/TabPFN 模型；分类和回归聚合等价均严格通过。Adult/Sick 目标覆盖、多种子稳定性、资源预算与准入仍待完成。
+- P4 Local/Global Utility 已通过有限范围诊断工作流，并留存[工程证据](../evidence/evaluation/p4-utility-run-31053624769.json)。单独的[真实来源运行时 pilot](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) 已使用锁定 TabEval 文件和真实 XGB/KNN/TabPFN 模型，严格通过分类/回归聚合等价。首次[数据集规模准入](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)失败：Adult 因运行器关闭而执行不完整；Sick 完整执行且资源门通过，但两个稳定性哨兵失败。P4 仍为诊断状态，不允许 profile 冻结或 Official Results 准入。
 - 经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
@@ -168,7 +168,7 @@ tests/evaluation/
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | 诊断门与有限范围真实来源运行时等价已通过；[工程](../evidence/evaluation/p4-utility-run-31053624769.json)和[运行时](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json)证据已留存；数据集规模准入待完成 | 原始 arms、状态语义、profile 身份、来源/公式验证和精确 pilot 聚合均通过 |
+| P4 | Local 与 Global Utility | P1、P3 | 诊断门与有限范围来源运行时等价已通过；首次[数据集规模准入](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)失败；仍为诊断状态 | 新预注册的完整运行在冻结审阅前通过目标覆盖、稳定性、高基数、资源和证据完整性门 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
@@ -293,6 +293,8 @@ Global Utility 任务：
 - 随机算法的可复现性和容差政策已预声明；
 - 声称来源等价的所选 profile 通过来源等价验证；以及
 - Local Utility 与 Global Utility 保持为不同输出和子榜单。
+
+当前裁决：有限范围来源等价已通过，但 `p4-dataset-scale-admission-pilot@0.1.1` 未通过。profile 冻结前必须有新协议版本与一次完整通过的运行；不得事后放宽已观察的 `0.1.1` 门限。
 
 ### 6.6 P5 — 高阶 Fidelity 与经验 Privacy
 
@@ -462,7 +464,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P4 现在使用经过 P3 审阅的不可变模型视图，以及单独由校验和绑定的 held-out real test。其有限范围 Linux/Python 3.11 来源运行时 pilot 已通过，来源/适配器聚合值严格一致，并真实训练了 XGB/KNN/TabPFN。下一道门是对 Adult/Sick 已审阅目标与多个种子进行数据集规模验证，留存高基数省略、稳定性、墙钟时间、内存和失败证据；之后才能决定是否冻结 profile。P5 不得把仍为诊断状态的 P4 profile 当成 Official Results 组件。
+P4 现在已具备实现、有限范围工程门、精确来源运行时等价，以及一次预注册的数据集规模裁决。该数据集规模运行因两个独立原因失败：Adult 运行器丢失导致覆盖不完整，Sick 两个稳定性哨兵超过固定门限。P4 的下一步需要审阅来源忠实的执行环境，或经审批且通过等价性验证的源码补丁，随后执行新预注册的完整重跑。在所有门通过前，P4 仍为诊断状态，P5 不得把它当成 Official Results 组件。
 
 ## 12. 相关规范
 

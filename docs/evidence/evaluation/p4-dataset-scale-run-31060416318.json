@@ -1,0 +1,13 @@
+{
+  "claim_boundary": "Covers every reviewed Adult and non-constant Sick Global target at full official split size under seed 0, plus five-seed stratified sentinel stability. It validates the evaluator and resource envelope using a row-permutation surrogate; it does not evaluate generator quality or admit Official Results.",
+  "error": "Expected 9 shard artifacts, observed 5",
+  "error_type": "P4DatasetScaleValidationError",
+  "evidence_schema_version": "1.0.0",
+  "official_results_allowed": false,
+  "phase": "P4 Adult/Sick dataset-scale and stability admission pilot",
+  "pilot_manifest_fingerprint": "0314a80f0d9b274092aca83fd4407186ec505755682a1fac3f50ea3321f5f45e",
+  "protocol_id": "p4-dataset-scale-admission-pilot-v1",
+  "repository_commit": "ce53739340ebf2afe4fdc836203fcd8f2b7696e7",
+  "status": "fail",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/standardized_tabular_diffusion/validation/p4_dataset_scale.py\", line 680, in finalize_shards\n    raise P4DatasetScaleValidationError(\nP4DatasetScaleValidationError: Expected 9 shard artifacts, observed 5\n"
+}
