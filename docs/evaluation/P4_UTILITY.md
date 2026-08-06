@@ -114,12 +114,37 @@ std-tabular-diffusion evaluate-table \
 
 P4 defaults to evaluator seeds `0,1,2,3,4`. A diagnostic run may provide `--evaluator-seeds 23` or another comma-separated list. A different seed set is recorded and is not automatically leaderboard-compatible.
 
+## Dataset-scale admission protocol
+
+`p4-dataset-scale-admission-pilot@0.1.1` is the preregistered, non-official admission protocol for the real Global Utility runtime. It runs on Linux x86-64, Python 3.11, and CPU with the exact dependency and checkpoint identities used by the bounded source-runtime pilot. The first execution established that TabPFN 2.1.2 applies its official 1,000-row CPU guard. Version `0.1.1` therefore records and requires the official `TABPFN_ALLOW_CPU_LARGE_DATASET=1` opt-in and retains AutoGluon per-model failure metadata. It does not change the predictor panel, targets, seeds, surrogate, or thresholds.
+
+The schedule contains 67 unique target/seed tasks and 134 TRTR/TSTR arms:
+
+- seed-zero coverage of all 15 reviewed Adult targets at the official 32,561/16,281 split;
+- seed-zero coverage of all 28 reviewed non-constant Sick targets at the official 2,800/972 split; and
+- seeds zero through four for one binary, one high-cardinality or multiclass, and one numerical sentinel per dataset: Adult `income`, `native-country`, and `fnlwgt`; Sick `class`, `referral-source`, and `tsh`.
+
+The TSTR input is a deterministic full-row permutation of real train. It preserves every row and every column's support, exercises both evaluator arms, and cannot be published as generator-quality evidence. Targets with more than ten real-train classes may omit TabPFN exactly as the locked source does; XGB and KNN remain mandatory, and both arms must expose the same trained model set.
+
+The preregistered gates require every scheduled task exactly once, every applicable predictor family, an absolute identity-ratio deviation no greater than `0.05`, a five-seed ratio range no greater than `0.05`, no arm above 600 observed seconds, and no observed Python process-tree peak above 14 GiB. Shards write failure-first JSON after every target. The finalizer rejects missing or duplicate shards, changed commits or manifests, incomplete target coverage, model-set drift, resource failures, and threshold failures before emitting one retained result.
+
+TabPFN's version-matched official documentation recommends GPU execution and states that only datasets of approximately 1,000 rows or fewer are feasible on CPU; it describes the large-dataset CPU opt-in as very slow. The admission run therefore measures a deliberately strict source-faithful CPU envelope rather than assuming it will pass. See the [TabPFN v2.1.1 documentation](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start); PyPI 2.1.2 contains no source change from that release according to the upstream changelog.
+
+## Dataset-scale admission result
+
+[Run 31060416318](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318) **failed** the preregistered `0.1.1` admission protocol. The immutable [admission decision](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) is bound to the original [finalizer output](../evidence/evaluation/p4-dataset-scale-run-31060416318.json), reconstructed [partial observations](../evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json), and reviewed [runner-failure observations](../evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json). Their SHA-256 values are, respectively, `8d6555c586f5b1a2c9a8024d6e151cb9559742ef023bfec2c3ea36b7b578d85e`, `cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8`, `a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f`, and `135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35`.
+
+All five Sick shards completed: 40 tasks and 80 arms passed execution, with all XGB/KNN/TabPFN families present. Maximum arm wall time was `346.2811` seconds and maximum process-tree RSS was `2.1784` GiB, both within the preregistered limits. The `class` sentinel passed stability. `referral-source` failed with maximum identity deviation `0.05280` and seed range `0.07229`; `tsh` failed with seed range `0.08488`. Each applicable limit was `0.05`.
+
+All four Adult jobs lost their GitHub Actions runner during execution, so 27 Adult tasks and four shard artifacts are missing. The shutdown is observed fact. Resource exhaustion is consistent with the execution path and upstream CPU guidance but is **not proven**, because no kernel OOM record or completed process-tree sample was retained. Adult coverage, stability, high-cardinality behavior, and resource compliance are therefore not assessed.
+
+The result is not generator-quality evidence because the pilot used the declared row-permutation surrogate. It does not freeze the profile, admit P4 into Official Results, or justify changing an observed threshold after the run.
+
 ## Remaining P4 exit work
 
 Before P4 can advance beyond diagnostic use:
 
-1. run representative Adult and Sick Global pilots across their reviewed target sets;
-2. measure multi-seed stability, wall time, peak memory, and target-level failure behavior;
-3. validate full AutoGluon omission and equal-arm handling for reviewed high-cardinality targets;
-4. freeze predictor versions, parameters, checkpoint identities, seed policy, and runtime budgets; and
-5. issue a separate protocol-freeze and Official Results admission decision.
+1. review and select a source-faithful execution environment, or separately approve and equivalence-validate a documented upstream-source patch, before another Adult run;
+2. preregister a new protocol version without post-hoc relaxation of the failed `0.1.1` gates;
+3. rerun complete Adult and Sick coverage and five-seed stability, including high-cardinality omission and equal-arm behavior; and
+4. reconsider profile freeze and Official Results admission only after every new gate passes.

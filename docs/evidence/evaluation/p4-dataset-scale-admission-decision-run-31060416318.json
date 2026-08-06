@@ -1,0 +1,69 @@
+{
+  "decision_schema_version": "1.0.0",
+  "decision_type": "dataset-scale-admission",
+  "protocol_id": "p4-dataset-scale-admission-pilot",
+  "protocol_version": "0.1.1",
+  "pilot_manifest_fingerprint": "0314a80f0d9b274092aca83fd4407186ec505755682a1fac3f50ea3321f5f45e",
+  "decision": "fail",
+  "lifecycle_after_decision": "diagnostic",
+  "profile_freeze_allowed": false,
+  "official_results_allowed": false,
+  "run": {
+    "run_id": 31060416318,
+    "url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318",
+    "repository_commit": "ce53739340ebf2afe4fdc836203fcd8f2b7696e7",
+    "conclusion": "failure",
+    "created_at": "2026-08-06T00:39:57Z",
+    "completed_at": "2026-08-06T02:56:05Z"
+  },
+  "gates": {
+    "adult_full_target_execution": "fail",
+    "adult_five_seed_stability": "not-assessed",
+    "adult_high_cardinality_policy": "not-assessed",
+    "adult_resource_envelope": "not-assessed",
+    "sick_full_target_execution": "pass",
+    "sick_five_seed_stability": "fail",
+    "sick_resource_envelope": "pass",
+    "generator_quality": "not-in-scope",
+    "profile_freeze": "fail",
+    "official_results_admission": "fail"
+  },
+  "reasons": [
+    "All four Adult jobs lost their GitHub Actions runner during execution, so 27 Adult tasks and four expected shard artifacts are missing.",
+    "Sick referral-source failed both preregistered stability limits: maximum absolute identity-ratio deviation 0.052801789219291795 and five-seed range 0.07228569680249919 exceed 0.05.",
+    "Sick tsh failed the preregistered five-seed range limit: 0.08487652994695161 exceeds 0.05."
+  ],
+  "observed_passes": {
+    "sick_tasks": 40,
+    "sick_arms": 80,
+    "sick_task_status_counts": {
+      "pass": 40
+    },
+    "sick_maximum_arm_wall_seconds": 346.2810744579997,
+    "sick_maximum_process_tree_peak_rss_gib": 2.1784019470214844,
+    "sick_class_stability": "pass"
+  },
+  "evidence": [
+    {
+      "role": "original-finalizer-output",
+      "path": "docs/evidence/evaluation/p4-dataset-scale-run-31060416318.json",
+      "sha256": "cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8"
+    },
+    {
+      "role": "partial-observation-adjudication",
+      "path": "docs/evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json",
+      "sha256": "a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f"
+    },
+    {
+      "role": "runner-failure-observations",
+      "path": "docs/evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json",
+      "sha256": "135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35"
+    }
+  ],
+  "claim_boundary": "This decision assesses only the preregistered CPU dataset-scale admission pilot using the deterministic row-permutation surrogate. It neither evaluates generator quality nor changes the protocol's predictor panel, targets, seeds, resource limits, or 0.05 stability thresholds.",
+  "next_review_requirements": [
+    "Select and review a source-faithful execution environment or an explicitly approved, documented, and equivalence-validated upstream-source patch before another Adult run.",
+    "Preregister a new protocol version before rerunning; do not relax version 0.1.1 thresholds after observing this result.",
+    "Rerun every Adult and Sick coverage and stability shard, retain all artifacts, and pass every gate before profile freeze is reconsidered."
+  ]
+}

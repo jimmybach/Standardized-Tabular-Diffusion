@@ -14,6 +14,7 @@ from standardized_tabular_diffusion.evaluation.utility import (
     LOCAL_RETENTION_METRIC_ID,
     GlobalBackendResult,
     UtilityProfileError,
+    _global_model_failure_records,
     evaluate_utility,
     global_target_ratio,
     load_p4_evaluator_profile,
@@ -23,6 +24,32 @@ from standardized_tabular_diffusion.evaluation.utility import (
 )
 
 pytestmark = [pytest.mark.core, pytest.mark.evaluation]
+
+
+def test_global_backend_retains_stable_autogluon_model_failure_fields() -> None:
+    class Predictor:
+        @staticmethod
+        def model_failures() -> pd.DataFrame:
+            return pd.DataFrame(
+                [
+                    {
+                        "model": "CustomTabPFNModel",
+                        "exc_type": "ValueError",
+                        "exc_str": "CPU large-dataset opt-in is required.",
+                        "total_time": 1.25,
+                        "exc_traceback": "intentionally not retained",
+                    }
+                ]
+            )
+
+    assert _global_model_failure_records(Predictor()) == (
+        {
+            "model": "CustomTabPFNModel",
+            "exception_type": "ValueError",
+            "exception_message": "CPU large-dataset opt-in is required.",
+            "total_time_seconds": 1.25,
+        },
+    )
 
 
 def _learnable_adult_frames(adult_frames):

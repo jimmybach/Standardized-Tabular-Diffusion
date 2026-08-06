@@ -114,12 +114,37 @@ std-tabular-diffusion evaluate-table \
 
 P4 默认使用种子 `0,1,2,3,4`。诊断运行可以传入 `--evaluator-seeds 23` 或其他逗号分隔列表。不同种子集合会被记录，不能自动视为榜单兼容。
 
+## 数据集规模准入协议
+
+`p4-dataset-scale-admission-pilot@0.1.1` 是针对真实 Global Utility 运行时预注册的非正式准入协议。它在 Linux x86-64、Python 3.11 和 CPU 上运行，并沿用有限范围来源运行时 pilot 的精确依赖与检查点身份。首次执行证明 TabPFN 2.1.2 会执行官方的 1,000 行 CPU 保护门。因此，版本 `0.1.1` 明确记录并要求使用官方 `TABPFN_ALLOW_CPU_LARGE_DATASET=1` 选择加入开关，同时保留 AutoGluon 的逐模型失败元数据；预测器面板、目标、种子、surrogate 和阈值均未改变。
+
+该计划包含 67 个唯一的目标/种子任务，共 134 条 TRTR/TSTR arm：
+
+- 在官方 32,561/16,281 划分上，以种子 0 覆盖 Adult 全部 15 个已审阅目标；
+- 在官方 2,800/972 划分上，以种子 0 覆盖 Sick 全部 28 个已审阅且非恒定的目标；以及
+- 每个数据集各选一个二分类、一个高基数或多分类、一个数值 sentinel，使用种子 0 至 4：Adult 为 `income`、`native-country`、`fnlwgt`，Sick 为 `class`、`referral-source`、`tsh`。
+
+TSTR 输入是对真实训练集进行确定性的全行置换。它保留每一行和每一列的 support，用于同时执行两条评测 arm，但不能发布为生成器质量证据。真实训练目标类别数超过十时，可以严格按照锁定来源的行为省略 TabPFN；XGB 与 KNN 仍为必需，而且两条 arm 必须暴露相同的实际训练模型集合。
+
+预注册门要求：每个计划任务恰好出现一次；所有适用预测器族都存在；相对单位比率的绝对偏差不超过 `0.05`；五种子比率范围不超过 `0.05`；任一 arm 的观测墙钟时间不超过 600 秒；观测到的 Python 进程树峰值不超过 14 GiB。每个 shard 在每个目标后写入 failure-first JSON。Finalizer 在生成单份留存结果前，会拒绝缺失或重复 shard、commit 或 manifest 漂移、目标覆盖不完整、模型集合漂移、资源失败和阈值失败。
+
+与该版本匹配的 TabPFN 官方文档建议使用 GPU，并说明 CPU 上只有约 1,000 行及以下的数据集可行；其大数据 CPU 选择加入开关被明确描述为会非常慢。因此，本次准入运行测量的是刻意严格、来源忠实的 CPU 边界，而不是预设其必然通过。参见 [TabPFN v2.1.1 文档](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start)；根据上游 changelog，PyPI 2.1.2 相对此版本没有源码变化。
+
+## 数据集规模准入结果
+
+[Run 31060416318](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318) **未通过**预注册的 `0.1.1` 准入协议。不可变的[准入决定](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)已绑定原始 [finalizer 输出](../evidence/evaluation/p4-dataset-scale-run-31060416318.json)、重建的[部分观察](../evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json)和已审阅的[运行器失败观察](../evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json)。它们的 SHA-256 依次为 `8d6555c586f5b1a2c9a8024d6e151cb9559742ef023bfec2c3ea36b7b578d85e`、`cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8`、`a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f` 和 `135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35`。
+
+Sick 的五个 shard 全部完成：40 个任务和 80 条 arm 均执行成功，XGB/KNN/TabPFN 三个模型族全部存在。arm 最长墙钟时间为 `346.2811` 秒，进程树 RSS 峰值为 `2.1784` GiB，两者都在预注册上限内。`class` 稳定性哨兵通过。`referral-source` 的最大单位偏差为 `0.05280`、种子极差为 `0.07229`，未通过；`tsh` 的种子极差为 `0.08488`，也未通过。相应门限均为 `0.05`。
+
+Adult 的四个作业均在执行期间丢失 GitHub Actions 运行器，因此缺失 27 个任务和四个 shard 产物。运行器关闭是直接观察事实。该现象与执行路径及上游 CPU 指引下的资源耗尽一致，但**未被证实**：未留存内核 OOM 记录或完整的进程树采样。因此 Adult 的覆盖率、稳定性、高基数行为和资源合规性均记为未评估。
+
+该结果不是生成器质量证据，因为 pilot 使用的是声明的整行置换 surrogate。它不会冻结 profile，不会将 P4 准入 Official Results，也不允许在看到结果后修改原门限。
+
 ## P4 剩余出口工作
 
 P4 在提升为非诊断用途前，还需要：
 
-1. 对 Adult 与 Sick 已审阅目标集合运行具有代表性的 Global pilot；
-2. 测量多种子稳定性、墙钟时间、峰值内存和逐目标失败行为；
-3. 对已审阅高基数目标验证完整 AutoGluon 省略行为和两条 arm 的一致处理；
-4. 冻结预测器版本、参数、检查点身份、种子策略和运行预算；
-5. 单独作出协议冻结与 Official Results 准入决定。
+1. 在再次运行 Adult 前，审阅并选定保持来源行为的执行环境，或单独审批、记录并完成等价性验证的上游源码补丁；
+2. 在重跑前预注册新协议版本，不得事后放宽已失败的 `0.1.1` 门限；
+3. 重跑完整 Adult/Sick 覆盖与五种子稳定性，包括高基数省略和等 arm 行为；
+4. 只有新协议的每一道门都通过后，才能重新考虑 profile 冻结与 Official Results 准入。
