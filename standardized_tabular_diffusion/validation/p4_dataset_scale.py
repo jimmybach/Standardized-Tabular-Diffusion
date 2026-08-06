@@ -13,6 +13,7 @@ import statistics
 import threading
 import time
 import traceback
+from collections import Counter
 from importlib import resources
 from pathlib import Path
 from typing import Any, Iterable
@@ -656,22 +657,251 @@ def _locked_files() -> dict[str, str]:
     return {path: sha256_file(REPO_ROOT / path) for path in relative_paths}
 
 
+def _shard_label(dataset: str, mode: str, shard_index: int, shard_count: int) -> str:
+    return f"{dataset}:{mode}:{shard_index}-of-{shard_count}"
+
+
+def _expected_shard_labels(manifest: dict[str, Any]) -> set[str]:
+    labels: set[str] = set()
+    for dataset, record in manifest["coverage"]["datasets"].items():
+        labels.update(
+            _shard_label(dataset, "coverage", shard_index, record["shards"])
+            for shard_index in range(record["shards"])
+        )
+        labels.add(_shard_label(dataset, "stability", 0, 1))
+    return labels
+
+
+def _observed_pilot_summary(
+    shard_records: list[tuple[Path, Any]],
+    manifest: dict[str, Any],
+    expected_task_keys: set[str],
+) -> dict[str, Any]:
+    """Summarize every usable observation even when admission fails closed."""
+
+    expected_shards = _expected_shard_labels(manifest)
+    observed_shards: list[dict[str, Any]] = []
+    observed_labels: list[str] = []
+    results: list[dict[str, Any]] = []
+    issues: list[str] = []
+    for path, shard in shard_records:
+        if not isinstance(shard, dict):
+            issues.append(f"malformed-shard:{path.name}")
+            continue
+        identity = shard.get("shard")
+        if not isinstance(identity, dict) or any(
+            key not in identity for key in ("dataset", "mode", "shard_index", "shard_count")
+        ):
+            issues.append(f"malformed-shard-identity:{path.name}")
+            continue
+        try:
+            label = _shard_label(
+                str(identity["dataset"]),
+                str(identity["mode"]),
+                int(identity["shard_index"]),
+                int(identity["shard_count"]),
+            )
+        except (TypeError, ValueError):
+            issues.append(f"malformed-shard-identity:{path.name}")
+            continue
+        observed_labels.append(label)
+        shard_results = shard.get("results")
+        usable_results = [item for item in shard_results if isinstance(item, dict)] if isinstance(
+            shard_results, list
+        ) else []
+        results.extend(usable_results)
+        observed_shards.append(
+            {
+                "shard": label,
+                "status": shard.get("status"),
+                "result_count": len(usable_results),
+                "sha256": sha256_file(path),
+            }
+        )
+        if shard.get("status") != "pass":
+            issues.append(f"nonpassing-shard:{label}")
+
+    observed_label_set = set(observed_labels)
+    duplicates = sorted(label for label, count in Counter(observed_labels).items() if count > 1)
+    missing_shards = sorted(expected_shards - observed_label_set)
+    unexpected_shards = sorted(observed_label_set - expected_shards)
+    if missing_shards:
+        issues.append(f"missing-shards:{len(missing_shards)}")
+    if unexpected_shards:
+        issues.append(f"unexpected-shards:{len(unexpected_shards)}")
+    if duplicates:
+        issues.append(f"duplicate-shards:{len(duplicates)}")
+
+    task_keys = [str(result.get("task_key")) for result in results if result.get("task_key") is not None]
+    task_key_set = set(task_keys)
+    missing_tasks = sorted(expected_task_keys - task_key_set)
+    unexpected_tasks = sorted(task_key_set - expected_task_keys)
+    duplicate_tasks = sorted(key for key, count in Counter(task_keys).items() if count > 1)
+    if missing_tasks:
+        issues.append(f"missing-tasks:{len(missing_tasks)}")
+    if unexpected_tasks:
+        issues.append(f"unexpected-tasks:{len(unexpected_tasks)}")
+    if duplicate_tasks:
+        issues.append(f"duplicate-tasks:{len(duplicate_tasks)}")
+    task_status_counts = dict(sorted(Counter(str(result.get("status")) for result in results).items()))
+    if any(result.get("status") != "pass" for result in results):
+        issues.append("nonpassing-observed-task")
+
+    max_deviation = float(manifest["stability"]["maximum_absolute_identity_ratio_deviation"])
+    max_range = float(manifest["stability"]["maximum_seed_ratio_range"])
+    stability: dict[str, Any] = {}
+    for dataset, targets in manifest["stability"]["sentinel_target_column_ids"].items():
+        stability[dataset] = {}
+        for target in targets:
+            target_results = sorted(
+                (
+                    result
+                    for result in results
+                    if result.get("dataset") == dataset
+                    and result.get("target_column_id") == target
+                    and result.get("status") == "pass"
+                    and isinstance(result.get("seed"), int)
+                    and not isinstance(result.get("seed"), bool)
+                    and isinstance(result.get("ratio"), (int, float))
+                    and not isinstance(result.get("ratio"), bool)
+                    and math.isfinite(float(result["ratio"]))
+                ),
+                key=lambda result: int(result["seed"]),
+            )
+            seeds = [int(result["seed"]) for result in target_results]
+            ratios = [float(result["ratio"]) for result in target_results]
+            record: dict[str, Any] = {"seeds": seeds, "ratios": ratios, "gate": "not-assessed"}
+            if seeds == manifest["stability"]["seeds"]:
+                record.update(
+                    {
+                        "mean": statistics.fmean(ratios),
+                        "population_standard_deviation": statistics.pstdev(ratios),
+                        "range": max(ratios) - min(ratios),
+                        "maximum_absolute_deviation_from_identity": max(
+                            abs(value - 1.0) for value in ratios
+                        ),
+                    }
+                )
+                record["gate"] = (
+                    "pass"
+                    if record["range"] <= max_range
+                    and record["maximum_absolute_deviation_from_identity"] <= max_deviation
+                    else "fail"
+                )
+                if record["gate"] == "fail":
+                    issues.append(f"stability-gate:{dataset}:{target}")
+            stability[dataset][target] = record
+
+    arms: list[tuple[str, str, dict[str, Any]]] = []
+    for result in results:
+        arm_map = result.get("arms")
+        if not isinstance(arm_map, dict):
+            continue
+        arms.extend(
+            (str(result.get("task_key")), str(arm_name), arm)
+            for arm_name, arm in arm_map.items()
+            if isinstance(arm, dict)
+        )
+    wall_records = [
+        (task_key, arm_name, float(arm["wall_seconds"]))
+        for task_key, arm_name, arm in arms
+        if isinstance(arm.get("wall_seconds"), (int, float))
+        and not isinstance(arm.get("wall_seconds"), bool)
+        and math.isfinite(float(arm["wall_seconds"]))
+    ]
+    peak_records = [
+        (task_key, arm_name, float(arm["peak_rss_bytes"]) / GIB)
+        for task_key, arm_name, arm in arms
+        if isinstance(arm.get("peak_rss_bytes"), (int, float))
+        and not isinstance(arm.get("peak_rss_bytes"), bool)
+        and math.isfinite(float(arm["peak_rss_bytes"]))
+    ]
+    walls = [record[2] for record in wall_records]
+    peaks = [record[2] for record in peak_records]
+    resource_summary: dict[str, Any] = {
+        "observed_arm_count": len(arms),
+        "preregistered_limits": manifest["resources"],
+    }
+    if walls:
+        maximum_record = max(wall_records, key=lambda record: record[2])
+        resource_summary["wall_seconds"] = {
+            "median": statistics.median(walls),
+            "p95": _percentile(walls, 0.95),
+            "maximum": max(walls),
+            "sum": sum(walls),
+            "maximum_arm": {
+                "task_key": maximum_record[0],
+                "arm": maximum_record[1],
+            },
+        }
+    if peaks:
+        maximum_peak_record = max(peak_records, key=lambda record: record[2])
+        resource_summary["process_tree_peak_rss_gib"] = {
+            "median": statistics.median(peaks),
+            "p95": _percentile(peaks, 0.95),
+            "maximum": max(peaks),
+            "maximum_arm": {
+                "task_key": maximum_peak_record[0],
+                "arm": maximum_peak_record[1],
+            },
+        }
+
+    return {
+        "expected_shard_count": len(expected_shards),
+        "observed_shard_count": len(observed_shards),
+        "observed_shards": sorted(observed_shards, key=lambda record: record["shard"]),
+        "missing_shards": missing_shards,
+        "unexpected_shards": unexpected_shards,
+        "duplicate_shards": duplicates,
+        "expected_task_count": len(expected_task_keys),
+        "observed_task_count": len(results),
+        "observed_unique_task_count": len(task_key_set),
+        "task_status_counts": task_status_counts,
+        "missing_task_keys": missing_tasks,
+        "unexpected_task_keys": unexpected_tasks,
+        "duplicate_task_keys": duplicate_tasks,
+        "stability": stability,
+        "resources": resource_summary,
+        "issues": sorted(set(issues)),
+    }
+
+
 def finalize_shards(shard_paths: Iterable[Path], output: Path) -> dict[str, Any]:
     """Fail closed unless every preregistered task appears once and passes."""
 
     manifest = validate_pilot_manifest()
     expected_keys = _expected_task_keys(manifest)
-    shards = [read_json(path) for path in sorted(shard_paths)]
+    paths = sorted(shard_paths)
+    shard_records: list[tuple[Path, Any]] = []
+    shard_read_errors: list[dict[str, str]] = []
+    for path in paths:
+        try:
+            shard = read_json(path)
+        except Exception as exc:
+            shard = {"read_error": f"{type(exc).__name__}: {exc}"}
+            shard_read_errors.append({"path": path.name, "error": shard["read_error"]})
+        shard_records.append((path, shard))
+    shards = [shard for _, shard in shard_records]
+    observed_commits = {
+        shard.get("repository_commit") for shard in shards if isinstance(shard, dict)
+    } - {None}
+    adjudicator_commit = p4_global_source._repository_commit()
     final: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": PROTOCOL_ID,
         "phase": "P4 Adult/Sick dataset-scale and stability admission pilot",
         "status": "fail",
-        "repository_commit": p4_global_source._repository_commit(),
+        "repository_commit": (
+            next(iter(observed_commits)) if len(observed_commits) == 1 else adjudicator_commit
+        ),
+        "adjudicator_repository_commit": adjudicator_commit,
         "pilot_manifest_fingerprint": content_fingerprint(manifest),
         "claim_boundary": manifest["claim_boundary"],
         "official_results_allowed": False,
+        "observations": _observed_pilot_summary(shard_records, manifest, expected_keys),
     }
+    if shard_read_errors:
+        final["shard_read_errors"] = shard_read_errors
     try:
         expected_shards = sum(
             record["shards"] + 1 for record in manifest["coverage"]["datasets"].values()

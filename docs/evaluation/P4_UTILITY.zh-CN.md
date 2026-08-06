@@ -114,6 +114,22 @@ std-tabular-diffusion evaluate-table \
 
 P4 默认使用种子 `0,1,2,3,4`。诊断运行可以传入 `--evaluator-seeds 23` 或其他逗号分隔列表。不同种子集合会被记录，不能自动视为榜单兼容。
 
+## 数据集规模准入协议
+
+`p4-dataset-scale-admission-pilot@0.1.1` 是针对真实 Global Utility 运行时预注册的非正式准入协议。它在 Linux x86-64、Python 3.11 和 CPU 上运行，并沿用有限范围来源运行时 pilot 的精确依赖与检查点身份。首次执行证明 TabPFN 2.1.2 会执行官方的 1,000 行 CPU 保护门。因此，版本 `0.1.1` 明确记录并要求使用官方 `TABPFN_ALLOW_CPU_LARGE_DATASET=1` 选择加入开关，同时保留 AutoGluon 的逐模型失败元数据；预测器面板、目标、种子、surrogate 和阈值均未改变。
+
+该计划包含 67 个唯一的目标/种子任务，共 134 条 TRTR/TSTR arm：
+
+- 在官方 32,561/16,281 划分上，以种子 0 覆盖 Adult 全部 15 个已审阅目标；
+- 在官方 2,800/972 划分上，以种子 0 覆盖 Sick 全部 28 个已审阅且非恒定的目标；以及
+- 每个数据集各选一个二分类、一个高基数或多分类、一个数值 sentinel，使用种子 0 至 4：Adult 为 `income`、`native-country`、`fnlwgt`，Sick 为 `class`、`referral-source`、`tsh`。
+
+TSTR 输入是对真实训练集进行确定性的全行置换。它保留每一行和每一列的 support，用于同时执行两条评测 arm，但不能发布为生成器质量证据。真实训练目标类别数超过十时，可以严格按照锁定来源的行为省略 TabPFN；XGB 与 KNN 仍为必需，而且两条 arm 必须暴露相同的实际训练模型集合。
+
+预注册门要求：每个计划任务恰好出现一次；所有适用预测器族都存在；相对单位比率的绝对偏差不超过 `0.05`；五种子比率范围不超过 `0.05`；任一 arm 的观测墙钟时间不超过 600 秒；观测到的 Python 进程树峰值不超过 14 GiB。每个 shard 在每个目标后写入 failure-first JSON。Finalizer 在生成单份留存结果前，会拒绝缺失或重复 shard、commit 或 manifest 漂移、目标覆盖不完整、模型集合漂移、资源失败和阈值失败。
+
+与该版本匹配的 TabPFN 官方文档建议使用 GPU，并说明 CPU 上只有约 1,000 行及以下的数据集可行；其大数据 CPU 选择加入开关被明确描述为会非常慢。因此，本次准入运行测量的是刻意严格、来源忠实的 CPU 边界，而不是预设其必然通过。参见 [TabPFN v2.1.1 文档](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start)；根据上游 changelog，PyPI 2.1.2 相对此版本没有源码变化。
+
 ## P4 剩余出口工作
 
 P4 在提升为非诊断用途前，还需要：
