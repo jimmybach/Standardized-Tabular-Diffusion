@@ -942,7 +942,12 @@ def finalize_shards(shard_paths: Iterable[Path], output: Path) -> dict[str, Any]
             dataset_identities[identity["dataset"]] = dataset_identity
             runtime_identities.append(shard["runtime"])
             results.extend(shard["results"])
-        task_keys = [result.get("task_key") for result in results]
+        task_keys: list[str] = []
+        for result in results:
+            task_key = result.get("task_key")
+            if not isinstance(task_key, str):
+                raise P4DatasetScaleValidationError("Shard result has no string task_key")
+            task_keys.append(task_key)
         if len(task_keys) != len(set(task_keys)) or set(task_keys) != expected_keys:
             missing = sorted(expected_keys - set(task_keys))
             unexpected = sorted(set(task_keys) - expected_keys)
@@ -972,18 +977,19 @@ def finalize_shards(shard_paths: Iterable[Path], output: Path) -> dict[str, Any]
                 seeds = [int(result["seed"]) for result in target_results]
                 if seeds != manifest["stability"]["seeds"]:
                     raise P4DatasetScaleValidationError(f"Incomplete stability seeds for {dataset}/{target}")
-                record = {
+                ratio_range = max(ratios) - min(ratios)
+                maximum_deviation = max(abs(value - 1.0) for value in ratios)
+                record: dict[str, Any] = {
                     "seeds": seeds,
                     "ratios": ratios,
                     "mean": statistics.fmean(ratios),
                     "population_standard_deviation": statistics.pstdev(ratios),
-                    "range": max(ratios) - min(ratios),
-                    "maximum_absolute_deviation_from_identity": max(abs(value - 1.0) for value in ratios),
+                    "range": ratio_range,
+                    "maximum_absolute_deviation_from_identity": maximum_deviation,
                 }
                 record["gate"] = (
                     "pass"
-                    if record["range"] <= max_range
-                    and record["maximum_absolute_deviation_from_identity"] <= max_deviation
+                    if ratio_range <= max_range and maximum_deviation <= max_deviation
                     else "fail"
                 )
                 stability[dataset][target] = record
