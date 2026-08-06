@@ -1,6 +1,6 @@
 {
   "profile_schema_version": "1.0.0",
-  "dataset_profile_version": "1.2.0-reviewed",
+  "dataset_profile_version": "1.3.0-reviewed",
   "dataset_id": "sick",
   "display_name": "UCI Thyroid Disease — Sick",
   "dataset_version": "uci-102-a0982569a744",
@@ -25,6 +25,10 @@
     {
       "version": "1.2.0-reviewed",
       "change": "Added the reviewed diagnostic P4 Local and Global Utility declarations."
+    },
+    {
+      "version": "1.3.0-reviewed",
+      "change": "Excluded the constant TBG_measured field from Global Utility with an explicit non-predictive-target reason after official-split cardinality review."
     }
   ],
   "suite_membership": ["diagnostic"],
@@ -184,8 +188,14 @@
     "status": "reviewed-diagnostic",
     "local": {"primary_task_id":"predict-sick-class","evaluator_profile_id":"p4-utility-pilot","evaluator_profile_version":"0.1.0"},
     "global": {
-      "included_target_column_ids": ["age","sex","on-thyroxine","query-on-thyroxine","on-antithyroid-medication","sick-feature","pregnant","thyroid-surgery","i131-treatment","query-hypothyroid","query-hyperthyroid","lithium","goitre","tumor","hypopituitary","psych","tsh-measured","tsh","t3-measured","t3","tt4-measured","tt4","t4u-measured","t4u","fti-measured","fti","tbg-measured","referral-source","class"],
-      "excluded_targets": [],
+      "included_target_column_ids": ["age","sex","on-thyroxine","query-on-thyroxine","on-antithyroid-medication","sick-feature","pregnant","thyroid-surgery","i131-treatment","query-hypothyroid","query-hyperthyroid","lithium","goitre","tumor","hypopituitary","psych","tsh-measured","tsh","t3-measured","t3","tt4-measured","tt4","t4u-measured","t4u","fti-measured","fti","referral-source","class"],
+      "excluded_targets": [
+        {
+          "column_id": "tbg-measured",
+          "reason_code": "constant-real-target",
+          "reason_detail": "TBG_measured is False for every row in both checksum-pinned official splits and therefore cannot define a predictive classification task."
+        }
+      ],
       "evaluator_profile_id": "p4-utility-pilot",
       "evaluator_profile_version": "0.1.0"
     }
