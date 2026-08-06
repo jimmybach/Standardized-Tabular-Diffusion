@@ -72,6 +72,7 @@ jobs:
         run: >-
           python -m pytest
           tests/evaluation/test_p4_dataset_scale_validation.py
+          tests/test_p4_dataset_scale_retained_evidence.py
           -q
 
       - name: Lint the dataset-scale surfaces
@@ -79,6 +80,7 @@ jobs:
           python -m ruff check
           standardized_tabular_diffusion/validation/p4_dataset_scale.py
           tests/evaluation/test_p4_dataset_scale_validation.py
+          tests/test_p4_dataset_scale_retained_evidence.py
 
   dataset-scale:
     if: github.event_name == 'workflow_dispatch'
