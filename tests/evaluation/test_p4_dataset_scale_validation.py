@@ -21,7 +21,10 @@ def test_preregistered_pilot_binds_full_datasets_stratified_seeds_and_safety_lim
     manifest = validation.validate_pilot_manifest()
 
     assert manifest["status"] == "preregistered-diagnostic"
+    assert manifest["pilot_version"] == "0.1.1"
     assert manifest["official_results_allowed"] is False
+    assert manifest["amendments"][0]["from_version"] == "0.1.0"
+    assert "31059896167" in manifest["amendments"][0]["trigger_run"]
     assert manifest["coverage"]["seed"] == 0
     assert manifest["stability"]["seeds"] == [0, 1, 2, 3, 4]
     assert manifest["surrogate"] == {
@@ -34,6 +37,9 @@ def test_preregistered_pilot_binds_full_datasets_stratified_seeds_and_safety_lim
     }
     assert manifest["resources"]["autogluon_fit_time_limit_per_arm_seconds"] == 300
     assert manifest["resources"]["maximum_observed_process_tree_peak_rss_gib"] == 14.0
+    assert manifest["environment"]["tabpfn_cpu_large_dataset_opt_in"] == (
+        "TABPFN_ALLOW_CPU_LARGE_DATASET=1"
+    )
 
 
 def test_schedule_covers_every_nonconstant_target_once_and_adds_only_preregistered_stability() -> None:

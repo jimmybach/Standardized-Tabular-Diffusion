@@ -105,6 +105,7 @@ jobs:
       MKL_NUM_THREADS: "1"
       NUMEXPR_NUM_THREADS: "1"
       STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN: "1"
+      TABPFN_ALLOW_CPU_LARGE_DATASET: "1"
 
     steps:
       - name: Check out repository
