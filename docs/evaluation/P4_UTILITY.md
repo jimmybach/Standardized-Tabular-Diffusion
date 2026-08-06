@@ -114,6 +114,22 @@ std-tabular-diffusion evaluate-table \
 
 P4 defaults to evaluator seeds `0,1,2,3,4`. A diagnostic run may provide `--evaluator-seeds 23` or another comma-separated list. A different seed set is recorded and is not automatically leaderboard-compatible.
 
+## Dataset-scale admission protocol
+
+`p4-dataset-scale-admission-pilot@0.1.1` is the preregistered, non-official admission protocol for the real Global Utility runtime. It runs on Linux x86-64, Python 3.11, and CPU with the exact dependency and checkpoint identities used by the bounded source-runtime pilot. The first execution established that TabPFN 2.1.2 applies its official 1,000-row CPU guard. Version `0.1.1` therefore records and requires the official `TABPFN_ALLOW_CPU_LARGE_DATASET=1` opt-in and retains AutoGluon per-model failure metadata. It does not change the predictor panel, targets, seeds, surrogate, or thresholds.
+
+The schedule contains 67 unique target/seed tasks and 134 TRTR/TSTR arms:
+
+- seed-zero coverage of all 15 reviewed Adult targets at the official 32,561/16,281 split;
+- seed-zero coverage of all 28 reviewed non-constant Sick targets at the official 2,800/972 split; and
+- seeds zero through four for one binary, one high-cardinality or multiclass, and one numerical sentinel per dataset: Adult `income`, `native-country`, and `fnlwgt`; Sick `class`, `referral-source`, and `tsh`.
+
+The TSTR input is a deterministic full-row permutation of real train. It preserves every row and every column's support, exercises both evaluator arms, and cannot be published as generator-quality evidence. Targets with more than ten real-train classes may omit TabPFN exactly as the locked source does; XGB and KNN remain mandatory, and both arms must expose the same trained model set.
+
+The preregistered gates require every scheduled task exactly once, every applicable predictor family, an absolute identity-ratio deviation no greater than `0.05`, a five-seed ratio range no greater than `0.05`, no arm above 600 observed seconds, and no observed Python process-tree peak above 14 GiB. Shards write failure-first JSON after every target. The finalizer rejects missing or duplicate shards, changed commits or manifests, incomplete target coverage, model-set drift, resource failures, and threshold failures before emitting one retained result.
+
+TabPFN's version-matched official documentation recommends GPU execution and states that only datasets of approximately 1,000 rows or fewer are feasible on CPU; it describes the large-dataset CPU opt-in as very slow. The admission run therefore measures a deliberately strict source-faithful CPU envelope rather than assuming it will pass. See the [TabPFN v2.1.1 documentation](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start); PyPI 2.1.2 contains no source change from that release according to the upstream changelog.
+
 ## Remaining P4 exit work
 
 Before P4 can advance beyond diagnostic use:

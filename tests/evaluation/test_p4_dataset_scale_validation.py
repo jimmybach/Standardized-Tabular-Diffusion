@@ -237,3 +237,57 @@ def test_finalizer_fails_closed_when_one_preregistered_task_is_missing(tmp_path:
     assert evidence["status"] == "fail"
     assert evidence["error_type"] == "P4DatasetScaleValidationError"
     assert "Task coverage differs" in evidence["error"]
+    assert evidence["observations"]["observed_task_count"] == 66
+    assert len(evidence["observations"]["missing_task_keys"]) == 1
+
+
+def test_finalizer_retains_partial_observations_and_stability_failures(tmp_path: Path) -> None:
+    paths = [path for path in _fake_shards(tmp_path) if path.name.startswith("sick-")]
+    for path in paths:
+        payload = copy.deepcopy(validation.read_json(path))
+        for result in payload["results"]:
+            if result["target_column_id"] == "referral-source" and result["seed"] == 4:
+                result["ratio"] = 1.06
+            if result["target_column_id"] == "tsh" and result["seed"] == 3:
+                result["ratio"] = 0.94
+        atomic_write_json(path, payload)
+
+    evidence = validation.finalize_shards(paths, tmp_path / "partial.json")
+    observations = evidence["observations"]
+
+    assert evidence["status"] == "fail"
+    assert evidence["repository_commit"] == p4_global_source._repository_commit()
+    assert observations["expected_shard_count"] == 9
+    assert observations["observed_shard_count"] == 5
+    assert observations["missing_shards"] == [
+        "adult:coverage:0-of-3",
+        "adult:coverage:1-of-3",
+        "adult:coverage:2-of-3",
+        "adult:stability:0-of-1",
+    ]
+    assert observations["observed_task_count"] == 40
+    assert observations["task_status_counts"] == {"pass": 40}
+    assert observations["resources"]["observed_arm_count"] == 80
+    assert observations["stability"]["sick"]["class"]["gate"] == "pass"
+    assert observations["stability"]["sick"]["referral-source"]["gate"] == "fail"
+    assert observations["stability"]["sick"]["tsh"]["gate"] == "fail"
+    assert "missing-shards:4" in observations["issues"]
+    assert "stability-gate:sick:referral-source" in observations["issues"]
+    assert "stability-gate:sick:tsh" in observations["issues"]
+
+
+def test_finalizer_writes_failure_evidence_for_an_unreadable_shard(tmp_path: Path) -> None:
+    paths = _fake_shards(tmp_path)
+    paths[0].write_text("not-json", encoding="utf-8")
+    output = tmp_path / "unreadable-final.json"
+
+    evidence = validation.finalize_shards(paths, output)
+
+    assert output.is_file()
+    assert evidence["status"] == "fail"
+    assert evidence["shard_read_errors"][0]["path"] == paths[0].name
+    assert evidence["observations"]["observed_shard_count"] == 8
+    assert any(
+        issue.startswith("malformed-shard-identity:")
+        for issue in evidence["observations"]["issues"]
+    )

@@ -125,6 +125,10 @@ def test_p4_finalizes_raw_arms_ratios_and_held_out_test_provenance(
     assert metadata["provenance"]["real_test_artifact"] == request.real_test_artifact
     assert metadata["provenance"]["test_used_for_fit"] is False
     assert details["input_boundary"]["same_real_test_for_all_arms"] is True
+    assert all(
+        run["predictor_failures"] == {"trtr": [], "tstr": []}
+        for run in details["global_runs"]
+    )
     assert {artifact["artifact_id"] for artifact in read_json(root / "artifacts" / "index.json")["artifacts"]} >= {
         "reference-table",
         "real-test-table",

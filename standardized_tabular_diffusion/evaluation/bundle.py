@@ -1196,8 +1196,33 @@ def _validate_final_atomic_results(
                 "reason_code",
                 "predictors",
                 "predictor_scores",
+                "predictor_failures",
             }:
                 raise BundleError("P4 Global run detail is malformed")
+            failure_maps = run["predictor_failures"]
+            if not isinstance(failure_maps, dict) or not set(failure_maps).issubset({"trtr", "tstr"}):
+                raise BundleError("P4 Global predictor failure evidence is malformed")
+            for failures in failure_maps.values():
+                if not isinstance(failures, list):
+                    raise BundleError("P4 Global predictor failure evidence is malformed")
+                for failure in failures:
+                    if not isinstance(failure, dict) or set(failure) not in (
+                        {"model", "exception_type", "exception_message"},
+                        {"model", "exception_type", "exception_message", "total_time_seconds"},
+                    ):
+                        raise BundleError("P4 Global predictor failure evidence is malformed")
+                    if any(
+                        not isinstance(failure[field], str)
+                        for field in ("model", "exception_type", "exception_message")
+                    ):
+                        raise BundleError("P4 Global predictor failure evidence is malformed")
+                    if "total_time_seconds" in failure and (
+                        isinstance(failure["total_time_seconds"], bool)
+                        or not isinstance(failure["total_time_seconds"], (int, float))
+                        or not math.isfinite(float(failure["total_time_seconds"]))
+                        or float(failure["total_time_seconds"]) < 0
+                    ):
+                        raise BundleError("P4 Global predictor failure evidence is malformed")
             seed_text = f"neg-{abs(run['seed'])}" if run["seed"] < 0 else str(run["seed"])
             base = f"{run['target_column_id']}--seed-{seed_text}"
             ratio_atom = by_metric_scope.get((GLOBAL_TARGET_RATIO_METRIC_ID, base))
