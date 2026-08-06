@@ -237,6 +237,7 @@ def test_finalizer_fails_closed_when_one_preregistered_task_is_missing(tmp_path:
     assert evidence["status"] == "fail"
     assert evidence["error_type"] == "P4DatasetScaleValidationError"
     assert "Task coverage differs" in evidence["error"]
+    assert "traceback" not in evidence
     assert evidence["observations"]["observed_task_count"] == 66
     assert len(evidence["observations"]["missing_task_keys"]) == 1
 

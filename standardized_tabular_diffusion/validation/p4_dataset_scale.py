@@ -1082,7 +1082,6 @@ def finalize_shards(shard_paths: Iterable[Path], output: Path) -> dict[str, Any]
     except Exception as exc:
         final["error_type"] = type(exc).__name__
         final["error"] = str(exc)
-        final["traceback"] = traceback.format_exc()
     atomic_write_json(output, final)
     return final
 
