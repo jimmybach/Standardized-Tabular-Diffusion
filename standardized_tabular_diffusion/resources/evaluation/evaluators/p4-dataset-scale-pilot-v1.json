@@ -1,0 +1,65 @@
+{
+  "pilot_schema_version": "1.0.0",
+  "pilot_id": "p4-dataset-scale-admission-pilot",
+  "pilot_version": "0.1.0",
+  "status": "preregistered-diagnostic",
+  "official_results_allowed": false,
+  "source_runtime_manifest": "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
+  "evaluator_profile_id": "p4-utility-pilot",
+  "evaluator_profile_version": "0.1.0",
+  "environment": {
+    "platform": "Linux x86_64 CPU",
+    "python": "3.11",
+    "dependency_lock": "requirements-p4-global-source-validation.txt"
+  },
+  "surrogate": {
+    "type": "full-row-multiset-preserving-permutation",
+    "purpose": "Exercise both TRTR and TSTR evaluator arms without attributing quality to a generator.",
+    "preserves_all_rows": true,
+    "preserves_all_per-column_support": true,
+    "generation_seed_source": "evaluator seed",
+    "quality_result_publishable": false
+  },
+  "coverage": {
+    "seed": 0,
+    "datasets": {
+      "adult": {
+        "dataset_profile": "configs/datasets/adult-uci-2-v1.json",
+        "dataset_profile_version": "1.2.0-reviewed",
+        "train_rows": 32561,
+        "test_rows": 16281,
+        "shards": 3
+      },
+      "sick": {
+        "dataset_profile": "configs/datasets/sick-uci-102-v1.json",
+        "dataset_profile_version": "1.3.0-reviewed",
+        "train_rows": 2800,
+        "test_rows": 972,
+        "shards": 4
+      }
+    }
+  },
+  "stability": {
+    "seeds": [0, 1, 2, 3, 4],
+    "sentinel_target_column_ids": {
+      "adult": ["income", "native-country", "fnlwgt"],
+      "sick": ["class", "referral-source", "tsh"]
+    },
+    "maximum_absolute_identity_ratio_deviation": 0.05,
+    "maximum_seed_ratio_range": 0.05
+  },
+  "resources": {
+    "autogluon_fit_time_limit_per_arm_seconds": 300,
+    "maximum_observed_arm_wall_seconds": 600,
+    "maximum_observed_process_tree_peak_rss_gib": 14.0,
+    "workflow_timeout_minutes": 360,
+    "measurement_scope": "Python process plus recursive child-process RSS sampled during each arm"
+  },
+  "predictor_policy": {
+    "required_families": ["xgb", "knn", "tabpfn"],
+    "tabpfn_maximum_classes": 10,
+    "high_cardinality_policy": "TabPFN may be omitted only for classification targets with more than ten real-train classes; XGB and KNN remain mandatory.",
+    "arm_model_sets_must_match": true
+  },
+  "claim_boundary": "Covers every reviewed Adult and non-constant Sick Global target at full official split size under seed 0, plus five-seed stratified sentinel stability. It validates the evaluator and resource envelope using a row-permutation surrogate; it does not evaluate generator quality or admit Official Results."
+}
