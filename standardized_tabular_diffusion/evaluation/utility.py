@@ -79,6 +79,7 @@ class GlobalBackendResult:
     score: float
     predictors: tuple[str, ...]
     predictor_scores: dict[str, float]
+    predictor_failures: tuple[dict[str, Any], ...] = ()
 
 
 GlobalScorer = Callable[
@@ -1111,6 +1112,26 @@ def _prepare_global_frames(tables: ValidatedUtilityTables) -> tuple[pd.DataFrame
     return frames[0], frames[1], frames[2]
 
 
+def _global_model_failure_records(predictor: Any) -> tuple[dict[str, Any], ...]:
+    """Retain stable failure fields before AutoGluon's temporary workspace is removed."""
+
+    failures = predictor.model_failures()
+    if not isinstance(failures, pd.DataFrame):
+        raise UtilityImplementationError("AutoGluon model_failures() did not return a DataFrame")
+    records: list[dict[str, Any]] = []
+    for _, row in failures.iterrows():
+        record: dict[str, Any] = {
+            "model": str(row.get("model", "unknown")),
+            "exception_type": str(row.get("exc_type", "unknown")),
+            "exception_message": str(row.get("exc_str", "")),
+        }
+        total_time = row.get("total_time")
+        if isinstance(total_time, (int, float, np.number)) and math.isfinite(float(total_time)):
+            record["total_time_seconds"] = float(total_time)
+        records.append(record)
+    return tuple(records)
+
+
 def _default_global_scorer(
     train: pd.DataFrame,
     test: pd.DataFrame,
@@ -1167,6 +1188,7 @@ def _default_global_scorer(
                     time_limit=time_limit_seconds,
                 )
                 leaderboard = predictor.leaderboard(test, extra_metrics=[extra_metric])
+                predictor_failures = _global_model_failure_records(predictor)
     except (OSError, PermissionError, TimeoutError) as exc:
         raise UtilityResourceError(f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}") from exc
     except Exception as exc:
@@ -1189,14 +1211,25 @@ def _default_global_scorer(
         "tabpfn": any("tabpfn" in name.lower() for name in names),
     }
     if not families["xgb"] or not families["knn"]:
-        raise UtilityImplementationError(f"Global Utility source backend omitted a required XGB/KNN family: {names}")
+        raise UtilityImplementationError(
+            f"Global Utility source backend omitted a required XGB/KNN family: {names}; "
+            f"model_failures={predictor_failures!r}"
+        )
     # TabPFN supports at most ten classes in this pinned snapshot. AutoGluon
     # may source-faithfully skip it for a higher-cardinality target; the exact
     # trained model set is retained and must match between TRTR and TSTR.
     if not families["tabpfn"] and not (task_type == "classification" and train[target].nunique() > 10):
-        raise UtilityImplementationError(f"Global Utility source backend unexpectedly omitted TabPFN: {names}")
+        raise UtilityImplementationError(
+            f"Global Utility source backend unexpectedly omitted TabPFN: {names}; "
+            f"model_failures={predictor_failures!r}"
+        )
     score = float(np.mean(list(predictor_scores.values())))
-    return GlobalBackendResult(score=score, predictors=names, predictor_scores=predictor_scores)
+    return GlobalBackendResult(
+        score=score,
+        predictors=names,
+        predictor_scores=predictor_scores,
+        predictor_failures=predictor_failures,
+    )
 
 
 def _global_failure_atom(
@@ -1440,6 +1473,9 @@ def _evaluate_global(
                     },
                     "predictor_scores": {
                         arm: result.predictor_scores for arm, result in arm_results.items()
+                    },
+                    "predictor_failures": {
+                        arm: list(result.predictor_failures) for arm, result in arm_results.items()
                     },
                 }
             )

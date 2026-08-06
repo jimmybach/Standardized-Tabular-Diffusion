@@ -131,7 +131,7 @@ GlobalUtility(D) = mean_j Utility_j(D)
 
 论文的 Full-tuned profile 集成九个调参预测器：Logistic Regression、KNN、MLP、Random Forest、Extra Trees、LightGBM、CatBoost、XGBoost 和 TabPFN。Tiny-default profile 使用三个未调参预测器，论文支持将其作为成本更低的 Global Utility profile。锁定的 TabEval `UtilityPerFeature` 快照实现了三预测器配置，并在合成目标恒定时赋予有利的 `[1]` 分类值。
 
-决定：不同预测器 profile 具有不同指标身份。本基准不接受恒定目标的有利回退；该情况成为显式支持失败，因此在这一边界情况上不能声称与代码完全等价。TabStruct 公式仍是 Global Utility 的目标。有限范围 Linux/Python 3.11 pilot 已直接执行锁定的 TabEval 来源与真实 XGB/KNN/TabPFN 模型，适配器分类/回归聚合值均严格一致。由于上游未发布依赖锁定，该运行时仍被明确标记为基准审批环境，而非上游官方环境；数据集规模准入仍待完成。
+决定：不同预测器 profile 具有不同指标身份。本基准不接受恒定目标的有利回退；该情况成为显式支持失败，因此在这一边界情况上不能声称与代码完全等价。TabStruct 公式仍是 Global Utility 的目标。有限范围 Linux/Python 3.11 pilot 已直接执行锁定的 TabEval 来源与真实 XGB/KNN/TabPFN 模型，适配器分类/回归聚合值均严格一致。由于上游未发布依赖锁定，该运行时仍被明确标记为基准审批环境，而非上游官方环境。首次预注册的数据集规模准入未通过：Adult 的所有 shard 因运行器关闭而丢失；Sick 已完整执行且资源门通过，但两个稳定性哨兵失败。该预测器 profile 仍为诊断状态。
 
 ### 3.7 DCR
 

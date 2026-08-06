@@ -1,0 +1,213 @@
+{
+  "adjudicator_repository_commit": "c4aafebed24862a44f193d6ba4f3fe9cfa30941b",
+  "claim_boundary": "Covers every reviewed Adult and non-constant Sick Global target at full official split size under seed 0, plus five-seed stratified sentinel stability. It validates the evaluator and resource envelope using a row-permutation surrogate; it does not evaluate generator quality or admit Official Results.",
+  "error": "Expected 9 shard artifacts, observed 5",
+  "error_type": "P4DatasetScaleValidationError",
+  "evidence_schema_version": "1.0.0",
+  "observations": {
+    "duplicate_shards": [],
+    "duplicate_task_keys": [],
+    "expected_shard_count": 9,
+    "expected_task_count": 67,
+    "issues": [
+      "missing-shards:4",
+      "missing-tasks:27",
+      "stability-gate:sick:referral-source",
+      "stability-gate:sick:tsh"
+    ],
+    "missing_shards": [
+      "adult:coverage:0-of-3",
+      "adult:coverage:1-of-3",
+      "adult:coverage:2-of-3",
+      "adult:stability:0-of-1"
+    ],
+    "missing_task_keys": [
+      "adult:age:seed-0",
+      "adult:capital-gain:seed-0",
+      "adult:capital-loss:seed-0",
+      "adult:education-num:seed-0",
+      "adult:education:seed-0",
+      "adult:fnlwgt:seed-0",
+      "adult:fnlwgt:seed-1",
+      "adult:fnlwgt:seed-2",
+      "adult:fnlwgt:seed-3",
+      "adult:fnlwgt:seed-4",
+      "adult:hours-per-week:seed-0",
+      "adult:income:seed-0",
+      "adult:income:seed-1",
+      "adult:income:seed-2",
+      "adult:income:seed-3",
+      "adult:income:seed-4",
+      "adult:marital-status:seed-0",
+      "adult:native-country:seed-0",
+      "adult:native-country:seed-1",
+      "adult:native-country:seed-2",
+      "adult:native-country:seed-3",
+      "adult:native-country:seed-4",
+      "adult:occupation:seed-0",
+      "adult:race:seed-0",
+      "adult:relationship:seed-0",
+      "adult:sex:seed-0",
+      "adult:workclass:seed-0"
+    ],
+    "observed_shard_count": 5,
+    "observed_shards": [
+      {
+        "result_count": 7,
+        "sha256": "82d85114b0e1bc7a64a8d0c0fe5827d2555c3f8e10b5e145328c66a883cbb4f5",
+        "shard": "sick:coverage:0-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "5fb88c2c46a0f6629029102ef56f6d092183da05898ecb454a18e8b98625abf0",
+        "shard": "sick:coverage:1-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "9a67bd47e6ebd4870a9353563ed165c3827fa1972d8676d5976435de4ca10406",
+        "shard": "sick:coverage:2-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "f8553e77726bf40fd48d88859f17bdb66bf8246910d05c62a403b2438ff87740",
+        "shard": "sick:coverage:3-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 12,
+        "sha256": "8835eb15563fa207c0007c363627393c1daa1456743cf32663454f1a323af29b",
+        "shard": "sick:stability:0-of-1",
+        "status": "pass"
+      }
+    ],
+    "observed_task_count": 40,
+    "observed_unique_task_count": 40,
+    "resources": {
+      "observed_arm_count": 80,
+      "preregistered_limits": {
+        "autogluon_fit_time_limit_per_arm_seconds": 300,
+        "maximum_observed_arm_wall_seconds": 600,
+        "maximum_observed_process_tree_peak_rss_gib": 14.0,
+        "measurement_scope": "Python process plus recursive child-process RSS sampled during each arm",
+        "workflow_timeout_minutes": 360
+      },
+      "process_tree_peak_rss_gib": {
+        "maximum": 2.1784019470214844,
+        "maximum_arm": {
+          "arm": "trtr",
+          "task_key": "sick:tsh:seed-4"
+        },
+        "median": 2.1194686889648438,
+        "p95": 2.178346061706543
+      },
+      "wall_seconds": {
+        "maximum": 346.2810744579997,
+        "maximum_arm": {
+          "arm": "tstr",
+          "task_key": "sick:class:seed-4"
+        },
+        "median": 319.83951208350004,
+        "p95": 342.51291029500015,
+        "sum": 25831.446677044998
+      }
+    },
+    "stability": {
+      "adult": {
+        "fnlwgt": {
+          "gate": "not-assessed",
+          "ratios": [],
+          "seeds": []
+        },
+        "income": {
+          "gate": "not-assessed",
+          "ratios": [],
+          "seeds": []
+        },
+        "native-country": {
+          "gate": "not-assessed",
+          "ratios": [],
+          "seeds": []
+        }
+      },
+      "sick": {
+        "class": {
+          "gate": "pass",
+          "maximum_absolute_deviation_from_identity": 0.02008196721311495,
+          "mean": 0.9909562841530054,
+          "population_standard_deviation": 0.011306715352875977,
+          "range": 0.032786885245901676,
+          "ratios": [
+            1.0127049180327867,
+            0.9861566484517305,
+            0.979918032786885,
+            0.9866120218579235,
+            0.9893897996357013
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "referral-source": {
+          "gate": "fail",
+          "maximum_absolute_deviation_from_identity": 0.052801789219291795,
+          "mean": 1.0170627994733041,
+          "population_standard_deviation": 0.02453990699238112,
+          "range": 0.07228569680249919,
+          "ratios": [
+            1.0165284605768148,
+            1.003646387856485,
+            0.9805160924167926,
+            1.0318212672971359,
+            1.0528017892192918
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "tsh": {
+          "gate": "fail",
+          "maximum_absolute_deviation_from_identity": 0.04522761677342868,
+          "mean": 1.0084235637407244,
+          "population_standard_deviation": 0.027532849212819004,
+          "range": 0.08487652997233819,
+          "ratios": [
+            1.011742452996126,
+            1.0452276167734287,
+            1.0059883781159646,
+            0.9603510868010905,
+            1.018808284017012
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    },
+    "task_status_counts": {
+      "pass": 40
+    },
+    "unexpected_shards": [],
+    "unexpected_task_keys": []
+  },
+  "official_results_allowed": false,
+  "phase": "P4 Adult/Sick dataset-scale and stability admission pilot",
+  "pilot_manifest_fingerprint": "0314a80f0d9b274092aca83fd4407186ec505755682a1fac3f50ea3321f5f45e",
+  "protocol_id": "p4-dataset-scale-admission-pilot-v1",
+  "repository_commit": "ce53739340ebf2afe4fdc836203fcd8f2b7696e7",
+  "status": "fail"
+}

@@ -390,6 +390,7 @@ def _serialize_backend_result(result: Any) -> dict[str, Any]:
         "score": result.score,
         "predictors": list(result.predictors),
         "predictor_scores": result.predictor_scores,
+        "predictor_failures": list(result.predictor_failures),
     }
 
 
