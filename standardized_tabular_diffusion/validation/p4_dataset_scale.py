@@ -77,6 +77,7 @@ def validate_pilot_manifest(manifest: dict[str, Any] | None = None) -> dict[str,
         "pilot_version",
         "status",
         "official_results_allowed",
+        "amendments",
         "source_runtime_manifest",
         "evaluator_profile_id",
         "evaluator_profile_version",
@@ -93,12 +94,21 @@ def validate_pilot_manifest(manifest: dict[str, Any] | None = None) -> dict[str,
     if (
         payload["pilot_schema_version"] != "1.0.0"
         or payload["pilot_id"] != "p4-dataset-scale-admission-pilot"
-        or payload["pilot_version"] != "0.1.0"
+        or payload["pilot_version"] != "0.1.1"
         or payload["status"]
         not in {"preregistered-diagnostic", "dataset-scale-pilot-validated-diagnostic"}
         or payload["official_results_allowed"] is not False
     ):
         raise P4DatasetScaleValidationError("Pilot identity or Official Results boundary has drifted")
+    amendments = payload["amendments"]
+    if (
+        not isinstance(amendments, list)
+        or len(amendments) != 1
+        or amendments[0].get("from_version") != "0.1.0"
+        or "31059896167" not in amendments[0].get("trigger_run", "")
+        or "TABPFN_ALLOW_CPU_LARGE_DATASET=1" not in amendments[0].get("change", "")
+    ):
+        raise P4DatasetScaleValidationError("Pilot amendment history is incomplete")
     evaluator = load_p4_evaluator_profile()
     if (payload["evaluator_profile_id"], payload["evaluator_profile_version"]) != (
         evaluator["profile_id"],
@@ -110,6 +120,7 @@ def validate_pilot_manifest(manifest: dict[str, Any] | None = None) -> dict[str,
         "platform": "Linux x86_64 CPU",
         "python": "3.11",
         "dependency_lock": "requirements-p4-global-source-validation.txt",
+        "tabpfn_cpu_large_dataset_opt_in": "TABPFN_ALLOW_CPU_LARGE_DATASET=1",
     }:
         raise P4DatasetScaleValidationError("Pilot environment identity has drifted")
     surrogate = payload["surrogate"]
@@ -355,6 +366,7 @@ def _run_arm(
             "score": result.score,
             "predictors": list(result.predictors),
             "predictor_scores": result.predictor_scores,
+            "predictor_failures": list(result.predictor_failures),
             "families": _families(result.predictors),
             "wall_seconds": time.perf_counter() - started,
             "baseline_rss_bytes": sampler.baseline_rss_bytes,
@@ -494,6 +506,7 @@ def _system_identity() -> dict[str, Any]:
         "logical_cpu_count": psutil.cpu_count(logical=True),
         "physical_cpu_count": psutil.cpu_count(logical=False),
         "total_memory_bytes": psutil.virtual_memory().total,
+        "tabpfn_allow_cpu_large_dataset": os.environ.get("TABPFN_ALLOW_CPU_LARGE_DATASET"),
         "github_runner_environment": {
             key: os.environ.get(key)
             for key in ("RUNNER_ARCH", "RUNNER_NAME", "RUNNER_OS")
@@ -537,6 +550,10 @@ def run_shard(
     try:
         if require_primary_environment:
             p4_global_source._assert_primary_environment()
+        if os.environ.get("TABPFN_ALLOW_CPU_LARGE_DATASET") != "1":
+            raise P4DatasetScaleValidationError(
+                "Dataset-scale CPU execution requires the official TABPFN_ALLOW_CPU_LARGE_DATASET=1 opt-in"
+            )
         runtime = p4_global_source.verify_pilot_runtime()
         source_manifest = p4_global_source._manifest()
         checkpoints = {

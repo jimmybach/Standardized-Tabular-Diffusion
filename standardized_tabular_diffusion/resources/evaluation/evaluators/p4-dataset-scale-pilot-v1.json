@@ -1,16 +1,26 @@
 {
   "pilot_schema_version": "1.0.0",
   "pilot_id": "p4-dataset-scale-admission-pilot",
-  "pilot_version": "0.1.0",
+  "pilot_version": "0.1.1",
   "status": "preregistered-diagnostic",
   "official_results_allowed": false,
+  "amendments": [
+    {
+      "from_version": "0.1.0",
+      "trigger_run": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31059896167",
+      "observation": "TabPFN 2.1.2 source-faithfully refused every CPU fit above 1,000 rows and instructed users to set TABPFN_ALLOW_CPU_LARGE_DATASET=1.",
+      "change": "Record and require the official TabPFN CPU large-dataset opt-in TABPFN_ALLOW_CPU_LARGE_DATASET=1, and retain AutoGluon per-model failure metadata.",
+      "unchanged": "Datasets, target coverage, seeds, surrogate, predictor panel, stability thresholds, and resource limits."
+    }
+  ],
   "source_runtime_manifest": "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
   "evaluator_profile_id": "p4-utility-pilot",
   "evaluator_profile_version": "0.1.0",
   "environment": {
     "platform": "Linux x86_64 CPU",
     "python": "3.11",
-    "dependency_lock": "requirements-p4-global-source-validation.txt"
+    "dependency_lock": "requirements-p4-global-source-validation.txt",
+    "tabpfn_cpu_large_dataset_opt_in": "TABPFN_ALLOW_CPU_LARGE_DATASET=1"
   },
   "surrogate": {
     "type": "full-row-multiset-preserving-permutation",
