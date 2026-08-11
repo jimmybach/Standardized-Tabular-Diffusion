@@ -1,0 +1,262 @@
+{
+  "adjudicator_repository_commit": "a754ca1950aca5714070dc86b466a556be4545f2",
+  "claim_boundary": "Repeats the unchanged 67-task Adult/Sick surrogate schedule and fixed 0.05 stability gates on the preregistered native Windows/Python 3.11/RTX 5080 runtime. It does not evaluate generator quality, generalize to other GPUs, or admit Official Results.",
+  "error": "Preregistered sentinel stability bound failed",
+  "error_type": "P4DatasetScaleValidationError",
+  "evidence_schema_version": "1.0.0",
+  "observations": {
+    "duplicate_shards": [],
+    "duplicate_task_keys": [],
+    "expected_shard_count": 9,
+    "expected_task_count": 67,
+    "issues": [
+      "stability-gate:adult:native-country",
+      "stability-gate:sick:referral-source",
+      "stability-gate:sick:tsh"
+    ],
+    "missing_shards": [],
+    "missing_task_keys": [],
+    "observed_shard_count": 9,
+    "observed_shards": [
+      {
+        "result_count": 5,
+        "sha256": "5dbff06c7be8863d38b49278c7acd7dc58f9e21c8b521d3cd51453406683e7be",
+        "shard": "adult:coverage:0-of-3",
+        "status": "pass"
+      },
+      {
+        "result_count": 5,
+        "sha256": "2a1a70fb6c6b65010e0b8745d1382df6f8e40e9b2979dac22a1b4d5d62a1c530",
+        "shard": "adult:coverage:1-of-3",
+        "status": "pass"
+      },
+      {
+        "result_count": 5,
+        "sha256": "62217c137a5f008b377f94a61894014767e55a1e0a0a2a154d7899793fa1a130",
+        "shard": "adult:coverage:2-of-3",
+        "status": "pass"
+      },
+      {
+        "result_count": 12,
+        "sha256": "016485ee7de59803d8b285e123eb5b815b38ee5b6a83c4a5356467ed4c6c486c",
+        "shard": "adult:stability:0-of-1",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "282ed30e09b602a01e58a1c7db66546e0bec0db2b8279ca4914d6376b09cbe5e",
+        "shard": "sick:coverage:0-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "30dc2d2dbdb48567a84d71da38b8cfde73adad7bace67ef7ac75db848f624708",
+        "shard": "sick:coverage:1-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "7a3448a2540a5e3ce9810c91caa0b7411e0fffb12b29801cad01775aace984ad",
+        "shard": "sick:coverage:2-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 7,
+        "sha256": "06123d4bfdb48a31a42d0439622c02605c36662e0b9dd4ab99657b3a7af9ce9e",
+        "shard": "sick:coverage:3-of-4",
+        "status": "pass"
+      },
+      {
+        "result_count": 12,
+        "sha256": "b93c8bd4777138a1601b223f4082eb13c45c8575a254bb3eb28b9ad6620fc00d",
+        "shard": "sick:stability:0-of-1",
+        "status": "pass"
+      }
+    ],
+    "observed_task_count": 67,
+    "observed_unique_task_count": 67,
+    "resources": {
+      "cuda_peak_allocation_increase_gib": {
+        "maximum": 3.6476244926452637,
+        "maximum_arm": {
+          "arm": "trtr",
+          "task_key": "adult:age:seed-0"
+        },
+        "median": 0.36077451705932617,
+        "p95": 3.6396899223327637
+      },
+      "observed_arm_count": 134,
+      "preregistered_limits": {
+        "autogluon_fit_time_limit_per_arm_seconds": 300,
+        "maximum_observed_arm_wall_seconds": 600,
+        "maximum_observed_cuda_peak_allocated_gib": 15.0,
+        "maximum_observed_process_tree_peak_rss_gib": 14.0,
+        "measurement_scope": "Python process plus recursive child-process RSS and CUDA device-0 allocated memory sampled for every arm",
+        "workflow_timeout_minutes": 360
+      },
+      "process_tree_peak_rss_gib": {
+        "maximum": 2.0041885375976562,
+        "maximum_arm": {
+          "arm": "tstr",
+          "task_key": "adult:capital-loss:seed-0"
+        },
+        "median": 1.8472099304199219,
+        "p95": 1.987969970703125
+      },
+      "wall_seconds": {
+        "maximum": 17.198702699999558,
+        "maximum_arm": {
+          "arm": "tstr",
+          "task_key": "adult:native-country:seed-1"
+        },
+        "median": 1.3302919000002476,
+        "p95": 8.83462674999964,
+        "sum": 385.7434091999976
+      }
+    },
+    "stability": {
+      "adult": {
+        "fnlwgt": {
+          "gate": "pass",
+          "maximum_absolute_deviation_from_identity": 0.0016815333934945276,
+          "mean": 1.0002706488116233,
+          "population_standard_deviation": 0.0007801917875344947,
+          "range": 0.002307708212439752,
+          "ratios": [
+            1.0003798940726127,
+            0.9993738251810548,
+            0.9998133619958084,
+            1.0016815333934945,
+            1.0001046294151466
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "income": {
+          "gate": "pass",
+          "maximum_absolute_deviation_from_identity": 0.004750591812583194,
+          "mean": 1.002188522329718,
+          "population_standard_deviation": 0.0019114944834437498,
+          "range": 0.004666576215567764,
+          "ratios": [
+            1.0047505918125832,
+            1.0010488671918534,
+            1.0008348018239581,
+            1.0000840155970154,
+            1.0042243352231794
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "native-country": {
+          "gate": "fail",
+          "maximum_absolute_deviation_from_identity": 0.19202557345239923,
+          "mean": 1.0942503355934152,
+          "population_standard_deviation": 0.08520337048813711,
+          "range": 0.24827211227598045,
+          "ratios": [
+            0.9437534611764188,
+            1.1568159100465254,
+            1.0972612949116058,
+            1.081395438380127,
+            1.1920255734523992
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      },
+      "sick": {
+        "class": {
+          "gate": "pass",
+          "maximum_absolute_deviation_from_identity": 0.02008196721311495,
+          "mean": 0.9910018214936247,
+          "population_standard_deviation": 0.011300771636947864,
+          "range": 0.032786885245901676,
+          "ratios": [
+            1.0127049180327867,
+            0.9861566484517305,
+            0.979918032786885,
+            0.9866120218579235,
+            0.9896174863387979
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "referral-source": {
+          "gate": "fail",
+          "maximum_absolute_deviation_from_identity": 0.04088239680359651,
+          "mean": 1.0195244509188357,
+          "population_standard_deviation": 0.018829961755786915,
+          "range": 0.053724705881859514,
+          "ratios": [
+            1.0270466658426745,
+            1.0111088532012507,
+            0.987157690921737,
+            1.0314266478249192,
+            1.0408823968035965
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "tsh": {
+          "gate": "fail",
+          "maximum_absolute_deviation_from_identity": 0.04423520918503565,
+          "mean": 1.0056399344835727,
+          "population_standard_deviation": 0.028108303707302915,
+          "range": 0.0863025967285368,
+          "ratios": [
+            1.011913536791543,
+            1.0420673875435011,
+            1.0032770821339652,
+            0.9557647908149643,
+            1.0151768751338894
+          ],
+          "seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        }
+      }
+    },
+    "task_status_counts": {
+      "pass": 67
+    },
+    "unexpected_shards": [],
+    "unexpected_task_keys": []
+  },
+  "official_results_allowed": false,
+  "phase": "P4 Adult/Sick dataset-scale and stability admission pilot",
+  "pilot_manifest_fingerprint": "3c07a7865fb803c5fd8f49c5aa8fe8d3e2d41ff80adb66e68683a60f6a7bc107",
+  "pilot_profile": "windows-rtx5080",
+  "protocol_id": "p4-dataset-scale-windows-gpu-admission-pilot-v1",
+  "repository_commit": "a754ca1950aca5714070dc86b466a556be4545f2",
+  "status": "fail"
+}

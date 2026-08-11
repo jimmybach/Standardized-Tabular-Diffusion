@@ -34,6 +34,6 @@
     "finalization": "Utility details, raw arms, ratios, Atomic Results, provenance, and exact checksums must cross-validate before finalization."
   },
   "owners": ["repository-maintainers"],
-  "review_record": {"status":"diagnostic-development","official_admission":"pending Windows/Python 3.11 GPU runtime qualification, complete dataset-scale admission, and profile freeze"},
+  "review_record": {"status":"diagnostic-stability-review-required","official_admission":"Windows/Python 3.11 GPU source parity and complete dataset execution passed, but three fixed stability gates failed; predictor-profile review and profile freeze remain pending"},
   "change_log": [{"version":"0.4.0","change":"Implemented the reviewed P4 diagnostic Local and Global Utility vertical slice."}]
 }
