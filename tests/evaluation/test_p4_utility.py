@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import copy
+import logging
 from dataclasses import replace
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -14,6 +16,7 @@ from standardized_tabular_diffusion.evaluation.utility import (
     LOCAL_RETENTION_METRIC_ID,
     GlobalBackendResult,
     UtilityProfileError,
+    _close_workspace_log_handlers,
     _global_model_failure_records,
     evaluate_utility,
     global_target_ratio,
@@ -24,6 +27,30 @@ from standardized_tabular_diffusion.evaluation.utility import (
 )
 
 pytestmark = [pytest.mark.core, pytest.mark.evaluation]
+
+
+def test_workspace_log_cleanup_closes_only_owned_autogluon_handlers(tmp_path: Path) -> None:
+    logger = logging.getLogger("autogluon")
+    owned_path = tmp_path / "owned" / "predictor.log"
+    other_path = tmp_path / "other" / "predictor.log"
+    owned_path.parent.mkdir()
+    other_path.parent.mkdir()
+    owned = logging.FileHandler(owned_path)
+    other = logging.FileHandler(other_path)
+    logger.addHandler(owned)
+    logger.addHandler(other)
+    try:
+        assert _close_workspace_log_handlers(owned_path.parent) == 1
+        assert owned not in logger.handlers
+        assert other in logger.handlers
+        owned_path.unlink()
+    finally:
+        if owned in logger.handlers:
+            logger.removeHandler(owned)
+            owned.close()
+        if other in logger.handlers:
+            logger.removeHandler(other)
+            other.close()
 
 
 def test_global_backend_retains_stable_autogluon_model_failure_fields() -> None:

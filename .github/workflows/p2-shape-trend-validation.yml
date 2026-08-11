@@ -42,9 +42,19 @@ concurrency:
 
 jobs:
   p2-shape-trend:
-    name: Linux / Python 3.11 / locked SDMetrics parity
-    runs-on: ubuntu-latest
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows / Python 3.11 / primary locked SDMetrics parity
+            tier: primary
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary locked SDMetrics parity
+            tier: secondary
 
     steps:
       - name: Check out repository
@@ -84,47 +94,32 @@ jobs:
           python -m mypy
 
       - name: Generate P2 exit-gate evidence
+        if: matrix.tier == 'primary'
         run: >-
           python -m standardized_tabular_diffusion.validation.p2_shape_trend
-          --output "${RUNNER_TEMP}/p2-shape-trend-evidence.json"
+          --output "${{ runner.temp }}/p2-shape-trend-evidence.json"
           --require-primary-environment
+
+      - name: Generate P2 secondary-compatibility evidence
+        if: matrix.tier == 'secondary'
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p2_shape_trend
+          --output "${{ runner.temp }}/p2-shape-trend-evidence.json"
 
       - name: Preserve pre-protocol failure evidence
         if: always()
-        shell: bash
-        run: |
-          if [[ ! -f "${RUNNER_TEMP}/p2-shape-trend-evidence.json" ]]; then
-            python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          output = Path(os.environ["RUNNER_TEMP"]) / "p2-shape-trend-evidence.json"
-          output.write_text(
-              json.dumps(
-                  {
-                      "evidence_schema_version": "1.0.0",
-                      "protocol_id": "p2-shape-trend-source-parity-v1",
-                      "phase": "P2",
-                      "status": "fail",
-                      "repository_commit": os.environ.get("GITHUB_SHA", "unknown"),
-                      "error_type": "PreProtocolFailure",
-                      "error": "A required P2 workflow step failed before evidence generation."
-                  },
-                  indent=2,
-                  sort_keys=True,
-              )
-              + "\n",
-              encoding="utf-8",
-          )
-          PY
-          fi
+        run: >-
+          python -m standardized_tabular_diffusion.validation.workflow_evidence
+          --output "${{ runner.temp }}/p2-shape-trend-evidence.json"
+          --protocol-id p2-shape-trend-source-parity-v1
+          --phase P2
+          --message "A required P2 workflow step failed before evidence generation."
 
       - name: Upload P2 evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: p2-shape-trend-evidence
+          name: p2-shape-trend-${{ matrix.tier }}-evidence
           path: ${{ runner.temp }}/p2-shape-trend-evidence.json
           if-no-files-found: error
           retention-days: 90

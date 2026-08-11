@@ -9,6 +9,7 @@ import warnings
 from collections import Counter
 from dataclasses import dataclass
 from importlib import resources
+from pathlib import Path
 from typing import Any, Callable, NoReturn
 
 import numpy as np
@@ -1132,6 +1133,34 @@ def _global_model_failure_records(predictor: Any) -> tuple[dict[str, Any], ...]:
     return tuple(records)
 
 
+def _close_workspace_log_handlers(workspace: str | Path) -> int:
+    """Close AutoGluon file handlers rooted in a disposable workspace.
+
+    AutoGluon 1.4 adds a process-global file handler for each predictor but
+    does not remove it when fitting finishes. Windows correctly refuses to
+    delete the open log file, so the adapter owns this workspace-local cleanup.
+    """
+
+    import logging
+
+    root = Path(workspace).resolve()
+    logger = logging.getLogger("autogluon")
+    closed = 0
+    for handler in list(logger.handlers):
+        filename = getattr(handler, "baseFilename", None)
+        if filename is None:
+            continue
+        try:
+            inside_workspace = Path(filename).resolve().is_relative_to(root)
+        except (OSError, RuntimeError):
+            inside_workspace = False
+        if inside_workspace:
+            logger.removeHandler(handler)
+            handler.close()
+            closed += 1
+    return closed
+
+
 def _default_global_scorer(
     train: pd.DataFrame,
     test: pd.DataFrame,
@@ -1172,23 +1201,26 @@ def _default_global_scorer(
     extra_metric = "root_mean_squared_error" if task_type == "regression" else "balanced_accuracy"
     try:
         with tempfile.TemporaryDirectory(prefix=f"p4-{arm}-{target}-") as workspace:
-            with _seeded_benchmark_context(seed):
-                predictor = TabularPredictor(
-                    label=target,
-                    path=workspace,
-                    problem_type=problem_type,
-                    verbosity=0,
-                    log_to_file=True,
-                ).fit(
-                    train_data=train,
-                    tuning_data=None,
-                    hyperparameters=hyperparameters,
-                    fit_weighted_ensemble=False,
-                    presets="medium_quality",
-                    time_limit=time_limit_seconds,
-                )
-                leaderboard = predictor.leaderboard(test, extra_metrics=[extra_metric])
-                predictor_failures = _global_model_failure_records(predictor)
+            try:
+                with _seeded_benchmark_context(seed):
+                    predictor = TabularPredictor(
+                        label=target,
+                        path=workspace,
+                        problem_type=problem_type,
+                        verbosity=0,
+                        log_to_file=True,
+                    ).fit(
+                        train_data=train,
+                        tuning_data=None,
+                        hyperparameters=hyperparameters,
+                        fit_weighted_ensemble=False,
+                        presets="medium_quality",
+                        time_limit=time_limit_seconds,
+                    )
+                    leaderboard = predictor.leaderboard(test, extra_metrics=[extra_metric])
+                    predictor_failures = _global_model_failure_records(predictor)
+            finally:
+                _close_workspace_log_handlers(workspace)
     except (OSError, PermissionError, TimeoutError) as exc:
         raise UtilityResourceError(f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}") from exc
     except Exception as exc:

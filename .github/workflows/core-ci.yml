@@ -14,9 +14,17 @@ concurrency:
 
 jobs:
   core:
-    name: Linux / Python 3.11 / core
-    runs-on: ubuntu-latest
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows / Python 3.11 / primary core
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary core
 
     steps:
       - name: Check out repository
@@ -34,26 +42,7 @@ jobs:
       - name: Verify dependency-free package surface
         run: |
           python -m pip install --no-deps .
-          python - <<'PY'
-          import subprocess
-          import sys
-          import tempfile
-
-          clean_directory = tempfile.mkdtemp()
-          import_check = """
-          import sys
-          import standardized_tabular_diffusion as package
-
-          assert package.list_models()
-          assert not {"numpy", "pandas", "sklearn", "torch"} & set(sys.modules)
-          """
-          subprocess.run([sys.executable, "-c", import_check], cwd=clean_directory, check=True)
-          subprocess.run(
-              [sys.executable, "-m", "standardized_tabular_diffusion.cli", "--help"],
-              cwd=clean_directory,
-              check=True,
-          )
-          PY
+          python -m standardized_tabular_diffusion.validation.core_ci dependency-free-surface
 
       - name: Install repository test dependencies
         run: |
@@ -76,27 +65,4 @@ jobs:
         run: python -m build
 
       - name: Inspect wheel contents
-        run: |
-          python - <<'PY'
-          import pathlib
-          import zipfile
-
-          wheel = next(pathlib.Path("dist").glob("*.whl"))
-          names = set(zipfile.ZipFile(wheel).namelist())
-          required = {
-              "standardized_tabular_diffusion/resources/datasets/sources.json",
-              "standardized_tabular_diffusion/resources/datasets/adult-uci-2-v1.json",
-              "standardized_tabular_diffusion/resources/datasets/sick-uci-102-v1.json",
-              "standardized_tabular_diffusion/resources/upstream/source-lock.json",
-              "standardized_tabular_diffusion/resources/upstream/ctabgan-source-manifest.json",
-              "standardized_tabular_diffusion/schemas/evaluation/atomic-result.schema.json",
-              "standardized_tabular_diffusion/schemas/evaluation/metric-registry-entry.schema.json",
-              "standardized_tabular_diffusion/resources/evaluation/metrics/legacy-tabstruct-aligned-v1.json",
-              "standardized_tabular_diffusion/resources/evaluation/protocols/development-p1.json",
-          }
-          assert required <= names
-          assert not any(
-              name.startswith(("research_inputs/", "TabDDPM-main/", "TabDiff-main/", "TabSyn-main/"))
-              for name in names
-          )
-          PY
+        run: python -m standardized_tabular_diffusion.validation.core_ci inspect-wheel --dist-directory dist

@@ -130,6 +130,8 @@ The preregistered gates require every scheduled task exactly once, every applica
 
 TabPFN's version-matched official documentation recommends GPU execution and states that only datasets of approximately 1,000 rows or fewer are feasible on CPU; it describes the large-dataset CPU opt-in as very slow. The admission run therefore measures a deliberately strict source-faithful CPU envelope rather than assuming it will pass. See the [TabPFN v2.1.1 documentation](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start); PyPI 2.1.2 contains no source change from that release according to the upstream changelog.
 
+`p4-dataset-scale-windows-gpu-admission-pilot@0.2.0` is a separate preregistered diagnostic profile for the repository's primary release platform. It preserves the exact 67-task schedule, row-permutation surrogate, predictor policy, TabEval source, TabPFN checkpoints, and fixed `0.05` stability gates. Only the execution profile changes to native Windows 11, Python 3.11, AutoGluon 1.4.0, XGBoost 3.0.3, TabPFN 2.1.2, PyTorch 2.8.0+cu128, CUDA 12.8, and the recorded RTX 5080. Every applicable arm must prove a positive CUDA allocation increase and remain below the preregistered 15 GiB CUDA allocation limit. This profile does not generalize to other GPUs.
+
 ## Dataset-scale admission result
 
 [Run 31060416318](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318) **failed** the preregistered `0.1.1` admission protocol. The immutable [admission decision](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) is bound to the original [finalizer output](../evidence/evaluation/p4-dataset-scale-run-31060416318.json), reconstructed [partial observations](../evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json), and reviewed [runner-failure observations](../evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json). Their SHA-256 values are, respectively, `8d6555c586f5b1a2c9a8024d6e151cb9559742ef023bfec2c3ea36b7b578d85e`, `cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8`, `a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f`, and `135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35`.
@@ -144,7 +146,7 @@ The result is not generator-quality evidence because the pilot used the declared
 
 Before P4 can advance beyond diagnostic use:
 
-1. review and select a source-faithful execution environment, or separately approve and equivalence-validate a documented upstream-source patch, before another Adult run;
-2. preregister a new protocol version without post-hoc relaxation of the failed `0.1.1` gates;
-3. rerun complete Adult and Sick coverage and five-seed stability, including high-cardinality omission and equal-arm behavior; and
-4. reconsider profile freeze and Official Results admission only after every new gate passes.
+1. retain and review the Windows source-runtime and dataset-scale evidence without changing the fixed stability gates after observation;
+2. diagnose any repeated sentinel instability as a scientific-profile issue, independently of CPU/GPU resource behavior;
+3. complete Adult and Sick coverage and five-seed stability under one immutable Windows profile if the admission question remains active; and
+4. reconsider profile freeze and Official Results admission only after every required gate passes.

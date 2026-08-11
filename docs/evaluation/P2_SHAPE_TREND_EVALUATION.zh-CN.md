@@ -3,6 +3,7 @@
 - 状态：已通过 Linux/Python 3.11 权威验证；仍仅为诊断协议
 - 协议：`p2-shape-trend@0.2.0`（draft、诊断用途）
 - 指标身份：`sdmetrics-column-shapes@1.0.0` 与 `sdmetrics-column-pair-trends@1.0.0`
+- 发布环境：Windows 11/Python 3.11 主要环境准入尚待完成；已留存的等价证据来自 Linux/Python 3.11
 - Official Results 准入：否
 - 最后更新：2026-08-05
 

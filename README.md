@@ -2,6 +2,8 @@
 
 > **Development status:** this repository is currently a pre-alpha engineering workspace, not an official benchmark release. The existing `tabstruct-aligned-v1` output is a legacy compatibility path while the reviewed evaluation protocol is implemented. See the [development baseline](docs/DEVELOPMENT.md), [evaluation implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
 
+The primary release target is native **Windows 11 x86-64 with Python 3.11**. Linux/Python 3.11 remains a required secondary compatibility and upstream-parity environment. Historical Linux evidence is preserved but does not by itself establish Windows release support; see the [platform policy](docs/PLATFORM_SUPPORT.md) and its [Chinese translation](docs/PLATFORM_SUPPORT.zh-CN.md).
+
 This repository now includes a shared benchmarking layer on top of the upstream model code in:
 
 - `TabDiff-main`
@@ -17,7 +19,7 @@ The goal is to preserve authoritative implementations whenever possible, record 
 
 The standardized layer is the preferred integration boundary. The vendored source trees are not assumed to be pristine until their revisions and local diffs have been audited.
 
-Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. All 21 registered adapters now have retained Linux/Python 3.11 validation evidence: 20 are `native-parity-validated`, while TabEBM is deliberately limited to `smoke-validated` because real generation requires externally gated TabPFN-v2 access. Every adapter remains experimental, unsupported, and outside Official Results until the separate evaluation, dataset, runtime, governance, and release gates pass.
+Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. All 21 registered adapters have retained Linux/Python 3.11 validation evidence: 20 are `native-parity-validated`, while TabEBM is deliberately limited to `smoke-validated` because real generation requires externally gated TabPFN-v2 access. These records preserve upstream parity claims in their declared environments; they do not yet establish native Windows release compatibility. Every adapter remains experimental, unsupported, and outside Official Results until the separate evaluation, dataset, Windows runtime, governance, and release gates pass.
 
 The final validation wave promoted GReaT in [run `30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472), TabuLa in [run `30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505), and TabSDS in [run `30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) after exact official-package/source comparisons. TabEBM [run `30974574544`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544) verified the locked official package, deterministic core, safe state, and delegation boundary but explicitly records that full TabPFN generation did not run. TabuLa and TabSDS remain release-blocked because their public upstream repositories declare no license.
 

@@ -2,10 +2,10 @@
 
 Chinese translation: [P3_VALIDITY_AND_PREPROCESSING.zh-CN.md](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 
-- Status: Linux/Python 3.11 validated diagnostic implementation
+- Status: diagnostic implementation with retained Linux/Python 3.11 evidence; Windows qualification pending
 - Protocol: `p3-validity@0.3.0`
 - Metric versions: `1.0.0`
-- Primary environment: Linux and Python 3.11
+- Release environment: native Windows 11 x86-64 and Python 3.11 primary; Linux/Python 3.11 secondary
 - Official Results allowed: no
 
 ## 1. Scope

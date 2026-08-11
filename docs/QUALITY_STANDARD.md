@@ -20,11 +20,11 @@ The project is a research benchmark, Python library, and command-line workflow f
 
 The primary supported environment is:
 
-- Linux;
+- native Windows 11 x86-64;
 - Python 3.11; and
 - documented CPU and GPU configurations.
 
-Windows support may be provided on a best-effort basis, but it is not a release-blocking platform unless a release explicitly states otherwise.
+Linux x86-64 with Python 3.11 is a required secondary compatibility environment. Linux-only upstream parity evidence remains valid for its original claim, but cannot substitute for the Windows release gate. The detailed policy is defined in [Platform Support Policy](PLATFORM_SUPPORT.md).
 
 ### 2.2 Non-goals
 
@@ -110,7 +110,7 @@ Validation level is cumulative. The recorded value is the highest level for whic
    - Successful real execution is not implied.
 
 3. `smoke-validated`
-   - A small end-to-end run succeeds in a supported Linux and Python 3.11 environment.
+   - A small end-to-end run succeeds in the native Windows 11 and Python 3.11 primary environment.
    - Produced samples and artifacts pass schema and integrity checks.
    - Scientific equivalence to the reproduction target is not implied.
 
@@ -548,7 +548,7 @@ Provide evidence for interface correctness, scientific fidelity, robustness, and
 1. **Unit tests** for deterministic utilities, validation, schemas, preprocessing, and metrics.
 2. **Contract tests** for every adapter and artifact interface.
 3. **Negative tests** for invalid configuration, missing dependencies, malformed samples, unsafe paths, and failed upstream processes.
-4. **Smoke tests** that execute real model code on small fixtures in Linux and Python 3.11.
+4. **Smoke tests** that execute real model code on small fixtures in native Windows 11 and Python 3.11.
 5. **Native parity tests** for official and approved-patched implementations.
 6. **Evaluation tests** using reference datasets and known metric behavior.
 7. **Reproducibility tests** across repeated runs and supported deterministic modes.
@@ -568,14 +568,15 @@ Provide a reproducible primary environment while isolating model families with c
 
 ### Requirements
 
-- Linux and Python 3.11 MUST be continuously tested as the primary release environment.
-- The supported Linux distribution, architecture, PyTorch version, CUDA version, and GPU families MUST be stated for each release.
+- Native Windows 11 x86-64 and Python 3.11 MUST be continuously tested as the primary release environment.
+- The supported Windows build range, architecture, PyTorch version, CUDA runtime, NVIDIA driver range, and GPU profiles MUST be stated for each release.
+- Linux x86-64 and Python 3.11 MUST be continuously tested as a secondary compatibility environment.
 - The core package MUST have a minimal dependency set.
 - Model families with incompatible stacks SHOULD use optional extras, lock profiles, or isolated environments.
 - Dependency resolution MUST be reproducible from clean machines.
 - CPU support and GPU requirements MUST be stated per model.
 - Platform-specific behavior MUST be isolated and tested; path manipulation MUST use portable APIs.
-- Windows limitations MUST be documented but are non-blocking by default.
+- Windows limitations are release-blocking for every component claimed as release-supported; Linux-only upstream parity limitations MUST be documented separately.
 
 ### Required evidence
 
@@ -736,7 +737,7 @@ Release support is independent of benchmark track. The public support matrix MUS
 
 The repository MUST NOT publish a version labeled `public-preview` unless:
 
-- core installation, metadata commands, and CLI help pass on Linux and Python 3.11;
+- core installation, metadata commands, and CLI help pass on native Windows 11 and Python 3.11;
 - the README identifies the release as a preview and does not make unsupported official-result claims;
 - every model is assigned a validation level, benchmark track, and support level consistent with recorded evidence;
 - official, experimental, and excluded tracks are clearly separated;

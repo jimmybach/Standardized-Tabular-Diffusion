@@ -32,6 +32,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
     read_yaml_safe,
     sha256_file,
 )
+from standardized_tabular_diffusion.platform_support import is_primary_release_environment
 
 PROTOCOL_ID = "p1-contracts-identity-foundation-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -46,8 +47,8 @@ def _distribution_version(distribution: str) -> str | None:
 
 
 def _assert_primary_environment() -> None:
-    if platform.system() != "Linux" or platform.python_version_tuple()[:2] != ("3", "11"):
-        raise AssertionError("Authoritative P1 evidence requires Linux and Python 3.11")
+    if not is_primary_release_environment():
+        raise AssertionError("Primary P1 release evidence requires Windows with Python 3.11")
 
 
 def _repository_commit() -> str:
