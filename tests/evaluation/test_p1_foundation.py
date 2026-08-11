@@ -22,17 +22,17 @@ def test_p1_evidence_is_machine_readable_and_excludes_tabstruct_runtime(tmp_path
     assert read_json(output) == evidence
 
 
-def test_authoritative_p1_evidence_fails_outside_primary_environment(
+def test_authoritative_p1_evidence_fails_outside_primary_family_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(p1_foundation, "is_primary_release_environment", lambda: False)
+    monkeypatch.setattr(p1_foundation, "is_primary_release_family_environment", lambda: False)
 
     with pytest.raises(AssertionError, match="Windows with Python 3.11"):
-        p1_foundation._assert_primary_environment()
+        p1_foundation._assert_primary_family_environment()
 
 
-def test_authoritative_p1_evidence_accepts_primary_environment(
+def test_authoritative_p1_evidence_accepts_primary_family_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(p1_foundation, "is_primary_release_environment", lambda: True)
-    p1_foundation._assert_primary_environment()
+    monkeypatch.setattr(p1_foundation, "is_primary_release_family_environment", lambda: True)
+    p1_foundation._assert_primary_family_environment()

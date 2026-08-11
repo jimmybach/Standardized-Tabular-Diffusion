@@ -21,7 +21,7 @@ from standardized_tabular_diffusion.evaluation.contracts import EvaluationReques
 from standardized_tabular_diffusion.evaluation.evaluate_table import evaluate_table_to_bundle
 from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile, resolve_protocol
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json, sha256_file
-from standardized_tabular_diffusion.platform_support import is_primary_release_environment
+from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 from standardized_tabular_diffusion.preprocessing import preprocess_splits
 
 PROTOCOL_ID = "p3-validity-and-preprocessing-v1"
@@ -51,9 +51,9 @@ def _repository_commit() -> str:
         return "unknown"
 
 
-def _assert_primary_environment() -> None:
-    if not is_primary_release_environment():
-        raise AssertionError("Primary P3 release evidence requires Windows with Python 3.11")
+def _assert_primary_family_environment() -> None:
+    if not is_primary_release_family_environment():
+        raise AssertionError("Primary-family P3 evidence requires Windows with Python 3.11")
 
 
 def _fixture(profile: dict[str, Any]) -> pd.DataFrame:
@@ -171,7 +171,7 @@ def _locked_files() -> dict[str, str]:
     return {relative: sha256_file(REPO_ROOT / relative) for relative in paths}
 
 
-def run_validation(output: Path, *, require_primary_environment: bool = False) -> dict[str, Any]:
+def run_validation(output: Path, *, require_primary_family_environment: bool = False) -> dict[str, Any]:
     evidence: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": PROTOCOL_ID,
@@ -188,12 +188,12 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
             "python": platform.python_version(),
             "pandas": _distribution_version("pandas"),
             "pyarrow": _distribution_version("pyarrow"),
-            "primary_environment_required": require_primary_environment,
+            "primary_family_environment_required": require_primary_family_environment,
         },
     }
     try:
-        if require_primary_environment:
-            _assert_primary_environment()
+        if require_primary_family_environment:
+            _assert_primary_family_environment()
         dataset = load_dataset_profile(REPO_ROOT / "configs/datasets/adult-uci-2-v1.json")
         protocol = resolve_protocol("p3-validity", "0.3.0")
         reference_frame = _fixture(dataset.payload)
@@ -275,10 +275,21 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate the P3 validity and preprocessing boundary")
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-primary-family-environment",
+        "--require-primary-environment",
+        dest="require_primary_family_environment",
+        action="store_true",
+    )
     args = parser.parse_args()
     print(
-        json.dumps(run_validation(args.output, require_primary_environment=args.require_primary_environment), indent=2)
+        json.dumps(
+            run_validation(
+                args.output,
+                require_primary_family_environment=args.require_primary_family_environment,
+            ),
+            indent=2,
+        )
     )
 
 

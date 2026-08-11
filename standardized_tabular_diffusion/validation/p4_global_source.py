@@ -512,19 +512,19 @@ def _pip_freeze() -> list[str]:
     return sorted(line.strip() for line in output.splitlines() if line.strip())
 
 
-def _assert_primary_environment() -> None:
+def _assert_linux_cpu_runtime_environment() -> None:
     if platform.system() != "Linux" or platform.python_version_tuple()[:2] != ("3", "11"):
         raise P4GlobalSourceValidationError("Authoritative P4 source evidence requires Linux and Python 3.11")
 
 
 def _assert_runtime_environment(runtime_profile: str) -> None:
     if runtime_profile == LINUX_CPU_RUNTIME_PROFILE:
-        _assert_primary_environment()
+        _assert_linux_cpu_runtime_environment()
         return
     if runtime_profile == WINDOWS_GPU_RUNTIME_PROFILE:
         if platform.system() != "Windows" or platform.python_version_tuple()[:2] != ("3", "11"):
             raise P4GlobalSourceValidationError(
-                "The Windows GPU P4 profile requires native Windows and Python 3.11"
+                "The Windows GPU P4 profile requires a Windows-family host and Python 3.11"
             )
         return
     raise P4GlobalSourceValidationError(f"Unknown P4 runtime profile: {runtime_profile}")
@@ -595,7 +595,7 @@ def run_validation(
     classifier_checkpoint: Path,
     regressor_checkpoint: Path,
     time_limit_seconds: int,
-    require_primary_environment: bool = False,
+    require_declared_runtime_environment: bool = False,
     runtime_profile: str = LINUX_CPU_RUNTIME_PROFILE,
 ) -> dict[str, Any]:
     protocol_id = (
@@ -618,7 +618,7 @@ def run_validation(
         "environment": {
             "platform": f"{platform.system()} / {platform.machine()}",
             "python": platform.python_version(),
-            "primary_environment_required": require_primary_environment,
+            "declared_runtime_environment_required": require_declared_runtime_environment,
             "runtime_profile": runtime_profile,
         },
     }
@@ -626,7 +626,7 @@ def run_validation(
     try:
         if time_limit_seconds < 1:
             raise P4GlobalSourceValidationError("time_limit_seconds must be positive")
-        if require_primary_environment:
+        if require_declared_runtime_environment:
             _assert_runtime_environment(runtime_profile)
         source = verify_tabeval_source(source_path, license_path)
         evidence["source"] = source
@@ -821,7 +821,13 @@ def main() -> None:
     parser.add_argument("--classifier-checkpoint", type=Path, required=True)
     parser.add_argument("--regressor-checkpoint", type=Path, required=True)
     parser.add_argument("--time-limit-seconds", type=int, default=120)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-declared-runtime-environment",
+        "--require-primary-environment",
+        dest="require_declared_runtime_environment",
+        action="store_true",
+        help="Require the OS/Python identity declared by the selected runtime profile.",
+    )
     parser.add_argument(
         "--runtime-profile",
         choices=(LINUX_CPU_RUNTIME_PROFILE, WINDOWS_GPU_RUNTIME_PROFILE),
@@ -835,7 +841,7 @@ def main() -> None:
         classifier_checkpoint=args.classifier_checkpoint.resolve(),
         regressor_checkpoint=args.regressor_checkpoint.resolve(),
         time_limit_seconds=args.time_limit_seconds,
-        require_primary_environment=args.require_primary_environment,
+        require_declared_runtime_environment=args.require_declared_runtime_environment,
         runtime_profile=args.runtime_profile,
     )
 

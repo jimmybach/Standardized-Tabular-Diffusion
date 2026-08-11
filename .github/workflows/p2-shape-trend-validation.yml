@@ -50,7 +50,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            label: Windows / Python 3.11 / primary locked SDMetrics parity
+            label: Hosted Windows / Python 3.11 / primary-family locked SDMetrics parity
             tier: primary
           - os: ubuntu-latest
             label: Linux / Python 3.11 / secondary locked SDMetrics parity
@@ -98,7 +98,7 @@ jobs:
         run: >-
           python -m standardized_tabular_diffusion.validation.p2_shape_trend
           --output "${{ runner.temp }}/p2-shape-trend-evidence.json"
-          --require-primary-environment
+          --require-primary-family-environment
 
       - name: Generate P2 secondary-compatibility evidence
         if: matrix.tier == 'secondary'

@@ -185,7 +185,7 @@ jobs:
           --shard-count "${{ matrix.shard_count }}"
           --classifier-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt"
           --regressor-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-regressor.ckpt"
-          --require-primary-environment
+          --require-declared-runtime-environment
 
       - name: Upload shard evidence
         if: always()

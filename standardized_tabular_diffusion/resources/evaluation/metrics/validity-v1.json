@@ -67,7 +67,7 @@
       "source_parity_evidence": [],
       "numerical_tolerance": {"relative": 1e-12, "absolute": 1e-12},
       "reference_fixtures": ["hand-computable mixed-type and cross-column fixtures"],
-      "supported_environment": {"release_primary": "Windows 11 x86-64 with Python 3.11", "validated": ["Linux x86-64 with Python 3.11"], "windows_release_qualification": "pending primary CI evidence"},
+      "supported_environment": {"release_primary": "Windows 11 x86-64 with Python 3.11", "validated": ["GitHub-hosted Windows Server with Python 3.11 for Windows-family compatibility", "Linux x86-64 with Python 3.11"], "windows_release_qualification": "hosted Windows-family CI passed; exact native Windows 11 qualification remains pending"},
       "unresolved_limitations": ["Current reviewed dataset profiles do not promote pending numerical ranges or cross-column relationships to hard constraints."],
       "release_decision": "diagnostic-only"
     },

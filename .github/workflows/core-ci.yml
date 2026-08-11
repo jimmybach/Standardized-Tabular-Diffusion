@@ -22,7 +22,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            label: Windows / Python 3.11 / primary core
+            label: Hosted Windows / Python 3.11 / primary-family core
           - os: ubuntu-latest
             label: Linux / Python 3.11 / secondary core
 

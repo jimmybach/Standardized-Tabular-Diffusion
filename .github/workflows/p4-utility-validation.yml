@@ -46,7 +46,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            label: Windows / Python 3.11 / primary Local and Global Utility diagnostic
+            label: Hosted Windows / Python 3.11 / primary-family Local and Global Utility diagnostic
             tier: primary
           - os: ubuntu-latest
             label: Linux / Python 3.11 / secondary Local and Global Utility diagnostic
@@ -91,7 +91,7 @@ jobs:
         run: >-
           python -m standardized_tabular_diffusion.validation.p4_utility
           --output "${{ runner.temp }}/p4-utility-evidence.json"
-          --require-primary-environment
+          --require-primary-family-environment
 
       - name: Generate bounded P4 secondary-compatibility evidence
         if: matrix.tier == 'secondary'

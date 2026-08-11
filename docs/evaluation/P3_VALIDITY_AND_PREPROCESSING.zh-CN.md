@@ -5,7 +5,7 @@
 - 状态：已留存 Linux/Python 3.11 证据的诊断性实现；Windows 准入尚待完成
 - 协议：`p3-validity@0.3.0`
 - 指标版本：`1.0.0`
-- 发布环境：原生 Windows 11 x86-64 与 Python 3.11 为主要环境；Linux/Python 3.11 为次要环境
+- 发布环境：已有托管 Windows/Python 3.11 主要平台家族 CI；精确原生 Windows 11 准入仍待完成；Linux/Python 3.11 为次要环境
 - 是否允许进入 Official Results：否
 
 ## 1. 范围
