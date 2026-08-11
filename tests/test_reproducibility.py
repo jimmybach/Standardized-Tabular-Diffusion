@@ -23,8 +23,13 @@ if str(TABDIFF_ROOT) not in sys.path:
     sys.path.insert(0, str(TABDIFF_ROOT))
 
 
-def test_prepare_ml_problem_uses_deterministic_split() -> None:
+def test_prepare_ml_problem_is_deterministic_under_a_scoped_numpy_seed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     pytest.importorskip("xgboost", reason="the legacy upstream MLE test requires xgboost")
+    prdc = types.ModuleType("prdc")
+    prdc.compute_prdc = lambda **kwargs: {}  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "prdc", prdc)
     mle = import_module("eval.mle.mle")
 
     train = np.array(
@@ -49,9 +54,17 @@ def test_prepare_ml_problem_uses_deterministic_split() -> None:
         "target_col_idx": [2],
     }
 
-    first = mle.prepare_ml_problem(train, test, info, seed=42)
-    second = mle.prepare_ml_problem(train, test, info, seed=42)
-    third = mle.prepare_ml_problem(train, test, info, seed=7)
+    def prepare(seed: int):
+        original_state = np.random.get_state()
+        try:
+            np.random.seed(seed)
+            return mle.prepare_ml_problem(train, test, info)
+        finally:
+            np.random.set_state(original_state)
+
+    first = prepare(42)
+    second = prepare(42)
+    third = prepare(7)
 
     np.testing.assert_array_equal(first[0], second[0])
     np.testing.assert_array_equal(first[1], second[1])

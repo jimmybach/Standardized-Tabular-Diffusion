@@ -129,23 +129,12 @@ class FakeTabulaTokenizer:
         return 7
 
 
-class FakeTabulaConfig:
-    n_layer = 2
-    n_head = 2
-    n_embd = 32
-    n_positions = 64
-
-    @classmethod
-    def from_pretrained(cls, path):
-        return cls()
-
-
 class FakeTabulaModel:
     def __init__(self):
         self.device = torch.device("cpu")
 
     @classmethod
-    def from_pretrained(cls, path):
+    def from_pretrained(cls, path, **kwargs):
         return cls()
 
     @classmethod
@@ -157,9 +146,10 @@ class FakeTabulaModel:
     def resize_token_embeddings(self, size):
         self.embedding_size = size
 
-    def save_pretrained(self, path):
+    def save_pretrained(self, path, *, safe_serialization=False):
+        assert safe_serialization
         Path(path).mkdir(parents=True, exist_ok=True)
-        (Path(path) / "model.bin").write_text("stub")
+        (Path(path) / "model.safetensors").write_text("stub")
 
     def to(self, device):
         self.device = torch.device(device)
@@ -168,24 +158,49 @@ class FakeTabulaModel:
     def eval(self):
         return None
 
+    def train(self):
+        return self
+
     def generate(self, **kwargs):
         return torch.tensor([[999]], dtype=torch.long)
 
 
-class FakeTrainingArguments:
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
+class FakeOfficialTabula:
+    def __init__(self, llm, *, categorical_columns, **kwargs):
+        self.llm = llm
+        self.categorical_columns = list(categorical_columns)
+        self.model = FakeTabulaModel()
+        self.tokenizer = FakeTabulaTokenizer()
+        self.columns: list[str] = []
+        self.num_cols: list[str] = []
+        self.conditional_col = None
+        self.conditional_col_dist = None
+        self.label_encoder_list: list[dict[str, object]] = []
 
+    def fit(self, frame, *, conditional_col=None):
+        self.columns = list(frame.columns)
+        self.num_cols = [column for column in self.columns if column not in self.categorical_columns]
+        self.conditional_col = conditional_col
+        self.conditional_col_dist = None
+        self.label_encoder_list = [
+            {
+                "column": column,
+                "label_encoder": types.SimpleNamespace(
+                    classes_=np.asarray(sorted(frame[column].astype(str).unique()), dtype=str)
+                ),
+            }
+            for column in self.categorical_columns
+        ]
 
-class FakeTrainer:
-    def __init__(self, model, args, train_dataset, data_collator):
-        self.model = model
-        self.args = args
-        self.train_dataset = train_dataset
-        self.data_collator = data_collator
-
-    def train(self):
-        return None
+    def sample(self, *, n_samples, **kwargs):
+        del kwargs
+        return pd.DataFrame(
+            {
+                "age": [42.0] * n_samples,
+                "city": ["Boston"] * n_samples,
+                "label": ["1"] * n_samples,
+            }
+        )
 
 
 def test_tabsyn_train_uses_unmodified_official_stages_and_does_not_reuse_checkpoints(
@@ -881,15 +896,28 @@ def test_ctab_gan_plus_preflight_requires_locked_source(tmp_path: Path, monkeypa
 @pytest.mark.skipif(torch is None, reason="TabuLa tensor contract requires the optional PyTorch runtime")
 def test_tabula_train_and_sample_with_stubbed_transformers(tmp_path: Path, monkeypatch) -> None:
     adapter = TabulaAdapter(tmp_path)
-    imports = types.SimpleNamespace(
-        AutoConfig=FakeTabulaConfig,
-        AutoModelForCausalLM=FakeTabulaModel,
-        AutoTokenizer=FakeTabulaTokenizer,
-        Trainer=FakeTrainer,
-        TrainingArguments=FakeTrainingArguments,
-        default_data_collator=object(),
+    source_root = tmp_path / "official-tabula"
+    source_root.mkdir()
+    source = {
+        "upstream_commit": adapter.upstream_commit,
+        "manifest_sha256": "a" * 64,
+        "source_dir": str(source_root),
+    }
+
+    @contextlib.contextmanager
+    def fake_official_class(root):
+        assert root == source_root
+        yield FakeOfficialTabula
+
+    transformers = types.ModuleType("transformers")
+    transformers.AutoModelForCausalLM = FakeTabulaModel
+    monkeypatch.setitem(sys.modules, "transformers", transformers)
+    monkeypatch.setattr(adapter, "_resolve_source_root", lambda spec: (source_root, source))
+    monkeypatch.setattr(adapter, "_official_class", fake_official_class)
+    monkeypatch.setattr(
+        "standardized_tabular_diffusion.models.tabula.validate_upstream_source",
+        lambda *args: source,
     )
-    monkeypatch.setattr(adapter, "_import_transformer_bits", lambda: imports)
 
     dataset_spec = DatasetSpec(
         name="adult",
@@ -925,7 +953,11 @@ def test_tabula_train_and_sample_with_stubbed_transformers(tmp_path: Path, monke
         dataset="adult",
         output_dir=str(tmp_path / "artifacts" / "tabula"),
         train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True, num_samples=2, extra={"max_tries": 4}),
+        sample=SampleConfig(
+            enabled=True,
+            num_samples=2,
+            extra={"max_empty_batches": 4, "allow_unbounded_sampling": True},
+        ),
         evaluation=EvaluationConfig(enabled=False),
     )
 
@@ -935,7 +967,10 @@ def test_tabula_train_and_sample_with_stubbed_transformers(tmp_path: Path, monke
     model_root = Path(train_config.output_dir) / "tabula_model"
     assert train_bundle.output_dir == Path(train_config.output_dir)
     assert model_root.exists()
-    assert (model_root / "adapter_metadata.json").exists()
+    assert (model_root / "tabula-state.json").exists()
+    assert (model_root / "tabula-integrity.json").exists()
+    assert (Path(train_config.output_dir) / "artifacts.json").exists()
+    adapter._validate_safe_model_root(model_root)
     assert sample_bundle.generated_sample_path is not None
     sampled = pd.read_csv(sample_bundle.generated_sample_path)
     assert list(sampled.columns) == ["age", "city", "label"]
