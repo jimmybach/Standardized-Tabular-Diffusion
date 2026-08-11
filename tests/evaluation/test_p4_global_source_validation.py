@@ -87,3 +87,21 @@ def test_manifest_is_canonical_json_resource() -> None:
     )
     payload = json.loads(resource.read_text(encoding="utf-8"))
     assert payload == validation._manifest()
+
+
+def test_windows_gpu_runtime_is_preregistered_and_bound_to_the_source_manifest() -> None:
+    runtime = validation._windows_gpu_runtime_manifest()
+
+    assert runtime["runtime_profile_id"] == "tabeval-p4-windows-rtx5080"
+    assert runtime["status"] == "preregistered-diagnostic"
+    assert runtime["upstream_official_environment_claimed"] is False
+    assert runtime["environment"] == {
+        "system": "Windows",
+        "machine": "AMD64",
+        "python": "3.11",
+        "dependency_lock": "requirements-p4-windows-gpu-validation.txt",
+    }
+    assert runtime["cuda"]["device_name"] == "NVIDIA GeForce RTX 5080"
+    assert runtime["cuda"]["compute_capability"] == [12, 0]
+    assert runtime["distributions"]["torch"] == "2.8.0+cu128"
+    assert runtime["distributions"]["xgboost_distribution"] == "xgboost"

@@ -2,10 +2,10 @@
 
 英文原文：[P3_VALIDITY_AND_PREPROCESSING.md](P3_VALIDITY_AND_PREPROCESSING.md)
 
-- 状态：通过 Linux/Python 3.11 验证的诊断性实现
+- 状态：已留存 Linux/Python 3.11 证据的诊断性实现；Windows 准入尚待完成
 - 协议：`p3-validity@0.3.0`
 - 指标版本：`1.0.0`
-- 主要环境：Linux 与 Python 3.11
+- 发布环境：原生 Windows 11 x86-64 与 Python 3.11 为主要环境；Linux/Python 3.11 为次要环境
 - 是否允许进入 Official Results：否
 
 ## 1. 范围

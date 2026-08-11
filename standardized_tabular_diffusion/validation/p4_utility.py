@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import platform
-import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
@@ -26,6 +25,7 @@ from standardized_tabular_diffusion.evaluation.utility import (
     p4_evaluator_profile_reference,
     validate_utility_profile,
 )
+from standardized_tabular_diffusion.platform_support import is_primary_release_environment
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -85,9 +85,9 @@ def _artifact(artifact_id: str, fingerprint: str, rows: int) -> dict[str, Any]:
 
 
 def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
-    primary = platform.system() == "Linux" and sys.version_info[:2] == (3, 11)
+    primary = is_primary_release_environment()
     if require_primary_environment and not primary:
-        raise RuntimeError("P4 primary evidence requires Linux with Python 3.11")
+        raise RuntimeError("P4 primary release evidence requires Windows with Python 3.11")
     dataset = load_dataset_profile(REPO_ROOT / "configs" / "datasets" / "adult-uci-2-v1.json")
     protocol = resolve_protocol("p4-utility", "0.4.0")
     evaluator = load_p4_evaluator_profile()

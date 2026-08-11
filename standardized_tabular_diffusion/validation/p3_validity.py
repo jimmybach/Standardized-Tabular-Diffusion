@@ -21,6 +21,7 @@ from standardized_tabular_diffusion.evaluation.contracts import EvaluationReques
 from standardized_tabular_diffusion.evaluation.evaluate_table import evaluate_table_to_bundle
 from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile, resolve_protocol
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json, sha256_file
+from standardized_tabular_diffusion.platform_support import is_primary_release_environment
 from standardized_tabular_diffusion.preprocessing import preprocess_splits
 
 PROTOCOL_ID = "p3-validity-and-preprocessing-v1"
@@ -51,8 +52,8 @@ def _repository_commit() -> str:
 
 
 def _assert_primary_environment() -> None:
-    if platform.system() != "Linux" or platform.python_version_tuple()[:2] != ("3", "11"):
-        raise AssertionError("Authoritative P3 evidence requires Linux and Python 3.11")
+    if not is_primary_release_environment():
+        raise AssertionError("Primary P3 release evidence requires Windows with Python 3.11")
 
 
 def _fixture(profile: dict[str, Any]) -> pd.DataFrame:

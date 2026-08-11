@@ -25,8 +25,14 @@ def test_p1_evidence_is_machine_readable_and_excludes_tabstruct_runtime(tmp_path
 def test_authoritative_p1_evidence_fails_outside_primary_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(p1_foundation.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(p1_foundation.platform, "python_version_tuple", lambda: ("3", "11", "15"))
+    monkeypatch.setattr(p1_foundation, "is_primary_release_environment", lambda: False)
 
-    with pytest.raises(AssertionError, match="Linux and Python 3.11"):
+    with pytest.raises(AssertionError, match="Windows with Python 3.11"):
         p1_foundation._assert_primary_environment()
+
+
+def test_authoritative_p1_evidence_accepts_primary_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(p1_foundation, "is_primary_release_environment", lambda: True)
+    p1_foundation._assert_primary_environment()

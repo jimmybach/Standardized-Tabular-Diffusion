@@ -4,8 +4,8 @@ Chinese translation: [EVALUATION_PROTOCOL.zh-CN.md](EVALUATION_PROTOCOL.zh-CN.md
 
 - Status: design baseline
 - Protocol family: Standardized Tabular Diffusion Benchmark
-- Document version: 0.1.0
-- Last updated: 2026-08-03
+- Document version: 0.1.1
+- Last updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -25,7 +25,7 @@ Requirements marked as pilot-frozen are mandatory after their threshold or imple
 
 The initial protocol targets static, single-table synthetic data. The canonical public interface MAY accept CSV, Parquet, or an in-memory DataFrame, but every official run MUST resolve the input to the same versioned canonical table and schema.
 
-The primary release environment is Linux with Python 3.11. Hardware-dependent results MUST additionally identify a compatible hardware profile.
+The primary release environment is native Windows 11 x86-64 with Python 3.11. Linux/Python 3.11 is a required secondary compatibility environment and MAY remain authoritative for a specifically declared Linux-only upstream parity protocol, but cannot establish Windows release support. Hardware-dependent results MUST additionally identify a compatible hardware profile. See the [Platform Support Policy](../PLATFORM_SUPPORT.md).
 
 ### 3.2 Evaluation subjects
 

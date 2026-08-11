@@ -130,6 +130,8 @@ TSTR 输入是对真实训练集进行确定性的全行置换。它保留每一
 
 与该版本匹配的 TabPFN 官方文档建议使用 GPU，并说明 CPU 上只有约 1,000 行及以下的数据集可行；其大数据 CPU 选择加入开关被明确描述为会非常慢。因此，本次准入运行测量的是刻意严格、来源忠实的 CPU 边界，而不是预设其必然通过。参见 [TabPFN v2.1.1 文档](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start)；根据上游 changelog，PyPI 2.1.2 相对此版本没有源码变化。
 
+`p4-dataset-scale-windows-gpu-admission-pilot@0.2.0` 是面向仓库主要发布平台的独立预注册诊断 profile。它完整保留 67 个任务、整行置换 surrogate、预测器策略、TabEval 源码、TabPFN 检查点以及固定的 `0.05` 稳定性门。唯一变化是执行 profile：原生 Windows 11、Python 3.11、AutoGluon 1.4.0、XGBoost 3.0.3、TabPFN 2.1.2、PyTorch 2.8.0+cu128、CUDA 12.8 与被完整记录的 RTX 5080。每条适用 arm 都必须证明 CUDA 分配量出现正增量，并低于预注册的 15 GiB CUDA 分配上限。该 profile 不会把结论推广到其他 GPU。
+
 ## 数据集规模准入结果
 
 [Run 31060416318](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318) **未通过**预注册的 `0.1.1` 准入协议。不可变的[准入决定](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)已绑定原始 [finalizer 输出](../evidence/evaluation/p4-dataset-scale-run-31060416318.json)、重建的[部分观察](../evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json)和已审阅的[运行器失败观察](../evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json)。它们的 SHA-256 依次为 `8d6555c586f5b1a2c9a8024d6e151cb9559742ef023bfec2c3ea36b7b578d85e`、`cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8`、`a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f` 和 `135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35`。
@@ -144,7 +146,7 @@ Adult 的四个作业均在执行期间丢失 GitHub Actions 运行器，因此�
 
 P4 在提升为非诊断用途前，还需要：
 
-1. 在再次运行 Adult 前，审阅并选定保持来源行为的执行环境，或单独审批、记录并完成等价性验证的上游源码补丁；
-2. 在重跑前预注册新协议版本，不得事后放宽已失败的 `0.1.1` 门限；
-3. 重跑完整 Adult/Sick 覆盖与五种子稳定性，包括高基数省略和等 arm 行为；
-4. 只有新协议的每一道门都通过后，才能重新考虑 profile 冻结与 Official Results 准入。
+1. 留存并审阅 Windows 来源运行时和数据集规模证据，不得在观察结果后修改固定稳定性门；
+2. 将再次出现的 sentinel 不稳定性作为科学 profile 问题诊断，并与 CPU/GPU 资源行为分开判断；
+3. 如果仍继续准入问题，则在同一个不可变 Windows profile 下完成 Adult/Sick 覆盖与五种子稳定性；
+4. 只有每一道必需门都通过后，才能重新考虑 profile 冻结与 Official Results 准入。

@@ -34,6 +34,6 @@
     "finalization": "Utility details, raw arms, ratios, Atomic Results, provenance, and exact checksums must cross-validate before finalization."
   },
   "owners": ["repository-maintainers"],
-  "review_record": {"status":"unit-validated-development","official_admission":"pending Linux/Python 3.11 source-runtime pilot and profile freeze"},
+  "review_record": {"status":"diagnostic-development","official_admission":"pending Windows/Python 3.11 GPU runtime qualification, complete dataset-scale admission, and profile freeze"},
   "change_log": [{"version":"0.4.0","change":"Implemented the reviewed P4 diagnostic Local and Global Utility vertical slice."}]
 }

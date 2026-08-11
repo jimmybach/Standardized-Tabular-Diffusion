@@ -42,6 +42,25 @@ def test_preregistered_pilot_binds_full_datasets_stratified_seeds_and_safety_lim
     )
 
 
+def test_windows_gpu_pilot_reuses_the_schedule_and_fixed_scientific_gates() -> None:
+    legacy = validation.validate_pilot_manifest()
+    windows = validation.validate_pilot_manifest(
+        pilot_profile=validation.WINDOWS_GPU_PILOT_PROFILE
+    )
+
+    assert windows["pilot_id"] == "p4-dataset-scale-windows-gpu-admission-pilot"
+    assert windows["pilot_version"] == "0.2.0"
+    assert windows["official_results_allowed"] is False
+    assert windows["amendments"] == []
+    assert windows["coverage"] == legacy["coverage"]
+    assert windows["stability"] == legacy["stability"]
+    assert windows["predictor_policy"] == legacy["predictor_policy"]
+    assert windows["environment"]["runtime_profile"] == "windows-rtx5080"
+    assert windows["environment"]["tabpfn_cpu_large_dataset_opt_in"] is None
+    assert windows["resources"]["maximum_observed_cuda_peak_allocated_gib"] == 15.0
+    assert len(validation._expected_task_keys(windows)) == 67
+
+
 def test_schedule_covers_every_nonconstant_target_once_and_adds_only_preregistered_stability() -> None:
     manifest = validation.validate_pilot_manifest()
     expected_counts = {"adult": (15, 12), "sick": (28, 12)}

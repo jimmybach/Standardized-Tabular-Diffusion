@@ -29,6 +29,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
     read_json,
     sha256_file,
 )
+from standardized_tabular_diffusion.platform_support import is_primary_release_environment
 
 PROTOCOL_ID = "p2-shape-trend-source-parity-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -58,8 +59,8 @@ def _repository_commit() -> str:
 
 
 def _assert_primary_environment() -> None:
-    if platform.system() != "Linux" or platform.python_version_tuple()[:2] != ("3", "11"):
-        raise AssertionError("Authoritative P2 evidence requires Linux and Python 3.11")
+    if not is_primary_release_environment():
+        raise AssertionError("Primary P2 release evidence requires Windows with Python 3.11")
 
 
 def _fixture(profile: dict[str, Any]) -> pd.DataFrame:

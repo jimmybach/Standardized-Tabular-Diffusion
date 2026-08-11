@@ -4,8 +4,8 @@
 
 - 状态：设计基线
 - 协议族：Standardized Tabular Diffusion Benchmark
-- 文档版本：0.1.0
-- 最后更新：2026-08-03
+- 文档版本：0.1.1
+- 最后更新：2026-08-11
 
 本文件是英文规范的对应中文译文。若两者存在歧义，以英文规范为准。
 
@@ -27,7 +27,7 @@ MUST、MUST NOT、SHOULD、SHOULD NOT 和 MAY 的含义与仓库质量标准中�
 
 初始协议面向静态单表合成数据。规范公共接口可以接受 CSV、Parquet 或内存中的 DataFrame，但每次官方运行必须将输入解析为相同的、带版本的规范表和 schema。
 
-主要发布环境为 Linux 与 Python 3.11。依赖硬件的结果还必须标识兼容的硬件 profile。
+主要发布环境为原生 Windows 11 x86-64 与 Python 3.11。Linux/Python 3.11 是必须保留的次要兼容环境；对明确声明的 Linux-only 上游等价协议，Linux 仍可作为权威环境，但不能证明 Windows 发布支持。依赖硬件的结果还必须标识兼容的硬件 profile。参见[平台支持政策](../PLATFORM_SUPPORT.zh-CN.md)。
 
 ### 3.2 评测对象
 
