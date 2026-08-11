@@ -168,7 +168,7 @@ tests/evaluation/
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | 诊断门与有限范围来源运行时等价已通过；首次[数据集规模准入](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)失败；仍为诊断状态 | 新预注册的完整运行在冻结审阅前通过目标覆盖、稳定性、高基数、资源和证据完整性门 |
+| P4 | Local 与 Global Utility | P1、P3 | Windows GPU 来源等价与完整 67 任务执行已通过；[数据集规模准入](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json)因三个固定稳定性门失败；仍为诊断状态 | 从科学上解决预测器 profile 稳定性、预注册后续身份，并在冻结审阅前通过每一道门 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
@@ -464,7 +464,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P4 现在已具备实现、有限范围工程门、精确 Linux 来源运行时等价，以及一次预注册的 Linux/CPU 数据集规模裁决。该运行因两个独立原因失败：Adult 运行器丢失导致覆盖不完整，Sick 两个稳定性哨兵超过固定门限。P4 的下一步是新预注册的原生 Windows 11/Python 3.11 GPU profile，使用仓库所有者的 RTX 5080，且不修改锁定 TabEval 源码。Windows GPU 运行时等价通过后，才执行完整 Adult/Sick 重跑。在所有门通过前，P4 仍为诊断状态，P5 不得把它当成 Official Results 组件。
+P4 现在已具备实现、有限范围工程门、留存的精确 Linux 来源运行时等价，以及留存的精确 Windows/Python 3.11/RTX 5080 来源运行时等价。完整 Windows GPU 数据集规模运行已执行全部 9 个 shard、67 个任务和 134 条 arm，所有资源门均通过，从而补齐了原先 Adult 无法完成执行的缺口。准入仍因保持不变的 Adult `native-country`、Sick `referral-source` 与 Sick `tsh` 稳定性门失败。P4 下一步是对预测器 profile 与单位比率稳定性契约进行科学审阅，而不是再次迁移平台或事后放宽门限。在新预注册的后续协议通过每一道门前，P4 仍为诊断状态，P5 不得把它当成 Official Results 组件。
 
 ## 12. 相关规范
 

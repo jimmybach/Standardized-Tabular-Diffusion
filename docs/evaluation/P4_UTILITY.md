@@ -142,11 +142,19 @@ All four Adult jobs lost their GitHub Actions runner during execution, so 27 Adu
 
 The result is not generator-quality evidence because the pilot used the declared row-permutation surrogate. It does not freeze the profile, admit P4 into Official Results, or justify changing an observed threshold after the run.
 
+### Windows GPU rerun result
+
+The exact Windows source-runtime pilot passed at commit `c0e6e72`. Its retained [machine-readable evidence](../evidence/evaluation/p4-global-source-windows-gpu-c0e6e72.json) has SHA-256 `3f3033348c075a7b2f2584eaad2bd50d419c7aa12391af320c6bec75ecab1306`. The locked TabEval source and adapter produced identical classification and regression aggregates, all XGB/KNN/TabPFN families trained, and both executions proved positive CUDA allocation on the recorded RTX 5080.
+
+The complete `0.2.1` dataset-scale run at commit `a754ca1` executed all 9 shards, 67 tasks, and 134 TRTR/TSTR arms successfully with no missing or duplicate coverage. Its retained [finalizer evidence](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json) has SHA-256 `2c7274a924b5e0673ba30878eb15de3c0e5d7cc78f930d8869054fc0177f4478`. Maximum arm wall time was `17.1987` seconds, maximum process-tree RSS was `2.0042` GiB, and maximum CUDA allocation increase was `3.6476` GiB; all resource gates passed. This resolves the former Adult execution gap and demonstrates that the selected Windows GPU profile is operational.
+
+Scientific admission nevertheless failed the unchanged stability gates. Adult `income` and `fnlwgt` passed, but `native-country` had a five-seed range of `0.24827` and maximum identity deviation of `0.19203`. Sick `class` passed, but `referral-source` had a range of `0.05372` and `tsh` had a range of `0.08630`. The limit is `0.05`. The result therefore isolates the remaining blocker as predictor-profile stability rather than platform resources. P4 remains diagnostic and excluded from Official Results.
+
 ## Remaining P4 exit work
 
 Before P4 can advance beyond diagnostic use:
 
-1. retain and review the Windows source-runtime and dataset-scale evidence without changing the fixed stability gates after observation;
-2. diagnose any repeated sentinel instability as a scientific-profile issue, independently of CPU/GPU resource behavior;
-3. complete Adult and Sick coverage and five-seed stability under one immutable Windows profile if the admission question remains active; and
+1. diagnose the repeated Adult `native-country`, Sick `referral-source`, and Sick `tsh` instability as a scientific-profile issue without changing the observed gates post hoc;
+2. decide whether the current XGB/KNN/TabPFN predictor profile and identity-ratio gate are scientifically appropriate before preregistering any successor protocol;
+3. rerun complete coverage and stability only after that scientific decision, under one newly frozen identity; and
 4. reconsider profile freeze and Official Results admission only after every required gate passes.

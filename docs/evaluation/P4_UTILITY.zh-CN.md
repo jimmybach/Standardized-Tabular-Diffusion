@@ -142,11 +142,19 @@ Adult 的四个作业均在执行期间丢失 GitHub Actions 运行器，因此�
 
 该结果不是生成器质量证据，因为 pilot 使用的是声明的整行置换 surrogate。它不会冻结 profile，不会将 P4 准入 Official Results，也不允许在看到结果后修改原门限。
 
+### Windows GPU 重跑结果
+
+精确 Windows 来源运行时 pilot 已在 commit `c0e6e72` 通过。留存的[机器可读证据](../evidence/evaluation/p4-global-source-windows-gpu-c0e6e72.json) SHA-256 为 `3f3033348c075a7b2f2584eaad2bd50d419c7aa12391af320c6bec75ecab1306`。锁定的 TabEval 源码与本仓库适配器产生完全一致的分类和回归聚合值，XGB/KNN/TabPFN 三个模型族均成功训练，而且两条执行路径都证明在记录的 RTX 5080 上产生了正 CUDA 分配增量。
+
+commit `a754ca1` 上完整的 `0.2.1` 数据集规模运行成功执行 9 个 shard、67 个任务与 134 条 TRTR/TSTR arm，没有覆盖缺失或重复。留存的 [finalizer 证据](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json) SHA-256 为 `2c7274a924b5e0673ba30878eb15de3c0e5d7cc78f930d8869054fc0177f4478`。单臂最长墙钟时间为 `17.1987` 秒，进程树 RSS 峰值为 `2.0042` GiB，CUDA 分配增量峰值为 `3.6476` GiB；所有资源门均通过。这补齐了原先 Adult 无法完成执行的缺口，并证明所选 Windows GPU profile 可以稳定运行。
+
+但科学准入仍未通过保持不变的稳定性门。Adult `income` 与 `fnlwgt` 通过，`native-country` 的五种子极差为 `0.24827`、最大单位偏差为 `0.19203`；Sick `class` 通过，`referral-source` 极差为 `0.05372`，`tsh` 极差为 `0.08630`。门限为 `0.05`。因此，剩余阻塞已被明确定位为预测器 profile 稳定性，而不是平台资源。P4 继续保持诊断状态并排除在 Official Results 之外。
+
 ## P4 剩余出口工作
 
 P4 在提升为非诊断用途前，还需要：
 
-1. 留存并审阅 Windows 来源运行时和数据集规模证据，不得在观察结果后修改固定稳定性门；
-2. 将再次出现的 sentinel 不稳定性作为科学 profile 问题诊断，并与 CPU/GPU 资源行为分开判断；
-3. 如果仍继续准入问题，则在同一个不可变 Windows profile 下完成 Adult/Sick 覆盖与五种子稳定性；
+1. 将再次出现的 Adult `native-country`、Sick `referral-source` 与 Sick `tsh` 不稳定性作为科学 profile 问题诊断，不得事后修改已观察的门；
+2. 在预注册任何后续协议前，先决定当前 XGB/KNN/TabPFN 预测器 profile 与单位比率门是否在科学上合理；
+3. 只有完成该科学决策后，才在一个新冻结身份下重跑完整覆盖与稳定性；
 4. 只有每一道必需门都通过后，才能重新考虑 profile 冻结与 Official Results 准入。
