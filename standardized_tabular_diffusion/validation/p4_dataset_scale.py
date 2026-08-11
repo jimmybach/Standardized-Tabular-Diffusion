@@ -116,7 +116,7 @@ def validate_pilot_manifest(
         raise P4DatasetScaleValidationError("P4 dataset-scale pilot fields have drifted")
     expected_pilot = {
         LEGACY_PILOT_PROFILE: ("p4-dataset-scale-admission-pilot", "0.1.1"),
-        WINDOWS_GPU_PILOT_PROFILE: ("p4-dataset-scale-windows-gpu-admission-pilot", "0.2.0"),
+        WINDOWS_GPU_PILOT_PROFILE: ("p4-dataset-scale-windows-gpu-admission-pilot", "0.2.1"),
     }[resolved_profile]
     if (
         payload["pilot_schema_version"] != "1.0.0"
@@ -137,8 +137,15 @@ def validate_pilot_manifest(
             or "TABPFN_ALLOW_CPU_LARGE_DATASET=1" not in amendments[0].get("change", "")
         ):
             raise P4DatasetScaleValidationError("Pilot amendment history is incomplete")
-    elif amendments:
-        raise P4DatasetScaleValidationError("The preregistered Windows GPU pilot has no amendments")
+    elif (
+        len(amendments) != 1
+        or amendments[0].get("from_version") != "0.2.0"
+        or "c0e6e72" not in amendments[0].get("trigger_run", "")
+        or "only to arms for which TabPFN is protocol-applicable" not in amendments[0].get(
+            "change", ""
+        )
+    ):
+        raise P4DatasetScaleValidationError("The Windows GPU pilot amendment history is incomplete")
     evaluator = load_p4_evaluator_profile()
     if (payload["evaluator_profile_id"], payload["evaluator_profile_version"]) != (
         evaluator["profile_id"],
@@ -467,6 +474,25 @@ def _run_arm(
         }
 
 
+def _cuda_resource_failures(
+    arm_name: str,
+    arm: dict[str, Any],
+    resource_limits: dict[str, Any],
+    *,
+    cuda_required: bool,
+) -> list[str]:
+    if "maximum_observed_cuda_peak_allocated_gib" not in resource_limits or not cuda_required:
+        return []
+    cuda_increase = arm.get("cuda_peak_allocation_increase_bytes")
+    if not isinstance(cuda_increase, (int, float)) or cuda_increase <= 0:
+        return [f"{arm_name}-cuda-execution-not-proven"]
+    if float(cuda_increase) / GIB > float(
+        resource_limits["maximum_observed_cuda_peak_allocated_gib"]
+    ):
+        return [f"{arm_name}-cuda-peak-allocated"]
+    return []
+
+
 def _run_task(
     task: dict[str, Any],
     *,
@@ -555,14 +581,14 @@ def _run_task(
             resource_limits["maximum_observed_process_tree_peak_rss_gib"]
         ):
             resource_failures.append(f"{name}-peak-rss")
-        if "maximum_observed_cuda_peak_allocated_gib" in resource_limits:
-            cuda_increase = arm.get("cuda_peak_allocation_increase_bytes")
-            if not isinstance(cuda_increase, (int, float)) or cuda_increase <= 0:
-                resource_failures.append(f"{name}-cuda-execution-not-proven")
-            elif float(cuda_increase) / GIB > float(
-                resource_limits["maximum_observed_cuda_peak_allocated_gib"]
-            ):
-                resource_failures.append(f"{name}-cuda-peak-allocated")
+        resource_failures.extend(
+            _cuda_resource_failures(
+                name,
+                arm,
+                resource_limits,
+                cuda_required=not high_cardinality,
+            )
+        )
     failures.extend(resource_failures)
     return {
         **task,

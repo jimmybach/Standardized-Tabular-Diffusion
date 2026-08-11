@@ -130,7 +130,7 @@ TSTR 输入是对真实训练集进行确定性的全行置换。它保留每一
 
 与该版本匹配的 TabPFN 官方文档建议使用 GPU，并说明 CPU 上只有约 1,000 行及以下的数据集可行；其大数据 CPU 选择加入开关被明确描述为会非常慢。因此，本次准入运行测量的是刻意严格、来源忠实的 CPU 边界，而不是预设其必然通过。参见 [TabPFN v2.1.1 文档](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start)；根据上游 changelog，PyPI 2.1.2 相对此版本没有源码变化。
 
-`p4-dataset-scale-windows-gpu-admission-pilot@0.2.0` 是面向仓库主要发布平台的独立预注册诊断 profile。它完整保留 67 个任务、整行置换 surrogate、预测器策略、TabEval 源码、TabPFN 检查点以及固定的 `0.05` 稳定性门。唯一变化是执行 profile：原生 Windows 11、Python 3.11、AutoGluon 1.4.0、XGBoost 3.0.3、TabPFN 2.1.2、PyTorch 2.8.0+cu128、CUDA 12.8 与被完整记录的 RTX 5080。每条适用 arm 都必须证明 CUDA 分配量出现正增量，并低于预注册的 15 GiB CUDA 分配上限。该 profile 不会把结论推广到其他 GPU。
+`p4-dataset-scale-windows-gpu-admission-pilot@0.2.1` 是面向仓库主要发布平台的独立预注册诊断 profile。它完整保留 67 个任务、整行置换 surrogate、预测器策略、TabEval 源码、TabPFN 检查点以及固定的 `0.05` 稳定性门。唯一变化是执行 profile：原生 Windows 11、Python 3.11、AutoGluon 1.4.0、XGBoost 3.0.3、TabPFN 2.1.2、PyTorch 2.8.0+cu128、CUDA 12.8 与被完整记录的 RTX 5080。每条按协议应运行 TabPFN 的 arm 都必须证明 CUDA 分配量出现正增量，并低于预注册的 15 GiB CUDA 分配上限；按协议必须省略 TabPFN 的高基数 arm 不受此门约束。版本 `0.2.1` 完整记录了首次 Adult shard 暴露 `0.2.0` 实现矛盾后的适用性修正；数据集、目标、种子、预测器策略、稳定性门与数值资源上限均未改变。该 profile 不会把结论推广到其他 GPU。
 
 ## 数据集规模准入结果
 
