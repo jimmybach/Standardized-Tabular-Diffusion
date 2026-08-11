@@ -1,10 +1,18 @@
 {
   "pilot_schema_version": "1.0.0",
   "pilot_id": "p4-dataset-scale-windows-gpu-admission-pilot",
-  "pilot_version": "0.2.0",
+  "pilot_version": "0.2.1",
   "status": "preregistered-diagnostic",
   "official_results_allowed": false,
-  "amendments": [],
+  "amendments": [
+    {
+      "from_version": "0.2.0",
+      "trigger_run": "local native-Windows shard attempt at repository commit c0e6e72",
+      "observation": "The first Adult shard correctly omitted TabPFN for education and occupation because both targets exceed ten classes, but the initial CUDA gate incorrectly required positive CUDA allocation from those XGB/KNN-only arms.",
+      "change": "Apply the positive CUDA-allocation gate only to arms for which TabPFN is protocol-applicable; retain zero-allocation evidence for high-cardinality arms that must omit TabPFN.",
+      "unchanged": "Datasets, target coverage, seeds, surrogate, predictor panel and high-cardinality omission policy, stability thresholds, and numerical resource limits."
+    }
+  ],
   "source_runtime_manifest": "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json",
   "evaluator_profile_id": "p4-utility-pilot",
   "evaluator_profile_version": "0.1.0",

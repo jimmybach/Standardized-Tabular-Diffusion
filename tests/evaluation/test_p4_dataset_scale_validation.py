@@ -49,9 +49,10 @@ def test_windows_gpu_pilot_reuses_the_schedule_and_fixed_scientific_gates() -> N
     )
 
     assert windows["pilot_id"] == "p4-dataset-scale-windows-gpu-admission-pilot"
-    assert windows["pilot_version"] == "0.2.0"
+    assert windows["pilot_version"] == "0.2.1"
     assert windows["official_results_allowed"] is False
-    assert windows["amendments"] == []
+    assert windows["amendments"][0]["from_version"] == "0.2.0"
+    assert "c0e6e72" in windows["amendments"][0]["trigger_run"]
     assert windows["coverage"] == legacy["coverage"]
     assert windows["stability"] == legacy["stability"]
     assert windows["predictor_policy"] == legacy["predictor_policy"]
@@ -59,6 +60,29 @@ def test_windows_gpu_pilot_reuses_the_schedule_and_fixed_scientific_gates() -> N
     assert windows["environment"]["tabpfn_cpu_large_dataset_opt_in"] is None
     assert windows["resources"]["maximum_observed_cuda_peak_allocated_gib"] == 15.0
     assert len(validation._expected_task_keys(windows)) == 67
+
+
+def test_cuda_resource_gate_applies_only_when_tabpfn_is_protocol_applicable() -> None:
+    limits = {"maximum_observed_cuda_peak_allocated_gib": 15.0}
+
+    assert validation._cuda_resource_failures(
+        "trtr",
+        {"cuda_peak_allocation_increase_bytes": 0},
+        limits,
+        cuda_required=False,
+    ) == []
+    assert validation._cuda_resource_failures(
+        "trtr",
+        {"cuda_peak_allocation_increase_bytes": 0},
+        limits,
+        cuda_required=True,
+    ) == ["trtr-cuda-execution-not-proven"]
+    assert validation._cuda_resource_failures(
+        "tstr",
+        {"cuda_peak_allocation_increase_bytes": 16 * 1024**3},
+        limits,
+        cuda_required=True,
+    ) == ["tstr-cuda-peak-allocated"]
 
 
 def test_schedule_covers_every_nonconstant_target_once_and_adds_only_preregistered_stability() -> None:
