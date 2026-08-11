@@ -2,7 +2,7 @@
 
 > **Development status:** this repository is currently a pre-alpha engineering workspace, not an official benchmark release. The existing `tabstruct-aligned-v1` output is a legacy compatibility path while the reviewed evaluation protocol is implemented. See the [development baseline](docs/DEVELOPMENT.md), [evaluation implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
 
-The primary release target is native **Windows 11 x86-64 with Python 3.11**. Linux/Python 3.11 remains a required secondary compatibility and upstream-parity environment. Historical Linux evidence is preserved but does not by itself establish Windows release support; see the [platform policy](docs/PLATFORM_SUPPORT.md) and its [Chinese translation](docs/PLATFORM_SUPPORT.zh-CN.md).
+The primary release family is **Windows x86-64 with Python 3.11**, and the exact release target is native **Windows 11 x86-64 with Python 3.11**. GitHub-hosted Windows CI establishes Windows-family compatibility but is not, by itself, Windows 11 qualification. Linux/Python 3.11 remains a required secondary compatibility and upstream-parity environment; see the [platform policy](docs/PLATFORM_SUPPORT.md) and its [Chinese translation](docs/PLATFORM_SUPPORT.zh-CN.md).
 
 This repository now includes a shared benchmarking layer on top of the upstream model code in:
 

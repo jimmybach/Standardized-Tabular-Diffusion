@@ -29,7 +29,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
     read_json,
     sha256_file,
 )
-from standardized_tabular_diffusion.platform_support import is_primary_release_environment
+from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 
 PROTOCOL_ID = "p2-shape-trend-source-parity-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -58,9 +58,9 @@ def _repository_commit() -> str:
         return "unknown"
 
 
-def _assert_primary_environment() -> None:
-    if not is_primary_release_environment():
-        raise AssertionError("Primary P2 release evidence requires Windows with Python 3.11")
+def _assert_primary_family_environment() -> None:
+    if not is_primary_release_family_environment():
+        raise AssertionError("Primary-family P2 evidence requires Windows with Python 3.11")
 
 
 def _fixture(profile: dict[str, Any]) -> pd.DataFrame:
@@ -205,7 +205,7 @@ def _locked_files() -> dict[str, str]:
     return {relative: sha256_file(REPO_ROOT / relative) for relative in paths}
 
 
-def run_validation(output: Path, *, require_primary_environment: bool = False) -> dict[str, Any]:
+def run_validation(output: Path, *, require_primary_family_environment: bool = False) -> dict[str, Any]:
     evidence: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": PROTOCOL_ID,
@@ -223,12 +223,12 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
             "pandas": _distribution_version("pandas"),
             "pyarrow": _distribution_version("pyarrow"),
             "sdmetrics": _distribution_version("sdmetrics"),
-            "primary_environment_required": require_primary_environment,
+            "primary_family_environment_required": require_primary_family_environment,
         },
     }
     try:
-        if require_primary_environment:
-            _assert_primary_environment()
+        if require_primary_family_environment:
+            _assert_primary_family_environment()
         source = verify_sdmetrics_source()
         dataset = load_dataset_profile(REPO_ROOT / "configs/datasets/adult-uci-2-v1.json")
         protocol = resolve_protocol("p2-shape-trend", "0.2.0")
@@ -318,9 +318,22 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate the P2 Shape/Trend vertical slice")
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-primary-family-environment",
+        "--require-primary-environment",
+        dest="require_primary_family_environment",
+        action="store_true",
+    )
     args = parser.parse_args()
-    print(json.dumps(run_validation(args.output, require_primary_environment=args.require_primary_environment), indent=2))
+    print(
+        json.dumps(
+            run_validation(
+                args.output,
+                require_primary_family_environment=args.require_primary_family_environment,
+            ),
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

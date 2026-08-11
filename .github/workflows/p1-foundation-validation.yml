@@ -46,7 +46,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            label: Windows / Python 3.11 / primary P1 contracts and identity
+            label: Hosted Windows / Python 3.11 / primary-family P1 contracts and identity
             tier: primary
           - os: ubuntu-latest
             label: Linux / Python 3.11 / secondary P1 contracts and identity
@@ -92,7 +92,7 @@ jobs:
         run: >-
           python -m standardized_tabular_diffusion.validation.p1_foundation
           --output "${{ runner.temp }}/p1-foundation-evidence.json"
-          --require-primary-environment
+          --require-primary-family-environment
 
       - name: Generate P1 secondary-compatibility evidence
         if: matrix.tier == 'secondary'

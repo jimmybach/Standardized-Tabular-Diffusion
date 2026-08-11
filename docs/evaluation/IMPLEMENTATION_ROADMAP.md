@@ -2,10 +2,10 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 through P3 passed their applicable diagnostic gates; historical Linux/Python 3.11 evidence is retained and Windows release qualification is active
-- Roadmap version: 0.3.1
+- Status: P1 through P3 passed their applicable diagnostic gates; hosted Windows/Python 3.11 family CI and historical Linux evidence are retained, while exact Windows 11 release qualification remains a separate gate
+- Roadmap version: 0.3.2
 - Last updated: 2026-08-11
-- Primary release environment: native Windows 11 x86-64 and Python 3.11; Linux/Python 3.11 is secondary compatibility
+- Primary release family: Windows x86-64 and Python 3.11; exact target: native Windows 11 x86-64 and Python 3.11; Linux/Python 3.11 is secondary compatibility
 
 ## 1. Purpose
 
@@ -88,7 +88,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Eight legacy, two P2, two P3, and eleven P4 records remain non-official |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
 | [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3 and P4 are selected explicitly, and P4 requires `--real-test` |
-| [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | Windows primary and Linux secondary CI; reference trees are excluded from default discovery and distribution |
+| [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | Hosted Windows primary-family and Linux secondary CI; reference trees are excluded from default discovery and distribution |
 | [`tests/evaluation/`](../../tests/evaluation) | Contract, structural, source-parity, Atomic Result, interruption, bundle, and CLI tests | P1 regression tests and P2 direct-authoritative tests are separated by dependency and marker boundaries |
 
 ### 3.3 Remaining gaps after P4 implementation
@@ -187,7 +187,7 @@ Tasks:
 - Make top-level imports lightweight; move optional model and metric imports behind factories with actionable missing-extra messages.
 - Establish formatting, linting, static typing, schema validation, unit-test, and documentation-link commands.
 - Record the current 51 repository tests as a migration baseline; classify each as unit, integration, smoke, or legacy-regression.
-- Maintain Windows/Python 3.11 primary CI and Linux/Python 3.11 secondary CI for metadata, schema, CLI help, core tests, lint, typing, and package builds.
+- Maintain hosted Windows/Python 3.11 primary-family CI and Linux/Python 3.11 secondary CI for metadata, schema, CLI help, core tests, lint, typing, and package builds. Do not present the hosted Windows Server image as exact Windows 11 evidence.
 - Treat `research_inputs/` as immutable review input and exclude it from packaging, ordinary test discovery, and runtime import paths.
 
 Exit evidence:
@@ -367,7 +367,7 @@ Tasks:
 - Replace old `implemented` inventory language with the approved model status dimensions and evidence records.
 - Update README, tutorials, examples, architecture, metric cards, dataset cards, troubleshooting, and contributor guidance in English; provide Chinese review translations where planned.
 - Add license, third-party notice, citation, contributor acknowledgement, security policy, code of conduct, and release checklist after their separate audits.
-- Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison on native Windows 11/Python 3.11; repeat portable surfaces on Linux/Python 3.11.
+- Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison in hosted Windows-family CI and on the exact native Windows 11/Python 3.11 target; repeat portable surfaces on Linux/Python 3.11.
 
 Exit evidence:
 
@@ -387,7 +387,7 @@ Exit evidence:
 | Source parity | Verify authoritative behavior | direct pinned call versus wrapper on shared fixtures |
 | State and negative | Prevent favorable silent failure | empty, constant, missing class, timeout, dependency failure |
 | Integration | Verify subsystem boundaries | profile -> table -> metric -> bundle -> validator |
-| End-to-end | Verify user workflows | external table and one real adapter on native Windows 11/Python 3.11; portable subset on Linux/Python 3.11 |
+| End-to-end | Verify user workflows | portable workflow in hosted Windows-family CI; external table and one real adapter on exact native Windows 11/Python 3.11; portable subset on Linux/Python 3.11 |
 | Determinism | Verify scientific identity | repeated seeds, process isolation, cache reuse, canonical serialization |
 | Migration | Preserve intentional compatibility | legacy reader, deprecation warnings, no official promotion |
 | Security and publication | Protect release artifacts | traversal, unsafe YAML, secret/path redaction, manifest allowlist |

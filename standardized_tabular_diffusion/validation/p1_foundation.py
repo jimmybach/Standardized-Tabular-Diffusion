@@ -32,7 +32,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
     read_yaml_safe,
     sha256_file,
 )
-from standardized_tabular_diffusion.platform_support import is_primary_release_environment
+from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 
 PROTOCOL_ID = "p1-contracts-identity-foundation-v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -46,9 +46,9 @@ def _distribution_version(distribution: str) -> str | None:
         return None
 
 
-def _assert_primary_environment() -> None:
-    if not is_primary_release_environment():
-        raise AssertionError("Primary P1 release evidence requires Windows with Python 3.11")
+def _assert_primary_family_environment() -> None:
+    if not is_primary_release_family_environment():
+        raise AssertionError("Primary-family P1 evidence requires Windows with Python 3.11")
 
 
 def _repository_commit() -> str:
@@ -185,7 +185,7 @@ def _locked_file_hashes() -> dict[str, str]:
     return {path.relative_to(REPO_ROOT).as_posix(): sha256_file(path) for path in sorted(paths)}
 
 
-def run_validation(output: Path, *, require_primary_environment: bool = False) -> dict[str, Any]:
+def run_validation(output: Path, *, require_primary_family_environment: bool = False) -> dict[str, Any]:
     evidence: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": PROTOCOL_ID,
@@ -202,12 +202,12 @@ def run_validation(output: Path, *, require_primary_environment: bool = False) -
             "python": platform.python_version(),
             "jsonschema": _distribution_version("jsonschema"),
             "pyyaml": _distribution_version("PyYAML"),
-            "primary_environment_required": require_primary_environment,
+            "primary_family_environment_required": require_primary_family_environment,
         },
     }
     try:
-        if require_primary_environment:
-            _assert_primary_environment()
+        if require_primary_family_environment:
+            _assert_primary_family_environment()
 
         schemas = list_schemas()
         for schema_name in schemas:
@@ -293,12 +293,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Validate the P1 evaluation contracts and identity foundation")
     parser.add_argument("--output", required=True, type=Path, help="Evidence JSON output path")
     parser.add_argument(
+        "--require-primary-family-environment",
         "--require-primary-environment",
+        dest="require_primary_family_environment",
         action="store_true",
-        help="Fail unless validation runs on the primary Linux/Python 3.11 environment",
+        help="Fail unless validation runs in the primary Windows/Python 3.11 family",
     )
     args = parser.parse_args()
-    evidence = run_validation(args.output, require_primary_environment=args.require_primary_environment)
+    evidence = run_validation(
+        args.output,
+        require_primary_family_environment=args.require_primary_family_environment,
+    )
     print(json.dumps(evidence, indent=2, sort_keys=True))
 
 

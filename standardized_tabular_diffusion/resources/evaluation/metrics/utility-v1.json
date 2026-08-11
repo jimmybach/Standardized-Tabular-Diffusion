@@ -59,7 +59,7 @@
       "source_parity_evidence": [],
       "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
       "reference_fixtures": ["hand-computable binary, multiclass, regression, weak-baseline, and denominator fixtures"],
-      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["Linux x86-64 with Python 3.11","Windows 11 x86-64 with Python 3.11 and RTX 5080 for the declared GPU profile"],"windows_release_qualification":"GPU source-runtime and complete dataset execution validated; repository-wide primary CI evidence remains pending"},
+      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["GitHub-hosted Windows Server with Python 3.11 for Windows-family compatibility","Linux x86-64 with Python 3.11","Windows 11 x86-64 with Python 3.11 and RTX 5080 for the declared GPU profile"],"windows_release_qualification":"exact Windows 11 GPU source-runtime and complete dataset execution validated for the declared profile; repository-wide exact-target qualification remains pending"},
       "unresolved_limitations": ["The complete Windows GPU run passed execution and resource gates but failed fixed stability gates for Adult native-country, Sick referral-source, and Sick tsh; predictor-profile review and Official Results admission remain pending."],
       "release_decision": "diagnostic-only"
     },

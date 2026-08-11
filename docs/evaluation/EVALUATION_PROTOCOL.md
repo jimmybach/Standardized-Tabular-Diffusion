@@ -25,7 +25,7 @@ Requirements marked as pilot-frozen are mandatory after their threshold or imple
 
 The initial protocol targets static, single-table synthetic data. The canonical public interface MAY accept CSV, Parquet, or an in-memory DataFrame, but every official run MUST resolve the input to the same versioned canonical table and schema.
 
-The primary release environment is native Windows 11 x86-64 with Python 3.11. Linux/Python 3.11 is a required secondary compatibility environment and MAY remain authoritative for a specifically declared Linux-only upstream parity protocol, but cannot establish Windows release support. Hardware-dependent results MUST additionally identify a compatible hardware profile. See the [Platform Support Policy](../PLATFORM_SUPPORT.md).
+The primary release family is Windows x86-64 with Python 3.11; the exact release target is native Windows 11 x86-64 with Python 3.11. GitHub-hosted Windows Server CI establishes family compatibility but MUST NOT be reported as exact Windows 11 qualification. Linux/Python 3.11 is a required secondary compatibility environment and MAY remain authoritative for a specifically declared Linux-only upstream parity protocol, but cannot establish Windows release support. Hardware-dependent results MUST additionally identify a compatible hardware profile. See the [Platform Support Policy](../PLATFORM_SUPPORT.md).
 
 ### 3.2 Evaluation subjects
 

@@ -656,7 +656,7 @@ def run_shard(
     shard_count: int,
     classifier_checkpoint: Path,
     regressor_checkpoint: Path,
-    require_primary_environment: bool = False,
+    require_declared_runtime_environment: bool = False,
     pilot_profile: str = LEGACY_PILOT_PROFILE,
 ) -> dict[str, Any]:
     """Execute one resumable matrix shard and retain failure evidence."""
@@ -688,7 +688,7 @@ def run_shard(
     atomic_write_json(output, evidence)
     started = time.perf_counter()
     try:
-        if require_primary_environment:
+        if require_declared_runtime_environment:
             p4_global_source._assert_runtime_environment(runtime_profile)
         if (
             resolved_profile == LEGACY_PILOT_PROFILE
@@ -1302,7 +1302,13 @@ def main() -> None:
     shard.add_argument("--shard-count", type=int, required=True)
     shard.add_argument("--classifier-checkpoint", type=Path, required=True)
     shard.add_argument("--regressor-checkpoint", type=Path, required=True)
-    shard.add_argument("--require-primary-environment", action="store_true")
+    shard.add_argument(
+        "--require-declared-runtime-environment",
+        "--require-primary-environment",
+        dest="require_declared_runtime_environment",
+        action="store_true",
+        help="Require the OS/Python identity declared by the selected pilot profile.",
+    )
     shard.add_argument(
         "--pilot-profile",
         choices=(LEGACY_PILOT_PROFILE, WINDOWS_GPU_PILOT_PROFILE),
@@ -1328,7 +1334,7 @@ def main() -> None:
             shard_count=args.shard_count,
             classifier_checkpoint=args.classifier_checkpoint.resolve(),
             regressor_checkpoint=args.regressor_checkpoint.resolve(),
-            require_primary_environment=args.require_primary_environment,
+            require_declared_runtime_environment=args.require_declared_runtime_environment,
             pilot_profile=args.pilot_profile,
         )
     else:

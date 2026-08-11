@@ -27,7 +27,7 @@ MUST、MUST NOT、SHOULD、SHOULD NOT 和 MAY 的含义与仓库质量标准中�
 
 初始协议面向静态单表合成数据。规范公共接口可以接受 CSV、Parquet 或内存中的 DataFrame，但每次官方运行必须将输入解析为相同的、带版本的规范表和 schema。
 
-主要发布环境为原生 Windows 11 x86-64 与 Python 3.11。Linux/Python 3.11 是必须保留的次要兼容环境；对明确声明的 Linux-only 上游等价协议，Linux 仍可作为权威环境，但不能证明 Windows 发布支持。依赖硬件的结果还必须标识兼容的硬件 profile。参见[平台支持政策](../PLATFORM_SUPPORT.zh-CN.md)。
+主要发布平台家族为 Windows x86-64 与 Python 3.11，精确发布目标为原生 Windows 11 x86-64 与 Python 3.11。GitHub 托管 Windows Server CI 只能证明平台家族兼容性，不得被表述为精确 Windows 11 准入。Linux/Python 3.11 是必须保留的次要兼容环境；对明确声明的 Linux-only 上游等价协议，Linux 仍可作为权威环境，但不能证明 Windows 发布支持。依赖硬件的结果还必须标识兼容的硬件 profile。参见[平台支持政策](../PLATFORM_SUPPORT.zh-CN.md)。
 
 ### 3.2 评测对象
 

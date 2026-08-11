@@ -2,10 +2,10 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 至 P3 已通过各自适用的诊断门；历史 Linux/Python 3.11 证据均已留存，Windows 发布准入正在进行
-- 路线图版本：0.3.1
+- 状态：P1 至 P3 已通过各自适用的诊断门；托管 Windows/Python 3.11 平台家族 CI 与历史 Linux 证据均保留，精确 Windows 11 发布准入仍是独立门
+- 路线图版本：0.3.2
 - 最后更新：2026-08-11
-- 主要发布环境：原生 Windows 11 x86-64 与 Python 3.11；Linux/Python 3.11 为次要兼容环境
+- 主要发布平台家族：Windows x86-64 与 Python 3.11；精确目标：原生 Windows 11 x86-64 与 Python 3.11；Linux/Python 3.11 为次要兼容环境
 
 ## 1. 目的
 
@@ -88,7 +88,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 八个旧记录、两个 P2、两个 P3 和十一个 P4 记录均非正式 |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
 | [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持默认；P3/P4 显式选择，P4 必须提供 `--real-test` |
-| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | Windows 主 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
+| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | 托管 Windows 主要平台家族 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
 | [`tests/evaluation/`](../../tests/evaluation) | 契约、结构、来源等价、Atomic Result、中断、bundle 与 CLI 测试 | P1 回归测试和 P2 直接权威测试按依赖与 marker 边界隔离 |
 
 ### 3.3 P4 实现后仍存在的缺口
@@ -187,7 +187,7 @@ tests/evaluation/
 - 让顶层导入保持轻量；把可选模型和指标导入移到工厂之后，并在缺少 extra 时给出可操作提示。
 - 建立格式化、lint、静态类型、schema 校验、单元测试和文档链接命令。
 - 把当前 51 个仓库测试记录为迁移基线；将每个测试分类为 unit、integration、smoke 或 legacy-regression。
-- 维护 Windows/Python 3.11 主 CI 和 Linux/Python 3.11 次要 CI，覆盖元数据、schema、CLI help、core 测试、lint、类型检查和打包。
+- 维护托管 Windows/Python 3.11 主要平台家族 CI 和 Linux/Python 3.11 次要 CI，覆盖元数据、schema、CLI help、core 测试、lint、类型检查和打包；不得把托管 Windows Server 镜像表述为精确 Windows 11 证据。
 - 把 `research_inputs/` 视为不可变审阅输入，排除在打包、普通测试发现和运行时导入路径之外。
 
 退出证据：
@@ -367,7 +367,7 @@ Privacy 任务：
 - 用已批准的模型状态维度和证据记录替换旧的 `implemented` inventory 语言。
 - 更新英文 README、教程、示例、架构、metric card、dataset card、故障排除和贡献者指南；按计划提供中文审阅翻译。
 - 在完成各自审计后，增加 license、third-party notice、citation、contributor acknowledgement、security policy、code of conduct 和发布 checklist。
-- 在原生 Windows 11/Python 3.11 上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison；并在 Linux/Python 3.11 上重复可移植表面。
+- 在托管 Windows 平台家族 CI 和精确原生 Windows 11/Python 3.11 目标上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison；并在 Linux/Python 3.11 上重复可移植表面。
 
 退出证据：
 
@@ -387,7 +387,7 @@ Privacy 任务：
 | Source parity | 校验权威行为 | 在共享 fixture 上直接锁定调用对比 wrapper |
 | State and negative | 防止有利的静默失败 | empty、constant、missing class、timeout、dependency failure |
 | Integration | 校验子系统边界 | profile -> table -> metric -> bundle -> validator |
-| End-to-end | 校验用户工作流 | 原生 Windows 11/Python 3.11 上的外部表和一个真实适配器；Linux/Python 3.11 上的可移植子集 |
+| End-to-end | 校验用户工作流 | 托管 Windows 平台家族 CI 中的可移植流程；精确原生 Windows 11/Python 3.11 上的外部表和一个真实适配器；Linux/Python 3.11 上的可移植子集 |
 | Determinism | 校验科学身份 | 重复 seed、进程隔离、cache reuse、canonical serialization |
 | Migration | 保留有意兼容性 | legacy reader、deprecation warning、不得正式升级 |
 | Security and publication | 保护发布 artifact | path traversal、unsafe YAML、secret/path redaction、manifest allowlist |

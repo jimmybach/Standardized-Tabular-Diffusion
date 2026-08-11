@@ -25,7 +25,7 @@ from standardized_tabular_diffusion.evaluation.utility import (
     p4_evaluator_profile_reference,
     validate_utility_profile,
 )
-from standardized_tabular_diffusion.platform_support import is_primary_release_environment
+from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -84,10 +84,10 @@ def _artifact(artifact_id: str, fingerprint: str, rows: int) -> dict[str, Any]:
     }
 
 
-def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
-    primary = is_primary_release_environment()
-    if require_primary_environment and not primary:
-        raise RuntimeError("P4 primary release evidence requires Windows with Python 3.11")
+def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, Any]:
+    primary = is_primary_release_family_environment()
+    if require_primary_family_environment and not primary:
+        raise RuntimeError("P4 primary-family evidence requires Windows with Python 3.11")
     dataset = load_dataset_profile(REPO_ROOT / "configs" / "datasets" / "adult-uci-2-v1.json")
     protocol = resolve_protocol("p4-utility", "0.4.0")
     evaluator = load_p4_evaluator_profile()
@@ -168,7 +168,7 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
         "environment": {
             "platform": f"{platform.system()} / {platform.machine()}",
             "python": platform.python_version(),
-            "primary_environment_required": require_primary_environment,
+            "primary_family_environment_required": require_primary_family_environment,
             "pandas": _package_version("pandas"),
             "scikit-learn": _package_version("scikit-learn"),
             "pyarrow": _package_version("pyarrow"),
@@ -194,9 +194,16 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-primary-family-environment",
+        "--require-primary-environment",
+        dest="require_primary_family_environment",
+        action="store_true",
+    )
     args = parser.parse_args()
-    payload = generate_evidence(require_primary_environment=args.require_primary_environment)
+    payload = generate_evidence(
+        require_primary_family_environment=args.require_primary_family_environment
+    )
     atomic_write_json(args.output, payload)
     if payload["status"] != "pass":
         raise SystemExit(1)
