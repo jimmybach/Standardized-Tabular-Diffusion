@@ -2,7 +2,7 @@
 
 ## 状态与声明边界
 
-P4 只有一个生成正式结果的实现：`p4-utility@0.5.0`，绑定 `p4-utility-stable@0.2.0` 评测器 profile。该实现已经完成，但仍处于诊断阶段，尚未冻结协议、获得发布支持或进入 Official Results。
+P4 只有一个生成结果的实现：已冻结的 `p4-utility@1.0.0`，绑定未改变的 `p4-utility-stable@0.2.0` 评测器 profile。这组指标只有在数据集、模型、comparison track、具体运行和精确执行环境分别通过独立准入时，才可以作为 Official Results 组件使用。P4 尚未获得仓库发布支持；本次冻结没有准入 Adult、Sick 或任何生成模型结果。
 
 TabEval 在提交 `dba19a4ee7aa391621cbeb464609285fd515dece` 的原始源码仍通过校验和锁定，用于来源追踪和内部源码等价测试。它不是第二个 CLI 选项、指标 profile 或榜单实现。面向用户的评测只使用下文的稳定适配器。
 
@@ -116,11 +116,15 @@ std-tabular-diffusion evaluate-table `
 
 P4 默认使用评测种子 `0,1,2,3,4`。任何覆盖值都会写入证据，且不会自动与榜单结果兼容。
 
-## 剩余准入工作
+## 冻结决定与剩余准入工作
 
-后继版本已经在观察结果后不改变门限的前提下，通过预注册的科学、执行、资源、拟合边界和证据门。P4 在冻结或进入 Official Results 前仍必须：
+单独的[冻结决定](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json)审阅了不可变证据，并在不改变科学身份的前提下完成冻结。P4 的精确资格仅限原生 Windows 11、Python 3.11 和 NVIDIA GeForce RTX 5080。其他硬件和操作系统在分别验证前仍属于兼容性诊断；不能把 RTX 5080 证据外推到其他 GPU。
 
-1. 审阅留存证据和不可变身份，决定是否冻结 profile；
-2. 确定支持的运行时与兼容性边界，不将 RTX 5080 证据推广到未经测试的硬件；
-3. 只通过独立准入决定更新生命周期与发布记录；
-4. 保持生成器质量评测和榜单发布不超出本次 identity-surrogate 验证的声明范围。
+发布具体 Official Result 前仍必须：
+
+1. 准入数据集及其精确版本、视图和划分；
+2. 准入模型适配器、comparison track 和源码来源；
+3. 在合格环境上验证该具体结果 bundle；
+4. 获得仓库发布支持，并在后续 P7 通过榜单快照准入。
+
+identity surrogate 验证的是评测器稳定性，不是生成器质量。历史失败候选仍保持失败证据。

@@ -1,0 +1,92 @@
+name: P5 High-Order Fidelity and Privacy Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p5-high-order-privacy-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p5-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "tests/evaluation/**"
+      - "tests/test_p5_retained_evidence.py"
+  pull_request:
+    paths:
+      - ".github/workflows/p5-high-order-privacy-validation.yml"
+      - "configs/datasets/**"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p5-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/evaluation/**"
+      - "standardized_tabular_diffusion/resources/evaluation/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "tests/evaluation/**"
+      - "tests/test_p5_retained_evidence.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p5-high-order-privacy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p5-high-order-privacy:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Hosted Windows / Python 3.11 / primary-family P5 diagnostic
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary P5 compatibility diagnostic
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install exact P5 diagnostic environment
+        run: |
+          python -m pip install ".[evaluation,dev]"
+          python -m pip check
+
+      - name: Run P5 formula, source-wrapper, bundle, registry, and CLI tests
+        run: >-
+          python -m pytest
+          tests/evaluation/test_p5_high_order_privacy.py
+          tests/evaluation/test_p5_evaluate_table.py
+          tests/evaluation/test_registry_and_profiles.py
+          tests/evaluation/test_contracts_and_schemas.py
+          tests/evaluation/test_bundle.py
+          tests/evaluation/test_cli_contracts.py
+          tests/test_p5_retained_evidence.py
+
+      - name: Lint and type-check P5 surfaces
+        run: |
+          python -m ruff check standardized_tabular_diffusion tests/evaluation tests/test_p5_retained_evidence.py
+          python -m mypy
+
+      - name: Build and inspect the distribution artifact
+        run: |
+          python -m build
+          python -m standardized_tabular_diffusion.validation.core_ci install-wheel --dist-directory dist
+          std-tabular-diffusion list-protocols > "${{ runner.temp }}/p5-packaged-protocols.json"
+          python -c "from standardized_tabular_diffusion.evaluation.high_order_privacy import load_p5_evaluator_profile; print(load_p5_evaluator_profile()['profile_id'])"

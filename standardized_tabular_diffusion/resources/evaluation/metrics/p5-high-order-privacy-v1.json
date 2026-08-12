@@ -1,0 +1,70 @@
+{
+  "registry_collection_schema_version": "1.0.0",
+  "common": {
+    "registry_schema_version": "1.0.0",
+    "metric_version": "1.0.0",
+    "dimension": "privacy-risk",
+    "definition_origin": "benchmark-derived",
+    "planned_leaderboard_role": "diagnostic",
+    "owner": "repository-maintainers",
+    "lifecycle_status": "unit-validated",
+    "review_record": {"registered_by":"p5-implementation","registered_at":"2026-08-12T00:00:00Z","reviews":[{"review_type":"definition-and-implementation","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","decision":"approved","evidence_ref":"docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"}]},
+    "source": {
+      "method_references": ["P5 High-order Fidelity and Empirical Privacy protocol"],
+      "upstream": "https://github.com/jimmybach/Standardized-Tabular-Diffusion",
+      "revision": "p5-high-order-privacy-1.0.0",
+      "implementation_symbol": "standardized_tabular_diffusion.evaluation.high_order_privacy.evaluate_high_order_privacy",
+      "source_authority": "local",
+      "implementation_mode": "local-reimplementation",
+      "retrieved_date": "2026-08-12",
+      "integrity_hash": null,
+      "license": "Repository license",
+      "attribution": ["C2ST, SDMetrics, and DOMIAS authors as identified per record"],
+      "known_deviations": []
+    },
+    "semantics": {
+      "supported_table_types": ["decoded real-train, heldout-real-test, and synthetic model views"],
+      "supported_column_types": ["continuous","integer","categorical","boolean"],
+      "required_dataset_profile_metadata": ["split.split_id","privacy"],
+      "input_view": "Strict canonical model view after P3-reviewed preprocessing; no synthetic repair",
+      "fitted_on": "train",
+      "output": {"shape":"scalar","unit":"score"},
+      "raw_range": {"minimum":0.0,"maximum":1.0},
+      "raw_direction": "minimize",
+      "target_value": null,
+      "undefined_conditions": ["Insufficient group support or singular density estimate."],
+      "minimum_support": {"real_train_rows":20,"real_test_rows":40,"synthetic_rows":20},
+      "randomness": {"deterministic_given_seed":true,"seed_source":"Evaluation Request evaluator_seeds"},
+      "default_parameters": {"evaluator_profile":"p5-high-order-privacy@0.1.0","default_evaluator_seeds":[0,1,2,3,4]},
+      "allowed_overrides": [],
+      "normalization": {"function":"none; transformations are separate metric identities","version":"1.0.0"},
+      "aggregation": {"rule":"Equal-seed descriptive mean; no cross-dimension or privacy total","version":"1.0.0"},
+      "uncertainty": {"procedure":"1000-replicate deterministic stratified bootstrap AUROC intervals"},
+      "failure_contribution_policy": {"computed":"Report without an overall-score contribution.","mathematically_undefined":"Zero weight and explicit state.","insufficient_support":"Zero weight and explicit state.","not_applicable":"Zero weight and explicit state.","implementation_failure":"Zero weight and partial bundle.","resource_failure":"Zero weight and partial bundle."}
+    },
+    "validation": {
+      "unit_test_evidence": ["tests/evaluation/test_p5_high_order_privacy.py"],
+      "boundary_test_evidence": ["tests/evaluation/test_p5_evaluate_table.py"],
+      "source_parity_evidence": [],
+      "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
+      "reference_fixtures": ["hand-computable collisions, SDMetrics DCR source comparison, and DOMIAS formula fixtures"],
+      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["Windows development environment with Python 3.11"]},
+      "unresolved_limitations": ["Adult and Sick sensitive/quasi-identifier reviews are not complete; attribute inference is excluded.","The P5 mixed-table DOMIAS adapter is not claimed as exact source parity."],
+      "release_decision": "diagnostic-only"
+    },
+    "lifecycle_evidence": {"definition_review":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["docs/evaluation/METRIC_SOURCE_REVIEW.md","docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"]},"implementation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/high_order_privacy.py"]},"unit_validation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["tests/evaluation/test_p5_high_order_privacy.py","tests/evaluation/test_p5_evaluate_table.py"]},"source_parity":null,"protocol_freeze":null,"release_approval":null},
+    "admission": {"official_results_allowed":false,"compatibility_version":"p5-high-order-privacy-0.1.0","reason":"Implemented and unit-validated diagnostic protocol; dataset threat-model review, pilot evidence, and protocol freeze remain separate gates."}
+  },
+  "records": [
+    {"metric_id":"std-c2st-rf-auroc","display_name":"C2ST Random-Forest AUROC","dimension":"high-order-fidelity","subdimension":"classifier-two-sample-test","description":"Raw heldout-real versus synthetic discriminator AUROC; chance target is 0.5.","source":{"method_references":["Lopez-Paz and Oquab, ICLR 2017"],"upstream":"https://arxiv.org/abs/1610.06545","known_deviations":["AUROC replaces the paper's primary accuracy statistic and is benchmark-derived."]},"semantics":{"raw_direction":"target","target_value":0.5}},
+    {"metric_id":"std-c2st-fidelity","display_name":"C2ST AUROC Fidelity Complement","dimension":"high-order-fidelity","subdimension":"classifier-two-sample-test","description":"Label-invariant 2*(1-max(AUROC,1-AUROC)); one is indistinguishable and zero is perfectly separable.","semantics":{"raw_direction":"maximize"}},
+    {"metric_id":"std-exact-train-collision-rate","display_name":"Exact Training Collision Rate","subdimension":"exact-copying","description":"Fraction of synthetic rows exactly equal to any real training row.","definition_origin":"benchmark-native"},
+    {"metric_id":"std-synthetic-internal-duplicate-rate","display_name":"Synthetic Internal Duplicate Rate","subdimension":"internal-duplication","description":"Fraction of synthetic rows beyond the first occurrence of each unique synthetic row.","definition_origin":"benchmark-native"},
+    {"metric_id":"sdmetrics-dcr-distribution","display_name":"SDMetrics Distance to Closest Record Distribution","subdimension":"distance-to-training","description":"Exact pinned SDMetrics per-synthetic-row DCR distribution.","definition_origin":"source-defined","source":{"method_references":["SDMetrics DCR source at ba8842f2ba04ce914f698cc1cf746ca12338ab0e"],"upstream":"https://github.com/sdv-dev/SDMetrics","revision":"ba8842f2ba04ce914f698cc1cf746ca12338ab0e","implementation_symbol":"sdmetrics.single_table.privacy.dcr_utils.calculate_dcr","source_authority":"official-repository","implementation_mode":"source-wrapper","integrity_hash":"140f36a0e893e4d4fbf45c824f19f4c6cc6c1736ffed387ce8ff6df924fb4c05","license":"MIT","attribution":["SDMetrics authors"]},"semantics":{"output":{"shape":"distribution","unit":"mixed-distance"},"raw_range":{"minimum":0.0,"maximum":1.0},"raw_direction":"distributional"}},
+    {"metric_id":"std-dcr-heldout-wasserstein","display_name":"Heldout-calibrated DCR Wasserstein Distance","subdimension":"distance-calibration","description":"Wasserstein distance between synthetic-to-train and heldout-to-train DCR distributions.","semantics":{"raw_range":{"minimum":0.0,"maximum":1.0}}},
+    {"metric_id":"domias-kde-attack-auroc","display_name":"DOMIAS KDE Membership Attack AUROC","subdimension":"membership-inference","description":"Black-box density-ratio membership-inference AUROC; higher is greater empirical attack risk.","definition_origin":"source-parameterized","source":{"method_references":["van Breugel et al., AISTATS 2023"],"upstream":"https://github.com/vanderschaarlab/DOMIAS","revision":"9527dab320f9d41372e1f67e0d5c2b80becfdd61","license":"MIT","attribution":["DOMIAS authors"],"known_deviations":["One-hot/standardization/PCA is a benchmark mixed-table adaptation, not exact source parity."]}},
+    {"metric_id":"domias-kde-attack-accuracy","display_name":"DOMIAS KDE Membership Attack Accuracy","subdimension":"membership-inference","description":"Official pooled-median-threshold attack accuracy under the declared threat model.","definition_origin":"source-parameterized"},
+    {"metric_id":"domias-kde-attack-advantage","display_name":"DOMIAS KDE Membership Attack Advantage","subdimension":"membership-inference","description":"Maximum TPR minus FPR across attack thresholds.","definition_origin":"benchmark-derived"},
+    {"metric_id":"domias-kde-tpr-at-fpr-01","display_name":"DOMIAS KDE TPR at FPR <= 1%","subdimension":"membership-inference","description":"Maximum attack true-positive rate at a false-positive rate no greater than one percent.","definition_origin":"benchmark-derived"}
+  ]
+}

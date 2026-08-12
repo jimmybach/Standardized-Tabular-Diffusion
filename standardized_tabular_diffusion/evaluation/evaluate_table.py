@@ -29,6 +29,13 @@ from standardized_tabular_diffusion.evaluation.contracts import (
     StageStatus,
     utc_timestamp,
 )
+from standardized_tabular_diffusion.evaluation.high_order_privacy import (
+    P5_DETAILS_ARTIFACT_PATH,
+    P5_METRICS,
+    HighOrderPrivacyError,
+    P5Outcome,
+    evaluate_high_order_privacy,
+)
 from standardized_tabular_diffusion.evaluation.schema import validate_instance
 from standardized_tabular_diffusion.evaluation.serialization import (
     content_fingerprint,
@@ -189,7 +196,7 @@ def _artifact(
     }
 
 
-def _atomic_parquet(outcome: ShapeTrendOutcome | ValidityOutcome | UtilityOutcome) -> bytes:
+def _atomic_parquet(outcome: ShapeTrendOutcome | ValidityOutcome | UtilityOutcome | P5Outcome) -> bytes:
     records = [result.to_dict() for result in outcome.atomic_results]
     for record in records:
         validate_instance("atomic-result", record)
@@ -531,9 +538,123 @@ def _utility_terminal_payloads(
             "test_used_for_fit": False,
         },
         "review": {
-            "status": "source-runtime-pilot-validated-p4-development",
+            "status": "p4-protocol-frozen-concrete-result-not-admitted",
             "official_results_allowed": False,
             "global_source_parity_claimed": False,
+            "reason": "Dataset, model, track, exact hardware, run, and release admission are independent of metric protocol freeze.",
+        },
+        "status": "finalized",
+    }
+    validate_instance("summary", summary)
+    validate_instance("metadata", metadata)
+    return summary, metadata
+
+
+def _p5_terminal_payloads(
+    request: EvaluationRequest,
+    profile: dict[str, Any],
+    outcome: P5Outcome,
+    *,
+    run_id: str,
+    started_at: str,
+    ended_at: str,
+    real_train_rows: int,
+    real_test_rows: int,
+    synthetic_rows: int,
+    artifact_refs: list[str],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    state_counts = Counter(result.state.value for result in outcome.atomic_results)
+    noncomputed = [result for result in outcome.atomic_results if result.state.value != "computed"]
+    terminal_status = "success" if not noncomputed else "partial"
+    summary = {
+        "summary_schema_version": "1.0.0",
+        "identity": {"run_id": run_id, "request_fingerprint": request.fingerprint},
+        "terminal_status": terminal_status,
+        "validity": {
+            "structural_gate": "passed",
+            "input_view": "strict-canonical-model-view",
+            "synthetic_repair_applied": False,
+        },
+        "dimensions": {
+            "high-order-fidelity": outcome.high_order_summary,
+            "privacy-risk": outcome.privacy_summary,
+        },
+        "local_utility": {},
+        "global_utility": {},
+        "privacy_risk": outcome.privacy_summary,
+        "efficiency": {},
+        "metric_state_counts": dict(sorted(state_counts.items())),
+        "denominator_counts": outcome.denominator_counts,
+        "warnings": sorted({warning for result in outcome.atomic_results for warning in result.warning_codes}),
+        "failures": [
+            {
+                "metric_id": result.metric_id,
+                "scope_id": result.scope_id,
+                "state": result.state.value,
+                "reason_code": result.reason_code,
+                "reason_detail": result.reason_detail,
+            }
+            for result in noncomputed
+        ],
+        "atomic_result_refs": [f"metrics.parquet#row={index}" for index in range(len(outcome.atomic_results))],
+        "aggregation": {
+            "implementation": "p5-separate-high-order-and-empirical-privacy-diagnostics",
+            "version": "1.0.0",
+            "reproducible_from_atomic_results": True,
+        },
+        "dataset_aggregation_eligible": False,
+    }
+    metadata = {
+        "metadata_schema_version": "1.0.0",
+        "identity": {"run_id": run_id, "request_fingerprint": request.fingerprint},
+        "protocol": request.protocol,
+        "dataset": request.dataset_profile,
+        "model": request.model or {"subject_type": request.subject_type, "model_id": "external"},
+        "implementation": {
+            "evaluation_subsystem": "p5-high-order-fidelity-empirical-privacy",
+            "metrics_executed": True,
+            "source": outcome.source,
+        },
+        "comparison_track": request.comparison_track,
+        "seeds": {"generation": request.generation_seed, "evaluators": list(request.evaluator_seeds)},
+        "evaluator": {"profile": request.evaluator_profile, "hardware_profile": request.hardware_profile},
+        "execution": {
+            "requested_action": "evaluate-table",
+            "started_at": started_at,
+            "ended_at": ended_at,
+            "terminal_phase": "report",
+            "run_status": terminal_status,
+            "requested_synthetic_rows": request.sample_artifact.get("row_count", real_train_rows),
+            "actual_synthetic_rows": synthetic_rows,
+            "resource_limits": request.resource_limits,
+            "interrupted": False,
+            "resume_ancestry": [],
+            "warning_codes": summary["warnings"],
+            "failure_category": None,
+            "failure_reason_code": None,
+            "artifact_refs": artifact_refs,
+        },
+        "coverage": {
+            "requested_metrics": list(request.metrics),
+            "computed": state_counts.get("computed", 0),
+            "states": dict(sorted(state_counts.items())),
+            "denominators": outcome.denominator_counts,
+        },
+        "provenance": {
+            "reference_artifact": request.reference_artifact,
+            "real_test_artifact": request.real_test_artifact,
+            "sample_artifact": request.sample_artifact,
+            "real_train_rows": real_train_rows,
+            "real_test_rows": real_test_rows,
+            "dataset_profile_status": profile["status"],
+            "original_synthetic_output_preserved": True,
+            "evaluation_repair_applied": False,
+            "formal_privacy_guarantee": False,
+        },
+        "review": {
+            "status": "unit-validated-p5-diagnostic",
+            "official_results_allowed": False,
+            "mixed_domias_source_parity_claimed": False,
         },
         "status": "finalized",
     }
@@ -567,7 +688,9 @@ def evaluate_table_to_bundle(
         raise TableEvaluationError("Synthetic table checksum differs from the Evaluation Request")
     if request.real_test_artifact is not None:
         if resolved_test_path is None:
-            raise TableEvaluationError("Evaluation Request declares real_test_artifact but no real_test_path was supplied")
+            raise TableEvaluationError(
+                "Evaluation Request declares real_test_artifact but no real_test_path was supplied"
+            )
         if sha256_file(resolved_test_path) != request.real_test_artifact["sha256"]:
             raise TableEvaluationError("Real test table checksum differs from the Evaluation Request")
     elif resolved_test_path is not None:
@@ -586,8 +709,9 @@ def evaluate_table_to_bundle(
     p2_metrics = {(item["metric_id"], item["metric_version"]) for item in P2_METRICS}
     p3_metrics = {(item["metric_id"], item["metric_version"]) for item in P3_METRICS}
     p4_metrics = {(item["metric_id"], item["metric_version"]) for item in P4_METRICS}
+    p5_metrics = {(item["metric_id"], item["metric_version"]) for item in P5_METRICS}
     if requested_metrics == p2_metrics:
-        phase: Literal["p2", "p3", "p4"] = "p2"
+        phase: Literal["p2", "p3", "p4", "p5"] = "p2"
         content_mode: Literal["strict", "preserve"] = "strict"
     elif requested_metrics == p3_metrics:
         phase = "p3"
@@ -597,10 +721,13 @@ def evaluate_table_to_bundle(
         content_mode = "strict"
         if request.real_test_artifact is None or resolved_test_path is None:
             raise TableEvaluationError("P4 Utility requires a checksum-bound held-out real test table")
+    elif requested_metrics == p5_metrics:
+        phase = "p5"
+        content_mode = "strict"
+        if request.real_test_artifact is None or resolved_test_path is None:
+            raise TableEvaluationError("P5 requires a checksum-bound held-out real test table")
     else:
-        raise TableEvaluationError(
-            "evaluate-table supports exactly the registered P2 Shape/Trend, P3 Validity, or P4 Utility metric set"
-        )
+        raise TableEvaluationError("evaluate-table supports exactly the registered P2, P3, P4, or P5 metric set")
 
     writer = IncompleteRunBundleWriter(output_dir)
     writer.create(request, environment=_environment(), producer=_producer())
@@ -639,9 +766,9 @@ def evaluate_table_to_bundle(
     stage_start = utc_timestamp()
     timer = time.perf_counter()
     try:
-        if phase == "p4":
+        if phase in {"p4", "p5"}:
             if resolved_test_path is None:
-                raise TableEvaluationError("P4 real test path was not resolved")
+                raise TableEvaluationError(f"{phase.upper()} real test path was not resolved")
             tables = validate_utility_tables(
                 reference_path,
                 resolved_test_path,
@@ -719,7 +846,7 @@ def evaluate_table_to_bundle(
 
     stage_start = utc_timestamp()
     timer = time.perf_counter()
-    outcome: ShapeTrendOutcome | ValidityOutcome | UtilityOutcome
+    outcome: ShapeTrendOutcome | ValidityOutcome | UtilityOutcome | P5Outcome
     try:
         if phase == "p2":
             if not isinstance(tables, ValidatedTables):
@@ -741,7 +868,7 @@ def evaluate_table_to_bundle(
             evaluation_action = "evaluate reviewed hard column rules and cross-column constraints"
             source_input = validity_outcome.source["dataset_validity_contract_sha256"]
             source_input_name = "validity-contract"
-        else:
+        elif phase == "p4":
             if not isinstance(tables, ValidatedUtilityTables):
                 raise TableEvaluationError("P4 resolved an incompatible structural table view")
             utility_outcome = evaluate_utility(request, dataset_profile, tables, run_id=run_id)
@@ -751,7 +878,24 @@ def evaluate_table_to_bundle(
             evaluation_action = "run Local Dummy/TRTR/TSTR and TabStruct-profile Global Utility over held-out real test"
             source_input = content_fingerprint(utility_outcome.source)
             source_input_name = "utility-source-profile"
-    except (SDMetricsBackendError, ShapeTrendError, ValidityError, UtilityError, ContractError) as exc:
+        else:
+            if not isinstance(tables, ValidatedUtilityTables):
+                raise TableEvaluationError("P5 resolved an incompatible structural table view")
+            p5_outcome = evaluate_high_order_privacy(request, dataset_profile, tables, run_id=run_id)
+            outcome = p5_outcome
+            details_path = P5_DETAILS_ARTIFACT_PATH
+            details_payload = p5_outcome.details
+            evaluation_action = "run C2ST, exact-row, pinned DCR, and DOMIAS empirical privacy diagnostics"
+            source_input = content_fingerprint(p5_outcome.source)
+            source_input_name = "p5-source-profile"
+    except (
+        SDMetricsBackendError,
+        ShapeTrendError,
+        ValidityError,
+        UtilityError,
+        HighOrderPrivacyError,
+        ContractError,
+    ) as exc:
         if isinstance(exc, SDMetricsSourceError):
             reason_code = "source_attestation_failure"
         elif isinstance(exc, SDMetricsBackendError):
@@ -760,6 +904,8 @@ def evaluate_table_to_bundle(
             reason_code = "validity_contract_failure"
         elif isinstance(exc, UtilityError):
             reason_code = "utility_contract_failure"
+        elif isinstance(exc, HighOrderPrivacyError):
+            reason_code = "p5_contract_failure"
         else:
             reason_code = "metric_contract_failure"
         failed = _stage(
@@ -771,6 +917,7 @@ def evaluate_table_to_bundle(
                 "p2": "run pinned SDMetrics properties and map every scope to Atomic Result",
                 "p3": "evaluate reviewed hard column rules and cross-column constraints",
                 "p4": "run Local and Global Utility over one held-out real test set",
+                "p5": "run high-order fidelity and empirical privacy diagnostics",
             }[phase],
             started_at=stage_start,
             ended_at=utc_timestamp(),
@@ -849,10 +996,25 @@ def evaluate_table_to_bundle(
             synthetic_rows=len(tables.synthetic),
             artifact_refs=artifact_refs,
         )
-    else:
+    elif isinstance(outcome, UtilityOutcome):
         if not isinstance(tables, ValidatedUtilityTables):
             raise TableEvaluationError("P4 terminal payload received an incompatible table view")
         summary, metadata = _utility_terminal_payloads(
+            request,
+            dataset_profile,
+            outcome,
+            run_id=run_id,
+            started_at=run_started,
+            ended_at=run_ended,
+            real_train_rows=len(tables.real_train),
+            real_test_rows=len(tables.real_test),
+            synthetic_rows=len(tables.synthetic),
+            artifact_refs=artifact_refs,
+        )
+    else:
+        if not isinstance(tables, ValidatedUtilityTables):
+            raise TableEvaluationError("P5 terminal payload received an incompatible table view")
+        summary, metadata = _p5_terminal_payloads(
             request,
             dataset_profile,
             outcome,
@@ -876,6 +1038,7 @@ def evaluate_table_to_bundle(
             "p2": "reproduce source property scores from Atomic Result contributions",
             "p3": "reproduce validity component scores from Atomic Result contributions",
             "p4": "reproduce Local retention and strict all-target Global Utility from Atomic Results",
+            "p5": "reproduce separate high-order and empirical privacy summaries from Atomic Results",
         }[phase],
         started_at=stage_start,
         ended_at=utc_timestamp(),
@@ -945,11 +1108,14 @@ def evaluate_table_to_bundle(
                 rights_classification="benchmark-generated",
             ),
             _artifact(
-                {"p2": "sdmetrics-details", "p3": "validity-details", "p4": "utility-details"}[phase],
+                {"p2": "sdmetrics-details", "p3": "validity-details", "p4": "utility-details", "p5": "p5-details"}[
+                    phase
+                ],
                 {
                     "p2": "verbatim source metric details",
                     "p3": "hard-rule validity evidence",
                     "p4": "raw-arm, support, predictor, ratio, and held-out-boundary evidence",
+                    "p5": "C2ST, exact-row, DCR, threat-model, and membership-attack evidence",
                 }[phase],
                 "application/json",
                 path=details_path,

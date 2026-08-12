@@ -35,6 +35,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
 from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 
 PROTOCOL_ID = "p1-contracts-identity-foundation-v1"
+PROTOCOL_PROFILE_ID = "development-p1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHA256_FIXTURE = "0" * 64
 
@@ -218,10 +219,12 @@ def run_validation(output: Path, *, require_primary_family_environment: bool = F
         assert legacy_registry and all(
             record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in legacy_registry
         )
-        assert all(record.payload["admission"]["official_results_allowed"] is False for record in registry)
+        assert all(record.payload["admission"]["official_results_allowed"] is False for record in legacy_registry)
 
         protocols = list_protocol_profiles()
-        assert protocols and all(profile.payload["official_results_allowed"] is False for profile in protocols)
+        p1_protocols = [profile for profile in protocols if profile.protocol_id == PROTOCOL_PROFILE_ID]
+        assert len(p1_protocols) == 1
+        assert p1_protocols[0].payload["official_results_allowed"] is False
         dataset_profiles = list_dataset_profiles(REPO_ROOT / "configs" / "datasets")
         assert dataset_profiles and all(profile.payload["official_eligible"] is False for profile in dataset_profiles)
 

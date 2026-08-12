@@ -29,17 +29,25 @@ pytestmark = [pytest.mark.core, pytest.mark.evaluation]
 
 def test_packaged_legacy_registry_is_explicitly_nonofficial() -> None:
     records = load_metric_registry()
-    assert len(records) == 23
+    assert len(records) == 40
     assert len({record.identity for record in records}) == len(records)
     legacy = [record for record in records if record.metric_id.startswith("legacy-")]
     assert len(legacy) == 8
     assert all(record.payload["lifecycle_status"] == "registered" for record in legacy)
     assert all(record.payload["planned_leaderboard_role"] == "legacy-diagnostic" for record in legacy)
-    assert all(not record.payload["admission"]["official_results_allowed"] for record in records)
+    assert all(
+        not record.payload["admission"]["official_results_allowed"]
+        for record in records
+        if record.payload["admission"]["compatibility_version"] != "p4-utility-1.0.0"
+    )
 
 
 def test_p2_metrics_are_source_parity_validated_but_not_officially_admitted() -> None:
-    records = [record for record in load_metric_registry() if record.metric_id.startswith("sdmetrics-")]
+    records = [
+        record
+        for record in load_metric_registry()
+        if record.metric_id in {"sdmetrics-column-shapes", "sdmetrics-column-pair-trends"}
+    ]
     assert {record.metric_id for record in records} == {
         "sdmetrics-column-shapes",
         "sdmetrics-column-pair-trends",
@@ -61,21 +69,22 @@ def test_p3_metrics_are_benchmark_native_unit_validated_and_nonofficial() -> Non
     assert all(record.payload["admission"]["official_results_allowed"] is False for record in records)
 
 
-def test_p4_metrics_are_unit_validated_diagnostics_without_source_parity_overclaim() -> None:
+def test_p4_metrics_are_protocol_frozen_with_independent_admission_boundaries() -> None:
     records = [
         record
         for record in load_metric_registry()
-        if record.payload["admission"]["compatibility_version"] == "p4-utility-0.5.0"
+        if record.payload["admission"]["compatibility_version"] == "p4-utility-1.0.0"
     ]
     assert len(records) == 11
     assert {record.payload["dimension"] for record in records} == {"local-utility", "global-utility"}
-    assert all(record.payload["lifecycle_status"] == "unit-validated" for record in records)
-    assert all(record.payload["validation"]["source_parity_evidence"] == [] for record in records)
-    assert all(record.payload["admission"]["official_results_allowed"] is False for record in records)
+    assert all(record.payload["lifecycle_status"] == "protocol-frozen" for record in records)
+    assert all(record.payload["validation"]["source_parity_evidence"] for record in records)
+    assert all(record.payload["admission"]["official_results_allowed"] is True for record in records)
+    assert all(record.payload["validation"]["release_decision"] == "pending" for record in records)
 
 
 def test_lifecycle_cannot_advance_without_cumulative_evidence() -> None:
-    payload = load_metric_registry()[0].to_dict()
+    payload = next(record for record in load_metric_registry() if record.metric_id.startswith("legacy-")).to_dict()
     payload["lifecycle_status"] = "unit-validated"
     with pytest.raises(MetricRegistryError, match="definition_review"):
         validate_metric_record(payload)
@@ -92,7 +101,7 @@ def test_lifecycle_cannot_advance_without_cumulative_evidence() -> None:
 
 
 def test_official_admission_requires_protocol_freeze_and_matching_role() -> None:
-    payload = load_metric_registry()[0].to_dict()
+    payload = next(record for record in load_metric_registry() if record.metric_id.startswith("legacy-")).to_dict()
     payload["admission"]["official_results_allowed"] = True
     with pytest.raises(MetricRegistryError, match="protocol-frozen"):
         validate_metric_record(payload)
@@ -180,16 +189,18 @@ def test_safe_yaml_loader_rejects_executable_constructor(tmp_path: Path) -> None
         load_protocol_profile(path)
 
 
-def test_packaged_protocols_resolve_exact_versions_and_are_nonofficial() -> None:
+def test_packaged_protocols_resolve_exact_versions_and_admission_states() -> None:
     profiles = list_protocol_profiles()
     assert {profile.identity for profile in profiles} == {
         ("development-p1", "0.1.0"),
         ("legacy-tabstruct-aligned", "1.0.0-legacy"),
         ("p2-shape-trend", "0.2.0"),
         ("p3-validity", "0.3.0"),
-        ("p4-utility", "0.5.0"),
+        ("p4-utility", "1.0.0"),
+        ("p5-high-order-privacy", "0.1.0"),
     }
-    assert all(not profile.payload["official_results_allowed"] for profile in profiles)
+    official = [profile.identity for profile in profiles if profile.payload["official_results_allowed"]]
+    assert official == [("p4-utility", "1.0.0")]
 
 
 def test_draft_protocol_cannot_claim_official_results(tmp_path: Path) -> None:

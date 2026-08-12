@@ -1,0 +1,16 @@
+{
+  "decision_schema_version": "1.0.0",
+  "decision": "approve-protocol-freeze",
+  "decided_at": "2026-08-12T00:00:00Z",
+  "protocol": {"protocol_id":"p4-utility","protocol_version":"1.0.0"},
+  "scientific_identity": {"evaluator_profile_id":"p4-utility-stable","evaluator_profile_version":"0.2.0","changed_from_validated_successor":false},
+  "validated_environment": {"operating_system":"Windows 11 x86-64","python":"3.11","gpu":"NVIDIA GeForce RTX 5080"},
+  "gates": {"complete_tasks":"67/67","complete_arms":"134/134","five_seed_identity_sentinels":"6/6 exact 1.0","resource_gates":"pass","source_runtime_pilot":"pass"},
+  "evidence": [
+    {"path":"docs/evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json","sha256":"19d55b260eaa5a3d1e522d1a1cabeadf4e952698a833e529576fd64b71797721"},
+    {"path":"docs/evidence/evaluation/p4-global-source-windows-gpu-c0e6e72.json","sha256":"3f3033348c075a7b2f2584eaad2bd50d419c7aa12391af320c6bec75ecab1306"},
+    {"path":"docs/evidence/evaluation/p4-global-source-runtime-run-31057073762.json","sha256":"1ca205c3fbad6c6e80cd275330dae00edda5dfcad7efe229f4fcb285b9d63596"}
+  ],
+  "admission": {"metric_components_allowed":true,"dataset_admission_required":true,"model_admission_required":true,"comparison_track_admission_required":true,"exact_environment_qualification_required":true,"adult_or_sick_admitted_by_this_decision":false,"generator_quality_assessed":false},
+  "claim_boundary": "This decision freezes the unchanged P4 metric protocol for conditional Official Results use. It does not admit a dataset, model, run, or unvalidated hardware environment and does not assess generator quality."
+}

@@ -410,6 +410,7 @@ files = [
   "standardized_tabular_diffusion/evaluation/contracts.py",
   "standardized_tabular_diffusion/evaluation/backends/sdmetrics.py",
   "standardized_tabular_diffusion/evaluation/evaluate_table.py",
+  "standardized_tabular_diffusion/evaluation/high_order_privacy.py",
   "standardized_tabular_diffusion/evaluation/profiles.py",
   "standardized_tabular_diffusion/evaluation/registry.py",
   "standardized_tabular_diffusion/evaluation/schema.py",

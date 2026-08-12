@@ -1049,9 +1049,10 @@ def _validate_final_atomic_results(
     if requested == p4_requested:
         local_summary = summary["local_utility"]
         global_summary = summary["global_utility"]
-        if summary["dimensions"].get("local-utility") != local_summary or summary["dimensions"].get(
-            "global-utility"
-        ) != global_summary:
+        if (
+            summary["dimensions"].get("local-utility") != local_summary
+            or summary["dimensions"].get("global-utility") != global_summary
+        ):
             raise BundleError("P4 canonical Local/Global Utility summaries differ from dimensions")
         if request.real_test_artifact is None:
             raise BundleError("P4 finalized bundles require a checksum-bound held-out real test artifact")
@@ -1072,9 +1073,11 @@ def _validate_final_atomic_results(
         }:
             raise BundleError("P4 utility details do not prove the held-out-test boundary")
         profile_ref = details.get("evaluator_profile")
-        if not isinstance(profile_ref, dict) or {
-            key: profile_ref.get(key) for key in ("profile_id", "profile_version", "sha256")
-        } != request.evaluator_profile:
+        if (
+            not isinstance(profile_ref, dict)
+            or {key: profile_ref.get(key) for key in ("profile_id", "profile_version", "sha256")}
+            != request.evaluator_profile
+        ):
             raise BundleError("P4 details evaluator profile differs from the immutable request")
 
         local_runs = details.get("local_runs")
@@ -1088,9 +1091,7 @@ def _validate_final_atomic_results(
             raise BundleError("P4 Local Utility summary declares an unknown primary metric")
         test_fingerprints = {run.get("test_fingerprint") for run in local_runs}
         if test_fingerprints != {request.real_test_artifact["sha256"]}:
-            raise BundleError(
-                "P4 Local arms do not attest the checksum-bound held-out real test artifact"
-            )
+            raise BundleError("P4 Local arms do not attest the checksum-bound held-out real test artifact")
         computed_local_retentions: list[AtomicResult] = []
         for run in local_runs:
             required_run = {
@@ -1120,8 +1121,10 @@ def _validate_final_atomic_results(
                 if atom.weight != 0 or atom.aggregate_contribution is not None:
                     raise BundleError("P4 raw Local arms must not contribute directly to aggregation")
                 if atom.state.value == "computed":
-                    if detail_value is None or atom.raw_value is None or not math.isclose(
-                        float(detail_value), atom.raw_value, rel_tol=1e-12, abs_tol=1e-12
+                    if (
+                        detail_value is None
+                        or atom.raw_value is None
+                        or not math.isclose(float(detail_value), atom.raw_value, rel_tol=1e-12, abs_tol=1e-12)
                     ):
                         raise BundleError("P4 Local raw-arm detail differs from its Atomic Result")
                 elif detail_value is not None:
@@ -1225,22 +1228,22 @@ def _validate_final_atomic_results(
                     raise BundleError("P4 Global fit-boundary evidence is malformed")
                 if (
                     fit_evidence["training_row_order"] != "lexicographic-all-model-columns-v1"
-                    or fit_evidence["split_implementation"]
-                    != "autogluon.core.utils.utils.generate_train_test_split"
+                    or fit_evidence["split_implementation"] != "autogluon.core.utils.utils.generate_train_test_split"
                     or fit_evidence["seed"] != run["seed"]
                     or fit_evidence["task_type"] != run["task_type"]
                     or fit_evidence["real_test_used_for_fit"] is not False
                 ):
                     raise BundleError("P4 Global fit-boundary identity differs from the run")
                 row_fields = ("input_rows", "fit_train_rows", "tuning_rows")
-                if any(
-                    isinstance(fit_evidence[field], bool)
-                    or not isinstance(fit_evidence[field], int)
-                    or fit_evidence[field] < 1
-                    for field in row_fields
-                ) or fit_evidence["fit_train_rows"] + fit_evidence["tuning_rows"] != fit_evidence[
-                    "input_rows"
-                ]:
+                if (
+                    any(
+                        isinstance(fit_evidence[field], bool)
+                        or not isinstance(fit_evidence[field], int)
+                        or fit_evidence[field] < 1
+                        for field in row_fields
+                    )
+                    or fit_evidence["fit_train_rows"] + fit_evidence["tuning_rows"] != fit_evidence["input_rows"]
+                ):
                     raise BundleError("P4 Global fit-boundary row counts are invalid")
                 if (
                     isinstance(fit_evidence["holdout_fraction"], bool)
@@ -1288,9 +1291,7 @@ def _validate_final_atomic_results(
             if ratio_atom is None or ratio_atom.state.value != run["state"]:
                 raise BundleError("P4 Global ratio detail differs from its Atomic Result state")
             if ratio_atom.state.value == "computed":
-                if set(fit_maps) != {"trtr", "tstr"} or any(
-                    fit_maps[arm] is None for arm in ("trtr", "tstr")
-                ):
+                if set(fit_maps) != {"trtr", "tstr"} or any(fit_maps[arm] is None for arm in ("trtr", "tstr")):
                     raise BundleError("A computed P4 Global ratio requires both fit-boundary records")
                 try:
                     reconstructed = global_target_ratio(
@@ -1354,6 +1355,185 @@ def _validate_final_atomic_results(
             or denominator_counts.get("global_computed_target_seed_ratios") != computed_global
         ):
             raise BundleError("P4 denominator evidence differs across Atomic Results, details, summary, or metadata")
+
+    from standardized_tabular_diffusion.evaluation.high_order_privacy import (
+        C2ST_AUROC_METRIC_ID,
+        C2ST_FIDELITY_METRIC_ID,
+        DCR_CALIBRATION_METRIC_ID,
+        DOMIAS_ACCURACY_METRIC_ID,
+        DOMIAS_ADVANTAGE_METRIC_ID,
+        DOMIAS_AUROC_METRIC_ID,
+        DOMIAS_TPR_METRIC_ID,
+        EXACT_TRAIN_COLLISION_METRIC_ID,
+        P5_METRICS,
+        SDMETRICS_DCR_METRIC_ID,
+        SYNTHETIC_DUPLICATE_METRIC_ID,
+    )
+
+    p5_requested = {(item["metric_id"], item["metric_version"]) for item in P5_METRICS}
+    if requested == p5_requested:
+        if request.real_test_artifact is None or request.evaluator_profile is None:
+            raise BundleError("P5 requires checksum-bound real test and evaluator profile identities")
+        high_order = summary["dimensions"].get("high-order-fidelity")
+        privacy = summary["privacy_risk"]
+        if not isinstance(high_order, dict) or summary["dimensions"].get("privacy-risk") != privacy:
+            raise BundleError("P5 canonical high-order/privacy summaries differ from dimensions")
+        if (
+            high_order.get("overall_fidelity_score") is not None
+            or privacy.get("overall_privacy_score") is not None
+            or privacy.get("formal_privacy_guarantee") is not False
+        ):
+            raise BundleError("P5 must not emit an overall score or formal privacy guarantee")
+        details_path = path.parent / "artifacts" / "p5-details.json"
+        try:
+            details = read_json(details_path)
+        except (OSError, ValueError, SerializationError) as exc:
+            raise BundleError(f"Cannot validate P5 details: {exc}") from exc
+        if not isinstance(details, dict) or details.get("p5_details_schema_version") != "1.0.0":
+            raise BundleError("P5 details use an invalid contract")
+        expected_boundary = {
+            "real_train_transform_fit_allowed": True,
+            "real_test_transform_fit_allowed": False,
+            "synthetic_transform_fit_allowed": False,
+            "domias_auxiliary_reference_fit_only": True,
+            "synthetic_repair_applied": False,
+        }
+        if details.get("input_boundary") != expected_boundary:
+            raise BundleError("P5 details do not prove the declared fit boundaries")
+        profile_ref = details.get("evaluator_profile")
+        if (
+            not isinstance(profile_ref, dict)
+            or {key: profile_ref.get(key) for key in ("profile_id", "profile_version", "sha256")}
+            != request.evaluator_profile
+        ):
+            raise BundleError("P5 details evaluator profile differs from the immutable request")
+        if details.get("claim_boundary") != (
+            "Empirical diagnostics only; no differential-privacy or other formal privacy guarantee."
+        ):
+            raise BundleError("P5 empirical privacy claim boundary is missing")
+        high_details = details.get("high_order")
+        privacy_details = details.get("privacy")
+        if (
+            not isinstance(high_details, dict)
+            or not isinstance(privacy_details, dict)
+            or high_details.get("summary") != high_order
+            or privacy_details.get("summary") != privacy
+        ):
+            raise BundleError("P5 detail summaries differ from summary.json")
+        threat = privacy_details.get("domias_threat_model")
+        if (
+            not isinstance(threat, dict)
+            or threat.get("model_access") != "none"
+            or not all(
+                threat.get(key)
+                for key in (
+                    "attacker_knowledge",
+                    "member_definition",
+                    "nonmember_definition",
+                    "score",
+                    "higher_score_means",
+                    "representation",
+                )
+            )
+        ):
+            raise BundleError("P5 DOMIAS output lacks a complete threat model")
+
+        by_metric: dict[str, list[AtomicResult]] = {
+            metric_id: [result for result in results if result.metric_id == metric_id] for metric_id, _ in p5_requested
+        }
+        seeds = len(request.evaluator_seeds)
+        required_counts = {
+            C2ST_AUROC_METRIC_ID: seeds,
+            C2ST_FIDELITY_METRIC_ID: seeds,
+            EXACT_TRAIN_COLLISION_METRIC_ID: 1,
+            SYNTHETIC_DUPLICATE_METRIC_ID: 1,
+            SDMETRICS_DCR_METRIC_ID: 1,
+            DCR_CALIBRATION_METRIC_ID: 1,
+            DOMIAS_AUROC_METRIC_ID: seeds,
+            DOMIAS_ACCURACY_METRIC_ID: seeds,
+            DOMIAS_ADVANTAGE_METRIC_ID: seeds,
+            DOMIAS_TPR_METRIC_ID: seeds,
+        }
+        if any(len(by_metric[metric_id]) != count for metric_id, count in required_counts.items()):
+            raise BundleError("P5 Atomic Results do not cover every required metric scope")
+        if any(result.weight != 0 or result.aggregate_contribution is not None for result in results):
+            raise BundleError("P5 diagnostics must not contribute to an undeclared overall score")
+
+        def computed_mean(metric_id: str) -> float | None:
+            values = [
+                result.raw_value
+                for result in by_metric[metric_id]
+                if result.state.value == "computed" and result.raw_value is not None
+            ]
+            return sum(values) / len(values) if values else None
+
+        mean_fields = {
+            C2ST_AUROC_METRIC_ID: (high_order, "c2st_raw_auroc_mean"),
+            C2ST_FIDELITY_METRIC_ID: (high_order, "c2st_fidelity_mean"),
+            DOMIAS_AUROC_METRIC_ID: (privacy, "domias_attack_auroc_mean"),
+            DOMIAS_ACCURACY_METRIC_ID: (privacy, "domias_attack_accuracy_mean"),
+            DOMIAS_ADVANTAGE_METRIC_ID: (privacy, "domias_attack_advantage_mean"),
+            DOMIAS_TPR_METRIC_ID: (privacy, "domias_tpr_at_fpr_01_mean"),
+        }
+        for metric_id, (section, key) in mean_fields.items():
+            expected = computed_mean(metric_id)
+            observed = section.get(key)
+            if expected is None:
+                if observed is not None:
+                    raise BundleError(f"P5 {key} must be null without computed Atomic Results")
+            elif not isinstance(observed, (int, float)) or not math.isclose(
+                expected, float(observed), rel_tol=1e-12, abs_tol=1e-12
+            ):
+                raise BundleError(f"P5 {key} is not reproducible from Atomic Results")
+        exact = privacy_details.get("exact_rows")
+        if not isinstance(exact, dict):
+            raise BundleError("P5 exact-row evidence is malformed")
+        synthetic_rows = exact.get("synthetic_rows")
+        collision_count = exact.get("train_collision_count")
+        duplicate_count = exact.get("synthetic_duplicate_count")
+        if (
+            any(
+                isinstance(value, bool) or not isinstance(value, int) or value < 0
+                for value in (synthetic_rows, collision_count, duplicate_count)
+            )
+            or not isinstance(synthetic_rows, int)
+            or synthetic_rows <= 0
+        ):
+            raise BundleError("P5 exact-row evidence is malformed")
+        assert isinstance(collision_count, int) and isinstance(duplicate_count, int)
+        exact_values = {
+            EXACT_TRAIN_COLLISION_METRIC_ID: collision_count / synthetic_rows,
+            SYNTHETIC_DUPLICATE_METRIC_ID: duplicate_count / synthetic_rows,
+        }
+        for metric_id, expected in exact_values.items():
+            atom = by_metric[metric_id][0]
+            if atom.raw_value is None or not math.isclose(expected, atom.raw_value, rel_tol=1e-12, abs_tol=1e-12):
+                raise BundleError("P5 exact-row detail does not reproduce its Atomic Result")
+        dcr = privacy_details.get("dcr")
+        if not isinstance(dcr, dict):
+            raise BundleError("P5 DCR detail is missing")
+        for key in ("synthetic_to_train", "heldout_to_train"):
+            block = dcr.get(key)
+            if (
+                not isinstance(block, dict)
+                or not isinstance(block.get("values"), list)
+                or not isinstance(block.get("summary"), dict)
+            ):
+                raise BundleError("P5 DCR distributions are incomplete")
+        calibration_atom = by_metric[DCR_CALIBRATION_METRIC_ID][0]
+        calibration = dcr.get("wasserstein_distance")
+        if isinstance(calibration, bool) or not isinstance(calibration, (int, float)):
+            raise BundleError("P5 DCR calibration is not finite numeric evidence")
+        if calibration_atom.raw_value is None or not math.isclose(
+            calibration_atom.raw_value,
+            float(calibration),
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        ):
+            raise BundleError("P5 DCR calibration differs from its Atomic Result")
+        denominator_counts = summary.get("denominator_counts")
+        if denominator_counts != metadata.get("coverage", {}).get("denominators"):
+            raise BundleError("P5 denominator evidence differs between summary and metadata")
 
 
 def _validate_final_checksums(bundle_root: Path) -> None:
