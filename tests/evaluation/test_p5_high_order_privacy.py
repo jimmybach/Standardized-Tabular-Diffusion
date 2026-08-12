@@ -111,6 +111,7 @@ def test_sick_source_boolean_tokens_are_losslessly_canonicalized() -> None:
 
 
 def test_sdmetrics_dcr_wrapper_matches_exact_upstream_null_and_zero_range_fixture() -> None:
+    pytest.importorskip("sdmetrics")
     from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr as upstream
 
     dataset = pd.DataFrame({"number": [1.0, 2.0, np.nan], "category": ["a", "b", None]})
@@ -132,6 +133,7 @@ def test_domias_formula_and_source_metrics_are_hand_computable() -> None:
 
 
 def test_p5_is_deterministic_preserves_boundaries_and_emits_no_overall_score(adult_profile) -> None:
+    pytest.importorskip("sdmetrics")
     train, test, synthetic = p5_frames(adult_profile)
     tables = validate_utility_tables(
         train,
