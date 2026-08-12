@@ -1,0 +1,38 @@
+{
+  "source_manifest_schema_version": "1.0.0",
+  "retrieved_date": "2026-08-12",
+  "sources": {
+    "c2st": {
+      "paper": "https://arxiv.org/abs/1610.06545",
+      "paper_sha256": "3af7178ffe9848db9c3e7d902acc622f19cec4712dd368ca228a0fbca060d8ff",
+      "citation": "Lopez-Paz and Oquab, Revisiting Classifier Two-Sample Tests, ICLR 2017",
+      "license": "paper citation; benchmark implementation is repository code",
+      "boundary": "The paper defines classifier two-sample testing; AUROC and its label-invariant fidelity complement are benchmark-derived extensions."
+    },
+    "sdmetrics_dcr": {
+      "repository": "https://github.com/sdv-dev/SDMetrics",
+      "revision": "ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
+      "distribution_version": "0.28.3.dev0",
+      "implementation_symbol": "sdmetrics.single_table.privacy.dcr_utils.calculate_dcr",
+      "source_file_sha256": "140f36a0e893e4d4fbf45c824f19f4c6cc6c1736ffed387ce8ff6df924fb4c05",
+      "license": "MIT",
+      "execution": "checksum-attested installed official package source"
+    },
+    "domias": {
+      "paper": "https://proceedings.mlr.press/v206/breugel23a.html",
+      "paper_sha256": "b9b2be03dd794263b156e630332563e0f897cf0f63cb4cd4fe211a81aebe95bf",
+      "repository": "https://github.com/vanderschaarlab/DOMIAS",
+      "revision": "9527dab320f9d41372e1f67e0d5c2b80becfdd61",
+      "evaluator_blob": "195bfb",
+      "metric_blob": "00afd",
+      "license": "MIT",
+      "boundary": "Density-ratio score, median-threshold accuracy, and AUROC reproduce the official formula; mixed-table encoding and PCA are a named benchmark adaptation."
+    },
+    "alaa_fidelity": {
+      "paper": "https://proceedings.mlr.press/v162/alaa22a.html",
+      "paper_sha256": "297aee43edb11060e4b10687a32badc5014e23531100c20311b0707ac589614c",
+      "citation": "Alaa et al., How Faithful is your Synthetic Data?, ICML 2022",
+      "status": "reviewed-not-selected"
+    }
+  }
+}

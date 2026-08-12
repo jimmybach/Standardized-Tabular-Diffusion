@@ -79,25 +79,26 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 | [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | Dataset/protocol loading, exact identity and legacy metadata import | P1 active path; duplicate identities and inconsistent profile references fail closed |
 | [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | Transactional Run Result writer, finalizer, and cross-file validator | P1 incomplete bundles remain supported; P2/P3 reconstruct scientific summaries and publish finalized status as the last atomic commit marker |
 | [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame canonical resolver and protocol-specific structural gates | P2 retains strict source-compatible content checks; P3 preserves safely representable content violations for Validity scoring |
-| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
-| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 active path; source aggregates are reconstructed and no combined Fidelity score is emitted |
+| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend and DCR backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
+| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py), [`evaluation/high_order_privacy.py`](../../standardized_tabular_diffusion/evaluation/high_order_privacy.py), and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 and P5 active paths; high-order fidelity and empirical privacy stay separate and no overall score is emitted |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | Closed hard-rule language, per-column/per-constraint Atomic Results, and Validity aggregation | P3 active diagnostic path; arbitrary code and inferred hard rules are prohibited, original output is not repaired |
-| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | Held-out-test Local/Global Utility, raw arms, support states, and strict ratio aggregation | P4 diagnostic engineering and bounded source-runtime parity gates passed; the first preregistered full-dataset admission failed and P4 remains diagnostic |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | Held-out-test Local/Global Utility, raw arms, support states, and strict ratio aggregation | `p4-utility@1.0.0` is protocol-frozen for conditional use on the exact validated Windows/Python/RTX 5080 runtime; dataset/model/run admission remains separate |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | Central mean/mode missing-value boundary | Fits real train only; target/synthetic repair is prohibited; state, schema, configuration, inputs, and outputs are fingerprinted |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | Ten Draft 2020-12 wire schemas | P1 canonical wire validators, packaged in the wheel |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Eight legacy, two P2, two P3, and eleven P4 records remain non-official |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Includes explicit P4 freeze evidence and resolved/blocked P5 metric records; blocked metrics are machine-readable exclusions |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3 and P4 are selected explicitly, and P4 requires `--real-test` |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3/P4/P5 are explicit, and P4/P5 require `--real-test` |
 | [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | Hosted Windows primary-family and Linux secondary CI; reference trees are excluded from default discovery and distribution |
 | [`tests/evaluation/`](../../tests/evaluation) | Contract, structural, source-parity, Atomic Result, interruption, bundle, and CLI tests | P1 regression tests and P2 direct-authoritative tests are separated by dependency and marker boundaries |
 
-### 3.3 Remaining gaps after P4 implementation
+### 3.3 Remaining gaps after P5 implementation
 
 - P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
 - P3 passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p3-validity-run-31036844043.json), but remains diagnostic pending protocol freeze and release approval.
-- P4 Local/Global Utility passed its bounded diagnostic workflow with retained [engineering evidence](../evidence/evaluation/p4-utility-run-31053624769.json). A separate [real source-runtime pilot](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) passed exact classification/regression aggregate parity with the locked TabEval file and real XGB/KNN/TabPFN models. The first [dataset-scale admission](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) failed: Adult execution was incomplete after runner shutdown, and complete Sick execution passed resource gates but failed two stability sentinels. P4 remains diagnostic; no profile freeze or Official Results admission is allowed.
-- Approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
+- Historical P4 failures remain immutable. The row-order-invariant successor passed the complete [Windows GPU validation](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json), and the separate [freeze decision](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json) froze `p4-utility@1.0.0` without changing its scientific identity. Official result use still requires independent dataset/model/track/run/environment admission.
+- P5 now implements balanced five-seed C2ST, exact train collisions, internal duplication, exact pinned SDMetrics DCR with heldout calibration, and a declared black-box DOMIAS KDE attack. It remains diagnostic pending dataset threat-model review, dataset-scale pilot evidence, and later protocol freeze.
+- Efficiency, cache/resume orchestration, uncertainty beyond P5 attack/C2ST intervals, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
@@ -168,8 +169,8 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
-| P4 | Local and Global Utility | P1, P3 | Stable explicit-split successor passed the complete [Windows GPU validation](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json): 67 tasks, 134 arms, six exact identity sentinels, and all resource gates; remains diagnostic | Conduct profile-freeze and Official Results admission review without changing the validated scientific identity |
-| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
+| P4 | Local and Global Utility | P1, P3 | Protocol-frozen at `p4-utility@1.0.0` after complete exact Windows GPU validation; concrete results still require independent admission | Preserve the frozen identity and complete release, dataset, model, track, and result admission gates |
+| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Implemented and unit-validated diagnostic: C2ST, exact-copy diagnostics, pinned DCR, heldout calibration, and DOMIAS threat model | Run retained Windows Adult/Sick pilots and review dataset privacy roles before any freeze |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
 | P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
@@ -294,7 +295,7 @@ Exit evidence:
 - the selected profiles pass source parity where source parity is claimed; and
 - Local Utility and Global Utility remain distinct outputs and sub-leaderboards.
 
-Current adjudication: the historical `0.1.1` CPU and `0.2.1` Windows profiles remain failed evidence. `p4-utility@0.5.0` has one result-producing adapter with canonical row ordering and an explicit seeded fit/tuning split; exact TabEval execution is isolated to internal provenance tests. The `0.3.0` Windows GPU successor passed all unchanged thresholds and the complete schedule at commit `6dc485f`. This permits a profile-freeze review but does not itself admit Official Results or assess generator quality.
+Current adjudication: the historical `0.1.1` CPU and `0.2.1` Windows profiles remain failed evidence. `p4-utility@1.0.0` freezes the sole row-order-invariant result-producing adapter after the `0.3.0` Windows GPU successor passed every unchanged threshold at commit `6dc485f`. The freeze is qualified only for the exact Windows 11/Python 3.11/RTX 5080 environment and does not admit Adult, Sick, a model, or an individual result. The identity surrogate did not assess generator quality.
 
 ### 6.6 P5 — high-order fidelity and empirical privacy
 
@@ -304,6 +305,8 @@ High-order tasks:
 - Preserve GReaT RF discriminator accuracy under a source-specific diagnostic identifier.
 - Keep integrated Alpha-Precision/Beta-Recall experimental until the mixed-table embedding and integration behavior are resolved.
 
+Implemented adjudication: `std-c2st-rf-auroc` records raw discriminator AUROC with chance target `0.5`; `std-c2st-fidelity` separately records the label-invariant AUROC complement. GReaT accuracy and Alaa support metrics are explicit excluded records and cannot enter the P5 request.
+
 Privacy tasks:
 
 - Implement exact train collision and synthetic internal duplication as separate diagnostics.
@@ -312,6 +315,8 @@ Privacy tasks:
 - Add attribute inference only for Dataset Profiles with reviewed sensitive/quasi-identifier roles and an approved threat model.
 - Keep Authenticity excluded until the paper/code discrepancy is adjudicated.
 - Keep Delta Presence excluded from official scoring until its semantics and failure behavior are scientifically resolved.
+
+Implemented adjudication: exact collisions and internal duplication are separate rates; SDMetrics DCR is called from the attested source and retained as distributions plus heldout Wasserstein calibration; DOMIAS reports density-ratio attack AUROC, source median-threshold accuracy, advantage, and TPR at FPR at most one percent under a complete black-box threat model. The mixed-table representation is a named benchmark adaptation, not exact DOMIAS source parity. Attribute inference, Authenticity, and Delta Presence remain explicit exclusions.
 
 Exit evidence:
 

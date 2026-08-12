@@ -167,13 +167,16 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
     if (
         profile["profile_id"] != "p4-utility-stable"
         or profile["profile_version"] != "0.2.0"
-        or profile["status"] != "preregistered-stability-candidate"
-        or profile["official_results_allowed"] is not False
+        or profile["status"] != "frozen"
+        or profile["official_results_allowed"] is not True
     ):
-        _fail("P4 stable-candidate identity, lifecycle, or diagnostic admission boundary has drifted")
+        _fail("P4 frozen identity, lifecycle, or conditional admission boundary has drifted")
     seeds = profile["default_evaluator_seeds"]
-    if not isinstance(seeds, list) or not seeds or len(seeds) != len(set(seeds)) or any(
-        isinstance(seed, bool) or not isinstance(seed, int) for seed in seeds
+    if (
+        not isinstance(seeds, list)
+        or not seeds
+        or len(seeds) != len(set(seeds))
+        or any(isinstance(seed, bool) or not isinstance(seed, int) for seed in seeds)
     ):
         _fail("default_evaluator_seeds must be a non-empty unique integer array")
     if seeds != [0, 1, 2, 3, 4]:
@@ -363,8 +366,10 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
     if any(global_profile[key] != value for key, value in expected_global_values.items()):
         _fail("P4 Global Utility source, predictors, formulas, or failure policy have drifted")
     deviations = global_profile["known_deviations"]
-    if not isinstance(deviations, list) or not deviations or any(
-        not isinstance(item, str) or not item.strip() for item in deviations
+    if (
+        not isinstance(deviations, list)
+        or not deviations
+        or any(not isinstance(item, str) or not item.strip() for item in deviations)
     ):
         _fail("P4 Global Utility known deviations must remain explicit and non-empty")
 
@@ -450,8 +455,7 @@ def validate_utility_profile(dataset_profile: dict[str, Any], evaluator_profile:
     if not isinstance(included, list) or len(included) != len(set(included)):
         _fail("Global Utility included targets must be a unique array")
     if not isinstance(excluded, list) or any(
-        not isinstance(item, dict) or set(item) != {"column_id", "reason_code", "reason_detail"}
-        for item in excluded
+        not isinstance(item, dict) or set(item) != {"column_id", "reason_code", "reason_detail"} for item in excluded
     ):
         _fail("Every Global Utility exclusion requires column_id, reason_code, and reason_detail")
     excluded_ids = [item["column_id"] for item in excluded]
@@ -638,7 +642,9 @@ def _feature_frames(
     return np.asarray(real_x), np.asarray(synthetic_x), np.asarray(test_x)
 
 
-def _classification_scores(model: Any, test_x: np.ndarray, y_test: pd.Series, labels: list[Any], positive: Any) -> _ArmResult:
+def _classification_scores(
+    model: Any, test_x: np.ndarray, y_test: pd.Series, labels: list[Any], positive: Any
+) -> _ArmResult:
     from sklearn.metrics import average_precision_score, balanced_accuracy_score, f1_score, roc_auc_score
     from sklearn.preprocessing import label_binarize
 
@@ -730,9 +736,11 @@ def _build_estimator(definition: dict[str, Any], task_type: str, seed: int) -> A
         parameters["random_state"] = seed
     model = implementations[implementation](**parameters)
     expected_suffix = "Classifier" if task_type == "classification" else "Regressor"
-    if expected_suffix not in implementation and not (
-        task_type == "classification" and implementation.endswith("LogisticRegression")
-    ) and not (task_type == "regression" and implementation.endswith("Ridge")):
+    if (
+        expected_suffix not in implementation
+        and not (task_type == "classification" and implementation.endswith("LogisticRegression"))
+        and not (task_type == "regression" and implementation.endswith("Ridge"))
+    ):
         raise UtilityImplementationError("Local evaluator implementation differs from the declared task type")
     return model
 
@@ -901,7 +909,11 @@ def _evaluate_local(
     real_y = tables.real_train[target_name]
     synthetic_y = tables.synthetic[target_name]
     test_y = tables.real_test[target_name]
-    labels = sorted(pd.unique(pd.concat([real_y, test_y], ignore_index=True)).tolist(), key=repr) if task_type == "classification" else None
+    labels = (
+        sorted(pd.unique(pd.concat([real_y, test_y], ignore_index=True)).tolist(), key=repr)
+        if task_type == "classification"
+        else None
+    )
     real_classes = set(pd.unique(real_y)) if task_type == "classification" else set()
     test_only = set(pd.unique(test_y)) - real_classes if task_type == "classification" else set()
     missing_synthetic = real_classes - set(pd.unique(synthetic_y)) if task_type == "classification" else set()
@@ -1043,9 +1055,13 @@ def _evaluate_local(
                         unit="ratio",
                     )
             else:
-                source_states = [result.state for result in arm_results.values() if result.state is not MetricState.COMPUTED]
+                source_states = [
+                    result.state for result in arm_results.values() if result.state is not MetricState.COMPUTED
+                ]
                 state = source_states[0] if source_states else MetricState.MATHEMATICALLY_UNDEFINED
-                code = next((result.reason_code for result in arm_results.values() if result.reason_code), "raw_arm_undefined")
+                code = next(
+                    (result.reason_code for result in arm_results.values() if result.reason_code), "raw_arm_undefined"
+                )
                 detail = next(
                     (result.reason_detail for result in arm_results.values() if result.reason_detail),
                     "At least one primary raw arm is not computable",
@@ -1115,9 +1131,7 @@ def _prepare_global_frames(tables: ValidatedUtilityTables) -> tuple[pd.DataFrame
 
     frames = [tables.real_train.copy(), tables.synthetic.copy(), tables.real_test.copy()]
     categorical = [
-        spec["name"]
-        for spec in tables.column_specs
-        if spec["semantic_type"] in _CLASSIFICATION_TYPES | {"string"}
+        spec["name"] for spec in tables.column_specs if spec["semantic_type"] in _CLASSIFICATION_TYPES | {"string"}
     ]
     datetimes = [spec["name"] for spec in tables.column_specs if spec["semantic_type"] == "datetime"]
     if categorical:
@@ -1311,7 +1325,9 @@ def _run_global_backend(
         "KNN": {},
         CustomTabPFNModel: {},
     }
-    problem_type = "regression" if task_type == "regression" else ("binary" if train[target].nunique() == 2 else "multiclass")
+    problem_type = (
+        "regression" if task_type == "regression" else ("binary" if train[target].nunique() == 2 else "multiclass")
+    )
     extra_metric = "root_mean_squared_error" if task_type == "regression" else "balanced_accuracy"
     fit_train = train
     tuning_data = None
@@ -1349,9 +1365,13 @@ def _run_global_backend(
             finally:
                 _close_workspace_log_handlers(workspace)
     except (OSError, PermissionError, TimeoutError) as exc:
-        raise UtilityResourceError(f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}") from exc
+        raise UtilityResourceError(
+            f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}"
+        ) from exc
     except Exception as exc:
-        raise UtilityImplementationError(f"Authoritative Global Utility backend failed: {type(exc).__name__}: {exc}") from exc
+        raise UtilityImplementationError(
+            f"Authoritative Global Utility backend failed: {type(exc).__name__}: {exc}"
+        ) from exc
     if "model" not in leaderboard or extra_metric not in leaderboard or leaderboard.empty:
         raise UtilityImplementationError("AutoGluon leaderboard lacks the declared model or score columns")
     predictor_scores: dict[str, float] = {}
@@ -1379,8 +1399,7 @@ def _run_global_backend(
     # trained model set is retained and must match between TRTR and TSTR.
     if not families["tabpfn"] and not (task_type == "classification" and train[target].nunique() > 10):
         raise UtilityImplementationError(
-            f"Global Utility source backend unexpectedly omitted TabPFN: {names}; "
-            f"model_failures={predictor_failures!r}"
+            f"Global Utility source backend unexpectedly omitted TabPFN: {names}; model_failures={predictor_failures!r}"
         )
     score = float(np.mean(list(predictor_scores.values())))
     return GlobalBackendResult(
@@ -1515,7 +1534,11 @@ def _evaluate_global(
             )
             raw_direction = RawDirection.MAXIMIZE if task_type == "classification" else RawDirection.MINIMIZE
             raw_scope_base = f"{column_id}--seed-{_seed_id(seed)}"
-            support_missing = set(pd.unique(tables.real_train[name])) - set(pd.unique(tables.synthetic[name])) if task_type == "classification" else set()
+            support_missing = (
+                set(pd.unique(tables.real_train[name])) - set(pd.unique(tables.synthetic[name]))
+                if task_type == "classification"
+                else set()
+            )
             arm_results: dict[str, GlobalBackendResult] = {}
             arm_failures: dict[str, tuple[MetricState, str, str]] = {}
             for arm, train in (("trtr", real_global), ("tstr", synthetic_global)):
@@ -1679,18 +1702,10 @@ def _evaluate_global(
                     "ratio": ratio_atom.raw_value,
                     "state": ratio_atom.state.value,
                     "reason_code": ratio_atom.reason_code,
-                    "predictors": {
-                        arm: list(result.predictors) for arm, result in arm_results.items()
-                    },
-                    "predictor_scores": {
-                        arm: result.predictor_scores for arm, result in arm_results.items()
-                    },
-                    "predictor_failures": {
-                        arm: list(result.predictor_failures) for arm, result in arm_results.items()
-                    },
-                    "fit_evidence": {
-                        arm: result.fit_evidence for arm, result in arm_results.items()
-                    },
+                    "predictors": {arm: list(result.predictors) for arm, result in arm_results.items()},
+                    "predictor_scores": {arm: result.predictor_scores for arm, result in arm_results.items()},
+                    "predictor_failures": {arm: list(result.predictor_failures) for arm, result in arm_results.items()},
+                    "fit_evidence": {arm: result.fit_evidence for arm, result in arm_results.items()},
                 }
             )
 
@@ -1755,9 +1770,7 @@ def evaluate_utility(
         "global_requested_target_seeds": global_summary["expected_target_seed_ratios"],
         "global_computed_target_seed_ratios": global_summary["computed_target_seed_ratios"],
         "global_requested_targets": global_summary["target_count"],
-        "global_fully_computed_targets": sum(
-            value is not None for value in global_summary["target_ratios"].values()
-        ),
+        "global_fully_computed_targets": sum(value is not None for value in global_summary["target_ratios"].values()),
         "computed_atomic_results": states.get("computed", 0),
         "noncomputed_atomic_results": len(atoms) - states.get("computed", 0),
     }
@@ -1792,15 +1805,11 @@ def evaluate_utility(
             ),
             "source": evaluator_profile["global"]["implementation_source"],
             "runtime_source_manifest": evaluator_profile["global"]["runtime_source_manifest"],
-            "source_runtime_validation_status": evaluator_profile["global"][
-                "source_runtime_validation_status"
-            ],
+            "source_runtime_validation_status": evaluator_profile["global"]["source_runtime_validation_status"],
             "source_parity_claimed": False,
             "stable_adapter": {
                 "training_row_order": evaluator_profile["global"]["training_row_order"],
-                "internal_validation_split": evaluator_profile["global"][
-                    "internal_validation_split"
-                ],
+                "internal_validation_split": evaluator_profile["global"]["internal_validation_split"],
             },
         },
     }

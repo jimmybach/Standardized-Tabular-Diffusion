@@ -2,8 +2,8 @@
   "profile_schema_version": "1.0.0",
   "profile_id": "p4-utility-stable",
   "profile_version": "0.2.0",
-  "status": "preregistered-stability-candidate",
-  "official_results_allowed": false,
+  "status": "frozen",
+  "official_results_allowed": true,
   "default_evaluator_seeds": [0, 1, 2, 3, 4],
   "local": {
     "profile_id": "std-local-three-family",
@@ -87,7 +87,7 @@
       "The reviewed wrapper forces numerical targets to regression and records failures instead of silently omitting targets.",
       "The stable adapter canonicalizes complete training rows and explicitly supplies an AutoGluon-generated tuning split, preventing input row order from changing the hidden fit boundary.",
       "The locked TabEval source is retained only for internal source-parity validation and is not a selectable result-producing implementation.",
-      "Dataset-scale successor validation and Official Results admission remain pending."
+      "Official use is qualified only for the exact validated Windows 11/Python 3.11/RTX 5080 runtime; other environments remain compatibility diagnostics until separately validated."
     ]
   }
 }

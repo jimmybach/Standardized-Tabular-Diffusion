@@ -1,25 +1,25 @@
 {
   "profile_schema_version": "1.0.0",
   "protocol_id": "p4-utility",
-  "protocol_version": "0.5.0",
-  "display_name": "P4 Local and Global Utility stable candidate",
-  "status": "draft",
-  "official_results_allowed": false,
+  "protocol_version": "1.0.0",
+  "display_name": "P4 Local and Global Utility",
+  "status": "frozen",
+  "official_results_allowed": true,
   "comparison_tracks": ["native", "standardized-tuning"],
   "metric_selections": [
-    {"metric_id":"std-local-utility-macro-f1","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-roc-auc","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-pr-auc","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-rmse","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-mae","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-r2","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"std-local-utility-retention","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"tabstruct-global-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"tabstruct-global-rmse","metric_version":"1.0.0","required":true,"role":"diagnostic"},
-    {"metric_id":"tabstruct-global-target-utility","metric_version":"1.0.0","required":true,"role":"diagnostic"}
+    {"metric_id":"std-local-utility-macro-f1","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-roc-auc","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-pr-auc","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-rmse","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-mae","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-r2","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"std-local-utility-retention","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"tabstruct-global-balanced-accuracy","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"tabstruct-global-rmse","metric_version":"1.0.0","required":true,"role":"official-component"},
+    {"metric_id":"tabstruct-global-target-utility","metric_version":"1.0.0","required":true,"role":"official-component"}
   ],
-  "dataset_suites": ["diagnostic"],
+  "dataset_suites": ["universal-core", "extended-catalog", "diagnostic"],
   "result_schema_versions": {"atomic_result":"1.0.0","manifest":"1.0.0","metadata":"1.0.0","summary":"1.0.0","stage_record":"1.0.0","artifact_index":"1.0.0"},
   "policies": {
     "test_boundary": "One checksum-bound held-out real test table is shared by Dummy, TRTR, and TSTR and is never a fit input.",
@@ -35,9 +35,10 @@
     "finalization": "Utility details, raw arms, ratios, Atomic Results, provenance, and exact checksums must cross-validate before finalization."
   },
   "owners": ["repository-maintainers"],
-  "review_record": {"status":"successor-validation-passed-freeze-review-required","official_admission":"The complete native Windows/Python 3.11/RTX 5080 successor validation passed all fixed scientific and resource gates; profile freeze, compatibility scope, and Official Results admission remain pending separate review."},
+  "review_record": {"status":"protocol-frozen","official_admission":"Metrics are admitted as Official Results components only when the dataset, model, comparison track, and exact execution environment independently satisfy their admission rules. Adult, Sick, and generator results are not admitted by this decision."},
   "change_log": [
     {"version":"0.4.0","change":"Implemented the reviewed P4 diagnostic Local and Global Utility vertical slice."},
-    {"version":"0.5.0","change":"Replaced AutoGluon's row-order-sensitive implicit holdout with canonical row ordering and an explicit seeded fit/tuning split; retained exact TabEval execution only as internal source-parity validation."}
+    {"version":"0.5.0","change":"Replaced AutoGluon's row-order-sensitive implicit holdout with canonical row ordering and an explicit seeded fit/tuning split; retained exact TabEval execution only as internal source-parity validation."},
+    {"version":"1.0.0","change":"Froze the unchanged scientific profile after complete native Windows 11/Python 3.11/RTX 5080 validation; formalized independent dataset, model, track, and environment admission boundaries."}
   ]
 }

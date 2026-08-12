@@ -107,6 +107,12 @@ P3 adds a protocol-selectable Validity path with one Atomic Result per canonical
 
 The centralized missing-value workflow fits numerical means and categorical modes on the real training split only, rejects missing targets and all-missing training features, fingerprints learned state and transformed schema, and changes the dataset-view token when policy or schema changes. See the [P3 guide](evaluation/P3_VALIDITY_AND_PREPROCESSING.md). P3 passed in [GitHub Actions run 31036844043](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31036844043), and the exact [Linux/Python 3.11 evidence](evidence/evaluation/p3-validity-run-31036844043.json) is retained. This validates the diagnostic P3 implementation; it does not freeze a protocol or admit Official Results.
 
+## P4 and P5 evaluation
+
+`p4-utility@1.0.0` is protocol-frozen after the retained exact Windows 11/Python 3.11/RTX 5080 successor validation. This admits the metric components conditionally, not any dataset, model, run, or untested environment. Release support remains a later gate; see the [P4 guide](evaluation/P4_UTILITY.md).
+
+`p5-high-order-privacy@0.1.0` implements C2ST, exact-copy diagnostics, pinned SDMetrics DCR, heldout calibration, and a declared DOMIAS black-box attack. It remains diagnostic, has no overall score, and makes no formal privacy claim. See the [P5 guide](evaluation/P5_HIGH_ORDER_PRIVACY.md).
+
 ## CI baseline
 
 The core workflow runs on Linux and Python 3.11 with read-only repository permissions. It verifies:

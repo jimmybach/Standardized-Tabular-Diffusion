@@ -164,12 +164,18 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
     synthetic = Path(args.synthetic)
     real_test = Path(args.real_test) if args.real_test is not None else None
     dataset = load_dataset_profile(args.dataset_profile)
-    protocol_versions = {"p2-shape-trend": "0.2.0", "p3-validity": "0.3.0", "p4-utility": "0.5.0"}
+    protocol_versions = {
+        "p2-shape-trend": "0.2.0",
+        "p3-validity": "0.3.0",
+        "p4-utility": "1.0.0",
+        "p5-high-order-privacy": "0.1.0",
+    }
     protocol = resolve_protocol(args.protocol, protocol_versions[args.protocol])
-    if args.protocol == "p4-utility" and real_test is None:
-        raise ValueError("--real-test is required for the p4-utility protocol")
-    if args.protocol != "p4-utility" and real_test is not None:
-        raise ValueError("--real-test is only valid with the p4-utility protocol")
+    three_table_protocols = {"p4-utility", "p5-high-order-privacy"}
+    if args.protocol in three_table_protocols and real_test is None:
+        raise ValueError(f"--real-test is required for the {args.protocol} protocol")
+    if args.protocol not in three_table_protocols and real_test is not None:
+        raise ValueError("--real-test is only valid with P4 or P5 protocols")
 
     def media_type(path: Path) -> str:
         suffix = path.suffix.lower()
@@ -183,10 +189,11 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
         {"metric_id": item["metric_id"], "metric_version": item["metric_version"]}
         for item in protocol.payload["metric_selections"]
     )
+    evaluator_seeds: tuple[int, ...]
     if args.evaluator_seeds is None:
         if args.evaluator_seed is not None:
             evaluator_seeds = (args.evaluator_seed,)
-        elif args.protocol == "p4-utility":
+        elif args.protocol in three_table_protocols:
             evaluator_seeds = (0, 1, 2, 3, 4)
         else:
             evaluator_seeds = (0,)
@@ -197,11 +204,19 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
             raise ValueError("--evaluator-seeds must be a comma-separated integer list") from exc
         if not evaluator_seeds:
             raise ValueError("--evaluator-seeds must contain at least one integer")
+    if args.protocol == "p5-high-order-privacy" and evaluator_seeds != (0, 1, 2, 3, 4):
+        raise ValueError("p5-high-order-privacy requires evaluator seeds 0,1,2,3,4")
     evaluator_profile = None
     if args.protocol == "p4-utility":
         from standardized_tabular_diffusion.evaluation.utility import p4_evaluator_profile_reference
 
         evaluator_profile = p4_evaluator_profile_reference()
+    elif args.protocol == "p5-high-order-privacy":
+        from standardized_tabular_diffusion.evaluation.high_order_privacy import (
+            p5_evaluator_profile_reference,
+        )
+
+        evaluator_profile = p5_evaluator_profile_reference()
     request = EvaluationRequest(
         subject_type="external-synthetic-table",
         reference_artifact={
@@ -356,13 +371,13 @@ def build_parser() -> argparse.ArgumentParser:
     evaluate_table_parser.add_argument(
         "--real-test",
         default=None,
-        help="Held-out real test CSV or Parquet table; required only for p4-utility",
+        help="Held-out real test CSV or Parquet table; required for P4 and P5",
     )
     evaluate_table_parser.add_argument("--dataset-profile", required=True, help="Reviewed Dataset Profile JSON/YAML")
     evaluate_table_parser.add_argument("--output", required=True, help="New result bundle directory")
     evaluate_table_parser.add_argument(
         "--protocol",
-        choices=["p2-shape-trend", "p3-validity", "p4-utility"],
+        choices=["p2-shape-trend", "p3-validity", "p4-utility", "p5-high-order-privacy"],
         default="p2-shape-trend",
         help="Evaluation protocol; the P2 default is retained for CLI backward compatibility",
     )
@@ -383,12 +398,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--evaluator-seed",
         type=int,
         default=None,
-        help="One evaluator seed; P2/P3 default to 0 and P4 defaults to its frozen five-seed panel",
+        help="One evaluator seed; P2/P3 default to 0 and P4/P5 default to their five-seed panels",
     )
     evaluate_table_parser.add_argument(
         "--evaluator-seeds",
         default=None,
-        help="Comma-separated evaluator seeds; p4-utility defaults to 0,1,2,3,4",
+        help="Comma-separated evaluator seeds; P4/P5 default to 0,1,2,3,4",
     )
 
     model_parser = subparsers.add_parser("show-model-inventory", help="Show one researched baseline model entry")

@@ -2,7 +2,7 @@
 
 ## Status and claim boundary
 
-P4 has one result-producing implementation: `p4-utility@0.5.0`, bound to evaluator profile `p4-utility-stable@0.2.0`. It is implemented but remains diagnostic. It is not yet protocol-frozen, release-supported, or eligible for Official Results.
+P4 has one result-producing implementation: frozen protocol `p4-utility@1.0.0`, bound to unchanged evaluator profile `p4-utility-stable@0.2.0`. Its metrics are protocol-frozen components that may be used in Official Results only when the dataset, model, comparison track, run, and exact execution environment pass their independent admission rules. P4 is not yet repository release-supported, and this freeze does not admit Adult, Sick, or any generator result.
 
 The exact TabEval source at revision `dba19a4ee7aa391621cbeb464609285fd515dece` remains checksum-locked for provenance and internal source-parity tests. It is not a second CLI option, metric profile, or leaderboard implementation. User-facing evaluation always uses the stable adapter described below.
 
@@ -116,11 +116,15 @@ std-tabular-diffusion evaluate-table `
 
 P4 defaults to evaluator seeds `0,1,2,3,4`. Overrides are recorded and are not automatically leaderboard-compatible.
 
-## Remaining admission work
+## Freeze decision and remaining admission work
 
-The successor completed its preregistered scientific, execution, resource, fit-boundary, and evidence gates without changing thresholds after observation. Before P4 can be frozen or admitted to Official Results:
+The separate [freeze decision](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json) reviewed the immutable evidence and froze the unchanged scientific identity. Exact P4 qualification is limited to native Windows 11, Python 3.11, and NVIDIA GeForce RTX 5080. Other hardware and operating systems remain compatibility diagnostics until separately validated; no inference is made from the RTX 5080 evidence to another GPU.
 
-1. review the retained evidence and immutable identity for profile freeze;
-2. decide the supported runtime/compatibility boundary without generalizing the RTX 5080 evidence to untested hardware;
-3. update lifecycle and release records only through a separate admission decision; and
-4. keep generator-quality evaluation and leaderboard publication outside this identity-surrogate validation claim.
+Still required before publishing a concrete Official Result:
+
+1. admit the dataset and its exact version/view/split;
+2. admit the model adapter, comparison track, and source provenance;
+3. validate the individual result bundle on the qualified environment; and
+4. obtain repository release support and later P7 leaderboard-snapshot admission.
+
+The identity-surrogate validation tested evaluator stability, not generator quality. Historical failed candidates remain failed evidence.

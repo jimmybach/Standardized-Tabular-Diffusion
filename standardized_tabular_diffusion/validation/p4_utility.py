@@ -68,9 +68,7 @@ def _source_boundary_stub(
     arm: str,
 ) -> GlobalBackendResult:
     del train, test, target, seed, time_limit_seconds
-    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (
-        2.0 if arm == "trtr" else 2.5
-    )
+    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (2.0 if arm == "trtr" else 2.5)
     predictors = ("KNeighbors", "TabPFN", "XGBoost")
     return GlobalBackendResult(score, predictors, {name: score for name in predictors})
 
@@ -89,7 +87,7 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
     if require_primary_family_environment and not primary:
         raise RuntimeError("P4 primary-family evidence requires Windows with Python 3.11")
     dataset = load_dataset_profile(REPO_ROOT / "configs" / "datasets" / "adult-uci-2-v1.json")
-    protocol = resolve_protocol("p4-utility", "0.5.0")
+    protocol = resolve_protocol("p4-utility", "1.0.0")
     evaluator = load_p4_evaluator_profile()
     validate_utility_profile(dataset.payload, evaluator)
     train, test, synthetic = _fixture(dataset.payload)
@@ -140,9 +138,16 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
     exit_gates = {
         "three_local_families": "pass" if len(retentions) == 3 else "fail",
         "raw_arms_and_retention": "pass" if outcome.local_summary["retention"] == 1.0 else "fail",
-        "all_target_global_formula": "pass" if len(ratios) == 15 and all(atom.raw_value is not None for atom in ratios) else "fail",
-        "held_out_test_boundary": "pass" if outcome.details["input_boundary"]["real_test_fit_allowed"] is False else "fail",
-        "unclipped_formulas": "pass" if local_retention(0.2, 0.8, 0.92, higher_is_better=True, tolerance=1e-12) > 1 and global_target_ratio(0.8, 0.88, task_type="classification") > 1 else "fail",
+        "all_target_global_formula": "pass"
+        if len(ratios) == 15 and all(atom.raw_value is not None for atom in ratios)
+        else "fail",
+        "held_out_test_boundary": "pass"
+        if outcome.details["input_boundary"]["real_test_fit_allowed"] is False
+        else "fail",
+        "unclipped_formulas": "pass"
+        if local_retention(0.2, 0.8, 0.92, higher_is_better=True, tolerance=1e-12) > 1
+        and global_target_ratio(0.8, 0.88, task_type="classification") > 1
+        else "fail",
         "diagnostic_admission_only": "pass" if evaluator["official_results_allowed"] is False else "fail",
     }
     status = "pass" if set(exit_gates.values()) == {"pass"} else "fail"
@@ -201,9 +206,7 @@ def main() -> None:
         action="store_true",
     )
     args = parser.parse_args()
-    payload = generate_evidence(
-        require_primary_family_environment=args.require_primary_family_environment
-    )
+    payload = generate_evidence(require_primary_family_environment=args.require_primary_family_environment)
     atomic_write_json(args.output, payload)
     if payload["status"] != "pass":
         raise SystemExit(1)

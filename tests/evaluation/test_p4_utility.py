@@ -150,9 +150,7 @@ def _learnable_adult_frames(adult_frames):
 
 def _source_stub(train, test, target, task_type, seed, time_limit_seconds, arm):
     del train, test, target, seed, time_limit_seconds
-    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (
-        2.0 if arm == "trtr" else 2.5
-    )
+    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (2.0 if arm == "trtr" else 2.5)
     predictors = ("KNeighbors", "TabPFN", "XGBoost")
     return GlobalBackendResult(
         score=score,
@@ -217,9 +215,7 @@ def test_p4_executes_three_local_families_and_equal_target_global_formula(
     assert outcome.global_summary["ratio_clipped"] is False
     assert outcome.denominator_counts["global_fully_computed_targets"] == 15
     assert {atom.evaluator_id for atom in ratio_atoms} == {"tabstruct-tabeval-stable"}
-    assert {run["test_fingerprint"] for run in outcome.details["local_runs"]} == {
-        request.real_test_artifact["sha256"]
-    }
+    assert {run["test_fingerprint"] for run in outcome.details["local_runs"]} == {request.real_test_artifact["sha256"]}
 
 
 def test_missing_synthetic_class_is_explicit_and_never_receives_favorable_global_default(
@@ -328,7 +324,7 @@ def test_global_profile_requires_every_model_view_target_or_a_reasoned_exclusion
 @pytest.mark.parametrize(
     ("path", "value"),
     [
-        (("official_results_allowed",), True),
+        (("official_results_allowed",), False),
         (("default_evaluator_seeds",), [0]),
         (("local", "classification", "primary_metric"), "accuracy"),
         (("local", "retention", "clipping"), "zero-one"),
