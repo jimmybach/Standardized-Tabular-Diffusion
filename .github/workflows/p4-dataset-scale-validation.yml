@@ -13,6 +13,7 @@ on:
       - "tests/evaluation/test_p4_dataset_scale_validation.py"
       - "tests/test_p4_dataset_scale_retained_evidence.py"
       - "tests/test_p4_windows_gpu_retained_evidence.py"
+      - "tests/test_p4_stable_successor_retained_evidence.py"
       - "docs/evaluation/P4_UTILITY*.md"
       - "docs/evaluation/IMPLEMENTATION_ROADMAP*.md"
       - "docs/evidence/evaluation/p4-dataset-scale-*.json"
@@ -28,6 +29,7 @@ on:
       - "tests/evaluation/test_p4_dataset_scale_validation.py"
       - "tests/test_p4_dataset_scale_retained_evidence.py"
       - "tests/test_p4_windows_gpu_retained_evidence.py"
+      - "tests/test_p4_stable_successor_retained_evidence.py"
       - "docs/evaluation/P4_UTILITY*.md"
       - "docs/evaluation/IMPLEMENTATION_ROADMAP*.md"
       - "docs/evidence/evaluation/p4-dataset-scale-*.json"
@@ -70,6 +72,7 @@ jobs:
           tests/evaluation/test_p4_dataset_scale_validation.py
           tests/test_p4_dataset_scale_retained_evidence.py
           tests/test_p4_windows_gpu_retained_evidence.py
+          tests/test_p4_stable_successor_retained_evidence.py
           -q
 
       - name: Lint dataset-scale surfaces

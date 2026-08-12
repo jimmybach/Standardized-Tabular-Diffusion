@@ -92,6 +92,8 @@ Bundle 校验会从原始 arm 重新构造派生值，并拒绝 arm 缺失、摘
 
 后继验证使用新身份 `p4-dataset-scale-windows-gpu-stable-candidate@0.3.0`。它保留相同的数据集、目标、五个种子、整行置换 identity surrogate、预测器策略、`0.05` 门限和资源限制，只绑定新的评测器与数据集 profile 版本。完整验证只允许在声明的原生 Windows 11、Python 3.11 和 RTX 5080 环境运行。GitHub 托管 runner 只校验契约，不能代替所需的 GPU 实验。
 
+提交 `6dc485f` 上的完整后继运行通过了全部 9 个 shard、67 个任务和 134 个 arm。Adult 的 `income`、`native-country`、`fnlwgt` 与 Sick 的 `class`、`referral-source`、`tsh` 的每一个五种子 identity ratio 都精确为 `1.0`，因此所有范围和最大绝对偏差均为 `0.0`。单个 arm 的最长时间为 `9.50134` 秒，进程树 RSS 峰值为 `2.03462` GiB，CUDA 分配增量峰值为 `3.64762` GiB，全部位于预注册限制内。留存的[机器可读证据](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json) SHA-256 为 `19d55b260eaa5a3d1e522d1a1cabeadf4e952698a833e529576fd64b71797721`。
+
 ## 命令
 
 安装标准 Utility 依赖：
@@ -116,9 +118,9 @@ P4 默认使用评测种子 `0,1,2,3,4`。任何覆盖值都会写入证据，�
 
 ## 剩余准入工作
 
-P4 在冻结或进入 Official Results 前必须：
+后继版本已经在观察结果后不改变门限的前提下，通过预注册的科学、执行、资源、拟合边界和证据门。P4 在冻结或进入 Official Results 前仍必须：
 
-1. 在声明的 Windows GPU 环境复验此前失败的 sentinel；
-2. 运行并 finalize 完整预注册的 67 任务计划；
-3. 在观察结果后不改变阈值，要求所有科学、执行、资源、拟合边界和证据门全部通过；
-4. 另行进行 profile 冻结与发布准入审阅。
+1. 审阅留存证据和不可变身份，决定是否冻结 profile；
+2. 确定支持的运行时与兼容性边界，不将 RTX 5080 证据推广到未经测试的硬件；
+3. 只通过独立准入决定更新生命周期与发布记录；
+4. 保持生成器质量评测和榜单发布不超出本次 identity-surrogate 验证的声明范围。
