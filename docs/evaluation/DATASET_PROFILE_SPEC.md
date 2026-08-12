@@ -287,7 +287,7 @@ Optional secondary targets use the same complete declaration. They are reported 
 
 The target MUST reflect a documented dataset task or a reviewed scientific purpose. It MUST NOT be chosen after comparing generator results.
 
-The reviewed Adult and Sick diagnostic profiles now bind their primary classification targets, positive classes, label mappings, Macro-F1 and secondary metrics, support declarations, Dummy strategy, and `p4-utility-pilot@0.1.0` identity. This records the P4 pilot contract without making either dataset official-eligible.
+The reviewed Adult and Sick diagnostic profiles bind their primary classification targets, positive classes, label mappings, Macro-F1 and secondary metrics, support declarations, Dummy strategy, and `p4-utility-stable@0.2.0` identity. The profile versions were advanced because the evaluator reference now requires canonical row ordering and an explicit seeded internal validation split. This does not make either dataset official-eligible.
 
 ## 12. Global Utility profile
 

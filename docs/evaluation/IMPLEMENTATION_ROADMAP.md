@@ -168,7 +168,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
-| P4 | Local and Global Utility | P1, P3 | Windows GPU source parity and complete 67-task execution passed; [dataset-scale admission](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json) failed three fixed stability gates; remains diagnostic | Resolve predictor-profile stability scientifically, preregister a successor identity, and pass every gate before freeze review |
+| P4 | Local and Global Utility | P1, P3 | Historical Windows GPU execution passed resource/coverage gates but failed three stability gates; root cause was the row-order-sensitive implicit AutoGluon split. One explicit-split successor is implemented and preregistered; remains diagnostic | Pass former-failure sentinels and the complete 67-task Windows GPU successor run before freeze review |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
@@ -294,7 +294,7 @@ Exit evidence:
 - the selected profiles pass source parity where source parity is claimed; and
 - Local Utility and Global Utility remain distinct outputs and sub-leaderboards.
 
-Current adjudication: bounded source parity passes, but `p4-dataset-scale-admission-pilot@0.1.1` fails. A new protocol version and complete passing run are required before profile freeze; the observed `0.1.1` thresholds must not be relaxed post hoc.
+Current adjudication: the historical `0.1.1` CPU and `0.2.1` Windows profiles remain failed evidence. `p4-utility@0.5.0` now has one result-producing adapter with canonical row ordering and an explicit seeded fit/tuning split. Exact TabEval execution is isolated to internal provenance tests. The preregistered Windows GPU successor must pass the unchanged thresholds and complete schedule before profile freeze.
 
 ### 6.6 P5 — high-order fidelity and empirical privacy
 

@@ -2,56 +2,44 @@
 
 ## Status and claim boundary
 
-P4 is implemented and its bounded diagnostic gates passed on [Linux/Python 3.11](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31053624769), with [machine-readable engineering evidence](../evidence/evaluation/p4-utility-run-31053624769.json) retained at SHA-256 `bb2b5f3d48647122b1036f8ce010eeecee948a0dfb4a0bfc247ab7100439cd59`. The separate real Global source-runtime pilot passed in [run 31057073762](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31057073762); its [retained evidence](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) has SHA-256 `1ca205c3fbad6c6e80cd275330dae00edda5dfcad7efe229f4fcb285b9d63596`. P4 remains a **diagnostic pilot**: it is not protocol-frozen, release-supported, or eligible for Official Results.
+P4 has one result-producing implementation: `p4-utility@0.5.0`, bound to evaluator profile `p4-utility-stable@0.2.0`. It is implemented but remains diagnostic. It is not yet protocol-frozen, release-supported, or eligible for Official Results.
 
-The implementation establishes the complete auditable path from three immutable decoded tables to Local and Global Utility Atomic Results and a finalized result bundle. The bounded pilot now establishes exact aggregate parity between the locked TabEval source and the adapter for one classification target and one regression target with real XGB, KNN, and TabPFN training. It does not establish full-dataset, multi-seed stability or Official Results admission.
+The exact TabEval source at revision `dba19a4ee7aa391621cbeb464609285fd515dece` remains checksum-locked for provenance and internal source-parity tests. It is not a second CLI option, metric profile, or leaderboard implementation. User-facing evaluation always uses the stable adapter described below.
 
 ## Required inputs and leakage boundary
 
-P4 requires three checksum-bound tables:
+P4 requires three checksum-bound canonical model-view tables:
 
-- real train: the only real table allowed to fit feature transformations and TRTR predictors;
-- synthetic train: the only table allowed to fit TSTR predictors; and
-- held-out real test: evaluation only, never a fit input.
+- real train, used to fit transformations, Dummy models, and TRTR predictors;
+- synthetic train, used to fit TSTR predictors; and
+- held-out real test, used only for scoring and never supplied to a fit operation.
 
-All three tables must pass the strict canonical model-view gate. The gate rejects missing model-input values, non-finite numerical values, lossy logical types, schema differences, and an unexpected synthetic row count. Generated values are never repaired.
-
-The Evaluation Request stores the real-train, real-test, and synthetic checksums separately. Bundle validation verifies these identities and requires every Local run to attest the same test view.
+The structural gate rejects schema drift, missing model inputs, non-finite numerical values, lossy logical types, and unexpected synthetic row counts. Generated values are not repaired. Bundle finalization verifies the three table identities separately and records `real_test_used_for_fit: false`.
 
 ## Local Utility
 
-Each reviewed dataset declares one primary task. Adult predicts `income`; Sick predicts `Class`. The pilot profile uses:
+Each dataset declares one reviewed primary predictive task. Adult predicts `income`; Sick predicts `Class`. Classification uses Macro-F1 as the primary metric and Balanced Accuracy, ROC-AUC, and PR-AUC when defined. Regression uses RMSE as the primary metric and MAE and R-squared when defined.
 
-- classification primary metric: Macro-F1;
-- regression primary metric: RMSE;
-- classification secondary metrics: Balanced Accuracy, ROC-AUC, and PR-AUC when defined;
-- regression secondary metrics: MAE and R-squared when defined; and
-- three evaluator families: linear, random forest, and histogram gradient boosting.
+The frozen local panel contains three families:
 
-The exact package classes and parameters are stored in `p4-utility-pilot-v1.json`. Classification uses Logistic Regression, Random Forest, and Histogram Gradient Boosting. Regression uses Ridge, Random Forest, and Histogram Gradient Boosting. Randomized estimators receive the Evaluation Request seed and use one worker where supported.
+- Logistic Regression or Ridge;
+- Random Forest; and
+- Histogram Gradient Boosting.
 
-One-hot category state and numerical scaling state are fitted once on real-train features. The same frozen transformation is applied to real train, synthetic train, and real test. The target and held-out test values never fit the transformation.
+The exact official scikit-learn classes and parameters are stored in `p4-utility-stable-v1.json`. One-hot encoding and numerical scaling are fitted only on real-train features and then frozen for real train, synthetic train, and real test.
 
-For every evaluator and seed, P4 retains the primary and applicable secondary values for:
-
-- Dummy: a most-frequent classifier or mean regressor fitted on real train;
-- TRTR: predictor fitted on real train and evaluated on real test; and
-- TSTR: the same predictor configuration fitted on synthetic train and evaluated on the same real test.
-
-The separately identified, benchmark-derived Local Utility retention is:
+For every evaluator seed, P4 retains Dummy, TRTR, and TSTR raw results. The benchmark-derived retention is:
 
 ~~~text
 higher is better: (TSTR - Dummy) / (TRTR - Dummy)
 lower is better:  (Dummy - TSTR) / (Dummy - TRTR)
 ~~~
 
-Retention is not clipped. If TRTR fails to improve on Dummy by more than `1e-12`, retention is `mathematically_undefined`. The strict summary is null unless every requested evaluator/seed retention computes.
+Retention is never clipped. It is `mathematically_undefined` when TRTR does not improve on Dummy beyond the declared `1e-12` tolerance.
 
 ## Global Utility
 
-Global Utility rotates every included canonical model-view column as the target. Dataset Profiles must account for every model-view column: include it, or record a stable exclusion reason. Identifiers, ignored fields, and audit-only fields cannot be included. Datetime and string targets require an explicit exclusion until their target policies are frozen.
-
-The reviewed source formula is TabStruct Equation 4:
+Global Utility rotates every included canonical model-view column as the target. Every column must be included or excluded with a stable reason. The formula follows TabStruct Equation 4:
 
 ~~~text
 categorical target: balanced_accuracy(TSTR) / balanced_accuracy(TRTR)
@@ -59,102 +47,78 @@ numerical target:   RMSE(TRTR) / RMSE(TSTR)
 global utility:     equal mean over targets, then equal mean over seeds
 ~~~
 
-Ratios above one are valid and are never clipped. A zero or non-finite denominator is explicit `mathematically_undefined`. The published diagnostic `global_utility` is null if any requested target/seed ratio is unavailable; computed targets are never silently reweighted.
+Ratios are not clipped. Missing class support, zero denominators, predictor failures, and resource failures remain explicit; unavailable targets are never silently removed from the denominator.
 
-The pinned low-cost predictor identity is TabEval `UtilityPerFeature` at revision `dba19a4ee7aa391621cbeb464609285fd515dece`, timestamp `2025-08-09`, configured with XGB, KNN, and TabPFN through AutoGluon. The LF-normalized source and Apache-2.0 license are checksum-locked. Upstream did not declare AutoGluon and left XGBoost and TabPFN unbounded, so no reproducible upstream-official environment exists. The pilot therefore labels its Linux/Python 3.11 CPU tuple—AutoGluon 1.4.0, `xgboost-cpu` 3.0.3, TabPFN 2.1.2, and PyTorch 2.3.0+cpu—as a benchmark-approved reconstruction rather than an upstream-official lock.
+The predictor panel follows the locked TabEval `UtilityPerFeature` configuration: XGB, KNN, and TabPFN through AutoGluon, with weighted ensembling disabled. TabPFN may be omitted only for classification targets exceeding the locked ten-class limit. XGB and KNN remain mandatory, and TRTR/TSTR must expose the same trained model set.
 
-In the retained run, both source and adapter trained `CustomTabPFNModel`, `KNeighbors`, and `XGBoost`. Their aggregate Balanced Accuracy was exactly `0.5416666666666666`; their aggregate RMSE was exactly `8.979373060535432`; both absolute source/adapter differences were zero under the declared `1e-8` gate. P4 records exact trained model names and per-model scores and requires matching TRTR/TSTR predictor sets for a target. No fallback model or unrecorded reduced profile is permitted.
+### Stable fit protocol
 
-The pinned TabPFN implementation supports at most ten classes. The pilot directly executed the locked source guard and confirmed that an eleven-class target is rejected before TabPFN model fitting. AutoGluon may then source-faithfully omit the failed family; P4 records `source-predictor-set-reduced` and accepts a ratio only when both arms expose the same predictor set. End-to-end high-cardinality behavior on reviewed dataset targets remains an admission item.
+TabEval passes `tuning_data=None` to AutoGluon. AutoGluon then creates a hidden validation split from the input row positions. The historical identity-surrogate runs showed that this made equal row multisets produce different fit boundaries after a harmless row permutation.
 
-TabEval's favorable value of one for a constant synthetic target is rejected. Missing synthetic target classes produce `insufficient_support`, remain visible, and prevent a strict Global Utility summary.
+The sole public adapter corrects that protocol-level instability without patching any upstream model source:
+
+1. convert all three inputs to the reviewed canonical model view;
+2. sort each training arm lexicographically by every model-view column, including the target, using `lexicographic-all-model-columns-v1`;
+3. compute AutoGluon's declared default holdout fraction;
+4. call `autogluon.core.utils.utils.generate_train_test_split` with the Evaluation Request evaluator seed and classification stratification when applicable;
+5. pass the resulting fit and tuning tables explicitly to AutoGluon; and
+6. pass the seed to AutoGluon's learner while keeping the held-out real test outside both tables.
+
+For each arm, `utility-details.json` records the ordering identity, split implementation, seed, task/problem type, holdout fraction, row counts, content fingerprints for the canonical input/fit/tuning tables, and `real_test_used_for_fit: false`. No row content is embedded in this evidence.
+
+This preserves the official XGB/KNN/TabPFN implementations, TabStruct formula, target coverage, and five-seed design. It changes only the benchmark-owned invocation boundary that previously depended on arbitrary input order.
 
 ## Atomic Results and bundle evidence
 
-P4 writes:
+P4 writes raw Local results per metric/arm/evaluator/seed, Local retention per evaluator/seed, raw Global results per target/arm/seed, and Global target ratios per target/seed. The finalized bundle includes `metrics.parquet`, `summary.json`, `metadata.json`, `artifacts/utility-details.json`, stage records, an artifact inventory, and final checksums.
 
-- one raw Local Atomic Result per metric, arm, evaluator, and seed;
-- one Local retention Atomic Result per evaluator and seed;
-- one raw Global Atomic Result per target, arm, and seed;
-- one Global target-ratio Atomic Result per target and seed;
-- `artifacts/utility-details.json` with raw-arm mappings, target support, exact predictor sets, per-predictor scores, and the test boundary;
-- `metrics.parquet`, `summary.json`, `metadata.json`, stage records, artifact inventory, and final checksums.
+Bundle validation reconstructs derived values from raw arms and rejects missing arms, changed summaries, unequal weights, mismatched predictor sets, altered denominators, or missing real-test provenance. A partial bundle may be retained for diagnosis but is not a leaderboard score.
 
-Raw arms have zero aggregation weight. Local retention uses equal evaluator/seed weights. Global target ratios use equal target/seed weights. Bundle finalization independently reconstructs both formulas from Atomic Results and rejects changed summaries, missing raw arms, unequal weights, mismatched predictor sets, altered denominators, or a missing real-test identity.
+## Source parity versus result production
 
-## Failure states
+The internal `_source_exact_global_scorer` reconstructs TabEval's original implicit-split call only inside the locked-source validation harness. It establishes that the pinned source, predictor wrapper, dependencies, and checkpoints were understood correctly. It is deliberately unregistered and unavailable from `evaluate-table`.
 
-- `insufficient_support`: synthetic target classes are missing, or the real train cannot support the real-test labels;
-- `mathematically_undefined`: a weak Local denominator, zero Global denominator, or undefined secondary metric;
-- `implementation_failure`: a declared predictor cannot satisfy its result contract;
-- `resource_failure`: the authoritative optional Global backend, weights, memory, or time budget is unavailable;
-- `not_applicable`: reserved for an explicit reviewed applicability decision.
+The stable adapter does not claim line-for-line or numerical source parity because its explicit split is an intentional, documented invocation change. Its scientific lineage is instead established by unchanged formulas, predictors, metrics, and direct use of official packages.
 
-Failures are never dropped. A bundle may finalize as `partial`, but partial summaries are not leaderboard scores.
+## Historical evidence and successor identity
+
+Historical results are immutable:
+
+- the bounded Linux source-runtime evidence remains at [p4-global-source-runtime-run-31057073762.json](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json);
+- the exact Windows GPU source-runtime evidence remains at [p4-global-source-windows-gpu-c0e6e72.json](../evidence/evaluation/p4-global-source-windows-gpu-c0e6e72.json); and
+- the complete historical Windows dataset-scale result remains at [p4-dataset-scale-windows-gpu-a754ca1.json](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json).
+
+The last result executed all 67 tasks and 134 arms and passed its execution/resource gates, but failed the unchanged `0.05` stability gates for Adult `native-country`, Sick `referral-source`, and Sick `tsh`. That result remains failed. It is not reinterpreted under the new implementation.
+
+The successor validation has a new identity, `p4-dataset-scale-windows-gpu-stable-candidate@0.3.0`. It retains the same datasets, targets, five seeds, full-row-permutation identity surrogate, predictor policy, `0.05` gates, and resource limits. It binds the new evaluator and dataset-profile versions and runs only on the declared native Windows 11/Python 3.11/RTX 5080 environment. GitHub-hosted runners validate its contracts but cannot substitute for the required GPU run.
 
 ## Command
 
-Install the frozen Local Utility, contract, table, and bundle dependencies with:
+Install the standard utility dependencies with:
 
-~~~bash
+~~~powershell
 python -m pip install -e ".[utility]"
 ~~~
 
-This extra deliberately excludes the pending AutoGluon/XGBoost/TabPFN Global source runtime. Without that separately reviewed environment, the command still evaluates Local Utility and records explicit Global `resource_failure` states; it does not substitute another predictor.
+The optional Global runtime must additionally satisfy `requirements-p4-windows-gpu-validation.txt`. Without it, Local Utility is computed and Global failures remain explicit; no fallback predictor is substituted.
 
-~~~bash
-std-tabular-diffusion evaluate-table \
-  --protocol p4-utility \
-  --reference real_train.csv \
-  --real-test real_test.csv \
-  --synthetic synthetic_train.csv \
-  --dataset-profile configs/datasets/adult-uci-2-v1.json \
+~~~powershell
+std-tabular-diffusion evaluate-table `
+  --protocol p4-utility `
+  --reference real_train.csv `
+  --real-test real_test.csv `
+  --synthetic synthetic_train.csv `
+  --dataset-profile configs/datasets/adult-uci-2-v1.json `
   --output artifacts/p4/adult/run-001
 ~~~
 
-P4 defaults to evaluator seeds `0,1,2,3,4`. A diagnostic run may provide `--evaluator-seeds 23` or another comma-separated list. A different seed set is recorded and is not automatically leaderboard-compatible.
+P4 defaults to evaluator seeds `0,1,2,3,4`. Overrides are recorded and are not automatically leaderboard-compatible.
 
-## Dataset-scale admission protocol
+## Remaining admission work
 
-`p4-dataset-scale-admission-pilot@0.1.1` is the preregistered, non-official admission protocol for the real Global Utility runtime. It runs on Linux x86-64, Python 3.11, and CPU with the exact dependency and checkpoint identities used by the bounded source-runtime pilot. The first execution established that TabPFN 2.1.2 applies its official 1,000-row CPU guard. Version `0.1.1` therefore records and requires the official `TABPFN_ALLOW_CPU_LARGE_DATASET=1` opt-in and retains AutoGluon per-model failure metadata. It does not change the predictor panel, targets, seeds, surrogate, or thresholds.
+Before P4 can be frozen or admitted to Official Results:
 
-The schedule contains 67 unique target/seed tasks and 134 TRTR/TSTR arms:
-
-- seed-zero coverage of all 15 reviewed Adult targets at the official 32,561/16,281 split;
-- seed-zero coverage of all 28 reviewed non-constant Sick targets at the official 2,800/972 split; and
-- seeds zero through four for one binary, one high-cardinality or multiclass, and one numerical sentinel per dataset: Adult `income`, `native-country`, and `fnlwgt`; Sick `class`, `referral-source`, and `tsh`.
-
-The TSTR input is a deterministic full-row permutation of real train. It preserves every row and every column's support, exercises both evaluator arms, and cannot be published as generator-quality evidence. Targets with more than ten real-train classes may omit TabPFN exactly as the locked source does; XGB and KNN remain mandatory, and both arms must expose the same trained model set.
-
-The preregistered gates require every scheduled task exactly once, every applicable predictor family, an absolute identity-ratio deviation no greater than `0.05`, a five-seed ratio range no greater than `0.05`, no arm above 600 observed seconds, and no observed Python process-tree peak above 14 GiB. Shards write failure-first JSON after every target. The finalizer rejects missing or duplicate shards, changed commits or manifests, incomplete target coverage, model-set drift, resource failures, and threshold failures before emitting one retained result.
-
-TabPFN's version-matched official documentation recommends GPU execution and states that only datasets of approximately 1,000 rows or fewer are feasible on CPU; it describes the large-dataset CPU opt-in as very slow. The admission run therefore measures a deliberately strict source-faithful CPU envelope rather than assuming it will pass. See the [TabPFN v2.1.1 documentation](https://github.com/PriorLabs/TabPFN/tree/v2.1.1#-quick-start); PyPI 2.1.2 contains no source change from that release according to the upstream changelog.
-
-`p4-dataset-scale-windows-gpu-admission-pilot@0.2.1` is a separate preregistered diagnostic profile for the repository's primary release platform. It preserves the exact 67-task schedule, row-permutation surrogate, predictor policy, TabEval source, TabPFN checkpoints, and fixed `0.05` stability gates. Only the execution profile changes to native Windows 11, Python 3.11, AutoGluon 1.4.0, XGBoost 3.0.3, TabPFN 2.1.2, PyTorch 2.8.0+cu128, CUDA 12.8, and the recorded RTX 5080. Every arm for which TabPFN is protocol-applicable must prove a positive CUDA allocation increase and remain below the preregistered 15 GiB CUDA allocation limit; high-cardinality arms that must omit TabPFN are exempt. Version `0.2.1` records this applicability correction after the first Adult shard exposed the contradictory `0.2.0` implementation; datasets, targets, seeds, predictor policy, stability thresholds, and numerical resource limits are unchanged. This profile does not generalize to other GPUs.
-
-## Dataset-scale admission result
-
-[Run 31060416318](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31060416318) **failed** the preregistered `0.1.1` admission protocol. The immutable [admission decision](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) is bound to the original [finalizer output](../evidence/evaluation/p4-dataset-scale-run-31060416318.json), reconstructed [partial observations](../evidence/evaluation/p4-dataset-scale-observations-run-31060416318.json), and reviewed [runner-failure observations](../evidence/evaluation/p4-dataset-scale-runner-failures-run-31060416318.json). Their SHA-256 values are, respectively, `8d6555c586f5b1a2c9a8024d6e151cb9559742ef023bfec2c3ea36b7b578d85e`, `cf3a53395f50af49600cb9ab190978ee45b875286b0e15c63215db6a26c90ae8`, `a7022a64e1a279f20e3090ccb00c0f445e1168d803efb06e5ae685280804057f`, and `135381b05c11eb4887a8563b29e4ccf0b9818679e913cea4fb53895f22d3fa35`.
-
-All five Sick shards completed: 40 tasks and 80 arms passed execution, with all XGB/KNN/TabPFN families present. Maximum arm wall time was `346.2811` seconds and maximum process-tree RSS was `2.1784` GiB, both within the preregistered limits. The `class` sentinel passed stability. `referral-source` failed with maximum identity deviation `0.05280` and seed range `0.07229`; `tsh` failed with seed range `0.08488`. Each applicable limit was `0.05`.
-
-All four Adult jobs lost their GitHub Actions runner during execution, so 27 Adult tasks and four shard artifacts are missing. The shutdown is observed fact. Resource exhaustion is consistent with the execution path and upstream CPU guidance but is **not proven**, because no kernel OOM record or completed process-tree sample was retained. Adult coverage, stability, high-cardinality behavior, and resource compliance are therefore not assessed.
-
-The result is not generator-quality evidence because the pilot used the declared row-permutation surrogate. It does not freeze the profile, admit P4 into Official Results, or justify changing an observed threshold after the run.
-
-### Windows GPU rerun result
-
-The exact Windows source-runtime pilot passed at commit `c0e6e72`. Its retained [machine-readable evidence](../evidence/evaluation/p4-global-source-windows-gpu-c0e6e72.json) has SHA-256 `3f3033348c075a7b2f2584eaad2bd50d419c7aa12391af320c6bec75ecab1306`. The locked TabEval source and adapter produced identical classification and regression aggregates, all XGB/KNN/TabPFN families trained, and both executions proved positive CUDA allocation on the recorded RTX 5080.
-
-The complete `0.2.1` dataset-scale run at commit `a754ca1` executed all 9 shards, 67 tasks, and 134 TRTR/TSTR arms successfully with no missing or duplicate coverage. Its retained [finalizer evidence](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json) has SHA-256 `2c7274a924b5e0673ba30878eb15de3c0e5d7cc78f930d8869054fc0177f4478`. Maximum arm wall time was `17.1987` seconds, maximum process-tree RSS was `2.0042` GiB, and maximum CUDA allocation increase was `3.6476` GiB; all resource gates passed. This resolves the former Adult execution gap and demonstrates that the selected Windows GPU profile is operational.
-
-Scientific admission nevertheless failed the unchanged stability gates. Adult `income` and `fnlwgt` passed, but `native-country` had a five-seed range of `0.24827` and maximum identity deviation of `0.19203`. Sick `class` passed, but `referral-source` had a range of `0.05372` and `tsh` had a range of `0.08630`. The limit is `0.05`. The result therefore isolates the remaining blocker as predictor-profile stability rather than platform resources. P4 remains diagnostic and excluded from Official Results.
-
-## Remaining P4 exit work
-
-Before P4 can advance beyond diagnostic use:
-
-1. diagnose the repeated Adult `native-country`, Sick `referral-source`, and Sick `tsh` instability as a scientific-profile issue without changing the observed gates post hoc;
-2. decide whether the current XGB/KNN/TabPFN predictor profile and identity-ratio gate are scientifically appropriate before preregistering any successor protocol;
-3. rerun complete coverage and stability only after that scientific decision, under one newly frozen identity; and
-4. reconsider profile freeze and Official Results admission only after every required gate passes.
+1. run the successor's former-failure sentinels on the declared Windows GPU runtime;
+2. run and finalize the complete preregistered 67-task schedule;
+3. require every scientific, execution, resource, fit-boundary, and evidence gate to pass without changing thresholds after observation; and
+4. perform a separate profile-freeze and release-admission review.

@@ -1,4 +1,4 @@
-"""Run and finalize the preregistered P4 Adult/Sick dataset-scale pilot."""
+"""Run and finalize the preregistered P4 Adult/Sick stable-candidate validation."""
 
 from __future__ import annotations
 
@@ -37,10 +37,8 @@ from standardized_tabular_diffusion.evaluation.utility import (
 )
 from standardized_tabular_diffusion.validation import p4_global_source
 
-PROTOCOL_ID = "p4-dataset-scale-admission-pilot-v1"
-WINDOWS_GPU_PROTOCOL_ID = "p4-dataset-scale-windows-gpu-admission-pilot-v1"
-LEGACY_PILOT_PROFILE = "linux-cpu"
-WINDOWS_GPU_PILOT_PROFILE = "windows-rtx5080"
+PROTOCOL_ID = "p4-dataset-scale-windows-gpu-stable-candidate-v1"
+STABLE_PILOT_PROFILE = "windows-rtx5080-stable"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GIB = 1024**3
 
@@ -49,11 +47,8 @@ class P4DatasetScaleValidationError(RuntimeError):
     """Raised when the preregistered dataset-scale protocol cannot be established."""
 
 
-def _pilot_manifest(pilot_profile: str = LEGACY_PILOT_PROFILE) -> dict[str, Any]:
-    filenames = {
-        LEGACY_PILOT_PROFILE: "p4-dataset-scale-pilot-v1.json",
-        WINDOWS_GPU_PILOT_PROFILE: "p4-dataset-scale-windows-gpu-pilot-v1.json",
-    }
+def _pilot_manifest(pilot_profile: str = STABLE_PILOT_PROFILE) -> dict[str, Any]:
+    filenames = {STABLE_PILOT_PROFILE: "p4-dataset-scale-windows-gpu-stable-v1.json"}
     if pilot_profile not in filenames:
         raise P4DatasetScaleValidationError(f"Unknown P4 dataset-scale pilot profile: {pilot_profile}")
     resource = resources.files("standardized_tabular_diffusion").joinpath(
@@ -67,10 +62,8 @@ def _pilot_manifest(pilot_profile: str = LEGACY_PILOT_PROFILE) -> dict[str, Any]
 
 
 def _profile_identity(manifest: dict[str, Any]) -> tuple[str, str]:
-    if manifest.get("pilot_id") == "p4-dataset-scale-admission-pilot":
-        return LEGACY_PILOT_PROFILE, PROTOCOL_ID
-    if manifest.get("pilot_id") == "p4-dataset-scale-windows-gpu-admission-pilot":
-        return WINDOWS_GPU_PILOT_PROFILE, WINDOWS_GPU_PROTOCOL_ID
+    if manifest.get("pilot_id") == "p4-dataset-scale-windows-gpu-stable-candidate":
+        return STABLE_PILOT_PROFILE, PROTOCOL_ID
     raise P4DatasetScaleValidationError("Unknown P4 dataset-scale pilot identity")
 
 
@@ -88,7 +81,7 @@ def _profile_for_dataset(dataset: str, manifest: dict[str, Any]) -> DatasetProfi
 def validate_pilot_manifest(
     manifest: dict[str, Any] | None = None,
     *,
-    pilot_profile: str = LEGACY_PILOT_PROFILE,
+    pilot_profile: str = STABLE_PILOT_PROFILE,
 ) -> dict[str, Any]:
     """Validate the scientific schedule before any expensive model fit starts."""
 
@@ -114,75 +107,40 @@ def validate_pilot_manifest(
     }
     if set(payload) != expected_fields:
         raise P4DatasetScaleValidationError("P4 dataset-scale pilot fields have drifted")
-    expected_pilot = {
-        LEGACY_PILOT_PROFILE: ("p4-dataset-scale-admission-pilot", "0.1.1"),
-        WINDOWS_GPU_PILOT_PROFILE: ("p4-dataset-scale-windows-gpu-admission-pilot", "0.2.1"),
-    }[resolved_profile]
+    expected_pilot = ("p4-dataset-scale-windows-gpu-stable-candidate", "0.3.0")
     if (
         payload["pilot_schema_version"] != "1.0.0"
         or (payload["pilot_id"], payload["pilot_version"]) != expected_pilot
-        or payload["status"]
-        not in {"preregistered-diagnostic", "dataset-scale-pilot-validated-diagnostic"}
+        or payload["status"] not in {"preregistered-diagnostic", "dataset-scale-validated-diagnostic"}
         or payload["official_results_allowed"] is not False
     ):
         raise P4DatasetScaleValidationError("Pilot identity or Official Results boundary has drifted")
     amendments = payload["amendments"]
-    if not isinstance(amendments, list):
+    if amendments != []:
         raise P4DatasetScaleValidationError("Pilot amendment history is invalid")
-    if resolved_profile == LEGACY_PILOT_PROFILE:
-        if (
-            len(amendments) != 1
-            or amendments[0].get("from_version") != "0.1.0"
-            or "31059896167" not in amendments[0].get("trigger_run", "")
-            or "TABPFN_ALLOW_CPU_LARGE_DATASET=1" not in amendments[0].get("change", "")
-        ):
-            raise P4DatasetScaleValidationError("Pilot amendment history is incomplete")
-    elif (
-        len(amendments) != 1
-        or amendments[0].get("from_version") != "0.2.0"
-        or "c0e6e72" not in amendments[0].get("trigger_run", "")
-        or "only to arms for which TabPFN is protocol-applicable" not in amendments[0].get(
-            "change", ""
-        )
-    ):
-        raise P4DatasetScaleValidationError("The Windows GPU pilot amendment history is incomplete")
     evaluator = load_p4_evaluator_profile()
     if (payload["evaluator_profile_id"], payload["evaluator_profile_version"]) != (
         evaluator["profile_id"],
         evaluator["profile_version"],
     ):
         raise P4DatasetScaleValidationError("Pilot evaluator identity differs from P4")
-    expected_environments = {
-        LEGACY_PILOT_PROFILE: {
-            "platform": "Linux x86_64 CPU",
-            "python": "3.11",
-            "dependency_lock": "requirements-p4-global-source-validation.txt",
-            "tabpfn_cpu_large_dataset_opt_in": "TABPFN_ALLOW_CPU_LARGE_DATASET=1",
-        },
-        WINDOWS_GPU_PILOT_PROFILE: {
-            "platform": "native Windows 11 x86_64 with NVIDIA GeForce RTX 5080",
-            "python": "3.11",
-            "dependency_lock": "requirements-p4-windows-gpu-validation.txt",
-            "runtime_profile": "windows-rtx5080",
-            "tabpfn_cpu_large_dataset_opt_in": None,
-        },
+    expected_environment = {
+        "platform": "native Windows 11 x86_64 with NVIDIA GeForce RTX 5080",
+        "python": "3.11",
+        "dependency_lock": "requirements-p4-windows-gpu-validation.txt",
+        "runtime_profile": "windows-rtx5080",
+        "tabpfn_cpu_large_dataset_opt_in": None,
     }
     environment = payload["environment"]
-    if environment != expected_environments[resolved_profile]:
+    if environment != expected_environment:
         raise P4DatasetScaleValidationError("Pilot environment identity has drifted")
-    expected_runtime_manifests = {
-        LEGACY_PILOT_PROFILE: (
-            "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
-        ),
-        WINDOWS_GPU_PILOT_PROFILE: (
-            "standardized_tabular_diffusion/resources/evaluation/upstream/"
-            "tabeval-p4-windows-gpu-runtime.json"
-        ),
-    }
-    if payload["source_runtime_manifest"] != expected_runtime_manifests[resolved_profile]:
+    expected_runtime_manifest = (
+        "standardized_tabular_diffusion/resources/evaluation/upstream/"
+        "tabeval-p4-windows-gpu-runtime.json"
+    )
+    if payload["source_runtime_manifest"] != expected_runtime_manifest:
         raise P4DatasetScaleValidationError("Pilot source-runtime manifest identity has drifted")
-    if resolved_profile == WINDOWS_GPU_PILOT_PROFILE:
-        p4_global_source._windows_gpu_runtime_manifest()
+    p4_global_source._windows_gpu_runtime_manifest()
     surrogate = payload["surrogate"]
     if (
         surrogate.get("type") != "full-row-multiset-preserving-permutation"
@@ -198,8 +156,8 @@ def validate_pilot_manifest(
     }:
         raise P4DatasetScaleValidationError("Pilot coverage must bind Adult and Sick under seed zero")
     for dataset, expected in {
-        "adult": ("1.2.0-reviewed", 32561, 16281, 3),
-        "sick": ("1.3.0-reviewed", 2800, 972, 4),
+        "adult": ("1.3.0-reviewed", 32561, 16281, 3),
+        "sick": ("1.4.0-reviewed", 2800, 972, 4),
     }.items():
         record = datasets[dataset]
         if (
@@ -234,7 +192,7 @@ def validate_pilot_manifest(
     ):
         if not isinstance(resource_limits.get(key), (int, float)) or float(resource_limits[key]) <= 0:
             raise P4DatasetScaleValidationError(f"Invalid resource limit: {key}")
-    if resolved_profile == WINDOWS_GPU_PILOT_PROFILE and (
+    if (
         not isinstance(resource_limits.get("maximum_observed_cuda_peak_allocated_gib"), (int, float))
         or not 0 < float(resource_limits["maximum_observed_cuda_peak_allocated_gib"]) <= 16
     ):
@@ -443,6 +401,7 @@ def _run_arm(
             "predictors": list(result.predictors),
             "predictor_scores": result.predictor_scores,
             "predictor_failures": list(result.predictor_failures),
+            "fit_evidence": result.fit_evidence,
             "families": _families(result.predictors),
             "wall_seconds": time.perf_counter() - started,
             "baseline_rss_bytes": sampler.baseline_rss_bytes,
@@ -563,6 +522,17 @@ def _run_task(
                 failures.append(f"{name}-missing-tabpfn")
         if arms["trtr"]["predictors"] != arms["tstr"]["predictors"]:
             failures.append("predictor-set-mismatch")
+        trtr_fit_evidence = arms["trtr"].get("fit_evidence")
+        tstr_fit_evidence = arms["tstr"].get("fit_evidence")
+        if not isinstance(trtr_fit_evidence, dict) or not isinstance(tstr_fit_evidence, dict):
+            failures.append("explicit-fit-evidence-missing")
+        elif trtr_fit_evidence != tstr_fit_evidence:
+            failures.append("identity-fit-boundary-mismatch")
+        elif any(
+            item.get("real_test_used_for_fit") is not False
+            for item in (trtr_fit_evidence, tstr_fit_evidence)
+        ):
+            failures.append("held-out-test-boundary-not-proven")
     ratio = None
     if not failures:
         ratio = global_target_ratio(
@@ -657,17 +627,13 @@ def run_shard(
     classifier_checkpoint: Path,
     regressor_checkpoint: Path,
     require_declared_runtime_environment: bool = False,
-    pilot_profile: str = LEGACY_PILOT_PROFILE,
+    pilot_profile: str = STABLE_PILOT_PROFILE,
 ) -> dict[str, Any]:
     """Execute one resumable matrix shard and retain failure evidence."""
 
     manifest = validate_pilot_manifest(pilot_profile=pilot_profile)
     resolved_profile, protocol_id = _profile_identity(manifest)
-    runtime_profile = (
-        p4_global_source.LINUX_CPU_RUNTIME_PROFILE
-        if resolved_profile == LEGACY_PILOT_PROFILE
-        else p4_global_source.WINDOWS_GPU_RUNTIME_PROFILE
-    )
+    runtime_profile = p4_global_source.WINDOWS_GPU_RUNTIME_PROFILE
     evidence: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": protocol_id,
@@ -690,13 +656,6 @@ def run_shard(
     try:
         if require_declared_runtime_environment:
             p4_global_source._assert_runtime_environment(runtime_profile)
-        if (
-            resolved_profile == LEGACY_PILOT_PROFILE
-            and os.environ.get("TABPFN_ALLOW_CPU_LARGE_DATASET") != "1"
-        ):
-            raise P4DatasetScaleValidationError(
-                "Dataset-scale CPU execution requires the official TABPFN_ALLOW_CPU_LARGE_DATASET=1 opt-in"
-            )
         runtime = p4_global_source.verify_pilot_runtime(runtime_profile)
         source_manifest = p4_global_source._manifest()
         checkpoints = {
@@ -782,30 +741,22 @@ def _percentile(values: list[float], fraction: float) -> float:
     return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
 
 
-def _locked_files(pilot_profile: str = LEGACY_PILOT_PROFILE) -> dict[str, str]:
+def _locked_files(pilot_profile: str = STABLE_PILOT_PROFILE) -> dict[str, str]:
+    if pilot_profile != STABLE_PILOT_PROFILE:
+        raise P4DatasetScaleValidationError(f"Unknown P4 dataset-scale profile: {pilot_profile}")
     relative_paths = [
         ".github/workflows/p4-dataset-scale-validation.yml",
         "configs/datasets/adult-uci-2-v1.json",
         "configs/datasets/sick-uci-102-v1.json",
-        "requirements-p4-global-source-validation.txt",
+        "requirements-p4-windows-gpu-validation.txt",
         "standardized_tabular_diffusion/evaluation/tabstruct.py",
         "standardized_tabular_diffusion/evaluation/utility.py",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-dataset-scale-pilot-v1.json",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
-        "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-dataset-scale-windows-gpu-stable-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json",
         "standardized_tabular_diffusion/validation/p4_dataset_scale.py",
         "tests/evaluation/test_p4_dataset_scale_validation.py",
     ]
-    if pilot_profile == WINDOWS_GPU_PILOT_PROFILE:
-        relative_paths.extend(
-            [
-                "requirements-p4-windows-gpu-validation.txt",
-                "standardized_tabular_diffusion/resources/evaluation/evaluators/"
-                "p4-dataset-scale-windows-gpu-pilot-v1.json",
-                "standardized_tabular_diffusion/resources/evaluation/upstream/"
-                "tabeval-p4-windows-gpu-runtime.json",
-            ]
-        )
     return {path: sha256_file(REPO_ROOT / path) for path in relative_paths}
 
 
@@ -1041,7 +992,7 @@ def finalize_shards(
     shard_paths: Iterable[Path],
     output: Path,
     *,
-    pilot_profile: str = LEGACY_PILOT_PROFILE,
+    pilot_profile: str = STABLE_PILOT_PROFILE,
 ) -> dict[str, Any]:
     """Fail closed unless every preregistered task appears once and passes."""
 
@@ -1311,8 +1262,8 @@ def main() -> None:
     )
     shard.add_argument(
         "--pilot-profile",
-        choices=(LEGACY_PILOT_PROFILE, WINDOWS_GPU_PILOT_PROFILE),
-        default=LEGACY_PILOT_PROFILE,
+        choices=(STABLE_PILOT_PROFILE,),
+        default=STABLE_PILOT_PROFILE,
     )
 
     finalize = subparsers.add_parser("finalize", help="Finalize all shard evidence")
@@ -1320,8 +1271,8 @@ def main() -> None:
     finalize.add_argument("--output", type=Path, required=True)
     finalize.add_argument(
         "--pilot-profile",
-        choices=(LEGACY_PILOT_PROFILE, WINDOWS_GPU_PILOT_PROFILE),
-        default=LEGACY_PILOT_PROFILE,
+        choices=(STABLE_PILOT_PROFILE,),
+        default=STABLE_PILOT_PROFILE,
     )
 
     args = parser.parse_args()

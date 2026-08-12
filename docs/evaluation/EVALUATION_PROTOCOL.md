@@ -204,7 +204,7 @@ Balanced Accuracy, ROC-AUC, PR-AUC, MAE, and R-squared are secondary metrics whe
 
 The evaluator suite represents at least a linear model, a random forest, and a gradient-boosted tree. Exact implementations and frozen hyperparameters are pilot-frozen. Evaluator selection MUST use train and permitted validation data only and MUST be independent of the synthetic-data method being scored.
 
-The implemented P4 diagnostic candidate binds scikit-learn Logistic Regression/Ridge, Random Forest, and Histogram Gradient Boosting through `p4-utility-pilot@0.1.0`, with five default evaluator seeds. Its bounded engineering gates passed with retained [Linux/Python 3.11 evidence](../evidence/evaluation/p4-utility-run-31053624769.json). This is an implemented pilot identity, not a frozen Official Results profile.
+The implemented P4 diagnostic candidate binds scikit-learn Logistic Regression/Ridge, Random Forest, and Histogram Gradient Boosting through `p4-utility-stable@0.2.0`, with five default evaluator seeds. Global Utility has one result-producing adapter: complete rows are canonicalized before an explicit seeded AutoGluon fit/tuning split, and the held-out real test remains outside the fit boundary. Exact TabEval execution is internal provenance validation, not a selectable result profile. The candidate is not yet a frozen Official Results profile.
 
 This primary Macro-F1/RMSE panel is a benchmark contract. It MUST NOT be called an exact reproduction of GReaT, which uses classification accuracy and regression MSE with linear or logistic regression, decision tree, and random forest predictors, or TabStruct, whose classification utility uses Balanced Accuracy.
 

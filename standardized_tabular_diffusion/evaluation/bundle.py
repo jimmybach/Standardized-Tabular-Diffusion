@@ -1197,8 +1197,67 @@ def _validate_final_atomic_results(
                 "predictors",
                 "predictor_scores",
                 "predictor_failures",
+                "fit_evidence",
             }:
                 raise BundleError("P4 Global run detail is malformed")
+            fit_maps = run["fit_evidence"]
+            if not isinstance(fit_maps, dict) or not set(fit_maps).issubset({"trtr", "tstr"}):
+                raise BundleError("P4 Global fit-boundary evidence is malformed")
+            fit_fields = {
+                "training_row_order",
+                "split_implementation",
+                "seed",
+                "task_type",
+                "problem_type",
+                "holdout_fraction",
+                "input_rows",
+                "fit_train_rows",
+                "tuning_rows",
+                "input_multiset_fingerprint",
+                "fit_train_fingerprint",
+                "tuning_fingerprint",
+                "real_test_used_for_fit",
+            }
+            for fit_evidence in fit_maps.values():
+                if fit_evidence is None:
+                    continue
+                if not isinstance(fit_evidence, dict) or set(fit_evidence) != fit_fields:
+                    raise BundleError("P4 Global fit-boundary evidence is malformed")
+                if (
+                    fit_evidence["training_row_order"] != "lexicographic-all-model-columns-v1"
+                    or fit_evidence["split_implementation"]
+                    != "autogluon.core.utils.utils.generate_train_test_split"
+                    or fit_evidence["seed"] != run["seed"]
+                    or fit_evidence["task_type"] != run["task_type"]
+                    or fit_evidence["real_test_used_for_fit"] is not False
+                ):
+                    raise BundleError("P4 Global fit-boundary identity differs from the run")
+                row_fields = ("input_rows", "fit_train_rows", "tuning_rows")
+                if any(
+                    isinstance(fit_evidence[field], bool)
+                    or not isinstance(fit_evidence[field], int)
+                    or fit_evidence[field] < 1
+                    for field in row_fields
+                ) or fit_evidence["fit_train_rows"] + fit_evidence["tuning_rows"] != fit_evidence[
+                    "input_rows"
+                ]:
+                    raise BundleError("P4 Global fit-boundary row counts are invalid")
+                if (
+                    isinstance(fit_evidence["holdout_fraction"], bool)
+                    or not isinstance(fit_evidence["holdout_fraction"], (int, float))
+                    or not 0 < float(fit_evidence["holdout_fraction"]) < 1
+                ):
+                    raise BundleError("P4 Global fit-boundary holdout fraction is invalid")
+                if any(
+                    not isinstance(fit_evidence[field], str)
+                    or re.fullmatch(r"[0-9a-f]{64}", fit_evidence[field]) is None
+                    for field in (
+                        "input_multiset_fingerprint",
+                        "fit_train_fingerprint",
+                        "tuning_fingerprint",
+                    )
+                ):
+                    raise BundleError("P4 Global fit-boundary fingerprints are invalid")
             failure_maps = run["predictor_failures"]
             if not isinstance(failure_maps, dict) or not set(failure_maps).issubset({"trtr", "tstr"}):
                 raise BundleError("P4 Global predictor failure evidence is malformed")
@@ -1229,6 +1288,10 @@ def _validate_final_atomic_results(
             if ratio_atom is None or ratio_atom.state.value != run["state"]:
                 raise BundleError("P4 Global ratio detail differs from its Atomic Result state")
             if ratio_atom.state.value == "computed":
+                if set(fit_maps) != {"trtr", "tstr"} or any(
+                    fit_maps[arm] is None for arm in ("trtr", "tstr")
+                ):
+                    raise BundleError("A computed P4 Global ratio requires both fit-boundary records")
                 try:
                     reconstructed = global_target_ratio(
                         float(run["trtr"]), float(run["tstr"]), task_type=run["task_type"]

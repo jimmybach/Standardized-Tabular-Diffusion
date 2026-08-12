@@ -89,7 +89,7 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
     if require_primary_family_environment and not primary:
         raise RuntimeError("P4 primary-family evidence requires Windows with Python 3.11")
     dataset = load_dataset_profile(REPO_ROOT / "configs" / "datasets" / "adult-uci-2-v1.json")
-    protocol = resolve_protocol("p4-utility", "0.4.0")
+    protocol = resolve_protocol("p4-utility", "0.5.0")
     evaluator = load_p4_evaluator_profile()
     validate_utility_profile(dataset.payload, evaluator)
     train, test, synthetic = _fixture(dataset.payload)
@@ -150,7 +150,7 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
         "configs/datasets/adult-uci-2-v1.json",
         "configs/datasets/sick-uci-102-v1.json",
         "standardized_tabular_diffusion/evaluation/utility.py",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/protocols/p4-utility.json",
         "tests/evaluation/test_p4_utility.py",

@@ -27,7 +27,7 @@ def p3_protocol():
 
 @pytest.fixture
 def p4_protocol():
-    return resolve_protocol("p4-utility", "0.4.0")
+    return resolve_protocol("p4-utility", "0.5.0")
 
 
 @pytest.fixture

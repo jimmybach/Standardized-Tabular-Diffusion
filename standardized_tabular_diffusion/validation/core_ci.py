@@ -19,7 +19,8 @@ REQUIRED_WHEEL_FILES = {
     "standardized_tabular_diffusion/schemas/evaluation/metric-registry-entry.schema.json",
     "standardized_tabular_diffusion/resources/evaluation/metrics/legacy-tabstruct-aligned-v1.json",
     "standardized_tabular_diffusion/resources/evaluation/protocols/development-p1.json",
-    "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-dataset-scale-windows-gpu-pilot-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-dataset-scale-windows-gpu-stable-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
     "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json",
 }
 

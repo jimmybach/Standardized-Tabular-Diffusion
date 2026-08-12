@@ -164,7 +164,7 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
     synthetic = Path(args.synthetic)
     real_test = Path(args.real_test) if args.real_test is not None else None
     dataset = load_dataset_profile(args.dataset_profile)
-    protocol_versions = {"p2-shape-trend": "0.2.0", "p3-validity": "0.3.0", "p4-utility": "0.4.0"}
+    protocol_versions = {"p2-shape-trend": "0.2.0", "p3-validity": "0.3.0", "p4-utility": "0.5.0"}
     protocol = resolve_protocol(args.protocol, protocol_versions[args.protocol])
     if args.protocol == "p4-utility" and real_test is None:
         raise ValueError("--real-test is required for the p4-utility protocol")

@@ -131,7 +131,7 @@ GlobalUtility(D) = mean_j Utility_j(D)
 
 论文的 Full-tuned profile 集成九个调参预测器：Logistic Regression、KNN、MLP、Random Forest、Extra Trees、LightGBM、CatBoost、XGBoost 和 TabPFN。Tiny-default profile 使用三个未调参预测器，论文支持将其作为成本更低的 Global Utility profile。锁定的 TabEval `UtilityPerFeature` 快照实现了三预测器配置，并在合成目标恒定时赋予有利的 `[1]` 分类值。
 
-决定：不同预测器 profile 具有不同指标身份。本基准不接受恒定目标的有利回退；该情况成为显式支持失败，因此在这一边界情况上不能声称与代码完全等价。TabStruct 公式仍是 Global Utility 的目标。有限范围 Linux/Python 3.11 pilot 已直接执行锁定的 TabEval 来源与真实 XGB/KNN/TabPFN 模型，适配器分类/回归聚合值均严格一致。由于上游未发布依赖锁定，该运行时仍被明确标记为基准审批环境，而非上游官方环境。首次预注册的数据集规模准入未通过：Adult 的所有 shard 因运行器关闭而丢失；Sick 已完整执行且资源门通过，但两个稳定性哨兵失败。该预测器 profile 仍为诊断状态。
+决定：不同预测器 profile 具有不同指标身份。本基准不接受恒定目标的有利回退，该情况成为显式支持失败。TabStruct 公式仍是 Global Utility 的目标。精确 TabEval 执行仅保留为内部来源验证。历史数据集规模运行证明，TabEval 的 `tuning_data=None` 调用会使输入行顺序改变 AutoGluon 的隐藏验证划分。因此，唯一生成结果的后继实现会先规范化完整训练行，再显式提供带种子的 AutoGluon 拟合/调参划分，同时保留官方 XGB/KNN/TabPFN 包、指标和目标覆盖范围。该调用变化拥有新身份，不声称精确源码等价；在预注册 Windows GPU 后继验证通过前，profile 仍为诊断状态。
 
 ### 3.7 DCR
 

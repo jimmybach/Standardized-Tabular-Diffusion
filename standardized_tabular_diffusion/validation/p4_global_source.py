@@ -1,4 +1,4 @@
-"""Execute the locked TabEval Global Utility source and the P4 adapter."""
+"""Execute the locked TabEval Global Utility source and its internal reconstruction."""
 
 from __future__ import annotations
 
@@ -567,7 +567,7 @@ def _locked_files(runtime_profile: str = LINUX_CPU_RUNTIME_PROFILE) -> dict[str,
         "standardized_tabular_diffusion/evaluation/evaluate_table.py",
         "standardized_tabular_diffusion/evaluation/tabstruct.py",
         "standardized_tabular_diffusion/evaluation/utility.py",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
         "standardized_tabular_diffusion/validation/p4_global_source.py",
@@ -610,8 +610,8 @@ def run_validation(
         "repository_commit": _repository_commit(),
         "claim_boundary": (
             "Executes the exact locked TabEval UtilityPerFeature and CustomTabPFNModel source with real "
-            "AutoGluon, XGBoost, KNN, and checksum-locked TabPFN-v2 checkpoints, then compares the P4 "
-            "adapter on classification and regression fixtures. This reconstructs a benchmark-approved pilot "
+            "AutoGluon, XGBoost, KNN, and checksum-locked TabPFN-v2 checkpoints, then compares an internal "
+            "source-exact reconstruction on classification and regression fixtures. This reconstructs a benchmark-approved pilot "
             f"runtime ({runtime_profile}) because upstream published no dependency lock; it does not freeze Official Results or "
             "complete Adult/Sick multi-seed admission."
         ),
@@ -674,13 +674,13 @@ def run_validation(
 
                 from standardized_tabular_diffusion.evaluation.utility import (
                     _close_workspace_log_handlers,
-                    _default_global_scorer,
+                    _source_exact_global_scorer,
                 )
 
                 adapter_gpu_before = _reset_cuda_peak() if gpu_profile else None
                 adapter_started = time.perf_counter()
                 with _controlled_runtime(seed):
-                    classification = _default_global_scorer(
+                    classification = _source_exact_global_scorer(
                         train,
                         test,
                         "binary_target",
@@ -689,7 +689,7 @@ def run_validation(
                         time_limit_seconds,
                         "source-pilot",
                     )
-                    regression = _default_global_scorer(
+                    regression = _source_exact_global_scorer(
                         train,
                         test,
                         "numeric_target",
@@ -722,7 +722,7 @@ def run_validation(
                 )
             if adapter_increase <= 0:
                 raise P4GlobalSourceValidationError(
-                    "P4 adapter execution did not prove an increase in CUDA allocation"
+                    "The internal source-exact reconstruction did not prove an increase in CUDA allocation"
                 )
             gpu_execution = {
                 "source": {
