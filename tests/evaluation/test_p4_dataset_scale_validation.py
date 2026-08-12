@@ -17,19 +17,23 @@ from standardized_tabular_diffusion.validation import p4_global_source
 pytestmark = [pytest.mark.evaluation, pytest.mark.source_parity]
 
 
-def test_preregistered_pilot_binds_full_datasets_stratified_seeds_and_safety_limits() -> None:
+def test_preregistered_successor_binds_full_datasets_seeds_and_safety_limits() -> None:
     manifest = validation.validate_pilot_manifest()
 
     assert manifest["status"] == "preregistered-diagnostic"
-    assert manifest["pilot_version"] == "0.1.1"
+    assert manifest["pilot_id"] == "p4-dataset-scale-windows-gpu-stable-candidate"
+    assert manifest["pilot_version"] == "0.3.0"
     assert manifest["official_results_allowed"] is False
-    assert manifest["amendments"][0]["from_version"] == "0.1.0"
-    assert "31059896167" in manifest["amendments"][0]["trigger_run"]
+    assert manifest["amendments"] == []
+    assert (manifest["evaluator_profile_id"], manifest["evaluator_profile_version"]) == (
+        "p4-utility-stable",
+        "0.2.0",
+    )
     assert manifest["coverage"]["seed"] == 0
     assert manifest["stability"]["seeds"] == [0, 1, 2, 3, 4]
     assert manifest["surrogate"] == {
         "type": "full-row-multiset-preserving-permutation",
-        "purpose": "Exercise both TRTR and TSTR evaluator arms without attributing quality to a generator.",
+        "purpose": "Verify that equal row multisets produce equal fit boundaries and Global Utility results regardless of input row order.",
         "preserves_all_rows": True,
         "preserves_all_per-column_support": True,
         "generation_seed_source": "evaluator seed",
@@ -37,29 +41,17 @@ def test_preregistered_pilot_binds_full_datasets_stratified_seeds_and_safety_lim
     }
     assert manifest["resources"]["autogluon_fit_time_limit_per_arm_seconds"] == 300
     assert manifest["resources"]["maximum_observed_process_tree_peak_rss_gib"] == 14.0
-    assert manifest["environment"]["tabpfn_cpu_large_dataset_opt_in"] == (
-        "TABPFN_ALLOW_CPU_LARGE_DATASET=1"
-    )
+    assert manifest["environment"]["runtime_profile"] == "windows-rtx5080"
+    assert manifest["environment"]["tabpfn_cpu_large_dataset_opt_in"] is None
 
 
-def test_windows_gpu_pilot_reuses_the_schedule_and_fixed_scientific_gates() -> None:
-    legacy = validation.validate_pilot_manifest()
-    windows = validation.validate_pilot_manifest(
-        pilot_profile=validation.WINDOWS_GPU_PILOT_PROFILE
-    )
+def test_successor_keeps_the_fixed_scientific_gates_and_complete_schedule() -> None:
+    manifest = validation.validate_pilot_manifest()
 
-    assert windows["pilot_id"] == "p4-dataset-scale-windows-gpu-admission-pilot"
-    assert windows["pilot_version"] == "0.2.1"
-    assert windows["official_results_allowed"] is False
-    assert windows["amendments"][0]["from_version"] == "0.2.0"
-    assert "c0e6e72" in windows["amendments"][0]["trigger_run"]
-    assert windows["coverage"] == legacy["coverage"]
-    assert windows["stability"] == legacy["stability"]
-    assert windows["predictor_policy"] == legacy["predictor_policy"]
-    assert windows["environment"]["runtime_profile"] == "windows-rtx5080"
-    assert windows["environment"]["tabpfn_cpu_large_dataset_opt_in"] is None
-    assert windows["resources"]["maximum_observed_cuda_peak_allocated_gib"] == 15.0
-    assert len(validation._expected_task_keys(windows)) == 67
+    assert manifest["stability"]["maximum_absolute_identity_ratio_deviation"] == 0.05
+    assert manifest["stability"]["maximum_seed_ratio_range"] == 0.05
+    assert manifest["resources"]["maximum_observed_cuda_peak_allocated_gib"] == 15.0
+    assert len(validation._expected_task_keys(manifest)) == 67
 
 
 def test_cuda_resource_gate_applies_only_when_tabpfn_is_protocol_applicable() -> None:
@@ -115,7 +107,7 @@ def test_sick_constant_tbg_measured_is_retained_but_reasoned_out_of_global_utili
     profile = validation._profile_for_dataset("sick", manifest).payload
     global_profile = profile["utility"]["global"]
 
-    assert profile["dataset_profile_version"] == "1.3.0-reviewed"
+    assert profile["dataset_profile_version"] == "1.4.0-reviewed"
     assert "TBG_measured" in profile["table_contract"]["canonical_column_order"]
     assert "tbg-measured" not in global_profile["included_target_column_ids"]
     assert global_profile["excluded_targets"] == [
@@ -165,10 +157,30 @@ def _fake_result(task: dict[str, object], manifest: dict[str, object]) -> dict[s
         "score": 0.75 if task_type == "classification" else 2.0,
         "predictors": predictors,
         "predictor_scores": {name: 0.75 for name in predictors},
+        "predictor_failures": [],
+        "fit_evidence": {
+            "training_row_order": "lexicographic-all-model-columns-v1",
+            "split_implementation": "autogluon.core.utils.utils.generate_train_test_split",
+            "seed": int(task["seed"]),
+            "task_type": task_type,
+            "problem_type": "regression" if task_type == "regression" else "binary",
+            "holdout_fraction": 0.1,
+            "input_rows": manifest["coverage"]["datasets"][dataset]["train_rows"],
+            "fit_train_rows": int(manifest["coverage"]["datasets"][dataset]["train_rows"] * 0.9),
+            "tuning_rows": (
+                manifest["coverage"]["datasets"][dataset]["train_rows"]
+                - int(manifest["coverage"]["datasets"][dataset]["train_rows"] * 0.9)
+            ),
+            "input_multiset_fingerprint": "e" * 64,
+            "fit_train_fingerprint": "f" * 64,
+            "tuning_fingerprint": "0" * 64,
+            "real_test_used_for_fit": False,
+        },
         "families": families,
         "wall_seconds": 2.0,
         "baseline_rss_bytes": 256 * 1024**2,
         "peak_rss_bytes": 512 * 1024**2,
+        "cuda_peak_allocation_increase_bytes": 0 if high_cardinality else 1024**3,
     }
     seed = int(task["seed"])
     return {
@@ -218,7 +230,7 @@ def _fake_shards(tmp_path: Path) -> list[Path]:
                     "shard_index": shard_index,
                     "shard_count": shard_count,
                 },
-                "environment": {"platform": "Linux / x86_64", "python": "3.11.15"},
+                "environment": {"platform": "Windows / AMD64", "python": "3.11.9"},
                 "runtime": {"status": "benchmark-approved-not-upstream-official"},
                 "source": {"revision": "dba19a4ee7aa391621cbeb464609285fd515dece"},
                 "checkpoints": {"classifier": {"sha256": "c" * 64}, "regressor": {"sha256": "d" * 64}},

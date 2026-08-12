@@ -65,7 +65,7 @@ def test_p4_metrics_are_unit_validated_diagnostics_without_source_parity_overcla
     records = [
         record
         for record in load_metric_registry()
-        if record.payload["admission"]["compatibility_version"] == "p4-utility-0.4.0"
+        if record.payload["admission"]["compatibility_version"] == "p4-utility-0.5.0"
     ]
     assert len(records) == 11
     assert {record.payload["dimension"] for record in records} == {"local-utility", "global-utility"}
@@ -187,7 +187,7 @@ def test_packaged_protocols_resolve_exact_versions_and_are_nonofficial() -> None
         ("legacy-tabstruct-aligned", "1.0.0-legacy"),
         ("p2-shape-trend", "0.2.0"),
         ("p3-validity", "0.3.0"),
-        ("p4-utility", "0.4.0"),
+        ("p4-utility", "0.5.0"),
     }
     assert all(not profile.payload["official_results_allowed"] for profile in profiles)
 

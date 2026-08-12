@@ -168,7 +168,7 @@ tests/evaluation/
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | Windows GPU 来源等价与完整 67 任务执行已通过；[数据集规模准入](../evidence/evaluation/p4-dataset-scale-windows-gpu-a754ca1.json)因三个固定稳定性门失败；仍为诊断状态 | 从科学上解决预测器 profile 稳定性、预注册后续身份，并在冻结审阅前通过每一道门 |
+| P4 | Local 与 Global Utility | P1、P3 | 历史 Windows GPU 运行通过资源与覆盖门，但三个稳定性门失败；根因是 AutoGluon 隐式划分依赖输入行顺序。唯一的显式划分后继实现已完成并预注册；仍为诊断状态 | 先通过此前失败的 sentinel，再完成并通过全部 67 任务 Windows GPU 后继验证，之后才能冻结审阅 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
@@ -294,7 +294,7 @@ Global Utility 任务：
 - 声称来源等价的所选 profile 通过来源等价验证；以及
 - Local Utility 与 Global Utility 保持为不同输出和子榜单。
 
-当前裁决：有限范围来源等价已通过，但 `p4-dataset-scale-admission-pilot@0.1.1` 未通过。profile 冻结前必须有新协议版本与一次完整通过的运行；不得事后放宽已观察的 `0.1.1` 门限。
+当前裁决：历史 `0.1.1` CPU 与 `0.2.1` Windows profile 均保持为失败证据。`p4-utility@0.5.0` 现在只有一个生成结果的适配器，采用规范行排序和显式种子拟合/调参划分；精确 TabEval 执行被隔离为内部来源测试。预注册的 Windows GPU 后继版本必须在不修改原门限的前提下通过完整计划，之后才能冻结 profile。
 
 ### 6.6 P5 — 高阶 Fidelity 与经验 Privacy
 

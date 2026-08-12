@@ -33,12 +33,33 @@ def _frames(adult_frames):
 
 
 def _source_stub(train, test, target, task_type, seed, time_limit_seconds, arm):
-    del train, test, target, seed, time_limit_seconds
+    del test, target, time_limit_seconds
     value = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (
         2.0 if arm == "trtr" else 2.5
     )
     predictors = ("KNeighbors", "TabPFN", "XGBoost")
-    return GlobalBackendResult(value, predictors, {name: value for name in predictors})
+    tuning_rows = max(1, len(train) // 10)
+    fit_evidence = {
+        "training_row_order": "lexicographic-all-model-columns-v1",
+        "split_implementation": "autogluon.core.utils.utils.generate_train_test_split",
+        "seed": seed,
+        "task_type": task_type,
+        "problem_type": "regression" if task_type == "regression" else "binary",
+        "holdout_fraction": tuning_rows / len(train),
+        "input_rows": len(train),
+        "fit_train_rows": len(train) - tuning_rows,
+        "tuning_rows": tuning_rows,
+        "input_multiset_fingerprint": "a" * 64,
+        "fit_train_fingerprint": "b" * 64,
+        "tuning_fingerprint": "c" * 64,
+        "real_test_used_for_fit": False,
+    }
+    return GlobalBackendResult(
+        value,
+        predictors,
+        {name: value for name in predictors},
+        fit_evidence=fit_evidence,
+    )
 
 
 def _patch_global(monkeypatch: pytest.MonkeyPatch) -> None:

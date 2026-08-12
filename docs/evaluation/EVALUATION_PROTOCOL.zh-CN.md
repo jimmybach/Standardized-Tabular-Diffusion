@@ -206,7 +206,7 @@ fidelity_score =
 
 评测器套件至少代表线性模型、随机森林和梯度提升树。具体实现和冻结超参数经 pilot 冻结。评测器选择只能使用 train 和允许的 validation 数据，并且必须独立于正在评分的合成数据方法。
 
-已实现的 P4 诊断候选通过 `p4-utility-pilot@0.1.0` 绑定 scikit-learn Logistic Regression/Ridge、Random Forest 和 Histogram Gradient Boosting，并默认使用五个评测种子。其有限范围工程门已经通过，并留存 [Linux/Python 3.11 证据](../evidence/evaluation/p4-utility-run-31053624769.json)。这是已实现的 pilot 身份，不是已冻结的 Official Results profile。
+已实现的 P4 诊断候选通过 `p4-utility-stable@0.2.0` 绑定 scikit-learn Logistic Regression/Ridge、Random Forest 和 Histogram Gradient Boosting，并默认使用五个评测种子。Global Utility 只有一个生成结果的适配器：完整行先被规范排序，再执行显式种子 AutoGluon 拟合/调参划分；留出的真实测试集始终位于拟合边界之外。精确 TabEval 执行只用于内部来源验证，不是可选择的结果 profile。该候选尚未冻结为 Official Results profile。
 
 这一以 Macro-F1/RMSE 为主的面板属于本基准契约。它不得称为 GReaT 的精确复现——GReaT 使用分类 accuracy、回归 MSE，以及线性或逻辑回归、决策树和随机森林；也不得称为 TabStruct 的精确复现——TabStruct 的分类效用使用 Balanced Accuracy。
 

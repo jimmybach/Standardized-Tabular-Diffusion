@@ -289,7 +289,7 @@ Train 用于拟合，Validation 仅用于允许的模型选择，Test 仅用于�
 
 目标必须反映有文档的数据集任务或经审查科学目的。不得在比较生成器结果后选择。
 
-已审阅的 Adult 与 Sick 诊断 profile 现在绑定主要分类目标、正类、标签映射、Macro-F1 与辅助指标、支持声明、Dummy 策略和 `p4-utility-pilot@0.1.0` 身份。这记录了 P4 pilot 契约，但不会使任何数据集自动获得正式资格。
+已审阅的 Adult 与 Sick 诊断 profile 绑定主要分类目标、正类、标签映射、Macro-F1 与辅助指标、支持声明、Dummy 策略和 `p4-utility-stable@0.2.0` 身份。由于评测器引用现在要求规范行排序和显式种子内部验证划分，数据集 profile 版本也已升级；这不会使任何数据集自动获得正式资格。
 
 ## 12. Global Utility profile
 
