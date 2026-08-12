@@ -148,7 +148,12 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
         if local_retention(0.2, 0.8, 0.92, higher_is_better=True, tolerance=1e-12) > 1
         and global_target_ratio(0.8, 0.88, task_type="classification") > 1
         else "fail",
-        "diagnostic_admission_only": "pass" if evaluator["official_results_allowed"] is False else "fail",
+        "conditional_protocol_freeze": "pass"
+        if evaluator["status"] == "frozen"
+        and evaluator["official_results_allowed"] is True
+        and protocol.payload["status"] == "frozen"
+        and protocol.payload["official_results_allowed"] is True
+        else "fail",
     }
     status = "pass" if set(exit_gates.values()) == {"pass"} else "fail"
     locked = [
@@ -168,7 +173,8 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
         "status": status,
         "claim_boundary": (
             "Validates P4 formulas, local official-package boundary, held-out-test isolation, Atomic Result coverage, "
-            "and the pinned Global backend call contract. The real AutoGluon/XGB/KNN/TabPFN source runtime was not executed."
+            "and the pinned Global backend call contract. The real AutoGluon/XGB/KNN/TabPFN source runtime was not "
+            "executed, and this bounded fixture is not an admitted Official Result despite the conditional protocol freeze."
         ),
         "environment": {
             "platform": f"{platform.system()} / {platform.machine()}",
@@ -185,6 +191,7 @@ def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, 
             "global_target_ratios": len(ratios),
             "global_utility": outcome.global_summary["global_utility"],
             "official_results_allowed": False,
+            "protocol_components_conditionally_admitted": True,
         },
         "global_source_runtime": {
             "executed": False,
