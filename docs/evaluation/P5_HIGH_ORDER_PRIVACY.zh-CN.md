@@ -2,7 +2,7 @@
 
 ## 状态与声明边界
 
-`p5-high-order-privacy@0.1.0` 已实现并通过单元验证，目前仍是诊断协议。它尚未冻结、尚未获得发布支持，也不能进入 Official Results。P5 只实现科学定义已经足够清楚的指标；定义尚有争议的指标会在注册表中明确标为 excluded，而不是被静默忽略。
+`p5-high-order-privacy@0.1.0` 已实现，并通过单元、结果包以及 Windows 11/Python 3.11 上 Adult/Sick identity-surrogate 留存验证，目前仍是诊断协议。它尚未冻结、尚未获得发布支持，也不能进入 Official Results。P5 只实现科学定义已经足够清楚的指标；定义尚有争议的指标会在注册表中明确标为 excluded，而不是被静默忽略。
 
 高阶保真度与经验隐私风险是两个独立维度。P5 不生成总 Fidelity 分数，也不生成总 Privacy 分数。经验攻击和距离诊断不能证明差分隐私，也不能证明其他形式化隐私保证。
 
@@ -87,4 +87,4 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 固定要求评测种子 `0,1,2,3,4`。下一道准入门是保留 Windows 上 Adult/Sick 的 pilot 证据，并完成数据集专用隐私角色审阅；只通过实现测试并不会自动冻结协议。
+P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick identity-surrogate 证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)验证了完整执行和结果边界，但明确没有评估生成模型质量。下一道准入门是运行非 identity 的生成器 pilot，并完成数据集专用隐私角色审阅；该证据和实现测试都不会自动冻结协议。

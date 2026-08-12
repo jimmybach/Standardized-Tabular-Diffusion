@@ -1,0 +1,186 @@
+{
+  "claim_boundary": "Validates the complete P5 implementation, source wrapper, deterministic five-seed schedules, three-table fit boundaries, Atomic Results, and finalized bundles on the reviewed Adult and Sick materializations. The synthetic input is deliberately identical to real train, so this record does not assess generator quality, establish a formal privacy guarantee, perform dataset-specific privacy-role review, freeze P5, or admit Official Results.",
+  "environment": {
+    "accelerator": {
+      "device_name": "NVIDIA GeForce RTX 5080",
+      "driver_version": "610.47",
+      "evaluation_used_accelerator": false,
+      "memory_mib": 16303,
+      "note": "The implemented C2ST, DCR, and DOMIAS evaluators execute on CPU; the GPU is recorded only as host provenance."
+    },
+    "implementation": "CPython",
+    "operating_system": {
+      "build": "26200",
+      "caption": "Microsoft Windows 11 Pro",
+      "python_platform_string": "Windows-10-10.0.26200-SP0",
+      "version": "10.0.26200"
+    },
+    "packages": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pyarrow": "18.1.0",
+      "scikit-learn": "1.5.2",
+      "scipy": "1.13.1",
+      "sdmetrics": "0.28.3.dev0"
+    },
+    "python": "3.11.15"
+  },
+  "evaluator_profile": {
+    "profile_id": "p5-high-order-privacy",
+    "profile_version": "0.1.0",
+    "sha256": "da46213d6170d06da6fd8587beba9d7b04a5b9d611fd36a73e442bc866fbcfff"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "atomic_results_and_bundle_cross_validation": "pass",
+    "deterministic_scientific_details_across_independent_attempts": "pass",
+    "five_seed_c2st_schedule": "pass",
+    "five_seed_domias_schedule": "pass",
+    "formal_privacy_guarantee": "not-claimed",
+    "generator_quality": "not-assessed",
+    "official_results_admission": "not-assessed",
+    "p5_protocol_freeze": "not-assessed",
+    "pinned_sdmetrics_dcr_source_attestation": "pass",
+    "three_table_fit_boundary": "pass"
+  },
+  "generated_at": "2026-08-12T21:01:46Z",
+  "identity_surrogate": {
+    "expected_exact_train_collision_rate": 1.0,
+    "purpose": "End-to-end implementation and boundary validation only",
+    "synthetic_artifact_equals_real_train_artifact": true
+  },
+  "locked_files": {
+    "standardized_tabular_diffusion/evaluation/backends/sdmetrics.py": "137e7e487236dfc9481b9e9d831ee665e5a1c9e67929dfd2760c0cd254efbd18",
+    "standardized_tabular_diffusion/evaluation/bundle.py": "3ebbef4e30f1f74f7c1bf92714cc6dc90889ca7b03203525937634ec1aabbbd5",
+    "standardized_tabular_diffusion/evaluation/evaluate_table.py": "ce066c0507c003db64d7ab6f8f751edb158025b5849357f99a0af483fdb82729",
+    "standardized_tabular_diffusion/evaluation/high_order_privacy.py": "f50cc55190c1ea5ccc39ecd6b992aa33cd99aead4e87ac9e5415abeafcbf3c21",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p5-high-order-privacy-v1.json": "a54379cd45e2ad773c0cc2b9079ffb8e8cc9014c6f0fb427d03ef304a7edc859",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/p5-excluded-v1.json": "9fcfe8be484239609899d60f3b47998aaeea57e66180b5f1e2ca1222be670da7",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/p5-high-order-privacy-v1.json": "1632ab163a5353658293f3fcab6d927eb927382a3d2ea8cfde8220ff9f1a5077",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/p5-high-order-privacy.json": "d22a437e298bc897bb41b1742b43ba224b35cd205be5a73fc3179b8a7c393bff",
+    "standardized_tabular_diffusion/resources/evaluation/upstream/p5-sources.json": "e2e31f583f752cd31a6627a13237fea431d9e34e502ae1478badc8e568e9c818"
+  },
+  "phase": "P5",
+  "protocol": {
+    "official_results_allowed": false,
+    "protocol_id": "p5-high-order-privacy",
+    "protocol_version": "0.1.0",
+    "sha256": "8341db05a1166958f7dd609a9c757ff94bcbf55c202f56d3e0638d25be87eb83",
+    "status": "draft"
+  },
+  "repository_commit": "c66fa23b7f4541205d004d701bb92ad2d35709b5",
+  "runs": {
+    "adult": {
+      "artifact_hashes": {
+        "artifacts/p5-details.json": "7700759cd739d5760e3d3e2414da0da434b254e2884abfb0366c755ef058c780",
+        "checksums.sha256": "c36fafac7f7730d51abb634308290fbd5f6518bd2ae432cb94a87538ab822511",
+        "environment.json": "28993b9537daee9512cbd6ec5a88180a759a7cdf6c4f3b1d83d82395fca17d0b",
+        "manifest.json": "9a210128be9ac06ee7ab77586a40f8dbcecb0be789eaba2b5639d5d3f0d9d565",
+        "metadata.json": "5b767d4c721372358e1de6d7128df7c73977a8fe2c0d47a72f951406829a90fd",
+        "metrics.parquet": "a7e9ce8eed1bd673366dd140c2f9c0ac116274f5a02bb069348921d8c6053c2d",
+        "summary.json": "0647b1de086b582f649a54d2c6bb5470329e3beb55385a1f627c9b1e70642e07"
+      },
+      "bundle_id": "run-a71c64c316b24ef7a612b423ec31b883",
+      "computed_atomic_results": 34,
+      "dataset_profile": {
+        "dataset_id": "adult",
+        "dataset_profile_version": "1.3.0-reviewed",
+        "sha256": "9b115292425844a2b982269f28f11f25ee997b3e6bcdcd05a7941b624a24b4e2"
+      },
+      "details_reproduced_across_independent_attempts": true,
+      "duration_seconds": 81.289483,
+      "finalization_status": "finalized",
+      "heldout_real_test": {
+        "repository_path": "TabDiff-main/data/adult/test.csv",
+        "rows": 16281,
+        "sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596"
+      },
+      "metrics": {
+        "c2st_fidelity_mean": 0.9920449704380104,
+        "c2st_raw_auroc_mean": 0.49691568231486355,
+        "dcr_wasserstein_heldout_calibration": 0.04380367084941872,
+        "domias_attack_accuracy_mean": 0.512,
+        "domias_attack_advantage_mean": 0.04760000000000002,
+        "domias_attack_auroc_mean": 0.5168427999999998,
+        "domias_tpr_at_fpr_01_mean": 0.0116,
+        "exact_train_collision_rate": 1.0,
+        "formal_privacy_guarantee": false,
+        "overall_fidelity_score": null,
+        "overall_privacy_score": null,
+        "synthetic_internal_duplicate_rate": 0.0007370780995669666
+      },
+      "real_train_and_identity_synthetic": {
+        "repository_path": "TabDiff-main/data/adult/train.csv",
+        "rows": 32561,
+        "sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4"
+      },
+      "request_fingerprint": "b81439f987d306d53eb6a3926c2fca1b71eb9868a3854cab2b8885af4b7d446c",
+      "seed_coverage": {
+        "c2st": "5/5",
+        "domias": "5/5"
+      }
+    },
+    "sick": {
+      "artifact_hashes": {
+        "artifacts/p5-details.json": "0965b2af4db7fc1fd3ceb3748f5179ed2b70e9605f496030890586f92e9d09a0",
+        "checksums.sha256": "ff9905efd13f03bc2b055481db7b284b291c1ca9899d21a82bc6ef2cecf8224e",
+        "environment.json": "28993b9537daee9512cbd6ec5a88180a759a7cdf6c4f3b1d83d82395fca17d0b",
+        "manifest.json": "14d5769a14297180fc069ab995f91912a28910a880edb4a8862874a96ffe8c45",
+        "metadata.json": "2249fa9100e59969be0b2a5996036ea46d286b7283e3348bed8738efb163dc21",
+        "metrics.parquet": "bcb543a61ff7d0dcaa68bde68a517c17b2fc6124bc8d3540ec712b7e41f9eff0",
+        "summary.json": "fcd8c5d068da899b853559749b21f08b91adc34250a302e8025b67032c54263d"
+      },
+      "bundle_id": "run-1cdcc238fe094ed69bcf6bbadb065c78",
+      "computed_atomic_results": 34,
+      "dataset_profile": {
+        "dataset_id": "sick",
+        "dataset_profile_version": "1.4.0-reviewed",
+        "sha256": "57ca1ffeeecb910665805474af145c353494c86e3c7bf68b2d852a6e79263cf4"
+      },
+      "details_reproduced_across_independent_attempts": true,
+      "duration_seconds": 29.477265,
+      "finalization_status": "finalized",
+      "heldout_real_test": {
+        "repository_path": "TabDiff-main/data/sick/test.csv",
+        "rows": 972,
+        "sha256": "26a937e4690fbcef9406d1facc7334fc45847b7a89621f6283fcfd2ee873e0cd"
+      },
+      "metrics": {
+        "c2st_fidelity_mean": 0.9704025145430663,
+        "c2st_raw_auroc_mean": 0.4864679114280353,
+        "dcr_wasserstein_heldout_calibration": 0.006206080649508288,
+        "domias_attack_accuracy_mean": 0.5436213991769547,
+        "domias_attack_advantage_mean": 0.11440329218106997,
+        "domias_attack_auroc_mean": 0.5635611949397957,
+        "domias_tpr_at_fpr_01_mean": 0.023456790123456788,
+        "exact_train_collision_rate": 1.0,
+        "formal_privacy_guarantee": false,
+        "overall_fidelity_score": null,
+        "overall_privacy_score": null,
+        "synthetic_internal_duplicate_rate": 0.0175
+      },
+      "real_train_and_identity_synthetic": {
+        "repository_path": "TabDiff-main/data/sick/train.csv",
+        "rows": 2800,
+        "sha256": "da040856ed7478be5c66ee3108eefff8e38a2db1f8a5ab868efd7c7706e768e6"
+      },
+      "request_fingerprint": "5961defcd26d6918e5a44881b5de020dd4ebbbe1fa6f0da7b99105aab25234cf",
+      "seed_coverage": {
+        "c2st": "5/5",
+        "domias": "5/5"
+      }
+    }
+  },
+  "source_attestation": {
+    "domias_boundary": "The density-ratio formula and source metrics are aligned with the official source; mixed-table encoding and PCA are an explicit benchmark adaptation and are not claimed as exact end-to-end parity.",
+    "sdmetrics_dcr": {
+      "distribution_version": "0.28.3.dev0",
+      "implementation_symbol": "sdmetrics.single_table.privacy.dcr_utils.calculate_dcr",
+      "python_source_file_count": 121,
+      "python_source_tree_sha256": "784beda5c7a63d5ebb5fe74f98d00db3a2e018a29b2f32f643bf857750a6c2a9",
+      "revision": "ba8842f2ba04ce914f698cc1cf746ca12338ab0e",
+      "source_file_sha256": "140f36a0e893e4d4fbf45c824f19f4c6cc6c1736ffed387ce8ff6df924fb4c05"
+    }
+  },
+  "status": "pass"
+}

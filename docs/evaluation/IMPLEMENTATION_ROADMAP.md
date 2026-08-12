@@ -97,7 +97,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
 - P3 passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p3-validity-run-31036844043.json), but remains diagnostic pending protocol freeze and release approval.
 - Historical P4 failures remain immutable. The row-order-invariant successor passed the complete [Windows GPU validation](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json), and the separate [freeze decision](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json) froze `p4-utility@1.0.0` without changing its scientific identity. Official result use still requires independent dataset/model/track/run/environment admission.
-- P5 now implements balanced five-seed C2ST, exact train collisions, internal duplication, exact pinned SDMetrics DCR with heldout calibration, and a declared black-box DOMIAS KDE attack. It remains diagnostic pending dataset threat-model review, dataset-scale pilot evidence, and later protocol freeze.
+- P5 now implements balanced five-seed C2ST, exact train collisions, internal duplication, exact pinned SDMetrics DCR with heldout calibration, and a declared black-box DOMIAS KDE attack. Its complete Windows 11/Python 3.11 Adult/Sick identity-surrogate evidence is retained; it remains diagnostic pending non-identity generator pilots, dataset privacy-role review, and later protocol freeze.
 - Efficiency, cache/resume orchestration, uncertainty beyond P5 attack/C2ST intervals, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
@@ -170,7 +170,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Protocol-frozen at `p4-utility@1.0.0` after complete exact Windows GPU validation; concrete results still require independent admission | Preserve the frozen identity and complete release, dataset, model, track, and result admission gates |
-| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Implemented and unit-validated diagnostic: C2ST, exact-copy diagnostics, pinned DCR, heldout calibration, and DOMIAS threat model | Run retained Windows Adult/Sick pilots and review dataset privacy roles before any freeze |
+| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Implemented diagnostic with retained Windows Adult/Sick identity-surrogate evidence: C2ST, exact-copy diagnostics, pinned DCR, heldout calibration, and DOMIAS threat model | Run non-identity generator pilots and review dataset privacy roles before any freeze |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
 | P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
@@ -325,6 +325,8 @@ Exit evidence:
 - no privacy diagnostic is described as a formal privacy guarantee; and
 - unresolved metrics remain present only as explicitly experimental or excluded records.
 
+The complete Adult/Sick identity-surrogate path passed under Windows 11 and Python 3.11 at commit `c66fa23`; its [machine-readable evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) is retained. This closes the implementation-scale boundary gate only. It neither evaluates a generator nor freezes P5.
+
 ### 6.7 P6 — orchestration, efficiency, cache, and resume
 
 Tasks:
@@ -469,13 +471,14 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-P4 now has implementation, bounded engineering, retained exact Linux source-runtime parity, and retained exact Windows/Python 3.11/RTX 5080 source-runtime parity. The complete Windows GPU dataset-scale run executed all 9 shards, 67 tasks, and 134 arms with every resource gate passing, thereby resolving the former Adult execution gap. Admission still failed the unchanged stability gates for Adult `native-country`, Sick `referral-source`, and Sick `tsh`. The next P4 action is a scientific review of the predictor profile and identity-ratio stability contract, not another platform migration or a post-hoc threshold relaxation. Until a newly preregistered successor passes every gate, P4 remains diagnostic and P5 must not treat it as an Official Results component.
+P4 is conditionally protocol-frozen, and P5 has completed its implementation-scale Windows identity-surrogate gate while remaining diagnostic. The next implementation increment is P6: define the execution-node identity contract, hardware/resource profiles, timing and memory measurements, safe cache keys, and interruption-safe resume semantics before adding orchestration code. P5 generator pilots and dataset privacy-role review remain separate scientific-admission work and must not be conflated with P6 engineering completion.
 
 ## 12. Related specifications
 
 - [Evaluation Protocol](EVALUATION_PROTOCOL.md)
 - [P3 Validity and Preprocessing Guide](P3_VALIDITY_AND_PREPROCESSING.md)
 - [P4 Local and Global Utility Guide](P4_UTILITY.md)
+- [P5 High-order Fidelity and Empirical Privacy Guide](P5_HIGH_ORDER_PRIVACY.md)
 - [Metric Governance](METRIC_GOVERNANCE.md)
 - [Metric Source Review](METRIC_SOURCE_REVIEW.md)
 - [Dataset Profile Specification](DATASET_PROFILE_SPEC.md)

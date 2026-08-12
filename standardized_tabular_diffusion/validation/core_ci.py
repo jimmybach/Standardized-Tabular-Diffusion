@@ -21,6 +21,11 @@ REQUIRED_WHEEL_FILES = {
     "standardized_tabular_diffusion/resources/evaluation/protocols/development-p1.json",
     "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-dataset-scale-windows-gpu-stable-v1.json",
     "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/evaluators/p5-high-order-privacy-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/p5-excluded-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/metrics/p5-high-order-privacy-v1.json",
+    "standardized_tabular_diffusion/resources/evaluation/protocols/p5-high-order-privacy.json",
+    "standardized_tabular_diffusion/resources/evaluation/upstream/p5-sources.json",
     "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json",
 }
 
