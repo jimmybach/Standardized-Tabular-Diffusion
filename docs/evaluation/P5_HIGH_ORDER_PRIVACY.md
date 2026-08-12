@@ -2,7 +2,7 @@
 
 ## Status and claim boundary
 
-`p5-high-order-privacy@0.1.0` is an implemented, unit-validated diagnostic protocol. It is not protocol-frozen, release-supported, or eligible for Official Results. The phase deliberately resolves only scientifically defensible metrics and registers unresolved metrics as excluded.
+`p5-high-order-privacy@0.1.0` is an implemented diagnostic protocol with unit, bundle, and retained Windows 11/Python 3.11 Adult/Sick identity-surrogate validation. It is not protocol-frozen, release-supported, or eligible for Official Results. The phase deliberately resolves only scientifically defensible metrics and registers unresolved metrics as excluded.
 
 P5 reports high-order fidelity and empirical privacy risk as separate dimensions. It emits neither an overall Fidelity score nor an overall Privacy score. Empirical attacks and distances do not establish differential privacy or any other formal privacy guarantee.
 
@@ -87,4 +87,4 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 requires evaluator seeds `0,1,2,3,4`. Its next admission gate is retained Windows Adult/Sick pilot evidence plus dataset-specific privacy-role review; passing implementation tests alone does not freeze the protocol.
+P5 requires evaluator seeds `0,1,2,3,4`. The retained [Windows Adult/Sick identity-surrogate evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) validates the complete execution and result boundary but deliberately does not assess generator quality. The next admission gates are non-identity generator pilots and dataset-specific privacy-role review; neither this evidence nor passing implementation tests freezes the protocol.
