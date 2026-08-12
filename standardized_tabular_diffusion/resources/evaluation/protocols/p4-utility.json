@@ -35,7 +35,7 @@
     "finalization": "Utility details, raw arms, ratios, Atomic Results, provenance, and exact checksums must cross-validate before finalization."
   },
   "owners": ["repository-maintainers"],
-  "review_record": {"status":"successor-preregistered-validation-required","official_admission":"The row-order instability root cause is corrected in a new protocol identity; Windows/Python 3.11 GPU successor validation and profile freeze remain pending."},
+  "review_record": {"status":"successor-validation-passed-freeze-review-required","official_admission":"The complete native Windows/Python 3.11/RTX 5080 successor validation passed all fixed scientific and resource gates; profile freeze, compatibility scope, and Official Results admission remain pending separate review."},
   "change_log": [
     {"version":"0.4.0","change":"Implemented the reviewed P4 diagnostic Local and Global Utility vertical slice."},
     {"version":"0.5.0","change":"Replaced AutoGluon's row-order-sensitive implicit holdout with canonical row ordering and an explicit seeded fit/tuning split; retained exact TabEval execution only as internal source-parity validation."}

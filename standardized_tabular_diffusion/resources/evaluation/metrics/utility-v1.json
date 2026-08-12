@@ -60,7 +60,7 @@
       "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
       "reference_fixtures": ["hand-computable binary, multiclass, regression, weak-baseline, and denominator fixtures"],
       "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["GitHub-hosted Windows Server with Python 3.11 for Windows-family compatibility","Linux x86-64 with Python 3.11","Windows 11 x86-64 with Python 3.11 and RTX 5080 for the declared GPU profile"],"windows_release_qualification":"exact Windows 11 GPU source-runtime and complete dataset execution validated for the declared profile; repository-wide exact-target qualification remains pending"},
-      "unresolved_limitations": ["The historical implicit-split profile failed fixed stability gates. The row-order-invariant successor is preregistered and still requires complete Windows GPU validation before Official Results admission."],
+      "unresolved_limitations": ["The row-order-invariant successor passed complete Windows GPU dataset-scale validation; profile freeze, compatibility scope, and Official Results admission still require separate review."],
       "release_decision": "diagnostic-only"
     },
     "lifecycle_evidence": {
@@ -71,7 +71,7 @@
       "protocol_freeze": null,
       "release_approval": null
     },
-    "admission": {"official_results_allowed":false,"compatibility_version":"p4-utility-0.5.0","reason":"P4 has one row-order-invariant result-producing implementation. Its successor identity is preregistered but complete Windows GPU validation and protocol freeze remain pending."}
+    "admission": {"official_results_allowed":false,"compatibility_version":"p4-utility-0.5.0","reason":"P4 has one row-order-invariant result-producing implementation and passed the complete preregistered Windows GPU stability/resource protocol. Profile freeze and Official Results admission remain separate pending decisions."}
   },
   "records": [
     {"metric_id":"std-local-utility-macro-f1","display_name":"Local Utility Macro-F1","subdimension":"raw-classification","description":"Macro-F1 for one Dummy, TRTR, or TSTR arm."},

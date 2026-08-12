@@ -92,6 +92,8 @@ The last result executed all 67 tasks and 134 arms and passed its execution/reso
 
 The successor validation has a new identity, `p4-dataset-scale-windows-gpu-stable-candidate@0.3.0`. It retains the same datasets, targets, five seeds, full-row-permutation identity surrogate, predictor policy, `0.05` gates, and resource limits. It binds the new evaluator and dataset-profile versions and runs only on the declared native Windows 11/Python 3.11/RTX 5080 environment. GitHub-hosted runners validate its contracts but cannot substitute for the required GPU run.
 
+The complete successor run at commit `6dc485f` passed all 9 shards, 67 tasks, and 134 arms. Every five-seed identity ratio for Adult `income`, `native-country`, and `fnlwgt`, and Sick `class`, `referral-source`, and `tsh`, was exactly `1.0`; every range and maximum absolute deviation was therefore `0.0`. Maximum arm wall time was `9.50134` seconds, process-tree RSS was `2.03462` GiB, and CUDA allocation increase was `3.64762` GiB, all within the preregistered bounds. The retained [machine-readable evidence](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json) has SHA-256 `19d55b260eaa5a3d1e522d1a1cabeadf4e952698a833e529576fd64b71797721`.
+
 ## Command
 
 Install the standard utility dependencies with:
@@ -116,9 +118,9 @@ P4 defaults to evaluator seeds `0,1,2,3,4`. Overrides are recorded and are not a
 
 ## Remaining admission work
 
-Before P4 can be frozen or admitted to Official Results:
+The successor completed its preregistered scientific, execution, resource, fit-boundary, and evidence gates without changing thresholds after observation. Before P4 can be frozen or admitted to Official Results:
 
-1. run the successor's former-failure sentinels on the declared Windows GPU runtime;
-2. run and finalize the complete preregistered 67-task schedule;
-3. require every scientific, execution, resource, fit-boundary, and evidence gate to pass without changing thresholds after observation; and
-4. perform a separate profile-freeze and release-admission review.
+1. review the retained evidence and immutable identity for profile freeze;
+2. decide the supported runtime/compatibility boundary without generalizing the RTX 5080 evidence to untested hardware;
+3. update lifecycle and release records only through a separate admission decision; and
+4. keep generator-quality evaluation and leaderboard publication outside this identity-surrogate validation claim.
