@@ -353,6 +353,8 @@ Completion evidence (2026-08-13): all listed engineering gates passed on Windows
 
 ### 6.8 P7 — aggregation and leaderboard publication
 
+Current implementation: fail-closed finalized-bundle loading, exact scientific compatibility groups, Atomic Result-to-suite aggregation, deterministic hierarchical intervals, explicit missing/failed and pairwise denominators, independent admissions, reviewed corrections, publication classes, immutable manifests/fingerprints, source-derived JSON/CSV/HTML/Markdown assets, CLI commands, and Windows-primary/Linux-secondary CI are implemented. No existing result is promoted to Official by this engineering completion.
+
 Tasks:
 
 - Validate every input bundle and construct compatibility groups before aggregation.
@@ -369,6 +371,8 @@ Exit evidence:
 - missing or failed contributions cannot improve coverage or disappear from denominators;
 - snapshot reconstruction is deterministic from its declared bundles; and
 - no model, dataset, or metric can enter Official Results without its independent admission record.
+
+The dedicated exit gate is `p7-leaderboard-exit-gate-v1`; retained Windows evidence is added only from a clean implementation commit. See the [P7 guide](P7_AGGREGATION_AND_LEADERBOARD.md) and its [Chinese review translation](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
 
 ### 6.9 P8 — migration and release
 
