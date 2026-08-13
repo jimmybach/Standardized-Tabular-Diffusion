@@ -1,0 +1,118 @@
+name: P6 Orchestration Validation
+
+on:
+  push:
+    paths:
+      - ".github/workflows/p6-orchestration-validation.yml"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p6-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/orchestration/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p6_orchestration.py"
+      - "tests/orchestration/**"
+      - "tests/evaluation/test_contracts_and_schemas.py"
+  pull_request:
+    paths:
+      - ".github/workflows/p6-orchestration-validation.yml"
+      - "docs/evaluation/**"
+      - "docs/evidence/evaluation/p6-*.json"
+      - "pyproject.toml"
+      - "standardized_tabular_diffusion/cli.py"
+      - "standardized_tabular_diffusion/orchestration/**"
+      - "standardized_tabular_diffusion/schemas/evaluation/**"
+      - "standardized_tabular_diffusion/validation/p6_orchestration.py"
+      - "tests/orchestration/**"
+      - "tests/evaluation/test_contracts_and_schemas.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p6-orchestration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  p6-orchestration:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Hosted Windows / Python 3.11 / primary-family P6 orchestration
+            require_primary: true
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary P6 compatibility
+            require_primary: false
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install exact P6 validation environment
+        run: |
+          python -m pip install ".[orchestration,dev]"
+          python -m pip check
+
+      - name: Run P6 contracts and forced-boundary tests
+        run: >-
+          python -m pytest
+          tests/orchestration
+          tests/evaluation/test_contracts_and_schemas.py
+          tests/evaluation/test_cli_contracts.py
+          tests/test_cli.py
+          tests/test_core_ci.py
+
+      - name: Lint and type-check P6 surfaces
+        run: |
+          python -m ruff check standardized_tabular_diffusion tests/orchestration
+          python -m mypy
+
+      - name: Generate P6 exit-gate evidence
+        shell: bash
+        run: |
+          arguments=()
+          if [[ "${{ matrix.require_primary }}" == "true" ]]; then
+            arguments+=(--require-primary-family-environment)
+          fi
+          python -m standardized_tabular_diffusion.validation.p6_orchestration \
+            --output "${{ runner.temp }}/p6-orchestration-evidence.json" \
+            "${arguments[@]}"
+
+      - name: Build and inspect the distribution artifact
+        run: |
+          python -m build
+          python -m standardized_tabular_diffusion.validation.core_ci install-wheel --dist-directory dist
+          std-tabular-diffusion benchmark hardware-profile --profile-id packaged-p6-smoke
+
+      - name: Preserve pre-protocol failure evidence
+        if: ${{ failure() }}
+        run: >-
+          python -m standardized_tabular_diffusion.validation.workflow_evidence
+          --output "${{ runner.temp }}/p6-orchestration-evidence.json"
+          --protocol-id p6-orchestration-exit-gate-v1
+          --phase P6
+          --message "The P6 workflow failed before protocol evidence was produced."
+
+      - name: Upload P6 evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: p6-orchestration-${{ matrix.os }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/p6-orchestration-evidence.json
+          if-no-files-found: error
+          retention-days: 30
