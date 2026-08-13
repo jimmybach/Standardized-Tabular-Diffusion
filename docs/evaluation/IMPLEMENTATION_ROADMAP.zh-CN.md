@@ -84,23 +84,25 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | 封闭硬规则语言、逐列/逐约束 Atomic Result 与 Validity 聚合 | P3 活跃诊断路径；禁止任意代码和推断硬规则，不修复原始输出 |
 | [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | `p4-utility@1.0.0` 已在精确验证的 Windows/Python/RTX 5080 环境上条件性冻结；数据集、模型和具体结果仍需独立准入 |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | 集中式均值/众数缺失值边界 | 只在真实 train 上拟合；禁止目标/合成数据修复；状态、schema、配置、输入与输出均有指纹 |
-| [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
+| [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十四个 Draft 2020-12 线格式 schema | P1 科学契约与 P6 硬件/软件/运行/阶段编排契约，并随 wheel 打包 |
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 包含独立 P4 冻结证据，以及 P5 已解决/被阻止指标记录；被阻止项是机器可读 exclusion |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持默认；P3/P4/P5 显式选择，P4/P5 必须提供 `--real-test` |
-| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | 托管 Windows 主要平台家族 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
-| [`tests/evaluation/`](../../tests/evaluation) | 契约、结构、来源等价、Atomic Result、中断、bundle 与 CLI 测试 | P1 回归测试和 P2 直接权威测试按依赖与 marker 边界隔离 |
+| [`orchestration/`](../../standardized_tabular_diffusion/orchestration) | 七阶段隔离执行、内容寻址 cache/resume、资源边界、脱敏日志与观测硬件/软件身份 | P6 活跃执行路径；运行层聚合与 P7 排行榜聚合明确分离 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table`、P6 `benchmark` 命令与旧版命令 | 表格协议仍默认 P2；P3/P4/P5 显式选择，P6 执行在 P8 迁移前显式启用 |
+| [`pyproject.toml`](../../pyproject.toml)、[`core-ci.yml`](../../.github/workflows/core-ci.yml) 与 [`p6-orchestration-validation.yml`](../../.github/workflows/p6-orchestration-validation.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查、构建与 P6 退出验证 | 托管 Windows 主要平台家族 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
+| [`tests/evaluation/`](../../tests/evaluation) 与 [`tests/orchestration/`](../../tests/orchestration) | 科学契约/等价测试，以及进程、cache、resume、资源、硬件和 CLI 失败边界测试 | 科学声明与运行声明按依赖、marker 和 workflow 边界分离 |
 
-### 3.3 P5 实现后仍存在的缺口
+### 3.3 P6 实现后仍存在的缺口
 
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
 - P4 历史失败保持不可变。行顺序不变的后继版本通过完整 [Windows GPU 验证](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json)，单独的[冻结决定](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json)在不改变科学身份的前提下冻结 `p4-utility@1.0.0`。正式结果仍需数据集、模型、track、运行和环境独立准入。
 - P5 已实现五种子平衡 C2ST、精确训练碰撞、内部重复、锁定 SDMetrics DCR 与留出校准，以及声明完整的黑盒 DOMIAS KDE 攻击。Adult/Sick 隐私角色和有边界的成员推断威胁模型已经审阅；独立预注册的 TabDDPM/Adult 生成种子 `3,4,5` 确认性试验通过全部非分数门槛，因此 P5 v1 已完成条件式协议冻结。数据集、模型、赛道、运行、发布类别和 release-support 门仍相互独立。
-- Efficiency、cache/resume orchestration、P5 攻击/C2ST 区间之外的不确定性、兼容聚合和榜单发布仍未实现。
+- P6 已实现资源感知隔离执行、观测硬件/软件 profile、精确的内容寻址 cache/resume、结构化失败语义与诊断性 Efficiency 核算。cache reuse 不具备 Efficiency 证据资格，跨 profile 比较采用 fail-closed。正式 Efficiency 准入和 warm 重复生成政策仍属于未来协议/发布决定。
+- P6 强制边界退出门已在提交 `da47011` 的 Windows/AMD64 与 Python 3.11.15 环境通过；其[留存证据](../evidence/evaluation/p6-windows-py311-da47011.json)锁定实现并保留非 Official 的声明边界。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
-- Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
+- 跨科学 bundle 的兼容性分组、声明 P5 区间之外的不确定性、聚合、不可变 leaderboard snapshot 与发布准入仍属于 P7 工作。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
 
 ## 4. 目标架构
@@ -171,7 +173,7 @@ tests/evaluation/
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 完整精确 Windows GPU 验证后，已在 `p4-utility@1.0.0` 冻结；具体结果仍需独立准入 | 保持冻结身份，并完成发布、数据集、模型、track 和结果准入门 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 数据角色/威胁模型已审阅，独立预注册确认性试验通过，已完成条件式协议冻结 | 继续保持数据集/模型/运行/发布独立准入；release support 仍待完成 |
-| P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
+| P6 | 资源感知编排、效率、缓存与恢复 | P2 | 工程退出门已通过；已留存 [Windows/Python 3.11 证据](../evidence/evaluation/p6-windows-py311-da47011.json) | 在声明硬件 profile 下通过阶段核算与复用完整性验证 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
 | P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
 
@@ -329,6 +331,8 @@ Privacy 任务：
 
 ### 6.7 P6 — Orchestration、Efficiency、cache 与 resume
 
+当前实现：七阶段子进程引擎、内容寻址产物缓存、尝试祖先链、强制资源边界、结构化脱敏日志、观测硬件 profile、兼容性守卫、验证器以及 Windows/Linux CI 退出门均已实现。运行层的 aggregate/report 不执行 P7 排行榜聚合。在 P8 把中央 P2–P5 表格评测接入该引擎前，标准 CLI 适配器计划仍保留一个 evaluate 阶段。
+
 任务：
 
 - 把执行扩展为 prepare、train、sample、validate、evaluate、aggregate 和 report 阶段记录。
@@ -344,6 +348,8 @@ Privacy 任务：
 - cache 复用证明所有身份输入吻合，并在阶段 metadata 中可见；
 - Efficiency 测量在命名硬件配置下、声明容差内可复现；以及
 - 一个可选指标失败不会删除已完成的 Atomic Result。
+
+完成证据（2026-08-13）：以上工程关卡已在提交 `da47011` 的 Windows/AMD64 与 Python 3.11.15 环境全部通过；[留存的机器可读记录](../evidence/evaluation/p6-windows-py311-da47011.json)由仓库测试保证不可变。它不会让任何硬件 profile、模型、数据集、结果或 Efficiency 排名进入 Official Results。
 
 ### 6.8 P7 — 聚合与榜单发布
 
@@ -471,7 +477,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P4 与 P5 v1 均已完成条件式协议冻结。下一项实现增量是 P6：先定义执行节点身份契约、硬件/资源 profile、时间与内存测量、安全 cache key 和可安全处理中断的 resume 语义，再编写 orchestration 代码。P5 的 release support 和具体数据集/模型/运行准入仍属于独立发布工作。
+P6 工程实现及其强制边界退出验证器已经完成。下一项实现增量是 P7：先定义兼容组身份、分层聚合顺序、不确定性与覆盖率核算、发布类别和不可变 leaderboard snapshot，再编写排名代码。P5 的 release support 和具体数据集/模型/运行准入仍属于独立发布工作。
 
 ## 12. 相关规范
 
@@ -479,6 +485,7 @@ P4 与 P5 v1 均已完成条件式协议冻结。下一项实现增量是 P6：�
 - [P3 有效性与预处理指南](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 - [P4 Local 与 Global Utility 指南](P4_UTILITY.zh-CN.md)
 - [P5 高阶 Fidelity 与经验 Privacy 指南](P5_HIGH_ORDER_PRIVACY.zh-CN.md)
+- [P6 资源感知运行编排指南](P6_ORCHESTRATION.zh-CN.md)
 - [指标治理](METRIC_GOVERNANCE.zh-CN.md)
 - [指标来源审阅](METRIC_SOURCE_REVIEW.zh-CN.md)
 - [数据集配置规范](DATASET_PROFILE_SPEC.zh-CN.md)
