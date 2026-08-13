@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
+from standardized_tabular_diffusion.models.tabddpm import build_tabddpm_environment
 from standardized_tabular_diffusion.validation.tabddpm import MANIFEST_RELATIVE_PATH, _sha256_lf, verify_sources
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +43,23 @@ def test_tabddpm_libzero_license_hash_is_line_ending_independent(tmp_path: Path)
     crlf_path.write_bytes(source.replace("\r\n", "\n").replace("\n", "\r\n").encode())
 
     assert _sha256_lf(lf_path) == _sha256_lf(crlf_path) == expected
+
+
+def test_tabddpm_modern_sklearn_bridge_preserves_integral_subsample() -> None:
+    environment = os.environ.copy()
+    environment.update(build_tabddpm_environment(REPO_ROOT / "TabDDPM-main"))
+    command = [
+        sys.executable,
+        "-c",
+        (
+            "import sklearn.preprocessing as p; "
+            "q=p.QuantileTransformer(subsample=1e9); "
+            "print(type(q).__name__, q.subsample)"
+        ),
+    ]
+    completed = subprocess.run(command, check=True, capture_output=True, text=True, env=environment)
+
+    assert completed.stdout.strip() == "IntegralSubsampleQuantileTransformer 1000000000"
 
 
 def test_tabddpm_native_parity_evidence_is_complete_and_immutable() -> None:

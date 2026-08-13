@@ -9,6 +9,7 @@ import warnings
 from collections import Counter
 from dataclasses import dataclass
 from importlib import resources
+from pathlib import Path
 from typing import Any, Callable, NoReturn
 
 import numpy as np
@@ -49,9 +50,13 @@ P4_METRICS = tuple(
     )
 )
 UTILITY_DETAILS_ARTIFACT_PATH = "artifacts/utility-details.json"
-UTILITY_IMPLEMENTATION_VERSION = "1.0.0"
+UTILITY_IMPLEMENTATION_VERSION = "1.1.0"
 EVALUATOR_RESOURCE_PACKAGE = "standardized_tabular_diffusion.resources.evaluation.evaluators"
-EVALUATOR_RESOURCE_NAME = "p4-utility-pilot-v1.json"
+EVALUATOR_RESOURCE_NAME = "p4-utility-stable-v1.json"
+GLOBAL_EVALUATOR_ID = "tabstruct-tabeval-stable"
+GLOBAL_EVALUATOR_VERSION = "0.2.0"
+GLOBAL_TRAIN_ORDERING = "lexicographic-all-model-columns-v1"
+GLOBAL_SPLIT_IMPLEMENTATION = "autogluon.core.utils.utils.generate_train_test_split"
 
 _IDENTIFIER = re.compile(r"^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$")
 _NUMERIC_TYPES = {"continuous", "integer"}
@@ -80,6 +85,7 @@ class GlobalBackendResult:
     predictors: tuple[str, ...]
     predictor_scores: dict[str, float]
     predictor_failures: tuple[dict[str, Any], ...] = ()
+    fit_evidence: dict[str, Any] | None = None
 
 
 GlobalScorer = Callable[
@@ -159,19 +165,22 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
     _require_id("profile_id", profile["profile_id"])
     _require_id("profile_version", profile["profile_version"])
     if (
-        profile["profile_id"] != "p4-utility-pilot"
-        or profile["profile_version"] != "0.1.0"
-        or profile["status"] != "source-runtime-pilot-validated-diagnostic"
-        or profile["official_results_allowed"] is not False
+        profile["profile_id"] != "p4-utility-stable"
+        or profile["profile_version"] != "0.2.0"
+        or profile["status"] != "frozen"
+        or profile["official_results_allowed"] is not True
     ):
-        _fail("P4 pilot identity, lifecycle, or diagnostic admission boundary has drifted")
+        _fail("P4 frozen identity, lifecycle, or conditional admission boundary has drifted")
     seeds = profile["default_evaluator_seeds"]
-    if not isinstance(seeds, list) or not seeds or len(seeds) != len(set(seeds)) or any(
-        isinstance(seed, bool) or not isinstance(seed, int) for seed in seeds
+    if (
+        not isinstance(seeds, list)
+        or not seeds
+        or len(seeds) != len(set(seeds))
+        or any(isinstance(seed, bool) or not isinstance(seed, int) for seed in seeds)
     ):
         _fail("default_evaluator_seeds must be a non-empty unique integer array")
     if seeds != [0, 1, 2, 3, 4]:
-        _fail("P4 pilot default evaluator seeds must remain exactly 0 through 4")
+        _fail("P4 stable-candidate default evaluator seeds must remain exactly 0 through 4")
 
     local = _require_exact(
         "P4 Evaluator Profile local",
@@ -188,7 +197,7 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
         },
     )
     if local["profile_id"] != "std-local-three-family" or local["profile_version"] != "0.1.0":
-        _fail("P4 pilot requires std-local-three-family@0.1.0")
+        _fail("P4 stable candidate requires std-local-three-family@0.1.0")
     if not isinstance(local["fit_boundary"], str) or not local["fit_boundary"].strip():
         _fail("P4 Local Utility requires a non-empty fit-boundary declaration")
     if local["categorical_encoding"] != {
@@ -309,6 +318,8 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
             "constant_synthetic_target_policy",
             "dependency_failure_policy",
             "source_parity_claimed",
+            "training_row_order",
+            "internal_validation_split",
             "known_deviations",
         },
     )
@@ -319,14 +330,14 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
         "source_sha256": "1861a7573949e50b360c722f4e73110f2c3d014c412693b66c704d070df62743",
     }
     expected_global_values = {
-        "profile_id": "tabeval-tiny-default",
-        "profile_version": "2025-08-09-pinned",
+        "profile_id": GLOBAL_EVALUATOR_ID,
+        "profile_version": GLOBAL_EVALUATOR_VERSION,
         "formula_source": "TabStruct Equation 4",
         "implementation_source": expected_source,
         "runtime_source_manifest": (
             "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
         ),
-        "source_runtime_validation_status": "bounded-pilot-passed",
+        "source_runtime_validation_status": "bounded-exact-source-parity-passed",
         "predictors": ["xgb", "knn", "tabpfn"],
         "autogluon_presets": "medium_quality",
         "fit_weighted_ensemble": False,
@@ -339,12 +350,26 @@ def validate_evaluator_profile(profile: dict[str, Any]) -> None:
         "constant_synthetic_target_policy": "insufficient_support",
         "dependency_failure_policy": "resource_failure-no-substitution",
         "source_parity_claimed": False,
+        "training_row_order": {
+            "implementation": GLOBAL_TRAIN_ORDERING,
+            "columns": "all canonical model-view columns including the target",
+            "purpose": "make equal row multisets independent of input row order before seeded splitting",
+        },
+        "internal_validation_split": {
+            "implementation": GLOBAL_SPLIT_IMPLEMENTATION,
+            "holdout_fraction": "autogluon.core.utils.utils.default_holdout_frac",
+            "random_state": "evaluation-request evaluator seed",
+            "classification_stratification": True,
+            "real_test_used_for_fit": False,
+        },
     }
     if any(global_profile[key] != value for key, value in expected_global_values.items()):
         _fail("P4 Global Utility source, predictors, formulas, or failure policy have drifted")
     deviations = global_profile["known_deviations"]
-    if not isinstance(deviations, list) or not deviations or any(
-        not isinstance(item, str) or not item.strip() for item in deviations
+    if (
+        not isinstance(deviations, list)
+        or not deviations
+        or any(not isinstance(item, str) or not item.strip() for item in deviations)
     ):
         _fail("P4 Global Utility known deviations must remain explicit and non-empty")
 
@@ -430,8 +455,7 @@ def validate_utility_profile(dataset_profile: dict[str, Any], evaluator_profile:
     if not isinstance(included, list) or len(included) != len(set(included)):
         _fail("Global Utility included targets must be a unique array")
     if not isinstance(excluded, list) or any(
-        not isinstance(item, dict) or set(item) != {"column_id", "reason_code", "reason_detail"}
-        for item in excluded
+        not isinstance(item, dict) or set(item) != {"column_id", "reason_code", "reason_detail"} for item in excluded
     ):
         _fail("Every Global Utility exclusion requires column_id, reason_code, and reason_detail")
     excluded_ids = [item["column_id"] for item in excluded]
@@ -522,8 +546,8 @@ def _atomic(
         unit=unit,
         evaluator_id=evaluator_id,
         evaluator_version=(
-            "2025-08-09-pinned"
-            if evaluator_id == "tabeval-tiny-default"
+            GLOBAL_EVALUATOR_VERSION
+            if evaluator_id == GLOBAL_EVALUATOR_ID
             else ("0.1.0" if evaluator_id is not None else None)
         ),
         task_type=task_type,
@@ -618,7 +642,9 @@ def _feature_frames(
     return np.asarray(real_x), np.asarray(synthetic_x), np.asarray(test_x)
 
 
-def _classification_scores(model: Any, test_x: np.ndarray, y_test: pd.Series, labels: list[Any], positive: Any) -> _ArmResult:
+def _classification_scores(
+    model: Any, test_x: np.ndarray, y_test: pd.Series, labels: list[Any], positive: Any
+) -> _ArmResult:
     from sklearn.metrics import average_precision_score, balanced_accuracy_score, f1_score, roc_auc_score
     from sklearn.preprocessing import label_binarize
 
@@ -710,9 +736,11 @@ def _build_estimator(definition: dict[str, Any], task_type: str, seed: int) -> A
         parameters["random_state"] = seed
     model = implementations[implementation](**parameters)
     expected_suffix = "Classifier" if task_type == "classification" else "Regressor"
-    if expected_suffix not in implementation and not (
-        task_type == "classification" and implementation.endswith("LogisticRegression")
-    ) and not (task_type == "regression" and implementation.endswith("Ridge")):
+    if (
+        expected_suffix not in implementation
+        and not (task_type == "classification" and implementation.endswith("LogisticRegression"))
+        and not (task_type == "regression" and implementation.endswith("Ridge"))
+    ):
         raise UtilityImplementationError("Local evaluator implementation differs from the declared task type")
     return model
 
@@ -881,7 +909,11 @@ def _evaluate_local(
     real_y = tables.real_train[target_name]
     synthetic_y = tables.synthetic[target_name]
     test_y = tables.real_test[target_name]
-    labels = sorted(pd.unique(pd.concat([real_y, test_y], ignore_index=True)).tolist(), key=repr) if task_type == "classification" else None
+    labels = (
+        sorted(pd.unique(pd.concat([real_y, test_y], ignore_index=True)).tolist(), key=repr)
+        if task_type == "classification"
+        else None
+    )
     real_classes = set(pd.unique(real_y)) if task_type == "classification" else set()
     test_only = set(pd.unique(test_y)) - real_classes if task_type == "classification" else set()
     missing_synthetic = real_classes - set(pd.unique(synthetic_y)) if task_type == "classification" else set()
@@ -1023,9 +1055,13 @@ def _evaluate_local(
                         unit="ratio",
                     )
             else:
-                source_states = [result.state for result in arm_results.values() if result.state is not MetricState.COMPUTED]
+                source_states = [
+                    result.state for result in arm_results.values() if result.state is not MetricState.COMPUTED
+                ]
                 state = source_states[0] if source_states else MetricState.MATHEMATICALLY_UNDEFINED
-                code = next((result.reason_code for result in arm_results.values() if result.reason_code), "raw_arm_undefined")
+                code = next(
+                    (result.reason_code for result in arm_results.values() if result.reason_code), "raw_arm_undefined"
+                )
                 detail = next(
                     (result.reason_detail for result in arm_results.values() if result.reason_detail),
                     "At least one primary raw arm is not computable",
@@ -1095,9 +1131,7 @@ def _prepare_global_frames(tables: ValidatedUtilityTables) -> tuple[pd.DataFrame
 
     frames = [tables.real_train.copy(), tables.synthetic.copy(), tables.real_test.copy()]
     categorical = [
-        spec["name"]
-        for spec in tables.column_specs
-        if spec["semantic_type"] in _CLASSIFICATION_TYPES | {"string"}
+        spec["name"] for spec in tables.column_specs if spec["semantic_type"] in _CLASSIFICATION_TYPES | {"string"}
     ]
     datetimes = [spec["name"] for spec in tables.column_specs if spec["semantic_type"] == "datetime"]
     if categorical:
@@ -1132,7 +1166,128 @@ def _global_model_failure_records(predictor: Any) -> tuple[dict[str, Any], ...]:
     return tuple(records)
 
 
-def _default_global_scorer(
+def _close_workspace_log_handlers(workspace: str | Path) -> int:
+    """Close AutoGluon file handlers rooted in a disposable workspace.
+
+    AutoGluon 1.4 adds a process-global file handler for each predictor but
+    does not remove it when fitting finishes. Windows correctly refuses to
+    delete the open log file, so the adapter owns this workspace-local cleanup.
+    """
+
+    import logging
+
+    root = Path(workspace).resolve()
+    logger = logging.getLogger("autogluon")
+    closed = 0
+    for handler in list(logger.handlers):
+        filename = getattr(handler, "baseFilename", None)
+        if filename is None:
+            continue
+        try:
+            inside_workspace = Path(filename).resolve().is_relative_to(root)
+        except (OSError, RuntimeError):
+            inside_workspace = False
+        if inside_workspace:
+            logger.removeHandler(handler)
+            handler.close()
+            closed += 1
+    return closed
+
+
+def _frame_fingerprint(frame: pd.DataFrame) -> str:
+    """Hash one already-validated model view without retaining row content."""
+
+    import hashlib
+
+    payload = frame.to_csv(index=False, lineterminator="\n").encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _canonicalize_global_training_frame(train: pd.DataFrame) -> pd.DataFrame:
+    """Make a training table's row order a function of its complete row multiset.
+
+    Global Utility inputs have already been converted to the numeric canonical
+    model view. Sorting by every column, including the target, means that two
+    tables with identical rows receive identical downstream seeded splits.
+    Stable sorting also makes duplicate full rows interchangeable.
+    """
+
+    if train.empty:
+        raise UtilityImplementationError("Global Utility cannot fit an empty training table")
+    if not train.columns.is_unique:
+        raise UtilityImplementationError("Global Utility training columns must be unique")
+    try:
+        return train.sort_values(
+            by=list(train.columns),
+            kind="mergesort",
+            na_position="first",
+        ).reset_index(drop=True)
+    except (TypeError, ValueError) as exc:
+        raise UtilityImplementationError(
+            f"Global Utility could not canonicalize the model-view row order: {exc}"
+        ) from exc
+
+
+def _explicit_global_fit_split(
+    train: pd.DataFrame,
+    *,
+    target: str,
+    problem_type: str,
+    task_type: str,
+    seed: int,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    """Create the benchmark-owned, deterministic AutoGluon fit/tuning split."""
+
+    try:
+        from autogluon.core.utils.utils import default_holdout_frac, generate_train_test_split
+    except ModuleNotFoundError as exc:
+        raise UtilityResourceError("The declared AutoGluon split implementation is unavailable") from exc
+    if target not in train:
+        raise UtilityImplementationError(f"Global Utility target {target!r} is absent from training data")
+    canonical = _canonicalize_global_training_frame(train)
+    holdout_fraction = float(default_holdout_frac(len(canonical), hyperparameter_tune=False))
+    features = canonical.drop(columns=[target])
+    labels = canonical[target]
+    try:
+        fit_x, tuning_x, fit_y, tuning_y = generate_train_test_split(
+            features,
+            labels,
+            problem_type=problem_type,
+            test_size=holdout_fraction,
+            random_state=seed,
+        )
+    except (AssertionError, TypeError, ValueError) as exc:
+        raise UtilityImplementationError(
+            f"Global Utility could not create its declared internal validation split: {exc}"
+        ) from exc
+    fit = fit_x.copy(deep=True)
+    tuning = tuning_x.copy(deep=True)
+    fit[target] = fit_y
+    tuning[target] = tuning_y
+    fit = fit.loc[:, canonical.columns].reset_index(drop=True)
+    tuning = tuning.loc[:, canonical.columns].reset_index(drop=True)
+    reconstructed = _canonicalize_global_training_frame(pd.concat([fit, tuning], ignore_index=True))
+    if not reconstructed.equals(canonical):
+        raise UtilityImplementationError("Global Utility internal split did not preserve the training row multiset")
+    evidence = {
+        "training_row_order": GLOBAL_TRAIN_ORDERING,
+        "split_implementation": GLOBAL_SPLIT_IMPLEMENTATION,
+        "seed": seed,
+        "task_type": task_type,
+        "problem_type": problem_type,
+        "holdout_fraction": holdout_fraction,
+        "input_rows": len(canonical),
+        "fit_train_rows": len(fit),
+        "tuning_rows": len(tuning),
+        "input_multiset_fingerprint": _frame_fingerprint(canonical),
+        "fit_train_fingerprint": _frame_fingerprint(fit),
+        "tuning_fingerprint": _frame_fingerprint(tuning),
+        "real_test_used_for_fit": False,
+    }
+    return fit, tuning, evidence
+
+
+def _run_global_backend(
     train: pd.DataFrame,
     test: pd.DataFrame,
     target: str,
@@ -1140,19 +1295,21 @@ def _default_global_scorer(
     seed: int,
     time_limit_seconds: int,
     arm: str,
+    *,
+    explicit_fit_split: bool,
 ) -> GlobalBackendResult:
     try:
         from autogluon.tabular import TabularPredictor
     except ModuleNotFoundError as exc:
         raise UtilityResourceError(
-            "tabeval-tiny-default requires AutoGluon, XGBoost, and TabPFN; no fallback predictor is permitted"
+            "Global Utility requires AutoGluon, XGBoost, and TabPFN; no fallback predictor is permitted"
         ) from exc
     for dependency in ("xgboost", "tabpfn"):
         try:
             __import__(dependency)
         except (ImportError, OSError) as exc:
             raise UtilityResourceError(
-                f"tabeval-tiny-default requires an importable {dependency} runtime; no fallback is permitted"
+                f"Global Utility requires an importable {dependency} runtime; no fallback is permitted"
             ) from exc
     try:
         from standardized_tabular_diffusion.evaluation.tabstruct import (
@@ -1168,31 +1325,53 @@ def _default_global_scorer(
         "KNN": {},
         CustomTabPFNModel: {},
     }
-    problem_type = "regression" if task_type == "regression" else ("binary" if train[target].nunique() == 2 else "multiclass")
+    problem_type = (
+        "regression" if task_type == "regression" else ("binary" if train[target].nunique() == 2 else "multiclass")
+    )
     extra_metric = "root_mean_squared_error" if task_type == "regression" else "balanced_accuracy"
+    fit_train = train
+    tuning_data = None
+    fit_evidence = None
+    if explicit_fit_split:
+        fit_train, tuning_data, fit_evidence = _explicit_global_fit_split(
+            train,
+            target=target,
+            problem_type=problem_type,
+            task_type=task_type,
+            seed=seed,
+        )
+    predictor_kwargs: dict[str, Any] = {
+        "label": target,
+        "problem_type": problem_type,
+        "verbosity": 0,
+        "log_to_file": True,
+    }
+    if explicit_fit_split:
+        predictor_kwargs["learner_kwargs"] = {"random_state": seed}
     try:
         with tempfile.TemporaryDirectory(prefix=f"p4-{arm}-{target}-") as workspace:
-            with _seeded_benchmark_context(seed):
-                predictor = TabularPredictor(
-                    label=target,
-                    path=workspace,
-                    problem_type=problem_type,
-                    verbosity=0,
-                    log_to_file=True,
-                ).fit(
-                    train_data=train,
-                    tuning_data=None,
-                    hyperparameters=hyperparameters,
-                    fit_weighted_ensemble=False,
-                    presets="medium_quality",
-                    time_limit=time_limit_seconds,
-                )
-                leaderboard = predictor.leaderboard(test, extra_metrics=[extra_metric])
-                predictor_failures = _global_model_failure_records(predictor)
+            try:
+                with _seeded_benchmark_context(seed):
+                    predictor = TabularPredictor(path=workspace, **predictor_kwargs).fit(
+                        train_data=fit_train,
+                        tuning_data=tuning_data,
+                        hyperparameters=hyperparameters,
+                        fit_weighted_ensemble=False,
+                        presets="medium_quality",
+                        time_limit=time_limit_seconds,
+                    )
+                    leaderboard = predictor.leaderboard(test, extra_metrics=[extra_metric])
+                    predictor_failures = _global_model_failure_records(predictor)
+            finally:
+                _close_workspace_log_handlers(workspace)
     except (OSError, PermissionError, TimeoutError) as exc:
-        raise UtilityResourceError(f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}") from exc
+        raise UtilityResourceError(
+            f"Authoritative Global Utility backend resource failure: {type(exc).__name__}: {exc}"
+        ) from exc
     except Exception as exc:
-        raise UtilityImplementationError(f"Authoritative Global Utility backend failed: {type(exc).__name__}: {exc}") from exc
+        raise UtilityImplementationError(
+            f"Authoritative Global Utility backend failed: {type(exc).__name__}: {exc}"
+        ) from exc
     if "model" not in leaderboard or extra_metric not in leaderboard or leaderboard.empty:
         raise UtilityImplementationError("AutoGluon leaderboard lacks the declared model or score columns")
     predictor_scores: dict[str, float] = {}
@@ -1220,8 +1399,7 @@ def _default_global_scorer(
     # trained model set is retained and must match between TRTR and TSTR.
     if not families["tabpfn"] and not (task_type == "classification" and train[target].nunique() > 10):
         raise UtilityImplementationError(
-            f"Global Utility source backend unexpectedly omitted TabPFN: {names}; "
-            f"model_failures={predictor_failures!r}"
+            f"Global Utility source backend unexpectedly omitted TabPFN: {names}; model_failures={predictor_failures!r}"
         )
     score = float(np.mean(list(predictor_scores.values())))
     return GlobalBackendResult(
@@ -1229,6 +1407,58 @@ def _default_global_scorer(
         predictors=names,
         predictor_scores=predictor_scores,
         predictor_failures=predictor_failures,
+        fit_evidence=fit_evidence,
+    )
+
+
+def _default_global_scorer(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    target: str,
+    task_type: str,
+    seed: int,
+    time_limit_seconds: int,
+    arm: str,
+) -> GlobalBackendResult:
+    """Run the repository's sole user-facing stable Global Utility backend."""
+
+    return _run_global_backend(
+        train,
+        test,
+        target,
+        task_type,
+        seed,
+        time_limit_seconds,
+        arm,
+        explicit_fit_split=True,
+    )
+
+
+def _source_exact_global_scorer(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    target: str,
+    task_type: str,
+    seed: int,
+    time_limit_seconds: int,
+    arm: str,
+) -> GlobalBackendResult:
+    """Internal-only reconstruction used to test the locked TabEval source.
+
+    This is deliberately not registered, exported through the CLI, or used by
+    result production. It preserves TabEval's implicit split only so source
+    identity can continue to be checked independently of the stable protocol.
+    """
+
+    return _run_global_backend(
+        train,
+        test,
+        target,
+        task_type,
+        seed,
+        time_limit_seconds,
+        arm,
+        explicit_fit_split=False,
     )
 
 
@@ -1254,7 +1484,7 @@ def _global_failure_atom(
         metric_id=metric_id,
         dimension="global-utility",
         scope_id=scope_id,
-        evaluator_id="tabeval-tiny-default",
+        evaluator_id=GLOBAL_EVALUATOR_ID,
         task_type=task_type,
         state=state,
         raw_direction=direction,
@@ -1304,7 +1534,11 @@ def _evaluate_global(
             )
             raw_direction = RawDirection.MAXIMIZE if task_type == "classification" else RawDirection.MINIMIZE
             raw_scope_base = f"{column_id}--seed-{_seed_id(seed)}"
-            support_missing = set(pd.unique(tables.real_train[name])) - set(pd.unique(tables.synthetic[name])) if task_type == "classification" else set()
+            support_missing = (
+                set(pd.unique(tables.real_train[name])) - set(pd.unique(tables.synthetic[name]))
+                if task_type == "classification"
+                else set()
+            )
             arm_results: dict[str, GlobalBackendResult] = {}
             arm_failures: dict[str, tuple[MetricState, str, str]] = {}
             for arm, train in (("trtr", real_global), ("tstr", synthetic_global)):
@@ -1343,7 +1577,7 @@ def _evaluate_global(
                             metric_id=raw_metric_id,
                             dimension="global-utility",
                             scope_id=scope,
-                            evaluator_id="tabeval-tiny-default",
+                            evaluator_id=GLOBAL_EVALUATOR_ID,
                             task_type=task_type,
                             state=MetricState.COMPUTED,
                             raw_direction=raw_direction,
@@ -1427,7 +1661,7 @@ def _evaluate_global(
                             metric_id=GLOBAL_TARGET_RATIO_METRIC_ID,
                             dimension="global-utility",
                             scope_id=ratio_scope,
-                            evaluator_id="tabeval-tiny-default",
+                            evaluator_id=GLOBAL_EVALUATOR_ID,
                             task_type=task_type,
                             state=MetricState.COMPUTED,
                             raw_direction=RawDirection.MAXIMIZE,
@@ -1468,15 +1702,10 @@ def _evaluate_global(
                     "ratio": ratio_atom.raw_value,
                     "state": ratio_atom.state.value,
                     "reason_code": ratio_atom.reason_code,
-                    "predictors": {
-                        arm: list(result.predictors) for arm, result in arm_results.items()
-                    },
-                    "predictor_scores": {
-                        arm: result.predictor_scores for arm, result in arm_results.items()
-                    },
-                    "predictor_failures": {
-                        arm: list(result.predictor_failures) for arm, result in arm_results.items()
-                    },
+                    "predictors": {arm: list(result.predictors) for arm, result in arm_results.items()},
+                    "predictor_scores": {arm: result.predictor_scores for arm, result in arm_results.items()},
+                    "predictor_failures": {arm: list(result.predictor_failures) for arm, result in arm_results.items()},
+                    "fit_evidence": {arm: result.fit_evidence for arm, result in arm_results.items()},
                 }
             )
 
@@ -1541,9 +1770,7 @@ def evaluate_utility(
         "global_requested_target_seeds": global_summary["expected_target_seed_ratios"],
         "global_computed_target_seed_ratios": global_summary["computed_target_seed_ratios"],
         "global_requested_targets": global_summary["target_count"],
-        "global_fully_computed_targets": sum(
-            value is not None for value in global_summary["target_ratios"].values()
-        ),
+        "global_fully_computed_targets": sum(value is not None for value in global_summary["target_ratios"].values()),
         "computed_atomic_results": states.get("computed", 0),
         "noncomputed_atomic_results": len(atoms) - states.get("computed", 0),
     }
@@ -1578,10 +1805,12 @@ def evaluate_utility(
             ),
             "source": evaluator_profile["global"]["implementation_source"],
             "runtime_source_manifest": evaluator_profile["global"]["runtime_source_manifest"],
-            "source_runtime_validation_status": evaluator_profile["global"][
-                "source_runtime_validation_status"
-            ],
+            "source_runtime_validation_status": evaluator_profile["global"]["source_runtime_validation_status"],
             "source_parity_claimed": False,
+            "stable_adapter": {
+                "training_row_order": evaluator_profile["global"]["training_row_order"],
+                "internal_validation_split": evaluator_profile["global"]["internal_validation_split"],
+            },
         },
     }
     return UtilityOutcome(

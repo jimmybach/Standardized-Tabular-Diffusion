@@ -12,6 +12,7 @@ __all__ = [
     "METRIC_DEFINITIONS",
     "MetricState",
     "evaluate_table_to_bundle",
+    "evaluate_high_order_privacy",
     "evaluate_utility",
     "evaluate_validity",
     "validate_validity_profile",
@@ -45,6 +46,10 @@ _LAZY_EXPORTS = {
         "validate_validity_profile",
     ),
     "evaluate_utility": ("standardized_tabular_diffusion.evaluation.utility", "evaluate_utility"),
+    "evaluate_high_order_privacy": (
+        "standardized_tabular_diffusion.evaluation.high_order_privacy",
+        "evaluate_high_order_privacy",
+    ),
     "validate_utility_profile": (
         "standardized_tabular_diffusion.evaluation.utility",
         "validate_utility_profile",

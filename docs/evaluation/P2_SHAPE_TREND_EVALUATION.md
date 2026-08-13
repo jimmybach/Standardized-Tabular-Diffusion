@@ -3,6 +3,7 @@
 - Status: passed on authoritative Linux/Python 3.11; diagnostic protocol only
 - Protocol: `p2-shape-trend@0.2.0` (draft, diagnostic)
 - Metric identities: `sdmetrics-column-shapes@1.0.0` and `sdmetrics-column-pair-trends@1.0.0`
+- Release environment: hosted Windows/Python 3.11 primary-family CI is present; exact Windows 11 qualification remains pending; retained parity evidence is Linux/Python 3.11
 - Official Results admission: no
 - Last updated: 2026-08-05
 

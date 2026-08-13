@@ -4,8 +4,8 @@
 
 - 状态：设计基线
 - 协议族：Standardized Tabular Diffusion Benchmark
-- 文档版本：0.1.0
-- 最后更新：2026-08-03
+- 文档版本：0.1.1
+- 最后更新：2026-08-11
 
 本文件是英文规范的对应中文译文。若两者存在歧义，以英文规范为准。
 
@@ -27,7 +27,7 @@ MUST、MUST NOT、SHOULD、SHOULD NOT 和 MAY 的含义与仓库质量标准中�
 
 初始协议面向静态单表合成数据。规范公共接口可以接受 CSV、Parquet 或内存中的 DataFrame，但每次官方运行必须将输入解析为相同的、带版本的规范表和 schema。
 
-主要发布环境为 Linux 与 Python 3.11。依赖硬件的结果还必须标识兼容的硬件 profile。
+主要发布平台家族为 Windows x86-64 与 Python 3.11，精确发布目标为原生 Windows 11 x86-64 与 Python 3.11。GitHub 托管 Windows Server CI 只能证明平台家族兼容性，不得被表述为精确 Windows 11 准入。Linux/Python 3.11 是必须保留的次要兼容环境；对明确声明的 Linux-only 上游等价协议，Linux 仍可作为权威环境，但不能证明 Windows 发布支持。依赖硬件的结果还必须标识兼容的硬件 profile。参见[平台支持政策](../PLATFORM_SUPPORT.zh-CN.md)。
 
 ### 3.2 评测对象
 
@@ -206,7 +206,7 @@ fidelity_score =
 
 评测器套件至少代表线性模型、随机森林和梯度提升树。具体实现和冻结超参数经 pilot 冻结。评测器选择只能使用 train 和允许的 validation 数据，并且必须独立于正在评分的合成数据方法。
 
-已实现的 P4 诊断候选通过 `p4-utility-pilot@0.1.0` 绑定 scikit-learn Logistic Regression/Ridge、Random Forest 和 Histogram Gradient Boosting，并默认使用五个评测种子。其有限范围工程门已经通过，并留存 [Linux/Python 3.11 证据](../evidence/evaluation/p4-utility-run-31053624769.json)。这是已实现的 pilot 身份，不是已冻结的 Official Results profile。
+已冻结的 `p4-utility@1.0.0` 通过未改变的 `p4-utility-stable@0.2.0` 评测器 profile 绑定 scikit-learn Logistic Regression/Ridge、Random Forest 和 Histogram Gradient Boosting，并默认使用五个评测种子。Global Utility 只有一个生成结果的适配器：完整行先被规范排序，再执行显式种子 AutoGluon 拟合/调参划分；留出的真实测试集始终位于拟合边界之外。精确 TabEval 执行只用于内部来源验证，不是可选择的结果 profile。条件性 Official Results 使用范围仅限已精确验证的 Windows 11/Python 3.11/RTX 5080 环境，并且仍需独立通过数据集、模型、track 和具体结果准入。
 
 这一以 Macro-F1/RMSE 为主的面板属于本基准契约。它不得称为 GReaT 的精确复现——GReaT 使用分类 accuracy、回归 MSE，以及线性或逻辑回归、决策树和随机森林；也不得称为 TabStruct 的精确复现——TabStruct 的分类效用使用 Balanced Accuracy。
 

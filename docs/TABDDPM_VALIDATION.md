@@ -36,6 +36,17 @@ The last step is intentional. `rtdl==0.0.9` declares `torch<2`, while the limite
 
 The official entrypoint is a script under `scripts/`, while `lib` and `zero` are sibling packages at the upstream repository root. The adapter therefore prepends that root to `PYTHONPATH`; the native comparison command uses the identical environment. This is an invocation-only adaptation and does not modify upstream source or runtime semantics.
 
+Full Adult configurations use upstream quantile normalization. The pinned
+source passes `subsample=1e9`, an integral float accepted by its original
+`scikit-learn==1.0.2` environment but rejected by supported Python 3.11
+scikit-learn releases before fitting. A repository-owned startup bridge converts
+only integral float `subsample` values to the exactly equal integer before
+calling the unchanged official `QuantileTransformer`; all other values and
+arguments are forwarded. This is an adapter-only API compatibility boundary,
+not an upstream source or algorithm patch. The earlier tiny parity fixture used
+min-max normalization and therefore did not exercise this branch; the real
+Adult P5 pilot adds that coverage.
+
 Equivalent local installation commands are:
 
 ```bash

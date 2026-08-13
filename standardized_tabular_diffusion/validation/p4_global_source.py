@@ -1,4 +1,4 @@
-"""Execute the locked TabEval Global Utility source and the P4 adapter."""
+"""Execute the locked TabEval Global Utility source and its internal reconstruction."""
 
 from __future__ import annotations
 
@@ -28,6 +28,9 @@ import pandas as pd
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, sha256_file
 
 PROTOCOL_ID = "p4-global-source-runtime-pilot-v1"
+WINDOWS_GPU_PROTOCOL_ID = "p4-global-source-windows-gpu-pilot-v1"
+LINUX_CPU_RUNTIME_PROFILE = "linux-cpu"
+WINDOWS_GPU_RUNTIME_PROFILE = "windows-rtx5080"
 SOURCE_MODULE_NAME = "_standardized_tabular_diffusion_locked_tabeval_p4"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 NUMERICAL_ABSOLUTE_TOLERANCE = 1e-8
@@ -93,6 +96,20 @@ def _manifest() -> dict[str, Any]:
         payload = json.load(stream)
     if not isinstance(payload, dict):
         raise P4GlobalSourceValidationError("The packaged TabEval P4 source manifest is invalid")
+    return payload
+
+
+def _windows_gpu_runtime_manifest() -> dict[str, Any]:
+    resource = resources.files("standardized_tabular_diffusion").joinpath(
+        "resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json"
+    )
+    with resource.open("r", encoding="utf-8") as stream:
+        payload = json.load(stream)
+    if not isinstance(payload, dict):
+        raise P4GlobalSourceValidationError("The packaged Windows GPU runtime manifest is invalid")
+    source_manifest = REPO_ROOT / payload["source_manifest"]
+    if sha256_file(source_manifest) != payload["source_manifest_sha256"]:
+        raise P4GlobalSourceValidationError("The Windows GPU runtime is not bound to the current source manifest")
     return payload
 
 
@@ -219,11 +236,37 @@ def _verify_checkpoint(path: Path, expected: dict[str, str]) -> dict[str, Any]:
     }
 
 
-def verify_pilot_runtime() -> dict[str, Any]:
+def _nvidia_driver_version() -> str | None:
+    try:
+        output = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-gpu=driver_version",
+                "--format=csv,noheader",
+                "--id=0",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return output.splitlines()[0].strip() if output else None
+
+
+def verify_pilot_runtime(runtime_profile: str = LINUX_CPU_RUNTIME_PROFILE) -> dict[str, Any]:
     """Attest the benchmark-selected runtime and distinguish it from an upstream lock."""
 
-    manifest = _manifest()
-    expected = manifest["approved_pilot_runtime"]
+    if runtime_profile not in {LINUX_CPU_RUNTIME_PROFILE, WINDOWS_GPU_RUNTIME_PROFILE}:
+        raise P4GlobalSourceValidationError(f"Unknown P4 runtime profile: {runtime_profile}")
+    if runtime_profile == LINUX_CPU_RUNTIME_PROFILE:
+        expected = _manifest()["approved_pilot_runtime"]
+        runtime_profile_id = "tabeval-p4-linux-cpu"
+    else:
+        runtime_manifest = _windows_gpu_runtime_manifest()
+        expected = runtime_manifest["distributions"]
+        runtime_profile_id = runtime_manifest["runtime_profile_id"]
     actual = {
         name: _distribution_version(name)
         for name in (
@@ -234,8 +277,9 @@ def verify_pilot_runtime() -> dict[str, Any]:
             "tabpfn",
         )
     }
-    actual["xgboost_distribution"] = "xgboost-cpu"
-    actual["xgboost"] = _distribution_version("xgboost-cpu")
+    xgboost_distribution = expected["xgboost_distribution"]
+    actual["xgboost_distribution"] = xgboost_distribution
+    actual["xgboost"] = _distribution_version(xgboost_distribution)
     try:
         import torch
         import xgboost
@@ -250,16 +294,59 @@ def verify_pilot_runtime() -> dict[str, Any]:
             )
     if actual["xgboost"] != expected["xgboost"] or actual["xgboost_import"] != expected["xgboost"]:
         raise P4GlobalSourceValidationError("The approved CPU XGBoost distribution/runtime is not installed")
-    if not str(actual["torch"]).startswith("2.3.0+"):
-        raise P4GlobalSourceValidationError(f"Runtime drift for torch: observed {actual['torch']!r}")
-    if torch.cuda.is_available():
-        raise P4GlobalSourceValidationError("The approved pilot is CPU-only but CUDA is available")
+    if runtime_profile == LINUX_CPU_RUNTIME_PROFILE:
+        if not str(actual["torch"]).startswith("2.3.0+"):
+            raise P4GlobalSourceValidationError(f"Runtime drift for torch: observed {actual['torch']!r}")
+        if torch.cuda.is_available():
+            raise P4GlobalSourceValidationError("The approved pilot is CPU-only but CUDA is available")
+        return {
+            "runtime_profile_id": runtime_profile_id,
+            "status": expected["status"],
+            "selection_basis": expected["selection_basis"],
+            "upstream_official_environment_claimed": False,
+            "versions": actual,
+            "torch_cuda_available": False,
+        }
+
+    runtime_manifest = _windows_gpu_runtime_manifest()
+    if platform.system() != runtime_manifest["environment"]["system"]:
+        raise P4GlobalSourceValidationError("The Windows GPU runtime requires native Windows")
+    if platform.machine().upper() != runtime_manifest["environment"]["machine"]:
+        raise P4GlobalSourceValidationError("The Windows GPU runtime machine architecture has drifted")
+    if ".".join(platform.python_version_tuple()[:2]) != runtime_manifest["environment"]["python"]:
+        raise P4GlobalSourceValidationError("The Windows GPU runtime requires Python 3.11")
+    if actual["torch"] != expected["torch"]:
+        raise P4GlobalSourceValidationError(
+            f"Runtime drift for torch: observed {actual['torch']!r}, expected {expected['torch']!r}"
+        )
+    if not torch.cuda.is_available():
+        raise P4GlobalSourceValidationError("The Windows GPU runtime requires CUDA")
+    cuda_expected = runtime_manifest["cuda"]
+    properties = torch.cuda.get_device_properties(0)
+    capability = list(torch.cuda.get_device_capability(0))
+    if torch.version.cuda != cuda_expected["runtime"]:
+        raise P4GlobalSourceValidationError("The PyTorch CUDA runtime has drifted")
+    if properties.name != cuda_expected["device_name"]:
+        raise P4GlobalSourceValidationError("The preregistered NVIDIA device identity has drifted")
+    if capability != cuda_expected["compute_capability"]:
+        raise P4GlobalSourceValidationError("The preregistered compute capability has drifted")
+    if properties.total_memory < cuda_expected["minimum_total_memory_bytes"]:
+        raise P4GlobalSourceValidationError("Available GPU memory is below the preregistered minimum")
     return {
-        "status": expected["status"],
-        "selection_basis": expected["selection_basis"],
+        "runtime_profile_id": runtime_profile_id,
+        "status": runtime_manifest["status"],
+        "selection_basis": runtime_manifest["selection_basis"],
         "upstream_official_environment_claimed": False,
         "versions": actual,
-        "torch_cuda_available": False,
+        "torch_cuda_available": True,
+        "cuda": {
+            "runtime": torch.version.cuda,
+            "device_index": 0,
+            "device_name": properties.name,
+            "compute_capability": capability,
+            "total_memory_bytes": properties.total_memory,
+            "driver_version": _nvidia_driver_version(),
+        },
     }
 
 
@@ -270,15 +357,20 @@ def _controlled_runtime(seed: int) -> Iterator[None]:
     python_state = random.getstate()
     numpy_state = np.random.get_state()
     torch_state = torch.random.get_rng_state()
+    cuda_states = torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
     try:
         yield
     finally:
         random.setstate(python_state)
         np.random.set_state(numpy_state)
         torch.random.set_rng_state(torch_state)
+        if cuda_states is not None:
+            torch.cuda.set_rng_state_all(cuda_states)
 
 
 def _fixture() -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
@@ -420,13 +512,46 @@ def _pip_freeze() -> list[str]:
     return sorted(line.strip() for line in output.splitlines() if line.strip())
 
 
-def _assert_primary_environment() -> None:
+def _assert_linux_cpu_runtime_environment() -> None:
     if platform.system() != "Linux" or platform.python_version_tuple()[:2] != ("3", "11"):
         raise P4GlobalSourceValidationError("Authoritative P4 source evidence requires Linux and Python 3.11")
 
 
-def _locked_files() -> dict[str, str]:
-    paths = (
+def _assert_runtime_environment(runtime_profile: str) -> None:
+    if runtime_profile == LINUX_CPU_RUNTIME_PROFILE:
+        _assert_linux_cpu_runtime_environment()
+        return
+    if runtime_profile == WINDOWS_GPU_RUNTIME_PROFILE:
+        if platform.system() != "Windows" or platform.python_version_tuple()[:2] != ("3", "11"):
+            raise P4GlobalSourceValidationError(
+                "The Windows GPU P4 profile requires a Windows-family host and Python 3.11"
+            )
+        return
+    raise P4GlobalSourceValidationError(f"Unknown P4 runtime profile: {runtime_profile}")
+
+
+def _cuda_allocation_snapshot() -> dict[str, int]:
+    import torch
+
+    torch.cuda.synchronize(0)
+    return {
+        "allocated_bytes": torch.cuda.memory_allocated(0),
+        "peak_allocated_bytes": torch.cuda.max_memory_allocated(0),
+        "reserved_bytes": torch.cuda.memory_reserved(0),
+        "peak_reserved_bytes": torch.cuda.max_memory_reserved(0),
+    }
+
+
+def _reset_cuda_peak() -> dict[str, int]:
+    import torch
+
+    torch.cuda.synchronize(0)
+    torch.cuda.reset_peak_memory_stats(0)
+    return _cuda_allocation_snapshot()
+
+
+def _locked_files(runtime_profile: str = LINUX_CPU_RUNTIME_PROFILE) -> dict[str, str]:
+    paths = [
         ".github/workflows/p4-global-source-validation.yml",
         "THIRD_PARTY_NOTICES.md",
         "docs/evaluation/EVALUATION_PROTOCOL.md",
@@ -442,13 +567,23 @@ def _locked_files() -> dict[str, str]:
         "standardized_tabular_diffusion/evaluation/evaluate_table.py",
         "standardized_tabular_diffusion/evaluation/tabstruct.py",
         "standardized_tabular_diffusion/evaluation/utility.py",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
         "standardized_tabular_diffusion/validation/p4_global_source.py",
         "tests/evaluation/test_p4_global_source_validation.py",
         "tests/test_p4_global_source_retained_evidence.py",
-    )
+    ]
+    if runtime_profile == WINDOWS_GPU_RUNTIME_PROFILE:
+        paths.extend(
+            [
+                "docs/PLATFORM_SUPPORT.md",
+                "docs/PLATFORM_SUPPORT.zh-CN.md",
+                "requirements-p4-windows-gpu-validation.txt",
+                "standardized_tabular_diffusion/platform_support.py",
+                "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json",
+            ]
+        )
     return {path: sha256_file(REPO_ROOT / path) for path in paths}
 
 
@@ -460,33 +595,39 @@ def run_validation(
     classifier_checkpoint: Path,
     regressor_checkpoint: Path,
     time_limit_seconds: int,
-    require_primary_environment: bool = False,
+    require_declared_runtime_environment: bool = False,
+    runtime_profile: str = LINUX_CPU_RUNTIME_PROFILE,
 ) -> dict[str, Any]:
+    protocol_id = (
+        PROTOCOL_ID if runtime_profile == LINUX_CPU_RUNTIME_PROFILE else WINDOWS_GPU_PROTOCOL_ID
+    )
+    gpu_profile = runtime_profile == WINDOWS_GPU_RUNTIME_PROFILE
     evidence: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
-        "protocol_id": PROTOCOL_ID,
+        "protocol_id": protocol_id,
         "phase": "P4 Global source-runtime pilot",
         "status": "fail",
         "repository_commit": _repository_commit(),
         "claim_boundary": (
             "Executes the exact locked TabEval UtilityPerFeature and CustomTabPFNModel source with real "
-            "AutoGluon, CPU XGBoost, KNN, and checksum-locked TabPFN-v2 checkpoints, then compares the P4 "
-            "adapter on classification and regression fixtures. This reconstructs a benchmark-approved pilot "
-            "runtime because upstream published no dependency lock; it does not freeze Official Results or "
+            "AutoGluon, XGBoost, KNN, and checksum-locked TabPFN-v2 checkpoints, then compares an internal "
+            "source-exact reconstruction on classification and regression fixtures. This reconstructs a benchmark-approved pilot "
+            f"runtime ({runtime_profile}) because upstream published no dependency lock; it does not freeze Official Results or "
             "complete Adult/Sick multi-seed admission."
         ),
         "environment": {
             "platform": f"{platform.system()} / {platform.machine()}",
             "python": platform.python_version(),
-            "primary_environment_required": require_primary_environment,
+            "declared_runtime_environment_required": require_declared_runtime_environment,
+            "runtime_profile": runtime_profile,
         },
     }
     started = time.perf_counter()
     try:
         if time_limit_seconds < 1:
             raise P4GlobalSourceValidationError("time_limit_seconds must be positive")
-        if require_primary_environment:
-            _assert_primary_environment()
+        if require_declared_runtime_environment:
+            _assert_runtime_environment(runtime_profile)
         source = verify_tabeval_source(source_path, license_path)
         evidence["source"] = source
         manifest = _manifest()
@@ -499,7 +640,7 @@ def run_validation(
             ),
         }
         evidence["checkpoints"] = checkpoints
-        runtime = verify_pilot_runtime()
+        runtime = verify_pilot_runtime(runtime_profile)
         evidence["runtime"] = runtime
         module = load_tabeval_source_module(source_path)
         traces: list[dict[str, Any]] = []
@@ -508,47 +649,95 @@ def run_validation(
         seed = 42
         with tempfile.TemporaryDirectory(prefix="p4-global-source-") as temporary:
             workspace = Path(temporary)
-            evaluator = module.UtilityPerFeature(workspace=workspace / "source", use_cache=False)
-            source_started = time.perf_counter()
-            with _controlled_runtime(seed):
-                source_result = evaluator._evaluate(
-                    _SourceDataLoader(test),
-                    _SourceDataLoader(train),
-                    columns,
-                    time_limit_seconds,
+            try:
+                evaluator = module.UtilityPerFeature(workspace=workspace / "source", use_cache=False)
+                source_gpu_before = _reset_cuda_peak() if gpu_profile else None
+                source_started = time.perf_counter()
+                with _controlled_runtime(seed):
+                    source_result = evaluator._evaluate(
+                        _SourceDataLoader(test),
+                        _SourceDataLoader(train),
+                        columns,
+                        time_limit_seconds,
+                    )
+                source_seconds = time.perf_counter() - source_started
+                source_gpu_after = _cuda_allocation_snapshot() if gpu_profile else None
+                evidence["source_execution"] = {
+                    "completed": True,
+                    "results": _json_compatible(source_result),
+                    "predictor_traces": _json_compatible(traces),
+                    "elapsed_seconds": source_seconds,
+                    "cuda_before": source_gpu_before,
+                    "cuda_after": source_gpu_after,
+                }
+                guard = _source_high_cardinality_guard(module, workspace / "guard")
+
+                from standardized_tabular_diffusion.evaluation.utility import (
+                    _close_workspace_log_handlers,
+                    _source_exact_global_scorer,
                 )
-            source_seconds = time.perf_counter() - source_started
-            evidence["source_execution"] = {
-                "completed": True,
-                "results": _json_compatible(source_result),
-                "predictor_traces": _json_compatible(traces),
-                "elapsed_seconds": source_seconds,
+
+                adapter_gpu_before = _reset_cuda_peak() if gpu_profile else None
+                adapter_started = time.perf_counter()
+                with _controlled_runtime(seed):
+                    classification = _source_exact_global_scorer(
+                        train,
+                        test,
+                        "binary_target",
+                        "classification",
+                        seed,
+                        time_limit_seconds,
+                        "source-pilot",
+                    )
+                    regression = _source_exact_global_scorer(
+                        train,
+                        test,
+                        "numeric_target",
+                        "regression",
+                        seed,
+                        time_limit_seconds,
+                        "source-pilot",
+                    )
+                adapter_seconds = time.perf_counter() - adapter_started
+                adapter_gpu_after = _cuda_allocation_snapshot() if gpu_profile else None
+            finally:
+                from standardized_tabular_diffusion.evaluation.utility import (
+                    _close_workspace_log_handlers,
+                )
+
+                _close_workspace_log_handlers(workspace)
+
+        if gpu_profile:
+            assert source_gpu_before is not None and source_gpu_after is not None
+            assert adapter_gpu_before is not None and adapter_gpu_after is not None
+            source_increase = (
+                source_gpu_after["peak_allocated_bytes"] - source_gpu_before["allocated_bytes"]
+            )
+            adapter_increase = (
+                adapter_gpu_after["peak_allocated_bytes"] - adapter_gpu_before["allocated_bytes"]
+            )
+            if source_increase <= 0:
+                raise P4GlobalSourceValidationError(
+                    "Exact TabEval source execution did not prove an increase in CUDA allocation"
+                )
+            if adapter_increase <= 0:
+                raise P4GlobalSourceValidationError(
+                    "The internal source-exact reconstruction did not prove an increase in CUDA allocation"
+                )
+            gpu_execution = {
+                "source": {
+                    "before": source_gpu_before,
+                    "after": source_gpu_after,
+                    "peak_allocation_increase_bytes": source_increase,
+                },
+                "adapter": {
+                    "before": adapter_gpu_before,
+                    "after": adapter_gpu_after,
+                    "peak_allocation_increase_bytes": adapter_increase,
+                },
             }
-            guard = _source_high_cardinality_guard(module, workspace / "guard")
-
-            from standardized_tabular_diffusion.evaluation.utility import _default_global_scorer
-
-            adapter_started = time.perf_counter()
-            with _controlled_runtime(seed):
-                classification = _default_global_scorer(
-                    train,
-                    test,
-                    "binary_target",
-                    "classification",
-                    seed,
-                    time_limit_seconds,
-                    "source-pilot",
-                )
-                regression = _default_global_scorer(
-                    train,
-                    test,
-                    "numeric_target",
-                    "regression",
-                    seed,
-                    time_limit_seconds,
-                    "source-pilot",
-                )
-            adapter_seconds = time.perf_counter() - adapter_started
+        else:
+            gpu_execution = None
 
         source_scores = {
             "binary_target": _source_score(source_result, "binary_target", "classification"),
@@ -593,6 +782,7 @@ def run_validation(
                     "time_limit_per_target_seconds": time_limit_seconds,
                     "source_elapsed_seconds": source_seconds,
                     "adapter_elapsed_seconds": adapter_seconds,
+                    "gpu_execution": gpu_execution,
                 },
                 "exit_gates": {
                     "exact_lf_normalized_source_attested": "pass",
@@ -603,10 +793,11 @@ def run_validation(
                     "real_xgb_knn_tabpfn_families_trained": "pass",
                     "source_adapter_aggregate_numerical_parity": "pass",
                     "source_high_cardinality_guard_executed": "pass",
+                    "windows_gpu_execution_proven": "pass" if gpu_profile else "not-applicable",
                     "official_results_admission": "not-assessed",
                 },
                 "installed_distributions": _pip_freeze(),
-                "locked_files": _locked_files(),
+                "locked_files": _locked_files(runtime_profile),
                 "elapsed_seconds": time.perf_counter() - started,
                 "status": "pass",
             }
@@ -630,7 +821,18 @@ def main() -> None:
     parser.add_argument("--classifier-checkpoint", type=Path, required=True)
     parser.add_argument("--regressor-checkpoint", type=Path, required=True)
     parser.add_argument("--time-limit-seconds", type=int, default=120)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-declared-runtime-environment",
+        "--require-primary-environment",
+        dest="require_declared_runtime_environment",
+        action="store_true",
+        help="Require the OS/Python identity declared by the selected runtime profile.",
+    )
+    parser.add_argument(
+        "--runtime-profile",
+        choices=(LINUX_CPU_RUNTIME_PROFILE, WINDOWS_GPU_RUNTIME_PROFILE),
+        default=LINUX_CPU_RUNTIME_PROFILE,
+    )
     args = parser.parse_args()
     run_validation(
         args.output,
@@ -639,7 +841,8 @@ def main() -> None:
         classifier_checkpoint=args.classifier_checkpoint.resolve(),
         regressor_checkpoint=args.regressor_checkpoint.resolve(),
         time_limit_seconds=args.time_limit_seconds,
-        require_primary_environment=args.require_primary_environment,
+        require_declared_runtime_environment=args.require_declared_runtime_environment,
+        runtime_profile=args.runtime_profile,
     )
 
 

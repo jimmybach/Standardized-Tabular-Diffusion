@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import copy
+import logging
 from dataclasses import replace
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -14,6 +16,9 @@ from standardized_tabular_diffusion.evaluation.utility import (
     LOCAL_RETENTION_METRIC_ID,
     GlobalBackendResult,
     UtilityProfileError,
+    _canonicalize_global_training_frame,
+    _close_workspace_log_handlers,
+    _explicit_global_fit_split,
     _global_model_failure_records,
     evaluate_utility,
     global_target_ratio,
@@ -24,6 +29,86 @@ from standardized_tabular_diffusion.evaluation.utility import (
 )
 
 pytestmark = [pytest.mark.core, pytest.mark.evaluation]
+
+
+def test_global_training_order_depends_on_complete_row_multiset_not_input_order() -> None:
+    frame = pd.DataFrame(
+        {
+            "feature": [3.0, 1.0, 2.0, 1.0, 3.0],
+            "label": [1.0, 0.0, 1.0, 0.0, 1.0],
+        }
+    )
+    permuted = frame.sample(frac=1.0, random_state=19)
+
+    expected = _canonicalize_global_training_frame(frame)
+    observed = _canonicalize_global_training_frame(permuted)
+
+    pd.testing.assert_frame_equal(observed, expected)
+    assert list(observed.index) == list(range(len(frame)))
+
+
+def test_explicit_global_split_is_order_invariant_seeded_and_never_mentions_real_test() -> None:
+    pytest.importorskip("autogluon.core")
+    frame = pd.DataFrame(
+        {
+            "feature": [float(index) for index in range(100)],
+            "label": [float(index % 2) for index in range(100)],
+        }
+    )
+    permuted = frame.sample(frac=1.0, random_state=91)
+
+    fit_a, tune_a, evidence_a = _explicit_global_fit_split(
+        frame,
+        target="label",
+        problem_type="binary",
+        task_type="classification",
+        seed=7,
+    )
+    fit_b, tune_b, evidence_b = _explicit_global_fit_split(
+        permuted,
+        target="label",
+        problem_type="binary",
+        task_type="classification",
+        seed=7,
+    )
+    _, _, other_seed = _explicit_global_fit_split(
+        frame,
+        target="label",
+        problem_type="binary",
+        task_type="classification",
+        seed=11,
+    )
+
+    pd.testing.assert_frame_equal(fit_a, fit_b)
+    pd.testing.assert_frame_equal(tune_a, tune_b)
+    assert evidence_a == evidence_b
+    assert evidence_a["real_test_used_for_fit"] is False
+    assert evidence_a["fit_train_rows"] + evidence_a["tuning_rows"] == len(frame)
+    assert evidence_a["fit_train_fingerprint"] != other_seed["fit_train_fingerprint"]
+
+
+def test_workspace_log_cleanup_closes_only_owned_autogluon_handlers(tmp_path: Path) -> None:
+    logger = logging.getLogger("autogluon")
+    owned_path = tmp_path / "owned" / "predictor.log"
+    other_path = tmp_path / "other" / "predictor.log"
+    owned_path.parent.mkdir()
+    other_path.parent.mkdir()
+    owned = logging.FileHandler(owned_path)
+    other = logging.FileHandler(other_path)
+    logger.addHandler(owned)
+    logger.addHandler(other)
+    try:
+        assert _close_workspace_log_handlers(owned_path.parent) == 1
+        assert owned not in logger.handlers
+        assert other in logger.handlers
+        owned_path.unlink()
+    finally:
+        if owned in logger.handlers:
+            logger.removeHandler(owned)
+            owned.close()
+        if other in logger.handlers:
+            logger.removeHandler(other)
+            other.close()
 
 
 def test_global_backend_retains_stable_autogluon_model_failure_fields() -> None:
@@ -65,9 +150,7 @@ def _learnable_adult_frames(adult_frames):
 
 def _source_stub(train, test, target, task_type, seed, time_limit_seconds, arm):
     del train, test, target, seed, time_limit_seconds
-    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (
-        2.0 if arm == "trtr" else 2.5
-    )
+    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (2.0 if arm == "trtr" else 2.5)
     predictors = ("KNeighbors", "TabPFN", "XGBoost")
     return GlobalBackendResult(
         score=score,
@@ -131,9 +214,8 @@ def test_p4_executes_three_local_families_and_equal_target_global_formula(
     assert outcome.global_summary["global_utility"] == pytest.approx((9 * 0.75 + 6 * 0.8) / 15)
     assert outcome.global_summary["ratio_clipped"] is False
     assert outcome.denominator_counts["global_fully_computed_targets"] == 15
-    assert {run["test_fingerprint"] for run in outcome.details["local_runs"]} == {
-        request.real_test_artifact["sha256"]
-    }
+    assert {atom.evaluator_id for atom in ratio_atoms} == {"tabstruct-tabeval-stable"}
+    assert {run["test_fingerprint"] for run in outcome.details["local_runs"]} == {request.real_test_artifact["sha256"]}
 
 
 def test_missing_synthetic_class_is_explicit_and_never_receives_favorable_global_default(
@@ -242,7 +324,7 @@ def test_global_profile_requires_every_model_view_target_or_a_reasoned_exclusion
 @pytest.mark.parametrize(
     ("path", "value"),
     [
-        (("official_results_allowed",), True),
+        (("official_results_allowed",), False),
         (("default_evaluator_seeds",), [0]),
         (("local", "classification", "primary_metric"), "accuracy"),
         (("local", "retention", "clipping"), "zero-one"),

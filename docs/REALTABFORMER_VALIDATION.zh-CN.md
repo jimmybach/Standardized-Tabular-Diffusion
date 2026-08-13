@@ -103,7 +103,7 @@
 - 官方关系模型接收相互关联的父表和子表。当前仓库的规范契约是单表，因此关系模式不在本适配器已验证范围内。
 - Transformer 训练和自回归采样明显重于传统 baseline；各数据集的序列长度、时间和显存预算仍待研究。
 - 条件 seed input 和高级生成参数是官方专家接口；进入 Official Results 前必须在 benchmark profile 中冻结。
-- 官方包支持早于 3.11 的 Python，但本仓库正式支持的发布环境仅为 Linux/Python 3.11。
+- 官方包支持早于 3.11 的 Python。该适配器当前留存的等价证据来自 Linux/Python 3.11；本仓库针对该适配器的精确 Windows 11/Python 3.11 发布目标准入仍待完成。
 
 ## 证据
 

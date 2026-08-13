@@ -38,9 +38,19 @@ concurrency:
 
 jobs:
   p1-foundation:
-    name: Linux / Python 3.11 / P1 contracts and identity
-    runs-on: ubuntu-latest
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Hosted Windows / Python 3.11 / primary-family P1 contracts and identity
+            tier: primary
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary P1 contracts and identity
+            tier: secondary
 
     steps:
       - name: Check out repository
@@ -78,47 +88,32 @@ jobs:
         run: python -m build
 
       - name: Generate P1 exit-gate evidence
+        if: matrix.tier == 'primary'
         run: >-
           python -m standardized_tabular_diffusion.validation.p1_foundation
-          --output "${RUNNER_TEMP}/p1-foundation-evidence.json"
-          --require-primary-environment
+          --output "${{ runner.temp }}/p1-foundation-evidence.json"
+          --require-primary-family-environment
+
+      - name: Generate P1 secondary-compatibility evidence
+        if: matrix.tier == 'secondary'
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p1_foundation
+          --output "${{ runner.temp }}/p1-foundation-evidence.json"
 
       - name: Preserve pre-protocol failure evidence
         if: always()
-        shell: bash
-        run: |
-          if [[ ! -f "${RUNNER_TEMP}/p1-foundation-evidence.json" ]]; then
-            python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          output = Path(os.environ["RUNNER_TEMP"]) / "p1-foundation-evidence.json"
-          output.write_text(
-              json.dumps(
-                  {
-                      "evidence_schema_version": "1.0.0",
-                      "protocol_id": "p1-contracts-identity-foundation-v1",
-                      "phase": "P1",
-                      "status": "fail",
-                      "repository_commit": os.environ.get("GITHUB_SHA", "unknown"),
-                      "error_type": "PreProtocolFailure",
-                      "error": "A required P1 workflow step failed before evidence generation.",
-                  },
-                  indent=2,
-                  sort_keys=True,
-              )
-              + "\n",
-              encoding="utf-8",
-          )
-          PY
-          fi
+        run: >-
+          python -m standardized_tabular_diffusion.validation.workflow_evidence
+          --output "${{ runner.temp }}/p1-foundation-evidence.json"
+          --protocol-id p1-contracts-identity-foundation-v1
+          --phase P1
+          --message "A required P1 workflow step failed before evidence generation."
 
       - name: Upload P1 evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: p1-foundation-evidence
+          name: p1-foundation-${{ matrix.tier }}-evidence
           path: ${{ runner.temp }}/p1-foundation-evidence.json
           if-no-files-found: error
           retention-days: 90

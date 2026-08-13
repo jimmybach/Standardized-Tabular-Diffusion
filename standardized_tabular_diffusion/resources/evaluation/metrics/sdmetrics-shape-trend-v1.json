@@ -61,7 +61,7 @@
       "source_parity_evidence": ["tests/evaluation/test_p2_source_parity.py",".github/workflows/p2-shape-trend-validation.yml"],
       "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
       "reference_fixtures": ["mixed numerical, categorical, boolean, and datetime fixture"],
-      "supported_environment": {"primary":"Linux with Python 3.11"},
+      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["GitHub-hosted Windows Server with Python 3.11 for Windows-family compatibility","Linux x86-64 with Python 3.11"],"windows_release_qualification":"hosted Windows-family CI passed; exact native Windows 11 qualification remains pending"},
       "unresolved_limitations": ["P2 is diagnostic until the protocol and Dataset Profiles pass later release gates."],
       "release_decision": "diagnostic-only"
     },

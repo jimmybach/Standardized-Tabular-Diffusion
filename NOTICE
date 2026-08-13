@@ -1,0 +1,10 @@
+Standardized Tabular Diffusion
+Copyright 2026 The Standardized Tabular Diffusion Authors
+
+The Apache License 2.0 at the repository root applies only to the original
+project integration, adapters, evaluation framework, command-line interface,
+tests, and documentation whose rights are held by the project contributors.
+
+Third-party source trees, packages, datasets, papers, and model weights remain
+under their respective licenses or terms. See THIRD_PARTY_NOTICES.md and the
+license and NOTICE files distributed with each included component.

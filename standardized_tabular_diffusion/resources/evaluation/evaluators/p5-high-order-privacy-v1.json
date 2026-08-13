@@ -1,0 +1,56 @@
+{
+  "profile_schema_version": "1.0.0",
+  "profile_id": "p5-high-order-privacy",
+  "profile_version": "0.1.0",
+  "status": "validated-diagnostic",
+  "official_results_allowed": false,
+  "default_evaluator_seeds": [0, 1, 2, 3, 4],
+  "c2st": {
+    "comparison": "heldout-real-vs-synthetic",
+    "transform_fit": "real-train-only",
+    "categorical": "one-hot-handle-unknown-ignore",
+    "numeric": "standard-scaler",
+    "balance": "equal-seeded-canonical-subsample",
+    "test_fraction": 0.3,
+    "classifier": {
+      "implementation": "sklearn.ensemble.RandomForestClassifier",
+      "n_estimators": 200,
+      "max_depth": null,
+      "min_samples_leaf": 2,
+      "n_jobs": 1
+    },
+    "bootstrap_replicates": 1000,
+    "minimum_rows_per_class": 20
+  },
+  "dcr": {
+    "implementation": "sdmetrics.single_table.privacy.dcr_utils.calculate_dcr",
+    "query_max_rows": 2000,
+    "reference_max_rows": 5000,
+    "sampling_seed": 0,
+    "chunk_size": 250,
+    "calibration": "wasserstein-synthetic-vs-heldout"
+  },
+  "domias": {
+    "threat_model": "black-box-released-table-with-auxiliary-real-reference",
+    "member_source": "real-train",
+    "nonmember_source": "heldout-real-test",
+    "reference_source": "disjoint-heldout-real-test",
+    "transform_fit": "auxiliary-reference-only",
+    "mixed_table_adaptation": "one-hot-standardize-pca-kde",
+    "pca_max_components": 8,
+    "maximum_rows_per_group": 1000,
+    "minimum_rows_per_group": 20,
+    "bootstrap_replicates": 1000,
+    "accuracy_threshold": "pooled-score-median-strict-greater",
+    "tpr_fpr_ceiling": 0.01
+  },
+  "excluded_metrics": {
+    "great-rf-discriminator-accuracy": "Retained as a source-specific diagnostic, not merged with C2ST AUROC.",
+    "alaa-integrated-alpha-precision": "Requires a reviewed mixed-table support embedding before implementation.",
+    "alaa-integrated-beta-recall": "Requires a reviewed mixed-table support embedding before implementation.",
+    "alaa-authenticity-paper": "Paper and released-code semantics require adjudication.",
+    "alaa-authenticity-repository": "Paper and released-code semantics require adjudication.",
+    "synthcity-delta-presence": "Published package semantics are not yet sufficiently stable for benchmark admission.",
+    "attribute-inference": "Requires dataset-specific sensitive and quasi-identifier review."
+  }
+}

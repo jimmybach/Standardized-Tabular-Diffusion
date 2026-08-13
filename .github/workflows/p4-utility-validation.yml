@@ -38,9 +38,19 @@ concurrency:
 
 jobs:
   p4-utility:
-    name: Linux / Python 3.11 / Local and Global Utility diagnostic
-    runs-on: ubuntu-latest
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Hosted Windows / Python 3.11 / primary-family Local and Global Utility diagnostic
+            tier: primary
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary Local and Global Utility diagnostic
+            tier: secondary
 
     steps:
       - name: Check out repository
@@ -77,24 +87,39 @@ jobs:
           python -m mypy
 
       - name: Generate bounded P4 diagnostic evidence
+        if: matrix.tier == 'primary'
         run: >-
           python -m standardized_tabular_diffusion.validation.p4_utility
-          --output "${RUNNER_TEMP}/p4-utility-evidence.json"
-          --require-primary-environment
+          --output "${{ runner.temp }}/p4-utility-evidence.json"
+          --require-primary-family-environment
+
+      - name: Generate bounded P4 secondary-compatibility evidence
+        if: matrix.tier == 'secondary'
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p4_utility
+          --output "${{ runner.temp }}/p4-utility-evidence.json"
 
       - name: Build and inspect the distribution artifact
         run: |
           python -m build
-          python -m pip install --force-reinstall --no-deps dist/*.whl
-          cd "${RUNNER_TEMP}"
-          std-tabular-diffusion list-protocols > p4-packaged-protocols.json
+          python -m standardized_tabular_diffusion.validation.core_ci install-wheel --dist-directory dist
+          std-tabular-diffusion list-protocols > "${{ runner.temp }}/p4-packaged-protocols.json"
           python -c "from standardized_tabular_diffusion.evaluation.utility import load_p4_evaluator_profile; print(load_p4_evaluator_profile()['profile_id'])"
+
+      - name: Preserve pre-protocol failure evidence
+        if: always()
+        run: >-
+          python -m standardized_tabular_diffusion.validation.workflow_evidence
+          --output "${{ runner.temp }}/p4-utility-evidence.json"
+          --protocol-id p4-utility-diagnostic-v1
+          --phase P4
+          --message "A required P4 workflow step failed before evidence generation."
 
       - name: Upload P4 diagnostic evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: p4-utility-diagnostic-evidence
+          name: p4-utility-${{ matrix.tier }}-diagnostic-evidence
           path: ${{ runner.temp }}/p4-utility-evidence.json
           if-no-files-found: error
           retention-days: 90

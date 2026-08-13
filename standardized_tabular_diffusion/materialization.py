@@ -148,9 +148,23 @@ def materialization_status(dataset_name: str, repo_root: Path | None = None) -> 
     base_spec = get_dataset_spec(dataset_name, repo_root=repo_root)
     manifest = load_manifest(dataset_name, repo_root=repo_root)
 
-    return {
-        "dataset": dataset_name,
-        "base_spec": base_spec.to_dict(),
-        "manifest": manifest,
-        "materialized": manifest is not None,
-    }
+    def portable(value: Any) -> Any:
+        if isinstance(value, Path):
+            return str(value)
+        if isinstance(value, dict):
+            return {str(key): portable(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [portable(item) for item in value]
+        return value
+
+    payload = portable(
+        {
+            "dataset": dataset_name,
+            "base_spec": base_spec.to_dict(),
+            "manifest": manifest,
+            "materialized": manifest is not None,
+        }
+    )
+    if not isinstance(payload, dict):  # defensive: the root is statically an object
+        raise TypeError("Materialization status serialization produced a non-object")
+    return payload

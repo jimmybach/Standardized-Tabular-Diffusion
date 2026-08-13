@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75,<82"]
+requires = ["setuptools>=77,<82"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,10 +8,13 @@ version = "0.1.0.dev0"
 description = "A standardized research benchmark interface for tabular data synthesis methods"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["tabular-data", "synthetic-data", "benchmark", "diffusion"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Science/Research",
+  "Operating System :: Microsoft :: Windows :: Windows 11",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
@@ -409,6 +412,7 @@ files = [
   "standardized_tabular_diffusion/evaluation/contracts.py",
   "standardized_tabular_diffusion/evaluation/backends/sdmetrics.py",
   "standardized_tabular_diffusion/evaluation/evaluate_table.py",
+  "standardized_tabular_diffusion/evaluation/high_order_privacy.py",
   "standardized_tabular_diffusion/evaluation/profiles.py",
   "standardized_tabular_diffusion/evaluation/registry.py",
   "standardized_tabular_diffusion/evaluation/schema.py",
@@ -419,8 +423,11 @@ files = [
   "standardized_tabular_diffusion/evaluation/validity.py",
   "standardized_tabular_diffusion/preprocessing.py",
   "standardized_tabular_diffusion/materialization.py",
+  "standardized_tabular_diffusion/platform_support.py",
   "standardized_tabular_diffusion/registry.py",
   "standardized_tabular_diffusion/runner.py",
+  "standardized_tabular_diffusion/validation/core_ci.py",
+  "standardized_tabular_diffusion/validation/workflow_evidence.py",
 ]
 exclude = "(?x)(research_inputs|TabDDPM-main|TabDiff-main|TabSyn-main)/"
 check_untyped_defs = true

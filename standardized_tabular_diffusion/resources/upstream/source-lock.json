@@ -1418,6 +1418,14 @@
           "package": "libzero",
           "status": "exact-official-wheel-source-vendored",
           "version": "0.0.8"
+        },
+        {
+          "compatibility_file": "standardized_tabular_diffusion/compat/tabddpm_sklearn/sitecustomize.py",
+          "compatibility_file_sha256": "3a8d778334ebefbf4c39a91dd0011e52f7a07f405e05b43d86c428556a6f94e2",
+          "package": "scikit-learn",
+          "status": "adapter-only-integral-subsample-type-bridge",
+          "upstream_declared_version": "1.0.2",
+          "validated_python311_version": "1.5.2"
         }
       ],
       "modification_status": "adapter-only",
