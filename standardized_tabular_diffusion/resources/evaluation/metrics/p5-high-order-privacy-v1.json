@@ -35,7 +35,7 @@
       "undefined_conditions": ["Insufficient group support or singular density estimate."],
       "minimum_support": {"real_train_rows":20,"real_test_rows":40,"synthetic_rows":20},
       "randomness": {"deterministic_given_seed":true,"seed_source":"Evaluation Request evaluator_seeds"},
-      "default_parameters": {"evaluator_profile":"p5-high-order-privacy@0.1.0","default_evaluator_seeds":[0,1,2,3,4]},
+      "default_parameters": {"evaluator_profile":"p5-high-order-privacy@1.0.0","default_evaluator_seeds":[0,1,2,3,4]},
       "allowed_overrides": [],
       "normalization": {"function":"none; transformations are separate metric identities","version":"1.0.0"},
       "aggregation": {"rule":"Equal-seed descriptive mean; no cross-dimension or privacy total","version":"1.0.0"},
@@ -49,11 +49,11 @@
       "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
       "reference_fixtures": ["hand-computable collisions, SDMetrics DCR source comparison, and DOMIAS formula fixtures"],
       "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["Windows development environment with Python 3.11"]},
-      "unresolved_limitations": ["Adult and Sick sensitive/quasi-identifier reviews are not complete; attribute inference is excluded.","The P5 mixed-table DOMIAS adapter is not claimed as exact source parity."],
+      "unresolved_limitations": ["Attribute inference remains outside P5 v1 despite reviewed Adult and Sick roles because no separate implementation and threat model is approved.","The P5 mixed-table DOMIAS adapter is not claimed as exact source parity."],
       "release_decision": "diagnostic-only"
     },
     "lifecycle_evidence": {"definition_review":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["docs/evaluation/METRIC_SOURCE_REVIEW.md","docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"]},"implementation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/high_order_privacy.py"]},"unit_validation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["tests/evaluation/test_p5_high_order_privacy.py","tests/evaluation/test_p5_evaluate_table.py"]},"source_parity":null,"protocol_freeze":null,"release_approval":null},
-    "admission": {"official_results_allowed":false,"compatibility_version":"p5-high-order-privacy-0.1.0","reason":"Implemented and unit-validated diagnostic protocol; dataset threat-model review, pilot evidence, and protocol freeze remain separate gates."}
+    "admission": {"official_results_allowed":false,"compatibility_version":"p5-high-order-privacy-1.0.0","reason":"Preregistered freeze candidate; approval depends on the declared independent confirmatory completeness and provenance gates."}
   },
   "records": [
     {"metric_id":"std-c2st-rf-auroc","display_name":"C2ST Random-Forest AUROC","dimension":"high-order-fidelity","subdimension":"classifier-two-sample-test","description":"Raw heldout-real versus synthetic discriminator AUROC; chance target is 0.5.","source":{"method_references":["Lopez-Paz and Oquab, ICLR 2017"],"upstream":"https://arxiv.org/abs/1610.06545","known_deviations":["AUROC replaces the paper's primary accuracy statistic and is benchmark-derived."]},"semantics":{"raw_direction":"target","target_value":0.5}},

@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0 through P3 passed; P4 is conditionally protocol-frozen; P5 is implemented with retained Windows identity-surrogate and three-seed TabDDPM/Adult generator-pilot evidence
+- Status: P0 through P3 passed; P4 is conditionally protocol-frozen; P5 v1 is preregistered for independent TabDDPM/Adult three-seed confirmation after role and threat-model review
 - Primary environment: Windows and Python 3.11; Linux is the secondary compatibility family
 - Last updated: 2026-08-12
 
@@ -111,7 +111,7 @@ The centralized missing-value workflow fits numerical means and categorical mode
 
 `p4-utility@1.0.0` is protocol-frozen after the retained exact Windows 11/Python 3.11/RTX 5080 successor validation. This admits the metric components conditionally, not any dataset, model, run, or untested environment. Release support remains a later gate; see the [P4 guide](evaluation/P4_UTILITY.md).
 
-`p5-high-order-privacy@0.1.0` implements C2ST, exact-copy diagnostics, pinned SDMetrics DCR, heldout calibration, and a declared DOMIAS black-box attack. Its complete identity-surrogate path passed on reviewed Adult and Sick materializations under Windows 11/Python 3.11, and the bounded [implementation evidence](evidence/evaluation/p5-windows-py311-identity-c66fa23.json) is retained. The first real-generator pilot also passed: one checksum-pinned TabDDPM Adult checkpoint, three generated 32,561-row tables at seeds `0,1,2`, and three finalized P5 bundles on Windows/Python 3.11/RTX 5080. Its [machine-readable evidence](evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) is retained. P5 remains diagnostic, has no overall score, makes no formal privacy claim, and awaits dataset-specific privacy-role review plus confirmatory freeze decisions. See the [P5 guide](evaluation/P5_HIGH_ORDER_PRIVACY.md).
+`p5-high-order-privacy@1.0.0` is the freeze candidate for C2ST, exact-copy diagnostics, pinned SDMetrics DCR, heldout calibration, and the declared DOMIAS black-box attack. Its Adult/Sick field roles and bounded threat model are reviewed; attribute inference remains excluded. The complete Windows/Python 3.11 identity-surrogate [implementation evidence](evidence/evaluation/p5-windows-py311-identity-c66fa23.json) and the exploratory three-seed TabDDPM/Adult [generator evidence](evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) are retained. An independent seeds `3,4,5` run is fixed by the [preregistration](evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json). P5 remains nonofficial until that run passes its non-numerical gates and a separate freeze decision is recorded. See the [P5 guide](evaluation/P5_HIGH_ORDER_PRIVACY.md).
 
 ## CI baseline
 

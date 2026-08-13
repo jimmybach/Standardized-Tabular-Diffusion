@@ -1,8 +1,8 @@
 {
   "profile_schema_version": "1.0.0",
   "profile_id": "p5-high-order-privacy",
-  "profile_version": "0.1.0",
-  "status": "validated-diagnostic",
+  "profile_version": "1.0.0",
+  "status": "freeze-candidate",
   "official_results_allowed": false,
   "default_evaluator_seeds": [0, 1, 2, 3, 4],
   "c2st": {
@@ -51,6 +51,6 @@
     "alaa-authenticity-paper": "Paper and released-code semantics require adjudication.",
     "alaa-authenticity-repository": "Paper and released-code semantics require adjudication.",
     "synthcity-delta-presence": "Published package semantics are not yet sufficiently stable for benchmark admission.",
-    "attribute-inference": "Requires dataset-specific sensitive and quasi-identifier review."
+    "attribute-inference": "Excluded from P5 v1; dataset roles are reviewed, but no separately approved implementation and attribute-inference threat model exists."
   }
 }

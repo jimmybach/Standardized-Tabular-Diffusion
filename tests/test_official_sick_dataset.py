@@ -131,7 +131,8 @@ def test_reviewed_sick_profile_binds_official_source_but_does_not_overclaim_rele
     assert profile.payload["official_eligible"] is False
     assert profile.payload["split"]["train"]["rows"] == 2800
     assert profile.payload["split"]["test"]["rows"] == 972
-    assert profile.payload["privacy"]["status"] == "review-required"
+    assert profile.payload["privacy"]["status"] == "reviewed-for-bounded-p5-use"
+    assert profile.payload["privacy"]["sensitive_roles_reviewed"] is True
 
 
 def test_repository_sick_metadata_points_only_to_the_official_model_view() -> None:
