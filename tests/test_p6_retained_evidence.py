@@ -9,13 +9,15 @@ from standardized_tabular_diffusion.evaluation.serialization import read_json, s
 pytestmark = [pytest.mark.core, pytest.mark.evaluation]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE_PATH = REPO_ROOT / "docs/evidence/evaluation/p6-windows-py311-0fb5d07.json"
-EVIDENCE_SHA256 = "d1ef8213d3885f7c6cccf9bb159768d96790f3defbb69f66d52a7f3fa3150525"
+HISTORICAL_EVIDENCE_PATH = REPO_ROOT / "docs/evidence/evaluation/p6-windows-py311-0fb5d07.json"
+HISTORICAL_EVIDENCE_SHA256 = "d1ef8213d3885f7c6cccf9bb159768d96790f3defbb69f66d52a7f3fa3150525"
+EVIDENCE_PATH = REPO_ROOT / "docs/evidence/evaluation/p6-windows-py311-da47011.json"
+EVIDENCE_SHA256 = "67b5f40889c2f3e2b2da853303afaba99f3a866829dd020cb1e30e147f6887c2"
 
 
 def test_retained_p6_evidence_is_immutable_historical_evidence() -> None:
-    assert sha256_file(EVIDENCE_PATH) == EVIDENCE_SHA256
-    evidence = read_json(EVIDENCE_PATH)
+    assert sha256_file(HISTORICAL_EVIDENCE_PATH) == HISTORICAL_EVIDENCE_SHA256
+    evidence = read_json(HISTORICAL_EVIDENCE_PATH)
 
     assert evidence["status"] == "pass"
     assert evidence["phase"] == "P6"
@@ -31,6 +33,27 @@ def test_retained_p6_evidence_is_immutable_historical_evidence() -> None:
     assert set(evidence["exit_gates"].values()) == {"pass"}
     assert len(evidence["locked_files"]) >= 25
     assert all(len(digest) == 64 for digest in evidence["locked_files"].values())
+
+
+def test_retained_p6_current_evidence_is_immutable_and_bound_to_implementation() -> None:
+    assert sha256_file(EVIDENCE_PATH) == EVIDENCE_SHA256
+    evidence = read_json(EVIDENCE_PATH)
+
+    assert evidence["status"] == "pass"
+    assert evidence["phase"] == "P6"
+    assert evidence["protocol_id"] == "p6-orchestration-exit-gate-v1"
+    assert evidence["repository_commit"] == "da47011872c24957eea35c86d452203ea0b41b87"
+    assert evidence["environment"] == {
+        "hardware_comparison_key": "ef653fc54b104a6e3a0e1573f0708b1cb847965cd67b73806ed210c110a8d20c",
+        "hardware_profile_id": "p6-validation-observed-host",
+        "platform": "Windows / AMD64",
+        "primary_family_environment_required": True,
+        "python": "3.11.15",
+    }
+    assert set(evidence["exit_gates"].values()) == {"pass"}
+    assert len(evidence["locked_files"]) >= 27
+    for relative, digest in evidence["locked_files"].items():
+        assert sha256_file(REPO_ROOT / relative) == digest
 
 
 def test_retained_p6_evidence_preserves_failure_and_efficiency_boundaries() -> None:

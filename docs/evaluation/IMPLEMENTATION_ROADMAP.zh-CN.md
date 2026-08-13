@@ -100,7 +100,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 - P4 历史失败保持不可变。行顺序不变的后继版本通过完整 [Windows GPU 验证](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json)，单独的[冻结决定](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json)在不改变科学身份的前提下冻结 `p4-utility@1.0.0`。正式结果仍需数据集、模型、track、运行和环境独立准入。
 - P5 已实现五种子平衡 C2ST、精确训练碰撞、内部重复、锁定 SDMetrics DCR 与留出校准，以及声明完整的黑盒 DOMIAS KDE 攻击。Adult/Sick 隐私角色和有边界的成员推断威胁模型已经审阅；独立预注册的 TabDDPM/Adult 生成种子 `3,4,5` 确认性试验通过全部非分数门槛，因此 P5 v1 已完成条件式协议冻结。数据集、模型、赛道、运行、发布类别和 release-support 门仍相互独立。
 - P6 已实现资源感知隔离执行、观测硬件/软件 profile、精确的内容寻址 cache/resume、结构化失败语义与诊断性 Efficiency 核算。cache reuse 不具备 Efficiency 证据资格，跨 profile 比较采用 fail-closed。正式 Efficiency 准入和 warm 重复生成政策仍属于未来协议/发布决定。
-- P6 强制边界退出门已在提交 `0fb5d07` 的 Windows/AMD64 与 Python 3.11.15 环境通过；其[留存证据](../evidence/evaluation/p6-windows-py311-0fb5d07.json)锁定实现并保留非 Official 的声明边界。
+- P6 强制边界退出门已在提交 `da47011` 的 Windows/AMD64 与 Python 3.11.15 环境通过；其[留存证据](../evidence/evaluation/p6-windows-py311-da47011.json)锁定实现并保留非 Official 的声明边界。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - 跨科学 bundle 的兼容性分组、声明 P5 区间之外的不确定性、聚合、不可变 leaderboard snapshot 与发布准入仍属于 P7 工作。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
@@ -173,7 +173,7 @@ tests/evaluation/
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 完整精确 Windows GPU 验证后，已在 `p4-utility@1.0.0` 冻结；具体结果仍需独立准入 | 保持冻结身份，并完成发布、数据集、模型、track 和结果准入门 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 数据角色/威胁模型已审阅，独立预注册确认性试验通过，已完成条件式协议冻结 | 继续保持数据集/模型/运行/发布独立准入；release support 仍待完成 |
-| P6 | 资源感知编排、效率、缓存与恢复 | P2 | 工程退出门已通过；已留存 [Windows/Python 3.11 证据](../evidence/evaluation/p6-windows-py311-0fb5d07.json) | 在声明硬件 profile 下通过阶段核算与复用完整性验证 |
+| P6 | 资源感知编排、效率、缓存与恢复 | P2 | 工程退出门已通过；已留存 [Windows/Python 3.11 证据](../evidence/evaluation/p6-windows-py311-da47011.json) | 在声明硬件 profile 下通过阶段核算与复用完整性验证 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
 | P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
 
@@ -349,7 +349,7 @@ Privacy 任务：
 - Efficiency 测量在命名硬件配置下、声明容差内可复现；以及
 - 一个可选指标失败不会删除已完成的 Atomic Result。
 
-完成证据（2026-08-13）：以上工程关卡已在提交 `0fb5d07` 的 Windows/AMD64 与 Python 3.11.15 环境全部通过；[留存的机器可读记录](../evidence/evaluation/p6-windows-py311-0fb5d07.json)由仓库测试保证不可变。它不会让任何硬件 profile、模型、数据集、结果或 Efficiency 排名进入 Official Results。
+完成证据（2026-08-13）：以上工程关卡已在提交 `da47011` 的 Windows/AMD64 与 Python 3.11.15 环境全部通过；[留存的机器可读记录](../evidence/evaluation/p6-windows-py311-da47011.json)由仓库测试保证不可变。它不会让任何硬件 profile、模型、数据集、结果或 Efficiency 排名进入 Official Results。
 
 ### 6.8 P7 — 聚合与榜单发布
 

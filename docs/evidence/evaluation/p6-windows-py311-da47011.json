@@ -1,0 +1,85 @@
+{
+  "claim_boundary": "Validates resource-aware process orchestration, content-addressed reuse, resume ancestry, failure isolation, and observed-profile efficiency diagnostics. It performs no model-quality assessment, leaderboard aggregation, hardware normalization, or Official Results admission.",
+  "environment": {
+    "hardware_comparison_key": "ef653fc54b104a6e3a0e1573f0708b1cb847965cd67b73806ed210c110a8d20c",
+    "hardware_profile_id": "p6-validation-observed-host",
+    "platform": "Windows / AMD64",
+    "primary_family_environment_required": true,
+    "python": "3.11.15"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "cross_profile_ranking_prohibited": "pass",
+    "exact_identity_cache_reuse": "pass",
+    "forced_timeout": "pass",
+    "interruption_and_dependency_skip": "pass",
+    "named_hardware_profile_efficiency_tolerance": "pass",
+    "partial_success_preserves_completed_result": "pass",
+    "retry_with_ancestry": "pass",
+    "simulated_out_of_memory": "pass",
+    "stale_cache_rejection": "pass",
+    "structured_run_validation": "pass"
+  },
+  "locked_files": {
+    ".github/workflows/p4-dataset-scale-validation.yml": "8574873909de9fe5c1e8549c00d670a934c3bfcfa165cdf6fc980b223a399f10",
+    ".github/workflows/p6-orchestration-validation.yml": "0e26b20bf32e429dfe7c014ae16db6d22907e2217919084bec9f09ced88ca403",
+    "pyproject.toml": "22ed052c7f6399084d257547f8fcd24dd4566777922b2f97d3d40d06b63d171b",
+    "standardized_tabular_diffusion/cli.py": "835ee19fb2ded2c7ed58b594bcf4383279d769f7143f8da654a434a3f5aea6ca",
+    "standardized_tabular_diffusion/evaluation/schema.py": "3e20ca34bd69c3d1b493d10c7d787eddf77520b3ce5d6b6dd1581f3f26dce07e",
+    "standardized_tabular_diffusion/orchestration/__init__.py": "1e502ecf8aa9999e0e8c3b6ea0eb7bd77c62200a8511f03b5dceacb03f0dc6d1",
+    "standardized_tabular_diffusion/orchestration/engine.py": "79524056c55cf35e3c7eaf753a66cb8f46696d2a892742d49e6216801c60da23",
+    "standardized_tabular_diffusion/orchestration/environment.py": "b8f004516f83ff944d24eccd3fe49ca238dd36419e42d5670ef55eef13dff1bb",
+    "standardized_tabular_diffusion/orchestration/hardware.py": "277f0517db3bdbf5f4d56f6a444878c668c278c5a2dd521e5162d00916a659ec",
+    "standardized_tabular_diffusion/orchestration/pipeline.py": "773469d7a4923b93163c714ed65d53e22e03c4c85ac09659aa272a70cb5e0d83",
+    "standardized_tabular_diffusion/orchestration/process.py": "3d1c8af99c98d937461f87edf1a8c26327d620fe9a1f927ad89da31a9f45e084",
+    "standardized_tabular_diffusion/orchestration/worker.py": "1c639ed9d71f99217ecad75fb325381fb941e444df0dc30aa8c0d1b344ee8ec9",
+    "standardized_tabular_diffusion/schemas/evaluation/hardware-profile.schema.json": "86ba57953a7dabd94dca8235711dc5d704b1175ebbfad2fb2b03b93d70fcf0ec",
+    "standardized_tabular_diffusion/schemas/evaluation/orchestration-run.schema.json": "51ecdc5a34f19739c047aa2053b8685791c4b4c437a0bf66bed2b8950b8b20f1",
+    "standardized_tabular_diffusion/schemas/evaluation/orchestration-stage-record.schema.json": "fc0df123cbe2707b5c83dbe31d7d4f01159de93c91dde8a9e70be02c8f88d7b1",
+    "standardized_tabular_diffusion/schemas/evaluation/software-profile.schema.json": "9abb3c6b7181bce5eff1e05f7d47787ff489c811eb04d81a4bdbf3f36bb7add6",
+    "standardized_tabular_diffusion/validation/core_ci.py": "d89d266367c83b4a7e70644cf907166a46e160663f733fa671e07cf9fbe3c2c8",
+    "standardized_tabular_diffusion/validation/p6_orchestration.py": "768d7d1b8337609f4d33e155132bcbfd9ea093b21dbf76fd30d015a0969ef547",
+    "tests/evaluation/test_contracts_and_schemas.py": "cea60dbb4d5c0eb08790ef4579f6365c1b1f5d69bef58a5bb8a9a8105de51353",
+    "tests/orchestration/__init__.py": "c04ce65a5d4fba318956fd9a5d85f933665773a61dad5700d8c7126d6f0d56b8",
+    "tests/orchestration/conftest.py": "2151a115ad372cfeedfbc0df6487c7476713e4423c523c7765e9652033f3dffa",
+    "tests/orchestration/test_engine.py": "8d8769266d375ca4c9cdf9afbbcab8b6894f0ab6271be9971e0d4e747b1ad470",
+    "tests/orchestration/test_environment.py": "022e36798ccc212be60e3409e20640e8053e2e324544bb05d34aa8779b10c922",
+    "tests/orchestration/test_hardware.py": "6912965a3b80ff13acc30198e69b2a62eecf8d6aa18192038c954de78c152cfc",
+    "tests/orchestration/test_pipeline.py": "58e91ce04a665d7e2c23cb390b6da191fa240b16b578064a95295e2c5bb8c36b",
+    "tests/orchestration/test_process.py": "7fe1658764e7d60f1f4924f69d87b1381893b2ad8b1d191d5ffbe0cc3344bcd5",
+    "tests/test_cli.py": "f79896d8bf04e1cf28dd0d25985dbd249851d0f3447c9f1deeaee290b9442ff2",
+    "tests/test_core_ci.py": "fcf6ada6aa75d1095ac5cdc023ea95e4ee3af9cef7ed2a0a978c645c78f795b3"
+  },
+  "phase": "P6",
+  "protocol_id": "p6-orchestration-exit-gate-v1",
+  "repository_commit": "da47011872c24957eea35c86d452203ea0b41b87",
+  "result_summary": {
+    "cache_first_decision": "miss",
+    "cache_repeat_decision": "hit",
+    "changed_identity_decision": "miss",
+    "completed_atomic_result_preserved": true,
+    "cross_profile_efficiency_rejected": true,
+    "efficiency_observation_count": 3,
+    "efficiency_peak_rss_bytes": [
+      13832192,
+      13701120,
+      13770752
+    ],
+    "efficiency_tolerance": {
+      "peak_rss_ratio": 1.5,
+      "wall_absolute_seconds": 0.5
+    },
+    "efficiency_wall_seconds": [
+      0.37003570000160835,
+      0.3592468999995617,
+      0.3629305000031309
+    ],
+    "interruption_status": "cancelled",
+    "memory_category": "out-of-memory",
+    "partial_status": "partial",
+    "retry_attempt_count": 2,
+    "stale_cache_decision": "invalid",
+    "timeout_category": "timeout"
+  },
+  "status": "pass"
+}
