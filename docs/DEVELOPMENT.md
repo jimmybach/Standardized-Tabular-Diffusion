@@ -113,6 +113,19 @@ The centralized missing-value workflow fits numerical means and categorical mode
 
 `p5-high-order-privacy@1.0.0` is protocol-frozen for conditional component use. Its Adult/Sick field roles and bounded threat model are reviewed; attribute inference remains excluded. A fresh TabDDPM/Adult checkpoint and the exact preregistered generation seeds `3,4,5` produced three complete 32,561-row tables, 102 computed Atomic Results, and three finalized bundles on Windows 11/Python 3.11/RTX 5080. The [confirmation evidence](evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json), [preflight audit](evidence/evaluation/p5-confirmatory-execution-audit-2026-08-13.json), and [freeze decision](evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json) are retained. The decision did not use numerical scores and does not admit Adult, Sick, TabDDPM, any concrete bundle, or release support. See the [P5 guide](evaluation/P5_HIGH_ORDER_PRIVACY.md).
 
+## P6 execution orchestration
+
+Install `.[orchestration]` for process-tree resource enforcement. Use `std-tabular-diffusion benchmark run --config <path>` for the seven-stage P6 engine; the older top-level `run` command remains a P8 migration surface. Every P6 contribution must keep exact cache identity, prior attempts, structured failure categories, redacted JSONL logs, and hardware comparison keys visible. A cache hit can never be efficiency evidence.
+
+Run the focused local gate with:
+
+~~~bash
+python -m pytest tests/orchestration
+python -m standardized_tabular_diffusion.validation.p6_orchestration --output artifacts/p6-local.json
+~~~
+
+The Windows/Linux workflow is `.github/workflows/p6-orchestration-validation.yml`. See the [P6 specification and usage guide](evaluation/P6_ORCHESTRATION.md) and its [Chinese review translation](evaluation/P6_ORCHESTRATION.zh-CN.md). The operational `aggregate` stage is not the P7 leaderboard aggregator.
+
 ## CI baseline
 
 The core workflow runs on Linux and Python 3.11 with read-only repository permissions. It verifies:

@@ -269,6 +269,40 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
     return {"valid": True, "request_fingerprint": request.fingerprint, **report.to_dict()}
 
 
+def _run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
+    from standardized_tabular_diffusion.orchestration.pipeline import run_benchmark_pipeline
+
+    memory_limit = None if args.memory_gib is None else int(args.memory_gib * 1024**3)
+    return run_benchmark_pipeline(
+        args.config,
+        cache_dir=args.cache_dir,
+        use_cache=not args.no_cache,
+        resume=not args.no_resume,
+        timeout_seconds=args.timeout_seconds,
+        memory_limit_bytes=memory_limit,
+        max_retries=args.max_retries,
+        hardware_profile_id=args.hardware_profile_id,
+    )
+
+
+def _benchmark_status(output_dir: str) -> dict[str, Any]:
+    from standardized_tabular_diffusion.orchestration import load_run_status
+
+    return load_run_status(output_dir)
+
+
+def _validate_benchmark(output_dir: str) -> dict[str, Any]:
+    from standardized_tabular_diffusion.orchestration import validate_orchestration_run
+
+    return validate_orchestration_run(output_dir)
+
+
+def _capture_hardware_profile(profile_id: str | None) -> dict[str, Any]:
+    from standardized_tabular_diffusion.orchestration import capture_hardware_profile
+
+    return capture_hardware_profile(profile_id=profile_id)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Standardized interface for tabular diffusion benchmarks")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -433,6 +467,58 @@ def build_parser() -> argparse.ArgumentParser:
 
     pipeline_parser = subparsers.add_parser("run", help="Run the full standardized pipeline for one config")
     pipeline_parser.add_argument("--config", required=True, help="Path to experiment config JSON")
+
+    benchmark_parser = subparsers.add_parser(
+        "benchmark",
+        help="Run or inspect the P6 resource-aware, resumable benchmark execution layer",
+    )
+    benchmark_subparsers = benchmark_parser.add_subparsers(dest="benchmark_command", required=True)
+    benchmark_run = benchmark_subparsers.add_parser("run", help="Execute the seven-stage P6 benchmark plan")
+    benchmark_run.add_argument("--config", required=True, help="Path to experiment config JSON")
+    benchmark_run.add_argument(
+        "--cache-dir",
+        default=None,
+        help="Optional external content cache; its host path is never serialized into the run record",
+    )
+    benchmark_run.add_argument("--no-cache", action="store_true", help="Execute every enabled stage afresh")
+    benchmark_run.add_argument(
+        "--no-resume",
+        action="store_true",
+        help="Require an output directory without existing orchestration state",
+    )
+    benchmark_run.add_argument(
+        "--timeout-seconds",
+        type=float,
+        default=None,
+        help="Optional positive per-stage timeout; evaluation otherwise uses its configured limit",
+    )
+    benchmark_run.add_argument(
+        "--memory-gib",
+        type=float,
+        default=None,
+        help="Optional positive process-tree memory limit in GiB; requires the orchestration extra",
+    )
+    benchmark_run.add_argument(
+        "--max-retries",
+        type=int,
+        default=0,
+        help="Automatic retry count for timeout and implementation failures",
+    )
+    benchmark_run.add_argument(
+        "--hardware-profile-id",
+        default=None,
+        help="Optional portable label for the observed hardware; it does not grant Official eligibility",
+    )
+    benchmark_status = benchmark_subparsers.add_parser("status", help="Read the latest P6 run manifest")
+    benchmark_status.add_argument("--output-dir", required=True, help="Benchmark run output directory")
+    benchmark_validate = benchmark_subparsers.add_parser(
+        "validate", help="Verify P6 schemas, stage history, outputs, identities, and redacted logs"
+    )
+    benchmark_validate.add_argument("--output-dir", required=True, help="Benchmark run output directory")
+    hardware_parser = benchmark_subparsers.add_parser(
+        "hardware-profile", help="Capture the current hardware comparison profile"
+    )
+    hardware_parser.add_argument("--profile-id", default=None, help="Optional portable observed-profile label")
 
     materialize_parser = subparsers.add_parser(
         "materialize-dataset", help="Download/process one dataset into the canonical materialized layout"
@@ -605,6 +691,29 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+
+    if args.command == "benchmark":
+        if args.benchmark_command == "run":
+            if args.timeout_seconds is not None and args.timeout_seconds <= 0:
+                parser.error("--timeout-seconds must be positive")
+            if args.memory_gib is not None and args.memory_gib <= 0:
+                parser.error("--memory-gib must be positive")
+            if args.max_retries < 0:
+                parser.error("--max-retries must be non-negative")
+            result = _run_benchmark(args)
+            print(json.dumps(result, indent=2))
+            if result["status"] in {"failed", "cancelled"}:
+                raise SystemExit(1)
+            return
+        if args.benchmark_command == "status":
+            print(json.dumps(_benchmark_status(args.output_dir), indent=2))
+            return
+        if args.benchmark_command == "validate":
+            print(json.dumps(_validate_benchmark(args.output_dir), indent=2))
+            return
+        if args.benchmark_command == "hardware-profile":
+            print(json.dumps(_capture_hardware_profile(args.profile_id), indent=2))
+            return
 
     if args.command == "list-models":
         models: Any = list_adapter_specs() if args.details else list_models()

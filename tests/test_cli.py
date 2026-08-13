@@ -553,6 +553,89 @@ def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, mo
     assert payload["phases"]["train"]["model"] == "tabsyn"
 
 
+def test_cli_benchmark_run_forwards_p6_boundaries_and_prints_manifest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(args):
+        observed.update(
+            config=args.config,
+            cache_dir=args.cache_dir,
+            no_cache=args.no_cache,
+            no_resume=args.no_resume,
+            timeout_seconds=args.timeout_seconds,
+            memory_gib=args.memory_gib,
+            max_retries=args.max_retries,
+            hardware_profile_id=args.hardware_profile_id,
+        )
+        return {"status": "success", "run_id": "orun-fixture"}
+
+    monkeypatch.setattr(cli, "_run_benchmark", fake_run)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "benchmark",
+            "run",
+            "--config",
+            str(tmp_path / "config.json"),
+            "--cache-dir",
+            str(tmp_path / "cache"),
+            "--timeout-seconds",
+            "30",
+            "--memory-gib",
+            "2",
+            "--max-retries",
+            "1",
+            "--hardware-profile-id",
+            "fixture-profile",
+        ],
+    )
+    cli.main()
+    assert json.loads(capsys.readouterr().out) == {"status": "success", "run_id": "orun-fixture"}
+    assert observed == {
+        "config": str(tmp_path / "config.json"),
+        "cache_dir": str(tmp_path / "cache"),
+        "no_cache": False,
+        "no_resume": False,
+        "timeout_seconds": 30.0,
+        "memory_gib": 2.0,
+        "max_retries": 1,
+        "hardware_profile_id": "fixture-profile",
+    }
+
+
+def test_cli_benchmark_status_validate_and_hardware_profile(monkeypatch, capsys) -> None:
+    monkeypatch.setattr(cli, "_benchmark_status", lambda output_dir: {"status": "partial", "root": output_dir})
+    monkeypatch.setattr(cli, "_validate_benchmark", lambda output_dir: {"valid": True, "root": output_dir})
+    monkeypatch.setattr(
+        cli,
+        "_capture_hardware_profile",
+        lambda profile_id: {"profile_id": profile_id, "official_efficiency_eligible": False},
+    )
+
+    monkeypatch.setattr(sys, "argv", ["std-cli", "benchmark", "status", "--output-dir", "run"])
+    cli.main()
+    assert json.loads(capsys.readouterr().out)["status"] == "partial"
+
+    monkeypatch.setattr(sys, "argv", ["std-cli", "benchmark", "validate", "--output-dir", "run"])
+    cli.main()
+    assert json.loads(capsys.readouterr().out)["valid"] is True
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["std-cli", "benchmark", "hardware-profile", "--profile-id", "observed-fixture"],
+    )
+    cli.main()
+    assert json.loads(capsys.readouterr().out) == {
+        "profile_id": "observed-fixture",
+        "official_efficiency_eligible": False,
+    }
+
+
 def test_cli_run_action_builds_context_saves_it_and_prints_bundle(tmp_path: Path, monkeypatch, capsys) -> None:
     config_path = tmp_path / "config.json"
     output_dir = tmp_path / "artifacts" / "action"
