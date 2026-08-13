@@ -81,17 +81,23 @@ def make_atomic_result(**changes: object) -> AtomicResult:
 
 def test_all_packaged_schemas_are_valid_draft_2020_12() -> None:
     assert set(list_schemas()) == {
+        "admission-record",
         "artifact-index",
         "atomic-result",
+        "correction-record",
         "dataset-profile",
+        "dataset-summary",
         "evaluation-request",
         "hardware-profile",
+        "leaderboard-snapshot",
         "manifest",
         "metadata",
         "metric-registry-entry",
         "orchestration-run",
         "orchestration-stage-record",
         "protocol-profile",
+        "snapshot-manifest",
+        "snapshot-request",
         "software-profile",
         "stage-record",
         "summary",

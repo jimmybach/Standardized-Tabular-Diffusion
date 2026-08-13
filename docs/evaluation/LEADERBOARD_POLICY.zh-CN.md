@@ -2,9 +2,11 @@
 
 英文规范：[LEADERBOARD_POLICY.md](LEADERBOARD_POLICY.md)
 
-- 状态：设计基线
+- 状态：设计基线，P7 工程实现已完成
 - 政策版本：0.1.0
-- 最后更新：2026-08-03
+- 最后更新：2026-08-13
+
+实现覆盖范围：P7 已实现本政策中的聚合、兼容性、发布类别、纠正、确定性 snapshot 以及静态 JSON/CSV/HTML/Markdown 契约。科学准入决定、全局冻结的 Official 并列阈值、两两优越性检验和 P8 多 snapshot 发布界面仍是独立关卡。参见 [P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md)。
 
 本文件是英文规范的对应中文译文。若两者存在歧义，以英文规范为准。
 

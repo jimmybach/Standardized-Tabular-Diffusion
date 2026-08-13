@@ -154,6 +154,39 @@ def _validate_result_bundle(path: str) -> dict[str, Any]:
     return {"valid": True, **validate_result_bundle(path).to_dict()}
 
 
+def _build_leaderboard(args: argparse.Namespace) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.leaderboard import build_snapshot_from_paths
+
+    snapshot = build_snapshot_from_paths(
+        request_path=args.request,
+        bundle_paths=args.bundles,
+        admission_paths=args.admissions,
+        correction_paths=args.corrections,
+        output=args.output,
+    )
+    return {
+        "valid": True,
+        "snapshot_id": snapshot["snapshot_id"],
+        "snapshot_fingerprint": snapshot["snapshot_fingerprint"],
+        "publication_class": snapshot["publication_class"],
+        "entry_count": len(snapshot["leaderboard"]),
+        "output": str(Path(args.output)),
+    }
+
+
+def _validate_leaderboard(path: str) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.leaderboard import validate_snapshot_bundle
+
+    snapshot = validate_snapshot_bundle(path)
+    return {
+        "valid": True,
+        "snapshot_id": snapshot["snapshot_id"],
+        "snapshot_fingerprint": snapshot["snapshot_fingerprint"],
+        "publication_class": snapshot["publication_class"],
+        "entry_count": len(snapshot["leaderboard"]),
+    }
+
+
 def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
     from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest
     from standardized_tabular_diffusion.evaluation.evaluate_table import evaluate_table_to_bundle
@@ -395,6 +428,27 @@ def build_parser() -> argparse.ArgumentParser:
         "validate-result", help="Validate an incomplete or finalized result bundle"
     )
     validate_result_parser.add_argument("--bundle", required=True, help="Result bundle directory")
+
+    build_leaderboard_parser = subparsers.add_parser(
+        "build-leaderboard",
+        help="Validate finalized Run Results and publish one immutable P7 Leaderboard Snapshot",
+    )
+    build_leaderboard_parser.add_argument("--request", required=True, help="Versioned Snapshot Request JSON")
+    build_leaderboard_parser.add_argument(
+        "--bundle", dest="bundles", action="append", required=True, help="Finalized Run Result bundle; repeat per run"
+    )
+    build_leaderboard_parser.add_argument(
+        "--admission", dest="admissions", action="append", default=[], help="Independent admission record JSON"
+    )
+    build_leaderboard_parser.add_argument(
+        "--correction", dest="corrections", action="append", default=[], help="Correction or supersession record JSON"
+    )
+    build_leaderboard_parser.add_argument("--output", required=True, help="New immutable snapshot directory")
+
+    validate_leaderboard_parser = subparsers.add_parser(
+        "validate-leaderboard", help="Validate a finalized P7 Leaderboard Snapshot and its publication assets"
+    )
+    validate_leaderboard_parser.add_argument("--snapshot", required=True, help="Leaderboard Snapshot directory")
 
     evaluate_table_parser = subparsers.add_parser(
         "evaluate-table",
@@ -775,6 +829,14 @@ def main() -> None:
 
     if args.command == "validate-result":
         print(json.dumps(_validate_result_bundle(args.bundle), indent=2))
+        return
+
+    if args.command == "build-leaderboard":
+        print(json.dumps(_build_leaderboard(args), indent=2))
+        return
+
+    if args.command == "validate-leaderboard":
+        print(json.dumps(_validate_leaderboard(args.snapshot), indent=2))
         return
 
     if args.command == "evaluate-table":

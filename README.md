@@ -119,6 +119,8 @@ P5 adds five-seed Random-Forest C2ST with raw AUROC and a separate label-invaria
 
 P6 adds a seven-stage, resource-aware execution layer around the adapters. Each enabled stage runs in an isolated process with explicit timeout and process-tree memory boundaries, structured redacted logs, attempt ancestry, content-addressed output caching, exact cache validation, and observed hardware/software identity. Cache reuse is never efficiency evidence, damaged cache entries execute afresh, optional failures preserve completed outputs, and cross-hardware efficiency comparison fails closed. The operational `aggregate` stage is not P7 leaderboard aggregation, and captured hardware profiles are not automatically Official. The engineering exit gate passed on Windows/AMD64 and Python 3.11.15 with [retained evidence](docs/evidence/evaluation/p6-windows-py311-da47011.json). See the [P6 guide](docs/evaluation/P6_ORCHESTRATION.md) and [Chinese translation](docs/evaluation/P6_ORCHESTRATION.zh-CN.md).
 
+P7 adds fail-closed aggregation and immutable leaderboard publication. It validates finalized Run Result bundles, keeps exact scientific compatibility groups separate, aggregates Atomic Results through equal-seed and equal-dataset levels, preserves missing and failed denominators, and emits deterministic JSON, CSV, HTML, and Markdown from one structured snapshot. Official ranks require complete five-seed coverage, a frozen tie rule, a release-supported metric, and independent admissions for every applicable identity and run; Partial/Diagnostic and Community outputs never receive Official ranks. See the [P7 guide](docs/evaluation/P7_AGGREGATION_AND_LEADERBOARD.md) and [Chinese translation](docs/evaluation/P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
+
 P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
 Useful contract commands include:
@@ -132,6 +134,8 @@ std-tabular-diffusion evaluate-table --reference real.csv --synthetic synthetic.
 std-tabular-diffusion evaluate-table --protocol p3-validity --reference real.csv --synthetic synthetic.csv --dataset-profile path/to/profile.json --output path/to/new_validity_bundle
 std-tabular-diffusion evaluate-table --protocol p4-utility --reference real_train.csv --real-test real_test.csv --synthetic synthetic_train.csv --dataset-profile path/to/profile.json --output path/to/new_utility_bundle
 std-tabular-diffusion evaluate-table --protocol p5-high-order-privacy --reference real_train.csv --real-test real_test.csv --synthetic synthetic_train.csv --dataset-profile path/to/profile.json --output path/to/new_p5_bundle
+std-tabular-diffusion build-leaderboard --request path/to/snapshot-request.json --bundle path/to/finalized-run --output path/to/new_snapshot
+std-tabular-diffusion validate-leaderboard --snapshot path/to/snapshot
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
 ~~~
 

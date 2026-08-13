@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/snapshot-request/1.0.0",
+  "title": "Leaderboard Snapshot Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["snapshot_request_schema_version", "repository_release", "published_at", "publication_class", "comparison_track", "protocol", "dataset_suite", "metric", "expected_generation_seeds", "aggregation", "bootstrap", "ties", "compatibility", "community_submission"],
+  "properties": {
+    "snapshot_request_schema_version": {"const": "1.0.0"},
+    "repository_release": {"$ref": "#/$defs/id"},
+    "published_at": {"type": "string", "format": "date-time"},
+    "publication_class": {"enum": ["official", "partial-diagnostic", "community"]},
+    "comparison_track": {"enum": ["native", "standardized-tuning"]},
+    "protocol": {
+      "type": "object", "additionalProperties": false,
+      "required": ["protocol_id", "protocol_version", "sha256"],
+      "properties": {"protocol_id": {"$ref": "#/$defs/id"}, "protocol_version": {"$ref": "#/$defs/id"}, "sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "dataset_suite": {
+      "type": "object", "additionalProperties": false,
+      "required": ["suite_id", "suite_version", "datasets"],
+      "properties": {
+        "suite_id": {"$ref": "#/$defs/id"}, "suite_version": {"$ref": "#/$defs/id"},
+        "datasets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/dataset"}}
+      }
+    },
+    "metric": {
+      "type": "object", "additionalProperties": false,
+      "required": ["metric_id", "metric_version", "dimension", "direction"],
+      "properties": {"metric_id": {"$ref": "#/$defs/id"}, "metric_version": {"$ref": "#/$defs/id"}, "dimension": {"$ref": "#/$defs/id"}, "direction": {"enum": ["maximize", "minimize"]}}
+    },
+    "expected_generation_seeds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer"}},
+    "aggregation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["aggregation_id", "aggregation_version", "run_rule", "seed_rule", "dataset_rule"],
+      "properties": {
+        "aggregation_id": {"const": "atomic-contribution-hierarchy"}, "aggregation_version": {"const": "1.0.0"},
+        "run_rule": {"const": "sum-declared-atomic-contributions"}, "seed_rule": {"const": "equal-seed-mean"},
+        "dataset_rule": {"const": "equal-dataset-macro-mean"}
+      }
+    },
+    "bootstrap": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "replicates", "confidence_level", "random_seed"],
+      "properties": {
+        "method": {"const": "hierarchical-percentile"}, "replicates": {"type": "integer", "minimum": 100},
+        "confidence_level": {"type": "number", "exclusiveMinimum": 0.5, "exclusiveMaximum": 1.0},
+        "random_seed": {"type": "integer"}
+      }
+    },
+    "ties": {
+      "type": "object", "additionalProperties": false,
+      "required": ["method", "equivalence_margin"],
+      "properties": {"method": {"enum": ["disabled", "margin-and-interval-overlap"]}, "equivalence_margin": {"type": "number", "minimum": 0}}
+    },
+    "compatibility": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hardware_profile", "evaluator_profile"],
+      "properties": {"hardware_profile": {"enum": ["exact"]}, "evaluator_profile": {"enum": ["exact"]}}
+    },
+    "community_submission": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "object", "additionalProperties": false, "required": ["submitter", "repository", "revision"], "properties": {"submitter": {"type": "string", "minLength": 1}, "repository": {"type": "string", "minLength": 1}, "revision": {"type": "string", "minLength": 1}}}
+      ]
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "dataset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dataset_id", "dataset_profile_version", "sha256"],
+      "properties": {"dataset_id": {"$ref": "#/$defs/id"}, "dataset_profile_version": {"$ref": "#/$defs/id"}, "sha256": {"$ref": "#/$defs/sha256"}}
+    }
+  }
+}

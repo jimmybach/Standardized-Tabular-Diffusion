@@ -2,9 +2,11 @@
 
 Chinese translation: [LEADERBOARD_POLICY.zh-CN.md](LEADERBOARD_POLICY.zh-CN.md)
 
-- Status: design baseline
+- Status: design baseline with P7 engineering implementation
 - Policy version: 0.1.0
-- Last updated: 2026-08-03
+- Last updated: 2026-08-13
+
+Implementation coverage: P7 now implements the aggregation, compatibility, publication-class, correction, deterministic snapshot, and static JSON/CSV/HTML/Markdown contracts in this policy. Scientific admission decisions, a globally frozen Official tie threshold, pairwise superiority testing, and the P8 multi-snapshot publication interface remain separate gates. See [P7_AGGREGATION_AND_LEADERBOARD.md](P7_AGGREGATION_AND_LEADERBOARD.md).
 
 ## 1. Purpose
 
