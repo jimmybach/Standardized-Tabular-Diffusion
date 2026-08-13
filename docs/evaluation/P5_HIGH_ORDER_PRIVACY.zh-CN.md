@@ -87,4 +87,14 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick identity-surrogate 证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)验证了完整执行和结果边界，但明确没有评估生成模型质量。下一道准入门是运行非 identity 的生成器 pilot，并完成数据集专用隐私角色审阅；该证据和实现测试都不会自动冻结协议。
+P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick identity-surrogate 证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)验证了完整执行和结果边界，但明确没有评估生成模型质量。已留存的 [TabDDPM/Adult 三生成种子证据](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json)关闭了首个探索性非 identity 试验。数据集专用隐私角色审阅和后续确认性冻结决策仍未完成；两份证据都不会让结果自动进入 Official Results。
+
+## 已完成的首个生成器试验
+
+首个非 identity 试验已在有意限定的小范围内通过：在经过审阅的 Adult 数据集上运行一个经过校验和锁定的 TabDDPM 模型。试验使用官方 Adult `ddpm_cb_best` 配置训练一个检查点，再以生成种子 `0,1,2` 对同一个检查点进行采样，每张合成表严格生成 32,561 行。每张表仍分别使用未改动的 P5 评测种子 `0,1,2,3,4` 进行评测。
+
+虽然 TabDDPM 的原生加载器要求提供验证数组，但生成器训练不会使用该数组。因此，本试验仅在加载接口提供一行真实训练数据的镜像，同时仍以完整的 32,561 行官方训练集作为唯一拟合输入。适配器将上游分类索引映射为经过审阅的标签，并在解码 CSV 时将声明为整数的字段转换到最近整数（中点取偶数）；原始上游数组、哈希以及转换行数均保存在被 Git 忽略的实验制品中。P5 评测器不会修复合成数据。
+
+本试验属于探索性验证。其通过结果不会冻结 P5，不会让 TabDDPM 或 Adult 自动进入 Official Results，也不构成形式化隐私保证。属性推断仍保持排除状态，直至敏感属性、准标识符和威胁模型通过数据集专用审阅。
+
+本试验还覆盖了小型 TabDDPM 等价性样例未触发的一处旧依赖边界：上游将数学上为整数的 `1e9` 以浮点类型传给 `QuantileTransformer.subsample`，而支持 Python 3.11 的 scikit-learn 会在拟合前拒绝该类型。因此，适配器启动桥仅把整数值浮点数转换为完全相等的整数；它不修改上游源码，也不改变任何非整数的估计器参数。

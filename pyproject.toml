@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75,<82"]
+requires = ["setuptools>=77,<82"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,6 +8,8 @@ version = "0.1.0.dev0"
 description = "A standardized research benchmark interface for tabular data synthesis methods"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["tabular-data", "synthetic-data", "benchmark", "diffusion"]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
