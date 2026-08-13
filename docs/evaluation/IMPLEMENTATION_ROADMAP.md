@@ -100,7 +100,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 - Historical P4 failures remain immutable. The row-order-invariant successor passed the complete [Windows GPU validation](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json), and the separate [freeze decision](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json) froze `p4-utility@1.0.0` without changing its scientific identity. Official result use still requires independent dataset/model/track/run/environment admission.
 - P5 implements balanced five-seed C2ST, exact train collisions, internal duplication, exact pinned SDMetrics DCR with heldout calibration, and a declared black-box DOMIAS KDE attack. Adult/Sick privacy roles and the bounded membership threat model are reviewed. The independently preregistered TabDDPM/Adult seeds `3,4,5` confirmation passed every non-score gate, so P5 v1 is conditionally protocol-frozen; dataset, model, track, run, publication, and release-support gates remain separate.
 - P6 now implements resource-aware isolated execution, observed hardware/software profiles, exact content-addressed cache/resume, structured failure semantics, and diagnostic efficiency accounting. Cache reuse is ineligible as efficiency evidence, and cross-profile comparison fails closed. Formal efficiency admission and warm repeated-generation policy remain future protocol/release decisions.
-- The P6 forced-boundary exit gate passed on Windows/AMD64 and Python 3.11.15 at commit `0fb5d07`; its [retained evidence](../evidence/evaluation/p6-windows-py311-0fb5d07.json) locks the implementation and preserves the non-Official claim boundary.
+- The P6 forced-boundary exit gate passed on Windows/AMD64 and Python 3.11.15 at commit `da47011`; its [retained evidence](../evidence/evaluation/p6-windows-py311-da47011.json) locks the implementation and preserves the non-Official claim boundary.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Compatibility grouping across scientific bundles, uncertainty beyond the declared P5 intervals, aggregation, immutable leaderboard snapshots, and publication admission remain P7 work.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
@@ -173,7 +173,7 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
 | P4 | Local and Global Utility | P1, P3 | Protocol-frozen at `p4-utility@1.0.0` after complete exact Windows GPU validation; concrete results still require independent admission | Preserve the frozen identity and complete release, dataset, model, track, and result admission gates |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Conditionally protocol-frozen after reviewed roles/threat model and a passed preregistered independent confirmation | Preserve independent dataset/model/run/publication gates; release support remains pending |
-| P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Passed engineering exit gate; [Windows/Python 3.11 evidence retained](../evidence/evaluation/p6-windows-py311-0fb5d07.json) | Phase accounting and reuse integrity pass under declared hardware profiles |
+| P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Passed engineering exit gate; [Windows/Python 3.11 evidence retained](../evidence/evaluation/p6-windows-py311-da47011.json) | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
 | P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
 
@@ -349,7 +349,7 @@ Exit evidence:
 - efficiency measures are reproducible within declared tolerances on a named hardware profile; and
 - failures in one optional metric do not erase completed Atomic Results.
 
-Completion evidence (2026-08-13): all listed engineering gates passed on Windows/AMD64 and Python 3.11.15 at commit `0fb5d07`; the [retained machine-readable record](../evidence/evaluation/p6-windows-py311-0fb5d07.json) is immutable under repository tests. It does not admit a hardware profile, model, dataset, result, or efficiency ranking to Official Results.
+Completion evidence (2026-08-13): all listed engineering gates passed on Windows/AMD64 and Python 3.11.15 at commit `da47011`; the [retained machine-readable record](../evidence/evaluation/p6-windows-py311-da47011.json) is immutable under repository tests. It does not admit a hardware profile, model, dataset, result, or efficiency ranking to Official Results.
 
 ### 6.8 P7 — aggregation and leaderboard publication
 
