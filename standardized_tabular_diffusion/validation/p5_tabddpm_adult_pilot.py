@@ -55,10 +55,10 @@ def _git(repo_root: Path, *args: str) -> str:
     return _run_text(["git", *args], cwd=repo_root)
 
 
-def _require_exact_seed_panel(seeds: Iterable[int]) -> tuple[int, ...]:
+def _require_exact_seed_panel(seeds: Iterable[int], expected: tuple[int, ...] = GENERATION_SEEDS) -> tuple[int, ...]:
     resolved = tuple(seeds)
-    if resolved != GENERATION_SEEDS:
-        raise PilotError(f"Pilot generation seeds are frozen as {GENERATION_SEEDS}, got {resolved}")
+    if resolved != expected:
+        raise PilotError(f"Generation seeds are frozen as {expected}, got {resolved}")
     return resolved
 
 
@@ -387,16 +387,64 @@ def _hardware() -> dict[str, Any]:
     }
 
 
-def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[str, Any]:
+def run_declared_experiment(
+    repo_root: Path,
+    output_root: Path,
+    evidence_path: Path,
+    *,
+    experiment_protocol_id: str,
+    evaluation_protocol_version: str,
+    generation_seeds: tuple[int, ...],
+    expected_generation_seeds: tuple[int, ...],
+    experiment_kind: str,
+    claim_boundary: str,
+    preregistration_path: Path | None = None,
+    additional_retained_sources: tuple[Path, ...] = (),
+) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     output_root = output_root.resolve()
     evidence_path = evidence_path.resolve()
-    _require_exact_seed_panel(GENERATION_SEEDS)
+    generation_seeds = _require_exact_seed_panel(generation_seeds, expected_generation_seeds)
+    if len(generation_seeds) != 3 or len(set(generation_seeds)) != 3:
+        raise PilotError("The declared P5 experiment requires exactly three distinct generation seeds")
+    preregistration: dict[str, Any] | None = None
+    preregistration_sha256: str | None = None
+    if preregistration_path is not None:
+        preregistration_path = (repo_root / preregistration_path).resolve()
+        if not preregistration_path.is_file():
+            raise PilotError(f"Preregistration is missing: {preregistration_path}")
+        preregistration = json.loads(preregistration_path.read_text(encoding="utf-8"))
+        preregistration_sha256 = sha256_file(preregistration_path)
+        if preregistration.get("status") != "preregistered" or preregistration.get("generation_seeds") != list(
+            generation_seeds
+        ):
+            raise PilotError("Preregistration status or generation seed panel differs from the declared run")
+        if preregistration.get("evaluation", {}).get("protocol_version") != evaluation_protocol_version:
+            raise PilotError("Preregistered and requested P5 protocol versions differ")
+        if preregistration.get("evaluation", {}).get("evaluator_seeds") != list(EVALUATOR_SEEDS):
+            raise PilotError("Preregistered P5 evaluator seed panel differs")
+        if (
+            preregistration.get("model", {}).get("model_id") != MODEL_ID
+            or preregistration.get("model", {}).get("training_seed") != 0
+        ):
+            raise PilotError("Preregistered model or training-seed identity differs")
+        if preregistration.get("dataset", {}).get("dataset_id") != DATASET_ID:
+            raise PilotError("Preregistered dataset identity differs")
+        if _git(repo_root, "status", "--short"):
+            raise PilotError("Confirmatory execution requires a clean, committed preregistration state")
     if output_root.exists():
-        raise PilotError(f"Refusing to overwrite pilot output: {output_root}")
+        raise PilotError(f"Refusing to overwrite declared experiment output: {output_root}")
     output_root.mkdir(parents=True)
     started_at = _utc_now()
     hardware = _hardware()
+    if preregistration is not None:
+        required_environment = preregistration["required_environment"]
+        if (
+            required_environment["operating_system"] != "Windows 11 x86-64"
+            or required_environment["python"] != "3.11"
+            or hardware["gpu"] != required_environment["gpu"]
+        ):
+            raise PilotError(f"Runtime differs from the preregistered environment: {hardware}")
     source_integrity = verify_sources(repo_root)
     base, profile = _load_declared_inputs(repo_root)
     dataset = _prepare_upstream_data(repo_root, output_root, profile)
@@ -411,7 +459,7 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
         base,
         parent_dir=parent_dir,
         data_dir=Path(dataset["path"]),
-        sample_seed=GENERATION_SEEDS[0],
+        sample_seed=generation_seeds[0],
         num_samples=dataset["train_rows"],
     )
     training_config_path = config_dir / "train.toml"
@@ -433,7 +481,7 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
     checkpoint_hashes = {path.name: sha256_file(path) for path in checkpoint_paths}
 
     seed_results: list[dict[str, Any]] = []
-    for seed in GENERATION_SEEDS:
+    for seed in generation_seeds:
         print(f"[{_utc_now()}] Sampling and evaluating generation seed {seed}", flush=True)
         seed_dir = output_root / f"seed-{seed}"
         sample_config = _runtime_config(
@@ -500,10 +548,12 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
         Path("standardized_tabular_diffusion/resources/evaluation/evaluators/p5-high-order-privacy-v1.json"),
         DATASET_PROFILE,
         BASE_CONFIG,
+        *additional_retained_sources,
     ]
     evidence = {
         "evidence_schema_version": "1.0.0",
-        "protocol_id": PROTOCOL_ID,
+        "protocol_id": experiment_protocol_id,
+        "experiment_kind": experiment_kind,
         "status": "passed",
         "started_at": started_at,
         "completed_at": _utc_now(),
@@ -522,7 +572,7 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
             "base_config_sha256": sha256_file(base_config_path),
             "training_runs": 1,
             "training_seed": 0,
-            "generation_seeds": list(GENERATION_SEEDS),
+            "generation_seeds": list(generation_seeds),
             "checkpoint_reused_across_generation_seeds": True,
             "checkpoint_sha256": checkpoint_hashes,
             "configuration_policy": "official-ddpm-cb-best-values-with-only-path-device-row-count-and-generation-seed-runtime-bindings",
@@ -541,13 +591,20 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
         },
         "evaluation": {
             "protocol_id": "p5-high-order-privacy",
-            "protocol_version": "0.1.0",
+            "protocol_version": evaluation_protocol_version,
             "comparison_track": "native",
             "evaluator_seeds_per_generated_table": list(EVALUATOR_SEEDS),
             "overall_fidelity_score": None,
             "overall_privacy_score": None,
             "formal_privacy_guarantee": False,
-            "attribute_inference": "excluded-pending-approved-dataset-specific-roles-and-threat-model",
+            "attribute_inference": "excluded-from-p5-v1-pending-separate-implementation-and-threat-model",
+        },
+        "preregistration": None
+        if preregistration_path is None
+        else {
+            "path": preregistration_path.relative_to(repo_root).as_posix(),
+            "sha256": preregistration_sha256,
+            "decision_rule": preregistration["decision_rule"],
         },
         "environment": {"hardware": hardware, "dependencies": _dependency_versions()},
         "seed_results": seed_results,
@@ -561,19 +618,33 @@ def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[s
             "no_overall_score_emitted": True,
             "no_formal_privacy_guarantee_claimed": True,
             "official_results_admitted": False,
-            "protocol_frozen_by_this_pilot": False,
+            "protocol_frozen_by_this_run": False,
         },
-        "claim_boundary": (
-            "Exploratory non-identity generator pilot for TabDDPM on the reviewed Adult split. "
-            "It validates real generator execution and diagnostic P5 behavior only; it does not freeze P5, "
-            "admit Official Results, establish a formal privacy guarantee, or generalize to other models, "
-            "datasets, platforms, configurations, or random seeds."
-        ),
+        "claim_boundary": claim_boundary,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
     atomic_write_json(evidence_path, evidence)
     print(f"[{_utc_now()}] Evidence written to {evidence_path}", flush=True)
     return evidence
+
+
+def run_pilot(repo_root: Path, output_root: Path, evidence_path: Path) -> dict[str, Any]:
+    return run_declared_experiment(
+        repo_root,
+        output_root,
+        evidence_path,
+        experiment_protocol_id=PROTOCOL_ID,
+        evaluation_protocol_version="1.0.0",
+        generation_seeds=GENERATION_SEEDS,
+        expected_generation_seeds=GENERATION_SEEDS,
+        experiment_kind="exploratory-generator-pilot",
+        claim_boundary=(
+            "Exploratory non-identity generator pilot for TabDDPM on the reviewed Adult split. "
+            "It validates real generator execution and diagnostic P5 behavior only; it does not freeze P5, "
+            "admit Official Results, establish a formal privacy guarantee, or generalize to other models, "
+            "datasets, platforms, configurations, or random seeds."
+        ),
+    )
 
 
 def _parser() -> argparse.ArgumentParser:

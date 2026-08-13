@@ -197,7 +197,7 @@ def test_packaged_protocols_resolve_exact_versions_and_admission_states() -> Non
         ("p2-shape-trend", "0.2.0"),
         ("p3-validity", "0.3.0"),
         ("p4-utility", "1.0.0"),
-        ("p5-high-order-privacy", "0.1.0"),
+        ("p5-high-order-privacy", "1.0.0"),
     }
     official = [profile.identity for profile in profiles if profile.payload["official_results_allowed"]]
     assert official == [("p4-utility", "1.0.0")]

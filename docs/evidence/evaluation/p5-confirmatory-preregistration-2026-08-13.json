@@ -1,0 +1,66 @@
+{
+  "preregistration_schema_version": "1.0.0",
+  "preregistration_id": "p5-tabddpm-adult-confirmatory-windows-v1",
+  "status": "preregistered",
+  "registered_at": "2026-08-13T00:00:00Z",
+  "purpose": "Independent three-generation-seed confirmation of the unchanged P5 v1 scientific identity before protocol freeze.",
+  "repository_state_requirement": "Run only from a clean committed Git worktree containing this preregistration.",
+  "model": {
+    "model_id": "tabddpm",
+    "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
+    "base_config": "TabDDPM-main/exp/adult/ddpm_cb_best/config.toml",
+    "base_config_sha256": "d10f8960d8e48422d3fa384680339dc6da21a6e28073e8716ae1873214df53dd",
+    "training_runs": 1,
+    "training_seed": 0,
+    "configuration_policy": "Use the official ddpm_cb_best values; bind only paths, CUDA device, generated row count, and declared generation seed at runtime.",
+    "checkpoint_policy": "Train one new checkpoint and reuse its checksum-identical weights for all three generation seeds."
+  },
+  "dataset": {
+    "dataset_id": "adult",
+    "dataset_profile": "configs/datasets/adult-uci-2-v1.json",
+    "dataset_profile_version": "1.4.0-reviewed",
+    "train_rows": 32561,
+    "test_rows": 16281,
+    "train_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4",
+    "test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+    "row_level_retention": "prohibited outside ignored local artifacts"
+  },
+  "generation_seeds": [3, 4, 5],
+  "evaluation": {
+    "protocol_id": "p5-high-order-privacy",
+    "protocol_version": "1.0.0",
+    "evaluator_profile_id": "p5-high-order-privacy",
+    "evaluator_profile_version": "1.0.0",
+    "evaluator_seeds": [0, 1, 2, 3, 4],
+    "comparison_track": "native",
+    "required_metric_count_per_bundle": 10,
+    "overall_score": "prohibited",
+    "formal_privacy_guarantee": false,
+    "attribute_inference": "excluded"
+  },
+  "required_environment": {
+    "operating_system": "Windows 11 x86-64",
+    "python": "3.11",
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "cuda_required": true
+  },
+  "decision_rule": {
+    "approve_protocol_freeze_if_all": [
+      "one fresh training run completes from the pinned official configuration and upstream revision",
+      "exactly the preregistered generation seeds 3, 4, and 5 each produce 32561 decoded rows",
+      "all three tables pass the structural gate without evaluator repair",
+      "all three P5 bundles finalize successfully with all ten required metric identities and five evaluator seeds",
+      "source, configuration, checkpoint, synthetic-table, bundle, and execution checksums are retained",
+      "no row-level source, heldout, or synthetic table is committed",
+      "no numerical metric threshold, favorable-score filter, seed substitution, or rerun selection is applied"
+    ],
+    "reject_or_defer_if_any": [
+      "a declared identity or checksum drifts",
+      "a required run, table, metric, structural gate, or provenance field is missing",
+      "the environment differs from the preregistered Windows/Python/GPU identity",
+      "scientific parameters are changed after preregistration"
+    ],
+    "metric_values_used_for_decision": false
+  },
+  "claim_boundary": "A successful run can support freezing the P5 metric protocol only. It cannot admit Adult, TabDDPM, a comparison track, a concrete result bundle, or another environment to Official Results; it cannot establish privacy or regulatory compliance."
+}

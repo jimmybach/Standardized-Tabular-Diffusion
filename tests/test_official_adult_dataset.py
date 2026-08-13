@@ -132,7 +132,8 @@ def test_reviewed_adult_profile_does_not_overclaim_release_eligibility() -> None
     assert profile.payload["official_eligible"] is False
     assert profile.payload["split"]["train"]["rows"] == 32561
     assert profile.payload["split"]["test"]["rows"] == 16281
-    assert profile.payload["privacy"]["status"] == "review-required"
+    assert profile.payload["privacy"]["status"] == "reviewed-for-bounded-p5-use"
+    assert profile.payload["privacy"]["sensitive_roles_reviewed"] is True
 
 
 def test_repository_adult_metadata_points_only_to_the_official_model_view() -> None:
