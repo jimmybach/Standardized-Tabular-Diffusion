@@ -2,7 +2,7 @@
 
 ## 状态与声明边界
 
-`p5-high-order-privacy@0.1.0` 已实现，并通过单元、结果包以及 Windows 11/Python 3.11 上 Adult/Sick identity-surrogate 留存验证，目前仍是诊断协议。它尚未冻结、尚未获得发布支持，也不能进入 Official Results。P5 只实现科学定义已经足够清楚的指标；定义尚有争议的指标会在注册表中明确标为 excluded，而不是被静默忽略。
+`p5-high-order-privacy@1.0.0` 已完成协议冻结，可有条件地作为 Official Results 组成部分使用。其科学身份已经通过单元测试、结果包测试、Windows 11/Python 3.11 Adult/Sick identity-surrogate 留存验证、探索性真实生成器试验、Adult/Sick 角色与威胁模型审阅，以及独立的预注册确认性试验。它尚未达到 release-supported；这次指标协议冻结没有准入任何数据集、模型、具体运行或发布类别。未解决指标仍是明确的 excluded 记录。
 
 高阶保真度与经验隐私风险是两个独立维度。P5 不生成总 Fidelity 分数，也不生成总 Privacy 分数。经验攻击和距离诊断不能证明差分隐私，也不能证明其他形式化隐私保证。
 
@@ -71,7 +71,7 @@ DOMIAS 的密度比公式保持不变，但混合表表示是本仓库的适配�
 - integrated Alpha-Precision/Beta-Recall：混合表支持嵌入尚未解决；
 - Alaa 论文与仓库两个 Authenticity 变体：论文/代码语义差异尚未裁决；
 - SynthCity Delta Presence：威胁模型、方向和失败语义尚未解决；
-- attribute inference：Adult 与 Sick 尚无已批准的敏感属性、准标识符及数据集专用威胁模型。
+- attribute inference：Adult 与 Sick 的字段角色已经审阅，但 P5 v1 尚无单独获批的属性推断实现与威胁模型。
 
 ## Bundle 与命令
 
@@ -87,7 +87,7 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick identity-surrogate 证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)验证了完整执行和结果边界，但明确没有评估生成模型质量。已留存的 [TabDDPM/Adult 三生成种子证据](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json)关闭了首个探索性非 identity 试验。数据集专用隐私角色审阅和后续确认性冻结决策仍未完成；两份证据都不会让结果自动进入 Official Results。
+P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick identity-surrogate 证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)验证了完整执行和结果边界，但明确没有评估生成模型质量。已留存的 [TabDDPM/Adult 三生成种子证据](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json)关闭了首个探索性非 identity 试验。独立的生成种子 `3,4,5` 确认性试验及其通过/失败门槛已经写入[确认性预注册](../evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json)。这些记录都不能单独让结果进入 Official Results。
 
 ## 已完成的首个生成器试验
 
@@ -95,6 +95,12 @@ P5 固定要求评测种子 `0,1,2,3,4`。已留存的 [Windows Adult/Sick ident
 
 虽然 TabDDPM 的原生加载器要求提供验证数组，但生成器训练不会使用该数组。因此，本试验仅在加载接口提供一行真实训练数据的镜像，同时仍以完整的 32,561 行官方训练集作为唯一拟合输入。适配器将上游分类索引映射为经过审阅的标签，并在解码 CSV 时将声明为整数的字段转换到最近整数（中点取偶数）；原始上游数组、哈希以及转换行数均保存在被 Git 忽略的实验制品中。P5 评测器不会修复合成数据。
 
-本试验属于探索性验证。其通过结果不会冻结 P5，不会让 TabDDPM 或 Adult 自动进入 Official Results，也不构成形式化隐私保证。属性推断仍保持排除状态，直至敏感属性、准标识符和威胁模型通过数据集专用审阅。
+本试验属于探索性验证。其通过结果不会冻结 P5，不会让 TabDDPM 或 Adult 自动进入 Official Results，也不构成形式化隐私保证。属性推断仍排除在 P5 v1 之外；已审阅字段角色不能替代单独获批的属性推断实现与威胁模型。
 
 本试验还覆盖了小型 TabDDPM 等价性样例未触发的一处旧依赖边界：上游将数学上为整数的 `1e9` 以浮点类型传给 `QuantileTransformer.subsample`，而支持 Python 3.11 的 scikit-learn 会在拟合前拒绝该类型。因此，适配器启动桥仅把整数值浮点数转换为完全相等的整数；它不修改上游源码，也不改变任何非整数的估计器参数。
+
+## 已完成的预注册确认性试验
+
+冻结候选试验使用训练种子 `0` 重新训练一个检查点，再用新的生成种子 `3,4,5` 对同一份校验和一致的检查点采样。每张 32,561 行合成表均使用未改变的五评测种子面板。冻结判断只依据预注册的完整性、结构、环境和来源门槛；指标数值的好坏不能导致接受、拒绝、替换种子或选择性重跑。行级数据仅保存在被 Git 忽略的本地制品中。
+
+三张表均在无评测器修复的情况下通过结构门，三份结果包全部 finalization，留存了 102/102 个已计算 Atomic Results、15/15 个 C2ST 种子作用域和 15/15 个 DOMIAS 种子作用域。[确认性证据](../evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json)与干净的预注册提交绑定。模型构建前曾发生两次依赖导入失败，均未生成 checkpoint、合成表或指标；安装声明依赖后，完整试验从训练第 0 步重新开始。[执行审计](../evidence/evaluation/p5-confirmatory-execution-audit-2026-08-13.json)明确保留了这两次尝试。[独立冻结决定](../evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json)仅有条件地准入十个指标组成部分，没有准入数据集、模型、赛道、具体运行、发布类别或其他环境，也不证明形式化隐私或法规合规。

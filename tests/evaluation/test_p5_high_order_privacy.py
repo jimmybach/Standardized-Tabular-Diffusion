@@ -54,7 +54,7 @@ def p5_frames(profile, *, train_rows: int = 120, test_rows: int = 100):
 
 
 def p5_request(profile, *, seeds: tuple[int, ...] = (0, 1, 2, 3, 4)) -> EvaluationRequest:
-    protocol = resolve_protocol("p5-high-order-privacy", "0.1.0")
+    protocol = resolve_protocol("p5-high-order-privacy", "1.0.0")
     return EvaluationRequest(
         subject_type="external-synthetic-table",
         reference_artifact={"artifact_id": "reference-table", "media_type": "text/csv", "sha256": "0" * 64},

@@ -1,0 +1,57 @@
+{
+  "decision_schema_version": "1.0.0",
+  "decision": "approve-protocol-freeze",
+  "decided_at": "2026-08-13T00:00:00Z",
+  "protocol": {"protocol_id":"p5-high-order-privacy","protocol_version":"1.0.0"},
+  "scientific_identity": {
+    "evaluator_profile_id": "p5-high-order-privacy",
+    "evaluator_profile_version": "1.0.0",
+    "scientific_parameters_sha256": "32292d1fa930b1de27017eaac4c19cf2df4d77325fcf453938e2d385f6255711",
+    "changed_after_preregistration": false,
+    "metric_components": 10,
+    "overall_fidelity_score": null,
+    "overall_privacy_score": null
+  },
+  "validated_environment": {
+    "operating_system": "Windows 11 x86-64",
+    "python": "3.11.15",
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "cuda_runtime": "12.8",
+    "torch": "2.8.0+cu128"
+  },
+  "gates": {
+    "clean_committed_preregistration_head": "8351b931a6b2f18cbaf273c8762344d9f2fe6756",
+    "fresh_training_runs": "1/1",
+    "generation_seeds": "3/3 exact panel [3,4,5]",
+    "decoded_rows": "97683/97683",
+    "structural_gates": "3/3 passed without evaluator repair",
+    "finalized_bundles": "3/3",
+    "computed_atomic_results": "102/102",
+    "c2st_seed_scopes": "15/15",
+    "domias_seed_scopes": "15/15",
+    "required_metric_identities": "10/10 per bundle",
+    "provenance_and_checksum_gates": "passed",
+    "row_level_materializations_committed": false,
+    "numerical_metric_threshold_used": false,
+    "favorable_seed_or_result_selection_used": false
+  },
+  "evidence": [
+    {"path":"docs/evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json","sha256":"c0d065d26d5876774b7b72267c9a5284d28462aef3c049e421874836cc237f27"},
+    {"path":"docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json","sha256":"ff57502eb691d6ccccef85f40e14564c3f99cc3be40a282dbdef09762ea40e36"},
+    {"path":"docs/evidence/evaluation/p5-confirmatory-execution-audit-2026-08-13.json","sha256":"9fe5976e99a4f26a5811f7f682374a3db014269f3a080a2ab0293803ca2b1b6c"}
+  ],
+  "admission": {
+    "metric_components_allowed": true,
+    "dataset_admission_required": true,
+    "model_admission_required": true,
+    "comparison_track_admission_required": true,
+    "exact_environment_qualification_required": true,
+    "run_and_publication_admission_required": true,
+    "adult_or_sick_admitted_by_this_decision": false,
+    "tabddpm_admitted_by_this_decision": false,
+    "confirmatory_bundles_admitted_by_this_decision": false,
+    "formal_privacy_guarantee_established": false,
+    "regulatory_compliance_established": false
+  },
+  "claim_boundary": "This decision freezes the unchanged P5 v1 metric protocol for conditional Official Results use. It does not admit a dataset, model, comparison track, concrete run, publication class, or unvalidated environment; empirical privacy diagnostics do not establish a formal privacy guarantee or regulatory compliance."
+}

@@ -73,7 +73,7 @@ def test_p5_evaluate_table_finalizes_and_cross_validates_every_diagnostic(
             "row_count": len(synthetic),
         },
     )
-    protocol = resolve_protocol("p5-high-order-privacy", "0.1.0")
+    protocol = resolve_protocol("p5-high-order-privacy", "1.0.0")
     bundle = tmp_path / "bundle"
 
     report = evaluate_table_to_bundle(

@@ -135,8 +135,7 @@ def validate_pilot_manifest(
     if environment != expected_environment:
         raise P4DatasetScaleValidationError("Pilot environment identity has drifted")
     expected_runtime_manifest = (
-        "standardized_tabular_diffusion/resources/evaluation/upstream/"
-        "tabeval-p4-windows-gpu-runtime.json"
+        "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-windows-gpu-runtime.json"
     )
     if payload["source_runtime_manifest"] != expected_runtime_manifest:
         raise P4DatasetScaleValidationError("Pilot source-runtime manifest identity has drifted")
@@ -150,10 +149,15 @@ def validate_pilot_manifest(
     ):
         raise P4DatasetScaleValidationError("Pilot surrogate must preserve the full row multiset")
     datasets = payload["coverage"].get("datasets")
-    if payload["coverage"].get("seed") != 0 or not isinstance(datasets, dict) or set(datasets) != {
-        "adult",
-        "sick",
-    }:
+    if (
+        payload["coverage"].get("seed") != 0
+        or not isinstance(datasets, dict)
+        or set(datasets)
+        != {
+            "adult",
+            "sick",
+        }
+    ):
         raise P4DatasetScaleValidationError("Pilot coverage must bind Adult and Sick under seed zero")
     for dataset, expected in {
         "adult": ("1.3.0-reviewed", 32561, 16281, 3),
@@ -169,7 +173,15 @@ def validate_pilot_manifest(
             raise P4DatasetScaleValidationError(f"Pilot {dataset} coverage identity has drifted")
         profile = _profile_for_dataset(dataset, payload)
         if profile.dataset_profile_version != expected[0]:
-            raise P4DatasetScaleValidationError(f"Pilot {dataset} Dataset Profile version does not resolve")
+            compatibility = profile.payload.get("compatibility", {}).get("p4_dataset_scale", {})
+            if (
+                expected[0] not in compatibility.get("compatible_predecessor_versions", [])
+                or compatibility.get("p4_scientific_identity_changed") is not False
+                or compatibility.get("change_scope") != "p5-privacy-governance-only"
+            ):
+                raise P4DatasetScaleValidationError(
+                    f"Pilot {dataset} Dataset Profile version does not resolve as a declared P4-compatible successor"
+                )
         validate_utility_profile(profile.payload, evaluator)
     stability = payload["stability"]
     if stability.get("seeds") != [0, 1, 2, 3, 4]:
@@ -445,9 +457,7 @@ def _cuda_resource_failures(
     cuda_increase = arm.get("cuda_peak_allocation_increase_bytes")
     if not isinstance(cuda_increase, (int, float)) or cuda_increase <= 0:
         return [f"{arm_name}-cuda-execution-not-proven"]
-    if float(cuda_increase) / GIB > float(
-        resource_limits["maximum_observed_cuda_peak_allocated_gib"]
-    ):
+    if float(cuda_increase) / GIB > float(resource_limits["maximum_observed_cuda_peak_allocated_gib"]):
         return [f"{arm_name}-cuda-peak-allocated"]
     return []
 
@@ -528,10 +538,7 @@ def _run_task(
             failures.append("explicit-fit-evidence-missing")
         elif trtr_fit_evidence != tstr_fit_evidence:
             failures.append("identity-fit-boundary-mismatch")
-        elif any(
-            item.get("real_test_used_for_fit") is not False
-            for item in (trtr_fit_evidence, tstr_fit_evidence)
-        ):
+        elif any(item.get("real_test_used_for_fit") is not False for item in (trtr_fit_evidence, tstr_fit_evidence)):
             failures.append("held-out-test-boundary-not-proven")
     ratio = None
     if not failures:
@@ -547,9 +554,7 @@ def _run_task(
     for name, arm in arms.items():
         if float(arm["wall_seconds"]) > float(resource_limits["maximum_observed_arm_wall_seconds"]):
             resource_failures.append(f"{name}-wall-time")
-        if float(arm["peak_rss_bytes"]) / GIB > float(
-            resource_limits["maximum_observed_process_tree_peak_rss_gib"]
-        ):
+        if float(arm["peak_rss_bytes"]) / GIB > float(resource_limits["maximum_observed_process_tree_peak_rss_gib"]):
             resource_failures.append(f"{name}-peak-rss")
         resource_failures.extend(
             _cuda_resource_failures(
@@ -768,8 +773,7 @@ def _expected_shard_labels(manifest: dict[str, Any]) -> set[str]:
     labels: set[str] = set()
     for dataset, record in manifest["coverage"]["datasets"].items():
         labels.update(
-            _shard_label(dataset, "coverage", shard_index, record["shards"])
-            for shard_index in range(record["shards"])
+            _shard_label(dataset, "coverage", shard_index, record["shards"]) for shard_index in range(record["shards"])
         )
         labels.add(_shard_label(dataset, "stability", 0, 1))
     return labels
@@ -809,9 +813,9 @@ def _observed_pilot_summary(
             continue
         observed_labels.append(label)
         shard_results = shard.get("results")
-        usable_results = [item for item in shard_results if isinstance(item, dict)] if isinstance(
-            shard_results, list
-        ) else []
+        usable_results = (
+            [item for item in shard_results if isinstance(item, dict)] if isinstance(shard_results, list) else []
+        )
         results.extend(usable_results)
         observed_shards.append(
             {
@@ -880,9 +884,7 @@ def _observed_pilot_summary(
                         "mean": statistics.fmean(ratios),
                         "population_standard_deviation": statistics.pstdev(ratios),
                         "range": max(ratios) - min(ratios),
-                        "maximum_absolute_deviation_from_identity": max(
-                            abs(value - 1.0) for value in ratios
-                        ),
+                        "maximum_absolute_deviation_from_identity": max(abs(value - 1.0) for value in ratios),
                     }
                 )
                 record["gate"] = (
@@ -1010,18 +1012,14 @@ def finalize_shards(
             shard_read_errors.append({"path": path.name, "error": shard["read_error"]})
         shard_records.append((path, shard))
     shards = [shard for _, shard in shard_records]
-    observed_commits = {
-        shard.get("repository_commit") for shard in shards if isinstance(shard, dict)
-    } - {None}
+    observed_commits = {shard.get("repository_commit") for shard in shards if isinstance(shard, dict)} - {None}
     adjudicator_commit = p4_global_source._repository_commit()
     final: dict[str, Any] = {
         "evidence_schema_version": "1.0.0",
         "protocol_id": protocol_id,
         "phase": "P4 Adult/Sick dataset-scale and stability admission pilot",
         "status": "fail",
-        "repository_commit": (
-            next(iter(observed_commits)) if len(observed_commits) == 1 else adjudicator_commit
-        ),
+        "repository_commit": (next(iter(observed_commits)) if len(observed_commits) == 1 else adjudicator_commit),
         "adjudicator_repository_commit": adjudicator_commit,
         "pilot_manifest_fingerprint": content_fingerprint(manifest),
         "claim_boundary": manifest["claim_boundary"],
@@ -1032,13 +1030,9 @@ def finalize_shards(
     if shard_read_errors:
         final["shard_read_errors"] = shard_read_errors
     try:
-        expected_shards = sum(
-            record["shards"] + 1 for record in manifest["coverage"]["datasets"].values()
-        )
+        expected_shards = sum(record["shards"] + 1 for record in manifest["coverage"]["datasets"].values())
         if len(shards) != expected_shards:
-            raise P4DatasetScaleValidationError(
-                f"Expected {expected_shards} shard artifacts, observed {len(shards)}"
-            )
+            raise P4DatasetScaleValidationError(f"Expected {expected_shards} shard artifacts, observed {len(shards)}")
         commit_ids = {shard.get("repository_commit") for shard in shards if isinstance(shard, dict)}
         fingerprints = {shard.get("pilot_manifest_fingerprint") for shard in shards if isinstance(shard, dict)}
         if len(commit_ids) != 1 or None in commit_ids:
@@ -1116,11 +1110,7 @@ def finalize_shards(
                     "range": ratio_range,
                     "maximum_absolute_deviation_from_identity": maximum_deviation,
                 }
-                record["gate"] = (
-                    "pass"
-                    if ratio_range <= max_range and maximum_deviation <= max_deviation
-                    else "fail"
-                )
+                record["gate"] = "pass" if ratio_range <= max_range and maximum_deviation <= max_deviation else "fail"
                 stability[dataset][target] = record
         if any(record["gate"] != "pass" for dataset in stability.values() for record in dataset.values()):
             raise P4DatasetScaleValidationError("Preregistered sentinel stability bound failed")
@@ -1164,14 +1154,12 @@ def finalize_shards(
                 "seeds": sorted(
                     other["seed"]
                     for other in results
-                    if other["dataset"] == result["dataset"]
-                    and other["target_column_id"] == result["target_column_id"]
+                    if other["dataset"] == result["dataset"] and other["target_column_id"] == result["target_column_id"]
                 ),
                 "tabpfn_omitted_in_all_arms": all(
                     not arm["families"]["tabpfn"]
                     for other in results
-                    if other["dataset"] == result["dataset"]
-                    and other["target_column_id"] == result["target_column_id"]
+                    if other["dataset"] == result["dataset"] and other["target_column_id"] == result["target_column_id"]
                     for arm in other["arms"].values()
                 ),
             }
@@ -1182,8 +1170,7 @@ def finalize_shards(
             (record["dataset"], record["target_column_id"]): record for record in high_cardinality
         }
         if not deduplicated_high_cardinality or any(
-            not record["tabpfn_omitted_in_all_arms"]
-            for record in deduplicated_high_cardinality.values()
+            not record["tabpfn_omitted_in_all_arms"] for record in deduplicated_high_cardinality.values()
         ):
             raise P4DatasetScaleValidationError("Dataset-scale high-cardinality omission did not pass")
 
@@ -1203,9 +1190,7 @@ def finalize_shards(
                     "completed_arms": len(arms),
                 },
                 "constant_target_exclusions": {
-                    "sick": _profile_for_dataset("sick", manifest).payload["utility"]["global"][
-                        "excluded_targets"
-                    ]
+                    "sick": _profile_for_dataset("sick", manifest).payload["utility"]["global"]["excluded_targets"]
                 },
                 "high_cardinality_targets": list(deduplicated_high_cardinality.values()),
                 "stability": stability,

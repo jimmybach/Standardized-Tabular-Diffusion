@@ -168,7 +168,7 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
         "p2-shape-trend": "0.2.0",
         "p3-validity": "0.3.0",
         "p4-utility": "1.0.0",
-        "p5-high-order-privacy": "0.1.0",
+        "p5-high-order-privacy": "1.0.0",
     }
     protocol = resolve_protocol(args.protocol, protocol_versions[args.protocol])
     three_table_protocols = {"p4-utility", "p5-high-order-privacy"}
