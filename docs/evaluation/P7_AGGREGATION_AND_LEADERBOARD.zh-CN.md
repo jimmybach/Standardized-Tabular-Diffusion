@@ -185,4 +185,3 @@ python -m standardized_tabular_diffusion.validation.p7_leaderboard `
 - pairwise completeness 与 raw difference 仅为描述性信息；尚未启用 superiority test 和经审阅的 multiple-comparison policy。
 - P7 能强制执行已批准 admission，但不能自行产生科学批准。准入决定仍是独立审阅产物。
 - 缺少 Atomic Result 的历史 legacy summary 不能经 P7 升级；其只读迁移边界属于 P8。
-

@@ -185,4 +185,3 @@ python -m standardized_tabular_diffusion.validation.p7_leaderboard `
 - Pairwise completeness and raw differences are descriptive only; superiority testing and a reviewed multiple-comparison policy are not enabled.
 - P7 can enforce approved admissions but cannot create scientific approvals. Those decisions remain independent review artifacts.
 - Historical legacy summaries lacking Atomic Results cannot be promoted through P7. Their read-only migration boundary belongs to P8.
-

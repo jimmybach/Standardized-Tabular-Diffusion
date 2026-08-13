@@ -372,7 +372,7 @@ Privacy 任务：
 - 可以从声明的 bundle 确定性重建 snapshot；以及
 - 没有独立准入记录的模型、数据集或指标不能进入 Official Results。
 
-专用退出门为 `p7-leaderboard-exit-gate-v1`；只有在干净 implementation commit 上生成的 Windows 证据才会留存。参见 [P7 指南](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md)及其[英文规范](P7_AGGREGATION_AND_LEADERBOARD.md)。
+完成证据（2026-08-13）：以上工程关卡已在 implementation commit `4c8da76` 的 Windows/AMD64 与 Python 3.11.15 环境全部通过；[留存的机器可读记录](../evidence/evaluation/p7-windows-py311-4c8da76.json)绑定精确实现输入。它不会让任何 model、dataset、metric、protocol、run、suite 或 release 进入 Official Results。参见 [P7 指南](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md)及其[英文规范](P7_AGGREGATION_AND_LEADERBOARD.md)。
 
 ### 6.9 P8 — 迁移与发布
 
