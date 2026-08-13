@@ -63,6 +63,11 @@ def test_runtime_config_changes_only_declared_bindings(tmp_path: Path) -> None:
     assert runtime["diffusion_params"] == base["diffusion_params"]
 
 
+def test_real_pilot_still_fails_closed_when_adult_data_is_absent(tmp_path: Path) -> None:
+    with pytest.raises(pilot.PilotError, match="Required pilot data is missing"):
+        pilot._prepare_upstream_data(tmp_path, tmp_path / "output", _profile())
+
+
 def test_decode_sample_is_explicit_and_canonical(tmp_path: Path) -> None:
     profile = _profile()
     parent = tmp_path / "upstream"
