@@ -21,7 +21,6 @@ from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
-import tomli_w
 
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, sha256_file
 from standardized_tabular_diffusion.interfaces import RunSpec
@@ -213,6 +212,12 @@ def _runtime_config(
 
 
 def _write_toml(path: Path, payload: dict[str, Any]) -> None:
+    try:
+        import tomli_w
+    except ImportError as error:
+        raise PilotError(
+            "The TabDDPM pilot requires tomli-w; install requirements-tabddpm-validation.txt"
+        ) from error
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(tomli_w.dumps(payload), encoding="utf-8", newline="\n")
 
