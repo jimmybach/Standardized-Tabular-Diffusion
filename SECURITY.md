@@ -13,4 +13,4 @@ This repository is a pre-alpha research workspace and does not yet have a suppor
 
 ## Before a public release
 
-The maintainers must complete the license and third-party review, pin upstream revisions and package versions, audit repository history for secrets and restricted data, publish checksums for supported artifacts, and run the supported Linux/Python 3.11 CI and security test suite.
+The maintainers must complete the third-party and dataset-rights review, pin upstream revisions and package versions, audit repository history for secrets and restricted data, publish checksums for supported artifacts, and run the primary Windows 11/Python 3.11 checks plus the required secondary Linux/Python 3.11 CI and security suite.

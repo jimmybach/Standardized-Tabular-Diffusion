@@ -36,7 +36,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
-from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
+from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter, build_tabddpm_environment
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
@@ -409,10 +409,8 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
         (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
         (["scripts/pipeline.py", "--config", str(config_path), "--sample"], upstream_root),
     ]
-    assert environments == [
-        {"PYTHONPATH": str(upstream_root.resolve())},
-        {"PYTHONPATH": str(upstream_root.resolve())},
-    ]
+    expected_environment = build_tabddpm_environment(upstream_root)
+    assert environments == [expected_environment, expected_environment]
     assert train_bundle.output_dir.joinpath("artifacts.json").exists()
     assert sample_bundle.output_dir.joinpath("artifacts.json").exists()
     assert eval_bundle.standardized_summary_path == Path(eval_config.output_dir) / "standardized_summary.json"

@@ -9,9 +9,10 @@ from standardized_tabular_diffusion.models.base import BaseModelAdapter
 
 
 def build_tabddpm_environment(upstream_root: Path) -> dict[str, str]:
-    """Expose the upstream root to its script-style `lib` and `zero` imports."""
+    """Expose official imports plus the narrow scikit-learn API bridge."""
 
-    entries = [str(upstream_root.resolve())]
+    compatibility_root = Path(__file__).resolve().parents[1] / "compat" / "tabddpm_sklearn"
+    entries = [str(compatibility_root), str(upstream_root.resolve())]
     existing = os.environ.get("PYTHONPATH")
     if existing:
         entries.append(existing)

@@ -87,4 +87,33 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 requires evaluator seeds `0,1,2,3,4`. The retained [Windows Adult/Sick identity-surrogate evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) validates the complete execution and result boundary but deliberately does not assess generator quality. The next admission gates are non-identity generator pilots and dataset-specific privacy-role review; neither this evidence nor passing implementation tests freezes the protocol.
+P5 requires evaluator seeds `0,1,2,3,4`. The retained [Windows Adult/Sick identity-surrogate evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) validates the complete execution and result boundary but deliberately does not assess generator quality. The retained [TabDDPM/Adult three-generation-seed evidence](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) closes the first exploratory non-identity pilot. Dataset-specific privacy-role review and a later confirmatory freeze decision remain open; neither evidence record admits Official Results.
+
+## Completed first generator pilot
+
+The first non-identity pilot passed in the deliberately narrow declared scope: one checksum-pinned
+TabDDPM model on the reviewed Adult dataset. It trains one checkpoint with the
+official `ddpm_cb_best` Adult configuration and samples the same checkpoint at
+generation seeds `0,1,2`, producing exactly 32,561 rows per table. Every table
+is independently evaluated with the unchanged P5 evaluator seeds
+`0,1,2,3,4`.
+
+TabDDPM's unchanged loader requires a validation array although its generator
+training does not use one. The pilot therefore supplies a disclosed one-row
+mirror of real train solely at the loader boundary while fitting on the full
+32,561-row official training split. The adapter's decoded CSV maps the upstream
+classification indices to reviewed labels and converts declared integer fields
+to nearest integers (ties to even); raw upstream arrays, hashes, and conversion
+counts remain in the ignored experiment artifacts. P5 applies no repair.
+
+The pilot is exploratory. Its passing result does not freeze P5, admit TabDDPM or Adult
+to Official Results, or establish a formal privacy guarantee. Attribute
+inference remains excluded until sensitive/quasi-identifier roles and a threat
+model receive dataset-specific approval.
+
+The pilot also exercises a dated dependency boundary absent from the small
+TabDDPM parity fixture: upstream passes the mathematically integral value `1e9`
+as a float to `QuantileTransformer.subsample`. Supported Python 3.11
+scikit-learn rejects the type before fitting, so an adapter-only startup bridge
+converts integral floats to their exactly equal integers. It does not modify
+upstream source or any non-integral estimator value.
