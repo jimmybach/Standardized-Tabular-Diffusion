@@ -152,12 +152,14 @@ def _locked_file_hashes() -> dict[str, str]:
             / "evaluation"
             / "software-profile.schema.json",
             REPO_ROOT / ".github" / "workflows" / "p6-orchestration-validation.yml",
+            REPO_ROOT / ".github" / "workflows" / "p4-dataset-scale-validation.yml",
             REPO_ROOT / "pyproject.toml",
             REPO_ROOT / "standardized_tabular_diffusion" / "cli.py",
             REPO_ROOT / "standardized_tabular_diffusion" / "evaluation" / "schema.py",
             REPO_ROOT / "standardized_tabular_diffusion" / "validation" / "core_ci.py",
             REPO_ROOT / "tests" / "evaluation" / "test_contracts_and_schemas.py",
             REPO_ROOT / "tests" / "test_cli.py",
+            REPO_ROOT / "tests" / "test_core_ci.py",
             Path(__file__).resolve(),
         }
     )
