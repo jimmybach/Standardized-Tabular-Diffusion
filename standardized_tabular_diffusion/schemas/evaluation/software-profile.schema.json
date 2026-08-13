@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/software-profile/1.0.0",
+  "title": "Observed Software Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "software_profile_schema_version", "python", "platform", "packages", "material_environment",
+    "repository", "locale", "fingerprint", "code_fingerprint"
+  ],
+  "properties": {
+    "software_profile_schema_version": {"const": "1.0.0"},
+    "python": {
+      "type": "object", "additionalProperties": false, "required": ["implementation", "version"],
+      "properties": {
+        "implementation": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "platform": {
+      "type": "object", "additionalProperties": false, "required": ["system", "release", "machine"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "release": {"type": "string"},
+        "machine": {"type": "string", "minLength": 1}
+      }
+    },
+    "packages": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["name", "version"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "version": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "material_environment": {"type": "object", "additionalProperties": {"type": "string"}},
+    "repository": {
+      "type": "object", "additionalProperties": false, "required": ["commit", "dirty", "patch_sha256"],
+      "properties": {
+        "commit": {"type": "string", "minLength": 1},
+        "dirty": {"type": "boolean"},
+        "patch_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "locale": {"type": "string", "minLength": 1},
+    "fingerprint": {"$ref": "#/$defs/sha256"},
+    "code_fingerprint": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

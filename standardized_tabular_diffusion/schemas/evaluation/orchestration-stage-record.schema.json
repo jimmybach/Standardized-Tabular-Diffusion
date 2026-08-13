@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/orchestration-stage-record/1.0.0",
+  "title": "Orchestration Stage Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "orchestration_stage_schema_version", "stage_id", "stage_name", "stage_version", "attempt",
+    "status", "required", "enabled", "allow_failed_dependencies", "dependency_stage_ids",
+    "identity_fingerprint", "identity_inputs", "input_fingerprints", "code_fingerprint",
+    "software_fingerprint", "hardware_comparison_key", "resolved_action", "started_at", "ended_at",
+    "resource_usage", "process", "log_ref", "outputs", "output_fingerprint", "warning_codes",
+    "failure", "cache", "retry_count", "resume_ancestry"
+  ],
+  "properties": {
+    "orchestration_stage_schema_version": {"const": "1.0.0"},
+    "stage_id": {"$ref": "#/$defs/id"},
+    "stage_name": {"$ref": "#/$defs/id"},
+    "stage_version": {"$ref": "#/$defs/id"},
+    "attempt": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["running", "succeeded", "failed", "skipped", "cancelled", "invalidated"]},
+    "required": {"type": "boolean"},
+    "enabled": {"type": "boolean"},
+    "allow_failed_dependencies": {"type": "boolean"},
+    "dependency_stage_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "identity_fingerprint": {"$ref": "#/$defs/sha256"},
+    "identity_inputs": {"type": "object"},
+    "input_fingerprints": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "code_fingerprint": {"$ref": "#/$defs/sha256"},
+    "software_fingerprint": {"$ref": "#/$defs/sha256"},
+    "hardware_comparison_key": {"$ref": "#/$defs/sha256"},
+    "resolved_action": {"type": "string", "minLength": 1},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "ended_at": {"type": ["string", "null"], "format": "date-time"},
+    "resource_usage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["wall_seconds", "action_wall_seconds", "cpu_seconds", "peak_rss_bytes",
+        "peak_accelerator_memory_bytes", "requested_rows", "actual_rows", "rows_per_second",
+        "warmup_policy", "excluded_setup_seconds", "measurement_mode", "reliability", "efficiency_eligible"],
+      "properties": {
+        "wall_seconds": {"type": ["number", "null"], "minimum": 0},
+        "action_wall_seconds": {"type": ["number", "null"], "minimum": 0},
+        "cpu_seconds": {"type": ["number", "null"], "minimum": 0},
+        "peak_rss_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "peak_accelerator_memory_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "requested_rows": {"type": ["integer", "null"], "minimum": 0},
+        "actual_rows": {"type": ["integer", "null"], "minimum": 0},
+        "rows_per_second": {"type": ["number", "null"], "minimum": 0},
+        "warmup_policy": {"type": "string", "minLength": 1},
+        "excluded_setup_seconds": {"type": ["number", "null"], "minimum": 0},
+        "measurement_mode": {"enum": ["fresh-process", "cache-reuse", "not-run"]},
+        "reliability": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/reason"}},
+        "efficiency_eligible": {"type": "boolean"}
+      }
+    },
+    "process": {
+      "type": "object", "additionalProperties": false,
+      "required": ["exit_code", "timed_out", "memory_limit_exceeded", "interrupted", "timeout_seconds", "memory_limit_bytes"],
+      "properties": {
+        "exit_code": {"type": ["integer", "null"]},
+        "timed_out": {"type": "boolean"},
+        "memory_limit_exceeded": {"type": "boolean"},
+        "interrupted": {"type": "boolean"},
+        "timeout_seconds": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "memory_limit_bytes": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "log_ref": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/path"}]},
+    "outputs": {
+      "type": "array", "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "media_type", "byte_size", "sha256"],
+        "properties": {
+          "path": {"$ref": "#/$defs/path"}, "media_type": {"type": "string", "minLength": 1},
+          "byte_size": {"type": "integer", "minimum": 0}, "sha256": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "output_fingerprint": {"$ref": "#/$defs/sha256"},
+    "warning_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/reason"}},
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["category", "reason_code", "detail"],
+      "properties": {
+        "category": {"enum": ["timeout", "out-of-memory", "dependency", "implementation", "interrupted", "invalid-cache", "dependency-failed"]},
+        "reason_code": {"$ref": "#/$defs/reason"},
+        "detail": {"type": "string", "minLength": 1}
+      }
+    },
+    "cache": {
+      "type": "object", "additionalProperties": false,
+      "required": ["decision", "cache_key", "identity_verified", "outputs_verified", "reused_stage_id"],
+      "properties": {
+        "decision": {"enum": ["not-requested", "miss", "hit", "bypassed", "invalid"]},
+        "cache_key": {"$ref": "#/$defs/sha256"},
+        "identity_verified": {"type": "boolean"},
+        "outputs_verified": {"type": "boolean"},
+        "reused_stage_id": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/id"}]}
+      }
+    },
+    "retry_count": {"type": "integer", "minimum": 0},
+    "resume_ancestry": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "running"}}}, "then": {"properties": {"started_at": {"type": "string", "format": "date-time"}, "ended_at": {"type": "null"}, "failure": {"type": "null"}}}},
+    {"if": {"properties": {"status": {"const": "succeeded"}}}, "then": {"properties": {"started_at": {"type": "string", "format": "date-time"}, "ended_at": {"type": "string", "format": "date-time"}, "failure": {"type": "null"}}}},
+    {"if": {"properties": {"status": {"enum": ["failed", "cancelled", "invalidated"]}}}, "then": {"properties": {"started_at": {"type": "string", "format": "date-time"}, "ended_at": {"type": "string", "format": "date-time"}, "failure": {"type": "object"}}}},
+    {"if": {"properties": {"status": {"const": "skipped"}}}, "then": {"properties": {"started_at": {"type": "null"}, "ended_at": {"type": "null"}}}}
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "reason": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"},
+    "path": {"type": "string", "pattern": "^(?!/)(?!.*[<>:|?*])(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"}
+  }
+}

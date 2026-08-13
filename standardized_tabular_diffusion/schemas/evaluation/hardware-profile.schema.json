@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/hardware-profile/1.0.0",
+  "title": "Observed Hardware Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hardware_profile_schema_version",
+    "profile_id",
+    "profile_version",
+    "profile_origin",
+    "captured_at",
+    "operating_system",
+    "python",
+    "cpu",
+    "memory",
+    "accelerators",
+    "runtime",
+    "comparison_key",
+    "official_efficiency_eligible",
+    "warning_codes"
+  ],
+  "properties": {
+    "hardware_profile_schema_version": {"const": "1.0.0"},
+    "profile_id": {"$ref": "#/$defs/id"},
+    "profile_version": {"$ref": "#/$defs/id"},
+    "profile_origin": {"enum": ["observed", "declared-observed"]},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "operating_system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "release", "version", "machine"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "release": {"type": "string"},
+        "version": {"type": "string"},
+        "machine": {"type": "string", "minLength": 1}
+      }
+    },
+    "python": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementation", "version"],
+      "properties": {
+        "implementation": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "cpu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model", "logical_count", "permitted_count", "thread_limits"],
+      "properties": {
+        "model": {"type": "string", "minLength": 1},
+        "logical_count": {"type": "integer", "minimum": 1},
+        "permitted_count": {"type": "integer", "minimum": 1},
+        "thread_limits": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total_bytes"],
+      "properties": {"total_bytes": {"type": ["integer", "null"], "minimum": 1}}
+    },
+    "accelerators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["backend", "name", "memory_total_bytes", "driver_version"],
+        "properties": {
+          "backend": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "memory_total_bytes": {"type": ["integer", "null"], "minimum": 1},
+          "driver_version": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cuda_version", "material_environment"],
+      "properties": {
+        "cuda_version": {"type": ["string", "null"]},
+        "material_environment": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "comparison_key": {"$ref": "#/$defs/sha256"},
+    "official_efficiency_eligible": {"const": false},
+    "warning_codes": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/reason"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "reason": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$"}
+  }
+}
