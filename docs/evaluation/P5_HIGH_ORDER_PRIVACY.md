@@ -2,7 +2,7 @@
 
 ## Status and claim boundary
 
-`p5-high-order-privacy@1.0.0` is the preregistered freeze candidate. Its scientific identity has unit, bundle, retained Windows 11/Python 3.11 Adult/Sick identity-surrogate validation, and an exploratory real-generator pilot. Adult and Sick field roles plus the bounded black-box membership threat model are reviewed. The candidate is not yet protocol-frozen, release-supported, or eligible for Official Results; unresolved metrics remain explicit exclusions.
+`p5-high-order-privacy@1.0.0` is protocol-frozen for conditional Official Results component use. Its scientific identity has unit, bundle, retained Windows 11/Python 3.11 Adult/Sick identity-surrogate validation, an exploratory real-generator pilot, reviewed Adult/Sick roles and threat model, and a successful independent preregistered confirmation. It is not release-supported, and no dataset, model, concrete run, or publication class is admitted by the metric freeze; unresolved metrics remain explicit exclusions.
 
 P5 reports high-order fidelity and empirical privacy risk as separate dimensions. It emits neither an overall Fidelity score nor an overall Privacy score. Empirical attacks and distances do not establish differential privacy or any other formal privacy guarantee.
 
@@ -118,14 +118,24 @@ scikit-learn rejects the type before fitting, so an adapter-only startup bridge
 converts integral floats to their exactly equal integers. It does not modify
 upstream source or any non-integral estimator value.
 
-## Preregistered confirmation
+## Completed preregistered confirmation
 
-The freeze-candidate run uses a fresh training run at training seed `0`, then
-samples the checksum-identical checkpoint at new generation seeds `3,4,5`.
-Each 32,561-row table is evaluated with the unchanged five-seed panel. The
-decision uses only preregistered completeness, structural, environment, and
+The freeze-candidate run used a fresh training run at training seed `0`, then
+sampled the checksum-identical checkpoint at new generation seeds `3,4,5`.
+Each 32,561-row table was evaluated with the unchanged five-seed panel. The
+decision used only preregistered completeness, structural, environment, and
 provenance gates; numerical metric values cannot cause acceptance, rejection,
 seed replacement, or selective reruns. Row-level materializations remain in
-ignored local artifacts. A successful confirmation may support a separate
-protocol-freeze decision, but cannot admit a dataset, model, track, run, or
-environment and cannot establish privacy or regulatory compliance.
+ignored local artifacts.
+
+All three tables passed without evaluator repair; all three bundles finalized,
+retaining 102/102 computed Atomic Results, 15/15 C2ST seed scopes, and 15/15
+DOMIAS seed scopes. The retained [confirmation evidence](../evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json)
+is checksum-bound to the clean preregistration commit. Two import failures
+before model construction produced no checkpoint, synthetic table, or metric;
+the declared dependency environment was then installed and the complete run
+restarted from training step zero. The [execution audit](../evidence/evaluation/p5-confirmatory-execution-audit-2026-08-13.json)
+discloses both attempts. The separate [freeze decision](../evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json)
+admits the ten metric components conditionally, but no dataset, model, track,
+concrete run, publication class, or other environment. It establishes neither
+formal privacy nor regulatory compliance.
