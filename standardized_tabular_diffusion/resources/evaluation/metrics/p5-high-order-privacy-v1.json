@@ -5,9 +5,9 @@
     "metric_version": "1.0.0",
     "dimension": "privacy-risk",
     "definition_origin": "benchmark-derived",
-    "planned_leaderboard_role": "diagnostic",
+    "planned_leaderboard_role": "official-component",
     "owner": "repository-maintainers",
-    "lifecycle_status": "unit-validated",
+    "lifecycle_status": "protocol-frozen",
     "review_record": {"registered_by":"p5-implementation","registered_at":"2026-08-12T00:00:00Z","reviews":[{"review_type":"definition-and-implementation","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","decision":"approved","evidence_ref":"docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"}]},
     "source": {
       "method_references": ["P5 High-order Fidelity and Empirical Privacy protocol"],
@@ -45,15 +45,15 @@
     "validation": {
       "unit_test_evidence": ["tests/evaluation/test_p5_high_order_privacy.py"],
       "boundary_test_evidence": ["tests/evaluation/test_p5_evaluate_table.py"],
-      "source_parity_evidence": [],
+      "source_parity_evidence": ["tests/evaluation/test_p5_high_order_privacy.py","docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json"],
       "numerical_tolerance": {"relative":1e-12,"absolute":1e-12},
       "reference_fixtures": ["hand-computable collisions, SDMetrics DCR source comparison, and DOMIAS formula fixtures"],
-      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11","validated":["Windows development environment with Python 3.11"]},
+      "supported_environment": {"release_primary":"Windows 11 x86-64 with Python 3.11 and NVIDIA GeForce RTX 5080","validated":["Windows 11 x86-64 with Python 3.11.15, NVIDIA GeForce RTX 5080, CUDA 12.8, and PyTorch 2.8.0+cu128"],"qualification_boundary":"Other hardware and platforms remain diagnostic until independently qualified."},
       "unresolved_limitations": ["Attribute inference remains outside P5 v1 despite reviewed Adult and Sick roles because no separate implementation and threat model is approved.","The P5 mixed-table DOMIAS adapter is not claimed as exact source parity."],
-      "release_decision": "diagnostic-only"
+      "release_decision": "pending"
     },
-    "lifecycle_evidence": {"definition_review":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["docs/evaluation/METRIC_SOURCE_REVIEW.md","docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"]},"implementation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/high_order_privacy.py"]},"unit_validation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["tests/evaluation/test_p5_high_order_privacy.py","tests/evaluation/test_p5_evaluate_table.py"]},"source_parity":null,"protocol_freeze":null,"release_approval":null},
-    "admission": {"official_results_allowed":false,"compatibility_version":"p5-high-order-privacy-1.0.0","reason":"Preregistered freeze candidate; approval depends on the declared independent confirmatory completeness and provenance gates."}
+    "lifecycle_evidence": {"definition_review":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["docs/evaluation/METRIC_SOURCE_REVIEW.md","docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"]},"implementation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["standardized_tabular_diffusion/evaluation/high_order_privacy.py"]},"unit_validation":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-12T00:00:00Z","evidence_refs":["tests/evaluation/test_p5_high_order_privacy.py","tests/evaluation/test_p5_evaluate_table.py"]},"source_parity":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-13T00:00:00Z","evidence_refs":["tests/evaluation/test_p5_high_order_privacy.py","docs/evaluation/P5_HIGH_ORDER_PRIVACY.md"]},"protocol_freeze":{"decision":"approved","reviewer":"repository-maintainers","reviewed_at":"2026-08-13T00:00:00Z","evidence_refs":["docs/evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json","docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json"]},"release_approval":null},
+    "admission": {"official_results_allowed":true,"compatibility_version":"p5-high-order-privacy-1.0.0","reason":"The unchanged P5 scientific profile is protocol-frozen for conditional Official Results use on the exact validated runtime. Dataset, model, track, run, and publication admission remain independent gates."}
   },
   "records": [
     {"metric_id":"std-c2st-rf-auroc","display_name":"C2ST Random-Forest AUROC","dimension":"high-order-fidelity","subdimension":"classifier-two-sample-test","description":"Raw heldout-real versus synthetic discriminator AUROC; chance target is 0.5.","source":{"method_references":["Lopez-Paz and Oquab, ICLR 2017"],"upstream":"https://arxiv.org/abs/1610.06545","known_deviations":["AUROC replaces the paper's primary accuracy statistic and is benchmark-derived."]},"semantics":{"raw_direction":"target","target_value":0.5}},

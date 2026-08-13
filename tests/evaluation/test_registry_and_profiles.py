@@ -38,7 +38,8 @@ def test_packaged_legacy_registry_is_explicitly_nonofficial() -> None:
     assert all(
         not record.payload["admission"]["official_results_allowed"]
         for record in records
-        if record.payload["admission"]["compatibility_version"] != "p4-utility-1.0.0"
+        if record.payload["admission"]["compatibility_version"]
+        not in {"p4-utility-1.0.0", "p5-high-order-privacy-1.0.0"}
     )
 
 
@@ -81,6 +82,21 @@ def test_p4_metrics_are_protocol_frozen_with_independent_admission_boundaries() 
     assert all(record.payload["validation"]["source_parity_evidence"] for record in records)
     assert all(record.payload["admission"]["official_results_allowed"] is True for record in records)
     assert all(record.payload["validation"]["release_decision"] == "pending" for record in records)
+
+
+def test_p5_metrics_are_protocol_frozen_without_overall_score_or_release_overclaim() -> None:
+    records = [
+        record
+        for record in load_metric_registry()
+        if record.payload["admission"]["compatibility_version"] == "p5-high-order-privacy-1.0.0"
+    ]
+    assert len(records) == 10
+    assert all(record.payload["lifecycle_status"] == "protocol-frozen" for record in records)
+    assert all(record.payload["planned_leaderboard_role"] == "official-component" for record in records)
+    assert all(record.payload["validation"]["source_parity_evidence"] for record in records)
+    assert all(record.payload["admission"]["official_results_allowed"] is True for record in records)
+    assert all(record.payload["validation"]["release_decision"] == "pending" for record in records)
+    assert all(record.payload["semantics"]["aggregation"]["rule"].find("no cross-dimension") >= 0 for record in records)
 
 
 def test_lifecycle_cannot_advance_without_cumulative_evidence() -> None:
@@ -200,7 +216,7 @@ def test_packaged_protocols_resolve_exact_versions_and_admission_states() -> Non
         ("p5-high-order-privacy", "1.0.0"),
     }
     official = [profile.identity for profile in profiles if profile.payload["official_results_allowed"]]
-    assert official == [("p4-utility", "1.0.0")]
+    assert official == [("p4-utility", "1.0.0"), ("p5-high-order-privacy", "1.0.0")]
 
 
 def test_draft_protocol_cannot_claim_official_results(tmp_path: Path) -> None:

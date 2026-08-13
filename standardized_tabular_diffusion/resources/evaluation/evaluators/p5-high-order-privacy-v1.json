@@ -2,8 +2,8 @@
   "profile_schema_version": "1.0.0",
   "profile_id": "p5-high-order-privacy",
   "profile_version": "1.0.0",
-  "status": "freeze-candidate",
-  "official_results_allowed": false,
+  "status": "frozen",
+  "official_results_allowed": true,
   "default_evaluator_seeds": [0, 1, 2, 3, 4],
   "c2st": {
     "comparison": "heldout-real-vs-synthetic",
