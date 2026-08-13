@@ -1,0 +1,457 @@
+{
+  "assertions": {
+    "all_p5_bundles_finalized": true,
+    "all_structural_gates_passed": true,
+    "five_evaluator_seeds_preserved_per_table": true,
+    "no_formal_privacy_guarantee_claimed": true,
+    "no_overall_score_emitted": true,
+    "official_results_admitted": false,
+    "one_dataset": true,
+    "one_model": true,
+    "protocol_frozen_by_this_run": false,
+    "three_generation_seeds": true
+  },
+  "claim_boundary": "Preregistered TabDDPM/Adult confirmation for the unchanged P5 v1 scientific identity. Passing the declared non-numerical gates may support a separate protocol-freeze decision only; this run does not itself admit Official Results, establish a formal privacy guarantee, assess regulatory compliance, or generalize to another model, dataset, configuration, seed, or platform.",
+  "completed_at": "2026-08-13T13:12:12Z",
+  "dataset": {
+    "categorical_columns": [
+      "workclass",
+      "education",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "native.country"
+    ],
+    "dataset_id": "adult",
+    "label_mapping": {
+      "<=50K": 0,
+      ">50K": 1
+    },
+    "numerical_columns": [
+      "age",
+      "fnlwgt",
+      "education.num",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week"
+    ],
+    "path": "runtime-input/adult",
+    "profile": "configs/datasets/adult-uci-2-v1.json",
+    "profile_sha256": "446ab1ee151b16260bb33d18590fba08a57e983b088049edeb0b4063f078d8a3",
+    "target_column": "income",
+    "test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+    "test_rows": 16281,
+    "train_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4",
+    "train_rows": 32561,
+    "validation_rows": 1,
+    "validation_used_for_fit": false
+  },
+  "environment": {
+    "dependencies": {
+      "category-encoders": "2.6.3",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "rtdl": "0.0.9",
+      "scikit-learn": "1.5.2",
+      "scipy": "1.13.1",
+      "sdmetrics": "0.28.3.dev0",
+      "standardized-tabular-diffusion": "0.1.0.dev0",
+      "tomli-w": "1.0.0",
+      "torch": "2.8.0+cu128"
+    },
+    "hardware": {
+      "cuda_available": true,
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 5080",
+      "gpu_count": 1,
+      "nvidia_smi": [
+        "NVIDIA GeForce RTX 5080, 610.47, 16303 MiB"
+      ],
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.11.15",
+      "torch": "2.8.0+cu128"
+    }
+  },
+  "evaluation": {
+    "attribute_inference": "excluded-from-p5-v1-pending-separate-implementation-and-threat-model",
+    "comparison_track": "native",
+    "evaluator_seeds_per_generated_table": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "formal_privacy_guarantee": false,
+    "overall_fidelity_score": null,
+    "overall_privacy_score": null,
+    "protocol_id": "p5-high-order-privacy",
+    "protocol_version": "1.0.0"
+  },
+  "evidence_schema_version": "1.0.0",
+  "experiment_kind": "preregistered-confirmatory",
+  "model": {
+    "base_config": "TabDDPM-main/exp/adult/ddpm_cb_best/config.toml",
+    "base_config_sha256": "d10f8960d8e48422d3fa384680339dc6da21a6e28073e8716ae1873214df53dd",
+    "checkpoint_reused_across_generation_seeds": true,
+    "checkpoint_sha256": {
+      "model.pt": "a3ddba236b20216f10ffc177cbf235d8e7b554b056dfae50065bbae8c5f644dc",
+      "model_ema.pt": "ede1bd1f88f6e77478e3e64262ffc58035fe212ee1d9ed6971ac284577bb59d1"
+    },
+    "configuration_policy": "official-ddpm-cb-best-values-with-only-path-device-row-count-and-generation-seed-runtime-bindings",
+    "generation_seeds": [
+      3,
+      4,
+      5
+    ],
+    "model_id": "tabddpm",
+    "runtime_compatibility": "adapter-only integral-float-to-equal-integer QuantileTransformer.subsample bridge; upstream source and estimator behavior otherwise unchanged",
+    "source_integrity": {
+      "libzero_distribution_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
+      "libzero_modules_verified": 7,
+      "manifest_path": "standardized_tabular_diffusion\\resources\\upstream\\tabddpm-source-manifest.json",
+      "manifest_sha256": "e0d342be44b53216a159ea726a60817e0800476b67a9e8d42b2ffba75e653813",
+      "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
+      "upstream_files_verified": 64
+    },
+    "training_runs": 1,
+    "training_seed": 0,
+    "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8"
+  },
+  "preregistration": {
+    "decision_rule": {
+      "approve_protocol_freeze_if_all": [
+        "one fresh training run completes from the pinned official configuration and upstream revision",
+        "exactly the preregistered generation seeds 3, 4, and 5 each produce 32561 decoded rows",
+        "all three tables pass the structural gate without evaluator repair",
+        "all three P5 bundles finalize successfully with all ten required metric identities and five evaluator seeds",
+        "source, configuration, checkpoint, synthetic-table, bundle, and execution checksums are retained",
+        "no row-level source, heldout, or synthetic table is committed",
+        "no numerical metric threshold, favorable-score filter, seed substitution, or rerun selection is applied"
+      ],
+      "metric_values_used_for_decision": false,
+      "reject_or_defer_if_any": [
+        "a declared identity or checksum drifts",
+        "a required run, table, metric, structural gate, or provenance field is missing",
+        "the environment differs from the preregistered Windows/Python/GPU identity",
+        "scientific parameters are changed after preregistration"
+      ]
+    },
+    "path": "docs/evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json",
+    "sha256": "c0d065d26d5876774b7b72267c9a5284d28462aef3c049e421874836cc237f27"
+  },
+  "protocol_id": "p5-tabddpm-adult-confirmatory-windows-v1",
+  "repository": {
+    "branch": "codex/p5-protocol-freeze",
+    "execution_source_sha256": {
+      "TabDDPM-main/exp/adult/ddpm_cb_best/config.toml": "d10f8960d8e48422d3fa384680339dc6da21a6e28073e8716ae1873214df53dd",
+      "configs/datasets/adult-uci-2-v1.json": "446ab1ee151b16260bb33d18590fba08a57e983b088049edeb0b4063f078d8a3",
+      "docs/evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json": "c0d065d26d5876774b7b72267c9a5284d28462aef3c049e421874836cc237f27",
+      "standardized_tabular_diffusion/compat/tabddpm_sklearn/sitecustomize.py": "3a8d778334ebefbf4c39a91dd0011e52f7a07f405e05b43d86c428556a6f94e2",
+      "standardized_tabular_diffusion/evaluation/high_order_privacy.py": "1ab4190e7425d45cca6c171ddfecc7751f0a2ad514f3bb8b93a2e950943c8329",
+      "standardized_tabular_diffusion/models/tabddpm.py": "777b3b8f688dc70f4c0d6a1ff7f5567393a5e5d7762be2b04e065d1163274c52",
+      "standardized_tabular_diffusion/resources/evaluation/evaluators/p5-high-order-privacy-v1.json": "3f825ce2395f626ed3d9f54d2b05c24872b89347cf30cd273934bb3dcb733112",
+      "standardized_tabular_diffusion/validation/p5_tabddpm_adult_confirmatory.py": "93b3618605eb3bc258227fd73aea9e80515361a09d90ed9dbae4cfc84f629a3b",
+      "standardized_tabular_diffusion/validation/p5_tabddpm_adult_pilot.py": "9e6e7ff87e2f3044bb0e384acb42cf15a8a341845cb844635facf38a9270564e"
+    },
+    "head": "8351b931a6b2f18cbaf273c8762344d9f2fe6756",
+    "working_tree_dirty": false
+  },
+  "seed_results": [
+    {
+      "bundle_checksums_sha256": "18ae35248b1d98500fe621b9c0ab577c9a7704ef36bc3ce900f691bab164a842",
+      "bundle_path": "seed-3/p5-bundle",
+      "claim_boundary": "Empirical diagnostics only; no differential-privacy or other formal privacy guarantee.",
+      "decoded_sample": {
+        "columns": 15,
+        "integer_decoding": {
+          "age": {
+            "changed_rows": 2072,
+            "maximum_absolute_delta": 0.49851959351727615,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.gain": {
+            "changed_rows": 1324,
+            "maximum_absolute_delta": 0.49960881744209473,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.loss": {
+            "changed_rows": 685,
+            "maximum_absolute_delta": 0.4995608537096814,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "education.num": {
+            "changed_rows": 0,
+            "maximum_absolute_delta": 0.0,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "fnlwgt": {
+            "changed_rows": 32561,
+            "maximum_absolute_delta": 0.4999738011829322,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "hours.per.week": {
+            "changed_rows": 2018,
+            "maximum_absolute_delta": 0.4998169410860811,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          }
+        },
+        "raw_array_sha256": {
+          "X_cat_unnorm.npy": "8a2bddddfe90bbe2384c0635c77d23d400b29ce7e3deead0903fd1a99da21b4a",
+          "X_num_unnorm.npy": "f477ece3e1ec0879962d104ad13d42443de05cee49821cdffcbd7367321feba6",
+          "categorical": "c8f36ec333ae6d8c64f5e45abf8c847578b399b5e63f1ae5bfb6f9fce7a1a7c9",
+          "numerical": "1d994054ee889835a9a98e504e9777e0dd26588152ecbd15d674e5d05893d684",
+          "target": "79549a703782701b660802b1d1b859ab69c78882e4703b1c95e0b88822b690f6"
+        },
+        "rows": 32561,
+        "synthetic_path": "seed-3/synthetic.csv",
+        "synthetic_repair_applied_by_evaluator": false,
+        "synthetic_sha256": "794be77cee7c54328de89d96e60913aed0b3350af3b9bed39f9aaf843ee32cae"
+      },
+      "denominator_counts": {
+        "computed_c2st_seeds": 5,
+        "computed_domias_seeds": 5,
+        "dcr_heldout_query_rows": 2000,
+        "dcr_synthetic_query_rows": 2000,
+        "expected_c2st_seeds": 5,
+        "expected_domias_seeds": 5,
+        "synthetic_rows_exact_audit": 32561
+      },
+      "excluded_metrics": {
+        "alaa-authenticity-paper": "Paper and released-code semantics require adjudication.",
+        "alaa-authenticity-repository": "Paper and released-code semantics require adjudication.",
+        "alaa-integrated-alpha-precision": "Requires a reviewed mixed-table support embedding before implementation.",
+        "alaa-integrated-beta-recall": "Requires a reviewed mixed-table support embedding before implementation.",
+        "attribute-inference": "Excluded from P5 v1; dataset roles are reviewed, but no separately approved implementation and attribute-inference threat model exists.",
+        "great-rf-discriminator-accuracy": "Retained as a source-specific diagnostic, not merged with C2ST AUROC.",
+        "synthcity-delta-presence": "Published package semantics are not yet sufficiently stable for benchmark admission."
+      },
+      "generation_seed": 3,
+      "high_order_fidelity": {
+        "c2st_fidelity_mean": 0.8638031145502998,
+        "c2st_raw_auroc_mean": 0.5680984427248501,
+        "computed_seeds": 5,
+        "expected_seeds": 5,
+        "overall_fidelity_score": null,
+        "overall_score_policy": "prohibited-in-p5"
+      },
+      "metric_state_counts": {
+        "computed": 34
+      },
+      "privacy_risk": {
+        "computed_domias_seeds": 5,
+        "dcr_wasserstein_heldout_calibration": 0.004571114448793597,
+        "domias_attack_accuracy_mean": 0.5046,
+        "domias_attack_advantage_mean": 0.03199999999999999,
+        "domias_attack_auroc_mean": 0.50498,
+        "domias_tpr_at_fpr_01_mean": 0.009400000000000002,
+        "exact_train_collision_rate": 0.0,
+        "expected_domias_seeds": 5,
+        "formal_privacy_guarantee": false,
+        "overall_privacy_score": null,
+        "synthetic_internal_duplicate_rate": 0.0
+      },
+      "request_fingerprint": "886f3577f97ac16f745568e247fe0ea5acdc78d20f9ad5bdf442ae9693eb348b",
+      "sample_config_sha256": "8579da8291ffdc06b7c75d1f9da6b7aa68044ea24d748e80b6ff176ba6e074b3",
+      "training_checkpoint_reused": true
+    },
+    {
+      "bundle_checksums_sha256": "682a87b7933166c890e29a2f2a286ad4e9b59c698d59be7838e940599de3c502",
+      "bundle_path": "seed-4/p5-bundle",
+      "claim_boundary": "Empirical diagnostics only; no differential-privacy or other formal privacy guarantee.",
+      "decoded_sample": {
+        "columns": 15,
+        "integer_decoding": {
+          "age": {
+            "changed_rows": 2068,
+            "maximum_absolute_delta": 0.49930397560088124,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.gain": {
+            "changed_rows": 1330,
+            "maximum_absolute_delta": 0.499878818027355,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.loss": {
+            "changed_rows": 693,
+            "maximum_absolute_delta": 0.4989941367894062,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "education.num": {
+            "changed_rows": 0,
+            "maximum_absolute_delta": 0.0,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "fnlwgt": {
+            "changed_rows": 32559,
+            "maximum_absolute_delta": 0.4999874869827181,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "hours.per.week": {
+            "changed_rows": 1980,
+            "maximum_absolute_delta": 0.49989636001820514,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          }
+        },
+        "raw_array_sha256": {
+          "X_cat_unnorm.npy": "44be802ab29759ba531ac7023911e148ee6b2772c794a67f44e8f9a2e89b8c5d",
+          "X_num_unnorm.npy": "eabf660d9b2f3524ed45a55f6edffdfa943b494577e474b5bf914682957af0d8",
+          "categorical": "ef00a5f77b90f613068c68fc3096ae8e5cd0802949ab21d45434430233042675",
+          "numerical": "0cca500ea5750d1360f98ee78e3823b3adf505932da8e4351eb452ae7bcf5abc",
+          "target": "07ffc583f21860bf08812c85cc789c72fa051b5744ccb564bcc8ac00548ae625"
+        },
+        "rows": 32561,
+        "synthetic_path": "seed-4/synthetic.csv",
+        "synthetic_repair_applied_by_evaluator": false,
+        "synthetic_sha256": "4a7aac29ce6b5db96b0490cccc6e53c89bf3f3c0102add93e7859c90c89fe111"
+      },
+      "denominator_counts": {
+        "computed_c2st_seeds": 5,
+        "computed_domias_seeds": 5,
+        "dcr_heldout_query_rows": 2000,
+        "dcr_synthetic_query_rows": 2000,
+        "expected_c2st_seeds": 5,
+        "expected_domias_seeds": 5,
+        "synthetic_rows_exact_audit": 32561
+      },
+      "excluded_metrics": {
+        "alaa-authenticity-paper": "Paper and released-code semantics require adjudication.",
+        "alaa-authenticity-repository": "Paper and released-code semantics require adjudication.",
+        "alaa-integrated-alpha-precision": "Requires a reviewed mixed-table support embedding before implementation.",
+        "alaa-integrated-beta-recall": "Requires a reviewed mixed-table support embedding before implementation.",
+        "attribute-inference": "Excluded from P5 v1; dataset roles are reviewed, but no separately approved implementation and attribute-inference threat model exists.",
+        "great-rf-discriminator-accuracy": "Retained as a source-specific diagnostic, not merged with C2ST AUROC.",
+        "synthcity-delta-presence": "Published package semantics are not yet sufficiently stable for benchmark admission."
+      },
+      "generation_seed": 4,
+      "high_order_fidelity": {
+        "c2st_fidelity_mean": 0.8682909875540377,
+        "c2st_raw_auroc_mean": 0.5658545062229812,
+        "computed_seeds": 5,
+        "expected_seeds": 5,
+        "overall_fidelity_score": null,
+        "overall_score_policy": "prohibited-in-p5"
+      },
+      "metric_state_counts": {
+        "computed": 34
+      },
+      "privacy_risk": {
+        "computed_domias_seeds": 5,
+        "dcr_wasserstein_heldout_calibration": 0.005464391358922306,
+        "domias_attack_accuracy_mean": 0.5035999999999999,
+        "domias_attack_advantage_mean": 0.035199999999999995,
+        "domias_attack_auroc_mean": 0.5067368,
+        "domias_tpr_at_fpr_01_mean": 0.0078,
+        "exact_train_collision_rate": 0.0,
+        "expected_domias_seeds": 5,
+        "formal_privacy_guarantee": false,
+        "overall_privacy_score": null,
+        "synthetic_internal_duplicate_rate": 0.0
+      },
+      "request_fingerprint": "4b346a787ad320cc250dc0e321441eb4489d90054dd0bbca6f2dcd35b3f2f448",
+      "sample_config_sha256": "63ded5fe2ef7c7fb4bd66af8d4d092810aead16f58b2f3bc87f741d971471441",
+      "training_checkpoint_reused": true
+    },
+    {
+      "bundle_checksums_sha256": "4ef7db3769f70c7bb675786f9b9c3f4184a9c000b8c2d617bbe8f89e008ad3d0",
+      "bundle_path": "seed-5/p5-bundle",
+      "claim_boundary": "Empirical diagnostics only; no differential-privacy or other formal privacy guarantee.",
+      "decoded_sample": {
+        "columns": 15,
+        "integer_decoding": {
+          "age": {
+            "changed_rows": 2043,
+            "maximum_absolute_delta": 0.4995668397221209,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.gain": {
+            "changed_rows": 1305,
+            "maximum_absolute_delta": 0.4990397853398463,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "capital.loss": {
+            "changed_rows": 699,
+            "maximum_absolute_delta": 0.4995207573983862,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "education.num": {
+            "changed_rows": 0,
+            "maximum_absolute_delta": 0.0,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "fnlwgt": {
+            "changed_rows": 32560,
+            "maximum_absolute_delta": 0.49998635007068515,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          },
+          "hours.per.week": {
+            "changed_rows": 1960,
+            "maximum_absolute_delta": 0.49998481340603007,
+            "policy": "nearest-integer-ties-to-even-at-adapter-decoding-boundary"
+          }
+        },
+        "raw_array_sha256": {
+          "X_cat_unnorm.npy": "3555ec92c28f28e49bee61263fe57d37e33d7863b7ed1b409122e99c208785ec",
+          "X_num_unnorm.npy": "68dc32a466792b692a84f02bbde8a7236fa7b0c69992b9802c1f80f9fa22c36b",
+          "categorical": "3ff94eec435903f69acfab9bff9ca118248d113f8e3aadd45a1a35c8c1853b59",
+          "numerical": "903fb5d0ccc77c250dd48bd3e584f79df88ae1d4351258b181fd1fe81467c90d",
+          "target": "41669f669f767cd2308b1cb7f4181a650024fc151d16885258a37cf9fef24d11"
+        },
+        "rows": 32561,
+        "synthetic_path": "seed-5/synthetic.csv",
+        "synthetic_repair_applied_by_evaluator": false,
+        "synthetic_sha256": "e9006dd69a00165141adaffd72b5f948443ed183930c7039ebd00359ed0e1b69"
+      },
+      "denominator_counts": {
+        "computed_c2st_seeds": 5,
+        "computed_domias_seeds": 5,
+        "dcr_heldout_query_rows": 2000,
+        "dcr_synthetic_query_rows": 2000,
+        "expected_c2st_seeds": 5,
+        "expected_domias_seeds": 5,
+        "synthetic_rows_exact_audit": 32561
+      },
+      "excluded_metrics": {
+        "alaa-authenticity-paper": "Paper and released-code semantics require adjudication.",
+        "alaa-authenticity-repository": "Paper and released-code semantics require adjudication.",
+        "alaa-integrated-alpha-precision": "Requires a reviewed mixed-table support embedding before implementation.",
+        "alaa-integrated-beta-recall": "Requires a reviewed mixed-table support embedding before implementation.",
+        "attribute-inference": "Excluded from P5 v1; dataset roles are reviewed, but no separately approved implementation and attribute-inference threat model exists.",
+        "great-rf-discriminator-accuracy": "Retained as a source-specific diagnostic, not merged with C2ST AUROC.",
+        "synthcity-delta-presence": "Published package semantics are not yet sufficiently stable for benchmark admission."
+      },
+      "generation_seed": 5,
+      "high_order_fidelity": {
+        "c2st_fidelity_mean": 0.86618332205845,
+        "c2st_raw_auroc_mean": 0.5669083389707751,
+        "computed_seeds": 5,
+        "expected_seeds": 5,
+        "overall_fidelity_score": null,
+        "overall_score_policy": "prohibited-in-p5"
+      },
+      "metric_state_counts": {
+        "computed": 34
+      },
+      "privacy_risk": {
+        "computed_domias_seeds": 5,
+        "dcr_wasserstein_heldout_calibration": 0.003915580763265102,
+        "domias_attack_accuracy_mean": 0.4962,
+        "domias_attack_advantage_mean": 0.031999999999999994,
+        "domias_attack_auroc_mean": 0.5017628000000001,
+        "domias_tpr_at_fpr_01_mean": 0.0118,
+        "exact_train_collision_rate": 0.0,
+        "expected_domias_seeds": 5,
+        "formal_privacy_guarantee": false,
+        "overall_privacy_score": null,
+        "synthetic_internal_duplicate_rate": 0.0
+      },
+      "request_fingerprint": "a2cb729cc7d1ff1c0b7b0ec71ef1031d6131d5283037d5914ec40a0e600c6c7a",
+      "sample_config_sha256": "9f119507940664a415092e01ed6940ab2b7f8d86c0a8d1404001d5c980cbb87f",
+      "training_checkpoint_reused": true
+    }
+  ],
+  "started_at": "2026-08-13T12:59:51Z",
+  "status": "passed"
+}

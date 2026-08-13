@@ -2,7 +2,7 @@
 
 ## Status and claim boundary
 
-`p5-high-order-privacy@0.1.0` is an implemented diagnostic protocol with unit, bundle, and retained Windows 11/Python 3.11 Adult/Sick identity-surrogate validation. It is not protocol-frozen, release-supported, or eligible for Official Results. The phase deliberately resolves only scientifically defensible metrics and registers unresolved metrics as excluded.
+`p5-high-order-privacy@1.0.0` is protocol-frozen for conditional Official Results component use. Its scientific identity has unit, bundle, retained Windows 11/Python 3.11 Adult/Sick identity-surrogate validation, an exploratory real-generator pilot, reviewed Adult/Sick roles and threat model, and a successful independent preregistered confirmation. It is not release-supported, and no dataset, model, concrete run, or publication class is admitted by the metric freeze; unresolved metrics remain explicit exclusions.
 
 P5 reports high-order fidelity and empirical privacy risk as separate dimensions. It emits neither an overall Fidelity score nor an overall Privacy score. Empirical attacks and distances do not establish differential privacy or any other formal privacy guarantee.
 
@@ -71,7 +71,7 @@ The Metric Registry records these metrics as excluded, and they cannot be select
 - integrated Alpha-Precision and Beta-Recall: mixed-table support embedding unresolved;
 - Alaa paper and repository Authenticity variants: paper/code semantics unresolved;
 - SynthCity Delta Presence: threat model, direction, and failure semantics unresolved; and
-- attribute inference: Adult and Sick lack approved sensitive/quasi-identifier roles and a dataset-specific threat model.
+- attribute inference: Adult and Sick roles are reviewed, but P5 v1 has no separately approved attribute-inference implementation and threat model.
 
 ## Bundle and command
 
@@ -87,7 +87,7 @@ std-tabular-diffusion evaluate-table `
   --output artifacts/p5/adult/run-001
 ~~~
 
-P5 requires evaluator seeds `0,1,2,3,4`. The retained [Windows Adult/Sick identity-surrogate evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) validates the complete execution and result boundary but deliberately does not assess generator quality. The retained [TabDDPM/Adult three-generation-seed evidence](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) closes the first exploratory non-identity pilot. Dataset-specific privacy-role review and a later confirmatory freeze decision remain open; neither evidence record admits Official Results.
+P5 requires evaluator seeds `0,1,2,3,4`. The retained [Windows Adult/Sick identity-surrogate evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) validates the complete execution and result boundary but deliberately does not assess generator quality. The retained [TabDDPM/Adult three-generation-seed evidence](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) closes the first exploratory non-identity pilot. The independent seeds `3,4,5` confirmation and its pass/fail gates are fixed in the [confirmatory preregistration](../evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json). None of these records independently admits Official Results.
 
 ## Completed first generator pilot
 
@@ -108,8 +108,8 @@ counts remain in the ignored experiment artifacts. P5 applies no repair.
 
 The pilot is exploratory. Its passing result does not freeze P5, admit TabDDPM or Adult
 to Official Results, or establish a formal privacy guarantee. Attribute
-inference remains excluded until sensitive/quasi-identifier roles and a threat
-model receive dataset-specific approval.
+inference remains excluded from P5 v1. Reviewed field roles do not substitute
+for a separately approved implementation and attribute-inference threat model.
 
 The pilot also exercises a dated dependency boundary absent from the small
 TabDDPM parity fixture: upstream passes the mathematically integral value `1e9`
@@ -117,3 +117,25 @@ as a float to `QuantileTransformer.subsample`. Supported Python 3.11
 scikit-learn rejects the type before fitting, so an adapter-only startup bridge
 converts integral floats to their exactly equal integers. It does not modify
 upstream source or any non-integral estimator value.
+
+## Completed preregistered confirmation
+
+The freeze-candidate run used a fresh training run at training seed `0`, then
+sampled the checksum-identical checkpoint at new generation seeds `3,4,5`.
+Each 32,561-row table was evaluated with the unchanged five-seed panel. The
+decision used only preregistered completeness, structural, environment, and
+provenance gates; numerical metric values cannot cause acceptance, rejection,
+seed replacement, or selective reruns. Row-level materializations remain in
+ignored local artifacts.
+
+All three tables passed without evaluator repair; all three bundles finalized,
+retaining 102/102 computed Atomic Results, 15/15 C2ST seed scopes, and 15/15
+DOMIAS seed scopes. The retained [confirmation evidence](../evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json)
+is checksum-bound to the clean preregistration commit. Two import failures
+before model construction produced no checkpoint, synthetic table, or metric;
+the declared dependency environment was then installed and the complete run
+restarted from training step zero. The [execution audit](../evidence/evaluation/p5-confirmatory-execution-audit-2026-08-13.json)
+discloses both attempts. The separate [freeze decision](../evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json)
+admits the ten metric components conditionally, but no dataset, model, track,
+concrete run, publication class, or other environment. It establishes neither
+formal privacy nor regulatory compliance.

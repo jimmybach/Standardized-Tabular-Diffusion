@@ -124,9 +124,9 @@ def validate_p5_evaluator_profile(profile: dict[str, Any]) -> None:
     if (
         profile["profile_schema_version"] != "1.0.0"
         or profile["profile_id"] != "p5-high-order-privacy"
-        or profile["profile_version"] != "0.1.0"
-        or profile["status"] != "validated-diagnostic"
-        or profile["official_results_allowed"] is not False
+        or profile["profile_version"] != "1.0.0"
+        or (profile["status"], profile["official_results_allowed"])
+        not in {("freeze-candidate", False), ("frozen", True)}
         or profile["default_evaluator_seeds"] != [0, 1, 2, 3, 4]
     ):
         raise HighOrderPrivacyError("P5 evaluator identity or admission boundary has drifted")

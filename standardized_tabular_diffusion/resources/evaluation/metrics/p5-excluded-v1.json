@@ -16,6 +16,6 @@
     {"metric_id":"alaa-authenticity-paper","display_name":"Alaa Authenticity Paper Definition","subdimension":"authenticity","description":"Excluded pending paper/repository discrepancy adjudication."},
     {"metric_id":"alaa-authenticity-repository","display_name":"Alaa Authenticity Repository Definition","subdimension":"authenticity","description":"Excluded pending paper/repository discrepancy adjudication."},
     {"metric_id":"synthcity-delta-presence","display_name":"SynthCity Delta Presence","subdimension":"presence-disclosure","description":"Excluded pending semantic and source-stability review."},
-    {"metric_id":"attribute-inference","display_name":"Attribute Inference","subdimension":"attribute-disclosure","description":"Excluded until sensitive and quasi-identifier roles are approved per Dataset Profile.","definition_origin":"benchmark-native"}
+    {"metric_id":"attribute-inference","display_name":"Attribute Inference","subdimension":"attribute-disclosure","description":"Excluded from P5 v1. Adult and Sick roles are reviewed, but no separately approved implementation and attribute-inference threat model exists.","definition_origin":"benchmark-native"}
   ]
 }

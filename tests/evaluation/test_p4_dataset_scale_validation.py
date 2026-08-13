@@ -57,12 +57,15 @@ def test_successor_keeps_the_fixed_scientific_gates_and_complete_schedule() -> N
 def test_cuda_resource_gate_applies_only_when_tabpfn_is_protocol_applicable() -> None:
     limits = {"maximum_observed_cuda_peak_allocated_gib": 15.0}
 
-    assert validation._cuda_resource_failures(
-        "trtr",
-        {"cuda_peak_allocation_increase_bytes": 0},
-        limits,
-        cuda_required=False,
-    ) == []
+    assert (
+        validation._cuda_resource_failures(
+            "trtr",
+            {"cuda_peak_allocation_increase_bytes": 0},
+            limits,
+            cuda_required=False,
+        )
+        == []
+    )
     assert validation._cuda_resource_failures(
         "trtr",
         {"cuda_peak_allocation_increase_bytes": 0},
@@ -107,7 +110,8 @@ def test_sick_constant_tbg_measured_is_retained_but_reasoned_out_of_global_utili
     profile = validation._profile_for_dataset("sick", manifest).payload
     global_profile = profile["utility"]["global"]
 
-    assert profile["dataset_profile_version"] == "1.4.0-reviewed"
+    assert profile["dataset_profile_version"] == "1.5.0-reviewed"
+    assert profile["compatibility"]["p4_dataset_scale"]["compatible_predecessor_versions"] == ["1.4.0-reviewed"]
     assert "TBG_measured" in profile["table_contract"]["canonical_column_order"]
     assert "tbg-measured" not in global_profile["included_target_column_ids"]
     assert global_profile["excluded_targets"] == [
@@ -133,9 +137,7 @@ def test_full_row_permutation_is_deterministic_and_preserves_exact_multiset_and_
     assert list(first.index) != list(other.index)
     assert sorted(first.index) == list(frame.index)
     for column in frame:
-        assert first[column].value_counts(dropna=False).to_dict() == frame[column].value_counts(
-            dropna=False
-        ).to_dict()
+        assert first[column].value_counts(dropna=False).to_dict() == frame[column].value_counts(dropna=False).to_dict()
 
 
 def _fake_result(task: dict[str, object], manifest: dict[str, object]) -> dict[str, object]:
@@ -146,11 +148,15 @@ def _fake_result(task: dict[str, object], manifest: dict[str, object]) -> dict[s
     task_type = _task_type(column)
     domain = column.get("valid_domain") or {}
     high_cardinality = task_type == "classification" and len(domain.get("values", [])) > 10
-    predictors = ["KNeighbors", "XGBoost"] if high_cardinality else [
-        "CustomTabPFNModel",
-        "KNeighbors",
-        "XGBoost",
-    ]
+    predictors = (
+        ["KNeighbors", "XGBoost"]
+        if high_cardinality
+        else [
+            "CustomTabPFNModel",
+            "KNeighbors",
+            "XGBoost",
+        ]
+    )
     families = {"xgb": True, "knn": True, "tabpfn": not high_cardinality}
     arm = {
         "status": "pass",
@@ -211,10 +217,9 @@ def _fake_shards(tmp_path: Path) -> list[Path]:
     fingerprint = content_fingerprint(manifest)
     paths: list[Path] = []
     for dataset, record in manifest["coverage"]["datasets"].items():
-        specs = [
-            ("coverage", shard_index, record["shards"])
-            for shard_index in range(record["shards"])
-        ] + [("stability", 0, 1)]
+        specs = [("coverage", shard_index, record["shards"]) for shard_index in range(record["shards"])] + [
+            ("stability", 0, 1)
+        ]
         for mode, shard_index, shard_count in specs:
             schedule = validation.task_schedule(dataset, mode, shard_index, shard_count, manifest)
             payload = {
@@ -267,11 +272,7 @@ def test_finalizer_reconstructs_complete_coverage_stability_resources_and_high_c
     }
     assert evidence["resource_summary"]["arm_count"] == 134
     assert evidence["resource_summary"]["wall_seconds"]["maximum"] == 2.0
-    assert all(
-        record["gate"] == "pass"
-        for dataset in evidence["stability"].values()
-        for record in dataset.values()
-    )
+    assert all(record["gate"] == "pass" for dataset in evidence["stability"].values() for record in dataset.values())
     assert {record["target_column_id"] for record in evidence["high_cardinality_targets"]} == {
         "education",
         "occupation",
@@ -343,7 +344,4 @@ def test_finalizer_writes_failure_evidence_for_an_unreadable_shard(tmp_path: Pat
     assert evidence["status"] == "fail"
     assert evidence["shard_read_errors"][0]["path"] == paths[0].name
     assert evidence["observations"]["observed_shard_count"] == 8
-    assert any(
-        issue.startswith("malformed-shard-identity:")
-        for issue in evidence["observations"]["issues"]
-    )
+    assert any(issue.startswith("malformed-shard-identity:") for issue in evidence["observations"]["issues"])

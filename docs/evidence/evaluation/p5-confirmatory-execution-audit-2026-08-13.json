@@ -1,0 +1,62 @@
+{
+  "audit_schema_version": "1.0.0",
+  "audit_id": "p5-tabddpm-adult-confirmatory-execution-audit-v1",
+  "status": "complete-with-disclosed-preflight-failures",
+  "preregistration": {
+    "path": "docs/evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json",
+    "sha256": "c0d065d26d5876774b7b72267c9a5284d28462aef3c049e421874836cc237f27",
+    "repository_head": "8351b931a6b2f18cbaf273c8762344d9f2fe6756"
+  },
+  "preflight_failures": [
+    {
+      "started_at": "2026-08-13T12:57:20Z",
+      "stage": "upstream-import-before-model-construction",
+      "reason_code": "missing-declared-runtime-dependency",
+      "missing_import": "tomli",
+      "model_fit_started": false,
+      "checkpoint_created": false,
+      "synthetic_table_created": false,
+      "metric_value_created": false,
+      "local_artifact_directory": "artifacts/p5-confirmatory/failed-preflight-missing-tomli-20260813T125720Z",
+      "retention": "ignored-local-audit-only"
+    },
+    {
+      "started_at": "2026-08-13T12:58:14Z",
+      "stage": "upstream-import-before-model-construction",
+      "reason_code": "missing-declared-runtime-dependency",
+      "missing_import": "pynvml",
+      "model_fit_started": false,
+      "checkpoint_created": false,
+      "synthetic_table_created": false,
+      "metric_value_created": false,
+      "local_artifact_directory": "artifacts/p5-confirmatory/failed-preflight-missing-pynvml-20260813T125814Z",
+      "retention": "ignored-local-audit-only"
+    }
+  ],
+  "environment_remediation": {
+    "scientific_parameter_changed": false,
+    "dependency_lock": "requirements-tabddpm-validation.txt",
+    "dependency_lock_sha256": "1bb8f330ed02e22ba651026f928d1f495f7e196ca1facd3b5853d5e946627041",
+    "additional_documented_install": "rtdl==0.0.9 installed without dependency resolution as required by docs/TABDDPM_VALIDATION.md",
+    "complete_runtime_import_preflight": "passed",
+    "known_metadata_conflict": "rtdl 0.0.9 declares torch<2; the limited upstream interface was executed with the already validated torch 2.8.0+cu128 runtime without a model-source patch"
+  },
+  "complete_run": {
+    "started_at": "2026-08-13T12:59:51Z",
+    "completed_at": "2026-08-13T13:12:12Z",
+    "evidence_path": "docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json",
+    "evidence_sha256": "ff57502eb691d6ccccef85f40e14564c3f99cc3be40a282dbdef09762ea40e36",
+    "status": "passed",
+    "fresh_training_from_step_zero": true,
+    "generation_seeds": [3, 4, 5],
+    "seed_or_result_selected_from_failed_attempts": false
+  },
+  "host_os_attestation": {
+    "source": "Windows Win32_OperatingSystem",
+    "caption": "Microsoft Windows 11 Pro",
+    "version": "10.0.26200",
+    "architecture": "64-bit",
+    "note": "Python platform.platform reports the compatible NT product version as Windows-10; the native OS inventory identifies Windows 11."
+  },
+  "claim_boundary": "The two disclosed failures occurred before model construction and produced no scientific values. Re-running the complete preregistered design after installing its declared dependencies is an environment remediation, not favorable-score selection."
+}

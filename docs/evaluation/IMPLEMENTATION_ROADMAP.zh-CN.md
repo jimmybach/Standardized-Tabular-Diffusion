@@ -97,7 +97,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
 - P4 历史失败保持不可变。行顺序不变的后继版本通过完整 [Windows GPU 验证](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json)，单独的[冻结决定](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json)在不改变科学身份的前提下冻结 `p4-utility@1.0.0`。正式结果仍需数据集、模型、track、运行和环境独立准入。
-- P5 已实现五种子平衡 C2ST、精确训练碰撞、内部重复、锁定 SDMetrics DCR 与留出校准，以及声明完整的黑盒 DOMIAS KDE 攻击；Windows 11/Python 3.11 Adult/Sick identity-surrogate 证据和首个 TabDDPM/Adult 三种子真实生成器试验证据均已留存。在完成数据集隐私角色审阅、确认性冻结和独立准入门之前，P5 仍为诊断用途。
+- P5 已实现五种子平衡 C2ST、精确训练碰撞、内部重复、锁定 SDMetrics DCR 与留出校准，以及声明完整的黑盒 DOMIAS KDE 攻击。Adult/Sick 隐私角色和有边界的成员推断威胁模型已经审阅；独立预注册的 TabDDPM/Adult 生成种子 `3,4,5` 确认性试验通过全部非分数门槛，因此 P5 v1 已完成条件式协议冻结。数据集、模型、赛道、运行、发布类别和 release-support 门仍相互独立。
 - Efficiency、cache/resume orchestration、P5 攻击/C2ST 区间之外的不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
@@ -170,7 +170,7 @@ tests/evaluation/
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
 | P4 | Local 与 Global Utility | P1、P3 | 完整精确 Windows GPU 验证后，已在 `p4-utility@1.0.0` 冻结；具体结果仍需独立准入 | 保持冻结身份，并完成发布、数据集、模型、track 和结果准入门 |
-| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 已实现并留存 Windows Adult/Sick identity-surrogate 证据，且 TabDDPM/Adult 三种子真实生成器试验已经通过 | 在协议冻结前审阅数据集隐私角色，并使用冻结设计运行确认性评测 |
+| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 数据角色/威胁模型已审阅，独立预注册确认性试验通过，已完成条件式协议冻结 | 继续保持数据集/模型/运行/发布独立准入；release support 仍待完成 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
 | P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
@@ -325,7 +325,7 @@ Privacy 任务：
 - 任何 privacy diagnostic 都不被描述为形式化 privacy guarantee；以及
 - 未解决的指标只以明确 experimental 或 excluded 记录存在。
 
-完整 Adult/Sick identity-surrogate 路径已在提交 `c66fa23` 的 Windows 11/Python 3.11 环境通过，并留存[机器可读证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)。首个探索性真实生成器试验随后以锁定的 TabDDPM Adult `ddpm_cb_best` 配置训练 30,000 步，在种子 `0,1,2` 生成三张完整表，并完成三份 P5 bundle finalization；其[机器可读证据](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json)也已留存。这些记录只关闭实现规模门和首个探索性生成器门，不会冻结 P5 或准入 Official Results。
+完整 Adult/Sick identity-surrogate 路径已在提交 `c66fa23` 的 Windows 11/Python 3.11 环境通过，并留存[机器可读证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)。首个探索性真实生成器试验随后以锁定的 TabDDPM Adult `ddpm_cb_best` 配置训练 30,000 步，在种子 `0,1,2` 生成三张完整表，并完成三份 P5 bundle finalization。Adult/Sick 隐私角色与“发布表黑盒 + 辅助真实参照”的成员推断威胁模型随后完成审阅。独立生成种子 `3,4,5` 设计先写入[确认性预注册](../evidence/evaluation/p5-confirmatory-preregistration-2026-08-13.json)，再通过全部完整性、结构、来源和环境门槛。[冻结决定](../evidence/evaluation/p5-protocol-freeze-decision-2026-08-13.json)没有使用指标数值是否有利，只对十个指标组成部分作出有条件准入。
 
 ### 6.7 P6 — Orchestration、Efficiency、cache 与 resume
 
@@ -471,7 +471,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P4 已完成条件式协议冻结，P5 已完成 Windows identity-surrogate 实现规模门和首个探索性 TabDDPM/Adult 生成器试验，但仍是诊断协议。下一项实现增量是 P6：先定义执行节点身份契约、硬件/资源 profile、时间与内存测量、安全 cache key 和可安全处理中断的 resume 语义，再编写 orchestration 代码。P5 的数据集隐私角色审阅和后续确认性冻结决策仍是独立科学准入工作，不能与 P6 工程完成混为一谈。
+P4 与 P5 v1 均已完成条件式协议冻结。下一项实现增量是 P6：先定义执行节点身份契约、硬件/资源 profile、时间与内存测量、安全 cache key 和可安全处理中断的 resume 语义，再编写 orchestration 代码。P5 的 release support 和具体数据集/模型/运行准入仍属于独立发布工作。
 
 ## 12. 相关规范
 
