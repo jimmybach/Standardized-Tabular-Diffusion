@@ -147,3 +147,5 @@ P6 退出门验证器和 CI 覆盖：
 - 拒绝跨硬件 profile 的效率比较。
 
 这些都只是工程和运行声明。真实模型质量、Official Results 准入、排行榜聚合和发布支持仍是独立关卡。
+
+完成证据（2026-08-13）：完整退出验证器已在 Windows/AMD64 与 Python 3.11.15 上针对实现提交 `0fb5d07` 通过。[机器可读证据](../evidence/evaluation/p6-windows-py311-0fb5d07.json)已留存，SHA-256 为 `d1ef8213d3885f7c6cccf9bb159768d96790f3defbb69f66d52a7f3fa3150525`。该证据锁定实现、Schema、测试、CLI、打包检查与 CI workflow；它不声明模型质量、排行榜、跨硬件归一化或 Official Results 准入。
