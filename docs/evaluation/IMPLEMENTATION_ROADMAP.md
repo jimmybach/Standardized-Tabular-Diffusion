@@ -372,7 +372,7 @@ Exit evidence:
 - snapshot reconstruction is deterministic from its declared bundles; and
 - no model, dataset, or metric can enter Official Results without its independent admission record.
 
-The dedicated exit gate is `p7-leaderboard-exit-gate-v1`; retained Windows evidence is added only from a clean implementation commit. See the [P7 guide](P7_AGGREGATION_AND_LEADERBOARD.md) and its [Chinese review translation](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
+Completion evidence (2026-08-13): every listed engineering gate passed on Windows/AMD64 and Python 3.11.15 at implementation commit `4c8da76`; the [retained machine-readable record](../evidence/evaluation/p7-windows-py311-4c8da76.json) binds the exact implementation inputs. It does not admit a model, dataset, metric, protocol, run, suite, or release to Official Results. See the [P7 guide](P7_AGGREGATION_AND_LEADERBOARD.md) and its [Chinese review translation](P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
 
 ### 6.9 P8 — migration and release
 
