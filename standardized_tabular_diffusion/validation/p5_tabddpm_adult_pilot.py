@@ -78,7 +78,7 @@ def _artifact_relative_path(path: Path, output_root: Path) -> str:
 def _load_declared_inputs(repo_root: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     base_path = repo_root / BASE_CONFIG
     profile_path = repo_root / DATASET_PROFILE
-    for path in (base_path, profile_path, repo_root / REAL_TRAIN, repo_root / REAL_TEST):
+    for path in (base_path, profile_path):
         if not path.is_file():
             raise PilotError(f"Required pilot input is missing: {path}")
     with base_path.open("rb") as stream:
@@ -146,6 +146,9 @@ def _prepare_upstream_data(
 
     train_path = repo_root / REAL_TRAIN
     test_path = repo_root / REAL_TEST
+    for path in (train_path, test_path):
+        if not path.is_file():
+            raise PilotError(f"Required pilot data is missing: {path}")
     train = pd.read_csv(train_path)
     test = pd.read_csv(test_path)
     numerical, categorical, target = _column_groups(profile)
@@ -215,9 +218,7 @@ def _write_toml(path: Path, payload: dict[str, Any]) -> None:
     try:
         import tomli_w
     except ImportError as error:
-        raise PilotError(
-            "The TabDDPM pilot requires tomli-w; install requirements-tabddpm-validation.txt"
-        ) from error
+        raise PilotError("The TabDDPM pilot requires tomli-w; install requirements-tabddpm-validation.txt") from error
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(tomli_w.dumps(payload), encoding="utf-8", newline="\n")
 
