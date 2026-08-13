@@ -99,6 +99,10 @@ def _canonical_boolean(series: pd.Series, column: str, *, preserve_content_viola
         "false": False,
         "True": True,
         "False": False,
+        "t": True,
+        "f": False,
+        "T": True,
+        "F": False,
         "1": True,
         "0": False,
     }
@@ -409,9 +413,7 @@ def validate_utility_tables(
         "column_count": len(expected),
         "rows": {name: len(frame) for name, frame in canonical.items()},
         "expected_synthetic_rows": requested_rows,
-        "missing_values": {
-            name: int(frame.isna().sum().sum()) for name, frame in canonical.items()
-        },
+        "missing_values": {name: int(frame.isna().sum().sum()) for name, frame in canonical.items()},
         "test_is_fit_input": False,
         "synthetic_repair_applied": False,
         "checks": [

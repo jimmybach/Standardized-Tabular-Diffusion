@@ -48,9 +48,19 @@ concurrency:
 
 jobs:
   p3-validity:
-    name: Linux / Python 3.11 / validity and preprocessing boundary
-    runs-on: ubuntu-latest
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Hosted Windows / Python 3.11 / primary-family validity and preprocessing boundary
+            tier: primary
+          - os: ubuntu-latest
+            label: Linux / Python 3.11 / secondary validity and preprocessing boundary
+            tier: secondary
 
     steps:
       - name: Check out repository
@@ -88,56 +98,39 @@ jobs:
           python -m mypy
 
       - name: Generate P3 exit-gate evidence
+        if: matrix.tier == 'primary'
         run: >-
           python -m standardized_tabular_diffusion.validation.p3_validity
-          --output "${RUNNER_TEMP}/p3-validity-evidence.json"
-          --require-primary-environment
+          --output "${{ runner.temp }}/p3-validity-evidence.json"
+          --require-primary-family-environment
+
+      - name: Generate P3 secondary-compatibility evidence
+        if: matrix.tier == 'secondary'
+        run: >-
+          python -m standardized_tabular_diffusion.validation.p3_validity
+          --output "${{ runner.temp }}/p3-validity-evidence.json"
 
       - name: Build and install the distribution artifact
-        shell: bash
         run: |
           python -m build
-          python -m pip install --force-reinstall --no-deps dist/*.whl
-          cd "${RUNNER_TEMP}"
-          std-tabular-diffusion list-protocols > p3-packaged-protocols.json
+          python -m standardized_tabular_diffusion.validation.core_ci install-wheel --dist-directory dist
+          std-tabular-diffusion list-protocols > "${{ runner.temp }}/p3-packaged-protocols.json"
           python -c "from standardized_tabular_diffusion.evaluation.validity import validate_validity_profile; print(validate_validity_profile)"
 
       - name: Preserve pre-protocol failure evidence
         if: always()
-        shell: bash
-        run: |
-          if [[ ! -f "${RUNNER_TEMP}/p3-validity-evidence.json" ]]; then
-            python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          output = Path(os.environ["RUNNER_TEMP"]) / "p3-validity-evidence.json"
-          output.write_text(
-              json.dumps(
-                  {
-                      "evidence_schema_version": "1.0.0",
-                      "protocol_id": "p3-validity-and-preprocessing-v1",
-                      "phase": "P3",
-                      "status": "fail",
-                      "repository_commit": os.environ.get("GITHUB_SHA", "unknown"),
-                      "error_type": "PreProtocolFailure",
-                      "error": "A required P3 workflow step failed before evidence generation."
-                  },
-                  indent=2,
-                  sort_keys=True,
-              )
-              + "\n",
-              encoding="utf-8",
-          )
-          PY
-          fi
+        run: >-
+          python -m standardized_tabular_diffusion.validation.workflow_evidence
+          --output "${{ runner.temp }}/p3-validity-evidence.json"
+          --protocol-id p3-validity-and-preprocessing-v1
+          --phase P3
+          --message "A required P3 workflow step failed before evidence generation."
 
       - name: Upload P3 evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: p3-validity-evidence
+          name: p3-validity-${{ matrix.tier }}-evidence
           path: ${{ runner.temp }}/p3-validity-evidence.json
           if-no-files-found: error
           retention-days: 90

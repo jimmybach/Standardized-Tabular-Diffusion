@@ -1,0 +1,35 @@
+{
+  "runtime_manifest_schema_version": "1.0.0",
+  "runtime_profile_id": "tabeval-p4-windows-rtx5080",
+  "runtime_profile_version": "0.1.0",
+  "status": "preregistered-diagnostic",
+  "upstream_official_environment_claimed": false,
+  "source_manifest": "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json",
+  "source_manifest_sha256": "e74a2309d629273b241174153fc4e0e59cd1bfc2cebed25923348ec66206c76e",
+  "selection_basis": "Native Windows release qualification on the repository owner's available RTX 5080 while preserving the exact approved TabEval source, predictor panel, and TabPFN checkpoint identities.",
+  "environment": {
+    "system": "Windows",
+    "machine": "AMD64",
+    "python": "3.11",
+    "dependency_lock": "requirements-p4-windows-gpu-validation.txt"
+  },
+  "distributions": {
+    "autogluon.common": "1.4.0",
+    "autogluon.core": "1.4.0",
+    "autogluon.features": "1.4.0",
+    "autogluon.tabular": "1.4.0",
+    "tabpfn": "2.1.2",
+    "torch": "2.8.0+cu128",
+    "xgboost_distribution": "xgboost",
+    "xgboost": "3.0.3"
+  },
+  "cuda": {
+    "runtime": "12.8",
+    "device_name": "NVIDIA GeForce RTX 5080",
+    "compute_capability": [12, 0],
+    "minimum_total_memory_bytes": 16000000000,
+    "require_source_execution_allocation_increase": true,
+    "require_adapter_execution_allocation_increase": true
+  },
+  "claim_boundary": "Qualifies one exact native Windows/Python 3.11/RTX 5080 diagnostic execution profile. It does not generalize support to other GPUs, admit Official Results, or alter the immutable Linux/CPU pilot evidence."
+}

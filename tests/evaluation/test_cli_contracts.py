@@ -9,7 +9,12 @@ import pytest
 from standardized_tabular_diffusion import cli
 from standardized_tabular_diffusion.evaluation.bundle import IncompleteRunBundleWriter
 from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest
-from standardized_tabular_diffusion.evaluation.profiles import import_legacy_dataset_spec, write_dataset_profile
+from standardized_tabular_diffusion.evaluation.profiles import (
+    import_legacy_dataset_spec,
+    list_protocol_profiles,
+    write_dataset_profile,
+)
+from standardized_tabular_diffusion.evaluation.registry import load_metric_registry
 from standardized_tabular_diffusion.interfaces import DatasetSpec
 
 pytestmark = [pytest.mark.core, pytest.mark.evaluation]
@@ -23,20 +28,17 @@ def test_cli_lists_validated_metric_records(
     monkeypatch.setattr(sys, "argv", ["std-tabular-diffusion", "validate-metric-registry"])
     cli.main()
     payload = json.loads(capsys.readouterr().out)
-    assert payload == {"valid": True, "record_count": 23}
+    assert payload == {"valid": True, "record_count": len(load_metric_registry())}
+    assert payload["record_count"] > 0
 
 
 def test_cli_lists_protocol_profiles(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setattr(sys, "argv", ["std-tabular-diffusion", "list-protocols"])
     cli.main()
     payload = json.loads(capsys.readouterr().out)
-    assert {item["protocol_id"] for item in payload["protocols"]} == {
-        "development-p1",
-        "legacy-tabstruct-aligned",
-        "p2-shape-trend",
-        "p3-validity",
-        "p4-utility",
-    }
+    expected = {profile.protocol_id for profile in list_protocol_profiles()}
+    assert {item["protocol_id"] for item in payload["protocols"]} == expected
+    assert "p5-high-order-privacy" in expected
 
 
 def test_cli_validates_dataset_profile_and_result_bundle(

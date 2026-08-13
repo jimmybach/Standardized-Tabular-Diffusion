@@ -14,7 +14,7 @@ on:
       - "standardized_tabular_diffusion/evaluation/evaluate_table.py"
       - "standardized_tabular_diffusion/evaluation/tabstruct.py"
       - "standardized_tabular_diffusion/evaluation/utility.py"
-      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json"
       - "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json"
       - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
       - "standardized_tabular_diffusion/validation/p4_global_source.py"
@@ -33,7 +33,7 @@ on:
       - "standardized_tabular_diffusion/evaluation/evaluate_table.py"
       - "standardized_tabular_diffusion/evaluation/tabstruct.py"
       - "standardized_tabular_diffusion/evaluation/utility.py"
-      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json"
+      - "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json"
       - "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json"
       - "standardized_tabular_diffusion/resources/evaluation/upstream/tabeval-p4-source.json"
       - "standardized_tabular_diffusion/validation/p4_global_source.py"
@@ -149,7 +149,7 @@ jobs:
           --classifier-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-classifier-finetuned-zk73skhh.ckpt"
           --regressor-checkpoint "$TABPFN_MODEL_CACHE_DIR/tabpfn-v2-regressor.ckpt"
           --time-limit-seconds 120
-          --require-primary-environment
+          --require-declared-runtime-environment
 
       - name: Upload source-runtime evidence
         if: always()

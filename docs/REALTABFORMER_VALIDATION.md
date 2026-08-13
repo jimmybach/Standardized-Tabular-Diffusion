@@ -103,7 +103,7 @@ Any mismatch, dependency drift, wrong platform, unsafe artifact, ambiguous model
 - The official relational model accepts linked parent and child tables. The repository's current canonical contract is single-table, so relational mode is outside this adapter's validated scope.
 - Transformer training and autoregressive sampling are substantially heavier than classical baselines. Dataset-specific sequence-length, runtime, and memory budgets remain pending.
 - Conditional seed inputs and advanced generation controls are official expert interfaces; benchmark profiles must freeze them before Official Results.
-- The official package supports Python versions older than 3.11, but this repository's supported release environment is Linux/Python 3.11 only.
+- The official package supports Python versions older than 3.11. This adapter's retained parity evidence is Linux/Python 3.11; the repository's exact Windows 11/Python 3.11 release-target qualification for this adapter remains pending.
 
 ## Evidence
 

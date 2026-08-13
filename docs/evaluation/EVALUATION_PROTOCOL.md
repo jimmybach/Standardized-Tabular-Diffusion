@@ -4,8 +4,8 @@ Chinese translation: [EVALUATION_PROTOCOL.zh-CN.md](EVALUATION_PROTOCOL.zh-CN.md
 
 - Status: design baseline
 - Protocol family: Standardized Tabular Diffusion Benchmark
-- Document version: 0.1.0
-- Last updated: 2026-08-03
+- Document version: 0.1.1
+- Last updated: 2026-08-11
 
 ## 1. Purpose
 
@@ -25,7 +25,7 @@ Requirements marked as pilot-frozen are mandatory after their threshold or imple
 
 The initial protocol targets static, single-table synthetic data. The canonical public interface MAY accept CSV, Parquet, or an in-memory DataFrame, but every official run MUST resolve the input to the same versioned canonical table and schema.
 
-The primary release environment is Linux with Python 3.11. Hardware-dependent results MUST additionally identify a compatible hardware profile.
+The primary release family is Windows x86-64 with Python 3.11; the exact release target is native Windows 11 x86-64 with Python 3.11. GitHub-hosted Windows Server CI establishes family compatibility but MUST NOT be reported as exact Windows 11 qualification. Linux/Python 3.11 is a required secondary compatibility environment and MAY remain authoritative for a specifically declared Linux-only upstream parity protocol, but cannot establish Windows release support. Hardware-dependent results MUST additionally identify a compatible hardware profile. See the [Platform Support Policy](../PLATFORM_SUPPORT.md).
 
 ### 3.2 Evaluation subjects
 
@@ -204,7 +204,7 @@ Balanced Accuracy, ROC-AUC, PR-AUC, MAE, and R-squared are secondary metrics whe
 
 The evaluator suite represents at least a linear model, a random forest, and a gradient-boosted tree. Exact implementations and frozen hyperparameters are pilot-frozen. Evaluator selection MUST use train and permitted validation data only and MUST be independent of the synthetic-data method being scored.
 
-The implemented P4 diagnostic candidate binds scikit-learn Logistic Regression/Ridge, Random Forest, and Histogram Gradient Boosting through `p4-utility-pilot@0.1.0`, with five default evaluator seeds. Its bounded engineering gates passed with retained [Linux/Python 3.11 evidence](../evidence/evaluation/p4-utility-run-31053624769.json). This is an implemented pilot identity, not a frozen Official Results profile.
+Frozen `p4-utility@1.0.0` binds scikit-learn Logistic Regression/Ridge, Random Forest, and Histogram Gradient Boosting through unchanged evaluator profile `p4-utility-stable@0.2.0`, with five default evaluator seeds. Global Utility has one result-producing adapter: complete rows are canonicalized before an explicit seeded AutoGluon fit/tuning split, and the held-out real test remains outside the fit boundary. Exact TabEval execution is internal provenance validation, not a selectable result profile. Conditional Official Results use is qualified only for the exact validated Windows 11/Python 3.11/RTX 5080 environment and still requires independent dataset, model, track, and result admission.
 
 This primary Macro-F1/RMSE panel is a benchmark contract. It MUST NOT be called an exact reproduction of GReaT, which uses classification accuracy and regression MSE with linear or logistic regression, decision tree, and random forest predictors, or TabStruct, whose classification utility uses Balanced Accuracy.
 

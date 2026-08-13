@@ -41,6 +41,14 @@ class SDMetricsQualityResult:
     source: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class SDMetricsDCRResult:
+    """Exact upstream per-row distance-to-closest-record output."""
+
+    distances: np.ndarray
+    source: dict[str, Any]
+
+
 @contextmanager
 def _controlled_numpy_random_state(seed: int) -> Iterator[None]:
     """Control and restore the legacy RNG used by upstream pandas sampling.
@@ -91,11 +99,7 @@ def _installed_license_digest() -> str:
         installed = distribution("sdmetrics")
     except PackageNotFoundError as exc:
         raise SDMetricsSourceError("Cannot locate installed SDMetrics distribution metadata") from exc
-    candidates = [
-        item
-        for item in (installed.files or ())
-        if item.as_posix().endswith(".dist-info/licenses/LICENSE")
-    ]
+    candidates = [item for item in (installed.files or ()) if item.as_posix().endswith(".dist-info/licenses/LICENSE")]
     if len(candidates) != 1:
         raise SDMetricsSourceError("Installed SDMetrics distribution must retain exactly one MIT LICENSE")
     try:
@@ -173,18 +177,12 @@ def evaluate_quality(
             trends.num_rows_subsample = defaults["num_rows_subsample"]
             trends.real_correlation_threshold = defaults["real_correlation_threshold"]
             trends.real_association_threshold = defaults["real_association_threshold"]
-            shapes_score = shapes.get_score(
-                real_data.copy(deep=True), synthetic_data.copy(deep=True), metadata
-            )
-            trends_score = trends.get_score(
-                real_data.copy(deep=True), synthetic_data.copy(deep=True), metadata
-            )
+            shapes_score = shapes.get_score(real_data.copy(deep=True), synthetic_data.copy(deep=True), metadata)
+            trends_score = trends.get_score(real_data.copy(deep=True), synthetic_data.copy(deep=True), metadata)
     except Exception as exc:
         if isinstance(exc, SDMetricsExecutionError):
             raise
-        raise SDMetricsExecutionError(
-            f"Official SDMetrics execution failed: {type(exc).__name__}: {exc}"
-        ) from exc
+        raise SDMetricsExecutionError(f"Official SDMetrics execution failed: {type(exc).__name__}: {exc}") from exc
     source = {
         **source,
         "execution": {
@@ -198,4 +196,45 @@ def evaluate_quality(
         column_shapes_details=shapes.details.copy(deep=True),
         column_pair_trends_details=trends.details.copy(deep=True),
         source=source,
+    )
+
+
+def calculate_dcr(
+    dataset: pd.DataFrame,
+    reference_dataset: pd.DataFrame,
+    metadata: dict[str, Any],
+    *,
+    chunk_size: int = 250,
+) -> SDMetricsDCRResult:
+    """Call the checksum-attested SDMetrics DCR implementation unchanged.
+
+    Sampling belongs to the caller's versioned protocol. This wrapper only
+    attests the installed source tree, validates the public execution
+    parameters, and preserves the exact upstream distances.
+    """
+
+    if isinstance(chunk_size, bool) or not isinstance(chunk_size, int) or chunk_size <= 0:
+        raise SDMetricsExecutionError("DCR chunk_size must be a positive integer")
+    source = verify_sdmetrics_source()
+    try:
+        from sdmetrics.single_table.privacy.dcr_utils import calculate_dcr as upstream_calculate_dcr
+
+        distances = upstream_calculate_dcr(
+            dataset.copy(deep=True),
+            reference_dataset.copy(deep=True),
+            metadata,
+            chunk_size=chunk_size,
+        )
+        values = np.asarray(distances, dtype=np.float64)
+    except Exception as exc:
+        raise SDMetricsExecutionError(f"Official SDMetrics DCR execution failed: {type(exc).__name__}: {exc}") from exc
+    if values.ndim != 1 or len(values) != len(dataset) or not np.isfinite(values).all():
+        raise SDMetricsExecutionError("Official SDMetrics DCR returned an invalid distance vector")
+    return SDMetricsDCRResult(
+        distances=values,
+        source={
+            **source,
+            "implementation_symbol": "sdmetrics.single_table.privacy.dcr_utils.calculate_dcr",
+            "execution": {"chunk_size": chunk_size},
+        },
     )

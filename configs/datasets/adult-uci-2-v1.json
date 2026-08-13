@@ -1,6 +1,6 @@
 {
   "profile_schema_version": "1.0.0",
-  "dataset_profile_version": "1.2.0-reviewed",
+  "dataset_profile_version": "1.3.0-reviewed",
   "dataset_id": "adult",
   "display_name": "UCI Adult",
   "dataset_version": "uci-2-7537312dd56c",
@@ -25,6 +25,10 @@
     {
       "version": "1.2.0-reviewed",
       "change": "Added the reviewed diagnostic P4 Local and Global Utility declarations."
+    },
+    {
+      "version": "1.3.0-reviewed",
+      "change": "Bound P4 Utility to the row-order-invariant evaluator profile with an explicit seeded internal validation split."
     }
   ],
   "suite_membership": ["diagnostic"],
@@ -133,12 +137,12 @@
   "utility": {
     "contract_schema_version": "1.0.0",
     "status": "reviewed-diagnostic",
-    "local": {"primary_task_id":"predict-income-class","evaluator_profile_id":"p4-utility-pilot","evaluator_profile_version":"0.1.0"},
+    "local": {"primary_task_id":"predict-income-class","evaluator_profile_id":"p4-utility-stable","evaluator_profile_version":"0.2.0"},
     "global": {
       "included_target_column_ids": ["age","workclass","fnlwgt","education","education-num","marital-status","occupation","relationship","race","sex","capital-gain","capital-loss","hours-per-week","native-country","income"],
       "excluded_targets": [],
-      "evaluator_profile_id": "p4-utility-pilot",
-      "evaluator_profile_version": "0.1.0"
+      "evaluator_profile_id": "p4-utility-stable",
+      "evaluator_profile_version": "0.2.0"
     }
   },
   "validity": {

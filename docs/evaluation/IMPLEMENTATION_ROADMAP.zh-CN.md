@@ -2,10 +2,10 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 至 P3 已通过各自适用的退出门；权威 Linux/Python 3.11 证据均已留存
-- 路线图版本：0.3.0
-- 最后更新：2026-08-05
-- 主要发布环境：Linux 与 Python 3.11
+- 状态：P1 至 P3 已通过各自适用的诊断门；托管 Windows/Python 3.11 平台家族 CI 与历史 Linux 证据均保留，精确 Windows 11 发布准入仍是独立门
+- 路线图版本：0.3.2
+- 最后更新：2026-08-11
+- 主要发布平台家族：Windows x86-64 与 Python 3.11；精确目标：原生 Windows 11 x86-64 与 Python 3.11；Linux/Python 3.11 为次要兼容环境
 
 ## 1. 目的
 
@@ -79,25 +79,26 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | 数据集/协议加载、精确身份和旧元数据导入 | P1 活跃路径；重复身份和不一致的 profile 引用均采用 fail-closed |
 | [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | 事务化 Run Result writer、finalizer 与跨文件校验器 | 保留 P1 incomplete bundle；P2/P3 重算科学汇总，并以最后一个原子提交标记发布 finalized 状态 |
 | [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame 规范解析器与协议专用结构门禁 | P2 保留严格来源兼容检查；P3 保留可安全表示的内容违规用于 Validity 评分 |
-| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | 隔离的权威 Shape/Trend 后端 | 要求 SDMetrics `0.28.3.dev0` 以及 commit `ba8842f2...` 的完整 121 文件源码树哈希 |
-| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) 与 [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result 映射与端到端表评测器 | P2 活跃路径；重建来源聚合且不生成合并 Fidelity 分数 |
+| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | 隔离的权威 Shape/Trend 与 DCR 后端 | 要求 SDMetrics `0.28.3.dev0` 以及 commit `ba8842f2...` 的完整 121 文件源码树哈希 |
+| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py)、[`evaluation/high_order_privacy.py`](../../standardized_tabular_diffusion/evaluation/high_order_privacy.py) 与 [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result 映射与端到端表评测器 | P2/P5 活跃路径；高阶保真度与经验隐私分开报告且不生成总分 |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | 封闭硬规则语言、逐列/逐约束 Atomic Result 与 Validity 聚合 | P3 活跃诊断路径；禁止任意代码和推断硬规则，不修复原始输出 |
-| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | P4 诊断工程门和有限范围来源运行时等价门已通过；首次预注册完整数据集准入失败，P4 仍为诊断状态 |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | held-out-test Local/Global Utility、原始 arms、支持状态与严格 ratio 聚合 | `p4-utility@1.0.0` 已在精确验证的 Windows/Python/RTX 5080 环境上条件性冻结；数据集、模型和具体结果仍需独立准入 |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | 集中式均值/众数缺失值边界 | 只在真实 train 上拟合；禁止目标/合成数据修复；状态、schema、配置、输入与输出均有指纹 |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | 十个 Draft 2020-12 线格式 schema | P1 规范线格式校验器，并随 wheel 打包 |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 八个旧记录、两个 P2、两个 P3 和十一个 P4 记录均非正式 |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 包含独立 P4 冻结证据，以及 P5 已解决/被阻止指标记录；被阻止项是机器可读 exclusion |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持默认；P3/P4 显式选择，P4 必须提供 `--real-test` |
-| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | P0 在 Linux 上启用并通过；参考代码树不进入默认发现或分发包 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table` 与旧版命令 | P2 保持默认；P3/P4/P5 显式选择，P4/P5 必须提供 `--real-test` |
+| [`pyproject.toml`](../../pyproject.toml) 与 [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查和构建 | 托管 Windows 主要平台家族 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
 | [`tests/evaluation/`](../../tests/evaluation) | 契约、结构、来源等价、Atomic Result、中断、bundle 与 CLI 测试 | P1 回归测试和 P2 直接权威测试按依赖与 marker 边界隔离 |
 
-### 3.3 P4 实现后仍存在的缺口
+### 3.3 P5 实现后仍存在的缺口
 
 - P2 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p2-shape-trend-run-31025796906.json)；后续门槛不得夸大这一诊断性声明。
 - 两个 P2 指标仅为来源等价候选；均未达到 protocol-frozen、release-supported 或 Official Results 准入。
 - P3 已通过，并留存[权威 Linux/Python 3.11 证据](../evidence/evaluation/p3-validity-run-31036844043.json)，但在协议冻结和发布审批前仍为诊断用途。
-- P4 Local/Global Utility 已通过有限范围诊断工作流，并留存[工程证据](../evidence/evaluation/p4-utility-run-31053624769.json)。单独的[真实来源运行时 pilot](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) 已使用锁定 TabEval 文件和真实 XGB/KNN/TabPFN 模型，严格通过分类/回归聚合等价。首次[数据集规模准入](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)失败：Adult 因运行器关闭而执行不完整；Sick 完整执行且资源门通过，但两个稳定性哨兵失败。P4 仍为诊断状态，不允许 profile 冻结或 Official Results 准入。
-- 经批准的高阶 fidelity/privacy、效率、不确定性、兼容聚合和榜单发布仍未实现。
+- P4 历史失败保持不可变。行顺序不变的后继版本通过完整 [Windows GPU 验证](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json)，单独的[冻结决定](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json)在不改变科学身份的前提下冻结 `p4-utility@1.0.0`。正式结果仍需数据集、模型、track、运行和环境独立准入。
+- P5 已实现五种子平衡 C2ST、精确训练碰撞、内部重复、锁定 SDMetrics DCR 与留出校准，以及声明完整的黑盒 DOMIAS KDE 攻击；Windows 11/Python 3.11 Adult/Sick identity-surrogate 证据和首个 TabDDPM/Adult 三种子真实生成器试验证据均已留存。在完成数据集隐私角色审阅、确认性冻结和独立准入门之前，P5 仍为诊断用途。
+- Efficiency、cache/resume orchestration、P5 攻击/C2ST 区间之外的不确定性、兼容聚合和榜单发布仍未实现。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
 - Evaluator 与 hardware profile、兼容性分组、resume/cache 执行、不确定性和榜单发布仍属于后续阶段。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
@@ -168,8 +169,8 @@ tests/evaluation/
 | P1 | 契约、registry、profile 与 incomplete bundle writer | P0 | 已通过；[Linux 证据已留存](../evidence/evaluation/p1-foundation-run-31018595264.json) | 无效契约可确定性失败；round-trip 与 schema 测试通过 |
 | P2 | 首个垂直切片：外部表 -> 结构门 -> Shape/Trend -> finalized bundle | P1 | 已通过；[Linux 证据已留存](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | 在 Linux/Python 3.11 上通过直接锁定来源等价和 bundle 校验 |
 | P3 | 完整 Validity 子系统和显式预处理边界 | P2 | 已通过；[Linux 证据已留存](../evidence/evaluation/p3-validity-run-31036844043.json) | 无隐藏修复或缺失值修改；规则和失败测试通过 |
-| P4 | Local 与 Global Utility | P1、P3 | 诊断门与有限范围来源运行时等价已通过；首次[数据集规模准入](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json)失败；仍为诊断状态 | 新预注册的完整运行在冻结审阅前通过目标覆盖、稳定性、高基数、资源和证据完整性门 |
-| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 未开始 | 只有已解决并批准的指标推进；被阻止的指标保持排除 |
+| P4 | Local 与 Global Utility | P1、P3 | 完整精确 Windows GPU 验证后，已在 `p4-utility@1.0.0` 冻结；具体结果仍需独立准入 | 保持冻结身份，并完成发布、数据集、模型、track 和结果准入门 |
+| P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 已实现并留存 Windows Adult/Sick identity-surrogate 证据，且 TabDDPM/Adult 三种子真实生成器试验已经通过 | 在协议冻结前审阅数据集隐私角色，并使用冻结设计运行确认性评测 |
 | P6 | 资源感知 orchestration、Efficiency、cache 与 resume | P2 | 未开始 | 阶段核算和复用完整性在声明的硬件配置下通过 |
 | P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
 | P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
@@ -187,7 +188,7 @@ tests/evaluation/
 - 让顶层导入保持轻量；把可选模型和指标导入移到工厂之后，并在缺少 extra 时给出可操作提示。
 - 建立格式化、lint、静态类型、schema 校验、单元测试和文档链接命令。
 - 把当前 51 个仓库测试记录为迁移基线；将每个测试分类为 unit、integration、smoke 或 legacy-regression。
-- 增加 Linux/Python 3.11 CI，仅安装 core 依赖并运行元数据、schema、CLI help 和 core 测试。
+- 维护托管 Windows/Python 3.11 主要平台家族 CI 和 Linux/Python 3.11 次要 CI，覆盖元数据、schema、CLI help、core 测试、lint、类型检查和打包；不得把托管 Windows Server 镜像表述为精确 Windows 11 证据。
 - 把 `research_inputs/` 视为不可变审阅输入，排除在打包、普通测试发现和运行时导入路径之外。
 
 退出证据：
@@ -294,7 +295,7 @@ Global Utility 任务：
 - 声称来源等价的所选 profile 通过来源等价验证；以及
 - Local Utility 与 Global Utility 保持为不同输出和子榜单。
 
-当前裁决：有限范围来源等价已通过，但 `p4-dataset-scale-admission-pilot@0.1.1` 未通过。profile 冻结前必须有新协议版本与一次完整通过的运行；不得事后放宽已观察的 `0.1.1` 门限。
+当前裁决：历史 `0.1.1` CPU 与 `0.2.1` Windows profile 均保持为失败证据。`p4-utility@1.0.0` 冻结唯一的行顺序不变结果适配器；`0.3.0` Windows GPU 后继版本已在提交 `6dc485f` 通过全部不变门限。冻结仅限精确的 Windows 11/Python 3.11/RTX 5080 环境，不会准入 Adult、Sick、模型或具体结果。identity surrogate 没有评估生成模型质量。
 
 ### 6.6 P5 — 高阶 Fidelity 与经验 Privacy
 
@@ -303,6 +304,8 @@ Global Utility 任务：
 - 在 C2ST 影响 Fidelity 前，通过 pilot 冻结预处理、discriminator、split、平衡、种子、不确定性和 AUROC-complement 变换。
 - 在来源专用 diagnostic 标识符下保留 GReaT RF discriminator accuracy。
 - 在 mixed-table embedding 和积分行为解决前，Integrated Alpha-Precision/Beta-Recall 保持 experimental。
+
+已实施裁决：`std-c2st-rf-auroc` 记录以 `0.5` 为目标的原始判别器 AUROC；`std-c2st-fidelity` 单独记录标签方向不变的 AUROC 补分。GReaT accuracy 和 Alaa 支持指标是显式 excluded 记录，不能进入 P5 请求。
 
 Privacy 任务：
 
@@ -313,12 +316,16 @@ Privacy 任务：
 - 在 paper/code 差异裁决前保持 Authenticity excluded。
 - 在 Delta Presence 的语义和失败行为得到科学解决前，将其排除在正式评分之外。
 
+已实施裁决：精确碰撞与内部重复是两个独立比例；SDMetrics DCR 直接调用已校验来源，并保留分布和留出 Wasserstein 校准；DOMIAS 在完整黑盒威胁模型下报告密度比攻击 AUROC、来源中位数阈值 accuracy、advantage 和 FPR 不超过 1% 时的 TPR。混合表表示是明确命名的基准适配，不声称 DOMIAS 精确源码等价。Attribute inference、Authenticity 与 Delta Presence 仍是显式 exclusion。
+
 退出证据：
 
 - 每个 privacy 输出都标识 attacker knowledge、member/non-member 构造、表示、模型和方向；
 - collision 与 DCR 边界/等价套件通过，包括 null 和 zero-range 行为；
 - 任何 privacy diagnostic 都不被描述为形式化 privacy guarantee；以及
 - 未解决的指标只以明确 experimental 或 excluded 记录存在。
+
+完整 Adult/Sick identity-surrogate 路径已在提交 `c66fa23` 的 Windows 11/Python 3.11 环境通过，并留存[机器可读证据](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json)。首个探索性真实生成器试验随后以锁定的 TabDDPM Adult `ddpm_cb_best` 配置训练 30,000 步，在种子 `0,1,2` 生成三张完整表，并完成三份 P5 bundle finalization；其[机器可读证据](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json)也已留存。这些记录只关闭实现规模门和首个探索性生成器门，不会冻结 P5 或准入 Official Results。
 
 ### 6.7 P6 — Orchestration、Efficiency、cache 与 resume
 
@@ -367,7 +374,7 @@ Privacy 任务：
 - 用已批准的模型状态维度和证据记录替换旧的 `implemented` inventory 语言。
 - 更新英文 README、教程、示例、架构、metric card、dataset card、故障排除和贡献者指南；按计划提供中文审阅翻译。
 - 在完成各自审计后，增加 license、third-party notice、citation、contributor acknowledgement、security policy、code of conduct 和发布 checklist。
-- 在 Linux/Python 3.11 上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison。
+- 在托管 Windows 平台家族 CI 和精确原生 Windows 11/Python 3.11 目标上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison；并在 Linux/Python 3.11 上重复可移植表面。
 
 退出证据：
 
@@ -387,7 +394,7 @@ Privacy 任务：
 | Source parity | 校验权威行为 | 在共享 fixture 上直接锁定调用对比 wrapper |
 | State and negative | 防止有利的静默失败 | empty、constant、missing class、timeout、dependency failure |
 | Integration | 校验子系统边界 | profile -> table -> metric -> bundle -> validator |
-| End-to-end | 校验用户工作流 | Linux/Python 3.11 上的外部表和一个真实适配器 |
+| End-to-end | 校验用户工作流 | 托管 Windows 平台家族 CI 中的可移植流程；精确原生 Windows 11/Python 3.11 上的外部表和一个真实适配器；Linux/Python 3.11 上的可移植子集 |
 | Determinism | 校验科学身份 | 重复 seed、进程隔离、cache reuse、canonical serialization |
 | Migration | 保留有意兼容性 | legacy reader、deprecation warning、不得正式升级 |
 | Security and publication | 保护发布 artifact | path traversal、unsafe YAML、secret/path redaction、manifest allowlist |
@@ -464,13 +471,14 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P4 现在已具备实现、有限范围工程门、精确来源运行时等价，以及一次预注册的数据集规模裁决。该数据集规模运行因两个独立原因失败：Adult 运行器丢失导致覆盖不完整，Sick 两个稳定性哨兵超过固定门限。P4 的下一步需要审阅来源忠实的执行环境，或经审批且通过等价性验证的源码补丁，随后执行新预注册的完整重跑。在所有门通过前，P4 仍为诊断状态，P5 不得把它当成 Official Results 组件。
+P4 已完成条件式协议冻结，P5 已完成 Windows identity-surrogate 实现规模门和首个探索性 TabDDPM/Adult 生成器试验，但仍是诊断协议。下一项实现增量是 P6：先定义执行节点身份契约、硬件/资源 profile、时间与内存测量、安全 cache key 和可安全处理中断的 resume 语义，再编写 orchestration 代码。P5 的数据集隐私角色审阅和后续确认性冻结决策仍是独立科学准入工作，不能与 P6 工程完成混为一谈。
 
 ## 12. 相关规范
 
 - [评测协议](EVALUATION_PROTOCOL.zh-CN.md)
 - [P3 有效性与预处理指南](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 - [P4 Local 与 Global Utility 指南](P4_UTILITY.zh-CN.md)
+- [P5 高阶 Fidelity 与经验 Privacy 指南](P5_HIGH_ORDER_PRIVACY.zh-CN.md)
 - [指标治理](METRIC_GOVERNANCE.zh-CN.md)
 - [指标来源审阅](METRIC_SOURCE_REVIEW.zh-CN.md)
 - [数据集配置规范](DATASET_PROFILE_SPEC.zh-CN.md)

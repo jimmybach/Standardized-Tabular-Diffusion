@@ -2,10 +2,10 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 through P3 passed their applicable exit gates; authoritative Linux/Python 3.11 evidence is retained
-- Roadmap version: 0.3.0
-- Last updated: 2026-08-05
-- Primary release environment: Linux and Python 3.11
+- Status: P1 through P3 passed their applicable diagnostic gates; hosted Windows/Python 3.11 family CI and historical Linux evidence are retained, while exact Windows 11 release qualification remains a separate gate
+- Roadmap version: 0.3.2
+- Last updated: 2026-08-11
+- Primary release family: Windows x86-64 and Python 3.11; exact target: native Windows 11 x86-64 and Python 3.11; Linux/Python 3.11 is secondary compatibility
 
 ## 1. Purpose
 
@@ -79,25 +79,26 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 | [`evaluation/profiles.py`](../../standardized_tabular_diffusion/evaluation/profiles.py) | Dataset/protocol loading, exact identity and legacy metadata import | P1 active path; duplicate identities and inconsistent profile references fail closed |
 | [`evaluation/bundle.py`](../../standardized_tabular_diffusion/evaluation/bundle.py) | Transactional Run Result writer, finalizer, and cross-file validator | P1 incomplete bundles remain supported; P2/P3 reconstruct scientific summaries and publish finalized status as the last atomic commit marker |
 | [`evaluation/table.py`](../../standardized_tabular_diffusion/evaluation/table.py) | CSV/Parquet/DataFrame canonical resolver and protocol-specific structural gates | P2 retains strict source-compatible content checks; P3 preserves safely representable content violations for Validity scoring |
-| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
-| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py) and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 active path; source aggregates are reconstructed and no combined Fidelity score is emitted |
+| [`evaluation/backends/sdmetrics.py`](../../standardized_tabular_diffusion/evaluation/backends/sdmetrics.py) | Isolated authoritative Shape/Trend and DCR backend | Requires SDMetrics `0.28.3.dev0` and the full 121-file source-tree hash for commit `ba8842f2...` |
+| [`evaluation/shape_trend.py`](../../standardized_tabular_diffusion/evaluation/shape_trend.py), [`evaluation/high_order_privacy.py`](../../standardized_tabular_diffusion/evaluation/high_order_privacy.py), and [`evaluation/evaluate_table.py`](../../standardized_tabular_diffusion/evaluation/evaluate_table.py) | Atomic Result mapping and end-to-end table evaluator | P2 and P5 active paths; high-order fidelity and empirical privacy stay separate and no overall score is emitted |
 | [`evaluation/validity.py`](../../standardized_tabular_diffusion/evaluation/validity.py) | Closed hard-rule language, per-column/per-constraint Atomic Results, and Validity aggregation | P3 active diagnostic path; arbitrary code and inferred hard rules are prohibited, original output is not repaired |
-| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | Held-out-test Local/Global Utility, raw arms, support states, and strict ratio aggregation | P4 diagnostic engineering and bounded source-runtime parity gates passed; the first preregistered full-dataset admission failed and P4 remains diagnostic |
+| [`evaluation/utility.py`](../../standardized_tabular_diffusion/evaluation/utility.py) | Held-out-test Local/Global Utility, raw arms, support states, and strict ratio aggregation | `p4-utility@1.0.0` is protocol-frozen for conditional use on the exact validated Windows/Python/RTX 5080 runtime; dataset/model/run admission remains separate |
 | [`preprocessing.py`](../../standardized_tabular_diffusion/preprocessing.py) | Central mean/mode missing-value boundary | Fits real train only; target/synthetic repair is prohibited; state, schema, configuration, inputs, and outputs are fingerprinted |
 | [`schemas/evaluation/`](../../standardized_tabular_diffusion/schemas/evaluation) | Ten Draft 2020-12 wire schemas | P1 canonical wire validators, packaged in the wheel |
-| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Eight legacy, two P2, two P3, and eleven P4 records remain non-official |
+| [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Includes explicit P4 freeze evidence and resolved/blocked P5 metric records; blocked metrics are machine-readable exclusions |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3 and P4 are selected explicitly, and P4 requires `--real-test` |
-| [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | P0 active and passing on Linux; reference trees are excluded from default discovery and distribution |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, and legacy commands | P2 remains the default; P3/P4/P5 are explicit, and P4/P5 require `--real-test` |
+| [`pyproject.toml`](../../pyproject.toml) and [`core-ci.yml`](../../.github/workflows/core-ci.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing and build | Hosted Windows primary-family and Linux secondary CI; reference trees are excluded from default discovery and distribution |
 | [`tests/evaluation/`](../../tests/evaluation) | Contract, structural, source-parity, Atomic Result, interruption, bundle, and CLI tests | P1 regression tests and P2 direct-authoritative tests are separated by dependency and marker boundaries |
 
-### 3.3 Remaining gaps after P4 implementation
+### 3.3 Remaining gaps after P5 implementation
 
 - P2 has passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p2-shape-trend-run-31025796906.json); later gates must not overstate that diagnostic claim.
 - The two P2 metrics are source-parity-validated candidates only; neither is protocol-frozen, release-supported, or admitted to Official Results.
 - P3 passed with retained [authoritative Linux/Python 3.11 evidence](../evidence/evaluation/p3-validity-run-31036844043.json), but remains diagnostic pending protocol freeze and release approval.
-- P4 Local/Global Utility passed its bounded diagnostic workflow with retained [engineering evidence](../evidence/evaluation/p4-utility-run-31053624769.json). A separate [real source-runtime pilot](../evidence/evaluation/p4-global-source-runtime-run-31057073762.json) passed exact classification/regression aggregate parity with the locked TabEval file and real XGB/KNN/TabPFN models. The first [dataset-scale admission](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) failed: Adult execution was incomplete after runner shutdown, and complete Sick execution passed resource gates but failed two stability sentinels. P4 remains diagnostic; no profile freeze or Official Results admission is allowed.
-- Approved high-order fidelity/privacy work, efficiency, uncertainty, compatibility aggregation, and leaderboard publication remain unimplemented.
+- Historical P4 failures remain immutable. The row-order-invariant successor passed the complete [Windows GPU validation](../evidence/evaluation/p4-dataset-scale-windows-gpu-stable-6dc485f.json), and the separate [freeze decision](../evidence/evaluation/p4-protocol-freeze-decision-2026-08-12.json) froze `p4-utility@1.0.0` without changing its scientific identity. Official result use still requires independent dataset/model/track/run/environment admission.
+- P5 implements balanced five-seed C2ST, exact train collisions, internal duplication, exact pinned SDMetrics DCR with heldout calibration, and a declared black-box DOMIAS KDE attack. Its Windows 11/Python 3.11 Adult/Sick identity-surrogate evidence and first real-generator TabDDPM/Adult three-seed pilot evidence are retained. It remains diagnostic pending dataset privacy-role review, confirmatory freeze, and independent admission gates.
+- Efficiency, cache/resume orchestration, uncertainty beyond P5 attack/C2ST intervals, compatibility aggregation, and leaderboard publication remain unimplemented.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
 - Evaluator and hardware profiles, compatibility grouping, resume/cache execution, uncertainty, and leaderboard publication remain later-phase work.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
@@ -168,8 +169,8 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P1 | Contracts, registries, profiles, and incomplete bundle writer | P0 | Passed; [Linux evidence retained](../evidence/evaluation/p1-foundation-run-31018595264.json) | Invalid contracts fail deterministically; round-trip and schema tests pass |
 | P2 | First vertical slice: external table -> structural gate -> Shape/Trend -> finalized bundle | P1 | Passed; [Linux evidence retained](../evidence/evaluation/p2-shape-trend-run-31025796906.json) | Direct pinned-source parity and bundle validation pass on Linux/Python 3.11 |
 | P3 | Full Validity subsystem and explicit preprocessing boundary | P2 | Passed; [Linux evidence retained](../evidence/evaluation/p3-validity-run-31036844043.json) | No hidden repair or missing-value mutation; rule and failure tests pass |
-| P4 | Local and Global Utility | P1, P3 | Diagnostic and bounded source-runtime parity gates passed; first [dataset-scale admission](../evidence/evaluation/p4-dataset-scale-admission-decision-run-31060416318.json) failed; remains diagnostic | A newly preregistered complete run passes target coverage, stability, high-cardinality, resource, and evidence-integrity gates before freeze review |
-| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Not started | Only resolved and approved metrics advance; blocked metrics remain excluded |
+| P4 | Local and Global Utility | P1, P3 | Protocol-frozen at `p4-utility@1.0.0` after complete exact Windows GPU validation; concrete results still require independent admission | Preserve the frozen identity and complete release, dataset, model, track, and result admission gates |
+| P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Implemented diagnostic with retained Windows Adult/Sick identity-surrogate evidence and a passed three-seed TabDDPM/Adult real-generator pilot | Review dataset privacy roles and run a confirmatory frozen-design evaluation before any protocol freeze |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Not started | Phase accounting and reuse integrity pass under declared hardware profiles |
 | P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
 | P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
@@ -187,7 +188,7 @@ Tasks:
 - Make top-level imports lightweight; move optional model and metric imports behind factories with actionable missing-extra messages.
 - Establish formatting, linting, static typing, schema validation, unit-test, and documentation-link commands.
 - Record the current 51 repository tests as a migration baseline; classify each as unit, integration, smoke, or legacy-regression.
-- Add a Linux/Python 3.11 CI job that installs only core dependencies and runs metadata, schema, CLI-help, and core tests.
+- Maintain hosted Windows/Python 3.11 primary-family CI and Linux/Python 3.11 secondary CI for metadata, schema, CLI help, core tests, lint, typing, and package builds. Do not present the hosted Windows Server image as exact Windows 11 evidence.
 - Treat `research_inputs/` as immutable review input and exclude it from packaging, ordinary test discovery, and runtime import paths.
 
 Exit evidence:
@@ -294,7 +295,7 @@ Exit evidence:
 - the selected profiles pass source parity where source parity is claimed; and
 - Local Utility and Global Utility remain distinct outputs and sub-leaderboards.
 
-Current adjudication: bounded source parity passes, but `p4-dataset-scale-admission-pilot@0.1.1` fails. A new protocol version and complete passing run are required before profile freeze; the observed `0.1.1` thresholds must not be relaxed post hoc.
+Current adjudication: the historical `0.1.1` CPU and `0.2.1` Windows profiles remain failed evidence. `p4-utility@1.0.0` freezes the sole row-order-invariant result-producing adapter after the `0.3.0` Windows GPU successor passed every unchanged threshold at commit `6dc485f`. The freeze is qualified only for the exact Windows 11/Python 3.11/RTX 5080 environment and does not admit Adult, Sick, a model, or an individual result. The identity surrogate did not assess generator quality.
 
 ### 6.6 P5 — high-order fidelity and empirical privacy
 
@@ -303,6 +304,8 @@ High-order tasks:
 - Pilot and freeze C2ST preprocessing, discriminator, split, balancing, seed, uncertainty, and AUROC-complement transformation before it contributes to Fidelity.
 - Preserve GReaT RF discriminator accuracy under a source-specific diagnostic identifier.
 - Keep integrated Alpha-Precision/Beta-Recall experimental until the mixed-table embedding and integration behavior are resolved.
+
+Implemented adjudication: `std-c2st-rf-auroc` records raw discriminator AUROC with chance target `0.5`; `std-c2st-fidelity` separately records the label-invariant AUROC complement. GReaT accuracy and Alaa support metrics are explicit excluded records and cannot enter the P5 request.
 
 Privacy tasks:
 
@@ -313,12 +316,16 @@ Privacy tasks:
 - Keep Authenticity excluded until the paper/code discrepancy is adjudicated.
 - Keep Delta Presence excluded from official scoring until its semantics and failure behavior are scientifically resolved.
 
+Implemented adjudication: exact collisions and internal duplication are separate rates; SDMetrics DCR is called from the attested source and retained as distributions plus heldout Wasserstein calibration; DOMIAS reports density-ratio attack AUROC, source median-threshold accuracy, advantage, and TPR at FPR at most one percent under a complete black-box threat model. The mixed-table representation is a named benchmark adaptation, not exact DOMIAS source parity. Attribute inference, Authenticity, and Delta Presence remain explicit exclusions.
+
 Exit evidence:
 
 - every privacy output identifies attacker knowledge, member/non-member construction, representation, model, and direction;
 - collision and DCR boundary/parity suites pass, including null and zero-range behavior;
 - no privacy diagnostic is described as a formal privacy guarantee; and
 - unresolved metrics remain present only as explicitly experimental or excluded records.
+
+The complete Adult/Sick identity-surrogate path passed under Windows 11 and Python 3.11 at commit `c66fa23`; its [machine-readable evidence](../evidence/evaluation/p5-windows-py311-identity-c66fa23.json) is retained. The first exploratory real-generator pilot subsequently trained the pinned TabDDPM Adult `ddpm_cb_best` configuration for 30,000 steps, generated three complete tables at seeds `0,1,2`, and finalized all three P5 bundles; its [machine-readable evidence](../evidence/evaluation/p5-tabddpm-adult-windows-py311-a2e4f27.json) is retained. These records close the implementation-scale gate and first exploratory generator gate only; they do not freeze P5 or admit Official Results.
 
 ### 6.7 P6 — orchestration, efficiency, cache, and resume
 
@@ -367,7 +374,7 @@ Tasks:
 - Replace old `implemented` inventory language with the approved model status dimensions and evidence records.
 - Update README, tutorials, examples, architecture, metric cards, dataset cards, troubleshooting, and contributor guidance in English; provide Chinese review translations where planned.
 - Add license, third-party notice, citation, contributor acknowledgement, security policy, code of conduct, and release checklist after their separate audits.
-- Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison on Linux/Python 3.11.
+- Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison in hosted Windows-family CI and on the exact native Windows 11/Python 3.11 target; repeat portable surfaces on Linux/Python 3.11.
 
 Exit evidence:
 
@@ -387,7 +394,7 @@ Exit evidence:
 | Source parity | Verify authoritative behavior | direct pinned call versus wrapper on shared fixtures |
 | State and negative | Prevent favorable silent failure | empty, constant, missing class, timeout, dependency failure |
 | Integration | Verify subsystem boundaries | profile -> table -> metric -> bundle -> validator |
-| End-to-end | Verify user workflows | external table and one real adapter on Linux/Python 3.11 |
+| End-to-end | Verify user workflows | portable workflow in hosted Windows-family CI; external table and one real adapter on exact native Windows 11/Python 3.11; portable subset on Linux/Python 3.11 |
 | Determinism | Verify scientific identity | repeated seeds, process isolation, cache reuse, canonical serialization |
 | Migration | Preserve intentional compatibility | legacy reader, deprecation warnings, no official promotion |
 | Security and publication | Protect release artifacts | traversal, unsafe YAML, secret/path redaction, manifest allowlist |
@@ -464,13 +471,14 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-P4 now has implementation, bounded engineering, exact source-runtime parity, and one preregistered dataset-scale adjudication. That dataset-scale run failed for two independent reasons: Adult runner loss left coverage incomplete, and two Sick stability sentinels exceeded fixed limits. The next P4 action requires review of a source-faithful execution environment or an approved and equivalence-validated source patch, followed by a newly preregistered complete rerun. Until every gate passes, P4 remains diagnostic and P5 must not treat it as an Official Results component.
+P4 is conditionally protocol-frozen, and P5 has completed its implementation-scale Windows identity-surrogate gate plus its first exploratory TabDDPM/Adult generator pilot while remaining diagnostic. The next implementation increment is P6: define the execution-node identity contract, hardware/resource profiles, timing and memory measurements, safe cache keys, and interruption-safe resume semantics before adding orchestration code. P5 dataset privacy-role review and a later confirmatory freeze decision remain separate scientific-admission work and must not be conflated with P6 engineering completion.
 
 ## 12. Related specifications
 
 - [Evaluation Protocol](EVALUATION_PROTOCOL.md)
 - [P3 Validity and Preprocessing Guide](P3_VALIDITY_AND_PREPROCESSING.md)
 - [P4 Local and Global Utility Guide](P4_UTILITY.md)
+- [P5 High-order Fidelity and Empirical Privacy Guide](P5_HIGH_ORDER_PRIVACY.md)
 - [Metric Governance](METRIC_GOVERNANCE.md)
 - [Metric Source Review](METRIC_SOURCE_REVIEW.md)
 - [Dataset Profile Specification](DATASET_PROFILE_SPEC.md)

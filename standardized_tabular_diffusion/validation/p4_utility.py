@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import platform
-import sys
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
@@ -26,6 +25,7 @@ from standardized_tabular_diffusion.evaluation.utility import (
     p4_evaluator_profile_reference,
     validate_utility_profile,
 )
+from standardized_tabular_diffusion.platform_support import is_primary_release_family_environment
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -68,9 +68,7 @@ def _source_boundary_stub(
     arm: str,
 ) -> GlobalBackendResult:
     del train, test, target, seed, time_limit_seconds
-    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (
-        2.0 if arm == "trtr" else 2.5
-    )
+    score = (0.8 if arm == "trtr" else 0.6) if task_type == "classification" else (2.0 if arm == "trtr" else 2.5)
     predictors = ("KNeighbors", "TabPFN", "XGBoost")
     return GlobalBackendResult(score, predictors, {name: score for name in predictors})
 
@@ -84,12 +82,12 @@ def _artifact(artifact_id: str, fingerprint: str, rows: int) -> dict[str, Any]:
     }
 
 
-def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
-    primary = platform.system() == "Linux" and sys.version_info[:2] == (3, 11)
-    if require_primary_environment and not primary:
-        raise RuntimeError("P4 primary evidence requires Linux with Python 3.11")
+def generate_evidence(*, require_primary_family_environment: bool) -> dict[str, Any]:
+    primary = is_primary_release_family_environment()
+    if require_primary_family_environment and not primary:
+        raise RuntimeError("P4 primary-family evidence requires Windows with Python 3.11")
     dataset = load_dataset_profile(REPO_ROOT / "configs" / "datasets" / "adult-uci-2-v1.json")
-    protocol = resolve_protocol("p4-utility", "0.4.0")
+    protocol = resolve_protocol("p4-utility", "1.0.0")
     evaluator = load_p4_evaluator_profile()
     validate_utility_profile(dataset.payload, evaluator)
     train, test, synthetic = _fixture(dataset.payload)
@@ -140,17 +138,29 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
     exit_gates = {
         "three_local_families": "pass" if len(retentions) == 3 else "fail",
         "raw_arms_and_retention": "pass" if outcome.local_summary["retention"] == 1.0 else "fail",
-        "all_target_global_formula": "pass" if len(ratios) == 15 and all(atom.raw_value is not None for atom in ratios) else "fail",
-        "held_out_test_boundary": "pass" if outcome.details["input_boundary"]["real_test_fit_allowed"] is False else "fail",
-        "unclipped_formulas": "pass" if local_retention(0.2, 0.8, 0.92, higher_is_better=True, tolerance=1e-12) > 1 and global_target_ratio(0.8, 0.88, task_type="classification") > 1 else "fail",
-        "diagnostic_admission_only": "pass" if evaluator["official_results_allowed"] is False else "fail",
+        "all_target_global_formula": "pass"
+        if len(ratios) == 15 and all(atom.raw_value is not None for atom in ratios)
+        else "fail",
+        "held_out_test_boundary": "pass"
+        if outcome.details["input_boundary"]["real_test_fit_allowed"] is False
+        else "fail",
+        "unclipped_formulas": "pass"
+        if local_retention(0.2, 0.8, 0.92, higher_is_better=True, tolerance=1e-12) > 1
+        and global_target_ratio(0.8, 0.88, task_type="classification") > 1
+        else "fail",
+        "conditional_protocol_freeze": "pass"
+        if evaluator["status"] == "frozen"
+        and evaluator["official_results_allowed"] is True
+        and protocol.payload["status"] == "frozen"
+        and protocol.payload["official_results_allowed"] is True
+        else "fail",
     }
     status = "pass" if set(exit_gates.values()) == {"pass"} else "fail"
     locked = [
         "configs/datasets/adult-uci-2-v1.json",
         "configs/datasets/sick-uci-102-v1.json",
         "standardized_tabular_diffusion/evaluation/utility.py",
-        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-pilot-v1.json",
+        "standardized_tabular_diffusion/resources/evaluation/evaluators/p4-utility-stable-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/metrics/utility-v1.json",
         "standardized_tabular_diffusion/resources/evaluation/protocols/p4-utility.json",
         "tests/evaluation/test_p4_utility.py",
@@ -163,12 +173,13 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
         "status": status,
         "claim_boundary": (
             "Validates P4 formulas, local official-package boundary, held-out-test isolation, Atomic Result coverage, "
-            "and the pinned Global backend call contract. The real AutoGluon/XGB/KNN/TabPFN source runtime was not executed."
+            "and the pinned Global backend call contract. The real AutoGluon/XGB/KNN/TabPFN source runtime was not "
+            "executed, and this bounded fixture is not an admitted Official Result despite the conditional protocol freeze."
         ),
         "environment": {
             "platform": f"{platform.system()} / {platform.machine()}",
             "python": platform.python_version(),
-            "primary_environment_required": require_primary_environment,
+            "primary_family_environment_required": require_primary_family_environment,
             "pandas": _package_version("pandas"),
             "scikit-learn": _package_version("scikit-learn"),
             "pyarrow": _package_version("pyarrow"),
@@ -180,6 +191,7 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
             "global_target_ratios": len(ratios),
             "global_utility": outcome.global_summary["global_utility"],
             "official_results_allowed": False,
+            "protocol_components_conditionally_admitted": True,
         },
         "global_source_runtime": {
             "executed": False,
@@ -194,9 +206,14 @@ def generate_evidence(*, require_primary_environment: bool) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--require-primary-environment", action="store_true")
+    parser.add_argument(
+        "--require-primary-family-environment",
+        "--require-primary-environment",
+        dest="require_primary_family_environment",
+        action="store_true",
+    )
     args = parser.parse_args()
-    payload = generate_evidence(require_primary_environment=args.require_primary_environment)
+    payload = generate_evidence(require_primary_family_environment=args.require_primary_family_environment)
     atomic_write_json(args.output, payload)
     if payload["status"] != "pass":
         raise SystemExit(1)

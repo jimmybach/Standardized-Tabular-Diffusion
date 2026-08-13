@@ -1,6 +1,6 @@
 # Third-Party Source Inventory
 
-This file is a release-preparation inventory, not a substitute for the license files distributed with each component. Audited source and package components are pinned in the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md) and the machine-readable [source lock](standardized_tabular_diffusion/resources/upstream/source-lock.json). Nested projects and transitive dependencies still require separate review before public release.
+The root Apache-2.0 license covers only original project material whose rights are held by the project contributors. It does not relicense any component listed here. This file is a release-preparation inventory, not a substitute for the license files distributed with each component. Audited source and package components are pinned in the [upstream source audit](docs/UPSTREAM_SOURCE_AUDIT.md) and the machine-readable [source lock](standardized_tabular_diffusion/resources/upstream/source-lock.json). Nested projects and transitive dependencies still require separate review before public release.
 
 | Component | Location | Declared upstream | Included license | Current treatment |
 |---|---|---|---|---|
