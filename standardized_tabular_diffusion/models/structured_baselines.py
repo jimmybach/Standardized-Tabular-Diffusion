@@ -24,6 +24,7 @@ from standardized_tabular_diffusion.evaluation.serialization import (
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
 
 
 class BNPreprocessor:
@@ -876,31 +877,53 @@ class BNAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             numerical_columns.extend(dataset_spec.target_columns)
         if numerical_columns and not np.isfinite(sample_df[numerical_columns].to_numpy(dtype=float)).all():
             raise ValueError("BN produced non-finite numerical values.")
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = decode_declared_integer_columns(
+            sample_df,
+            dataset_spec,
+            model_name="BN",
+        )
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "bn_native_inverse_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        atomic_write_json(
-            spec.output_dir / "bn_sample_metadata.json",
-            {
-                "package": self.package_name,
-                "package_version": self.package_version,
-                "seed": seed,
-                "requested_rows": num_samples,
-                "checkpoint_path": str(trusted_checkpoint),
-                "checkpoint_sha256": sha256_file(trusted_checkpoint),
-                "discrete_sample_sha256": hashlib.sha256(
-                    discrete_sample.to_csv(index=False).encode("utf-8")
-                ).hexdigest(),
-                "sample_path": str(sample_path),
-                "sample_sha256": sha256_file(sample_path),
-                "columns": dataset_spec.column_names,
-            },
-        )
+        sample_metadata = {
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "seed": seed,
+            "requested_rows": num_samples,
+            "checkpoint_path": str(trusted_checkpoint),
+            "checkpoint_sha256": sha256_file(trusted_checkpoint),
+            "discrete_sample_sha256": hashlib.sha256(
+                discrete_sample.to_csv(index=False).encode("utf-8")
+            ).hexdigest(),
+            "sample_path": str(sample_path),
+            "sample_sha256": sha256_file(sample_path),
+            "columns": dataset_spec.column_names,
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": None if native_sample_path is None else str(native_sample_path),
+                    "native_sample_sha256": (
+                        None if native_sample_path is None else sha256_file(native_sample_path)
+                    ),
+                }
+            )
+        atomic_write_json(spec.output_dir / "bn_sample_metadata.json", sample_metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint after the reviewed BN inverse transform; "
+                "the unmodified inverse output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 
