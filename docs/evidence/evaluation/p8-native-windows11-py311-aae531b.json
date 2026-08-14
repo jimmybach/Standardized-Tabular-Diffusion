@@ -1,0 +1,58 @@
+{
+  "claim_boundary": "Validates P8 software migration and release-candidate engineering only. It does not admit a model, dataset, metric, protocol, run, suite, result, or adapter to Official Results or release support.",
+  "environment": {
+    "exact_native_windows_11_required": true,
+    "native_windows_release": {
+      "build": "26200",
+      "display_version": "25H2",
+      "is_exact_native_windows_11_python_311_x86_64": true,
+      "product_name": "Windows 10 Pro",
+      "product_type": "WinNT"
+    },
+    "platform": "Windows / AMD64",
+    "platform_release": "10",
+    "platform_version": "10.0.26200",
+    "primary_family_environment_required": false,
+    "python": "3.11.15"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "adapter_evaluation_uses_central_result_bundle": "pass",
+    "diagnostic_snapshot_valid_and_unranked": "pass",
+    "legacy_import_read_only_and_checksum_bound": "pass",
+    "legacy_official_promotion_impossible": "pass",
+    "legacy_schema_frozen": "pass",
+    "official_smote_quickstart_completed": "pass",
+    "release_assets_present_and_portable": "pass",
+    "table_only_evaluation_finalized": "pass"
+  },
+  "locked_files": {
+    ".github/workflows/p8-release-validation.yml": "5fc5c1fa101298c93cb4e928592cc704ed6d470f42859f38f21442fe53764b91",
+    "CITATION.cff": "2fb680b42103e8e1b0cb82781969e20f3d7559f83a313b4aac64765b399f16d1",
+    "MANIFEST.in": "a40f0baa505bce12435673f4441858c7d88435ead242caaddecb5c514067e810",
+    "RELEASE_CHECKLIST.md": "f2de33d343ce6dcb57cd09d11ee86818af7e6078c74d4a334a79116833112a21",
+    "pyproject.toml": "eb97ab813331ddc9d20ce36cd670c9a88dbac1327e11cff00c82afafe0683d86",
+    "standardized_tabular_diffusion/evaluation/legacy.py": "8e6ee788f24bc5f8d596daf4674b021cd636eb3b0a79b1fb68717c3800e5fb33",
+    "standardized_tabular_diffusion/evaluation/service.py": "1a002da92ee85fe5d2daefc94c74f6cb89efd7bd6ad17ba8cadda141fe8077f4",
+    "standardized_tabular_diffusion/orchestration/pipeline.py": "fcb301a607b3bfeab61d06941718b14e0f8bb37d603951559629da83794abbe1",
+    "standardized_tabular_diffusion/orchestration/worker.py": "d9a69423241f730fcc764d3ee50a4c58ff33ffcd41c846ab9a2b779c8206c161",
+    "standardized_tabular_diffusion/quickstart.py": "7ed193fa85bedb2da6139d37c6097000894a4946a73b351ad258b149d6e7d733",
+    "standardized_tabular_diffusion/runner.py": "88e38147608fb9e482adb5e8fab94fd452a45c5c369c7c89c04296d84dd41916",
+    "standardized_tabular_diffusion/validation/core_ci.py": "f7d28360a4684f7ca6d63b697acd56b902402a8225a1d83a9448cf8cf1a8bed2",
+    "standardized_tabular_diffusion/validation/p8_release.py": "f756ce93bad83089507c1b38aa783cf9ca739246ef2b259728a648557ed15a10",
+    "tests/evaluation/test_p8_legacy_migration.py": "da2ffb18dddd29ea2062eff9b516cd08a5d5109d718cd6e1f4609aa50787dd92",
+    "tests/evaluation/test_p8_quickstart.py": "6b4e0afaef97801e3946579837b17693018f6a156b5e860043d6c55ecae75dcf"
+  },
+  "phase": "P8",
+  "protocol_id": "p8-migration-release-exit-gate-v1",
+  "repository_commit": "aae531bf0345ac7c46db2e1d94193c97a402c4eb",
+  "result_summary": {
+    "adapter": "smote",
+    "diagnostic_snapshot_id": "leaderboard-99d90dfa94300672d818",
+    "generation_seed": 17,
+    "legacy_source_sha256": "13cdca2fbfc62df07a6e9317db427b966f4c460235c14c5270ec9db5de3c7bd9",
+    "result_bundle_id": "run-8c48f5d3e7074079a0bc477e87c8291d",
+    "table_only_request_fingerprint": "372dbb5bb94243346e8b7ab4b7ac82381f2a5790873240642e1d8ceb06a2fc82"
+  },
+  "status": "pass"
+}
