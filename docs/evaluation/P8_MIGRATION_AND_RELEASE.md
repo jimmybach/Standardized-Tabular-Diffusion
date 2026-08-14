@@ -1,6 +1,6 @@
 # P8 Migration and Release
 
-Status: implemented release-candidate contract; final release evidence is pending CI and native-target execution.
+Status: implementation and exact native Windows 11/Python 3.11 exit gate passed at commit `aae531b`; hosted release evidence is pending.
 
 ## 1. Purpose
 
@@ -43,3 +43,5 @@ Before the final `0.1.0` tag:
 - package contents, links, legal inventory, secrets, and restricted data must be re-audited at the release commit.
 
 These gates establish software release readiness only. Model support, benchmark eligibility, dataset admission, metric admission, run admission, and Official publication remain independent.
+
+The retained [native Windows 11/Python 3.11 evidence](../evidence/evaluation/p8-native-windows11-py311-aae531b.json) passed all eight P8 software exit gates and checksum-locks the implementation surfaces. The Windows registry continues to expose the NT `10.0` compatibility version on Windows 11; the gate therefore binds workstation product type `WinNT` and build `26200`, rather than trusting `platform.release()`.

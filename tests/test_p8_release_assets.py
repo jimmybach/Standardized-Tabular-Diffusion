@@ -7,11 +7,14 @@ from pathlib import Path
 import pytest
 import yaml
 
+from standardized_tabular_diffusion.evaluation.serialization import read_json, sha256_file
 from standardized_tabular_diffusion.model_inventory import MODEL_INVENTORY, get_inventory_entry
 from standardized_tabular_diffusion.validation.core_ci import REQUIRED_WHEEL_FILES
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MARKDOWN_LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
+P8_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-aae531b.json"
+P8_EVIDENCE_SHA256 = "6a5d34c4f1845cb2600791a4e266905ffd9c508eb44be3a731f91c898000e8e7"
 
 
 def test_release_version_and_citation_are_synchronized() -> None:
@@ -132,3 +135,21 @@ def test_evaluation_config_rejects_negative_evaluator_seeds() -> None:
 
     with pytest.raises(ValueError, match="non-negative"):
         EvaluationConfig(evaluator_seeds=[-1])
+
+
+def test_native_p8_evidence_is_immutable_and_binds_the_implementation_commit() -> None:
+    assert sha256_file(P8_EVIDENCE) == P8_EVIDENCE_SHA256
+    evidence = read_json(P8_EVIDENCE)
+    assert evidence["status"] == "pass"
+    assert evidence["phase"] == "P8"
+    assert evidence["protocol_id"] == "p8-migration-release-exit-gate-v1"
+    assert evidence["repository_commit"] == "aae531bf0345ac7c46db2e1d94193c97a402c4eb"
+    assert set(evidence["exit_gates"].values()) == {"pass"}
+    environment = evidence["environment"]
+    assert environment["python"] == "3.11.15"
+    assert environment["native_windows_release"]["build"] == "26200"
+    assert environment["native_windows_release"]["product_type"] == "WinNT"
+    assert environment["native_windows_release"]["is_exact_native_windows_11_python_311_x86_64"] is True
+    assert "does not admit a model" in evidence["claim_boundary"]
+    for relative, digest in evidence["locked_files"].items():
+        assert sha256_file(REPO_ROOT / relative) == digest
