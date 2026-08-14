@@ -93,6 +93,8 @@ def _locked_file_hashes() -> dict[str, str]:
         REPO_ROOT / "standardized_tabular_diffusion" / "evaluation" / "legacy.py",
         REPO_ROOT / "standardized_tabular_diffusion" / "evaluation" / "service.py",
         REPO_ROOT / "standardized_tabular_diffusion" / "quickstart.py",
+        REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "quickstart" / "metadata.json",
+        REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "quickstart" / "train.csv",
         REPO_ROOT / "standardized_tabular_diffusion" / "runner.py",
         REPO_ROOT / "standardized_tabular_diffusion" / "orchestration" / "pipeline.py",
         REPO_ROOT / "standardized_tabular_diffusion" / "orchestration" / "worker.py",
