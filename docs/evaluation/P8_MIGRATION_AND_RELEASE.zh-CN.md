@@ -1,6 +1,6 @@
 # P8 迁移与发布
 
-状态：实现与精确原生 Windows 11/Python 3.11 退出门已在提交 `37c12de` 通过；托管发布证据待完成。
+状态：实现与精确原生 Windows 11/Python 3.11 退出门已在提交 `bb09085` 通过；托管发布证据待完成。
 
 ## 1. 目的
 
@@ -37,4 +37,4 @@ P6 把最终 Result Bundle 目录作为评测阶段所需输出。其 operationa
 
 这些只证明软件发布就绪。模型支持、榜单资格、数据集/指标/运行准入及 Official 发布仍互相独立。
 
-留存的[原生 Windows 11/Python 3.11 证据](../evidence/evaluation/p8-native-windows11-py311-37c12de.json)通过了全部八项 P8 软件退出门，并用校验和锁定实现表面。Windows 11 的注册表仍会暴露 NT `10.0` 兼容版本，因此该门同时绑定工作站产品类型 `WinNT` 与 build `26200`，而不是直接相信 `platform.release()`。
+留存的[原生 Windows 11/Python 3.11 证据](../evidence/evaluation/p8-native-windows11-py311-bb09085.json)通过了全部八项 P8 软件退出门，并用校验和锁定实现表面及采用规范 LF 换行的包内 quickstart 输入。Windows 11 的注册表仍会暴露 NT `10.0` 兼容版本，因此该门同时绑定工作站产品类型 `WinNT` 与 build `26200`，而不是直接相信 `platform.release()`。

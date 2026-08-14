@@ -15,8 +15,10 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MARKDOWN_LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 P8_HISTORICAL_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-aae531b.json"
 P8_HISTORICAL_EVIDENCE_SHA256 = "6a5d34c4f1845cb2600791a4e266905ffd9c508eb44be3a731f91c898000e8e7"
-P8_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-37c12de.json"
-P8_EVIDENCE_SHA256 = "a8efdd94d7275a027ae2d424313d7eaa13e124c47922553ddf3a6ec9825d00a3"
+P8_CROSS_PLATFORM_FIX_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-37c12de.json"
+P8_CROSS_PLATFORM_FIX_EVIDENCE_SHA256 = "a8efdd94d7275a027ae2d424313d7eaa13e124c47922553ddf3a6ec9825d00a3"
+P8_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-bb09085.json"
+P8_EVIDENCE_SHA256 = "973c2c5ac182a5f9212b5dd7308a313ac0a8024aca54eeeaca9194a74362f55c"
 
 
 def test_release_version_and_citation_are_synchronized() -> None:
@@ -145,7 +147,7 @@ def test_native_p8_evidence_is_immutable_and_binds_the_implementation_commit() -
     assert evidence["status"] == "pass"
     assert evidence["phase"] == "P8"
     assert evidence["protocol_id"] == "p8-migration-release-exit-gate-v1"
-    assert evidence["repository_commit"] == "37c12de2c530a9b778da972d326411f4bf665f39"
+    assert evidence["repository_commit"] == "bb090850a303eaa3419507c8a86ecf80b9503a78"
     assert set(evidence["exit_gates"].values()) == {"pass"}
     environment = evidence["environment"]
     assert environment["python"] == "3.11.15"
@@ -163,6 +165,10 @@ def test_superseded_native_evidence_remains_immutable_history() -> None:
     evidence = read_json(P8_HISTORICAL_EVIDENCE)
     assert evidence["repository_commit"] == "aae531bf0345ac7c46db2e1d94193c97a402c4eb"
     assert evidence["status"] == "pass"
+    assert sha256_file(P8_CROSS_PLATFORM_FIX_EVIDENCE) == P8_CROSS_PLATFORM_FIX_EVIDENCE_SHA256
+    cross_platform = read_json(P8_CROSS_PLATFORM_FIX_EVIDENCE)
+    assert cross_platform["repository_commit"] == "37c12de2c530a9b778da972d326411f4bf665f39"
+    assert cross_platform["status"] == "pass"
 
 
 def test_packaged_quickstart_table_has_platform_canonical_line_endings() -> None:
