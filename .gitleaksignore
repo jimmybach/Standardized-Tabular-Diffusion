@@ -1,0 +1,6 @@
+# Reviewed false positives: the matched value is a SHA-256 hardware-comparison
+# identity recorded in immutable P6 evidence, not a credential or API key.
+7036b66d31bc1be64857269db5eeb5ce6e2f51c0:tests/test_p6_retained_evidence.py:generic-api-key:47
+b83ce87eaebde23ce1f69d3e00eac617e459865b:tests/test_p6_retained_evidence.py:generic-api-key:25
+b83ce87eaebde23ce1f69d3e00eac617e459865b:docs/evidence/evaluation/p6-windows-py311-0fb5d07.json:generic-api-key:4
+7036b66d31bc1be64857269db5eeb5ce6e2f51c0:docs/evidence/evaluation/p6-windows-py311-da47011.json:generic-api-key:4
