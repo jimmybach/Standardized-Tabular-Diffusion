@@ -386,7 +386,7 @@ Tasks:
 - Add license, third-party notice, citation, contributor acknowledgement, security policy, code of conduct, and release checklist after their separate audits.
 - Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison in hosted Windows-family CI and on the exact native Windows 11/Python 3.11 target; repeat portable surfaces on Linux/Python 3.11.
 
-Current implementation: the frozen legacy schema and checksum-bound non-converting importer, central adapter-evaluation route, exact status/evidence inventory output, packaged artificial SMOTE-to-P3-to-diagnostic quickstart, release assets, bilingual P8 guides, and Windows/Linux release workflow are implemented for `0.1.0rc1`. No legacy record or diagnostic snapshot can acquire Official rank. The exact native Windows 11/Python 3.11 exit gate passed at implementation commit `aae531b` with [retained machine-readable evidence](../evidence/evaluation/p8-native-windows11-py311-aae531b.json); hosted Windows-family and Linux evidence remains pending.
+Current implementation: the frozen legacy schema and checksum-bound non-converting importer, central adapter-evaluation route, exact status/evidence inventory output, packaged artificial SMOTE-to-P3-to-diagnostic quickstart, release assets, bilingual P8 guides, and Windows/Linux release workflow are implemented for `0.1.0rc1`. No legacy record or diagnostic snapshot can acquire Official rank. The exact native Windows 11/Python 3.11 exit gate passed at implementation commit `37c12de` with [retained machine-readable evidence](../evidence/evaluation/p8-native-windows11-py311-37c12de.json); hosted Windows-family and Linux evidence remains pending.
 
 Exit evidence:
 
