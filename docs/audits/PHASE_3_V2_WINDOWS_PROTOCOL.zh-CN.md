@@ -31,15 +31,16 @@ TabDDPM 和 TabDiff 已拥有更强的 Windows 代表性真实证据。TabEBM �
 6. 将第一张有效表路由到中央 `p3-validity` 评测，并验证最终 Result Bundle；
 7. 保留命令输入、配置与锁文件哈希、适配器/源身份、环境、耗时、产物清单、输出哈希、评测 bundle 身份、失败与结论边界。
 
-仅支持 CPU 的算法保持使用 CPU。支持 CUDA 的神经网络和语言模型适配器请求已声明的 RTX 5080。设备选择是保留证据的一部分，不会仅根据设备可用性自动推断。
+仅支持 CPU 的算法保持使用 CPU。锁定到已验证 PyTorch 2.3 运行时的模型也保持使用 CPU，因为该运行时早于 RTX 5080 支持。运行时兼容且支持 CUDA 的适配器请求已声明的 RTX 5080。设备选择是保留证据的一部分，由适配器/运行时契约决定，而不会仅根据硬件可用性自动推断。
 
 ## 4. 成本受控批次
 
 | 批次 | 模型 |
 |---|---|
 | 快速 CPU | ARF、BN、SMOTE、NRGBoost、TabSDS |
-| 神经网络 GPU | CTGAN、TVAE、NFlow、CTAB-GAN、CTAB-GAN+、Goggle、CoDi、STaSy、TabSyn |
-| LLM GPU | GReaT、REaLTabFormer、TabuLa |
+| 旧版/运行时锁定 CPU | NFlow、CTAB-GAN、CTAB-GAN+、Goggle、REaLTabFormer |
+| 神经网络 GPU | CTGAN、TVAE、CoDi、STaSy、TabSyn |
+| LLM GPU | GReaT、TabuLa |
 | 重型 GPU | TabularARGN |
 
 失败尝试必须保留并诊断；不得因结果不理想而静默删除或替换。环境修复可以重试，但必须明确保留尝试继承关系。任何算法/配置变更都需要新的协议身份或经审批的计划更新。

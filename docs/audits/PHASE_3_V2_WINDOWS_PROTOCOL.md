@@ -31,15 +31,16 @@ For each scheduled model, the protocol:
 6. routes the first valid table through central `p3-validity` evaluation and validates the finalized Result Bundle; and
 7. retains the command inputs, configuration and lock hashes, adapter/source identity, environment, elapsed time, artifact manifests, output hashes, evaluation bundle identity, failures, and claim boundary.
 
-CPU-only algorithms remain on CPU. CUDA-capable neural and language-model adapters request the declared RTX 5080. Device choice is part of the retained evidence and is not inferred from availability alone.
+CPU-only algorithms remain on CPU. Models locked to the validated PyTorch 2.3 runtime also remain on CPU because that runtime predates RTX 5080 support. CUDA-capable adapters with a compatible validated runtime request the declared RTX 5080. Device choice is part of the retained evidence and is derived from the adapter/runtime contract, not inferred from hardware availability alone.
 
 ## 4. Cost-controlled batches
 
 | Batch | Models |
 |---|---|
 | Fast CPU | ARF, BN, SMOTE, NRGBoost, TabSDS |
-| Neural GPU | CTGAN, TVAE, NFlow, CTAB-GAN, CTAB-GAN+, Goggle, CoDi, STaSy, TabSyn |
-| LLM GPU | GReaT, REaLTabFormer, TabuLa |
+| Legacy/runtime-locked CPU | NFlow, CTAB-GAN, CTAB-GAN+, Goggle, REaLTabFormer |
+| Neural GPU | CTGAN, TVAE, CoDi, STaSy, TabSyn |
+| LLM GPU | GReaT, TabuLa |
 | Heavy GPU | TabularARGN |
 
 A failed attempt is retained and diagnosed; it is never silently deleted or replaced because its result was unfavorable. Environment repair may be retried with explicit ancestry. Any algorithm/configuration change requires a new protocol identity or reviewed plan update.

@@ -50,6 +50,11 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         assert config.model == row["model_id"]
         validate_action_controls(config.model, "train", config.train.extra)
         validate_action_controls(config.model, "sample", config.sample.extra)
+    by_model = {row["model_id"]: row for row in plan["models"]}
+    for model_id in ("nflow", "ctab-gan", "ctab-gan-plus", "goggle", "realtabformer"):
+        assert by_model[model_id]["batch"] == "legacy-cpu"
+        assert by_model[model_id]["device"] == "cpu"
+        assert by_model[model_id]["required_packages"]["torch"] == "2.3.0"
 
 
 def test_v2_adapter_metadata_is_strict_json_serializable() -> None:
