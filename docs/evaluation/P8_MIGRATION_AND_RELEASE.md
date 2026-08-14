@@ -1,6 +1,6 @@
 # P8 Migration and Release
 
-Status: implementation and exact native Windows 11/Python 3.11 exit gate passed at commit `bb09085`; hosted release evidence is pending.
+Status: P8 release-candidate engineering exit gates passed on exact native Windows 11/Python 3.11 and hosted Windows/Linux.
 
 ## 1. Purpose
 
@@ -45,3 +45,5 @@ Before the final `0.1.0` tag:
 These gates establish software release readiness only. Model support, benchmark eligibility, dataset admission, metric admission, run admission, and Official publication remain independent.
 
 The retained [native Windows 11/Python 3.11 evidence](../evidence/evaluation/p8-native-windows11-py311-bb09085.json) passed all eight P8 software exit gates and checksum-locks the implementation surfaces, including the canonical-LF packaged quickstart inputs. The Windows registry continues to expose the NT `10.0` compatibility version on Windows 11; the gate therefore binds workstation product type `WinNT` and build `26200`, rather than trusting `platform.release()`.
+
+[GitHub Actions run 31760027871](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871) passed the complete hosted Windows-family and Linux release matrix, including clean dependency installation, tests, lint, typing, exit-gate generation, wheel/sdist allowlists, installation from both distributions, and installed quickstarts outside the checkout. The retained [hosted Windows evidence](../evidence/evaluation/p8-hosted-windows-py311-run-31760027871.json) explicitly identifies Windows Server and therefore cannot substitute for native Windows 11 qualification; the [hosted Linux evidence](../evidence/evaluation/p8-hosted-linux-py311-run-31760027871.json) records the secondary portable surface. All three environments bind the same table-only request fingerprint.

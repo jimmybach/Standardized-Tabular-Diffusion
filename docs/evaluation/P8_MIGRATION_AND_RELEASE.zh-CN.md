@@ -1,6 +1,6 @@
 # P8 迁移与发布
 
-状态：实现与精确原生 Windows 11/Python 3.11 退出门已在提交 `bb09085` 通过；托管发布证据待完成。
+状态：P8 发布候选工程退出门已在精确原生 Windows 11/Python 3.11 及托管 Windows/Linux 环境全部通过。
 
 ## 1. 目的
 
@@ -38,3 +38,5 @@ P6 把最终 Result Bundle 目录作为评测阶段所需输出。其 operationa
 这些只证明软件发布就绪。模型支持、榜单资格、数据集/指标/运行准入及 Official 发布仍互相独立。
 
 留存的[原生 Windows 11/Python 3.11 证据](../evidence/evaluation/p8-native-windows11-py311-bb09085.json)通过了全部八项 P8 软件退出门，并用校验和锁定实现表面及采用规范 LF 换行的包内 quickstart 输入。Windows 11 的注册表仍会暴露 NT `10.0` 兼容版本，因此该门同时绑定工作站产品类型 `WinNT` 与 build `26200`，而不是直接相信 `platform.release()`。
+
+[GitHub Actions 运行 31760027871](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871)通过了完整托管 Windows 平台家族与 Linux 发布矩阵，包括干净依赖安装、测试、lint、类型检查、退出门证据生成、wheel/sdist 白名单、从两种发行物安装以及在仓库外运行已安装 quickstart。留存的[托管 Windows 证据](../evidence/evaluation/p8-hosted-windows-py311-run-31760027871.json)明确标识 Windows Server，因此不能代替原生 Windows 11 准入；[托管 Linux 证据](../evidence/evaluation/p8-hosted-linux-py311-run-31760027871.json)记录次要可移植表面。三个环境绑定同一个纯表评测请求指纹。

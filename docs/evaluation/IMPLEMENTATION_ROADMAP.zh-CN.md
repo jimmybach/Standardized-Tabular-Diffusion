@@ -2,9 +2,9 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
-- 状态：P1 至 P3 已通过各自适用的诊断门；托管 Windows/Python 3.11 平台家族 CI 与历史 Linux 证据均保留，精确 Windows 11 发布准入仍是独立门
-- 路线图版本：0.3.2
-- 最后更新：2026-08-11
+- 状态：P1-P8 工程退出门均已通过；Official Results 以及每个模型、数据集、指标、运行和发布支持准入仍相互独立
+- 路线图版本：0.4.0
+- 最后更新：2026-08-13
 - 主要发布平台家族：Windows x86-64 与 Python 3.11；精确目标：原生 Windows 11 x86-64 与 Python 3.11；Linux/Python 3.11 为次要兼容环境
 
 ## 1. 目的
@@ -386,7 +386,7 @@ Privacy 任务：
 - 在完成各自审计后，增加 license、third-party notice、citation、contributor acknowledgement、security policy、code of conduct 和发布 checklist。
 - 在托管 Windows 平台家族 CI 和精确原生 Windows 11/Python 3.11 目标上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison；并在 Linux/Python 3.11 上重复可移植表面。
 
-当前实现：冻结旧 schema 与校验和绑定的“只导入不转换”边界、中央适配器评测路径、精确状态/证据 inventory、包内人工 SMOTE→P3→诊断快照快速开始、发布资产、中英双语 P8 指南及 Windows/Linux 发布工作流，均已为 `0.1.0rc1` 实现。旧记录和诊断快照都不能获得 Official rank。精确原生 Windows 11/Python 3.11 退出门已在实现提交 `bb09085` 通过，并留存[机器可读证据](../evidence/evaluation/p8-native-windows11-py311-bb09085.json)；托管 Windows 平台家族与 Linux 证据待完成。
+当前实现：冻结旧 schema 与校验和绑定的“只导入不转换”边界、中央适配器评测路径、精确状态/证据 inventory、包内人工 SMOTE→P3→诊断快照快速开始、发布资产、中英双语 P8 指南及 Windows/Linux 发布工作流，均已为 `0.1.0rc1` 实现。旧记录和诊断快照都不能获得 Official rank。精确原生 Windows 11/Python 3.11 退出门已在实现提交 `bb09085` 通过，并留存[机器可读证据](../evidence/evaluation/p8-native-windows11-py311-bb09085.json)。托管 Windows 平台家族与 Linux 发布门已在[运行 31760027871](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871)通过，两份记录均由 [P8 契约](P8_MIGRATION_AND_RELEASE.zh-CN.md)链接留存。
 
 退出证据：
 

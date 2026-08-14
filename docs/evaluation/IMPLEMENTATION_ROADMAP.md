@@ -2,9 +2,9 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
-- Status: P1 through P3 passed their applicable diagnostic gates; hosted Windows/Python 3.11 family CI and historical Linux evidence are retained, while exact Windows 11 release qualification remains a separate gate
-- Roadmap version: 0.3.2
-- Last updated: 2026-08-11
+- Status: P1-P8 engineering exit gates passed; Official Results and every model/dataset/metric/run/release-support admission remain independent
+- Roadmap version: 0.4.0
+- Last updated: 2026-08-13
 - Primary release family: Windows x86-64 and Python 3.11; exact target: native Windows 11 x86-64 and Python 3.11; Linux/Python 3.11 is secondary compatibility
 
 ## 1. Purpose
@@ -386,7 +386,7 @@ Tasks:
 - Add license, third-party notice, citation, contributor acknowledgement, security policy, code of conduct, and release checklist after their separate audits.
 - Test clean installation, table-only evaluation, one adapter smoke run, result validation, and diagnostic comparison in hosted Windows-family CI and on the exact native Windows 11/Python 3.11 target; repeat portable surfaces on Linux/Python 3.11.
 
-Current implementation: the frozen legacy schema and checksum-bound non-converting importer, central adapter-evaluation route, exact status/evidence inventory output, packaged artificial SMOTE-to-P3-to-diagnostic quickstart, release assets, bilingual P8 guides, and Windows/Linux release workflow are implemented for `0.1.0rc1`. No legacy record or diagnostic snapshot can acquire Official rank. The exact native Windows 11/Python 3.11 exit gate passed at implementation commit `bb09085` with [retained machine-readable evidence](../evidence/evaluation/p8-native-windows11-py311-bb09085.json); hosted Windows-family and Linux evidence remains pending.
+Current implementation: the frozen legacy schema and checksum-bound non-converting importer, central adapter-evaluation route, exact status/evidence inventory output, packaged artificial SMOTE-to-P3-to-diagnostic quickstart, release assets, bilingual P8 guides, and Windows/Linux release workflow are implemented for `0.1.0rc1`. No legacy record or diagnostic snapshot can acquire Official rank. The exact native Windows 11/Python 3.11 exit gate passed at implementation commit `bb09085` with [retained machine-readable evidence](../evidence/evaluation/p8-native-windows11-py311-bb09085.json). Hosted Windows-family and Linux release gates passed in [run 31760027871](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871), with both records retained by the [P8 contract](P8_MIGRATION_AND_RELEASE.md).
 
 Exit evidence:
 
