@@ -415,7 +415,11 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             output_dir=output_dir / "adapter-manifests" / "train",
             device="cpu",
             seed=0,
-            extra={"deterministic": True, "exp_name": EXPERIMENT_NAME},
+            extra={
+                "allow_unstandardized_integer_output": True,
+                "deterministic": True,
+                "exp_name": EXPERIMENT_NAME,
+            },
         )
     )
     adapter_training = _snapshot_training_outputs(adapter_root, output_dir / "adapter-training")
@@ -429,6 +433,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             num_samples=EXPECTED_SAMPLE_ROWS,
             checkpoint_path=adapter_training["checkpoint"],
             extra={
+                "allow_unstandardized_integer_output": True,
                 "allow_unsafe_external_checkpoint": True,
                 "deterministic": True,
                 "exp_name": EXPERIMENT_NAME,
@@ -464,6 +469,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
                 num_samples=EXPECTED_SAMPLE_ROWS,
                 checkpoint_path=adapter_training["checkpoint"],
                 extra={
+                    "allow_unstandardized_integer_output": True,
                     "allow_unsafe_external_checkpoint": True,
                     "deterministic": True,
                     "exp_name": EXPERIMENT_NAME,

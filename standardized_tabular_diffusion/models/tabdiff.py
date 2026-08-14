@@ -82,12 +82,82 @@ class TabDiffAdapter(BaseModelAdapter):
             raise ValueError(f"TabDiff TOML is missing required sections: {missing}")
         return resolved
 
+    def _validate_integer_restoration_config(self, spec: RunSpec, config_path: Path | None) -> None:
+        info_path = self.upstream_root / "data" / spec.dataset / "info.json"
+        if not info_path.is_file():
+            return
+        info = json.loads(info_path.read_text(encoding="utf-8"))
+        if not info.get("int_col_idx"):
+            return
+        selected_config = config_path or self.upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+        with selected_config.open("rb") as stream:
+            config = tomllib.load(stream)
+        restoration = config.get("data", {}).get("dequant_dist")
+        if restoration == "none" and not bool(spec.extra.get("allow_unstandardized_integer_output", False)):
+            raise ValueError(
+                "TabDiff dequant_dist='none' does not restore integer-valued columns during inverse transformation. "
+                "Use the official 'round' mode for standardized execution, or explicitly set "
+                "allow_unstandardized_integer_output=true only for native-parity diagnostics."
+            )
+
+    def _validate_generated_sample_contract(self, spec: RunSpec, sample_path: Path) -> dict[str, object]:
+        info_path = self.upstream_root / "data" / spec.dataset / "info.json"
+        if not info_path.is_file():
+            return {"status": "not-evaluated", "reason": "upstream dataset info.json is unavailable"}
+
+        import numpy as np
+        import pandas as pd
+
+        info = json.loads(info_path.read_text(encoding="utf-8"))
+        frame = pd.read_csv(sample_path)
+        expected_columns = info["column_names"]
+        if list(frame.columns) != expected_columns:
+            raise ValueError("TabDiff generated columns differ from the upstream dataset schema.")
+        if frame.isna().any().any():
+            raise ValueError("TabDiff generated sample contains missing values.")
+        non_integral: dict[str, int] = {}
+        for index in info.get("int_col_idx", []):
+            column = expected_columns[index]
+            numeric = pd.to_numeric(frame[column], errors="coerce")
+            values = numeric.to_numpy(dtype=float)
+            if numeric.isna().any() or not np.isfinite(values).all():
+                raise ValueError(f"TabDiff generated integer column {column!r} contains invalid values.")
+            count = int((values != np.rint(values)).sum())
+            if count:
+                non_integral[column] = count
+        if non_integral:
+            if bool(spec.extra.get("allow_unstandardized_integer_output", False)):
+                return {
+                    "status": "diagnostic-bypass",
+                    "info_path": str(info_path),
+                    "info_sha256": self._sha256_file(info_path),
+                    "rows": len(frame),
+                    "columns": len(frame.columns),
+                    "missing_values": 0,
+                    "integer_columns_integral": False,
+                    "non_integral_cells": non_integral,
+                }
+            raise ValueError(
+                "TabDiff generated sample violates the standardized integer contract: "
+                f"{non_integral}. Use an upstream config with data.dequant_dist='round'."
+            )
+        return {
+            "status": "passed",
+            "info_path": str(info_path),
+            "info_sha256": self._sha256_file(info_path),
+            "rows": len(frame),
+            "columns": len(frame.columns),
+            "missing_values": 0,
+            "integer_columns_integral": True,
+        }
+
     def _write_run_metadata(
         self,
         spec: RunSpec,
         *,
         action: str,
         generated_sample_path: Path | None = None,
+        sample_contract: dict[str, object] | None = None,
     ) -> Path:
         patch = load_patch_record()
         config_path_overlay = load_config_path_overlay_record()
@@ -137,6 +207,7 @@ class TabDiffAdapter(BaseModelAdapter):
                 },
             },
             "generated_sample": None,
+            "sample_contract": sample_contract,
         }
         if spec.upstream_config_path is not None:
             config_path = self._resolve_config_path(spec)
@@ -203,6 +274,8 @@ class TabDiffAdapter(BaseModelAdapter):
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        config_path = self._resolve_config_path(spec)
+        self._validate_integer_restoration_config(spec, config_path)
         args = [
             "--dataname",
             spec.dataset,
@@ -211,7 +284,7 @@ class TabDiffAdapter(BaseModelAdapter):
             "--exp_name",
             spec.extra.get("exp_name", spec.output_dir.name),
         ]
-        if config_path := self._resolve_config_path(spec):
+        if config_path:
             args.extend(["--config_path", str(config_path)])
         args.extend(self._common_args(spec))
         self._run_python(
@@ -236,6 +309,8 @@ class TabDiffAdapter(BaseModelAdapter):
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        config_path = self._resolve_config_path(spec)
+        self._validate_integer_restoration_config(spec, config_path)
         checkpoint_path = self._resolve_checkpoint_path(spec)
         exp_name = spec.extra.get("exp_name", spec.output_dir.name)
         args = [
@@ -248,7 +323,7 @@ class TabDiffAdapter(BaseModelAdapter):
             "--ckpt_path",
             str(checkpoint_path),
         ]
-        if config_path := self._resolve_config_path(spec):
+        if config_path:
             args.extend(["--config_path", str(config_path)])
         if spec.num_samples is not None:
             args.extend(["--num_samples_to_generate", str(spec.num_samples)])
@@ -267,9 +342,15 @@ class TabDiffAdapter(BaseModelAdapter):
         )
         if not upstream_sample_path.is_file():
             raise FileNotFoundError(f"TabDiff did not produce the expected sample table: {upstream_sample_path}")
+        sample_contract = self._validate_generated_sample_contract(spec, upstream_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         atomic_write_bytes(sample_path, upstream_sample_path.read_bytes())
-        self._write_run_metadata(spec, action="sample", generated_sample_path=sample_path)
+        self._write_run_metadata(
+            spec,
+            action="sample",
+            generated_sample_path=sample_path,
+            sample_contract=sample_contract,
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

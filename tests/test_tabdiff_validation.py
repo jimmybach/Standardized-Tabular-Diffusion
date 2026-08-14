@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import tomllib
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -213,6 +214,49 @@ def test_tabdiff_adapter_forwards_validated_toml_config(tmp_path: Path, monkeypa
     metadata = json.loads((tmp_path / "artifacts" / "tabdiff_run.json").read_text(encoding="utf-8"))
     assert metadata["config_interface"]["custom_config_active"] is True
     assert metadata["config_interface"]["path"] == str(config_path.resolve())
+
+
+def test_tabdiff_standardized_integer_contract_requires_native_round_mode(tmp_path: Path) -> None:
+    upstream_root = tmp_path / "TabDiff-main"
+    info_path = upstream_root / "data" / "toy" / "info.json"
+    default_config = upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+    info_path.parent.mkdir(parents=True)
+    default_config.parent.mkdir(parents=True)
+    info_path.write_text(json.dumps({"int_col_idx": [0], "column_names": ["count"]}), encoding="utf-8")
+    default_config.write_text("[data]\ndequant_dist = 'none'\n", encoding="utf-8")
+    adapter = TabDiffAdapter(tmp_path)
+
+    with pytest.raises(ValueError, match="does not restore integer-valued columns"):
+        adapter.train(RunSpec(model="tabdiff", dataset="toy", output_dir=tmp_path / "artifacts"))
+
+
+def test_tabdiff_generated_integer_contract_fails_closed_with_diagnostic_bypass(tmp_path: Path) -> None:
+    upstream_root = tmp_path / "TabDiff-main"
+    info_path = upstream_root / "data" / "toy" / "info.json"
+    sample_path = tmp_path / "samples.csv"
+    info_path.parent.mkdir(parents=True)
+    info_path.write_text(
+        json.dumps({"int_col_idx": [0], "column_names": ["count", "kind"]}),
+        encoding="utf-8",
+    )
+    sample_path.write_text("count,kind\n1.5,a\n2.0,b\n", encoding="utf-8")
+    adapter = TabDiffAdapter(tmp_path)
+    spec = RunSpec(model="tabdiff", dataset="toy", output_dir=tmp_path / "artifacts")
+
+    with pytest.raises(ValueError, match="standardized integer contract"):
+        adapter._validate_generated_sample_contract(spec, sample_path)
+
+    spec.extra["allow_unstandardized_integer_output"] = True
+    result = adapter._validate_generated_sample_contract(spec, sample_path)
+    assert result["status"] == "diagnostic-bypass"
+    assert result["non_integral_cells"] == {"count": 1}
+
+
+def test_tabdiff_adult_real_function_config_uses_native_integer_restoration() -> None:
+    with (REPO_ROOT / "configs" / "validation" / "tabdiff-adult-real-function-v1.toml").open("rb") as stream:
+        config = tomllib.load(stream)
+
+    assert config["data"]["dequant_dist"] == "round"
 
 
 def test_tabdiff_new_pytorch_scheduler_bridge_discards_only_verbose() -> None:

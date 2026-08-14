@@ -4,7 +4,7 @@
 # size are reduced to make an end-to-end Windows/consumer-GPU acceptance run bounded.
 
 [data]
-dequant_dist = "none"
+dequant_dist = "round"
 int_dequant_factor = 0
 
 [unimodmlp_params]

@@ -25,10 +25,11 @@ TRAINING_SEED = 0
 GENERATION_SEEDS = (3, 4, 5)
 EXPECTED_TRAIN_ROWS = 32_561
 EXPECTED_TEST_ROWS = 16_281
-EXPERIMENT_NAME = "adult-windows-rtx5080-real-function-v1"
+EXPERIMENT_NAME = "adult-windows-rtx5080-real-function-v2"
 CONFIG_PATH = Path("configs/validation/tabdiff-adult-real-function-v1.toml")
 OFFICIAL_CONFIG_PATH = Path("TabDiff-main/tabdiff/configs/tabdiff_configs.toml")
 ALLOWED_CONFIG_DIFFERENCES = {
+    "data.dequant_dist",
     "sample.batch_size",
     "train.main.check_val_every",
     "train.main.steps",
@@ -186,11 +187,17 @@ def _validate_sample(path: Path, info: dict[str, Any]) -> dict[str, Any]:
     numeric = frame[numerical_columns].apply(pd.to_numeric, errors="coerce")
     if numeric.isna().any().any() or not np.isfinite(numeric.to_numpy()).all():
         raise TabDiffRealFunctionError(f"Generated table contains invalid numerical values: {path}")
-    non_integral = {
-        column: int((~np.isclose(numeric[column], np.round(numeric[column]))).sum()) for column in integer_columns
-    }
+    non_integral = {column: int((numeric[column] != np.rint(numeric[column])).sum()) for column in integer_columns}
     if any(non_integral.values()):
         raise TabDiffRealFunctionError(f"Generated integer columns contain fractional values: {non_integral}")
+    out_of_range: dict[str, int] = {}
+    for column in numerical_columns:
+        column_info = info["column_info"][column]
+        outside = (numeric[column] < column_info["min"]) | (numeric[column] > column_info["max"])
+        if outside.any():
+            out_of_range[column] = int(outside.sum())
+    if out_of_range:
+        raise TabDiffRealFunctionError(f"Generated numerical values violate reviewed ranges: {out_of_range}")
 
     invalid_categories: dict[str, list[str]] = {}
     for column in categorical_columns:
@@ -212,6 +219,7 @@ def _validate_sample(path: Path, info: dict[str, Any]) -> dict[str, Any]:
         "missing_values": 0,
         "finite_numerical_values": True,
         "integer_columns_integral": True,
+        "numerical_ranges_valid": True,
         "categorical_domains_valid": True,
     }
 
