@@ -1,0 +1,58 @@
+{
+  "claim_boundary": "Validates P7 aggregation hierarchy, compatibility rejection, denominator accounting, correction history, Official admission fail-closed behavior, deterministic snapshots, and source-derived static assets. It does not admit a model, dataset, metric, protocol, run, suite, or repository release to Official Results.",
+  "environment": {
+    "platform": "Windows / AMD64",
+    "primary_family_environment_required": true,
+    "python": "3.11.15"
+  },
+  "evidence_schema_version": "1.0.0",
+  "exit_gates": {
+    "atomic_to_seed_to_dataset_to_suite_hierarchy": "pass",
+    "compatibility_boundaries_fail_closed": "pass",
+    "equal_dataset_macro_weighting": "pass",
+    "hierarchical_uncertainty_deterministic": "pass",
+    "human_and_machine_assets_source_derived": "pass",
+    "immutable_snapshot_and_asset_checksums": "pass",
+    "missing_and_failed_denominators_preserved": "pass",
+    "official_admission_fail_closed": "pass",
+    "pairwise_completeness_exposed": "pass"
+  },
+  "locked_files": {
+    ".github/workflows/p7-leaderboard-validation.yml": "1b22781b0d7b0234cb48ca65a8e85102742d7eb43e97299eacaa5c2dc1c26449",
+    "pyproject.toml": "05c1149c533fddad203643d5ac281e8eeeb93834a0f36932d6b9456fcd524e2a",
+    "standardized_tabular_diffusion/cli.py": "a0acebae37bb1204a39bd2f33fbb6a3bc25a1924f2fca4e057ec4d456389aca7",
+    "standardized_tabular_diffusion/evaluation/leaderboard.py": "75983ecb22eea49dc21107a914701f86287000dbc5f4c431461a5276a4544cdd",
+    "standardized_tabular_diffusion/evaluation/schema.py": "fc823b4d5a01e194cd5959bea1841684c725c0335e999028b4e2263efa7d3163",
+    "standardized_tabular_diffusion/schemas/evaluation/admission-record.schema.json": "54936d3bd4db20fc1cc3e93f50720ae83c9c947000ddd78ebead93931ec88844",
+    "standardized_tabular_diffusion/schemas/evaluation/correction-record.schema.json": "5c3a60612de83a422821a132d1b910c436654a6e7f1b682ba5b8c4ccf2d99f30",
+    "standardized_tabular_diffusion/schemas/evaluation/dataset-summary.schema.json": "3fefd75d70953a98699abb81a98d6371e7c40f0074b4637512083c60c03da3a1",
+    "standardized_tabular_diffusion/schemas/evaluation/leaderboard-snapshot.schema.json": "f4d098a5ffb5d102a84ae262edb225c124baf37d1a122ff3ae40d2234f31cdeb",
+    "standardized_tabular_diffusion/schemas/evaluation/snapshot-manifest.schema.json": "26c5e387fdc4f442dd3f0ac9c77ac31ef3991b9f489320643b52681f18af010c",
+    "standardized_tabular_diffusion/schemas/evaluation/snapshot-request.schema.json": "a54a50bffb90e6257f9a0664ab0b87fa25ab643beccf9aef8e0f0c5b6718b0f1",
+    "standardized_tabular_diffusion/validation/core_ci.py": "87ac721057fe3475a636ad1e0422c6fcc801095cedab4d9b904a366b94204a96",
+    "standardized_tabular_diffusion/validation/p7_leaderboard.py": "70901d9d278cee82484799038a89914db761b7aaa0a66d6fe26b950ae79bb1e3",
+    "tests/evaluation/test_p7_leaderboard.py": "5f9342f8a239db5a585107684cfdda6a0b79efb9b22ccc0fdfb7c9be2934690a",
+    "tests/evaluation/test_p7_run_bundle_integration.py": "98eea60ebd4b0e7793ece62ce0288dff616d8635c8fc0f4647e83a2e0e69976c"
+  },
+  "phase": "P7",
+  "protocol_id": "p7-leaderboard-exit-gate-v1",
+  "repository_commit": "4c8da76c6e4e4d5ed1bd55c8d1d6825be6da05cc",
+  "result_summary": {
+    "dataset_summary_count": 4,
+    "failed_seed_denominator_preserved": true,
+    "input_fingerprint": "2edb235af2990fb5f14191991849fc370bf8a0ddc158264a42af2ce6dd2fdd5a",
+    "missing_seed_denominator_preserved": true,
+    "model_count": 2,
+    "official_without_admissions_rejected": true,
+    "pairwise_record_count": 1,
+    "publication_assets": [
+      "leaderboard.json",
+      "leaderboard.csv",
+      "leaderboard.html",
+      "leaderboard.md"
+    ],
+    "snapshot_fingerprint": "10e0504675b6364ebaa2e7a9986cc311cf05e54e124ab752d563a3986139bcbd",
+    "snapshot_id": "leaderboard-10e0504675b6364ebaa2"
+  },
+  "status": "pass"
+}
