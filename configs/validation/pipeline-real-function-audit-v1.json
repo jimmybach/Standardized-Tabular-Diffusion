@@ -1,0 +1,74 @@
+{
+  "plan_id": "pipeline-real-function-audit",
+  "version": "1.0",
+  "snapshot_date": "2026-08-14",
+  "state_authority": "audit-only; does not replace registry validation, benchmark, or support status",
+  "primary_environment": {
+    "operating_system": "native Windows 11 x86-64",
+    "python": "3.11",
+    "device_policy": "use the explicitly requested CUDA device and fail closed on unintended fallback"
+  },
+  "task_files": [
+    "docs/audits/TASK_01_SEED_AND_CONFIG.md",
+    "docs/audits/TASK_02_DATA_AND_OUTPUT_CONTRACT.md",
+    "docs/audits/TASK_03_CHECKPOINT_AND_ARTIFACT_ISOLATION.md",
+    "docs/audits/TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md",
+    "docs/audits/TASK_05_CENTRAL_EVALUATION_INTEGRATION.md",
+    "docs/audits/TASK_06_FAILURE_AND_RECOVERY.md"
+  ],
+  "inventory_summary": {
+    "registered": 21,
+    "registry_native_parity_validated": 20,
+    "registry_smoke_validated": 1,
+    "representative_real_passed": 2,
+    "minimal_real_pending": 18,
+    "externally_blocked": 1
+  },
+  "baselines": [
+    {"model_id": "arf", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "bn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "codi", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "ctab-gan-plus", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "ctgan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "goggle", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "great", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "nflow", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "nrgboost", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "realtabformer", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "smote", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "stasy", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "tabddpm",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "representative-real-passed",
+      "evidence": [
+        "docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json"
+      ]
+    },
+    {
+      "model_id": "tabdiff",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "representative-real-passed",
+      "evidence": [
+        "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
+        "docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json"
+      ]
+    },
+    {
+      "model_id": "tabebm",
+      "registry_validation_level": "smoke-validated",
+      "windows_real_function_state": "externally-blocked",
+      "blocker": "Full real generation requires externally gated TabPFN-v2 access.",
+      "evidence": [
+        "docs/TABEBM_VALIDATION.md",
+        "docs/evidence/tabebm/smoke-validation-run-30974574544.json"
+      ]
+    },
+    {"model_id": "tabsds", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "tabsyn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "tabula", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "tabularargn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {"model_id": "tvae", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []}
+  ]
+}
