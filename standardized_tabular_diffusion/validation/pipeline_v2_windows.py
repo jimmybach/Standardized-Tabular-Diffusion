@@ -126,6 +126,52 @@ def _require_device(entry: dict[str, Any], environment: dict[str, Any], plan: di
         )
 
 
+def _verify_environment_lock(
+    lock_path: Path,
+    environment: dict[str, Any],
+    required_packages: dict[str, str],
+) -> dict[str, Any]:
+    from packaging.requirements import Requirement
+    from packaging.utils import canonicalize_name
+
+    installed = {
+        canonicalize_name(name): version
+        for name, version in environment["packages"].items()
+    }
+    checked: dict[str, dict[str, str]] = {}
+    for raw_line in lock_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        requirement = Requirement(line)
+        if requirement.marker is not None and not requirement.marker.evaluate():
+            continue
+        name = canonicalize_name(requirement.name)
+        observed = installed.get(name)
+        if observed is None or (requirement.specifier and observed not in requirement.specifier):
+            raise PipelineV2Error(
+                f"Environment does not satisfy {lock_path.name}: required {requirement}, observed {observed}"
+            )
+        checked[name] = {"required": str(requirement.specifier) or "present", "observed": observed}
+    for package, expected in required_packages.items():
+        name = canonicalize_name(package)
+        observed = installed.get(name)
+        if observed is None:
+            raise PipelineV2Error(f"Required V2 runtime package is missing: {package}=={expected}")
+        normalized_observed = observed.partition("+")[0] if "+" not in expected else observed
+        if normalized_observed != expected:
+            raise PipelineV2Error(
+                f"V2 runtime package mismatch for {package}: expected {expected}, observed {observed}"
+            )
+        checked[name] = {"required": f"=={expected}", "observed": observed}
+    return {
+        "status": "pass",
+        "path": str(lock_path.resolve()),
+        "sha256": sha256_file(lock_path),
+        "packages": dict(sorted(checked.items())),
+    }
+
+
 def _greedy_coverage_indices(frame: Any, categorical: list[str], count: int, seed: int) -> list[int]:
     import numpy as np
 
@@ -422,7 +468,11 @@ def run_probe(
         config_path = repo_root / entry["config_path"]
         lock_path = repo_root / entry["environment_lock"]
         record["configuration"] = {"path": entry["config_path"], "sha256": sha256_file(config_path)}
-        record["environment_lock"] = {"path": entry["environment_lock"], "sha256": sha256_file(lock_path)}
+        record["environment_lock"] = _verify_environment_lock(
+            lock_path,
+            environment,
+            entry["required_packages"],
+        )
         fixture_spec = materialize_fixture(repo_root, plan, work_root / "shared-fixture")
         record["dataset_spec"] = fixture_spec.to_dict()
         record["fixture_manifest"] = json.loads(

@@ -24,6 +24,7 @@ from standardized_tabular_diffusion.validation.pipeline_v2_windows import (
     _assert_manifest_unchanged,
     _copy_training_artifacts,
     _load_plan,
+    _verify_environment_lock,
     materialize_fixture,
 )
 
@@ -44,6 +45,7 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         assert config_path.is_file()
         assert (REPO_ROOT / row["environment_lock"]).is_file()
         assert row["device"] in {"cpu", "cuda"}
+        assert isinstance(row["required_packages"], dict)
         config = load_experiment_config(config_path)
         assert config.model == row["model_id"]
         validate_action_controls(config.model, "train", config.train.extra)
@@ -147,6 +149,29 @@ def test_v2_training_artifact_copy_preserves_bytes_and_rejects_mutation(tmp_path
     (destination / "checkpoint" / "model.bin").write_bytes(b"mutated")
     with pytest.raises(PipelineV2Error, match="mutated"):
         _assert_manifest_unchanged(destination, manifest)
+
+
+def test_v2_environment_lock_checks_versions_and_cuda_local_suffix(tmp_path: Path) -> None:
+    lock = tmp_path / "requirements-validation.txt"
+    lock.write_text(
+        "numpy==1.26.4\nignored==9.9.9; python_version < '3.0'\n",
+        encoding="utf-8",
+    )
+    environment = {
+        "packages": {
+            "NumPy": "1.26.4",
+            "torch": "2.8.0+cu128",
+        }
+    }
+    result = _verify_environment_lock(lock, environment, {"torch": "2.8.0"})
+    assert result["status"] == "pass"
+    assert result["packages"]["torch"]["observed"] == "2.8.0+cu128"
+
+    with pytest.raises(PipelineV2Error, match="does not satisfy"):
+        _verify_environment_lock(lock, {"packages": {"numpy": "2.0.0"}}, {})
+
+    with pytest.raises(PipelineV2Error, match="runtime package mismatch"):
+        _verify_environment_lock(lock, environment, {"torch": "2.7.0"})
 
 
 def test_runner_accepts_a_name_matched_explicit_validation_dataset(tmp_path: Path) -> None:
