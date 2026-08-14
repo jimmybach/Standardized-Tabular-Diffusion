@@ -478,7 +478,7 @@ def run_probe(
         record["fixture_manifest"] = json.loads(
             (fixture_spec.metadata_path.parent / "fixture-manifest.json").read_text(encoding="utf-8")
         )
-        adapter_record = get_adapter_spec(model_id)
+        adapter_record = get_adapter_spec(model_id).to_dict(model_id)
         record["adapter"] = adapter_record
         model_root = work_root / model_id
         if model_root.exists() and any(model_root.iterdir()):

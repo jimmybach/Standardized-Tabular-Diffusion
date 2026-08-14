@@ -15,7 +15,7 @@ from standardized_tabular_diffusion.config import (
     load_experiment_config,
 )
 from standardized_tabular_diffusion.interfaces import DatasetSpec
-from standardized_tabular_diffusion.registry import list_adapter_specs
+from standardized_tabular_diffusion.registry import get_adapter_spec, list_adapter_specs
 from standardized_tabular_diffusion.runner import build_run_context
 from standardized_tabular_diffusion.runtime_contracts import validate_action_controls
 from standardized_tabular_diffusion.validation.pipeline_v2_windows import (
@@ -50,6 +50,11 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         assert config.model == row["model_id"]
         validate_action_controls(config.model, "train", config.train.extra)
         validate_action_controls(config.model, "sample", config.sample.extra)
+
+
+def test_v2_adapter_metadata_is_strict_json_serializable() -> None:
+    payload = get_adapter_spec("arf").to_dict("arf")
+    assert json.loads(json.dumps(payload, allow_nan=False))["model_id"] == "arf"
 
 
 def _write_source_fixture(repo_root: Path) -> None:
