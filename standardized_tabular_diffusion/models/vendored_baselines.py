@@ -10,6 +10,7 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
 from standardized_tabular_diffusion.runtime_contracts import bind_native_dataset_view
 from standardized_tabular_diffusion.upstream_sources import validate_upstream_source
 
@@ -728,6 +729,7 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._prepare_output(spec)
         dataset = self._validate_dataset(spec.dataset)
         dataset_binding = None
+        dataset_spec = None
         if "dataset_identity" in spec.extra:
             dataset_spec = self.resolve_dataset_spec(spec)
             dataset_binding = bind_native_dataset_view(
@@ -879,6 +881,19 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             observed = set(frame[column].astype(str).unique().tolist())
             if not observed.issubset(set(allowed)):
                 raise RuntimeError(f"CoDi produced values outside the fitted domain for {column!r}.")
+        integer_decoding: dict[str, dict[str, Any]] = {}
+        native_sample_path = None
+        if dataset_spec is not None:
+            native_frame = frame.copy()
+            frame, integer_decoding = decode_declared_integer_columns(
+                frame,
+                dataset_spec,
+                model_name="CoDi",
+            )
+            if any(record["changed_rows"] for record in integer_decoding.values()):
+                native_sample_path = spec.output_dir / "codi-native-samples.csv"
+                self._write_dataframe_csv(native_frame, native_sample_path)
+                self._write_dataframe_csv(frame, sample_path)
         atomic_write_json(
             spec.output_dir / "codi-sample-metadata.json",
             {
@@ -889,6 +904,11 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "rows": len(frame),
                 "columns": list(frame.columns),
                 "sample_sha256": self._sha256(sample_path),
+                "integer_decoding": integer_decoding,
+                "native_sample_path": None if native_sample_path is None else str(native_sample_path.resolve()),
+                "native_sample_sha256": (
+                    None if native_sample_path is None else self._sha256(native_sample_path)
+                ),
                 "checkpoint_con_sha256": metadata["checkpoint_con_sha256"],
                 "checkpoint_dis_sha256": metadata["checkpoint_dis_sha256"],
                 "sampling_config": {"T": config["T"], "num_threads": config["num_threads"]},
@@ -901,7 +921,8 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
             notes=[
-                "Sampling verified source identity, both trusted checkpoint hashes, exact rows, schema, domains, and finite output."
+                "Sampling verified source identity, both trusted checkpoint hashes, exact rows, schema, domains, and finite output.",
+                "Declared integer columns are decoded with numpy.rint at the adapter boundary; changed native output is retained without clipping.",
             ],
         )
         return self._write_bundle(bundle)

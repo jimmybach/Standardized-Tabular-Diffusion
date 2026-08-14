@@ -9,7 +9,7 @@ import pytest
 
 import standardized_tabular_diffusion.models.vendored_baselines as vendored_baselines
 from standardized_tabular_diffusion.compat.codi_launcher import _TorchProxy
-from standardized_tabular_diffusion.interfaces import RunSpec
+from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter
 from standardized_tabular_diffusion.upstream_sources import UpstreamSourceIntegrityError, validate_upstream_source
 
@@ -127,6 +127,24 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
     source = _source_record(tmp_path)
     commands: list[list[str]] = []
     monkeypatch.setattr(vendored_baselines, "validate_upstream_source", lambda model, path: source)
+    dataset_spec = DatasetSpec(
+        name="fixture",
+        task_type="classification",
+        column_names=["num", "cat", "target"],
+        numerical_columns=["num"],
+        categorical_columns=["cat"],
+        target_columns=["target"],
+        metadata_path=tmp_path / "TabSyn-main" / "data" / "fixture" / "info.json",
+        train_data_path=tmp_path / "TabSyn-main" / "data" / "fixture" / "train.csv",
+        test_data_path=tmp_path / "TabSyn-main" / "data" / "fixture" / "test.csv",
+        extra={"integer_columns": ["num"]},
+    )
+    monkeypatch.setattr(adapter, "resolve_dataset_spec", lambda spec: dataset_spec)
+    monkeypatch.setattr(
+        vendored_baselines,
+        "bind_native_dataset_view",
+        lambda dataset, native_root: {"binding": "reviewed-test-fixture"},
+    )
 
     def fake_run(args: list[str], *, seed: int) -> None:
         assert seed == 19
@@ -139,7 +157,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
             (checkpoint_root / "model_dis.pt").write_bytes(b"trusted-discrete")
         else:
             sample_path = Path(args[args.index("--save-path") + 1])
-            pd.DataFrame({"num": [1.0] * 5, "cat": ["g0"] * 5, "target": [0] * 5}).to_csv(
+            pd.DataFrame({"num": [1.5] * 5, "cat": ["g0"] * 5, "target": [0] * 5}).to_csv(
                 sample_path, index=False
             )
 
@@ -152,7 +170,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
             output_dir=output_dir,
             device="cpu",
             seed=19,
-            extra=_small_config(),
+            extra={**_small_config(), "dataset_identity": {"test": True}},
         )
     )
     bundle = adapter.sample(
@@ -163,7 +181,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
             device="cpu",
             seed=19,
             num_samples=5,
-            extra={"num_threads": 1},
+            extra={"num_threads": 1, "dataset_identity": {"test": True}},
         )
     )
 
@@ -175,6 +193,10 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
     assert metadata["source"]["runtime_files_verified"] == 24
     assert metadata["training_config"]["encoder_dim_con"] == [8, 8]
     assert sample_metadata["rows"] == 5
+    assert sample_metadata["integer_decoding"]["num"]["changed_rows"] == 5
+    assert sample_metadata["integer_decoding"]["num"]["clipped_rows"] == 0
+    assert pd.read_csv(output_dir / "samples.csv")["num"].tolist() == [2] * 5
+    assert pd.read_csv(output_dir / "codi-native-samples.csv")["num"].tolist() == [1.5] * 5
     assert bundle.generated_sample_path == output_dir.resolve() / "samples.csv"
     assert commands[1][commands[1].index("--num-samples") + 1] == "5"
 
