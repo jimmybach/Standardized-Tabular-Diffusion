@@ -85,6 +85,17 @@ def _run_sample(args: argparse.Namespace, upstream_args: SimpleNamespace) -> Non
     sample_module.main(upstream_args)
 
 
+def _without_removed_scheduler_verbose(official_scheduler: Callable[..., Any]) -> Callable[..., Any]:
+    """Drop the logging-only keyword removed from PyTorch 2.8."""
+
+    @functools.wraps(official_scheduler)
+    def compatible_scheduler(*scheduler_args: Any, **scheduler_kwargs: Any) -> Any:
+        scheduler_kwargs.pop("verbose", None)
+        return official_scheduler(*scheduler_args, **scheduler_kwargs)
+
+    return compatible_scheduler
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Invoke the unmodified official TabSyn implementation through a compatibility boundary."
@@ -132,7 +143,12 @@ def main(argv: list[str] | None = None) -> int:
         from tabsyn.vae import main as vae_module
 
         vae_module.__file__ = str(args.runtime_root / "tabsyn" / "vae" / "main.py")
-        vae_module.main(upstream_args)
+        official_scheduler = vae_module.ReduceLROnPlateau
+        vae_module.ReduceLROnPlateau = _without_removed_scheduler_verbose(official_scheduler)
+        try:
+            vae_module.main(upstream_args)
+        finally:
+            vae_module.ReduceLROnPlateau = official_scheduler
     elif args.action == "diffusion-train":
         from tabsyn import latent_utils
 

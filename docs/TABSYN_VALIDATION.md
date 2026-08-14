@@ -34,6 +34,8 @@ The repository-owned launcher imports and calls the official implementation and 
 - explicit external checkpoint paths are rejected because official TabSyn uses a coupled fixed VAE/diffusion layout; and
 - internal latent and PyTorch checkpoint paths must be regular, non-symlinked files inside the TabSyn worktree.
 
+PyTorch 2.8 removed the logging-only `verbose` parameter from `ReduceLROnPlateau`, while the frozen VAE entrypoint still passes it. The isolated launcher drops only that keyword on the V2 runtime, forwards every mathematical scheduler argument unchanged, restores the original class after the official call, and never edits the checksum-locked upstream file.
+
 Sampling uses PyTorch serialization files, which can execute code during loading. Only checkpoints produced or deliberately placed inside the audited TabSyn worktree should be used, and their provenance must be verified before execution.
 
 ## Frozen environment

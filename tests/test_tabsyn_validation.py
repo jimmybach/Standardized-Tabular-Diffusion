@@ -7,11 +7,24 @@ from pathlib import Path
 import pytest
 
 import standardized_tabular_diffusion.validation.tabsyn as tabsyn_validation
+from standardized_tabular_diffusion.compat.tabsyn_launcher import _without_removed_scheduler_verbose
 from standardized_tabular_diffusion.interfaces import RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsyn" / "native-parity-run-30871758645.json"
+
+
+def test_tabsyn_scheduler_bridge_removes_only_the_logging_keyword() -> None:
+    observed: list[tuple[tuple[object, ...], dict[str, object]]] = []
+
+    def scheduler(*args: object, **kwargs: object) -> str:
+        observed.append((args, kwargs))
+        return "scheduler"
+
+    compatible = _without_removed_scheduler_verbose(scheduler)
+    assert compatible("optimizer", mode="min", factor=0.95, patience=10, verbose=True) == "scheduler"
+    assert observed == [(('optimizer',), {"mode": "min", "factor": 0.95, "patience": 10})]
 
 
 def test_tabsyn_scoped_sources_match_frozen_official_manifest() -> None:
