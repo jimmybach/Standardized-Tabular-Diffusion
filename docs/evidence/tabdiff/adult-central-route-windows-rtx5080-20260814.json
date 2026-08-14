@@ -1,0 +1,57 @@
+{
+  "evidence_schema_version": "1.0.0",
+  "protocol_id": "tabdiff-adult-central-route-v1",
+  "status": "passed",
+  "completed_at": "2026-08-14T16:00:53.4999459Z",
+  "repository_head": "f9626e199119da87a5d6df1f621b0b110738e3fc",
+  "source_real_function_evidence": {
+    "path": "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
+    "sha256": "757804f6d62a79db0458a24d6f5aeebe8e31b38df046570e622e714fa1b9c413"
+  },
+  "input": {
+    "dataset_id": "adult",
+    "model_id": "tabdiff",
+    "generation_seed": 3,
+    "rows": 32561,
+    "sample_sha256": "c45689e95b3b5f914d87f1707f57bb875978a3d31749667668edc58e9a76dbd2",
+    "dataset_profile": "configs/datasets/adult-uci-2-v1.json",
+    "comparison_track": "native"
+  },
+  "p3_validity": {
+    "terminal_status": "success",
+    "finalization_status": "finalized",
+    "request_fingerprint": "9505e94368904b64b0efb53a0bf82b7123cae730956ce4153c7ccf3ad3b2e0a0",
+    "summary_sha256": "7963a4701b4f828d820d4da5d76179e1384272eb2ccb95ffc81dab6b42bf824c",
+    "bundle_checksums_sha256": "eceb70dc3982ef2fbd66ca53ae6f884b6d7a4e7b28b71f9f32ffedae7753f93f",
+    "structural_gate": "passed",
+    "synthetic_repair_applied": false,
+    "fully_valid_row_rate": 1.0,
+    "validity_score": 0.9999999999999999,
+    "computed_atomic_results": 15,
+    "not_applicable_atomic_results": 1
+  },
+  "p2_shape_trend": {
+    "terminal_status": "success",
+    "finalization_status": "finalized",
+    "request_fingerprint": "a449958f979427544a2513389ff5f9d41ec62ce8a7da60974ab8aff932bbff5b",
+    "summary_sha256": "8cd46e0b97bdb9b6f3913e523dc7c86c91d0772bc88530e04ff7d5d1fc8cbbde",
+    "bundle_checksums_sha256": "ad8eee6418024489e2641d786e1fb35ec0ef28f9c7fd4a9db8893d0ed35ccad6",
+    "structural_gate": "passed",
+    "column_shapes": 0.964263996805995,
+    "column_pair_trends": 0.8313575545386608,
+    "combined_score": null,
+    "computed_atomic_results": 27,
+    "not_applicable_atomic_results": 93
+  },
+  "assertions": {
+    "adapter_output_accepted_by_central_route": true,
+    "p3_bundle_finalized": true,
+    "p2_bundle_finalized": true,
+    "p3_structural_gate_passed": true,
+    "p2_structural_gate_passed": true,
+    "synthetic_repair_applied": false,
+    "official_results_admitted": false,
+    "release_support_admitted": false
+  },
+  "claim_boundary": "Development integration evidence only. The numerical values are diagnostic and do not admit this run, TabDiff, Adult, or any aggregate to Official Results."
+}

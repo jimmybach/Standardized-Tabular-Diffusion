@@ -1499,6 +1499,32 @@
       ],
       "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
       "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-configurable-seed-overlay-v1",
+          "reason": "The official deterministic entry point hard-codes seed 0 and does not expose the common generation-seed contract.",
+          "semantic_effect": "After an exact source digest check, six seed constants are replaced in memory with args.seed. Seed 0 remains exact; nonzero same-seed repeatability and cross-seed variation are validated."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-config-path-overlay-v1",
+          "reason": "The official module hard-codes its TOML path and cannot consume RunSpec.upstream_config_path.",
+          "semantic_effect": "A checksum-locked in-memory edit selects the supplied complete TOML or retains the official default. No configuration value is rewritten by the overlay."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-pytorch-reduce-lr-verbose-bridge-v1",
+          "reason": "PyTorch 2.8 removed the deprecated ReduceLROnPlateau verbose argument used by the pinned source.",
+          "semantic_effect": "The bridge accepts and discards only the removed logging argument, then delegates every scheduling operation to installed PyTorch."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-diagnostic-plot-bypass-v1",
+          "reason": "Optional Kaleido density-PNG rendering fails under some Windows non-ASCII paths.",
+          "semantic_effect": "Only density_plots.png rendering is disabled in memory. Synthetic tables, density metrics, and serialized metric results remain enabled."
+        }
+      ],
       "component_id": "tabdiff",
       "distribution_form": "source",
       "imported_at_repository_commit": "1caea9aee653d6d220765728951fe2de437268ad",
@@ -1506,7 +1532,7 @@
       "license_path": "TabDiff-main/LICENSE",
       "local_path": "TabDiff-main",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-and-release-gates",
+      "official_eligibility": "blocked-pending-complete-central-evaluation-dataset-model-result-and-release-admission-gates",
       "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
@@ -1531,6 +1557,22 @@
         "repository_commit": "230adafe96dc7ec224bada220e1ee184972b61ad",
         "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879",
         "status": "passed-native-parity-validated"
+      },
+      "real_function_validation": {
+        "protocol_id": "tabdiff-adult-real-function-windows-v1",
+        "status": "passed",
+        "repository_commit": "f9626e199119da87a5d6df1f621b0b110738e3fc",
+        "environment": "Windows / Python 3.11.15 / torch 2.8.0+cu128 / NVIDIA GeForce RTX 5080",
+        "dataset": "Adult official 32561/16281 split with train-only imputation",
+        "training_runs": 1,
+        "training_seed": 0,
+        "generation_seeds": [3, 4, 5],
+        "rows_per_generated_table": 32561,
+        "checkpoint_sha256": "4319e6938a1ae4619cdd17a995d71f5de0d50c450ff096754e6ef6ab2e0a26f0",
+        "evidence_path": "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
+        "central_route_evidence_path": "docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json",
+        "official_results_admitted": false,
+        "release_support_admitted": false
       }
     },
     "tabularargn": {

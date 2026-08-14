@@ -64,6 +64,14 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - Changes include estimator configuration, compute backend, objectives, seeded splitting, failure handling, and edge-case metric semantics.
 - Disposition: removed. The pinned method-author file was restored exactly modulo repository line endings. This upstream evaluator remains outside the benchmark's formal leaderboard path; official results must use the separately reviewed central versioned evaluator.
 
+### TabDiff runtime adaptation disposition
+
+- All 27 frozen `TabDiff-main` files remain exact against method-author commit `5ecdb3356261aea72716cc9a779f31d7ad083bf4`; no tracked upstream source is patched.
+- The adapter applies four checksum-locked, in-memory boundaries: configurable seed, optional complete TOML selection, a logging-only PyTorch scheduler API bridge, and optional density-PNG suppression for Windows non-ASCII paths. Exact source digests and edit multiplicities are verified before import.
+- Seed 0 retains native exactness. Repeated nonzero seeds reproduce exact bytes, different seeds vary, and the effective seed is retained per run.
+- A real Windows/Python 3.11/RTX 5080 Adult run trained the official 10.6M-parameter architecture once and generated three distinct complete tables. The official `dequant_dist="round"` inverse mode is required for standardized integer-valued datasets; the adapter rejects fractional integer output rather than repairing it.
+- The retained real-function and central P2/P3 evidence does not grant Official Results eligibility or release support.
+
 ### TabSyn patch disposition
 
 - The six modified official files were restored to commit `cb5ac0f74ec36ee88e7a974a393dfbef50d42da7`.
