@@ -19,6 +19,10 @@ P8_CROSS_PLATFORM_FIX_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native
 P8_CROSS_PLATFORM_FIX_EVIDENCE_SHA256 = "a8efdd94d7275a027ae2d424313d7eaa13e124c47922553ddf3a6ec9825d00a3"
 P8_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-native-windows11-py311-bb09085.json"
 P8_EVIDENCE_SHA256 = "973c2c5ac182a5f9212b5dd7308a313ac0a8024aca54eeeaca9194a74362f55c"
+P8_HOSTED_LINUX_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-hosted-linux-py311-run-31760027871.json"
+P8_HOSTED_LINUX_EVIDENCE_SHA256 = "3674256f3061f227b223ba9c769a60a101460b021e77fec611d9a9269b8295f1"
+P8_HOSTED_WINDOWS_EVIDENCE = REPO_ROOT / "docs/evidence/evaluation/p8-hosted-windows-py311-run-31760027871.json"
+P8_HOSTED_WINDOWS_EVIDENCE_SHA256 = "4d5ab1cebc8957a8d5d35d06d01bddec3c2ff50057ed915bbc2cf71d66d5d1aa"
 
 
 def test_release_version_and_citation_are_synchronized() -> None:
@@ -175,3 +179,25 @@ def test_packaged_quickstart_table_has_platform_canonical_line_endings() -> None
     payload = (REPO_ROOT / "standardized_tabular_diffusion/resources/quickstart/train.csv").read_bytes()
     assert b"\r" not in payload
     assert payload.endswith(b"\n")
+
+
+def test_hosted_p8_evidence_matches_native_scientific_input_identity() -> None:
+    native = read_json(P8_EVIDENCE)
+    linux = read_json(P8_HOSTED_LINUX_EVIDENCE)
+    windows = read_json(P8_HOSTED_WINDOWS_EVIDENCE)
+    assert sha256_file(P8_HOSTED_LINUX_EVIDENCE) == P8_HOSTED_LINUX_EVIDENCE_SHA256
+    assert sha256_file(P8_HOSTED_WINDOWS_EVIDENCE) == P8_HOSTED_WINDOWS_EVIDENCE_SHA256
+    assert {linux["status"], windows["status"]} == {"pass"}
+    assert set(linux["exit_gates"].values()) == {"pass"}
+    assert set(windows["exit_gates"].values()) == {"pass"}
+    assert linux["environment"]["platform"].startswith("Linux / ")
+    assert windows["environment"]["platform"] == "Windows / AMD64"
+    assert windows["environment"]["primary_family_environment_required"] is True
+    assert windows["environment"]["native_windows_release"]["product_type"] == "ServerNT"
+    assert windows["environment"]["native_windows_release"]["is_exact_native_windows_11_python_311_x86_64"] is False
+    fingerprints = {
+        item["result_summary"]["table_only_request_fingerprint"]
+        for item in (native, linux, windows)
+    }
+    assert fingerprints == {"372dbb5bb94243346e8b7ab4b7ac82381f2a5790873240642e1d8ceb06a2fc82"}
+    assert linux["locked_files"] == windows["locked_files"] == native["locked_files"]
