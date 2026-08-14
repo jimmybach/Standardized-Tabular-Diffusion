@@ -1,6 +1,6 @@
 # Development Baseline
 
-- Status: P0 through P3 passed; P4 and P5 v1 are conditionally protocol-frozen; dataset, model, run, publication, and release-support gates remain independent
+- Status: P0-P8 engineering surfaces implemented for `0.1.0rc1`; P4 and P5 v1 are conditionally protocol-frozen; Official and release-support admissions remain independent
 - Primary environment: Windows and Python 3.11; Linux is the secondary compatibility family
 - Last updated: 2026-08-12
 
@@ -21,6 +21,9 @@ python -m pip install -e ".[evaluation]"
 # Dependency-isolated P3 Validity and preprocessing path
 python -m pip install -e ".[validity]"
 
+# Packaged release quickstart: official SMOTE -> P3 bundle -> diagnostic snapshot
+python -m pip install -e ".[quickstart]"
+
 # Dependency-light schema, registry, profile, and bundle validation
 python -m pip install -e ".[contracts]"
 
@@ -34,7 +37,7 @@ python -m pip install -e ".[test]"
 python -m pip install -e ".[dev]"
 ~~~
 
-The broad [`requirements-benchmark-stack.txt`](../requirements-benchmark-stack.txt) remains a legacy convenience surface for existing adapters. It is not the core package contract and is not the future source-parity evaluation lock. Pinned backend-specific evaluation environments will be added with the metrics they validate.
+The broad [`requirements-benchmark-stack.txt`](../requirements-benchmark-stack.txt) remains a legacy convenience surface for existing adapters. It is not the package or release contract. Use the narrow extra for each adapter or evaluation surface.
 
 ## Import boundary
 

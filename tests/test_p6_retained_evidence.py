@@ -18,6 +18,8 @@ EVOLVING_SHARED_SURFACES = {
     "pyproject.toml",
     "standardized_tabular_diffusion/cli.py",
     "standardized_tabular_diffusion/evaluation/schema.py",
+    "standardized_tabular_diffusion/orchestration/pipeline.py",
+    "standardized_tabular_diffusion/orchestration/worker.py",
     "standardized_tabular_diffusion/validation/core_ci.py",
     "tests/evaluation/test_contracts_and_schemas.py",
     "tests/test_cli.py",
@@ -66,7 +68,8 @@ def test_retained_p6_current_evidence_is_immutable_and_binds_p6_owned_implementa
         path = REPO_ROOT / relative
         assert path.is_file()
         assert len(digest) == 64
-        # Shared packaging, schema routing, CLI, and cross-phase tests are expected to evolve in P7+.
+            # Shared packaging, schema routing, CLI, orchestration-to-evaluation wiring, and cross-phase
+            # tests are expected to evolve in P7+.
         # The immutable evidence and its recorded commit retain their historical hashes; current-tree
         # drift checks apply only to the P6-owned engine, schemas, workflow, validator, and tests.
         if relative not in EVOLVING_SHARED_SURFACES:

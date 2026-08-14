@@ -41,6 +41,19 @@ def _relative_output(root: Path, path: str | Path | None, *, required: bool = Fa
     return relative
 
 
+def _relative_bundle(root: Path, path: str | Path | None) -> str | None:
+    if path is None:
+        return None
+    candidate = Path(path)
+    try:
+        relative = candidate.resolve().relative_to(root).as_posix()
+    except (OSError, ValueError):
+        return None
+    if candidate.is_symlink() or not candidate.is_dir() or not (candidate / "manifest.json").is_file():
+        return None
+    return relative
+
+
 def _portable(value: Any, *, run_root: Path, repo_root: Path, key: str | None = None) -> Any:
     if key is not None and _SECRET_KEY.search(key):
         return "<redacted>"
@@ -130,6 +143,7 @@ def _bundle_result(operation: str, config: ExperimentConfig, root: Path, repo_ro
     bundle = run_action(action_config, operation)
     generated = _relative_output(root, bundle.generated_sample_path, required=operation == "sample")
     upstream_metrics = _relative_output(root, bundle.upstream_metrics_path)
+    evaluation_bundle = _relative_bundle(root, bundle.evaluation_bundle_path)
     standardized_summary = _relative_output(root, bundle.standardized_summary_path)
     actual_rows = _count_rows(root / generated) if generated is not None else None
     payload = {
@@ -139,13 +153,14 @@ def _bundle_result(operation: str, config: ExperimentConfig, root: Path, repo_ro
         "dataset": bundle.dataset,
         "generated_sample_path": generated,
         "upstream_metrics_path": upstream_metrics,
+        "evaluation_bundle_path": evaluation_bundle,
         "standardized_summary_path": standardized_summary,
         "notes": _portable(bundle.notes, run_root=root, repo_root=repo_root),
     }
     if operation == "sample":
         cache_safe = generated is not None
     elif operation == "evaluate":
-        cache_safe = upstream_metrics is not None or standardized_summary is not None
+        cache_safe = evaluation_bundle is not None
     else:
         cache_safe = True
     return payload, actual_rows, cache_safe

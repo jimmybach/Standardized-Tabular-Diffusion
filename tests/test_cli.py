@@ -92,7 +92,8 @@ def test_cli_show_model_inventory_prints_expected_entry(monkeypatch, capsys) -> 
 
     assert payload["name"] == "realtabformer"
     assert payload["family"] == "llm"
-    assert payload["runnable_recommendation"] == "yes"
+    assert payload["research_assessment"]["runnable_recommendation"] == "yes"
+    assert payload["research_assessment"]["status_authority"] == "non-normative-landscape-review"
 
 
 def test_cli_show_model_inventory_can_describe_not_yet_integrated_method(monkeypatch, capsys) -> None:
@@ -299,7 +300,7 @@ def test_cli_list_models_details_exposes_validation_without_release_claims(monke
     assert payload["models"]["tabdiff"]["validation_level"] == "native-parity-validated"
     assert payload["models"]["tabdiff"]["benchmark_track"] == "experimental"
     assert payload["models"]["tabdiff"]["support_level"] == "unsupported"
-    assert payload["models"]["tabddpm"]["evaluation_input"] == "upstream-artifacts"
+    assert payload["models"]["tabddpm"]["evaluation_input"] == "sample-file"
 
 
 def test_cli_lists_checksum_pinned_dataset_sources(monkeypatch, capsys) -> None:

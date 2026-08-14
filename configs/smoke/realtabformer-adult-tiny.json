@@ -37,11 +37,6 @@
   "evaluation": {
     "enabled": false,
     "total_time_limit_seconds": 900,
-    "compute_density": true,
-    "compute_ml_efficacy": true,
-    "compute_detection": true,
-    "compute_privacy": true,
-    "compute_structural_fidelity": true,
     "extra": {}
   },
   "upstream_config_path": null,

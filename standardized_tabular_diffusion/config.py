@@ -48,11 +48,12 @@ class SampleConfig:
 class EvaluationConfig:
     enabled: bool = True
     total_time_limit_seconds: int = 900
-    compute_density: bool = True
-    compute_ml_efficacy: bool = True
-    compute_detection: bool = True
-    compute_privacy: bool = True
-    compute_structural_fidelity: bool = True
+    protocol: str = "p3-validity"
+    dataset_profile_path: str | None = None
+    reference_path: str | None = None
+    real_test_path: str | None = None
+    comparison_track: str = "native"
+    evaluator_seeds: list[int] | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -62,6 +63,22 @@ class EvaluationConfig:
             or self.total_time_limit_seconds <= 0
         ):
             raise ValueError("evaluation.total_time_limit_seconds must be a positive integer")
+        if self.protocol not in {
+            "p2-shape-trend",
+            "p3-validity",
+            "p4-utility",
+            "p5-high-order-privacy",
+        }:
+            raise ValueError(f"Unsupported central evaluation protocol: {self.protocol!r}")
+        if self.comparison_track not in {"native", "standardized-tuning"}:
+            raise ValueError("evaluation.comparison_track must be 'native' or 'standardized-tuning'")
+        if self.evaluator_seeds is not None and (
+            not self.evaluator_seeds
+            or any(isinstance(seed, bool) or not isinstance(seed, int) for seed in self.evaluator_seeds)
+            or any(seed < 0 for seed in self.evaluator_seeds)
+            or len(set(self.evaluator_seeds)) != len(self.evaluator_seeds)
+        ):
+            raise ValueError("evaluation.evaluator_seeds must contain unique non-negative integers")
         _validate_extra("evaluation", self.extra)
 
 
@@ -142,13 +159,25 @@ def load_experiment_config(path: str | Path) -> ExperimentConfig:
     for section in ("train", "sample", "evaluation"):
         if section in payload and not isinstance(payload[section], dict):
             raise TypeError(f"{section} must be a JSON object")
+    evaluation_payload = dict(payload.get("evaluation", {}))
+    for legacy_key in (
+        "compute_density",
+        "compute_ml_efficacy",
+        "compute_detection",
+        "compute_privacy",
+        "compute_structural_fidelity",
+    ):
+        if legacy_key in evaluation_payload and evaluation_payload.pop(legacy_key) is not True:
+            raise ValueError(
+                f"Legacy evaluation selector {legacy_key!r} is retired; select a versioned protocol instead"
+            )
     return ExperimentConfig(
         model=payload["model"],
         dataset=payload["dataset"],
         output_dir=payload["output_dir"],
         train=TrainConfig(**payload.get("train", {})),
         sample=SampleConfig(**payload.get("sample", {})),
-        evaluation=EvaluationConfig(**payload.get("evaluation", {})),
+        evaluation=EvaluationConfig(**evaluation_payload),
         upstream_config_path=payload.get("upstream_config_path"),
         tags=payload.get("tags", []),
         notes=payload.get("notes"),

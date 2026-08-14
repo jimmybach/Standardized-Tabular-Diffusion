@@ -312,7 +312,7 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     assert json.loads((bundle.output_dir / "artifacts.json").read_text())["generated_sample_path"] == str(sample_path)
 
 
-def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalizes_summary(
+def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_evaluation_is_retired(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -354,22 +354,6 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     dataset_spec.train_data_path.write_text("a,b\n1,0\n")
     dataset_spec.test_data_path.write_text("a,b\n1,0\n")
 
-    normalized_calls: list[tuple[str, Path, dict[str, Path | None]]] = []
-
-    def fake_normalize(dataset: str, output_path: Path, metrics_paths: dict[str, Path | None]) -> None:
-        normalized_calls.append((dataset, output_path, metrics_paths))
-        output_path.write_text(
-            json.dumps(
-                {
-                    "dataset": dataset,
-                    "metrics_paths": {k: None if v is None else str(v) for k, v in metrics_paths.items()},
-                },
-                indent=2,
-            )
-        )
-
-    monkeypatch.setattr("standardized_tabular_diffusion.models.tabddpm.normalize_tabddpm_summary", fake_normalize)
-
     train_config = ExperimentConfig(
         model="tabddpm",
         dataset="adult",
@@ -392,8 +376,6 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
     sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
-    catboost_path = tmp_path / "catboost.json"
-    catboost_path.write_text("{}")
     eval_config = ExperimentConfig(
         model="tabddpm",
         dataset="adult",
@@ -401,9 +383,10 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
         upstream_config_path=str(config_path),
         train=TrainConfig(enabled=False),
         sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=True, extra={"results_catboost_path": str(catboost_path)}),
+        evaluation=EvaluationConfig(enabled=True),
     )
-    eval_bundle = adapter.evaluate_from_config(eval_config, dataset_spec=dataset_spec)
+    with pytest.raises(RuntimeError, match="central runner"):
+        adapter.evaluate_from_config(eval_config, dataset_spec=dataset_spec)
 
     assert commands == [
         (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
@@ -413,19 +396,7 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_evaluate_normalize
     assert environments == [expected_environment, expected_environment]
     assert train_bundle.output_dir.joinpath("artifacts.json").exists()
     assert sample_bundle.output_dir.joinpath("artifacts.json").exists()
-    assert eval_bundle.standardized_summary_path == Path(eval_config.output_dir) / "standardized_summary.json"
-    assert normalized_calls == [
-        (
-            "adult",
-            Path(eval_config.output_dir) / "standardized_summary.json",
-            {
-                "catboost": catboost_path,
-                "mlp": None,
-                "privacy": None,
-                "simple": None,
-            },
-        )
-    ]
+    assert not Path(eval_config.output_dir).joinpath("standardized_summary.json").exists()
 
 
 def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: Path) -> None:
@@ -433,8 +404,7 @@ def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: P
     sample_path.write_text("x\n1\n")
     config_path = tmp_path / "config.toml"
     config_path.write_text("seed = 1\n")
-    metrics_path = tmp_path / "metrics.json"
-    metrics_path.write_text("{}")
+    profile_path = Path(__file__).resolve().parents[1] / "configs" / "datasets" / "adult-uci-2-v1.json"
 
     dataset_spec = type(
         "Spec",
@@ -458,7 +428,11 @@ def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: P
         output_dir=str(tmp_path / "out-tabdiff"),
         train=TrainConfig(enabled=False),
         sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=True, extra={"sample_path": str(sample_path)}),
+        evaluation=EvaluationConfig(
+            enabled=True,
+            dataset_profile_path=str(profile_path),
+            extra={"sample_path": str(sample_path)},
+        ),
     )
     tabddpm_eval = ExperimentConfig(
         model="tabddpm",
@@ -467,7 +441,11 @@ def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: P
         upstream_config_path=str(config_path),
         train=TrainConfig(enabled=False),
         sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=True, extra={"results_catboost_path": str(metrics_path)}),
+        evaluation=EvaluationConfig(
+            enabled=True,
+            dataset_profile_path=str(profile_path),
+            extra={"sample_path": str(sample_path)},
+        ),
     )
 
     ready_tabdiff = validate_action_inputs(tabdiff_eval, "evaluate", dataset_spec=dataset_spec)

@@ -25,6 +25,10 @@ apply to the affected surface. New behavior should include deterministic tests
 and machine-readable evidence where the repository's validation policy requires
 it.
 
+Public adapter evaluation must go through the central versioned engine. Do not add a model-local metric implementation or write `standardized_summary.json`. Existing legacy summaries may only be handled through the read-only importer during its declared migration window.
+
+Before opening a pull request, use a focused test during development and then run the applicable release gates. Changes to a public contract must update its schema, tests, English documentation, and planned Chinese review translation together.
+
 ## Developer Certificate of Origin
 
 This project uses the Developer Certificate of Origin 1.1 rather than a

@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-from standardized_tabular_diffusion.evaluation.tabstruct import normalize_tabdiff_or_tabsyn_summary
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 
@@ -160,24 +159,6 @@ class TabSynAdapter(BaseModelAdapter):
         return self._write_bundle(bundle)
 
     def evaluate(self, spec: RunSpec) -> ArtifactBundle:
-        self._ensure_output_dir(spec)
-        sample_path = spec.extra.get("sample_path")
-        if sample_path is None:
-            raise ValueError("TabSyn evaluation requires spec.extra['sample_path'].")
-        summary_path = spec.output_dir / "standardized_summary.json"
-        normalize_tabdiff_or_tabsyn_summary(
-            repo_root=self.repo_root,
-            model_name=self.model_name,
-            dataset=spec.dataset,
-            sample_path=Path(sample_path),
-            output_path=summary_path,
+        raise RuntimeError(
+            "TabSyn adapter-local legacy evaluation is retired; use the central runner evaluation path."
         )
-        bundle = ArtifactBundle(
-            model=self.model_name,
-            dataset=spec.dataset,
-            output_dir=spec.output_dir,
-            upstream_workdir=self.upstream_root,
-            generated_sample_path=Path(sample_path),
-            standardized_summary_path=summary_path,
-        )
-        return self._write_bundle(bundle)

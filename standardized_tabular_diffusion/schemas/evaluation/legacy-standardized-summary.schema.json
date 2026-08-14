@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standardized-tabular-diffusion.org/schemas/legacy-standardized-summary/1.0.0",
+  "title": "Frozen legacy standardized_summary.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "protocol_name", "model", "dataset", "metrics", "tabstruct_alignment"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "protocol_name": {"const": "tabstruct-aligned-v1"},
+    "model": {"type": "string", "minLength": 1},
+    "dataset": {"type": "string", "minLength": 1},
+    "sample_path": {"type": "string", "minLength": 1},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["density", "ml_efficacy", "detection", "privacy", "structural_fidelity"],
+      "properties": {
+        "density": {"$ref": "#/$defs/density"},
+        "ml_efficacy": {"$ref": "#/$defs/mlEfficacy"},
+        "detection": {"$ref": "#/$defs/detection"},
+        "privacy": {"$ref": "#/$defs/privacy"},
+        "structural_fidelity": {"$ref": "#/$defs/structuralFidelity"}
+      }
+    },
+    "evaluation_failures": {"type": "object", "additionalProperties": {"type": "string"}},
+    "tabstruct_alignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["density_fidelity", "ml_efficacy", "detection", "privacy", "structural_fidelity"],
+      "properties": {
+        "density_fidelity": {"type": "string"},
+        "ml_efficacy": {"type": "string"},
+        "detection": {"type": "string"},
+        "privacy": {"type": "string"},
+        "structural_fidelity": {"type": "string"}
+      }
+    }
+  },
+  "$defs": {
+    "nullableNumber": {"type": ["number", "null"]},
+    "density": {
+      "type": "object", "additionalProperties": false,
+      "required": ["shape_score", "trend_score", "overall_score", "status"],
+      "properties": {
+        "shape_score": {"$ref": "#/$defs/nullableNumber"},
+        "trend_score": {"$ref": "#/$defs/nullableNumber"},
+        "overall_score": {"$ref": "#/$defs/nullableNumber"},
+        "status": {"type": "string"},
+        "error": {"type": ["string", "null"]}
+      }
+    },
+    "mlEfficacy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["primary_metric_name", "primary_metric_value", "task_type", "details"],
+      "properties": {
+        "primary_metric_name": {"type": ["string", "null"]},
+        "primary_metric_value": {"$ref": "#/$defs/nullableNumber"},
+        "task_type": {"type": ["string", "null"]},
+        "details": {"type": "object"},
+        "status": {"type": "string"},
+        "error": {"type": ["string", "null"]}
+      }
+    },
+    "detection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["logistic_detection", "status"],
+      "properties": {
+        "logistic_detection": {"$ref": "#/$defs/nullableNumber"},
+        "status": {"type": "string"},
+        "error": {"type": ["string", "null"]}
+      }
+    },
+    "privacy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dcr_score"],
+      "properties": {
+        "dcr_score": {"$ref": "#/$defs/nullableNumber"},
+        "status": {"type": "string"},
+        "details": {"description": "Opaque upstream legacy payload; preserved but never converted", "type": ["object", "null"]}
+      }
+    },
+    "structuralFidelity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["global_utility", "status"],
+      "properties": {
+        "global_utility": {"$ref": "#/$defs/nullableNumber"},
+        "local_utility": {"$ref": "#/$defs/nullableNumber"},
+        "status": {"type": "string"},
+        "message": {"type": "string"},
+        "implementation": {"type": "object"},
+        "utility_per_feature": {"type": "object"},
+        "column_groups": {"type": "object"}
+      }
+    }
+  }
+}

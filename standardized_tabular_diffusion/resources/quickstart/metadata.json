@@ -1,0 +1,7 @@
+{
+  "dataset_id": "quickstart-demo",
+  "description": "Artificial mixed-type classification data created for the repository quickstart.",
+  "license": "Apache-2.0",
+  "redistribution": "included-with-package",
+  "contains_real_people_or_events": false
+}
