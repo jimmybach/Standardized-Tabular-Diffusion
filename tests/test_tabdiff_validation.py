@@ -75,7 +75,7 @@ def test_tabdiff_adult_real_function_evidence_is_complete_and_immutable() -> Non
     evidence = json.loads(evidence_bytes)
 
     assert hashlib.sha256(evidence_bytes).hexdigest() == (
-        "757804f6d62a79db0458a24d6f5aeebe8e31b38df046570e622e714fa1b9c413"
+        "6c14d0d4dd15787c732e9854106b922f418ad77b7c3150ffc0fd485cb48e0079"
     )
     assert evidence["status"] == "passed"
     assert evidence["repository"]["head"] == "f9626e199119da87a5d6df1f621b0b110738e3fc"
@@ -96,7 +96,7 @@ def test_tabdiff_central_route_evidence_is_complete_and_immutable() -> None:
     evidence = json.loads(evidence_bytes)
 
     assert hashlib.sha256(evidence_bytes).hexdigest() == (
-        "31f98d3c95368c1de947d04d03ae921cfc73b21219f167d6c2ad04bcb756b8fe"
+        "e87b65f80f5b4c5dfb438498c99b77fa13cfe2b0d6862e6ef1f2b89a3298bf04"
     )
     assert evidence["status"] == "passed"
     assert evidence["p3_validity"]["structural_gate"] == "passed"

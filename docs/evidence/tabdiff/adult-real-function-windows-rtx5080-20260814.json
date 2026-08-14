@@ -115,7 +115,8 @@
   "repository": {
     "branch": "codex/adult-three-model-benchmark",
     "head": "f9626e199119da87a5d6df1f621b0b110738e3fc",
-    "working_tree_dirty": true
+    "working_tree_dirty": true,
+    "working_tree_note": "The prior failed-attempt evidence file was present and untracked when the successful run began; execution source was fixed at the recorded committed head."
   },
   "samples": [
     {

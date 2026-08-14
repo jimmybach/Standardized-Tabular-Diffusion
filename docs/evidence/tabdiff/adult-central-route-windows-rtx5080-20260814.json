@@ -6,7 +6,7 @@
   "repository_head": "f9626e199119da87a5d6df1f621b0b110738e3fc",
   "source_real_function_evidence": {
     "path": "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
-    "sha256": "757804f6d62a79db0458a24d6f5aeebe8e31b38df046570e622e714fa1b9c413"
+    "sha256": "6c14d0d4dd15787c732e9854106b922f418ad77b7c3150ffc0fd485cb48e0079"
   },
   "input": {
     "dataset_id": "adult",
