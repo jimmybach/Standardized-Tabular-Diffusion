@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import inspect
 import json
 import os
@@ -21,6 +22,26 @@ from standardized_tabular_diffusion.models.base import BaseModelAdapter
 class TabDiffAdapter(BaseModelAdapter):
     model_name = "tabdiff"
     upstream_dirname = "TabDiff-main"
+
+    @staticmethod
+    def _pytorch_runtime_metadata() -> dict[str, object]:
+        if importlib.util.find_spec("torch") is None:
+            return {
+                "inspection_state": "unavailable-in-parent-environment",
+                "bridge_active": None,
+                "torch_version": None,
+            }
+
+        import torch
+
+        scheduler_accepts_verbose = (
+            "verbose" in inspect.signature(torch.optim.lr_scheduler.ReduceLROnPlateau).parameters
+        )
+        return {
+            "inspection_state": "observed",
+            "bridge_active": not scheduler_accepts_verbose,
+            "torch_version": torch.__version__,
+        }
 
     @staticmethod
     def _gpu_index(spec: RunSpec) -> int:
@@ -163,11 +184,7 @@ class TabDiffAdapter(BaseModelAdapter):
         config_path_overlay = load_config_path_overlay_record()
         diagnostic_plot_bypass = load_diagnostic_plot_bypass_record()
         runtime_compatibility = json.loads(RUNTIME_COMPATIBILITY_RECORD_PATH.read_text(encoding="utf-8"))
-        import torch
-
-        scheduler_accepts_verbose = (
-            "verbose" in inspect.signature(torch.optim.lr_scheduler.ReduceLROnPlateau).parameters
-        )
+        pytorch_runtime = self._pytorch_runtime_metadata()
         payload: dict[str, object] = {
             "schema_version": 1,
             "model": self.model_name,
@@ -194,8 +211,7 @@ class TabDiffAdapter(BaseModelAdapter):
             },
             "runtime_compatibility": {
                 "bridge_id": runtime_compatibility["bridge_id"],
-                "bridge_active": not scheduler_accepts_verbose,
-                "torch_version": torch.__version__,
+                **pytorch_runtime,
                 "scientific_effect": runtime_compatibility["scientific_effect"],
                 "diagnostic_plot_bypass": {
                     "patch_id": diagnostic_plot_bypass["patch_id"],

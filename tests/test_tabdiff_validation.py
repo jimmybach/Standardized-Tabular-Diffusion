@@ -9,6 +9,7 @@ from types import SimpleNamespace
 
 import pytest
 
+import standardized_tabular_diffusion.models.tabdiff as tabdiff_module
 from standardized_tabular_diffusion.compat.tabdiff_seed_launcher import (
     TabDiffSeedOverlayError,
     apply_config_path_overlay,
@@ -319,6 +320,27 @@ def test_tabdiff_new_pytorch_scheduler_bridge_discards_only_verbose() -> None:
     assert scheduler.optimizer is optimizer
     assert scheduler.factor == 0.9
     assert install_pytorch_compatibility(torch_module) == []
+
+
+def test_tabdiff_run_metadata_does_not_require_optional_torch_in_parent_environment(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(tabdiff_module.importlib.util, "find_spec", lambda name: None)
+    output_dir = tmp_path / "artifacts"
+    output_dir.mkdir()
+    adapter = TabDiffAdapter(tmp_path)
+
+    metadata_path = adapter._write_run_metadata(
+        RunSpec(model="tabdiff", dataset="toy", output_dir=output_dir),
+        action="train",
+    )
+
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    compatibility = metadata["runtime_compatibility"]
+    assert compatibility["inspection_state"] == "unavailable-in-parent-environment"
+    assert compatibility["bridge_active"] is None
+    assert compatibility["torch_version"] is None
 
 
 def test_tabdiff_adapter_rejects_untrusted_explicit_checkpoint(tmp_path: Path) -> None:
