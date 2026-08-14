@@ -4,6 +4,7 @@
   "status": "remediation-regression-passed-v2-pending",
   "completed_at": "2026-08-14",
   "repository_base_commit": "7d71eb45af01f32b05b987d682c7e0b8e5f3638f",
+  "remediation_commit": "127880367330ff33fc65e475139eaf45a605b7f1",
   "claim_boundary": "This evidence establishes root-cause remediation and dependency-light V0/V1 regression behavior for the ten Phase 1 findings. It does not establish a new authoritative V2 model train/sample pass, output quality, native parity, benchmark eligibility, Official Results admission, or release support. Findings remain fixed rather than verified until their applicable V2 probes pass.",
   "upstream_mathematics_modified": false,
   "findings": [

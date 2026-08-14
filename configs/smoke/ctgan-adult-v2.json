@@ -1,0 +1,23 @@
+{
+  "model": "ctgan",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/ctgan",
+  "train": {
+    "enabled": true,
+    "seed": 13,
+    "device": "cuda",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 100,
+      "embedding_dim": 16,
+      "generator_dim": [32, 32],
+      "discriminator_dim": [32, 32],
+      "pac": 10,
+      "verbose": false
+    }
+  },
+  "sample": {"enabled": true, "seed": 17, "num_samples": 32, "checkpoint_path": null, "extra": {}},
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Bounded official-package CTGAN V2 configuration; not a benchmark-quality fit."
+}

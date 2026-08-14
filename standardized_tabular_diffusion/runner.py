@@ -91,9 +91,18 @@ def _claim_action_output(config: ExperimentConfig, action: str, dataset_spec: Da
     )
 
 
-def build_run_context(config: ExperimentConfig, repo_root: Path | None = None) -> dict[str, Any]:
+def build_run_context(
+    config: ExperimentConfig,
+    repo_root: Path | None = None,
+    *,
+    dataset_spec: DatasetSpec | None = None,
+) -> dict[str, Any]:
     adapter = get_adapter(config.model, repo_root=repo_root)
-    dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
+    dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
+    if dataset_spec.name != config.dataset:
+        raise ValueError(
+            f"Explicit DatasetSpec name {dataset_spec.name!r} does not match config dataset {config.dataset!r}."
+        )
     run_spec = adapter.build_run_spec(config, dataset_spec=dataset_spec)
     return {
         "config": config.to_dict(),
@@ -146,9 +155,15 @@ def run_action(
     config: ExperimentConfig,
     action: str,
     repo_root: Path | None = None,
+    *,
+    dataset_spec: DatasetSpec | None = None,
 ):
     adapter = get_adapter(config.model, repo_root=repo_root)
-    dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
+    dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
+    if dataset_spec.name != config.dataset:
+        raise ValueError(
+            f"Explicit DatasetSpec name {dataset_spec.name!r} does not match config dataset {config.dataset!r}."
+        )
     readiness = validate_action_inputs(config, action, dataset_spec=dataset_spec, repo_root=repo_root)
     if not readiness["ready"]:
         raise FileNotFoundError(

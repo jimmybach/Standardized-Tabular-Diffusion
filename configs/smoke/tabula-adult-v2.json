@@ -1,0 +1,28 @@
+{
+  "model": "tabula",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/tabula",
+  "train": {
+    "enabled": true,
+    "seed": 13,
+    "device": "cuda",
+    "extra": {
+      "llm": "sshleifer/tiny-gpt2",
+      "epochs": 1,
+      "batch_size": 2,
+      "max_train_rows": 32,
+      "num_threads": 1,
+      "train_kwargs": {"logging_steps": 1}
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "seed": 17,
+    "num_samples": 8,
+    "checkpoint_path": null,
+    "extra": {"k": 8, "max_length": 160, "temperature": 0.5, "max_empty_batches": 8}
+  },
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Bounded method-author TabuLa V2 configuration using a tiny public GPT-2 fixture."
+}

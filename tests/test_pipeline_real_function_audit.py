@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 from collections import Counter
 from pathlib import Path
 
@@ -213,10 +214,25 @@ def test_phase_2_evidence_records_all_fixes_without_overclaiming_v2() -> None:
     assert phase["targeted_tests_passed"] == targeted["passed"]
     assert phase["full_repository_tests_passed"] == full["passed"]
     assert phase["full_repository_tests_skipped"] == full["skipped"]
+    remediation_commit = evidence["remediation_commit"]
+    assert re.fullmatch(r"[0-9a-f]{40}", remediation_commit)
+    assert (
+        subprocess.check_output(
+            ["git", "rev-parse", remediation_commit],
+            cwd=REPO_ROOT,
+            text=True,
+            encoding="utf-8",
+        ).strip()
+        == remediation_commit
+    )
     for field in ("report", "report_zh_cn", "evidence"):
         assert (REPO_ROOT / phase[field]).is_file()
     for relative, digest in evidence["retained_files_sha256"].items():
         path = REPO_ROOT / relative
         assert path.is_file(), relative
         assert SHA256.fullmatch(digest), relative
-        assert hashlib.sha256(path.read_bytes()).hexdigest() == digest, relative
+        retained_bytes = subprocess.check_output(
+            ["git", "show", f"{remediation_commit}:{relative}"],
+            cwd=REPO_ROOT,
+        )
+        assert hashlib.sha256(retained_bytes).hexdigest() == digest, relative
