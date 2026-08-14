@@ -37,6 +37,8 @@ Tracked upstream source remains unchanged. `standardized_tabular_diffusion/compa
 
 Python 3.11 uses scikit-learn 1.5.2, where `OneHotEncoder` renamed the snapshot's `sparse` keyword to `sparse_output`. The adapter-only `stasy-sklearn-onehot-keyword-v1` bridge forwards the unchanged `False` value to the renamed keyword. It changes neither the encoder nor its dense output.
 
+PyTorch 2.6 changed `torch.load` to default to `weights_only=True`, while the frozen STaSy snapshot stores optimizer, EMA, and NumPy scalar state in its checkpoint and does not pass that argument. On the V2 PyTorch 2.8 runtime, the isolated launcher therefore supplies `weights_only=False` only for the exact run-owned checkpoint that the adapter has already path-confined and SHA-256 verified. Any other path is rejected, the override is restored immediately after the official sampling call, and upstream source remains unchanged. This compatibility bridge does not authorize arbitrary external pickle loading.
+
 These controls configure objects returned by the snapshot's own `get_config` and call its own preprocessing, score model, SDE loss, EMA, checkpoint, sampling, and inverse-transform functions. No repository-side substitute model is used.
 
 The original snapshot's root CLI accepted epoch and row-count flags that STaSy did not consume, selected CUDA unconditionally inside the STaSy modules, and wrote checkpoints under tracked source. The dedicated boundary makes those behaviors explicit and testable instead of silently reporting unsupported controls as effective.
@@ -68,6 +70,7 @@ STaSy checkpoints use PyTorch's pickle-capable format. The adapter therefore:
 - rejects symlinked or externally supplied checkpoints;
 - records the checkpoint SHA-256, source-manifest identity, effective training configuration, seed, and device;
 - verifies the checksum and source identity before sampling; and
+- confines the PyTorch 2.8 legacy-load bridge to that exact verified checkpoint and restores it after sampling; and
 - records sample SHA-256, row count, columns, and sampler configuration.
 
 The smoke preset uses a deliberately small architecture and predictor-corrector schedule. It proves integration behavior only and is not a quality benchmark configuration.

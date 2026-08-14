@@ -107,6 +107,24 @@ def _install_sklearn_onehot_bridge() -> tuple[Any, Any]:
     return sklearn.preprocessing, official_encoder
 
 
+def _install_trusted_checkpoint_load_bridge(expected_checkpoint: Path) -> tuple[Any, Any]:
+    """Bridge PyTorch 2.6's default change for one adapter-verified checkpoint."""
+
+    import torch
+
+    official_load = torch.load
+    trusted_checkpoint = expected_checkpoint.resolve(strict=True)
+
+    def trusted_load(source: Any, *load_args: Any, **load_kwargs: Any) -> Any:
+        if not isinstance(source, (str, os.PathLike)) or Path(source).resolve(strict=True) != trusted_checkpoint:
+            raise PermissionError("STaSy compatibility loading is restricted to the verified run-owned checkpoint.")
+        load_kwargs.setdefault("weights_only", False)
+        return official_load(source, *load_args, **load_kwargs)
+
+    torch.load = trusted_load
+    return torch, official_load
+
+
 def _run_train(args: argparse.Namespace, device: str) -> None:
     from baselines.stasy import main as train_module
 
@@ -147,6 +165,8 @@ def _run_sample(args: argparse.Namespace, device: str) -> None:
     sample_module.json.load = configured_json_load
     official_torch = sample_module.torch
     sample_module.torch = _TorchDeviceProxy(official_torch, device)
+    checkpoint = args.output_dir / "ckpt" / args.dataname / "model.pth"
+    torch_module, official_torch_load = _install_trusted_checkpoint_load_bridge(checkpoint)
     try:
         sample_module.main(
             SimpleNamespace(
@@ -158,6 +178,7 @@ def _run_sample(args: argparse.Namespace, device: str) -> None:
     finally:
         sample_module.json.load = official_json_load
         sample_module.torch = official_torch
+        torch_module.load = official_torch_load
 
 
 def build_parser() -> argparse.ArgumentParser:

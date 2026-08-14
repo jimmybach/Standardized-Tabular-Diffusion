@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import pytest
 
 import standardized_tabular_diffusion.models.vendored_baselines as vendored_baselines
-from standardized_tabular_diffusion.compat.stasy_launcher import _install_sklearn_onehot_bridge
+from standardized_tabular_diffusion.compat.stasy_launcher import (
+    _install_sklearn_onehot_bridge,
+    _install_trusted_checkpoint_load_bridge,
+)
 from standardized_tabular_diffusion.interfaces import RunSpec
 from standardized_tabular_diffusion.models.vendored_baselines import STaSyAdapter
 from standardized_tabular_diffusion.upstream_sources import UpstreamSourceIntegrityError, validate_upstream_source
@@ -74,6 +79,32 @@ def test_stasy_sklearn_bridge_only_renames_the_dense_output_keyword() -> None:
             sklearn_preprocessing.OneHotEncoder(sparse=False, sparse_output=False)
     finally:
         sklearn_preprocessing.OneHotEncoder = official_encoder
+
+
+def test_stasy_checkpoint_bridge_is_scoped_and_explicitly_restorable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    checkpoint = tmp_path / "model.pth"
+    checkpoint.write_bytes(b"test-checkpoint")
+    other = tmp_path / "other.pth"
+    other.write_bytes(b"untrusted")
+    calls: list[tuple[object, tuple[object, ...], dict[str, object]]] = []
+    def fake_load(source: object, *args: object, **kwargs: object) -> str:
+        calls.append((source, args, kwargs))
+        return "loaded"
+
+    fake_torch = SimpleNamespace(load=fake_load)
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    torch_module, installed_over = _install_trusted_checkpoint_load_bridge(checkpoint)
+    try:
+        assert installed_over is fake_load
+        assert torch_module.load(checkpoint, map_location="cpu") == "loaded"
+        assert calls[0][2] == {"map_location": "cpu", "weights_only": False}
+        with pytest.raises(PermissionError, match="verified run-owned checkpoint"):
+            torch_module.load(other)
+    finally:
+        torch_module.load = installed_over
+    assert fake_torch.load is fake_load
 
 
 def test_stasy_adapter_confines_checkpoint_and_honors_requested_rows(tmp_path: Path, monkeypatch) -> None:
