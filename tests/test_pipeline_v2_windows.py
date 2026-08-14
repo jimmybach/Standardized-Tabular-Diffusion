@@ -24,6 +24,7 @@ from standardized_tabular_diffusion.validation.pipeline_v2_windows import (
     _assert_manifest_unchanged,
     _copy_training_artifacts,
     _load_plan,
+    _review_pip_check,
     _verify_environment_lock,
     materialize_fixture,
 )
@@ -46,6 +47,7 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         assert (REPO_ROOT / row["environment_lock"]).is_file()
         assert row["device"] in {"cpu", "cuda"}
         assert isinstance(row["required_packages"], dict)
+        assert isinstance(row.get("pip_check_waivers", []), list)
         config = load_experiment_config(config_path)
         assert config.model == row["model_id"]
         validate_action_controls(config.model, "train", config.train.extra)
@@ -55,6 +57,9 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         assert by_model[model_id]["batch"] == "legacy-cpu"
         assert by_model[model_id]["device"] == "cpu"
         assert by_model[model_id]["required_packages"]["torch"] == "2.3.0"
+    for model_id in ("codi", "stasy", "tabsyn"):
+        assert by_model[model_id]["required_packages"]["libzero"] == "0.0.8"
+        assert len(by_model[model_id]["pip_check_waivers"]) == 1
 
 
 def test_v2_adapter_metadata_is_strict_json_serializable() -> None:
@@ -183,6 +188,44 @@ def test_v2_environment_lock_checks_versions_and_cuda_local_suffix(tmp_path: Pat
 
     with pytest.raises(PipelineV2Error, match="runtime package mismatch"):
         _verify_environment_lock(lock, environment, {"torch": "2.7.0"})
+
+
+def test_v2_pip_check_only_accepts_an_exact_exercised_reviewed_waiver() -> None:
+    line = "libzero 0.0.8 has requirement torch<2,>=1.7, but you have torch 2.8.0+cu128.\n"
+    waiver = {
+        "distribution": "libzero",
+        "version": "0.0.8",
+        "requirement": "torch<2,>=1.7",
+        "installed_dependency": "torch",
+        "installed_dependency_version": "2.8.0+cu128",
+        "reason": "Reviewed stale metadata bound.",
+    }
+    result = _review_pip_check(
+        returncode=1,
+        stdout=line,
+        stderr="",
+        packages={"libzero": "0.0.8", "torch": "2.8.0+cu128"},
+        waivers=[waiver],
+    )
+    assert result["status"] == "pass-with-reviewed-waiver"
+    assert result["conflicts"][0]["requirement"] == "torch<2,>=1.7"
+
+    with pytest.raises(PipelineV2Error, match="lacks one exact reviewed waiver"):
+        _review_pip_check(
+            returncode=1,
+            stdout=line.replace("2.8.0+cu128", "2.8.1+cu128"),
+            stderr="",
+            packages={"libzero": "0.0.8", "torch": "2.8.1+cu128"},
+            waivers=[waiver],
+        )
+    with pytest.raises(PipelineV2Error, match="not exercised"):
+        _review_pip_check(
+            returncode=0,
+            stdout="",
+            stderr="",
+            packages={"libzero": "0.0.8", "torch": "2.8.0+cu128"},
+            waivers=[waiver],
+        )
 
 
 def test_runner_accepts_a_name_matched_explicit_validation_dataset(tmp_path: Path) -> None:

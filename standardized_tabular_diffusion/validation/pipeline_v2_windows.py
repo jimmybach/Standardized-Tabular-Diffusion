@@ -7,6 +7,7 @@ import hashlib
 import importlib.metadata
 import json
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -72,7 +73,87 @@ def _model_entry(plan: dict[str, Any], model_id: str) -> dict[str, Any]:
     return matches[0]
 
 
-def _environment(repo_root: Path) -> dict[str, Any]:
+_PIP_CHECK_CONFLICT = re.compile(
+    r"^(?P<distribution>\S+) (?P<version>\S+) has requirement "
+    r"(?P<requirement>.+), but you have (?P<installed_dependency>\S+) "
+    r"(?P<installed_dependency_version>\S+)\.$"
+)
+
+
+def _review_pip_check(
+    *,
+    returncode: int,
+    stdout: str,
+    stderr: str,
+    packages: dict[str, str],
+    waivers: list[dict[str, str]],
+) -> dict[str, Any]:
+    """Fail closed except for exact, plan-declared stale-metadata conflicts."""
+
+    from packaging.utils import canonicalize_name
+
+    lines = [line.strip() for line in f"{stdout}\n{stderr}".splitlines() if line.strip()]
+    if returncode == 0:
+        if lines:
+            raise PipelineV2Error(f"pip check returned success with unexpected output: {lines}")
+        if waivers:
+            raise PipelineV2Error("Declared pip-check waivers were not exercised")
+        return {"status": "pass", "conflicts": [], "reviewed_waivers": []}
+
+    if not lines:
+        raise PipelineV2Error("pip check failed without a diagnostic")
+    if not waivers:
+        raise PipelineV2Error(f"pip check failed: {'; '.join(lines)}")
+
+    required_fields = {
+        "distribution",
+        "version",
+        "requirement",
+        "installed_dependency",
+        "installed_dependency_version",
+        "reason",
+    }
+    normalized_waivers: list[dict[str, str]] = []
+    for waiver in waivers:
+        if set(waiver) != required_fields or not all(
+            isinstance(waiver[field], str) and waiver[field].strip() for field in required_fields
+        ):
+            raise PipelineV2Error("Each pip-check waiver must contain only the six required non-empty fields")
+        normalized_waivers.append(dict(waiver))
+
+    consumed: set[int] = set()
+    conflicts: list[dict[str, str]] = []
+    for line in lines:
+        match = _PIP_CHECK_CONFLICT.fullmatch(line)
+        if match is None:
+            raise PipelineV2Error(f"Unrecognized pip-check failure cannot be waived: {line}")
+        conflict = match.groupdict()
+        installed_distribution = packages.get(canonicalize_name(conflict["distribution"]))
+        installed_dependency = packages.get(canonicalize_name(conflict["installed_dependency"]))
+        if installed_distribution != conflict["version"] or installed_dependency != conflict[
+            "installed_dependency_version"
+        ]:
+            raise PipelineV2Error(f"pip-check diagnostic does not match the recorded environment: {line}")
+        matches = [
+            index
+            for index, waiver in enumerate(normalized_waivers)
+            if index not in consumed
+            and all(waiver[field] == conflict[field] for field in required_fields - {"reason"})
+        ]
+        if len(matches) != 1:
+            raise PipelineV2Error(f"pip-check failure lacks one exact reviewed waiver: {line}")
+        consumed.add(matches[0])
+        conflicts.append(conflict)
+    if len(consumed) != len(normalized_waivers):
+        raise PipelineV2Error("One or more declared pip-check waivers were not exercised")
+    return {
+        "status": "pass-with-reviewed-waiver",
+        "conflicts": conflicts,
+        "reviewed_waivers": normalized_waivers,
+    }
+
+
+def _environment(repo_root: Path, *, pip_check_waivers: list[dict[str, str]] | None = None) -> dict[str, Any]:
     if platform.system() != "Windows" or sys.version_info[:2] != (3, 11):
         raise PipelineV2Error(
             "Retained V2 evidence requires native Windows and Python 3.11; "
@@ -92,8 +173,13 @@ def _environment(repo_root: Path) -> dict[str, Any]:
         errors="replace",
         check=False,
     )
-    if pip_check.returncode != 0:
-        raise PipelineV2Error(f"pip check failed: {pip_check.stdout}{pip_check.stderr}")
+    pip_check_result = _review_pip_check(
+        returncode=pip_check.returncode,
+        stdout=pip_check.stdout,
+        stderr=pip_check.stderr,
+        packages=packages,
+        waivers=[] if pip_check_waivers is None else pip_check_waivers,
+    )
     hardware: dict[str, Any] = {"torch": None, "cuda_runtime": None, "cuda_available": False, "gpu": None}
     try:
         import torch
@@ -115,7 +201,7 @@ def _environment(repo_root: Path) -> dict[str, Any]:
         "python_executable": str(Path(sys.executable).resolve()),
         "packages": dict(sorted(packages.items())),
         "packages_sha256": _sha256_json(dict(sorted(packages.items()))),
-        "pip_check": "pass",
+        "pip_check": pip_check_result,
         "hardware": hardware,
     }
 
@@ -468,7 +554,7 @@ def run_probe(
     try:
         if _git(repo_root, "status", "--porcelain", "--untracked-files=no"):
             raise PipelineV2Error("V2 probes require a clean tracked worktree")
-        environment = _environment(repo_root)
+        environment = _environment(repo_root, pip_check_waivers=entry.get("pip_check_waivers", []))
         _require_device(entry, environment, plan)
         record["environment"] = environment
         config_path = repo_root / entry["config_path"]
@@ -598,9 +684,9 @@ def finalize_probe(
         raise PipelineV2Error(f"Cannot finalize a non-passing probe: {probe_path}")
     if probe.get("repository_commit") != _git(repo_root, "rev-parse", "HEAD"):
         raise PipelineV2Error("Probe commit differs from the current repository commit")
-    environment = _environment(repo_root)
-    dataset_spec = _dataset_from_record(probe)
     entry = _model_entry(plan, probe["model_id"])
+    environment = _environment(repo_root, pip_check_waivers=entry.get("pip_check_waivers", []))
+    dataset_spec = _dataset_from_record(probe)
     base = load_experiment_config(repo_root / entry["config_path"])
     first_sample = probe["samples"][0]
     config = _action_config(

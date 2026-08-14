@@ -23,7 +23,7 @@ This is an Adult-derived real-data validation fixture, not a new benchmark datas
 
 For each scheduled model, the protocol:
 
-1. requires native Windows, Python 3.11, a clean tracked worktree, a passing `pip check`, the declared dependency lock, and the requested CPU/CUDA device;
+1. requires native Windows, Python 3.11, a clean tracked worktree, a passing `pip check` (or only an exact, plan-declared stale-metadata conflict reviewed below), the declared dependency lock, and the requested CPU/CUDA device;
 2. performs one real fit with training seed `13`;
 3. byte-copies the resulting training artifacts into two separately claimed sample workspaces;
 4. performs real generation at seeds `17` and `29` from identical checkpoint bytes;
@@ -32,6 +32,8 @@ For each scheduled model, the protocol:
 7. retains the command inputs, configuration and lock hashes, adapter/source identity, environment, elapsed time, artifact manifests, output hashes, evaluation bundle identity, failures, and claim boundary.
 
 CPU-only algorithms remain on CPU. Models locked to the validated PyTorch 2.3 runtime also remain on CPU because that runtime predates RTX 5080 support. CUDA-capable adapters with a compatible validated runtime request the declared RTX 5080. Device choice is part of the retained evidence and is derived from the adapter/runtime contract, not inferred from hardware availability alone.
+
+The frozen CoDi, STaSy, and TabSyn snapshot imports `libzero==0.0.8`. That distribution's stale metadata declares `torch<2`, while the exact newer runtime has already passed the retained native-parity workflow. The plan therefore permits only that fully specified `libzero 0.0.8` versus `torch 2.8.0+cu128` diagnostic. The harness checks the installed versions, requires the waiver to be exercised exactly once, records it in evidence, and rejects every changed, additional, unrecognized, or unused waiver.
 
 ## 4. Cost-controlled batches
 
