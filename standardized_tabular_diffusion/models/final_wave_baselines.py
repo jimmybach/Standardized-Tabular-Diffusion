@@ -27,6 +27,10 @@ from standardized_tabular_diffusion.models._runtime import (
     temporary_sys_path,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import (
+    declared_integer_columns,
+    decode_declared_integer_columns,
+)
 
 
 @contextlib.contextmanager
@@ -438,68 +442,14 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
     @staticmethod
     def _declared_integer_columns(dataset_spec: DatasetSpec) -> list[str]:
-        declared: list[str] = []
-        explicit = dataset_spec.extra.get("integer_columns")
-        if explicit is not None:
-            if not isinstance(explicit, list) or any(not isinstance(column, str) for column in explicit):
-                raise TypeError("ARF DatasetSpec integer_columns must be a list of column names.")
-            declared.extend(explicit)
-        column_info = dataset_spec.extra.get("column_info", {})
-        if isinstance(column_info, dict):
-            for column, description in column_info.items():
-                if isinstance(description, str) and description.lower() in {"int", "integer"}:
-                    declared.append(column)
-                elif isinstance(description, dict) and (
-                    description.get("semantic_type") == "integer"
-                    or description.get("type") == "integer"
-                    or description.get("integer") is True
-                ):
-                    declared.append(column)
-        metadata = read_json(dataset_spec.metadata_path)
-        if isinstance(metadata, dict) and metadata.get("int_columns") is not None:
-            metadata_columns = metadata["int_columns"]
-            if not isinstance(metadata_columns, list) or any(
-                not isinstance(column, str) for column in metadata_columns
-            ):
-                raise TypeError("ARF dataset metadata int_columns must be a list of column names.")
-            declared.extend(metadata_columns)
-        declared = list(dict.fromkeys(declared))
-        invalid = [column for column in declared if column not in dataset_spec.column_names]
-        numerical_roles = list(dataset_spec.numerical_columns)
-        if dataset_spec.task_type == "regression":
-            numerical_roles.extend(dataset_spec.target_columns)
-        non_numerical = [column for column in declared if column not in numerical_roles]
-        if invalid or non_numerical:
-            raise ValueError(
-                "ARF integer declarations must name canonical numerical columns: "
-                f"unknown={invalid}, non_numerical={non_numerical}."
-            )
-        return declared
+        return declared_integer_columns(dataset_spec, model_name="ARF")
 
-    @classmethod
+    @staticmethod
     def _decode_declared_integer_columns(
-        cls,
         frame: pd.DataFrame,
         dataset_spec: DatasetSpec,
     ) -> tuple[pd.DataFrame, dict[str, dict[str, Any]]]:
-        decoded = frame.copy()
-        report: dict[str, dict[str, Any]] = {}
-        int64 = np.iinfo(np.int64)
-        for column in cls._declared_integer_columns(dataset_spec):
-            numeric = pd.to_numeric(decoded[column], errors="raise").to_numpy(dtype=np.float64)
-            if not np.isfinite(numeric).all():
-                raise ValueError(f"ARF integer column {column!r} contains non-finite native samples.")
-            rounded = np.rint(numeric)
-            if bool((rounded < int64.min).any() or (rounded > int64.max).any()):
-                raise OverflowError(f"ARF integer column {column!r} exceeds the signed 64-bit range.")
-            changed_rows = int(np.count_nonzero(numeric != rounded))
-            decoded[column] = rounded.astype(np.int64)
-            report[column] = {
-                "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
-                "changed_rows": changed_rows,
-                "clipped_rows": 0,
-            }
-        return decoded, report
+        return decode_declared_integer_columns(frame, dataset_spec, model_name="ARF")
 
     @classmethod
     def _encode_value(cls, value: Any) -> Any:
@@ -808,25 +758,28 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        atomic_write_json(
-            spec.output_dir / "arf_sample_metadata.json",
-            {
-                "package": self.package_name,
-                "package_version": self.package_version,
-                "seed": spec.seed,
-                "requested_rows": num_samples,
-                "checkpoint_path": str(trusted_checkpoint),
-                "checkpoint_sha256": sha256_file(trusted_checkpoint),
-                "sample_path": str(sample_path),
-                "sample_sha256": sha256_file(sample_path),
-                "columns": dataset_spec.column_names,
-                "integer_decoding": integer_decoding,
-                "native_sample_path": None if native_sample_path is None else str(native_sample_path),
-                "native_sample_sha256": (
-                    None if native_sample_path is None else sha256_file(native_sample_path)
-                ),
-            },
-        )
+        sample_metadata = {
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "seed": spec.seed,
+            "requested_rows": num_samples,
+            "checkpoint_path": str(trusted_checkpoint),
+            "checkpoint_sha256": sha256_file(trusted_checkpoint),
+            "sample_path": str(sample_path),
+            "sample_sha256": sha256_file(sample_path),
+            "columns": dataset_spec.column_names,
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": None if native_sample_path is None else str(native_sample_path),
+                    "native_sample_sha256": (
+                        None if native_sample_path is None else sha256_file(native_sample_path)
+                    ),
+                }
+            )
+        atomic_write_json(spec.output_dir / "arf_sample_metadata.json", sample_metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

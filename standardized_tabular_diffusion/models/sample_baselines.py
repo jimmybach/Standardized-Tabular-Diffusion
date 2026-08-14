@@ -7,10 +7,15 @@ from typing import Any
 
 import pandas as pd
 
-from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
+from standardized_tabular_diffusion.evaluation.serialization import (
+    atomic_write_bytes,
+    atomic_write_json,
+    sha256_file,
+)
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
 from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 
 
@@ -361,24 +366,43 @@ class SMOTEAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         replace = len(sampled_df) < desired_rows
         sampled_df = sampled_df.sample(n=desired_rows, replace=replace, random_state=spec.seed).reset_index(drop=True)
 
+        native_sample_df = sampled_df.copy()
+        sampled_df, integer_decoding = decode_declared_integer_columns(
+            sampled_df,
+            dataset_spec,
+            model_name="SMOTE",
+        )
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "smote_native_samples.csv"
+            atomic_write_bytes(native_sample_path, native_sample_df.to_csv(index=False).encode("utf-8"))
+
         sample_path = spec.output_dir / "samples.csv"
         atomic_write_bytes(sample_path, sampled_df.to_csv(index=False).encode("utf-8"))
-        atomic_write_json(
-            spec.output_dir / "smote_metadata.json",
-            {
-                "sampler": sampler_name,
-                "package": self.package_name,
-                "package_version": self.package_version,
-                "random_state": spec.seed,
-                "k_neighbors": k_neighbors,
-                "sampling_strategy": sampling_strategy,
-                "categorical_columns": categorical_columns,
-                "categorical_indices": categorical_indices,
-                "source_rows": len(train_df),
-                "balanced_rows": len(x_resampled),
-                "output_rows": len(sampled_df),
-            },
-        )
+        sample_metadata = {
+            "sampler": sampler_name,
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "random_state": spec.seed,
+            "k_neighbors": k_neighbors,
+            "sampling_strategy": sampling_strategy,
+            "categorical_columns": categorical_columns,
+            "categorical_indices": categorical_indices,
+            "source_rows": len(train_df),
+            "balanced_rows": len(x_resampled),
+            "output_rows": len(sampled_df),
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": None if native_sample_path is None else str(native_sample_path),
+                    "native_sample_sha256": (
+                        None if native_sample_path is None else sha256_file(native_sample_path)
+                    ),
+                }
+            )
+        atomic_write_json(spec.output_dir / "smote_metadata.json", sample_metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
@@ -388,6 +412,8 @@ class SMOTEAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             notes=[
                 "Rows are drawn from the SMOTE-resampled table.",
                 f"Mixed-type handling used {sampler_name}; categorical values were never interpolated as continuous data.",
+                "Declared integer columns are decoded with numpy.rint at the adapter boundary; "
+                "the unmodified official interpolation output is retained whenever values change.",
                 "If num_samples differs from the balanced-resample size, the adapter resamples rows from the SMOTE output.",
             ],
         )
