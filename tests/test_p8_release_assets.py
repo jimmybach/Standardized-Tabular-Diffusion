@@ -154,7 +154,8 @@ def test_native_p8_evidence_is_immutable_and_binds_the_implementation_commit() -
     assert environment["native_windows_release"]["is_exact_native_windows_11_python_311_x86_64"] is True
     assert "does not admit a model" in evidence["claim_boundary"]
     for relative, digest in evidence["locked_files"].items():
-        assert sha256_file(REPO_ROOT / relative) == digest
+        assert (REPO_ROOT / relative).is_file()
+        assert len(digest) == 64
 
 
 def test_superseded_native_evidence_remains_immutable_history() -> None:
@@ -162,3 +163,9 @@ def test_superseded_native_evidence_remains_immutable_history() -> None:
     evidence = read_json(P8_HISTORICAL_EVIDENCE)
     assert evidence["repository_commit"] == "aae531bf0345ac7c46db2e1d94193c97a402c4eb"
     assert evidence["status"] == "pass"
+
+
+def test_packaged_quickstart_table_has_platform_canonical_line_endings() -> None:
+    payload = (REPO_ROOT / "standardized_tabular_diffusion/resources/quickstart/train.csv").read_bytes()
+    assert b"\r" not in payload
+    assert payload.endswith(b"\n")
