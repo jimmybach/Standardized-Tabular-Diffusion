@@ -126,6 +126,28 @@ python -m standardized_tabular_diffusion.validation.p6_orchestration --output ar
 
 The Windows/Linux workflow is `.github/workflows/p6-orchestration-validation.yml`. See the [P6 specification and usage guide](evaluation/P6_ORCHESTRATION.md) and its [Chinese review translation](evaluation/P6_ORCHESTRATION.zh-CN.md). The operational `aggregate` stage is not the P7 leaderboard aggregator.
 
+## P7 aggregation and leaderboard publication
+
+Install `.[leaderboard]` to load finalized Parquet Run Result bundles. P7 contributions must retain exact protocol, metric, track, evaluator, hardware, software, schema, Dataset Profile, view, and split compatibility boundaries. Failed or missing generation seeds remain in their declared denominator. Duplicate attempts require a reviewed correction record; implementation code must never select a favorable attempt implicitly.
+
+Build and validate snapshots through the public CLI:
+
+~~~bash
+std-tabular-diffusion build-leaderboard --request snapshot-request.json --bundle run-bundle --output snapshot
+std-tabular-diffusion validate-leaderboard --snapshot snapshot
+~~~
+
+Every display asset must remain a deterministic rendering of `leaderboard.json`; display code cannot recompute scores, intervals, coverage, ranks, or ordering. Changes to aggregation weights, bootstrap semantics, tie rules, or Official admission gates are scientific review checkpoints, not ordinary refactors.
+
+Run the focused local gate with:
+
+~~~bash
+python -m pytest tests/evaluation/test_p7_leaderboard.py tests/evaluation/test_p7_run_bundle_integration.py
+python -m standardized_tabular_diffusion.validation.p7_leaderboard --output artifacts/p7-local.json
+~~~
+
+The primary Windows and secondary Linux workflow is `.github/workflows/p7-leaderboard-validation.yml`. See the [P7 specification and usage guide](evaluation/P7_AGGREGATION_AND_LEADERBOARD.md) and its [Chinese review translation](evaluation/P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
+
 ## CI baseline
 
 The core workflow runs on Linux and Python 3.11 with read-only repository permissions. It verifies:

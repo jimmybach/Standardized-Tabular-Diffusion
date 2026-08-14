@@ -12,9 +12,12 @@ from standardized_tabular_diffusion.evaluation.serialization import Serializatio
 SCHEMA_PACKAGE = "standardized_tabular_diffusion.schemas.evaluation"
 
 SCHEMA_FILES = {
+    "admission-record": "admission-record.schema.json",
     "artifact-index": "artifact-index.schema.json",
     "atomic-result": "atomic-result.schema.json",
+    "correction-record": "correction-record.schema.json",
     "dataset-profile": "dataset-profile.schema.json",
+    "dataset-summary": "dataset-summary.schema.json",
     "evaluation-request": "evaluation-request.schema.json",
     "hardware-profile": "hardware-profile.schema.json",
     "manifest": "manifest.schema.json",
@@ -22,6 +25,9 @@ SCHEMA_FILES = {
     "metric-registry-entry": "metric-registry-entry.schema.json",
     "orchestration-run": "orchestration-run.schema.json",
     "orchestration-stage-record": "orchestration-stage-record.schema.json",
+    "leaderboard-snapshot": "leaderboard-snapshot.schema.json",
+    "snapshot-manifest": "snapshot-manifest.schema.json",
+    "snapshot-request": "snapshot-request.schema.json",
     "protocol-profile": "protocol-profile.schema.json",
     "software-profile": "software-profile.schema.json",
     "stage-record": "stage-record.schema.json",

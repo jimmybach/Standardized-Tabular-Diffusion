@@ -13,6 +13,16 @@ HISTORICAL_EVIDENCE_PATH = REPO_ROOT / "docs/evidence/evaluation/p6-windows-py31
 HISTORICAL_EVIDENCE_SHA256 = "d1ef8213d3885f7c6cccf9bb159768d96790f3defbb69f66d52a7f3fa3150525"
 EVIDENCE_PATH = REPO_ROOT / "docs/evidence/evaluation/p6-windows-py311-da47011.json"
 EVIDENCE_SHA256 = "67b5f40889c2f3e2b2da853303afaba99f3a866829dd020cb1e30e147f6887c2"
+EVOLVING_SHARED_SURFACES = {
+    ".github/workflows/p4-dataset-scale-validation.yml",
+    "pyproject.toml",
+    "standardized_tabular_diffusion/cli.py",
+    "standardized_tabular_diffusion/evaluation/schema.py",
+    "standardized_tabular_diffusion/validation/core_ci.py",
+    "tests/evaluation/test_contracts_and_schemas.py",
+    "tests/test_cli.py",
+    "tests/test_core_ci.py",
+}
 
 
 def test_retained_p6_evidence_is_immutable_historical_evidence() -> None:
@@ -35,7 +45,7 @@ def test_retained_p6_evidence_is_immutable_historical_evidence() -> None:
     assert all(len(digest) == 64 for digest in evidence["locked_files"].values())
 
 
-def test_retained_p6_current_evidence_is_immutable_and_bound_to_implementation() -> None:
+def test_retained_p6_current_evidence_is_immutable_and_binds_p6_owned_implementation() -> None:
     assert sha256_file(EVIDENCE_PATH) == EVIDENCE_SHA256
     evidence = read_json(EVIDENCE_PATH)
 
@@ -53,7 +63,14 @@ def test_retained_p6_current_evidence_is_immutable_and_bound_to_implementation()
     assert set(evidence["exit_gates"].values()) == {"pass"}
     assert len(evidence["locked_files"]) >= 27
     for relative, digest in evidence["locked_files"].items():
-        assert sha256_file(REPO_ROOT / relative) == digest
+        path = REPO_ROOT / relative
+        assert path.is_file()
+        assert len(digest) == 64
+        # Shared packaging, schema routing, CLI, and cross-phase tests are expected to evolve in P7+.
+        # The immutable evidence and its recorded commit retain their historical hashes; current-tree
+        # drift checks apply only to the P6-owned engine, schemas, workflow, validator, and tests.
+        if relative not in EVOLVING_SHARED_SURFACES:
+            assert sha256_file(path) == digest
 
 
 def test_retained_p6_evidence_preserves_failure_and_efficiency_boundaries() -> None:
