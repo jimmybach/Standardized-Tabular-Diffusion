@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, cite this repository and the upstream methods and datasets you actually use."
+title: "Standardized Tabular Diffusion Benchmark"
+type: software
+version: 0.1.0rc1
+authors:
+  - name: "Standardized Tabular Diffusion contributors"
+repository-code: "https://github.com/jimmybach/Standardized-Tabular-Diffusion"
+url: "https://github.com/jimmybach/Standardized-Tabular-Diffusion"
+license: Apache-2.0
+keywords:
+  - tabular data
+  - synthetic data
+  - benchmark
+  - diffusion
+references:
+  - type: generic
+    title: "Contributor and upstream attribution records"
+    url: "https://github.com/jimmybach/Standardized-Tabular-Diffusion/blob/main/CONTRIBUTORS.md"

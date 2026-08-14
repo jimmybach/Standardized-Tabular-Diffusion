@@ -32,6 +32,10 @@ def summary_to_row(summary: dict) -> dict:
 
 
 def compare_summaries(summary_paths: list[Path]) -> pd.DataFrame:
+    from standardized_tabular_diffusion.evaluation.schema import validate_file
+
+    for summary_path in summary_paths:
+        validate_file("legacy-standardized-summary", summary_path)
     rows = [summary_to_row(load_summary(path)) for path in summary_paths]
     frame = pd.DataFrame(rows)
     sort_cols = [col for col in ("dataset", "model") if col in frame.columns]

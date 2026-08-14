@@ -56,6 +56,7 @@ class ArtifactBundle:
     upstream_workdir: Path
     generated_sample_path: Path | None = None
     upstream_metrics_path: Path | None = None
+    evaluation_bundle_path: Path | None = None
     standardized_summary_path: Path | None = None
     notes: list[str] = field(default_factory=list)
 
@@ -66,6 +67,7 @@ class ArtifactBundle:
             "upstream_workdir",
             "generated_sample_path",
             "upstream_metrics_path",
+            "evaluation_bundle_path",
             "standardized_summary_path",
         ):
             value = payload[key]

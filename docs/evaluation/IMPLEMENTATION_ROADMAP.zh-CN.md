@@ -386,12 +386,16 @@ Privacy 任务：
 - 在完成各自审计后，增加 license、third-party notice、citation、contributor acknowledgement、security policy、code of conduct 和发布 checklist。
 - 在托管 Windows 平台家族 CI 和精确原生 Windows 11/Python 3.11 目标上测试 clean installation、table-only evaluation、一个适配器 smoke run、result validation 和 diagnostic comparison；并在 Linux/Python 3.11 上重复可移植表面。
 
+当前实现：冻结旧 schema 与校验和绑定的“只导入不转换”边界、中央适配器评测路径、精确状态/证据 inventory、包内人工 SMOTE→P3→诊断快照快速开始、发布资产、中英双语 P8 指南及 Windows/Linux 发布工作流，均已为 `0.1.0rc1` 实现。旧记录和诊断快照都不能获得 Official rank。P8 最终完成证据仍需发布 commit 上的托管工作流和独立原生 Windows 11/Python 3.11 发布运行。
+
 退出证据：
 
 - legacy 与新输出不会因文件名、schema、CLI 标签或文档而混淆；
 - clean-checkout quickstart 不依赖开发者本地路径或未声明数据并通过；
 - 发布声明与实际生命周期、资格和支持记录一致；以及
 - Repository Quality Standard 中每个适用发布门都有基于证据的决定。
+
+见 [P8 迁移与发布契约](P8_MIGRATION_AND_RELEASE.zh-CN.md)及其[英文正式文件](P8_MIGRATION_AND_RELEASE.md)。
 
 ## 7. 验证策略
 
@@ -481,7 +485,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P6 工程实现及其强制边界退出验证器已经完成。下一项实现增量是 P7：先定义兼容组身份、分层聚合顺序、不确定性与覆盖率核算、发布类别和不可变 leaderboard snapshot，再编写排名代码。P5 的 release support 和具体数据集/模型/运行准入仍属于独立发布工作。
+P8 是当前规划的最后一个工程阶段；本路线图不会自动延伸为 P9。P8 发布候选 PR 通过审阅并留存 Windows、Linux 与原生目标环境证据后，剩余工作属于正式发布与科学准入：批准具体模型、数据集、指标和运行身份，解决第 9 节的待定事项，并且只在发布清单全部通过后标记 `0.1.0`。这些决定以后可以形成单独界定范围的里程碑，但不能被视作 P0-P8 的隐含续篇。
 
 ## 12. 相关规范
 
