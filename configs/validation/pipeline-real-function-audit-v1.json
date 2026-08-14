@@ -8,6 +8,24 @@
     "python": "3.11",
     "device_policy": "use the explicitly requested CUDA device and fail closed on unintended fallback"
   },
+  "phase_1_logic_audit": {
+    "state": "complete-with-confirmed-findings",
+    "scope": "T01-T04 V0/V1 only; no authoritative model training",
+    "models_audited": 21,
+    "task_model_cells_completed": 84,
+    "configuration_projection_passed": 21,
+    "confirmed_findings": 10,
+    "severity_counts": {
+      "S0": 0,
+      "S1": 9,
+      "S2": 1,
+      "S3": 0
+    },
+    "v2_minimal_real_execution_started": false,
+    "report": "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.md",
+    "report_zh_cn": "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md",
+    "evidence": "docs/evidence/audits/pipeline-phase1-logic-audit-20260814.json"
+  },
   "task_files": [
     "docs/audits/TASK_01_SEED_AND_CONFIG.md",
     "docs/audits/TASK_02_DATA_AND_OUTPUT_CONTRACT.md",

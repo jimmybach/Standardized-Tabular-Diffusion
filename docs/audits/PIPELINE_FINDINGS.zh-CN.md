@@ -30,8 +30,18 @@
 | RF-TABDIFF-003 | T02 | S1 | `tabdiff` | 官方 Adult 配置在逆去量化为 `none` 时，会在声明的整数列中生成小数。标准化输出契约现在要求使用官方 `round` 路径，否则拒绝该样本。 | [Adult 真实功能证据](../evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json)；整数恢复测试 | verified |
 | RF-TABDIFF-004 | T04 | S2 | `tabdiff` | 当前 PyTorch 和 Windows 运行需要范围很小的 scheduler、诊断绘图、编码和非 ASCII 路径处理。每个兼容桥都会封闭失败，并受源码校验和保护。 | [`TABDIFF_VALIDATION.md`](../TABDIFF_VALIDATION.md)；运行时 overlay manifest | verified |
 | RF-TABDIFF-005 | T04 | S2 | `tabdiff` | 运行元数据构建此前会在父进程无条件导入可选依赖 PyTorch，导致轻量适配器契约测试失败。现在 PyTorch 不存在时会明确记录“父环境不可检查”；真实模型执行仍要求声明的模型依赖。 | 可选依赖回归测试；完整核心测试套件 | verified |
+| RF-CORE-001 | T01 | S1 | `arf`、`bn`、`ctab-gan`、`ctab-gan-plus`、`ctgan`、`great`、`nflow`、`nrgboost`、`smote`、`tabddpm`、`tabdiff`、`tabebm`、`tabsds`、`tabsyn`、`tabula`、`tvae` | 未知的顶层动作参数没有被统一拒绝，因此拼写错误的选项可能静默使用默认值。第二阶段必须增加严格白名单，且不改变模型数学逻辑。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-CORE-002 | T02 | S1 | 全部 21 个适配器的直接 `run`/`run-action` 路径 | 共享预检仅记录数据路径和是否存在，没有记录文件大小或 SHA-256，所以无法把直接运行与注册数据集身份按内容绑定。第二阶段必须增加共享内容绑定。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-CORE-003 | T03 | S1 | 全部 21 个适配器的直接 `run`/`run-action` 路径 | 共享输出边界会接受已存在的目录，但没有通用运行/种子身份或非空目录策略；后一次生成可能覆盖 `samples.csv`。第二阶段必须隔离输出所有权，或拒绝冲突。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-CORE-004 | T04 | S2 | `great` 训练、`tabula` 训练、`nrgboost`、`smote`、`tabddpm`、`tabsds` | 这些路径会忽略请求的设备，或把选择交给自动机制但不封闭失败地记录结果。第二阶段必须明确 CPU-only 拒绝规则和 CPU/CUDA 选择记录。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-INTERNAL-DATA-001 | T02 | S1 | `codi`、`stasy`、`tabddpm`、`tabdiff`、`tabsyn` | 原生运行时读取内部布局或 TOML 路径，而共享边界未证明其内容与内嵌的标准 `DatasetSpec` 一致。第二阶段必须用校验和绑定或确定性生成原生视图。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-TABDDPM-001 | T01 | S1 | `tabddpm` | 普通适配器只传递 TOML 路径和动作标志。受控模拟表明，改变种子、设备、请求行数和输出目录后，上游命令仍完全不变。第二阶段必须显式绑定这些参数。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-TABDDPM-002 | T03 | S1 | `tabddpm` | 输出所有权仍由 TOML 决定，且生成 bundle 没有暴露 `generated_sample_path`，因此顶层路由无法自动把表交给中央评测。第二阶段必须明确生成样本的所有权。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-GOGGLE-001 | T01 | S1 | `goggle` | 生成阶段使用训练运行配置重新设置种子，而不是独立的生成 `RunSpec.seed`。第二阶段必须传递并应用生成种子。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-CTGAN-FAMILY-001 | T01 | S1 | `ctgan`、`tvae` | 训练会设置官方模型的随机状态，但生成重新加载检查点后直接调用 `sample()`，没有用请求的生成种子重置状态。第二阶段必须在生成前恢复官方包的随机状态控制。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
+| RF-UPSTREAM-WORKSPACE-001 | T03 | S1 | `tabddpm`、`tabdiff`、`tabsyn` | 如果没有模型专属的重定向/复制，可变检查点或结果可能保留在上游工作树中。第二阶段必须把可变产物归入声明的运行目录，同时不修改权威实现的数学逻辑。 | [第一阶段报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)；[不可变证据](../evidence/audits/pipeline-phase1-logic-audit-20260814.json) | confirmed |
 
-这些已解决的 TabDiff 条目说明，仅做 V1 模拟还不够。它们不表示其他适配器存在相同缺陷，也不能代替计划中的跨 baseline 审计。
+这些已解决的 TabDiff 条目说明，仅做 V1 模拟还不够。第一阶段确认的 10 个条目都只是边界明确的 V0/V1 发现；它们不表示 V2 已经失败，只有回归覆盖和适用的真实功能探针都通过后，才能关闭。
 
 ## 新问题模板
 

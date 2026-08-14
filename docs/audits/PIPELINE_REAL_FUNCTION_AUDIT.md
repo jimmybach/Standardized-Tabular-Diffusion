@@ -2,11 +2,13 @@
 
 Chinese translation: [PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 
-- Status: approved plan; cross-baseline execution not yet complete
+- Status: Phase 1 complete with confirmed findings; Phase 2 remediation and V2 execution not started
 - Plan version: 1.0
 - Snapshot date: 2026-08-14
 - Primary target: native Windows 11 x86-64, Python 3.11, and the requested CUDA device
 - Machine-readable snapshot: [`pipeline-real-function-audit-v1.json`](../../configs/validation/pipeline-real-function-audit-v1.json)
+- Phase 1 report: [Cross-Baseline Logic Audit Report](PHASE_1_LOGIC_AUDIT_REPORT.md)
+- Phase 1 evidence: [`pipeline-phase1-logic-audit-20260814.json`](../evidence/audits/pipeline-phase1-logic-audit-20260814.json)
 
 ## 1. Purpose
 
@@ -25,6 +27,8 @@ The runtime registry contains **21 baselines**:
 - TabDiff has a representative native-Windows Adult train/sample run with three generation seeds and finalized central P2/P3 bundles.
 - The other 18 baselines have not yet passed this new native-Windows cross-cutting real-function audit. `pending` means untested by this plan, not failed.
 - SMOTE remains a classification-only classical reference and is excluded from generative-model ranking, but its adapter still receives the same pipeline contract audit.
+
+Phase 1 completed all 84 T01-T04 V0/V1 task/model cells. Configuration projection passed for all 21 adapters, while downstream inspection and controlled simulation confirmed ten open findings: nine S1 and one S2. No real model was trained in Phase 1, and no V2 status changed. The retained report and machine-readable evidence define the exact scope and Phase 2 remediation order.
 
 ## 3. Validation layers and claim boundaries
 

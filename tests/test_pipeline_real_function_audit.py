@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 from standardized_tabular_diffusion.registry import list_adapter_specs
@@ -12,12 +13,21 @@ AUDIT_DOC = REPO_ROOT / "docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.md"
 AUDIT_DOC_ZH = REPO_ROOT / "docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md"
 FINDINGS_DOC = REPO_ROOT / "docs/audits/PIPELINE_FINDINGS.md"
 FINDINGS_DOC_ZH = REPO_ROOT / "docs/audits/PIPELINE_FINDINGS.zh-CN.md"
+PHASE_1_REPORT = REPO_ROOT / "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.md"
+PHASE_1_REPORT_ZH = REPO_ROOT / "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md"
+PHASE_1_EVIDENCE = REPO_ROOT / "docs/evidence/audits/pipeline-phase1-logic-audit-20260814.json"
 LOCAL_LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 FINDING_ID = re.compile(r"RF-[A-Z0-9-]+")
+SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
 def _load_audit() -> dict[str, object]:
     with AUDIT_CONFIG.open(encoding="utf-8") as stream:
+        return json.load(stream)
+
+
+def _load_phase_1_evidence() -> dict[str, object]:
+    with PHASE_1_EVIDENCE.open(encoding="utf-8") as stream:
         return json.load(stream)
 
 
@@ -53,7 +63,15 @@ def test_audit_summary_is_derived_from_declared_rows() -> None:
 
 def test_audit_assets_and_declared_evidence_exist() -> None:
     audit = _load_audit()
-    required = [AUDIT_DOC, AUDIT_DOC_ZH, FINDINGS_DOC, FINDINGS_DOC_ZH]
+    required = [
+        AUDIT_DOC,
+        AUDIT_DOC_ZH,
+        FINDINGS_DOC,
+        FINDINGS_DOC_ZH,
+        PHASE_1_REPORT,
+        PHASE_1_REPORT_ZH,
+        PHASE_1_EVIDENCE,
+    ]
     for relative in audit["task_files"]:
         task = REPO_ROOT / relative
         required.extend((task, task.with_name(f"{task.stem}.zh-CN{task.suffix}")))
@@ -65,7 +83,14 @@ def test_audit_assets_and_declared_evidence_exist() -> None:
 
 
 def test_audit_document_local_links_resolve() -> None:
-    documents = {AUDIT_DOC, AUDIT_DOC_ZH, FINDINGS_DOC, FINDINGS_DOC_ZH}
+    documents = {
+        AUDIT_DOC,
+        AUDIT_DOC_ZH,
+        FINDINGS_DOC,
+        FINDINGS_DOC_ZH,
+        PHASE_1_REPORT,
+        PHASE_1_REPORT_ZH,
+    }
     audit = _load_audit()
     for relative in audit["task_files"]:
         task = REPO_ROOT / relative
@@ -87,3 +112,72 @@ def test_findings_ledger_translations_contain_the_same_issue_ids() -> None:
     chinese = set(FINDING_ID.findall(FINDINGS_DOC_ZH.read_text(encoding="utf-8")))
     assert english
     assert english == chinese
+
+
+def test_phase_1_evidence_covers_every_registered_adapter_and_task() -> None:
+    evidence = _load_phase_1_evidence()
+    baselines = evidence["baselines"]
+    summary = evidence["summary"]
+    assert evidence["status"] == "passed-with-confirmed-findings"
+    assert isinstance(baselines, list)
+    by_model = {row["model_id"]: row for row in baselines}
+    assert len(baselines) == len(by_model) == 21
+    assert set(by_model) == set(list_adapter_specs())
+    for row in baselines:
+        assert set(row) == {"model_id", "source_file", "t01", "t02", "t03", "t04"}
+        assert (REPO_ROOT / row["source_file"]).is_file()
+    assert summary["models_audited"] == len(baselines)
+    assert summary["task_model_cells_completed"] == len(baselines) * 4 == 84
+    assert summary["configuration_projection_passed"] == len(baselines)
+    assert summary["v2_minimal_real_execution_started"] is False
+
+
+def test_phase_1_finding_references_are_complete_and_reciprocal() -> None:
+    evidence = _load_phase_1_evidence()
+    findings = evidence["findings"]
+    baselines = evidence["baselines"]
+    summary = evidence["summary"]
+    by_finding = {finding["id"]: finding for finding in findings}
+    by_model = {row["model_id"]: row for row in baselines}
+    assert len(findings) == len(by_finding) == summary["confirmed_findings"] == 10
+    assert summary["severity_counts"] == {
+        severity: Counter(finding["severity"] for finding in findings).get(severity, 0)
+        for severity in ("S0", "S1", "S2", "S3")
+    }
+
+    for model_id, row in by_model.items():
+        for task in ("T01", "T02", "T03", "T04"):
+            for finding_id in row[task.lower()]:
+                finding = by_finding[finding_id]
+                assert finding["task"] == task
+                assert model_id in finding["affected_models"]
+
+    for finding in findings:
+        assert finding["state"] == "confirmed"
+        for model_id in finding["affected_models"]:
+            assert finding["id"] in by_model[model_id][finding["task"].lower()]
+
+
+def test_phase_1_snapshot_agrees_with_plan_and_has_bound_source_inventory() -> None:
+    audit = _load_audit()
+    phase = audit["phase_1_logic_audit"]
+    evidence = _load_phase_1_evidence()
+    summary = evidence["summary"]
+    assert phase["state"] == "complete-with-confirmed-findings"
+    for field in (
+        "models_audited",
+        "task_model_cells_completed",
+        "configuration_projection_passed",
+        "confirmed_findings",
+        "severity_counts",
+        "v2_minimal_real_execution_started",
+    ):
+        assert phase[field] == summary[field]
+    for field in ("report", "report_zh_cn", "evidence"):
+        assert (REPO_ROOT / phase[field]).is_file()
+    assert re.fullmatch(r"[0-9a-f]{40}", evidence["audited_repository_commit"])
+    source_hashes = evidence["audited_files_sha256"]
+    assert len(source_hashes) >= 20
+    for relative, digest in source_hashes.items():
+        assert (REPO_ROOT / relative).is_file(), relative
+        assert SHA256.fullmatch(digest), relative

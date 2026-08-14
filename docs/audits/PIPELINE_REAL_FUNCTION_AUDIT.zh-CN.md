@@ -2,11 +2,13 @@
 
 英文原文：[PIPELINE_REAL_FUNCTION_AUDIT.md](PIPELINE_REAL_FUNCTION_AUDIT.md)
 
-- 状态：方案已认可；尚未完成全部 baseline 的执行
+- 状态：第一阶段已完成并确认了若干问题；尚未开始第二阶段修复和 V2 执行
 - 方案版本：1.0
 - 快照日期：2026-08-14
 - 主要目标环境：原生 Windows 11 x86-64、Python 3.11，以及用户指定的 CUDA 设备
 - 机器可读快照：[`pipeline-real-function-audit-v1.json`](../../configs/validation/pipeline-real-function-audit-v1.json)
+- 第一阶段报告：[跨 Baseline 逻辑审计报告](PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md)
+- 第一阶段证据：[`pipeline-phase1-logic-audit-20260814.json`](../evidence/audits/pipeline-phase1-logic-audit-20260814.json)
 
 ## 1. 目的
 
@@ -25,6 +27,8 @@
 - TabDiff 已完成原生 Windows 上 Adult 数据集的代表性真实训练/生成，包含 3 个生成种子和最终化的中央 P2/P3 bundle。
 - 另外 18 个 baseline 尚未通过本次新增的原生 Windows 横向真实功能审计。`pending` 只表示尚未按本方案测试，不表示失败。
 - SMOTE 是仅支持分类的传统参考方法，不参与生成模型排名，但它的适配器仍要接受同一套流水线契约审计。
+
+第一阶段已完成全部 84 个 T01-T04 V0/V1 任务/模型审计单元。21 个适配器的配置投影全部通过，后续源码审阅与受控模拟则确认了 10 个待解决问题：9 个 S1 和 1 个 S2。第一阶段没有训练真实模型，也没有改变任何 V2 状态。保留的报告和机器可读证据明确界定了本阶段范围及第二阶段修复顺序。
 
 ## 3. 验证层级与结论边界
 
