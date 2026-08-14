@@ -59,9 +59,10 @@ def test_tabsyn_rejects_epoch_controls_missing_from_official_source(tmp_path: Pa
 
 
 def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    upstream = tmp_path / "TabSyn-main"
-    vae = upstream / "tabsyn" / "vae" / "ckpt" / "adult"
-    diffusion = upstream / "tabsyn" / "ckpt" / "adult"
+    (tmp_path / "TabSyn-main").mkdir()
+    runtime_root = tmp_path / "artifacts" / "tabsyn-runtime"
+    vae = runtime_root / "tabsyn" / "vae" / "ckpt" / "adult"
+    diffusion = runtime_root / "tabsyn" / "ckpt" / "adult"
     vae.mkdir(parents=True)
     diffusion.mkdir(parents=True)
     for path in (vae / "train_z.npy", vae / "decoder.pt", diffusion / "model.pt"):
@@ -69,7 +70,11 @@ def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, m
 
     adapter = TabSynAdapter(tmp_path)
     calls: list[tuple[list[str], int]] = []
-    monkeypatch.setattr(adapter, "_run_tabsyn", lambda args, *, seed: calls.append((args, seed)))
+    def fake_run(args: list[str], *, seed: int) -> None:
+        calls.append((args, seed))
+        Path(args[args.index("--save-path") + 1]).write_text("x\n1\n", encoding="utf-8")
+
+    monkeypatch.setattr(adapter, "_run_tabsyn", fake_run)
     bundle = adapter.sample(
         RunSpec(
             model="tabsyn",
@@ -82,23 +87,30 @@ def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, m
         )
     )
     assert calls[0][1] == 11
-    assert calls[0][0][:8] == [
+    assert calls[0][0][:9] == [
         "--action",
         "sample",
         "--dataname",
         "adult",
         "--gpu",
         "2",
+        "--runtime-root",
+        str(runtime_root.resolve()),
         "--save-path",
-        str((tmp_path / "artifacts" / "samples.csv").resolve()),
     ]
-    assert calls[0][0][-4:] == ["--steps", "9", "--num-samples", "7"]
+    assert calls[0][0][9:] == [
+        str((tmp_path / "artifacts" / "samples.csv").resolve()),
+        "--steps",
+        "9",
+        "--num-samples",
+        "7",
+    ]
     assert bundle.generated_sample_path == (tmp_path / "artifacts" / "samples.csv").resolve()
 
 
 def test_tabsyn_rejects_symlinked_internal_checkpoint(tmp_path: Path) -> None:
-    upstream = tmp_path / "TabSyn-main"
-    vae = upstream / "tabsyn" / "vae" / "ckpt" / "adult"
+    (tmp_path / "TabSyn-main").mkdir()
+    vae = tmp_path / "artifacts" / "tabsyn-runtime" / "tabsyn" / "vae" / "ckpt" / "adult"
     vae.mkdir(parents=True)
     target = tmp_path / "external.npy"
     target.write_bytes(b"stub")

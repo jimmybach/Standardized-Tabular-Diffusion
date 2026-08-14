@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import os
 import sys
 import types
 from pathlib import Path
@@ -154,7 +155,10 @@ def load_patched_trainer(upstream_root: Path) -> None:
     exec(compile(patched_source, str(source_path), "exec"), module.__dict__)
 
 
-def load_patched_main(upstream_root: Path) -> Callable[[argparse.Namespace], Any]:
+def load_patched_main(
+    upstream_root: Path,
+    runtime_root: Path | None = None,
+) -> Callable[[argparse.Namespace], Any]:
     """Load the verified official module with the approved seed-only overlay in memory."""
 
     record = load_patch_record()
@@ -187,7 +191,9 @@ def load_patched_main(upstream_root: Path) -> Callable[[argparse.Namespace], Any
     load_patched_trainer(upstream_root)
     module_name = "tabdiff.main"
     module = types.ModuleType(module_name)
-    module.__file__ = str(source_path)
+    module.__file__ = str(
+        source_path if runtime_root is None else runtime_root / "tabdiff" / "main.py"
+    )
     module.__package__ = "tabdiff"
     module.__spec__ = None
     sys.modules[module_name] = module
@@ -226,6 +232,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--y_only_model_path")
     parser.add_argument("--w_num", type=float, default=0.6)
     parser.add_argument("--w_cat", type=float, default=0.6)
+    parser.add_argument("--runtime-root", type=Path, required=True)
     return parser
 
 
@@ -252,8 +259,13 @@ def main(argv: list[str] | None = None) -> int:
         args.device = f"cuda:{args.gpu}"
 
     upstream_root = Path.cwd().resolve()
+    if args.runtime_root.is_symlink():
+        raise ValueError(f"TabDiff runtime root must not be a symlink: {args.runtime_root}")
+    args.runtime_root.mkdir(parents=True, exist_ok=True)
+    args.runtime_root = args.runtime_root.resolve(strict=True)
     install_pytorch_compatibility(torch)
-    patched_main = load_patched_main(upstream_root)
+    patched_main = load_patched_main(upstream_root, args.runtime_root)
+    os.chdir(args.runtime_root)
     patched_main(args)
     return 0
 

@@ -29,7 +29,14 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     upstream_commit = "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
     checkpoint_filename = "model.pt"
 
-    _STANDARD_EXTRA_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+    _STANDARD_EXTRA_KEYS = {
+        "action_extras",
+        "config",
+        "dataset_identity",
+        "dataset_spec",
+        "evaluation",
+        "tags",
+    }
     _TRAIN_KEYS = {
         "alpha",
         "batch_size",
@@ -470,6 +477,8 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                     str(num_threads),
                     "--num-samples",
                     str(num_samples),
+                    "--seed",
+                    str(spec.seed),
                     "--raw-output",
                     str(raw_path.resolve()),
                 ],

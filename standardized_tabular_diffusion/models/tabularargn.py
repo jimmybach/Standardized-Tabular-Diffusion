@@ -52,7 +52,14 @@ EXPECTED_RUNTIME_VERSIONS = {
     "xgrammar": "0.1.33",
 }
 
-_COMMON_INTERNAL_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+_COMMON_INTERNAL_KEYS = {
+    "action_extras",
+    "config",
+    "dataset_identity",
+    "dataset_spec",
+    "evaluation",
+    "tags",
+}
 _TRAIN_KEYS = {
     "batch_size",
     "enable_flexible_generation",

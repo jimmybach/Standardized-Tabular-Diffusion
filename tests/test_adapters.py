@@ -37,7 +37,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
-from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter, build_tabddpm_environment
+from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
@@ -227,9 +227,34 @@ def test_tabsyn_train_uses_unmodified_official_stages_and_does_not_reuse_checkpo
 
     adapter.train(spec)
 
+    runtime_root = str((tmp_path / "artifacts" / "tabsyn-runtime").resolve())
     assert commands == [
-        (["--action", "vae-train", "--dataname", "adult", "--gpu", "-1"], 0),
-        (["--action", "diffusion-train", "--dataname", "adult", "--gpu", "-1"], 0),
+        (
+            [
+                "--action",
+                "vae-train",
+                "--dataname",
+                "adult",
+                "--gpu",
+                "-1",
+                "--runtime-root",
+                runtime_root,
+            ],
+            0,
+        ),
+        (
+            [
+                "--action",
+                "diffusion-train",
+                "--dataname",
+                "adult",
+                "--gpu",
+                "-1",
+                "--runtime-root",
+                runtime_root,
+            ],
+            0,
+        ),
     ]
 
 
@@ -240,8 +265,10 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     monkeypatch.delenv("PYTHONPATH", raising=False)
     repo_root = tmp_path
     upstream_root = repo_root / "TabDiff-main"
-    ckpt_dir = upstream_root / "tabdiff" / "ckpt" / "adult" / "exp-smoke"
-    result_dir = upstream_root / "tabdiff" / "result" / "adult" / "exp-smoke" / "7"
+    output_dir = tmp_path / "artifacts" / "tabdiff-sample"
+    runtime_root = output_dir / "tabdiff-runtime"
+    ckpt_dir = runtime_root / "tabdiff" / "ckpt" / "adult" / "exp-smoke"
+    result_dir = runtime_root / "tabdiff" / "result" / "adult" / "exp-smoke" / "7"
     ckpt_dir.mkdir(parents=True)
     result_dir.mkdir(parents=True)
 
@@ -278,14 +305,21 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
         train_data_path=tmp_path / "train.csv",
         test_data_path=tmp_path / "test.csv",
     )
-    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.metadata_path.write_text('{"column_names":["a","b"],"int_col_idx":[]}')
     dataset_spec.train_data_path.write_text("a,b\n1,0\n")
     dataset_spec.test_data_path.write_text("a,b\n1,0\n")
+    native_data = upstream_root / "data" / "adult"
+    native_data.mkdir(parents=True)
+    for path in (dataset_spec.metadata_path, dataset_spec.train_data_path, dataset_spec.test_data_path):
+        (native_data / path.name).write_bytes(path.read_bytes())
+    default_config = upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+    default_config.parent.mkdir(parents=True)
+    default_config.write_text("[data]\ndequant_dist = 'round'\n", encoding="utf-8")
 
     config = ExperimentConfig(
         model="tabdiff",
         dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabdiff-sample"),
+        output_dir=str(output_dir),
         train=TrainConfig(enabled=False),
         sample=SampleConfig(
             enabled=True,
@@ -301,6 +335,8 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
         (
             [
                 "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
+                "--runtime-root",
+                str(runtime_root.resolve()),
                 "--dataname",
                 "adult",
                 "--mode",
@@ -345,87 +381,14 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_eval
     tmp_path: Path,
     monkeypatch,
 ) -> None:
-    monkeypatch.delenv("PYTHONPATH", raising=False)
-    repo_root = tmp_path
-    upstream_root = repo_root / "TabDDPM-main"
-    upstream_root.mkdir(parents=True)
-    config_path = tmp_path / "adult.toml"
-    config_path.write_text("seed = 42\n")
-
-    adapter = TabDDPMAdapter(repo_root)
-    commands: list[tuple[list[str], Path]] = []
-    environments: list[dict[str, str] | None] = []
-
-    def fake_run_python(
-        args: list[str],
-        cwd: Path,
-        *,
-        module: bool = False,
-        env: dict[str, str] | None = None,
-    ) -> None:
-        assert not module
-        commands.append((args, cwd))
-        environments.append(env)
-
-    monkeypatch.setattr(adapter, "_run_python", fake_run_python)
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["a", "b"],
-        numerical_columns=["a"],
-        categorical_columns=[],
-        target_columns=["b"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("a,b\n1,0\n")
-    dataset_spec.test_data_path.write_text("a,b\n1,0\n")
-
-    train_config = ExperimentConfig(
-        model="tabddpm",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-train"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=True),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-    sample_config = ExperimentConfig(
-        model="tabddpm",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-sample"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
-    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
-
-    eval_config = ExperimentConfig(
-        model="tabddpm",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-eval"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=True),
-    )
+    del monkeypatch
+    adapter = TabDDPMAdapter(tmp_path)
+    spec = RunSpec(model="tabddpm", dataset="adult", output_dir=tmp_path / "artifacts")
+    with pytest.raises(ValueError, match="upstream_config_path"):
+        adapter.train(spec)
     with pytest.raises(RuntimeError, match="central runner"):
-        adapter.evaluate_from_config(eval_config, dataset_spec=dataset_spec)
-
-    assert commands == [
-        (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
-        (["scripts/pipeline.py", "--config", str(config_path), "--sample"], upstream_root),
-    ]
-    expected_environment = build_tabddpm_environment(upstream_root)
-    assert environments == [expected_environment, expected_environment]
-    assert train_bundle.output_dir.joinpath("artifacts.json").exists()
-    assert sample_bundle.output_dir.joinpath("artifacts.json").exists()
-    assert not Path(eval_config.output_dir).joinpath("standardized_summary.json").exists()
+        adapter.evaluate(spec)
+    assert not spec.output_dir.joinpath("standardized_summary.json").exists()
 
 
 def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: Path) -> None:

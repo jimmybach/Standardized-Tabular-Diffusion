@@ -14,6 +14,7 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 from standardized_tabular_diffusion.upstream_sources import validate_upstream_source
 
 
@@ -165,6 +166,7 @@ class TabSDSAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return generated.reset_index(drop=True)
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         frame = self._load_training_frame(dataset_spec)
@@ -254,6 +256,7 @@ class TabSDSAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return payload
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         frame = self._load_training_frame(dataset_spec)

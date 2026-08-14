@@ -56,6 +56,9 @@ def _namespace(args: argparse.Namespace, device: str) -> SimpleNamespace:
 
 
 def _run_sample(args: argparse.Namespace, upstream_args: SimpleNamespace) -> None:
+    from tabsyn import latent_utils
+
+    latent_utils.__file__ = str(args.runtime_root / "tabsyn" / "latent_utils.py")
     from tabsyn import sample as sample_module
 
     official_sample: Callable[..., Any] = sample_module.sample
@@ -96,6 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--num-samples", type=int)
     parser.add_argument("--steps", type=int, default=50)
     parser.add_argument("--save-path", type=Path)
+    parser.add_argument("--runtime-root", type=Path, required=True)
     return parser
 
 
@@ -114,19 +118,28 @@ def main(argv: list[str] | None = None) -> int:
     if not (upstream_root / "tabsyn" / "model.py").is_file():
         raise FileNotFoundError(f"TabSyn launcher must run from an official source root: {upstream_root}")
     sys.path.insert(0, str(upstream_root))
+    if args.runtime_root.is_symlink():
+        raise ValueError(f"TabSyn runtime root must not be a symlink: {args.runtime_root}")
+    args.runtime_root.mkdir(parents=True, exist_ok=True)
+    args.runtime_root = args.runtime_root.resolve(strict=True)
+    (args.runtime_root / "tabsyn" / "vae").mkdir(parents=True, exist_ok=True)
 
     _seed_everything(args.seed)
     device = _resolve_device(args.gpu)
     upstream_args = _namespace(args, device)
 
     if args.action == "vae-train":
-        from tabsyn.vae.main import main as train_vae
+        from tabsyn.vae import main as vae_module
 
-        train_vae(upstream_args)
+        vae_module.__file__ = str(args.runtime_root / "tabsyn" / "vae" / "main.py")
+        vae_module.main(upstream_args)
     elif args.action == "diffusion-train":
-        from tabsyn.main import main as train_diffusion
+        from tabsyn import latent_utils
 
-        train_diffusion(upstream_args)
+        latent_utils.__file__ = str(args.runtime_root / "tabsyn" / "latent_utils.py")
+        from tabsyn import main as diffusion_module
+
+        diffusion_module.main(upstream_args)
     else:
         _run_sample(args, upstream_args)
     return 0

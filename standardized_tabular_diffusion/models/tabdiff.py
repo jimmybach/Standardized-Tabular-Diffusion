@@ -17,11 +17,45 @@ from standardized_tabular_diffusion.compat.tabdiff_seed_launcher import (
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import materialize_bound_dataset_view
 
 
 class TabDiffAdapter(BaseModelAdapter):
     model_name = "tabdiff"
     upstream_dirname = "TabDiff-main"
+
+    @staticmethod
+    def _runtime_root(spec: RunSpec) -> Path:
+        return spec.output_dir / "tabdiff-runtime"
+
+    def _prepare_runtime(self, spec: RunSpec) -> dict[str, object]:
+        runtime_root = self._runtime_root(spec)
+        if runtime_root.is_symlink():
+            raise ValueError(f"TabDiff runtime root must not be a symlink: {runtime_root}")
+        runtime_root.mkdir(parents=True, exist_ok=True)
+        if "dataset_identity" in spec.extra:
+            dataset_spec = self.resolve_dataset_spec(spec)
+            binding: dict[str, object] = materialize_bound_dataset_view(
+                dataset_spec,
+                self.upstream_root / "data" / spec.dataset,
+                runtime_root / "data" / spec.dataset,
+            )
+        else:
+            binding = {"schema_version": 1, "status": "not-declared-at-direct-runspec-boundary"}
+        source_config = self.upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+        runtime_config = runtime_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+        if source_config.is_symlink():
+            raise FileNotFoundError(f"TabDiff official default configuration is missing: {source_config}")
+        if not source_config.is_file() and "dataset_identity" in spec.extra:
+            raise FileNotFoundError(f"TabDiff official default configuration is missing: {source_config}")
+        if runtime_config.exists() and source_config.is_file():
+            if runtime_config.is_symlink() or not runtime_config.is_file():
+                raise ValueError(f"TabDiff runtime configuration path is unsafe: {runtime_config}")
+            if self._sha256_file(runtime_config) != self._sha256_file(source_config):
+                raise FileExistsError("TabDiff runtime default configuration differs from official source.")
+        elif source_config.is_file():
+            atomic_write_bytes(runtime_config, source_config.read_bytes())
+        return binding
 
     @staticmethod
     def _pytorch_runtime_metadata() -> dict[str, object]:
@@ -179,6 +213,7 @@ class TabDiffAdapter(BaseModelAdapter):
         action: str,
         generated_sample_path: Path | None = None,
         sample_contract: dict[str, object] | None = None,
+        dataset_binding: dict[str, object] | None = None,
     ) -> Path:
         patch = load_patch_record()
         config_path_overlay = load_config_path_overlay_record()
@@ -224,6 +259,7 @@ class TabDiffAdapter(BaseModelAdapter):
             },
             "generated_sample": None,
             "sample_contract": sample_contract,
+            "dataset_binding": dataset_binding,
         }
         if spec.upstream_config_path is not None:
             config_path = self._resolve_config_path(spec)
@@ -265,7 +301,7 @@ class TabDiffAdapter(BaseModelAdapter):
                 format_name="PyTorch checkpoint",
             )
         exp_name = spec.extra.get("exp_name", spec.output_dir.name)
-        ckpt_parent = self.upstream_root / "tabdiff" / "ckpt" / spec.dataset / exp_name
+        ckpt_parent = self._runtime_root(spec) / "tabdiff" / "ckpt" / spec.dataset / exp_name
         ckpt_paths = sorted(ckpt_parent.glob("best_ema_model*"))
         if not ckpt_paths:
             raise FileNotFoundError(f"Could not infer TabDiff checkpoint from {ckpt_parent}")
@@ -286,13 +322,16 @@ class TabDiffAdapter(BaseModelAdapter):
         return result_dir / str(epoch) / "samples.csv"
 
     def _infer_report_sample_path(self, spec: RunSpec, exp_name: str) -> Path:
-        return self.upstream_root / "eval" / "report_runs" / exp_name / spec.dataset / "all_samples" / "samples_0.csv"
+        return self._runtime_root(spec) / "eval" / "report_runs" / exp_name / spec.dataset / "all_samples" / "samples_0.csv"
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        dataset_binding = self._prepare_runtime(spec)
         config_path = self._resolve_config_path(spec)
         self._validate_integer_restoration_config(spec, config_path)
         args = [
+            "--runtime-root",
+            str(self._runtime_root(spec).resolve()),
             "--dataname",
             spec.dataset,
             "--mode",
@@ -309,14 +348,14 @@ class TabDiffAdapter(BaseModelAdapter):
             module=True,
             env=self._execution_environment(spec),
         )
-        self._write_run_metadata(spec, action="train")
+        self._write_run_metadata(spec, action="train", dataset_binding=dataset_binding)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             notes=[
-                "Training artifacts are written by the upstream TabDiff code.",
+                "Training artifacts are written under the declared run-owned TabDiff runtime directory.",
                 f"Configurable seed supplied by approved overlay {load_patch_record()['patch_id']}.",
                 "Optional upstream density-plot PNG rendering is disabled; serialized metrics remain enabled.",
             ],
@@ -325,11 +364,14 @@ class TabDiffAdapter(BaseModelAdapter):
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
+        dataset_binding = self._prepare_runtime(spec)
         config_path = self._resolve_config_path(spec)
         self._validate_integer_restoration_config(spec, config_path)
         checkpoint_path = self._resolve_checkpoint_path(spec)
         exp_name = spec.extra.get("exp_name", spec.output_dir.name)
         args = [
+            "--runtime-root",
+            str(self._runtime_root(spec).resolve()),
             "--dataname",
             spec.dataset,
             "--mode",
@@ -366,6 +408,7 @@ class TabDiffAdapter(BaseModelAdapter):
             action="sample",
             generated_sample_path=sample_path,
             sample_contract=sample_contract,
+            dataset_binding=dataset_binding,
         )
         bundle = ArtifactBundle(
             model=self.model_name,

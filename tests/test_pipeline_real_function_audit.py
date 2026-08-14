@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections import Counter
@@ -16,6 +17,9 @@ FINDINGS_DOC_ZH = REPO_ROOT / "docs/audits/PIPELINE_FINDINGS.zh-CN.md"
 PHASE_1_REPORT = REPO_ROOT / "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.md"
 PHASE_1_REPORT_ZH = REPO_ROOT / "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md"
 PHASE_1_EVIDENCE = REPO_ROOT / "docs/evidence/audits/pipeline-phase1-logic-audit-20260814.json"
+PHASE_2_REPORT = REPO_ROOT / "docs/audits/PHASE_2_REMEDIATION_REPORT.md"
+PHASE_2_REPORT_ZH = REPO_ROOT / "docs/audits/PHASE_2_REMEDIATION_REPORT.zh-CN.md"
+PHASE_2_EVIDENCE = REPO_ROOT / "docs/evidence/audits/pipeline-phase2-remediation-20260814.json"
 LOCAL_LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 FINDING_ID = re.compile(r"RF-[A-Z0-9-]+")
 SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -28,6 +32,11 @@ def _load_audit() -> dict[str, object]:
 
 def _load_phase_1_evidence() -> dict[str, object]:
     with PHASE_1_EVIDENCE.open(encoding="utf-8") as stream:
+        return json.load(stream)
+
+
+def _load_phase_2_evidence() -> dict[str, object]:
+    with PHASE_2_EVIDENCE.open(encoding="utf-8") as stream:
         return json.load(stream)
 
 
@@ -71,6 +80,9 @@ def test_audit_assets_and_declared_evidence_exist() -> None:
         PHASE_1_REPORT,
         PHASE_1_REPORT_ZH,
         PHASE_1_EVIDENCE,
+        PHASE_2_REPORT,
+        PHASE_2_REPORT_ZH,
+        PHASE_2_EVIDENCE,
     ]
     for relative in audit["task_files"]:
         task = REPO_ROOT / relative
@@ -90,6 +102,8 @@ def test_audit_document_local_links_resolve() -> None:
         FINDINGS_DOC_ZH,
         PHASE_1_REPORT,
         PHASE_1_REPORT_ZH,
+        PHASE_2_REPORT,
+        PHASE_2_REPORT_ZH,
     }
     audit = _load_audit()
     for relative in audit["task_files"]:
@@ -181,3 +195,28 @@ def test_phase_1_snapshot_agrees_with_plan_and_has_bound_source_inventory() -> N
     for relative, digest in source_hashes.items():
         assert (REPO_ROOT / relative).is_file(), relative
         assert SHA256.fullmatch(digest), relative
+
+
+def test_phase_2_evidence_records_all_fixes_without_overclaiming_v2() -> None:
+    audit = _load_audit()
+    phase = audit["phase_2_remediation"]
+    evidence = _load_phase_2_evidence()
+    findings = evidence["findings"]
+    assert evidence["status"] == "remediation-regression-passed-v2-pending"
+    assert phase["state"] == "complete-v2-pending"
+    assert len(findings) == phase["findings_fixed"] == 10
+    assert phase["findings_verified"] == 0
+    assert {row["state"] for row in findings} == {"fixed"}
+    assert phase["v2_minimal_real_execution_started"] is False
+    targeted = evidence["test_results"]["targeted_phase2"]
+    full = evidence["test_results"]["full_repository"]
+    assert phase["targeted_tests_passed"] == targeted["passed"]
+    assert phase["full_repository_tests_passed"] == full["passed"]
+    assert phase["full_repository_tests_skipped"] == full["skipped"]
+    for field in ("report", "report_zh_cn", "evidence"):
+        assert (REPO_ROOT / phase[field]).is_file()
+    for relative, digest in evidence["retained_files_sha256"].items():
+        path = REPO_ROOT / relative
+        assert path.is_file(), relative
+        assert SHA256.fullmatch(digest), relative
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == digest, relative

@@ -11,6 +11,7 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 
 
 class _OfficialCTGANPackageAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
@@ -190,6 +191,7 @@ class _OfficialCTGANPackageAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             raise FileNotFoundError(f"Missing checkpoint for {self.model_name}: {checkpoint_path}")
 
         model = self._load_model(spec, checkpoint_path)
+        model.set_random_state(spec.seed)
 
         train_df = self._load_training_frame(dataset_spec)
         num_samples = spec.num_samples or len(train_df)
@@ -275,6 +277,7 @@ class SMOTEAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return frame[dataset_spec.column_names].copy()
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         if dataset_spec.task_type != "classification":
@@ -292,6 +295,7 @@ class SMOTEAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         if dataset_spec.task_type != "classification":

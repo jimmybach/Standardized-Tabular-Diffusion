@@ -26,6 +26,20 @@
     "report_zh_cn": "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md",
     "evidence": "docs/evidence/audits/pipeline-phase1-logic-audit-20260814.json"
   },
+  "phase_2_remediation": {
+    "state": "complete-v2-pending",
+    "scope": "root-cause remediation and V0/V1 regression for all ten Phase 1 findings",
+    "findings_fixed": 10,
+    "findings_verified": 0,
+    "v2_minimal_real_execution_started": false,
+    "upstream_mathematics_modified": false,
+    "targeted_tests_passed": 27,
+    "full_repository_tests_passed": 579,
+    "full_repository_tests_skipped": 8,
+    "report": "docs/audits/PHASE_2_REMEDIATION_REPORT.md",
+    "report_zh_cn": "docs/audits/PHASE_2_REMEDIATION_REPORT.zh-CN.md",
+    "evidence": "docs/evidence/audits/pipeline-phase2-remediation-20260814.json"
+  },
   "task_files": [
     "docs/audits/TASK_01_SEED_AND_CONFIG.md",
     "docs/audits/TASK_02_DATA_AND_OUTPUT_CONTRACT.md",

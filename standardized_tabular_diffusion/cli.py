@@ -861,8 +861,8 @@ def main() -> None:
     if args.command == "run-action":
         config = load_experiment_config(args.config)
         context = build_run_context(config)
-        save_run_context(context, config.output_dir)
         bundle = run_action(config, action=args.action)
+        save_run_context(context, config.output_dir)
         print(json.dumps(bundle.to_dict(), indent=2))
         return
 

@@ -10,11 +10,11 @@
       "llm": "distilgpt2",
       "epochs": 5,
       "batch_size": 8,
-      "logging_steps": 10,
-      "save_steps": 1000,
       "max_train_rows": 256,
-      "report_to": "none",
-      "preserve_column_order": true
+      "train_kwargs": {
+        "logging_steps": 10,
+        "save_steps": 1000
+      }
     }
   },
   "sample": {
@@ -24,18 +24,7 @@
     "extra": {
       "k": 16,
       "max_length": 224,
-      "max_length_schedule": [
-        224,
-        320,
-        448
-      ],
-      "temperature": 0.4,
-      "temperature_schedule": [
-        0.4,
-        0.3,
-        0.2
-      ],
-      "max_tries": 16
+      "temperature": 0.4
     }
   },
   "evaluation": {

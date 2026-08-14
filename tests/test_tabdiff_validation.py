@@ -133,9 +133,11 @@ def test_tabdiff_adapter_maps_cpu_and_official_deterministic_seed(tmp_path: Path
 
     assert commands == [
         (
-            [
-                "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
-                "--dataname",
+                [
+                    "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
+                    "--runtime-root",
+                    str((tmp_path / "artifacts" / "tabdiff-runtime").resolve()),
+                    "--dataname",
                 "toy",
                 "--mode",
                 "train",
@@ -360,12 +362,12 @@ def test_tabdiff_adapter_rejects_untrusted_explicit_checkpoint(tmp_path: Path) -
 
 
 def test_tabdiff_adapter_maps_official_report_output(tmp_path: Path, monkeypatch) -> None:
-    upstream_root = tmp_path / "TabDiff-main"
     output_dir = tmp_path / "artifacts"
     checkpoint = output_dir / "model_4.pt"
     checkpoint.parent.mkdir(parents=True)
     checkpoint.write_bytes(b"not loaded by mocked command")
-    sample_path = upstream_root / "eval" / "report_runs" / "parity" / "toy_dcr" / "all_samples" / "samples_0.csv"
+    runtime_root = output_dir / "tabdiff-runtime"
+    sample_path = runtime_root / "eval" / "report_runs" / "parity" / "toy_dcr" / "all_samples" / "samples_0.csv"
     sample_path.parent.mkdir(parents=True)
     sample_path.write_text("0,1\n0.1,a\n")
     adapter = TabDiffAdapter(tmp_path)
@@ -393,6 +395,8 @@ def test_tabdiff_adapter_maps_official_report_output(tmp_path: Path, monkeypatch
     assert commands == [
         [
             "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
+            "--runtime-root",
+            str(runtime_root.resolve()),
             "--dataname",
             "toy_dcr",
             "--mode",

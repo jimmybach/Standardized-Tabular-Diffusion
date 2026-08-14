@@ -21,6 +21,10 @@ from standardized_tabular_diffusion.models._runtime import (
     isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import (
+    observe_torch_model_device,
+    resolve_torch_training_device,
+)
 from standardized_tabular_diffusion.upstream_sources import validate_upstream_source
 
 
@@ -295,6 +299,9 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         frame = self._limit_training_frame(self._load_training_frame(dataset_spec), spec)
         source_root, source = self._resolve_source_root(spec)
         parameters = self._training_parameters(spec, self._roles(dataset_spec)[1])
+        device_contract = resolve_torch_training_device(spec.device)
+        parameters["train_kwargs"]["use_cpu"] = device_contract["trainer_use_cpu"]
+        parameters["device_contract"] = device_contract
         conditional_col = parameters["conditional_col"]
         if conditional_col is not None and conditional_col not in dataset_spec.column_names:
             raise ValueError(f"TabuLa conditional_col is unknown: {conditional_col!r}")
@@ -310,6 +317,7 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 **parameters["train_kwargs"],
             )
             model.fit(frame.copy(), conditional_col=conditional_col)
+        device_contract["observed"] = observe_torch_model_device(model, device_contract["requested"])
         model_root = self._model_root(spec)
         if model_root.exists() and any(model_root.iterdir()):
             raise FileExistsError(f"Refusing to overwrite non-empty TabuLa model directory: {model_root}")

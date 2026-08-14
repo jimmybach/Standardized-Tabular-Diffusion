@@ -1,0 +1,112 @@
+{
+  "evidence_schema_version": "1.0.0",
+  "phase": "phase-2-remediation",
+  "status": "remediation-regression-passed-v2-pending",
+  "completed_at": "2026-08-14",
+  "repository_base_commit": "7d71eb45af01f32b05b987d682c7e0b8e5f3638f",
+  "claim_boundary": "This evidence establishes root-cause remediation and dependency-light V0/V1 regression behavior for the ten Phase 1 findings. It does not establish a new authoritative V2 model train/sample pass, output quality, native parity, benchmark eligibility, Official Results admission, or release support. Findings remain fixed rather than verified until their applicable V2 probes pass.",
+  "upstream_mathematics_modified": false,
+  "findings": [
+    {
+      "id": "RF-CORE-001",
+      "state": "fixed",
+      "resolution": "Explicit action-control allowlists reject unknown top-level controls for all 16 affected adapters.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_unknown_top_level_controls_fail_closed"
+    },
+    {
+      "id": "RF-CORE-002",
+      "state": "fixed",
+      "resolution": "Shared dataset identities contain regular-file status, byte size, and SHA-256 and are rechecked by adapters.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_runspec_binds_dataset_bytes_and_detects_late_mutation"
+    },
+    {
+      "id": "RF-CORE-003",
+      "state": "fixed",
+      "resolution": "Direct output directories carry a shared immutable dataset identity plus per-action identities and reject conflicting data, controls, or undeclared non-empty contents.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_output_identity_rejects_a_different_seed_and_merges_actions; tests/test_phase2_pipeline_remediation.py::test_phase2_saved_context_claims_a_compatible_output_identity"
+    },
+    {
+      "id": "RF-CORE-004",
+      "state": "fixed",
+      "resolution": "CPU-only adapters reject CUDA; trainer and TabDDPM device selection is explicit and observable.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_cpu_only_adapters_reject_cuda_before_model_execution"
+    },
+    {
+      "id": "RF-INTERNAL-DATA-001",
+      "state": "fixed",
+      "resolution": "Native data views are checksum-bound or deterministically materialized from the canonical DatasetSpec.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_runspec_binds_dataset_bytes_and_detects_late_mutation"
+    },
+    {
+      "id": "RF-TABDDPM-001",
+      "state": "fixed",
+      "resolution": "A semantically round-tripped runtime TOML binds train/sample seeds, device, row count, data, and output.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_tabddpm_binds_controls_decodes_output_and_owns_workspace"
+    },
+    {
+      "id": "RF-TABDDPM-002",
+      "state": "fixed",
+      "resolution": "The adapter decodes and retains a canonical seed-specific sample and exposes generated_sample_path.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_tabddpm_binds_controls_decodes_output_and_owns_workspace"
+    },
+    {
+      "id": "RF-GOGGLE-001",
+      "state": "fixed",
+      "resolution": "The sample seed reaches and reseeds the compatibility launcher independently of training.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_goggle_sampling_passes_the_independent_sample_seed"
+    },
+    {
+      "id": "RF-CTGAN-FAMILY-001",
+      "state": "fixed",
+      "resolution": "Loaded CTGAN/TVAE synthesizers reset their official random state before sampling.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_ctgan_resets_loaded_model_random_state_before_sampling"
+    },
+    {
+      "id": "RF-UPSTREAM-WORKSPACE-001",
+      "state": "fixed",
+      "resolution": "TabDDPM, TabDiff, and TabSyn mutable workspaces are located below the declared output directory.",
+      "regression": "tests/test_phase2_pipeline_remediation.py::test_phase2_tabdiff_and_tabsyn_runtime_paths_are_run_owned"
+    }
+  ],
+  "test_results": {
+    "targeted_phase2": {
+      "command": "python -m pytest -q tests/test_phase2_pipeline_remediation.py --disable-warnings",
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0
+    },
+    "full_repository": {
+      "command": "python -m pytest -q --disable-warnings --maxfail=30",
+      "passed": 579,
+      "failed": 0,
+      "skipped": 8
+    }
+  },
+  "retained_files_sha256": {
+    "standardized_tabular_diffusion/cli.py": "2cb017439c09caab1909a13069629909c8a1adf4bd75123d636578c8425e1144",
+    "standardized_tabular_diffusion/runtime_contracts.py": "6ac9c3d221ccc2d6a271b5bc597a9ae4b0cf14393cc2aecf573096d2bcb655c3",
+    "standardized_tabular_diffusion/models/base.py": "90b824d2ea7c7d518246e135147ed1ada575c956f7ddda63b1b41a2d036c9668",
+    "standardized_tabular_diffusion/runner.py": "635efe40d4d014b1d9f661a4d3dcb0e91152e7d7ab15d6a0e8e2dccbb1007161",
+    "standardized_tabular_diffusion/compat/goggle_launcher.py": "1f7c8872cab3dd59443d2aa273bf21331919fc7e98c5c5bf917b0b20929ad200",
+    "standardized_tabular_diffusion/compat/tabdiff_seed_launcher.py": "a1fd46803137f89cbc6e8121d22894579cae96acf97374a4219c59b7a503ffee",
+    "standardized_tabular_diffusion/compat/tabsyn_launcher.py": "76f31caff05969a4a5a2e9b83beeea4577defa43d2f1e4a04097b1ff1c7d01ee",
+    "standardized_tabular_diffusion/models/goggle.py": "e261b31729a4744901267218bb225e3108665b0b75b4ed1dd7ffa48979b4d56f",
+    "standardized_tabular_diffusion/models/great.py": "3f62f894945218134dcb7d6e687b65c72bda6578b888e85860ade1864d3efe32",
+    "standardized_tabular_diffusion/models/next_wave_baselines.py": "fb7aaed30e25a3b0d65232cb21cfe56788a9f3684567bddec2e20c8b4d729486",
+    "standardized_tabular_diffusion/models/paper_gap_baselines.py": "1ab9defa078390f5c7304b48a490aae64527c4f1ba4816c67ef5b489e6e7f899",
+    "standardized_tabular_diffusion/models/realtabformer.py": "decd55f47361d6fd20bb744ed8a43a62da859b966ca253a57f6be982393bafcd",
+    "standardized_tabular_diffusion/models/sample_baselines.py": "9235bd32db2ab71e40a1434dfe14bc641524e31170dd3479bc2fca8a7cc855d6",
+    "standardized_tabular_diffusion/models/tabddpm.py": "2ea9534f0a740cac641e937f5d6f03f3bb8448b0d2eb870a77c83e32855a13ec",
+    "standardized_tabular_diffusion/models/tabdiff.py": "cc6b245865a0bfe52cb51285eb2066e0f3347c17c7a1ea003c4a1ceeb56d8a9a",
+    "standardized_tabular_diffusion/models/tabsyn.py": "13f400eb91029a656a87d7e3ebef2b20f5c784aec26fc055559e83d2a0dc7ddd",
+    "standardized_tabular_diffusion/models/tabula.py": "6d78d044bc480bb0be6e4145269184ac4b0869cc2c399e47d2423a233bb30275",
+    "standardized_tabular_diffusion/models/tabularargn.py": "4747c55558d837f5ff7120a78b603f4f6ce4b51ef7e7945f559fbe291b8ddb3f",
+    "standardized_tabular_diffusion/models/vendored_baselines.py": "d21058370d4298f044a72c0cb1d4dc214ad4601d8ec8f1c7e805c8e4fc85eb15",
+    "standardized_tabular_diffusion/validation/p5_tabddpm_adult_pilot.py": "55ee13f9e1acc883b946b08be7954ab558a7a41f5b3ca4c7f89f93342b982de2",
+    "tests/test_adapters.py": "6e57d60fe8e3bc86aa2571837f8aea7013759e73df16dd16c93d0e909ee92f5b",
+    "tests/test_pipeline_real_function_audit.py": "08ae9ce9050b27e9609380447df74c3c615368d6d6c5ae424f160f231b7703cb",
+    "tests/test_phase2_pipeline_remediation.py": "1b476b5632c76b015afeea1152109073bda0ae2fe7dac3faa48812ddf29b9926",
+    "tests/test_tabdiff_validation.py": "047e4d07760f3c9b27c367cbb42e8e6da915521ecf0ba0a865792858cd6bc212",
+    "tests/test_tabsyn_validation.py": "3d156d142520655fd4e0944a4d8ed5b32a4bb0dd1f0d1944107451e72f4a452c"
+  }
+}

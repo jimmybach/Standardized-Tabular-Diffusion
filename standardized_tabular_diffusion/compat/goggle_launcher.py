@@ -256,6 +256,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--num-threads", type=int, default=1)
     parser.add_argument("--input-csv", type=Path)
     parser.add_argument("--num-samples", type=int)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--raw-output", type=Path)
     return parser
 
@@ -276,15 +277,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.action == "train" and args.input_csv is None:
         raise ValueError("Goggle training requires --input-csv.")
     if args.action == "sample":
-        if args.num_samples is None or args.num_samples <= 0 or args.raw_output is None:
-            raise ValueError("Goggle sampling requires positive --num-samples and --raw-output.")
+        if args.num_samples is None or args.num_samples <= 0 or args.raw_output is None or args.seed is None:
+            raise ValueError("Goggle sampling requires positive --num-samples, --seed, and --raw-output.")
+        if args.seed < 0:
+            raise ValueError("Goggle sample seed must be non-negative.")
     os.environ.setdefault("DGLBACKEND", "pytorch")
-    os.environ.setdefault("PYTHONHASHSEED", str(config["seed"]))
+    execution_seed = config["seed"] if args.action == "train" else args.seed
+    os.environ["PYTHONHASHSEED"] = str(execution_seed)
     cache_dir = args.output_dir / ".runtime-cache"
     cache_dir.mkdir(exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache_dir / "matplotlib"))
     device = _resolve_device(args.device)
-    _seed_everything(config["seed"], args.num_threads)
+    _seed_everything(execution_seed, args.num_threads)
     with _official_import_boundary(args.source_dir) as GoggleModel:
         if args.action == "train":
             _run_train(args, GoggleModel, config, device)

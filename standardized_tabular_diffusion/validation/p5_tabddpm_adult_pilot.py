@@ -448,10 +448,9 @@ def run_declared_experiment(
     source_integrity = verify_sources(repo_root)
     base, profile = _load_declared_inputs(repo_root)
     dataset = _prepare_upstream_data(repo_root, output_root, profile)
-    parent_dir = output_root / "upstream-checkpoint"
-    parent_dir.mkdir()
     config_dir = output_root / "configs"
-    manifest_dir = output_root / "adapter-manifests"
+    adapter_run_dir = output_root / "adapter-run"
+    parent_dir = adapter_run_dir / "tabddpm-runtime"
     base_config_path = repo_root / BASE_CONFIG
 
     print(f"[{_utc_now()}] Training TabDDPM once with the official Adult configuration", flush=True)
@@ -469,7 +468,7 @@ def run_declared_experiment(
         RunSpec(
             model=MODEL_ID,
             dataset=DATASET_ID,
-            output_dir=manifest_dir / "train",
+            output_dir=adapter_run_dir,
             device="cuda:0",
             seed=0,
             upstream_config_path=training_config_path,
@@ -493,18 +492,31 @@ def run_declared_experiment(
         )
         sample_config_path = config_dir / f"sample-seed-{seed}.toml"
         _write_toml(sample_config_path, sample_config)
-        adapter.sample(
+        sample_bundle = adapter.sample(
             RunSpec(
                 model=MODEL_ID,
                 dataset=DATASET_ID,
-                output_dir=manifest_dir / f"sample-seed-{seed}",
+                output_dir=adapter_run_dir,
                 device="cuda:0",
                 seed=seed,
                 num_samples=dataset["train_rows"],
                 upstream_config_path=sample_config_path,
             )
         )
-        decoded = _decode_sample(parent_dir, seed_dir, profile, dataset["label_mapping"])
+        if sample_bundle.generated_sample_path is None:
+            raise PilotError("TabDDPM adapter did not expose its decoded generated sample")
+        sample_metadata_path = adapter_run_dir / f"tabddpm-sample-seed-{seed}.json"
+        sample_metadata = json.loads(sample_metadata_path.read_text(encoding="utf-8"))
+        sample_record = sample_metadata["sample"]
+        decoded = {
+            "synthetic_path": str(sample_bundle.generated_sample_path),
+            "synthetic_sha256": sample_record["sha256"],
+            "rows": sample_record["rows"],
+            "columns": len(sample_record["columns"]),
+            "raw_array_sha256": sample_record["raw_array_sha256"],
+            "integer_decoding": sample_record["integer_decoding"],
+            "synthetic_repair_applied_by_evaluator": False,
+        }
         bundle_dir = seed_dir / "p5-bundle"
         _evaluate_p5(
             repo_root,

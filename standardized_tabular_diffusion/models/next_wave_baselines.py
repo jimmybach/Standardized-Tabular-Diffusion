@@ -21,6 +21,7 @@ from standardized_tabular_diffusion.models._runtime import (
     isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 from standardized_tabular_diffusion.upstream_sources import (
     default_source_path,
     validate_upstream_source,
@@ -542,6 +543,7 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return params
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
@@ -585,6 +587,7 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
