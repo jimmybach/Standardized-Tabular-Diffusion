@@ -202,14 +202,50 @@ class _OfficialCTGANPackageAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         num_samples = spec.num_samples or len(train_df)
         sample_df = model.sample(num_samples)
         sample_df = sample_df[dataset_spec.column_names].copy()
+        if len(sample_df) != num_samples or bool(sample_df.isna().any().any()):
+            raise ValueError(
+                f"Official {self.model_name} returned an invalid row count or missing sample values."
+            )
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = decode_declared_integer_columns(
+            sample_df,
+            dataset_spec,
+            model_name=self.model_name.upper(),
+        )
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / f"{self.model_name}_native_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        if integer_decoding:
+            atomic_write_json(
+                spec.output_dir / f"{self.model_name}_sample_metadata.json",
+                {
+                    "package": "ctgan",
+                    "package_version": self._OFFICIAL_PACKAGE_VERSION,
+                    "model": self.model_name,
+                    "seed": spec.seed,
+                    "requested_rows": num_samples,
+                    "checkpoint_path": str(checkpoint_path.resolve()),
+                    "checkpoint_sha256": sha256_file(checkpoint_path),
+                    "sample_path": str(sample_path),
+                    "sample_sha256": sha256_file(sample_path),
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": str(native_sample_path),
+                    "native_sample_sha256": sha256_file(native_sample_path),
+                },
+            )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint after official package sampling; "
+                "the unmodified official output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 

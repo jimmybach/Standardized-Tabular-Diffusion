@@ -6,7 +6,7 @@ import pandas as pd
 
 from standardized_tabular_diffusion.evaluation.serialization import read_json
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
-from standardized_tabular_diffusion.models.sample_baselines import SMOTEAdapter
+from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter
 from standardized_tabular_diffusion.output_decoding import declared_integer_columns
 
 
@@ -76,3 +76,42 @@ def test_smote_integer_decoding_retains_unmodified_native_output(
     assert metadata["integer_decoding"]["count"]["changed_rows"] == 6
     assert metadata["integer_decoding"]["count"]["clipped_rows"] == 0
     assert metadata["native_sample_sha256"]
+
+
+def test_official_ctgan_package_adapter_decodes_declared_integers(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    dataset = _integer_dataset(tmp_path)
+    adapter = CTGANAdapter(tmp_path)
+
+    class FakeModel:
+        def set_random_state(self, _seed):
+            return None
+
+        def sample(self, rows):
+            frame = pd.read_csv(dataset.train_data_path).iloc[:rows].copy()
+            frame["count"] = frame["count"].astype(float) + 0.25
+            return frame
+
+    output = tmp_path / "ctgan-output"
+    output.mkdir()
+    (output / adapter.checkpoint_filename).write_bytes(b"test-checkpoint")
+    monkeypatch.setattr(adapter, "_load_model", lambda _spec, _path: FakeModel())
+    spec = RunSpec(
+        model="ctgan",
+        dataset=dataset.name,
+        output_dir=output,
+        device="cuda",
+        seed=29,
+        num_samples=6,
+        extra={"dataset_spec": dataset.to_dict()},
+    )
+
+    bundle = adapter.sample(spec)
+
+    assert pd.read_csv(bundle.generated_sample_path)["count"].tolist() == [1, 2, 3, 4, 5, 6]
+    assert (pd.read_csv(output / "ctgan_native_samples.csv")["count"] % 1 != 0).all()
+    metadata = read_json(output / "ctgan_sample_metadata.json")
+    assert metadata["integer_decoding"]["count"]["changed_rows"] == 6
+    assert metadata["checkpoint_sha256"]
