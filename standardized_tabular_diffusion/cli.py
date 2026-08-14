@@ -188,45 +188,13 @@ def _validate_leaderboard(path: str) -> dict[str, Any]:
 
 
 def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
-    from standardized_tabular_diffusion.evaluation.contracts import EvaluationRequest
-    from standardized_tabular_diffusion.evaluation.evaluate_table import evaluate_table_to_bundle
-    from standardized_tabular_diffusion.evaluation.profiles import load_dataset_profile, resolve_protocol
-    from standardized_tabular_diffusion.evaluation.serialization import sha256_file
+    from standardized_tabular_diffusion.evaluation.service import evaluate_table_files
 
-    reference = Path(args.reference)
-    synthetic = Path(args.synthetic)
-    real_test = Path(args.real_test) if args.real_test is not None else None
-    dataset = load_dataset_profile(args.dataset_profile)
-    protocol_versions = {
-        "p2-shape-trend": "0.2.0",
-        "p3-validity": "0.3.0",
-        "p4-utility": "1.0.0",
-        "p5-high-order-privacy": "1.0.0",
-    }
-    protocol = resolve_protocol(args.protocol, protocol_versions[args.protocol])
-    three_table_protocols = {"p4-utility", "p5-high-order-privacy"}
-    if args.protocol in three_table_protocols and real_test is None:
-        raise ValueError(f"--real-test is required for the {args.protocol} protocol")
-    if args.protocol not in three_table_protocols and real_test is not None:
-        raise ValueError("--real-test is only valid with P4 or P5 protocols")
-
-    def media_type(path: Path) -> str:
-        suffix = path.suffix.lower()
-        if suffix == ".csv":
-            return "text/csv"
-        if suffix in {".parquet", ".pq"}:
-            return "application/vnd.apache.parquet"
-        raise ValueError(f"Expected a .csv, .parquet, or .pq table: {path}")
-
-    metric_selections = tuple(
-        {"metric_id": item["metric_id"], "metric_version": item["metric_version"]}
-        for item in protocol.payload["metric_selections"]
-    )
     evaluator_seeds: tuple[int, ...]
     if args.evaluator_seeds is None:
         if args.evaluator_seed is not None:
             evaluator_seeds = (args.evaluator_seed,)
-        elif args.protocol in three_table_protocols:
+        elif args.protocol in {"p4-utility", "p5-high-order-privacy"}:
             evaluator_seeds = (0, 1, 2, 3, 4)
         else:
             evaluator_seeds = (0,)
@@ -237,69 +205,32 @@ def _evaluate_table(args: argparse.Namespace) -> dict[str, Any]:
             raise ValueError("--evaluator-seeds must be a comma-separated integer list") from exc
         if not evaluator_seeds:
             raise ValueError("--evaluator-seeds must contain at least one integer")
-    if args.protocol == "p5-high-order-privacy" and evaluator_seeds != (0, 1, 2, 3, 4):
-        raise ValueError("p5-high-order-privacy requires evaluator seeds 0,1,2,3,4")
-    evaluator_profile = None
-    if args.protocol == "p4-utility":
-        from standardized_tabular_diffusion.evaluation.utility import p4_evaluator_profile_reference
-
-        evaluator_profile = p4_evaluator_profile_reference()
-    elif args.protocol == "p5-high-order-privacy":
-        from standardized_tabular_diffusion.evaluation.high_order_privacy import (
-            p5_evaluator_profile_reference,
-        )
-
-        evaluator_profile = p5_evaluator_profile_reference()
-    request = EvaluationRequest(
-        subject_type="external-synthetic-table",
-        reference_artifact={
-            "artifact_id": "reference-table",
-            "media_type": media_type(reference),
-            "sha256": sha256_file(reference),
-        },
-        sample_artifact={
-            "artifact_id": "synthetic-table",
-            "media_type": media_type(synthetic),
-            "sha256": sha256_file(synthetic),
-            **({"row_count": args.expected_rows} if args.expected_rows is not None else {}),
-        },
-        real_test_artifact=(
-            {
-                "artifact_id": "real-test-table",
-                "media_type": media_type(real_test),
-                "sha256": sha256_file(real_test),
-            }
-            if real_test is not None
-            else None
-        ),
-        dataset_profile={
-            "dataset_id": dataset.dataset_id,
-            "dataset_profile_version": dataset.dataset_profile_version,
-            "sha256": dataset.fingerprint,
-        },
-        protocol={
-            "protocol_id": protocol.protocol_id,
-            "protocol_version": protocol.protocol_version,
-            "sha256": protocol.fingerprint,
-        },
-        metrics=metric_selections,
+    outcome = evaluate_table_files(
+        reference_path=args.reference,
+        synthetic_path=args.synthetic,
+        real_test_path=args.real_test,
+        dataset_profile_path=args.dataset_profile,
+        protocol_id=args.protocol,
+        output_dir=args.output,
         comparison_track=args.comparison_track,
         generation_seed=args.generation_seed,
         evaluator_seeds=evaluator_seeds,
-        evaluator_profile=evaluator_profile,
-        model={"model_id": args.model_id} if args.model_id else None,
-        failure_policy={"structural_gate": "fail-fast", "metric_failure": "partial-bundle"},
+        expected_rows=args.expected_rows,
+        model_id=args.model_id,
     )
-    report = evaluate_table_to_bundle(
-        reference_path=reference,
-        synthetic_path=synthetic,
-        real_test_path=real_test,
-        dataset_profile=dataset.payload,
-        protocol_profile=protocol.payload,
-        request=request,
-        output_dir=args.output,
-    )
-    return {"valid": True, "request_fingerprint": request.fingerprint, **report.to_dict()}
+    return {"valid": True, "request_fingerprint": outcome.request.fingerprint, **outcome.report.to_dict()}
+
+
+def _import_legacy_summary(source: str, output: str) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.legacy import import_legacy_summary
+
+    return import_legacy_summary(source, output)
+
+
+def _validate_legacy_import(path: str) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.legacy import validate_legacy_import
+
+    return validate_legacy_import(path)
 
 
 def _run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
@@ -461,6 +392,13 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Held-out real test CSV or Parquet table; required for P4 and P5",
     )
+
+    quickstart_parser = subparsers.add_parser(
+        "quickstart",
+        help="Run the packaged artificial SMOTE-to-diagnostic-snapshot release example",
+    )
+    quickstart_parser.add_argument("--output", required=True, help="New quickstart output directory")
+    quickstart_parser.add_argument("--seed", type=int, default=17, help="Non-negative generation seed")
     evaluate_table_parser.add_argument("--dataset-profile", required=True, help="Reviewed Dataset Profile JSON/YAML")
     evaluate_table_parser.add_argument("--output", required=True, help="New result bundle directory")
     evaluate_table_parser.add_argument(
@@ -731,13 +669,34 @@ def build_parser() -> argparse.ArgumentParser:
     )
     process_dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
 
-    compare_parser = subparsers.add_parser("compare", help="Aggregate standardized summaries")
+    import_legacy_parser = subparsers.add_parser(
+        "import-legacy-summary",
+        help="Preserve a frozen legacy standardized_summary.json as non-Official diagnostic evidence",
+    )
+    import_legacy_parser.add_argument("--summary", required=True, help="Frozen legacy summary to import")
+    import_legacy_parser.add_argument("--output", required=True, help="New legacy import directory")
+
+    validate_legacy_parser = subparsers.add_parser(
+        "validate-legacy-import", help="Validate a read-only legacy import bundle"
+    )
+    validate_legacy_parser.add_argument("--bundle", required=True, help="Legacy import directory")
+
+    compare_parser = subparsers.add_parser(
+        "compare-legacy-summaries", help="Diagnostic-only comparison of frozen legacy summaries"
+    )
     compare_parser.add_argument(
-        "--summary", dest="summaries", action="append", required=True, help="Path to a standardized_summary.json file"
+        "--summary",
+        dest="summaries",
+        action="append",
+        required=True,
+        help="Path to a frozen legacy standardized_summary.json file",
     )
     compare_parser.add_argument(
         "--csv", dest="csv_path", default=None, help="Optional path to save the comparison as CSV"
     )
+    compare_alias = subparsers.add_parser("compare", help=argparse.SUPPRESS)
+    compare_alias.add_argument("--summary", dest="summaries", action="append", required=True)
+    compare_alias.add_argument("--csv", dest="csv_path", default=None)
 
     return parser
 
@@ -841,6 +800,22 @@ def main() -> None:
 
     if args.command == "evaluate-table":
         print(json.dumps(_evaluate_table(args), indent=2))
+        return
+
+    if args.command == "quickstart":
+        if args.seed < 0:
+            parser.error("--seed must be non-negative")
+        from standardized_tabular_diffusion.quickstart import run_quickstart
+
+        print(json.dumps(run_quickstart(args.output, seed=args.seed), indent=2))
+        return
+
+    if args.command == "import-legacy-summary":
+        print(json.dumps(_import_legacy_summary(args.summary, args.output), indent=2))
+        return
+
+    if args.command == "validate-legacy-import":
+        print(json.dumps(_validate_legacy_import(args.bundle), indent=2))
         return
 
     if args.command == "describe-config":
@@ -992,7 +967,7 @@ def main() -> None:
         print(json.dumps(manifest, indent=2))
         return
 
-    if args.command == "compare":
+    if args.command in {"compare-legacy-summaries", "compare"}:
         summaries = [Path(path) for path in args.summaries]
         frame = compare_summaries(summaries)
         if args.csv_path:

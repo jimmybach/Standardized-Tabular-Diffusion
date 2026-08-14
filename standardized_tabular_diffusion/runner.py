@@ -8,7 +8,7 @@ from typing import Any
 from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
-from standardized_tabular_diffusion.interfaces import DatasetSpec
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec
 from standardized_tabular_diffusion.registry import get_adapter, get_adapter_spec
 from standardized_tabular_diffusion.upstream_sources import source_status
 
@@ -86,9 +86,69 @@ def run_action(
     if action == "sample":
         return adapter.sample_from_config(config, dataset_spec=dataset_spec)
     if action == "evaluate":
-        return adapter.evaluate_from_config(config, dataset_spec=dataset_spec)
+        return run_central_evaluation(config, dataset_spec=dataset_spec, repo_root=repo_root)
 
     raise ValueError(f"Unsupported action: {action}")
+
+
+def run_central_evaluation(
+    config: ExperimentConfig,
+    *,
+    dataset_spec: DatasetSpec,
+    repo_root: Path | None = None,
+) -> ArtifactBundle:
+    """Route every public adapter evaluation through the versioned central engine."""
+
+    from standardized_tabular_diffusion.evaluation.service import evaluate_adapter_output
+
+    sample_value = config.evaluation.extra.get("sample_path") or config.sample.extra.get("sample_path")
+    if not isinstance(sample_value, str) or not sample_value:
+        raise ValueError("Central adapter evaluation requires evaluation.extra.sample_path")
+    if config.evaluation.dataset_profile_path is None:
+        raise ValueError("Central adapter evaluation requires evaluation.dataset_profile_path")
+    reference = (
+        Path(config.evaluation.reference_path)
+        if config.evaluation.reference_path is not None
+        else dataset_spec.train_data_path
+    )
+    if reference is None:
+        raise ValueError("Central adapter evaluation requires a real training reference table")
+    real_test = (
+        Path(config.evaluation.real_test_path)
+        if config.evaluation.real_test_path is not None
+        else dataset_spec.test_data_path
+    )
+    bundle_root = Path(config.output_dir) / "evaluation-result"
+    outcome = evaluate_adapter_output(
+        model_id=config.model,
+        generation_seed=config.train.seed,
+        synthetic_path=sample_value,
+        output_dir=bundle_root,
+        protocol_id=config.evaluation.protocol,
+        dataset_profile_path=config.evaluation.dataset_profile_path,
+        reference_path=reference,
+        real_test_path=real_test if config.evaluation.protocol in {"p4-utility", "p5-high-order-privacy"} else None,
+        comparison_track=config.evaluation.comparison_track,
+        evaluator_seeds=(
+            None if config.evaluation.evaluator_seeds is None else tuple(config.evaluation.evaluator_seeds)
+        ),
+        expected_rows=config.sample.num_samples,
+    )
+    adapter = get_adapter(config.model, repo_root=repo_root)
+    result = ArtifactBundle(
+        model=config.model,
+        dataset=config.dataset,
+        output_dir=Path(config.output_dir),
+        upstream_workdir=adapter.upstream_root,
+        generated_sample_path=Path(sample_value),
+        evaluation_bundle_path=bundle_root,
+        notes=[
+            f"Central evaluation protocol: {config.evaluation.protocol}",
+            f"Finalized Result Bundle: {outcome.report.bundle_id}",
+            "Legacy standardized_summary.json generation is disabled.",
+        ],
+    )
+    return adapter._write_bundle(result)
 
 
 def run_pipeline(
@@ -136,7 +196,7 @@ def run_pipeline(
                 f"Cannot run evaluate for model={config.model}, dataset={config.dataset}. Missing inputs: "
                 + "; ".join(readiness["missing"])
             )
-        bundle = adapter.evaluate_from_config(eval_config, dataset_spec=dataset_spec)
+        bundle = run_central_evaluation(eval_config, dataset_spec=dataset_spec, repo_root=repo_root)
         phase_results["phases"]["evaluate"] = bundle.to_dict()
 
     return phase_results
@@ -467,26 +527,27 @@ def validate_action_inputs(
                 missing.append(f"upstream_config_path missing: {config.upstream_config_path}")
 
     if action == "evaluate":
-        if adapter_spec.evaluation_input == "sample-file":
-            sample_path = config.evaluation.extra.get("sample_path")
-            checked["sample_path"] = sample_path
-            if sample_path is None or not Path(sample_path).exists():
-                missing.append(f"sample_path missing: {sample_path}")
-        elif adapter_spec.evaluation_input == "upstream-artifacts":
-            required_any = [
-                "results_catboost_path",
-                "results_mlp_path",
-                "privacy_path",
-                "simple_path",
-            ]
-            existing_any = False
-            for key in required_any:
-                path = config.evaluation.extra.get(key)
-                checked[key] = path
-                if path is not None and Path(path).exists():
-                    existing_any = True
-            if not existing_any:
-                missing.append("at least one TabDDPM evaluation artifact path is required and must exist")
+        sample_path = config.evaluation.extra.get("sample_path") or config.sample.extra.get("sample_path")
+        checked["sample_path"] = sample_path
+        if not isinstance(sample_path, str) or not Path(sample_path).is_file():
+            missing.append(f"sample_path missing: {sample_path}")
+        profile_path = config.evaluation.dataset_profile_path
+        checked["dataset_profile_path"] = profile_path
+        if profile_path is None or not Path(profile_path).is_file():
+            missing.append(f"dataset_profile_path missing: {profile_path}")
+        reference_path = config.evaluation.reference_path or (
+            None if dataset_spec.train_data_path is None else str(dataset_spec.train_data_path)
+        )
+        checked["reference_path"] = reference_path
+        if reference_path is None or not Path(reference_path).is_file():
+            missing.append(f"reference_path missing: {reference_path}")
+        if config.evaluation.protocol in {"p4-utility", "p5-high-order-privacy"}:
+            test_path = config.evaluation.real_test_path or (
+                None if dataset_spec.test_data_path is None else str(dataset_spec.test_data_path)
+            )
+            checked["real_test_path"] = test_path
+            if test_path is None or not Path(test_path).is_file():
+                missing.append(f"real_test_path missing: {test_path}")
 
     return {
         "action": action,

@@ -1,6 +1,6 @@
 # Standardized Tabular Diffusion Benchmark
 
-> **Development status:** this repository is currently a pre-alpha engineering workspace, not an official benchmark release. The existing `tabstruct-aligned-v1` output is a legacy compatibility path while the reviewed evaluation protocol is implemented. See the [development baseline](docs/DEVELOPMENT.md), [evaluation implementation roadmap](docs/evaluation/IMPLEMENTATION_ROADMAP.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
+> **Release status:** `0.1.0rc1` is a software release candidate, not an Official Results release. P1-P8 engineering surfaces are implemented, while model support, benchmark eligibility, dataset/metric/run admission, and Official publication remain independent gates. See the [quickstart](docs/QUICKSTART.md), [P8 migration/release contract](docs/evaluation/P8_MIGRATION_AND_RELEASE.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
 
 The primary release family is **Windows x86-64 with Python 3.11**, and the exact release target is native **Windows 11 x86-64 with Python 3.11**. GitHub-hosted Windows CI establishes Windows-family compatibility but is not, by itself, Windows 11 qualification. Linux/Python 3.11 remains a required secondary compatibility and upstream-parity environment; see the [platform policy](docs/PLATFORM_SUPPORT.md) and its [Chinese translation](docs/PLATFORM_SUPPORT.zh-CN.md).
 
@@ -54,18 +54,18 @@ The new root package is `standardized_tabular_diffusion/`.
 - `interfaces.py`: common run and artifact schemas
 - `models/`: adapters for each upstream model family
 - `evaluation/`: versioned contracts, structural validation, source-attested metric backends, Atomic Results, bundle finalization, and the isolated legacy path
-- `comparison.py`: run aggregation utilities
+- `comparison.py`: frozen legacy diagnostic comparison only
 - `cli.py`: a single entrypoint for listing models, describing metrics, running evaluations, and building comparisons
 
 This organization is meant to make eventual migration into a single GitHub repository much easier: the upstream projects remain vendor-like sources, while the root package acts as the stable integration boundary.
 
 ## Standardized Interface
 
-Every adapter exposes the same high-level operations:
+Every registered adapter exposes train/sample operations through the shared contract. Public evaluation is deliberately centralized:
 
 - `train(spec)`
 - `sample(spec)`
-- `evaluate(spec)`
+- `run-action evaluate`, top-level `run`, and `benchmark run` route decoded samples to the P2-P5 engine
 
 Each operation accepts a shared `RunSpec` object and returns standardized artifact metadata. Model-specific arguments still exist, but they are isolated inside `spec.extra`.
 
@@ -101,13 +101,13 @@ Each standardized run writes canonical metadata such as:
 
 - `artifacts.json`
 - `pipeline_result.json`
-- `standardized_summary.json` when evaluation is enabled
+- `evaluation-result/` when central evaluation is enabled
 
 ## Evaluation Protocol
 
 The P1 evaluation foundation now provides versioned JSON Schemas and strict Python contracts for Evaluation Requests, Dataset Profiles, protocol profiles, Metric Registry entries, Atomic Results, stage records, manifests, metadata, summaries, and artifact indexes.
 
-The pre-existing `tabstruct-aligned-v1` path is retained only for compatibility. Its fields have been migrated into explicit `legacy-diagnostic` Metric Registry records at lifecycle status `registered`; they are not source-parity validated, protocol frozen, release supported, or eligible for Official Results. `standardized_summary.json` is therefore not a leaderboard source of truth. TabStruct paper and code materials are research references only; neither the P1 foundation nor the independent P2 evaluator imports the legacy `evaluation/tabstruct.py` path as its metric engine.
+The pre-existing `tabstruct-aligned-v1` path is read-only migration input. Its schema is frozen, supported generation is retired, and `standardized_summary.json` is not a Result Bundle or leaderboard source. During the `0.1.x` migration window, `import-legacy-summary` preserves the original bytes and emits an explicitly non-converted `legacy-diagnostic` record; it can never fabricate Atomic Results or Official eligibility. TabStruct paper/code materials remain research references only.
 
 The approved result design uses one structured Atomic Result per metric scope, preserves raw and derived values separately, represents failures through six explicit result states, and stores finalized observations in `metrics.parquet`. P2 now implements the first complete slice: a Dataset Profile structural gate, exact source-attested SDMetrics Column Shapes and Column Pair Trends, denominator-complete per-column/per-pair results, and interruption-safe finalized bundles. P2 passed its [authoritative Linux/Python 3.11 workflow](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31025796906), with [machine-readable evidence](docs/evidence/evaluation/p2-shape-trend-run-31025796906.json) retained. The two metrics remain diagnostic pending later protocol and release gates; see the [P2 guide](docs/evaluation/P2_SHAPE_TREND_EVALUATION.md).
 
@@ -120,6 +120,8 @@ P5 adds five-seed Random-Forest C2ST with raw AUROC and a separate label-invaria
 P6 adds a seven-stage, resource-aware execution layer around the adapters. Each enabled stage runs in an isolated process with explicit timeout and process-tree memory boundaries, structured redacted logs, attempt ancestry, content-addressed output caching, exact cache validation, and observed hardware/software identity. Cache reuse is never efficiency evidence, damaged cache entries execute afresh, optional failures preserve completed outputs, and cross-hardware efficiency comparison fails closed. The operational `aggregate` stage is not P7 leaderboard aggregation, and captured hardware profiles are not automatically Official. The engineering exit gate passed on Windows/AMD64 and Python 3.11.15 with [retained evidence](docs/evidence/evaluation/p6-windows-py311-da47011.json). See the [P6 guide](docs/evaluation/P6_ORCHESTRATION.md) and [Chinese translation](docs/evaluation/P6_ORCHESTRATION.zh-CN.md).
 
 P7 adds fail-closed aggregation and immutable leaderboard publication. It validates finalized Run Result bundles, keeps exact scientific compatibility groups separate, aggregates Atomic Results through equal-seed and equal-dataset levels, preserves missing and failed denominators, and emits deterministic JSON, CSV, HTML, and Markdown from one structured snapshot. Official ranks require complete five-seed coverage, a frozen tie rule, a release-supported metric, and independent admissions for every applicable identity and run; Partial/Diagnostic and Community outputs never receive Official ranks. The engineering exit gate passed on Windows/AMD64 and Python 3.11.15 with [retained evidence](docs/evidence/evaluation/p7-windows-py311-4c8da76.json). See the [P7 guide](docs/evaluation/P7_AGGREGATION_AND_LEADERBOARD.md) and [Chinese translation](docs/evaluation/P7_AGGREGATION_AND_LEADERBOARD.zh-CN.md).
+
+P8 freezes the old `standardized_summary.json` as checksum-bound, read-only legacy diagnostic input; routes adapter evaluation through the central Result Bundle engine; adds a packaged offline quickstart; separates exact lifecycle statuses; and supplies the `0.1.0rc1` release, legal, packaging, migration, and bilingual documentation surfaces. The native Windows 11/Python 3.11 exit gate and the hosted Windows/Linux release matrix passed with [retained native evidence](docs/evidence/evaluation/p8-native-windows11-py311-bb09085.json) and [GitHub Actions run 31760027871](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871). This is software engineering evidence, not Official Results or release support for any baseline. See the [P8 contract](docs/evaluation/P8_MIGRATION_AND_RELEASE.md).
 
 P1's engineering exit gate passed on Linux/Python 3.11 in [GitHub Actions run 31018595264](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31018595264), with the exact [machine-readable evidence](docs/evidence/evaluation/p1-foundation-run-31018595264.json) retained in the repository. This is not evidence that any metric is source-parity validated.
 
@@ -137,23 +139,32 @@ std-tabular-diffusion evaluate-table --protocol p5-high-order-privacy --referenc
 std-tabular-diffusion build-leaderboard --request path/to/snapshot-request.json --bundle path/to/finalized-run --output path/to/new_snapshot
 std-tabular-diffusion validate-leaderboard --snapshot path/to/snapshot
 std-tabular-diffusion validate-result --bundle path/to/result_bundle
+std-tabular-diffusion import-legacy-summary --summary path/to/standardized_summary.json --output path/to/legacy-import
+std-tabular-diffusion validate-legacy-import --bundle path/to/legacy-import
 ~~~
 
-## Legacy Diagnostic Benchmark Policy
+For a clean install-to-snapshot check using declared artificial data and the official SMOTE package:
 
-The pre-P1 diagnostic layer makes the following compatibility choices. They describe legacy summaries only and are not the approved official protocol:
+~~~bash
+python -m pip install ".[quickstart]"
+std-tabular-diffusion quickstart --output artifacts/quickstart
+~~~
+
+## Frozen Legacy Diagnostic Format
+
+The retired pre-P1 generator made the following choices. They document existing legacy files only; no supported command executes this evaluator now:
 
 - Dataset-level inputs are resolved through a canonical dataset registry in `standardized_tabular_diffusion/datasets.py`.
 - Materialized datasets override raw upstream paths when available.
-- `TabDiff` and `TabSyn` use a shared normalized evaluator.
-- `TabDDPM` is normalized from the metrics already emitted by its upstream evaluation stack.
+- `TabDiff` and `TabSyn` used a shared normalized evaluator.
+- `TabDDPM` was normalized from metrics emitted by its upstream evaluation stack.
 - Structural fidelity defaults to a reproducible local predictor set of `XGB + KNN`.
 - `TabPFN` is disabled by default and only enabled when `STANDARDIZED_TABULAR_DIFFUSION_ENABLE_TABPFN=1` is set.
 - When `TabPFN` is enabled, it is still treated as optional if it is unavailable because of gated-model access, unsupported class counts, or missing dependencies.
 
-## Legacy Diagnostic Reproducibility
+## Legacy Diagnostic Migration
 
-The legacy standardized evaluation path uses a benchmark-oriented deterministic configuration:
+Existing files may record the following historical reproducibility settings:
 
 - fixed benchmark seeds in the MLE evaluator and structural-fidelity layer
 - deterministic train/validation splitting in the upstream MLE path
@@ -161,7 +172,7 @@ The legacy standardized evaluation path uses a benchmark-oriented deterministic 
 - single-threaded XGBoost for the normalized MLE benchmark path
 - stable structural-fidelity predictor policy emitted into the summary metadata
 
-For the current smoke benchmark setup, repeated standardized evaluation runs now produce identical summary hashes.
+P8 does not rerun or reinterpret those calculations. Import preserves the source bytes and checksum, and explicitly refuses conversion to current Atomic Results.
 
 ## Environment
 
@@ -172,9 +183,9 @@ The repo now spans several dependency families that do not all evolve in lockste
 - DGL / graph baselines
 - TabPFN-backed energy-based baselines
 
-The current known-good reference stack is pinned in:
+The broad historical convenience stack is recorded in:
 
-- `requirements-benchmark-stack.txt`
+- `requirements-benchmark-stack.txt` (not the release contract; prefer narrow extras)
 
 Important current caveats:
 
@@ -335,10 +346,10 @@ Run the full standardized pipeline:
 python -m standardized_tabular_diffusion.cli run --config tmp/example.json
 ```
 
-Compare previously normalized run summaries:
+Compare frozen legacy summaries for diagnostic migration only:
 
 ```bash
-python -m standardized_tabular_diffusion.cli compare \
+python -m standardized_tabular_diffusion.cli compare-legacy-summaries \
   --summary artifacts/tabdiff/adult/run-1/standardized_summary.json \
   --summary artifacts/tabsyn/adult/run-1/standardized_summary.json
 ```
@@ -396,7 +407,7 @@ The main files to inspect afterward are:
 - `run_context.json`
 - `pipeline_result.json`
 - `artifacts.json`
-- `standardized_summary.json` when evaluation is enabled
+- `evaluation-result/manifest.json` and `evaluation-result/metrics.parquet` when evaluation is enabled
 
 For `tabddpm`, also set `upstream_config_path` in the experiment config so the standardized adapter can call the upstream TOML-based pipeline.
 
@@ -406,7 +417,7 @@ TabDDPM's adapter is `native-parity-validated` on Linux/Python 3.11 against the 
 
 The standardized layer now has lightweight regression coverage for:
 
-- reproducibility of dataset splitting and normalized summary generation
+- reproducibility of dataset processing, versioned evaluation, and immutable evidence generation
 - adapter-level contracts for `tabdiff` and `tabddpm`
 
 Run the current standardized test set with:
@@ -417,8 +428,7 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 
 ## Notes
 
-- `TabDiff` and `TabSyn` can share the same normalized evaluator because both repos use the same `info.json`-style tabular metadata.
-- `TabDDPM` currently has a partially different evaluation stack, so the adapter normalizes the metrics that are already available and marks unavailable TabStruct dimensions explicitly.
+- Adapter-local evaluation is retired; TabDiff, TabSyn, TabDDPM, and every other public adapter path use the same central protocol engine after sample generation.
 - `TabSyn` uses an unmodified, checksum-frozen official source scope. Device, seed, row-count, and sampling-step controls are isolated in the repository-owned invocation boundary, and three exact seed cases passed the retained native-parity protocol.
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.

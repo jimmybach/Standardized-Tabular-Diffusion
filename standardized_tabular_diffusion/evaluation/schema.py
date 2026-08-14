@@ -26,6 +26,8 @@ SCHEMA_FILES = {
     "orchestration-run": "orchestration-run.schema.json",
     "orchestration-stage-record": "orchestration-stage-record.schema.json",
     "leaderboard-snapshot": "leaderboard-snapshot.schema.json",
+    "legacy-import-record": "legacy-import-record.schema.json",
+    "legacy-standardized-summary": "legacy-standardized-summary.schema.json",
     "snapshot-manifest": "snapshot-manifest.schema.json",
     "snapshot-request": "snapshot-request.schema.json",
     "protocol-profile": "protocol-profile.schema.json",

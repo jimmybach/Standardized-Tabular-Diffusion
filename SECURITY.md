@@ -1,6 +1,6 @@
 # Security Policy
 
-This repository is a pre-alpha research workspace and does not yet have a supported security release. Report suspected vulnerabilities privately to the laboratory maintainer; do not include credentials, private data, or exploitable artifacts in a public issue.
+This repository publishes release-candidate research software but no Official Results or release-supported model adapters. Report suspected vulnerabilities privately through a GitHub Security Advisory for this repository; do not include credentials, private data, or exploitable artifacts in a public issue.
 
 ## Trust boundaries
 

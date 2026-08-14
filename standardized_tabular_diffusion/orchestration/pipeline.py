@@ -163,7 +163,7 @@ def build_benchmark_plan(
                 "train": "execute the selected official adapter training action",
                 "sample": "generate the requested decoded synthetic table",
                 "validate": "verify the generated artifact without scientific repair",
-                "evaluate": "execute the configured adapter evaluation action",
+                "evaluate": "evaluate the decoded adapter output with the versioned central Result Bundle engine",
                 "aggregate": "index completed operational stage artifacts without leaderboard aggregation",
                 "report": "emit an operational report without recomputing scientific values",
             }[name],

@@ -18,6 +18,11 @@ class ModelInventoryEntry:
 
     def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
+        payload["research_assessment"] = {
+            "runnable_recommendation": payload.pop("runnable_recommendation"),
+            "upstream_codebase_quality": payload.pop("implementation_quality"),
+            "status_authority": "non-normative-landscape-review",
+        }
         from standardized_tabular_diffusion.registry import get_adapter_spec
 
         try:
@@ -34,6 +39,7 @@ class ModelInventoryEntry:
                     "support_level": "unsupported",
                     "revision_status": "unresolved",
                     "evidence_records": [],
+                    "validation_level": "registered",
                 }
             )
         else:
@@ -50,6 +56,7 @@ class ModelInventoryEntry:
                     "revision_status": adapter_payload["revision_status"],
                     "evidence_records": adapter_payload["evidence_records"],
                     "license_status": adapter_payload["license_status"],
+                    "validation_level": adapter_payload["validation_level"],
                 }
             )
         return payload
