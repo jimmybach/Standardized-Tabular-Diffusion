@@ -46,3 +46,21 @@ def test_contribution_policy_uses_dco_and_preserves_credit() -> None:
     assert "Contributor License Agreement" in policy
     assert "principal contributor to the initial version" in contributors
     assert "@jimmybach" in contributors
+
+
+def test_history_sanitization_record_and_secret_scan_exceptions_are_reviewable() -> None:
+    notice = (REPO_ROOT / "docs" / "HISTORY_REWRITE_2026-08-14.md").read_text(encoding="utf-8")
+    translation = (REPO_ROOT / "docs" / "HISTORY_REWRITE_2026-08-14.zh-CN.md").read_text(encoding="utf-8")
+    ignore_lines = [
+        line
+        for line in (REPO_ROOT / ".gitleaksignore").read_text(encoding="utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+
+    assert "967e78c6d3232ebdc23b557edf62a34195948809" in notice
+    assert "refs/pull/*/head" in notice
+    assert "GitHub Support" in notice
+    assert "GitHub Support" in translation
+    assert len(ignore_lines) == 4
+    assert len(set(ignore_lines)) == 4
+    assert all(":generic-api-key:" in line for line in ignore_lines)

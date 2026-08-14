@@ -14,3 +14,5 @@ This repository publishes release-candidate research software but no Official Re
 ## Before a public release
 
 The maintainers must complete the third-party and dataset-rights review, pin upstream revisions and package versions, audit repository history for secrets and restricted data, publish checksums for supported artifacts, and run the primary Windows 11/Python 3.11 checks plus the required secondary Linux/Python 3.11 CI and security suite.
+
+The one-time 2026-08-14 branch-history cleanup and its remaining GitHub-hosted pull-reference boundary are documented in the [repository history sanitization notice](docs/HISTORY_REWRITE_2026-08-14.md). The first release tag remains blocked until the platform-side boundary is resolved or an explicit reviewed risk decision is recorded.

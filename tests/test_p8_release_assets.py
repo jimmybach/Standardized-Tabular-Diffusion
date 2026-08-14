@@ -40,6 +40,7 @@ def test_release_version_and_citation_are_synchronized() -> None:
 
 def test_release_assets_and_bilingual_p8_guides_are_present() -> None:
     for relative in (
+        ".gitleaksignore",
         "CITATION.cff",
         "CODE_OF_CONDUCT.md",
         "MANIFEST.in",
@@ -50,6 +51,8 @@ def test_release_assets_and_bilingual_p8_guides_are_present() -> None:
         "docs/ARCHITECTURE.zh-CN.md",
         "docs/TROUBLESHOOTING.md",
         "docs/TROUBLESHOOTING.zh-CN.md",
+        "docs/HISTORY_REWRITE_2026-08-14.md",
+        "docs/HISTORY_REWRITE_2026-08-14.zh-CN.md",
         "docs/METRIC_CARDS.md",
         "docs/METRIC_CARDS.zh-CN.md",
         "docs/DATASET_CARDS.md",
@@ -105,6 +108,9 @@ def test_release_document_local_links_resolve() -> None:
             "ARCHITECTURE.zh-CN.md",
             "DATASET_CARDS.md",
             "DATASET_CARDS.zh-CN.md",
+            "DATA_GOVERNANCE.md",
+            "HISTORY_REWRITE_2026-08-14.md",
+            "HISTORY_REWRITE_2026-08-14.zh-CN.md",
             "METRIC_CARDS.md",
             "METRIC_CARDS.zh-CN.md",
             "QUICKSTART.md",
