@@ -21,6 +21,7 @@ from standardized_tabular_diffusion.models._runtime import (
     isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
 from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 from standardized_tabular_diffusion.upstream_sources import (
     default_source_path,
@@ -352,22 +353,45 @@ class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 encoded = model.synthesizer.sample(int(num_samples))
                 sample_df = model.data_prep.inverse_prep(encoded)
         sample_df = sample_df[dataset_spec.column_names].copy()
+        if len(sample_df) != int(num_samples) or bool(sample_df.isna().any().any()):
+            raise ValueError("CTAB-GAN+ returned an invalid row count or missing sample values")
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = decode_declared_integer_columns(
+            sample_df,
+            dataset_spec,
+            model_name="CTAB-GAN+",
+        )
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "ctabgan_plus_native_inverse_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        sample_metadata = {
+            "model": self.model_name,
+            "dataset": dataset_spec.name,
+            "seed": spec.seed,
+            "requested_rows": int(num_samples),
+            "source": source,
+            "runtime_versions": versions,
+            "checkpoint_path": str(trusted_checkpoint),
+            "checkpoint_sha256": observed_checkpoint_sha256,
+            "sample_path": str(sample_path),
+            "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_inverse_sample_path": str(native_sample_path),
+                    "native_inverse_sample_sha256": hashlib.sha256(
+                        native_sample_path.read_bytes()
+                    ).hexdigest(),
+                }
+            )
         atomic_write_json(
             spec.output_dir / "ctabgan_plus_sample_metadata.json",
-            {
-                "model": self.model_name,
-                "dataset": dataset_spec.name,
-                "seed": spec.seed,
-                "requested_rows": int(num_samples),
-                "source": source,
-                "runtime_versions": versions,
-                "checkpoint_path": str(trusted_checkpoint),
-                "checkpoint_sha256": observed_checkpoint_sha256,
-                "sample_path": str(sample_path),
-                "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
-            },
+            sample_metadata,
         )
         bundle = ArtifactBundle(
             model=self.model_name,
@@ -375,6 +399,10 @@ class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             output_dir=spec.output_dir,
             upstream_workdir=source_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint after the official inverse transform; "
+                "the unmodified inverse output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 
