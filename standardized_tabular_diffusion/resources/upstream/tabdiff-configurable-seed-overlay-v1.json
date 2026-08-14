@@ -1,0 +1,51 @@
+{
+  "patch_schema_version": "1.0.0",
+  "patch_id": "tabdiff-configurable-seed-overlay-v1",
+  "status": "maintainer-approved",
+  "approved_at": "2026-08-14",
+  "scope": "interface-only",
+  "purpose": "Expose the common benchmark seed to the official deterministic TabDiff initialization without modifying model architecture, loss, schedule, optimizer, data processing, or sampling equations.",
+  "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
+  "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+  "source_path": "tabdiff/main.py",
+  "source_sha256_lf": "1682a2e54442e0c7badd01aecdcd8d88557b9a9cb40990fa86ae3a785404e844",
+  "patched_sha256_lf": "ed5b386f84cc143f81054f1cda79becba850d019a757141868db0242919a1cea",
+  "edits": [
+    {
+      "before": "        torch.manual_seed(0)",
+      "after": "        torch.manual_seed(args.seed)",
+      "expected_occurrences": 1
+    },
+    {
+      "before": "        random.seed(0)",
+      "after": "        random.seed(args.seed)",
+      "expected_occurrences": 1
+    },
+    {
+      "before": "        np.random.seed(0)",
+      "after": "        np.random.seed(args.seed)",
+      "expected_occurrences": 1
+    },
+    {
+      "before": "        os.environ['PYTHONHASHSEED'] = '0'",
+      "after": "        os.environ['PYTHONHASHSEED'] = str(args.seed)",
+      "expected_occurrences": 1
+    },
+    {
+      "before": "            torch.cuda.manual_seed(0)",
+      "after": "            torch.cuda.manual_seed(args.seed)",
+      "expected_occurrences": 1
+    },
+    {
+      "before": "            torch.cuda.manual_seed_all(0)",
+      "after": "            torch.cuda.manual_seed_all(args.seed)",
+      "expected_occurrences": 1
+    }
+  ],
+  "invariants": [
+    "The distributed TabDiff-main source remains byte-identical to the pinned official commit.",
+    "The overlay refuses changed source bytes or changed edit multiplicity.",
+    "Seed 0 must remain byte-exact with the unmodified official deterministic path.",
+    "Nonzero seeds require same-seed reproducibility and cross-seed variation validation before benchmark eligibility."
+  ]
+}

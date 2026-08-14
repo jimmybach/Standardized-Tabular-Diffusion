@@ -119,9 +119,10 @@ def run_central_evaluation(
         else dataset_spec.test_data_path
     )
     bundle_root = Path(config.output_dir) / "evaluation-result"
+    generation_seed = config.sample.seed if config.sample.seed is not None else config.train.seed
     outcome = evaluate_adapter_output(
         model_id=config.model,
-        generation_seed=config.train.seed,
+        generation_seed=generation_seed,
         synthetic_path=sample_value,
         output_dir=bundle_root,
         protocol_id=config.evaluation.protocol,

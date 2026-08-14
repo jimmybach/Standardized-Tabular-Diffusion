@@ -36,7 +36,7 @@ def test_public_adapter_evaluation_routes_to_central_bundle_without_legacy_outpu
         dataset="fixture",
         output_dir=str(output),
         train=TrainConfig(enabled=False, seed=9),
-        sample=SampleConfig(enabled=False, num_samples=1),
+        sample=SampleConfig(enabled=False, seed=17, num_samples=1),
         evaluation=EvaluationConfig(
             enabled=True,
             protocol="p3-validity",
@@ -82,6 +82,7 @@ def test_public_adapter_evaluation_routes_to_central_bundle_without_legacy_outpu
     assert observed["synthetic_path"] == str(sample)
     assert observed["reference_path"] == train
     assert observed["protocol_id"] == "p3-validity"
+    assert observed["generation_seed"] == 17
     assert observed["output_dir"] == output / "evaluation-result"
     assert bundle.evaluation_bundle_path == output / "evaluation-result"
     assert bundle.standardized_summary_path is None

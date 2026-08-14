@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import os
 import pickle
 import sys
 import types
@@ -236,6 +237,7 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     repo_root = tmp_path
     upstream_root = repo_root / "TabDiff-main"
     ckpt_dir = upstream_root / "tabdiff" / "ckpt" / "adult" / "exp-smoke"
@@ -251,9 +253,18 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     adapter = TabDiffAdapter(repo_root)
     commands: list[tuple[list[str], Path]] = []
 
-    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
-        assert not module
+    environments: list[dict[str, str] | None] = []
+
+    def fake_run_python(
+        args: list[str],
+        cwd: Path,
+        *,
+        module: bool = False,
+        env: dict[str, str] | None = None,
+    ) -> None:
+        assert module
         commands.append((args, cwd))
+        environments.append(env)
 
     monkeypatch.setattr(adapter, "_run_python", fake_run_python)
     dataset_spec = DatasetSpec(
@@ -289,7 +300,7 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     assert commands == [
         (
             [
-                "main.py",
+                "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
                 "--dataname",
                 "adult",
                 "--mode",
@@ -302,14 +313,32 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
                 "512",
                 "--gpu",
                 "1",
+                "--seed",
+                "0",
                 "--no_wandb",
                 "--deterministic",
             ],
             upstream_root,
         )
     ]
-    assert bundle.generated_sample_path == sample_path
-    assert json.loads((bundle.output_dir / "artifacts.json").read_text())["generated_sample_path"] == str(sample_path)
+    assert environments == [
+        {
+            "PYTHONHASHSEED": "0",
+            "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONPATH": os.pathsep.join([str(Path(__file__).resolve().parents[1]), str(repo_root)]),
+        }
+    ]
+    copied_sample_path = bundle.output_dir / "samples.csv"
+    assert bundle.generated_sample_path == copied_sample_path
+    assert copied_sample_path.read_bytes() == sample_path.read_bytes()
+    assert json.loads((bundle.output_dir / "artifacts.json").read_text())["generated_sample_path"] == str(
+        copied_sample_path
+    )
+    run_metadata = json.loads((bundle.output_dir / "tabdiff_run.json").read_text())
+    assert run_metadata["seed"] == 0
+    assert run_metadata["seed_interface"]["patch_id"] == "tabdiff-configurable-seed-overlay-v1"
 
 
 def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_evaluation_is_retired(
@@ -792,9 +821,7 @@ def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, mo
 
     @contextlib.contextmanager
     def fake_runtime(source_path):
-        yield PickleableFakeCTABGAN, object(), {
-            name: expected for name, expected in adapter.expected_versions.items()
-        }
+        yield PickleableFakeCTABGAN, object(), {name: expected for name, expected in adapter.expected_versions.items()}
 
     @contextlib.contextmanager
     def fake_seeded(seed, torch_module, num_threads):

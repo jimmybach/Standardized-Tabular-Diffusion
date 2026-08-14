@@ -1,7 +1,19 @@
 from __future__ import annotations
 
+import hashlib
+import inspect
+import json
+import os
+import tomllib
 from pathlib import Path
 
+from standardized_tabular_diffusion.compat.tabdiff_seed_launcher import (
+    RUNTIME_COMPATIBILITY_RECORD_PATH,
+    load_config_path_overlay_record,
+    load_diagnostic_plot_bypass_record,
+    load_patch_record,
+)
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 
@@ -24,23 +36,134 @@ class TabDiffAdapter(BaseModelAdapter):
         raise ValueError(f"Unsupported TabDiff device {spec.device!r}; use 'cpu', 'cuda', or 'cuda:<index>'.")
 
     @staticmethod
-    def _validate_seed_contract(spec: RunSpec) -> bool:
+    def _validate_seed_contract(spec: RunSpec) -> None:
         deterministic = bool(spec.extra.get("deterministic", True))
-        if spec.seed != 0:
-            raise ValueError(
-                "The pinned official TabDiff CLI exposes only deterministic seed 0. "
-                "Use seed=0; configurable upstream seeds require an approved source change."
-            )
-        return deterministic
+        if isinstance(spec.seed, bool) or not isinstance(spec.seed, int) or spec.seed < 0:
+            raise ValueError("TabDiff seed must be a non-negative integer.")
+        if not deterministic:
+            raise ValueError("TabDiff configurable seed execution requires deterministic=true.")
+
+    def _execution_environment(self, spec: RunSpec) -> dict[str, str]:
+        package_import_root = Path(__file__).resolve().parents[2]
+        python_paths = list(dict.fromkeys([str(package_import_root), str(self.repo_root.resolve())]))
+        if existing_python_path := os.environ.get("PYTHONPATH"):
+            python_paths.append(existing_python_path)
+        return {
+            "PYTHONHASHSEED": str(spec.seed),
+            "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONPATH": os.pathsep.join(python_paths),
+        }
+
+    @staticmethod
+    def _sha256_file(path: Path) -> str:
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for block in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(block)
+        return digest.hexdigest()
+
+    @staticmethod
+    def _resolve_config_path(spec: RunSpec) -> Path | None:
+        if spec.upstream_config_path is None:
+            return None
+        path = spec.upstream_config_path
+        if path.is_symlink():
+            raise PermissionError(f"Refusing to load a symlinked TabDiff TOML configuration: {path}")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_file() or resolved.suffix.lower() != ".toml":
+            raise ValueError(f"TabDiff upstream_config_path must be a regular TOML file: {resolved}")
+        with resolved.open("rb") as stream:
+            payload = tomllib.load(stream)
+        required_sections = {"data", "unimodmlp_params", "diffusion_params", "train", "sample"}
+        missing = sorted(required_sections - payload.keys())
+        if missing:
+            raise ValueError(f"TabDiff TOML is missing required sections: {missing}")
+        return resolved
+
+    def _write_run_metadata(
+        self,
+        spec: RunSpec,
+        *,
+        action: str,
+        generated_sample_path: Path | None = None,
+    ) -> Path:
+        patch = load_patch_record()
+        config_path_overlay = load_config_path_overlay_record()
+        diagnostic_plot_bypass = load_diagnostic_plot_bypass_record()
+        runtime_compatibility = json.loads(RUNTIME_COMPATIBILITY_RECORD_PATH.read_text(encoding="utf-8"))
+        import torch
+
+        scheduler_accepts_verbose = (
+            "verbose" in inspect.signature(torch.optim.lr_scheduler.ReduceLROnPlateau).parameters
+        )
+        payload: dict[str, object] = {
+            "schema_version": 1,
+            "model": self.model_name,
+            "dataset": spec.dataset,
+            "action": action,
+            "seed": spec.seed,
+            "deterministic": True,
+            "device": spec.device,
+            "seed_interface": {
+                "kind": "approved-runtime-overlay",
+                "patch_id": patch["patch_id"],
+                "scope": patch["scope"],
+                "upstream_commit": patch["upstream_commit"],
+                "source_path": patch["source_path"],
+                "source_sha256_lf": patch["source_sha256_lf"],
+                "patched_sha256_lf": patch["patched_sha256_lf"],
+            },
+            "config_interface": {
+                "patch_id": config_path_overlay["patch_id"],
+                "scope": config_path_overlay["scope"],
+                "custom_config_active": spec.upstream_config_path is not None,
+                "path": None,
+                "sha256": None,
+            },
+            "runtime_compatibility": {
+                "bridge_id": runtime_compatibility["bridge_id"],
+                "bridge_active": not scheduler_accepts_verbose,
+                "torch_version": torch.__version__,
+                "scientific_effect": runtime_compatibility["scientific_effect"],
+                "diagnostic_plot_bypass": {
+                    "patch_id": diagnostic_plot_bypass["patch_id"],
+                    "active": True,
+                    "scope": diagnostic_plot_bypass["scope"],
+                    "source_sha256_lf": diagnostic_plot_bypass["source_sha256_lf"],
+                    "patched_sha256_lf": diagnostic_plot_bypass["patched_sha256_lf"],
+                    "scientific_effect": diagnostic_plot_bypass["scientific_effect"],
+                },
+            },
+            "generated_sample": None,
+        }
+        if spec.upstream_config_path is not None:
+            config_path = self._resolve_config_path(spec)
+            if config_path is None:  # pragma: no cover - guarded by the condition above
+                raise AssertionError("TabDiff config resolution unexpectedly returned None.")
+            config_interface = payload["config_interface"]
+            if not isinstance(config_interface, dict):  # pragma: no cover - construction invariant
+                raise AssertionError("TabDiff config metadata has an unexpected representation.")
+            config_interface["path"] = str(config_path)
+            config_interface["sha256"] = self._sha256_file(config_path)
+        if generated_sample_path is not None:
+            payload["generated_sample"] = {
+                "path": str(generated_sample_path),
+                "sha256": self._sha256_file(generated_sample_path),
+            }
+        path = spec.output_dir / "tabdiff_run.json"
+        atomic_write_json(path, payload)
+        return path
 
     def _common_args(self, spec: RunSpec) -> list[str]:
-        args = ["--gpu", str(self._gpu_index(spec))]
+        self._validate_seed_contract(spec)
+        args = ["--gpu", str(self._gpu_index(spec)), "--seed", str(spec.seed)]
         if spec.extra.get("debug"):
             args.append("--debug")
         if spec.extra.get("no_wandb", True):
             args.append("--no_wandb")
-        if self._validate_seed_contract(spec):
-            args.append("--deterministic")
+        args.append("--deterministic")
         if spec.extra.get("non_learnable_schedule"):
             args.append("--non_learnable_schedule")
         if spec.extra.get("y_only"):
@@ -76,20 +199,11 @@ class TabDiffAdapter(BaseModelAdapter):
         return result_dir / str(epoch) / "samples.csv"
 
     def _infer_report_sample_path(self, spec: RunSpec, exp_name: str) -> Path:
-        return (
-            self.upstream_root
-            / "eval"
-            / "report_runs"
-            / exp_name
-            / spec.dataset
-            / "all_samples"
-            / "samples_0.csv"
-        )
+        return self.upstream_root / "eval" / "report_runs" / exp_name / spec.dataset / "all_samples" / "samples_0.csv"
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         args = [
-            "main.py",
             "--dataname",
             spec.dataset,
             "--mode",
@@ -97,14 +211,26 @@ class TabDiffAdapter(BaseModelAdapter):
             "--exp_name",
             spec.extra.get("exp_name", spec.output_dir.name),
         ]
+        if config_path := self._resolve_config_path(spec):
+            args.extend(["--config_path", str(config_path)])
         args.extend(self._common_args(spec))
-        self._run_python(args, self.upstream_root)
+        self._run_python(
+            ["standardized_tabular_diffusion.compat.tabdiff_seed_launcher", *args],
+            self.upstream_root,
+            module=True,
+            env=self._execution_environment(spec),
+        )
+        self._write_run_metadata(spec, action="train")
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
-            notes=["Training artifacts are written by the upstream TabDiff code."],
+            notes=[
+                "Training artifacts are written by the upstream TabDiff code.",
+                f"Configurable seed supplied by approved overlay {load_patch_record()['patch_id']}.",
+                "Optional upstream density-plot PNG rendering is disabled; serialized metrics remain enabled.",
+            ],
         )
         return self._write_bundle(bundle)
 
@@ -113,7 +239,6 @@ class TabDiffAdapter(BaseModelAdapter):
         checkpoint_path = self._resolve_checkpoint_path(spec)
         exp_name = spec.extra.get("exp_name", spec.output_dir.name)
         args = [
-            "main.py",
             "--dataname",
             spec.dataset,
             "--mode",
@@ -123,26 +248,41 @@ class TabDiffAdapter(BaseModelAdapter):
             "--ckpt_path",
             str(checkpoint_path),
         ]
+        if config_path := self._resolve_config_path(spec):
+            args.extend(["--config_path", str(config_path)])
         if spec.num_samples is not None:
             args.extend(["--num_samples_to_generate", str(spec.num_samples)])
         report = bool(spec.extra.get("report", False))
         if report:
             args.extend(["--report", "--num_runs", str(int(spec.extra.get("num_runs", 1)))])
         args.extend(self._common_args(spec))
-        self._run_python(args, self.upstream_root)
-        sample_path = (
+        self._run_python(
+            ["standardized_tabular_diffusion.compat.tabdiff_seed_launcher", *args],
+            self.upstream_root,
+            module=True,
+            env=self._execution_environment(spec),
+        )
+        upstream_sample_path = (
             self._infer_report_sample_path(spec, exp_name) if report else self._infer_sample_path(checkpoint_path)
         )
+        if not upstream_sample_path.is_file():
+            raise FileNotFoundError(f"TabDiff did not produce the expected sample table: {upstream_sample_path}")
+        sample_path = spec.output_dir / "samples.csv"
+        atomic_write_bytes(sample_path, upstream_sample_path.read_bytes())
+        self._write_run_metadata(spec, action="sample", generated_sample_path=sample_path)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
-            generated_sample_path=sample_path if sample_path.exists() else None,
+            generated_sample_path=sample_path,
             notes=[
                 "TabDiff report mode generated samples and evaluation outputs together."
                 if report
-                else "TabDiff test mode generates samples and evaluation outputs together."
+                else "TabDiff test mode generates samples and evaluation outputs together.",
+                f"Configurable seed supplied by approved overlay {load_patch_record()['patch_id']}.",
+                "Optional upstream density-plot PNG rendering is disabled; serialized metrics remain enabled.",
+                f"The seed-specific sample was copied from {upstream_sample_path} into the run output directory.",
             ],
         )
         return self._write_bundle(bundle)

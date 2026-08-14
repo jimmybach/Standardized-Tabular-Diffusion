@@ -156,7 +156,7 @@ def test_run_spec_keeps_action_extra_namespaces_isolated() -> None:
         dataset="adult",
         output_dir="artifacts/test",
         train=TrainConfig(extra={"epochs": 10}),
-        sample=SampleConfig(extra={"epochs": 20}),
+        sample=SampleConfig(seed=19, extra={"epochs": 20}),
         evaluation=EvaluationConfig(enabled=False),
     )
 
@@ -167,6 +167,8 @@ def test_run_spec_keeps_action_extra_namespaces_isolated() -> None:
     assert "epochs" not in generic_spec.extra
     assert train_spec.extra["epochs"] == 10
     assert sample_spec.extra["epochs"] == 20
+    assert generic_spec.seed == train_spec.seed == 0
+    assert sample_spec.seed == 19
     assert generic_spec.extra["action_extras"]["train"]["epochs"] == 10
 
 

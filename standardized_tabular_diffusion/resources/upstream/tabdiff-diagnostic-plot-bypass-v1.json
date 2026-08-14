@@ -1,0 +1,25 @@
+{
+  "patch_schema_version": "1.0.0",
+  "patch_id": "tabdiff-diagnostic-plot-bypass-v1",
+  "status": "maintainer-approved",
+  "approved_at": "2026-08-14",
+  "scope": "diagnostic-output-only",
+  "purpose": "Skip optional upstream density-plot PNG rendering, which fails under some Windows non-ASCII installation paths, while retaining synthetic-table generation and every metric calculation and serialized metric result.",
+  "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
+  "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+  "source_path": "tabdiff/trainer.py",
+  "source_sha256_lf": "8a80682c9ee90a82f2bfd09c0d607bd1cf296487633cb453f3230774cb1b4511",
+  "patched_sha256_lf": "94b2a78d3b8100a97d2aa0f6e98f86a6a63c722c934c4bc50a5fdfe053231aa9",
+  "edit": {
+    "before": "plot_density=True",
+    "after": "plot_density=False",
+    "expected_occurrences": 3
+  },
+  "scientific_effect": "none; only density_plots.png creation is disabled, and the density metrics and all other evaluation outputs are still computed and saved",
+  "invariants": [
+    "The distributed TabDiff-main source remains byte-identical to the pinned official commit.",
+    "The overlay refuses changed source bytes or changed edit multiplicity.",
+    "No model, optimizer, loss, schedule, data, sampling, or metric expression is changed.",
+    "Synthetic samples and serialized metric results must still be produced."
+  ]
+}
