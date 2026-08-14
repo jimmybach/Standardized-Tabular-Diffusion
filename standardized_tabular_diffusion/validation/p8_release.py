@@ -157,14 +157,18 @@ def _native_windows_release() -> dict[str, str | bool]:
     if platform.system() != "Windows":
         return details
     try:
-        import winreg
+        registry: Any = __import__("winreg")
 
-        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion") as key:
-            details["build"] = str(winreg.QueryValueEx(key, "CurrentBuildNumber")[0])
-            details["display_version"] = str(winreg.QueryValueEx(key, "DisplayVersion")[0])
-            details["product_name"] = str(winreg.QueryValueEx(key, "ProductName")[0])
-        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\ProductOptions") as key:
-            details["product_type"] = str(winreg.QueryValueEx(key, "ProductType")[0])
+        with registry.OpenKey(
+            registry.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+        ) as key:
+            details["build"] = str(registry.QueryValueEx(key, "CurrentBuildNumber")[0])
+            details["display_version"] = str(registry.QueryValueEx(key, "DisplayVersion")[0])
+            details["product_name"] = str(registry.QueryValueEx(key, "ProductName")[0])
+        with registry.OpenKey(
+            registry.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\ProductOptions"
+        ) as key:
+            details["product_type"] = str(registry.QueryValueEx(key, "ProductType")[0])
     except (OSError, ValueError):
         return details
     details["is_exact_native_windows_11_python_311_x86_64"] = _is_exact_native_windows_11(
