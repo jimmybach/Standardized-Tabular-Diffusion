@@ -136,6 +136,33 @@ def test_arf_adapter_loads_declared_types_and_rejects_missing_values(tmp_path: P
         adapter._load_training_frame(dataset_spec)
 
 
+def test_arf_declared_integer_decoding_is_explicit_and_retains_no_clipping(tmp_path: Path) -> None:
+    dataset_spec = _dataset_spec(tmp_path)
+    dataset_spec.extra["integer_columns"] = ["value"]
+    native = pd.DataFrame(
+        {
+            "value": [1.2, 2.5, 3.8],
+            "segment": ["a", "b", "a"],
+            "target": ["no", "yes", "no"],
+        }
+    )
+
+    decoded, report = ARFAdapter._decode_declared_integer_columns(native, dataset_spec)
+
+    assert decoded["value"].tolist() == [1, 2, 4]
+    assert str(decoded["value"].dtype) == "int64"
+    assert native["value"].tolist() == [1.2, 2.5, 3.8]
+    assert report["value"] == {
+        "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
+        "changed_rows": 3,
+        "clipped_rows": 0,
+    }
+
+    dataset_spec.extra["integer_columns"] = ["segment"]
+    with pytest.raises(ValueError, match="canonical numerical columns"):
+        ARFAdapter._decode_declared_integer_columns(native, dataset_spec)
+
+
 def test_arf_parameter_contract_fails_closed(tmp_path: Path) -> None:
     adapter = ARFAdapter(tmp_path)
     base = {

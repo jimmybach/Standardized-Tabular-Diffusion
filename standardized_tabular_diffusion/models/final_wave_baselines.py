@@ -436,6 +436,71 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             frame[column] = frame[column].astype("category")
         return frame
 
+    @staticmethod
+    def _declared_integer_columns(dataset_spec: DatasetSpec) -> list[str]:
+        declared: list[str] = []
+        explicit = dataset_spec.extra.get("integer_columns")
+        if explicit is not None:
+            if not isinstance(explicit, list) or any(not isinstance(column, str) for column in explicit):
+                raise TypeError("ARF DatasetSpec integer_columns must be a list of column names.")
+            declared.extend(explicit)
+        column_info = dataset_spec.extra.get("column_info", {})
+        if isinstance(column_info, dict):
+            for column, description in column_info.items():
+                if isinstance(description, str) and description.lower() in {"int", "integer"}:
+                    declared.append(column)
+                elif isinstance(description, dict) and (
+                    description.get("semantic_type") == "integer"
+                    or description.get("type") == "integer"
+                    or description.get("integer") is True
+                ):
+                    declared.append(column)
+        metadata = read_json(dataset_spec.metadata_path)
+        if isinstance(metadata, dict) and metadata.get("int_columns") is not None:
+            metadata_columns = metadata["int_columns"]
+            if not isinstance(metadata_columns, list) or any(
+                not isinstance(column, str) for column in metadata_columns
+            ):
+                raise TypeError("ARF dataset metadata int_columns must be a list of column names.")
+            declared.extend(metadata_columns)
+        declared = list(dict.fromkeys(declared))
+        invalid = [column for column in declared if column not in dataset_spec.column_names]
+        numerical_roles = list(dataset_spec.numerical_columns)
+        if dataset_spec.task_type == "regression":
+            numerical_roles.extend(dataset_spec.target_columns)
+        non_numerical = [column for column in declared if column not in numerical_roles]
+        if invalid or non_numerical:
+            raise ValueError(
+                "ARF integer declarations must name canonical numerical columns: "
+                f"unknown={invalid}, non_numerical={non_numerical}."
+            )
+        return declared
+
+    @classmethod
+    def _decode_declared_integer_columns(
+        cls,
+        frame: pd.DataFrame,
+        dataset_spec: DatasetSpec,
+    ) -> tuple[pd.DataFrame, dict[str, dict[str, Any]]]:
+        decoded = frame.copy()
+        report: dict[str, dict[str, Any]] = {}
+        int64 = np.iinfo(np.int64)
+        for column in cls._declared_integer_columns(dataset_spec):
+            numeric = pd.to_numeric(decoded[column], errors="raise").to_numpy(dtype=np.float64)
+            if not np.isfinite(numeric).all():
+                raise ValueError(f"ARF integer column {column!r} contains non-finite native samples.")
+            rounded = np.rint(numeric)
+            if bool((rounded < int64.min).any() or (rounded > int64.max).any()):
+                raise OverflowError(f"ARF integer column {column!r} exceeds the signed 64-bit range.")
+            changed_rows = int(np.count_nonzero(numeric != rounded))
+            decoded[column] = rounded.astype(np.int64)
+            report[column] = {
+                "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
+                "changed_rows": changed_rows,
+                "clipped_rows": 0,
+            }
+        return decoded, report
+
     @classmethod
     def _encode_value(cls, value: Any) -> Any:
         if isinstance(value, np.generic):
@@ -735,6 +800,12 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             numerical.extend(dataset_spec.target_columns)
         if numerical and not np.isfinite(sample_df[numerical].to_numpy(dtype=float)).all():
             raise ValueError("Official ARF forge produced non-finite numerical values.")
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = self._decode_declared_integer_columns(sample_df, dataset_spec)
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "arf_native_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
         atomic_write_json(
@@ -749,6 +820,11 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "sample_path": str(sample_path),
                 "sample_sha256": sha256_file(sample_path),
                 "columns": dataset_spec.column_names,
+                "integer_decoding": integer_decoding,
+                "native_sample_path": None if native_sample_path is None else str(native_sample_path),
+                "native_sample_sha256": (
+                    None if native_sample_path is None else sha256_file(native_sample_path)
+                ),
             },
         )
         bundle = ArtifactBundle(
@@ -757,6 +833,10 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint at the adapter boundary; "
+                "the unmodified official output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 
