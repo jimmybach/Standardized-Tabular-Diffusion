@@ -145,11 +145,12 @@ def test_v2_training_artifact_copy_preserves_bytes_and_rejects_mutation(tmp_path
     (source / "checkpoint" / "model.bin").write_bytes(b"authoritative-checkpoint")
     for root in (source, destination):
         (root / ".standardized-run-identity.json").write_text("{}", encoding="utf-8")
+        (root / "artifacts.json").write_text("{}", encoding="utf-8")
         (root / "run_context.json").write_text("{}", encoding="utf-8")
     manifest = _copy_training_artifacts(source, destination)
     assert set(manifest) == {"checkpoint/model.bin"}
     assert not (destination / "artifact_bundle.json").exists()
-    assert COPY_EXCLUSIONS >= {".standardized-run-identity.json", "run_context.json"}
+    assert COPY_EXCLUSIONS >= {".standardized-run-identity.json", "artifacts.json", "run_context.json"}
     _assert_manifest_unchanged(destination, manifest)
     (destination / "checkpoint" / "model.bin").write_bytes(b"mutated")
     with pytest.raises(PipelineV2Error, match="mutated"):

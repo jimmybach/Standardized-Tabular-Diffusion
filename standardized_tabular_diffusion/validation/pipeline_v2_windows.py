@@ -26,7 +26,13 @@ from standardized_tabular_diffusion.runner import build_run_context, run_action,
 
 PROTOCOL_ID = "pipeline-v2-native-windows-v1"
 IDENTITY_FILENAME = ".standardized-run-identity.json"
-COPY_EXCLUSIONS = {IDENTITY_FILENAME, "artifact_bundle.json", "pipeline_result.json", "run_context.json"}
+COPY_EXCLUSIONS = {
+    IDENTITY_FILENAME,
+    "artifact_bundle.json",
+    "artifacts.json",
+    "pipeline_result.json",
+    "run_context.json",
+}
 
 
 class PipelineV2Error(RuntimeError):
