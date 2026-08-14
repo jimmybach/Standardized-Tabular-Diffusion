@@ -16,7 +16,7 @@ from standardized_tabular_diffusion.config import (
 )
 from standardized_tabular_diffusion.interfaces import DatasetSpec
 from standardized_tabular_diffusion.registry import get_adapter_spec, list_adapter_specs
-from standardized_tabular_diffusion.runner import build_run_context
+from standardized_tabular_diffusion.runner import _action_identity, build_run_context
 from standardized_tabular_diffusion.runtime_contracts import validate_action_controls
 from standardized_tabular_diffusion.validation.pipeline_v2_windows import (
     COPY_EXCLUSIONS,
@@ -208,3 +208,35 @@ def test_runner_accepts_a_name_matched_explicit_validation_dataset(tmp_path: Pat
     mismatched = DatasetSpec(**{**dataset.__dict__, "name": "different"})
     with pytest.raises(ValueError, match="does not match"):
         build_run_context(config, repo_root=tmp_path, dataset_spec=mismatched)
+
+
+def test_runner_action_identity_uses_the_experiment_upstream_config(tmp_path: Path) -> None:
+    metadata = tmp_path / "info.json"
+    train = tmp_path / "train.csv"
+    upstream = tmp_path / "upstream.toml"
+    metadata.write_text("{}", encoding="utf-8")
+    train.write_text("x,label\n1,no\n2,yes\n", encoding="utf-8")
+    upstream.write_text("seed = 13\n", encoding="utf-8")
+    dataset = DatasetSpec(
+        name="pipeline-v2-test",
+        task_type="classification",
+        column_names=["x", "label"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["label"],
+        metadata_path=metadata,
+        train_data_path=train,
+    )
+    config = ExperimentConfig(
+        model="ctgan",
+        dataset=dataset.name,
+        output_dir=str(tmp_path / "output"),
+        upstream_config_path=str(upstream),
+        train=TrainConfig(enabled=True),
+        sample=SampleConfig(enabled=True, num_samples=2),
+        evaluation=EvaluationConfig(enabled=False),
+    )
+    for action in ("train", "sample"):
+        identity = _action_identity(config, action, dataset)
+        assert identity["upstream_config"]["path"] == str(upstream.resolve())
+        assert identity["upstream_config"]["sha256"]

@@ -43,14 +43,14 @@ def _action_identity(
         device = config.train.device
         num_samples = None
         checkpoint_path = None
-        upstream_config = config.train.upstream_config
+        upstream_config = config.upstream_config_path
     elif action == "sample":
         controls = config.sample.extra
         seed = config.sample.seed if config.sample.seed is not None else config.train.seed
         device = config.train.device
         num_samples = config.sample.num_samples
         checkpoint_path = config.sample.checkpoint_path
-        upstream_config = config.sample.upstream_config
+        upstream_config = config.upstream_config_path
     elif action == "evaluate":
         controls = config.evaluation.extra
         seed = config.sample.seed if config.sample.seed is not None else config.train.seed
