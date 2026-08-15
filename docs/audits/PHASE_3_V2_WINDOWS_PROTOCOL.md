@@ -37,6 +37,8 @@ The frozen CoDi, STaSy, and TabSyn snapshot imports `libzero==0.0.8`. That distr
 
 GReaT uses the official `distilgpt2` backbone, five epochs over all 256 fixture rows, and official guided sampling at temperature `0.2`. The earlier `sshleifer/tiny-gpt2` mechanical preset trained successfully but produced zero parseable legacy rows; guided sampling still returned missing numerical fields. That small fixture remains useful for adapter mechanics, but it is not treated as a minimally functional Adult generator. The V2 replacement changes only declared model hyperparameters and uses unchanged `be-great==0.0.14` APIs.
 
+TabuLa sampling is hard-bounded on Windows by executing its unchanged method-author retry loop in a disposable child process. The parent accepts output only when the child exits successfully within the declared timeout and its response schema, CSV shape, and SHA-256 all agree. A timed-out child is terminated without changing the copied training artifacts.
+
 ## 4. Cost-controlled batches
 
 | Batch | Models |

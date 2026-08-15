@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import os
 import pickle
+import subprocess
 import sys
 import types
 from pathlib import Path
@@ -957,6 +959,98 @@ def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
     assert adapter._model_root(spec).name == "tabula_model"
     assert adapter._state_path(adapter._model_root(spec)).name == "tabula-state.json"
     assert adapter._integrity_path(adapter._model_root(spec)).name == "tabula-integrity.json"
+
+
+def test_tabula_windows_subprocess_boundary_verifies_response_and_times_out(
+    tmp_path: Path, monkeypatch
+) -> None:
+    adapter = TabulaAdapter(REPO_ROOT)
+    dataset_spec = DatasetSpec(
+        name="tabula-subprocess",
+        task_type="classification",
+        column_names=["age", "label"],
+        numerical_columns=["age"],
+        categorical_columns=[],
+        target_columns=["label"],
+        metadata_path=tmp_path / "info.json",
+    )
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    observed: dict[str, object] = {}
+
+    def successful_run(command, **kwargs):
+        observed["command"] = command
+        observed["kwargs"] = kwargs
+        response_path = Path(command[command.index("--response") + 1])
+        sample_path = Path(command[command.index("--sample") + 1])
+        sample = pd.DataFrame({"age": [21, 22], "label": ["no", "yes"]})
+        sample.to_csv(sample_path, index=False)
+        response_path.write_text(
+            json.dumps(
+                {
+                    "status": "pass",
+                    "rows": 2,
+                    "columns": ["age", "label"],
+                    "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
+                }
+            ),
+            encoding="utf-8",
+        )
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr("standardized_tabular_diffusion.models.tabula.subprocess.run", successful_run)
+    result = adapter._sample_in_subprocess(
+        dataset_spec=dataset_spec,
+        model_root=tmp_path / "model",
+        source_root=tmp_path / "source",
+        source={"manifest_sha256": "a" * 64},
+        seed=17,
+        requested=2,
+        start_col="label",
+        start_dist={"no": 0.5, "yes": 0.5},
+        temperature=0.5,
+        k=2,
+        max_length=64,
+        device="cuda",
+        num_threads=1,
+        max_empty_batches=4,
+        timeout_seconds=9,
+        output_dir=output_dir,
+    )
+    assert result.to_dict(orient="records") == [
+        {"age": 21, "label": "no"},
+        {"age": 22, "label": "yes"},
+    ]
+    assert observed["command"][:3] == [
+        sys.executable,
+        "-m",
+        "standardized_tabular_diffusion.compat.tabula_sampling_launcher",
+    ]
+    assert observed["kwargs"]["timeout"] == 9  # type: ignore[index]
+
+    def timed_out(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr("standardized_tabular_diffusion.models.tabula.subprocess.run", timed_out)
+    with pytest.raises(TimeoutError, match="9-second timeout"):
+        adapter._sample_in_subprocess(
+            dataset_spec=dataset_spec,
+            model_root=tmp_path / "model",
+            source_root=tmp_path / "source",
+            source={"manifest_sha256": "a" * 64},
+            seed=17,
+            requested=2,
+            start_col="label",
+            start_dist=None,
+            temperature=0.5,
+            k=2,
+            max_length=64,
+            device="cuda",
+            num_threads=1,
+            max_empty_batches=4,
+            timeout_seconds=9,
+            output_dir=output_dir,
+        )
 
 
 def test_tabsds_train_and_sample_round_trip(tmp_path: Path, monkeypatch) -> None:

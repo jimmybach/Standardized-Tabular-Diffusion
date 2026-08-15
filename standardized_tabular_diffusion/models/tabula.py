@@ -6,6 +6,9 @@ import json
 import os
 import random
 import signal
+import subprocess
+import sys
+import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterator
 
@@ -480,15 +483,116 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             remaining -= len(batch)
         return pd.concat(batches, ignore_index=True).head(requested)
 
+    def _sample_in_subprocess(
+        self,
+        *,
+        dataset_spec: DatasetSpec,
+        model_root: Path,
+        source_root: Path,
+        source: dict[str, Any],
+        seed: int,
+        requested: int,
+        start_col: str,
+        start_dist: Any,
+        temperature: float,
+        k: int,
+        max_length: int,
+        device: str,
+        num_threads: int,
+        max_empty_batches: int,
+        timeout_seconds: int,
+        output_dir: Path,
+    ) -> pd.DataFrame:
+        """Run the unchanged upstream retry loop behind a Windows-safe hard timeout."""
+
+        launcher = Path(__file__).resolve().parents[1] / "compat" / "tabula_sampling_launcher.py"
+        if launcher.is_symlink() or not launcher.is_file():
+            raise FileNotFoundError(f"Missing trusted TabuLa sampling launcher: {launcher}")
+        with tempfile.TemporaryDirectory(prefix=".tabula-sampling-", dir=output_dir) as temporary:
+            temporary_root = Path(temporary)
+            request_path = temporary_root / "request.json"
+            response_path = temporary_root / "response.json"
+            sample_path = temporary_root / "samples.csv"
+            atomic_write_json(
+                request_path,
+                {
+                    "schema_version": 1,
+                    "repo_root": str(self.repo_root.resolve()),
+                    "dataset_spec": dataset_spec.to_dict(),
+                    "model_root": str(model_root.resolve()),
+                    "source_root": str(source_root.resolve()),
+                    "source_manifest_sha256": source["manifest_sha256"],
+                    "seed": seed,
+                    "requested": requested,
+                    "start_col": start_col,
+                    "start_dist": start_dist,
+                    "temperature": temperature,
+                    "k": k,
+                    "max_length": max_length,
+                    "device": device,
+                    "num_threads": num_threads,
+                    "max_empty_batches": max_empty_batches,
+                },
+            )
+            environment = os.environ.copy()
+            environment["PYTHONIOENCODING"] = "utf-8"
+            try:
+                completed = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "standardized_tabular_diffusion.compat.tabula_sampling_launcher",
+                        "--request",
+                        str(request_path),
+                        "--response",
+                        str(response_path),
+                        "--sample",
+                        str(sample_path),
+                    ],
+                    cwd=self.repo_root,
+                    env=environment,
+                    text=True,
+                    capture_output=True,
+                    timeout=timeout_seconds,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired as exc:
+                raise TimeoutError(
+                    f"Official TabuLa sampling exceeded the configured {timeout_seconds}-second timeout"
+                ) from exc
+            if not response_path.is_file() or response_path.is_symlink():
+                diagnostic = (completed.stderr or completed.stdout or "no child-process output")[-2000:]
+                raise RuntimeError(
+                    "Bounded TabuLa sampling subprocess did not produce a trusted response; "
+                    f"exit_code={completed.returncode}, diagnostic={diagnostic!r}"
+                )
+            response = read_json(response_path)
+            if not isinstance(response, dict):
+                raise RuntimeError("Bounded TabuLa sampling subprocess returned a non-object response")
+            if response.get("status") != "pass":
+                raise RuntimeError(
+                    "Bounded TabuLa sampling subprocess failed: "
+                    f"{response.get('error_type', 'unknown')}: {response.get('error', 'unknown error')}"
+                )
+            expected_response_keys = {"status", "rows", "columns", "sample_sha256"}
+            if set(response) != expected_response_keys or completed.returncode != 0:
+                raise RuntimeError("Bounded TabuLa sampling subprocess returned an invalid response contract")
+            if sample_path.is_symlink() or not sample_path.is_file():
+                raise RuntimeError("Bounded TabuLa sampling subprocess did not create a safe sample file")
+            if sha256_file(sample_path) != response["sample_sha256"]:
+                raise RuntimeError("Bounded TabuLa sampling subprocess sample digest mismatch")
+            sample_df = pd.read_csv(sample_path)
+            if len(sample_df) != response["rows"] or list(sample_df.columns) != response["columns"]:
+                raise RuntimeError("Bounded TabuLa sampling subprocess sample shape mismatch")
+            return sample_df
+
     def sample(self, spec: RunSpec) -> ArtifactBundle:
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         model_root = self._model_root(spec)
         source_root, source = self._resolve_source_root(spec)
-        model, state, manager = self._restore_model(model_root, dataset_spec, source_root, source)
         requested = spec.num_samples or int(spec.extra.get("num_samples", 0))
         if requested < 1:
-            manager.__exit__(None, None, None)
             raise ValueError("TabuLa sample requires a positive num_samples")
         temperature = self._positive_float("temperature", spec.extra.get("temperature", 0.7))
         k = self._positive_int("k", spec.extra.get("k", min(100, max(8, requested))))
@@ -501,26 +605,50 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         start_col = spec.extra.get("start_col", "")
         start_dist = spec.extra.get("start_col_dist")
         if start_col and start_col not in dataset_spec.column_names:
-            manager.__exit__(None, None, None)
             raise ValueError(f"TabuLa start_col is unknown: {start_col!r}")
-        try:
-            with self._scoped_randomness(spec.seed, num_threads), self._sampling_timeout(
-                timeout_seconds,
-                allow_unbounded=bool(spec.extra.get("allow_unbounded_sampling", False)),
-            ):
-                sample_df = self._sample_exact_rows(
-                    model,
-                    requested=requested,
-                    start_col=start_col,
-                    start_dist=start_dist,
-                    temperature=temperature,
-                    k=k,
-                    max_length=max_length,
-                    device=spec.device,
-                    max_empty_batches=max_empty_batches,
-                )
-        finally:
-            manager.__exit__(None, None, None)
+        allow_unbounded = bool(spec.extra.get("allow_unbounded_sampling", False))
+        if os.name == "nt" and not allow_unbounded:
+            self._validate_safe_model_root(model_root)
+            sample_df = self._sample_in_subprocess(
+                dataset_spec=dataset_spec,
+                model_root=model_root,
+                source_root=source_root,
+                source=source,
+                seed=spec.seed,
+                requested=requested,
+                start_col=start_col,
+                start_dist=start_dist,
+                temperature=temperature,
+                k=k,
+                max_length=max_length,
+                device=spec.device,
+                num_threads=num_threads,
+                max_empty_batches=max_empty_batches,
+                timeout_seconds=timeout_seconds,
+                output_dir=spec.output_dir,
+            )
+            timeout_boundary = "an isolated subprocess on Windows"
+        else:
+            model, _state, manager = self._restore_model(model_root, dataset_spec, source_root, source)
+            try:
+                with self._scoped_randomness(spec.seed, num_threads), self._sampling_timeout(
+                    timeout_seconds,
+                    allow_unbounded=allow_unbounded,
+                ):
+                    sample_df = self._sample_exact_rows(
+                        model,
+                        requested=requested,
+                        start_col=start_col,
+                        start_dist=start_dist,
+                        temperature=temperature,
+                        k=k,
+                        max_length=max_length,
+                        device=spec.device,
+                        max_empty_batches=max_empty_batches,
+                    )
+            finally:
+                manager.__exit__(None, None, None)
+            timeout_boundary = "SIGALRM on POSIX" if os.name == "posix" else "an explicit unbounded override"
         if not isinstance(sample_df, pd.DataFrame) or len(sample_df) != requested:
             observed = None if not isinstance(sample_df, pd.DataFrame) else len(sample_df)
             raise RuntimeError(f"Official TabuLa sampling returned {observed} rows; expected exactly {requested}")
@@ -547,7 +675,7 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 generated_sample_path=sample_path,
                 notes=[
                     f"Generated exactly {requested} rows through the locked method-author TabuLa source.",
-                    f"Sampling was bounded to {timeout_seconds} seconds in the supported Linux environment.",
+                    f"Sampling was bounded to {timeout_seconds} seconds through {timeout_boundary}.",
                     "No privacy guarantee is implied; model artifacts require access control.",
                 ],
             )
@@ -558,3 +686,64 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
 
 
 __all__ = ["TabulaAdapter"]
+
+
+def execute_tabula_sampling_request(request_path: Path, sample_path: Path) -> dict[str, Any]:
+    """Execute one internally generated TabuLa sampling request in a disposable child process."""
+
+    request = read_json(request_path)
+    required = {
+        "schema_version",
+        "repo_root",
+        "dataset_spec",
+        "model_root",
+        "source_root",
+        "source_manifest_sha256",
+        "seed",
+        "requested",
+        "start_col",
+        "start_dist",
+        "temperature",
+        "k",
+        "max_length",
+        "device",
+        "num_threads",
+        "max_empty_batches",
+    }
+    if not isinstance(request, dict) or set(request) != required or request["schema_version"] != 1:
+        raise ValueError("Malformed internal TabuLa sampling request")
+    dataset_payload = dict(request["dataset_spec"])
+    for name in ("metadata_path", "train_data_path", "val_data_path", "test_data_path"):
+        value = dataset_payload.get(name)
+        dataset_payload[name] = None if value is None else Path(value)
+    dataset_spec = DatasetSpec(**dataset_payload)
+    adapter = TabulaAdapter(Path(request["repo_root"]))
+    source_root = Path(request["source_root"])
+    source = validate_upstream_source(adapter.model_name, source_root)
+    if source["manifest_sha256"] != request["source_manifest_sha256"]:
+        raise ValueError("TabuLa child process observed a different locked source manifest")
+    model_root = Path(request["model_root"])
+    model, _state, manager = adapter._restore_model(model_root, dataset_spec, source_root, source)
+    try:
+        with adapter._scoped_randomness(int(request["seed"]), int(request["num_threads"])):
+            sample_df = adapter._sample_exact_rows(
+                model,
+                requested=int(request["requested"]),
+                start_col=str(request["start_col"]),
+                start_dist=request["start_dist"],
+                temperature=float(request["temperature"]),
+                k=int(request["k"]),
+                max_length=int(request["max_length"]),
+                device=str(request["device"]),
+                max_empty_batches=int(request["max_empty_batches"]),
+            )
+    finally:
+        manager.__exit__(None, None, None)
+    sample_df = sample_df[dataset_spec.column_names].copy()
+    adapter._write_dataframe_csv(sample_df, sample_path)
+    return {
+        "status": "pass",
+        "rows": len(sample_df),
+        "columns": list(sample_df.columns),
+        "sample_sha256": sha256_file(sample_path),
+    }
