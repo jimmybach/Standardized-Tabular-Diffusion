@@ -960,6 +960,23 @@ def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
     assert adapter._state_path(adapter._model_root(spec)).name == "tabula-state.json"
     assert adapter._integrity_path(adapter._model_root(spec)).name == "tabula-integrity.json"
 
+    start_col, start_dist, translated = adapter._default_sampling_start(
+        {
+            "official_state": {
+                "conditional_col": "label",
+                "conditional_col_dist": {"no": 0.75, "yes": 0.25},
+                "label_encoders": [
+                    {"column": "label", "classes": ["no", "yes"]},
+                ],
+            }
+        }
+    )
+    assert (start_col, start_dist, translated) == (
+        "label",
+        {"0": 0.75, "1": 0.25},
+        True,
+    )
+
 
 def test_tabula_windows_subprocess_boundary_verifies_response_and_times_out(
     tmp_path: Path, monkeypatch

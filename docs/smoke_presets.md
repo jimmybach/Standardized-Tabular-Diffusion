@@ -20,10 +20,9 @@ These presets are small, reproducible configs for quickly validating newly integ
 - [configs/smoke/great-adult-v2.json](../configs/smoke/great-adult-v2.json)
 - [configs/smoke/great-adult-distilgpt2-tiny.json](../configs/smoke/great-adult-distilgpt2-tiny.json)
 - [configs/smoke/great-adult-distilgpt2-strong.json](../configs/smoke/great-adult-distilgpt2-strong.json)
+- [configs/smoke/tabula-adult-v2.json](../configs/smoke/tabula-adult-v2.json)
 - [configs/smoke/tabebm-adult-smoke.json](../configs/smoke/tabebm-adult-smoke.json)
 - [configs/smoke/tabebm-adult-gated-sample.json](../configs/smoke/tabebm-adult-gated-sample.json)
-
-At the moment there is no dedicated smoke preset checked in for `tabula`, even though that adapter is integrated into the shared registry.
 
 ## Usage
 
@@ -62,6 +61,7 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-ad
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-v2.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-distilgpt2-tiny.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-distilgpt2-strong.json
+python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabula-adult-v2.json
 ```
 
 For `tabebm`, the preset also needs Prior Labs TabPFN access:
@@ -87,9 +87,9 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 - `great-adult-v2.json` is the bounded native-Windows real-function preset: it uses `distilgpt2`, all 256 validation rows, five epochs, and official guided sampling. It exists because the mechanical tiny checkpoint cannot reliably emit one complete 15-column Adult row; it is still not a quality benchmark profile.
 - `great-adult-distilgpt2-tiny.json` is the stronger-base follow-up check when you want to distinguish checkpoint weakness from adapter/runtime issues.
 - `great-adult-distilgpt2-strong.json` is the first GReaT preset intended to be sample-capable rather than train-only; it relies on ordered-column training and first-column prompting.
+- `tabula-adult-v2.json` is the bounded native-Windows real-function preset. It uses the official randomly initialized `distilgpt2` architecture, 256 validation rows, 20 epochs, and a child-process sampling timeout; it is not a quality benchmark profile.
 - `tabebm-adult-smoke.json` is now the train-only integration check for TabEBM.
 - `tabebm-adult-gated-sample.json` is the explicit opt-in sample path for machines with accepted TabPFN gated-model access.
 - `realtabformer-adult-tiny.json` is intentionally more conservative than the other presets:
   it disables sensitivity analysis, disables external reporting, and samples a small training subset with `max_train_rows`.
 - The `realtabformer` tiny preset is meant for local integration checks, not meaningful benchmark numbers. Formal `native-parity-validated` status is governed by `docs/REALTABFORMER_VALIDATION.md` and retained Linux evidence; that claim covers tabular training with `n_critic=0`, not sensitivity stopping or relational mode.
-- `tabula` is integrated in code, but it does not yet have a committed smoke preset; use `example-config --model tabula` as the starting point for local validation runs.

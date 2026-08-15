@@ -372,13 +372,12 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             )
         )
 
-    def _restore_model(
+    def _load_state(
         self,
         model_root: Path,
         dataset_spec: DatasetSpec,
-        source_root: Path,
         source: dict[str, Any],
-    ) -> tuple[Any, dict[str, Any], contextlib.AbstractContextManager[type[Any]]]:
+    ) -> dict[str, Any]:
         self._validate_safe_model_root(model_root)
         state = read_json(self._state_path(model_root))
         required = {
@@ -410,6 +409,16 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             or state["task_type"] != dataset_spec.task_type
         ):
             raise ValueError("TabuLa checkpoint source or dataset contract mismatch")
+        return state
+
+    def _restore_model(
+        self,
+        model_root: Path,
+        dataset_spec: DatasetSpec,
+        source_root: Path,
+        source: dict[str, Any],
+    ) -> tuple[Any, dict[str, Any], contextlib.AbstractContextManager[type[Any]]]:
+        state = self._load_state(model_root, dataset_spec, source)
         manager = self._official_class(source_root)
         model_class = manager.__enter__()
         try:
@@ -440,6 +449,29 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             manager.__exit__(None, None, None)
             raise
         return model, state, manager
+
+    @staticmethod
+    def _default_sampling_start(state: dict[str, Any]) -> tuple[str, Any, bool]:
+        """Translate the upstream pre-encoding default for a categorical start column."""
+
+        official = state["official_state"]
+        start_col = official["conditional_col"] or ""
+        start_dist = official["conditional_col_dist"]
+        if not start_col or not isinstance(start_dist, dict):
+            return start_col, start_dist, False
+        encoder = next(
+            (item for item in official["label_encoders"] if item["column"] == start_col),
+            None,
+        )
+        if encoder is None:
+            return start_col, start_dist, False
+        classes = list(encoder["classes"])
+        if set(start_dist) - set(classes):
+            raise ValueError("TabuLa categorical default distribution differs from its fitted label encoder")
+        translated = {
+            str(classes.index(label)): probability for label, probability in start_dist.items()
+        }
+        return start_col, translated, True
 
     @staticmethod
     def _sample_exact_rows(
@@ -606,6 +638,10 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         start_dist = spec.extra.get("start_col_dist")
         if start_col and start_col not in dataset_spec.column_names:
             raise ValueError(f"TabuLa start_col is unknown: {start_col!r}")
+        state = self._load_state(model_root, dataset_spec, source)
+        translated_default_start = False
+        if not start_col and start_dist is None:
+            start_col, start_dist, translated_default_start = self._default_sampling_start(state)
         allow_unbounded = bool(spec.extra.get("allow_unbounded_sampling", False))
         if os.name == "nt" and not allow_unbounded:
             self._validate_safe_model_root(model_root)
@@ -676,6 +712,11 @@ class TabulaAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 notes=[
                     f"Generated exactly {requested} rows through the locked method-author TabuLa source.",
                     f"Sampling was bounded to {timeout_seconds} seconds through {timeout_boundary}.",
+                    (
+                        "The fitted categorical default was translated to the exact label IDs used by official training."
+                        if translated_default_start
+                        else "The requested sampling start distribution was forwarded unchanged."
+                    ),
                     "No privacy guarantee is implied; model artifacts require access control.",
                 ],
             )

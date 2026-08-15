@@ -7,22 +7,30 @@
     "seed": 13,
     "device": "cuda",
     "extra": {
-      "llm": "sshleifer/tiny-gpt2",
-      "epochs": 1,
-      "batch_size": 2,
-      "max_train_rows": 32,
+      "llm": "distilgpt2",
+      "epochs": 20,
+      "batch_size": 8,
+      "max_train_rows": 256,
+      "conditional_col": "income",
       "num_threads": 1,
-      "train_kwargs": {"logging_steps": 1}
+      "train_kwargs": {"learning_rate": 0.0005, "logging_steps": 160}
     }
   },
   "sample": {
     "enabled": true,
     "seed": 17,
-    "num_samples": 8,
+    "num_samples": 4,
     "checkpoint_path": null,
-    "extra": {"k": 8, "max_length": 160, "temperature": 0.5, "max_empty_batches": 8}
+    "extra": {
+      "k": 8,
+      "max_length": 224,
+      "temperature": 0.2,
+      "max_empty_batches": 4,
+      "timeout_seconds": 180,
+      "num_threads": 1
+    }
   },
   "evaluation": {"enabled": false, "extra": {}},
   "tags": ["v2", "windows", "bounded-real"],
-  "notes": "Bounded method-author TabuLa V2 configuration using a tiny public GPT-2 fixture."
+  "notes": "Bounded method-author TabuLa V2 real-function configuration. The official implementation initializes the distilgpt2 architecture from configuration, so this preset uses all 256 fixture rows and 20 epochs rather than the mechanical tiny checkpoint."
 }

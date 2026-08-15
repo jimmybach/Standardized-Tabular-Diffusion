@@ -39,6 +39,8 @@ GReaT uses the official `distilgpt2` backbone, five epochs over all 256 fixture 
 
 TabuLa sampling is hard-bounded on Windows by executing its unchanged method-author retry loop in a disposable child process. The parent accepts output only when the child exits successfully within the declared timeout and its response schema, CSV shape, and SHA-256 all agree. A timed-out child is terminated without changing the copied training artifacts.
 
+The TabuLa V2 preset uses the official randomly initialized `distilgpt2` architecture, 20 epochs over all 256 fixture rows, and temperature `0.2`. The earlier tiny one-epoch configuration trained but entered the official unbounded retry loop without producing a usable Adult row; the new Windows subprocess boundary terminated that diagnostic attempt exactly at 60 seconds. The accepted preset changes declared training strength, not upstream source or sampling equations.
+
 ## 4. Cost-controlled batches
 
 | Batch | Models |
