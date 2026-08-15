@@ -6,7 +6,7 @@
 
 目标：方法作者官方 `nrgboost==0.0.3` 包
 
-支持的验证环境：Linux、Python 3.11
+权威等价性验证环境：Linux、Python 3.11
 
 ## 声明边界
 
@@ -26,6 +26,26 @@
 协议检查 wheel 文件名与摘要、安全归档路径、包元数据、Python 和 ABI 标签、声明依赖、源码与 wheel 许可证哈希、编译扩展、随包 OpenMP 运行库、wheel `RECORD` 中每个带哈希条目、安装分发根目录以及公开类导出。PyPI Trusted Publishing 来源将发行制品绑定到锁定标签提交。
 
 NRGBoost 0.0.3 提供 Linux 和 macOS wheel，当前不支持 Windows；源码构建需要 C 编译器和 OpenMP。因此本仓库以 Linux/Python 3.11 为权威环境，不会把 Windows 上的自行源码构建解释为等价证据。
+
+## Windows 诊断性源码构建
+
+Windows 是本仓库的主要用户平台，因此项目另设一个证据强度明确较低的路径，用于验证官方实现能否在 Windows 上实际运行。`tools/build_nrgboost_windows.ps1` 下载 PyPI 官方源码包 `nrgboost-0.0.3.tar.gz`，强制校验 SHA-256 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0`，并且不会修改解压后的源码。随后脚本会：
+
+1. 根据 `tools/nrgboost-windows-toolchain.explicit.txt` 创建精确锁定的 conda-forge MinGW-w64 5.3.0 环境；锁文件包含每个包归档的 MD5；
+2. 从已安装的官方 CPython DLL 生成 GNU 格式的 CPython 3.11 导入库；
+3. 使用官方声明的 OpenMP 参数构建原生 CFFI 扩展；
+4. 使用 `delvewheel==1.13.0` 打包所需的 MinGW/OpenMP 运行库；
+5. 在第二个全新环境中安装构建结果，执行 `pip check`，导入编译扩展，并实际调用其 64 位采样器。
+
+在 PowerShell 中使用 64 位 CPython 3.11 执行：
+
+```powershell
+.\tools\build_nrgboost_windows.ps1 -PythonExe C:\path\to\python.exe
+```
+
+旧版 MinGW 后端要求 `WorkRoot` 不存在或为空、只包含 ASCII 字符且总长度不超过 60 个字符；默认路径位于 `%LOCALAPPDATA%`，满足这些要求。命令会在 `WorkRoot\output` 中生成本地 wheel 和来源记录 JSON。该 wheel 只是诊断性本地制品，本仓库不会提交或再分发它，也不会将其称为作者发布的 Windows 发行包。wheel 的 ZIP 元数据与构建时间有关，因此每次构建记录实际摘要，而不把某次本地构建摘要冻结成官方发行摘要。
+
+该流程已在 Windows x86-64、CPython 3.11.15 上从头到尾实跑：锁定源码未经补丁即可编译，修复后的 wheel 能在全新环境安装，`pip check` 通过，编译扩展采样器也通过。该证据只支持 Windows 功能探针；永久保留的 Linux 运行仍是唯一的 `native-parity-validated` 权威证据。
 
 ## 适配器语义
 

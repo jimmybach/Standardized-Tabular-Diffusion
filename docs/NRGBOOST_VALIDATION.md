@@ -6,7 +6,7 @@ Protocol: `nrgboost-native-parity-v1`
 
 Target: official method-author `nrgboost==0.0.3` package
 
-Supported validation environment: Linux, Python 3.11
+Authoritative parity environment: Linux, Python 3.11
 
 ## Claim Boundary
 
@@ -26,6 +26,26 @@ The audited implementation is the [method-author repository](https://github.com/
 The protocol checks the wheel name and digest, safe archive paths, package metadata, Python and ABI tag, declared dependencies, source and wheel license hashes, compiled extension, bundled OpenMP runtime, every hash-bearing wheel `RECORD` entry, installed distribution root, and public class exports. PyPI Trusted Publishing provenance binds the release artifact to the locked tag commit.
 
 NRGBoost 0.0.3 publishes Linux and macOS wheels and does not support Windows. Source builds require a C compiler and OpenMP. The repository therefore treats Linux/Python 3.11 as authoritative and does not reinterpret a Windows source build as equivalent evidence.
+
+## Diagnostic Windows Source Build
+
+Windows is the repository's primary user platform, so a separate, explicitly lower-strength path verifies that the official implementation can execute there. `tools/build_nrgboost_windows.ps1` downloads the official PyPI source distribution `nrgboost-0.0.3.tar.gz`, requires SHA-256 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0`, and never edits the extracted source. It then:
+
+1. creates the exact conda-forge MinGW-w64 5.3.0 environment recorded, with archive MD5 values, in `tools/nrgboost-windows-toolchain.explicit.txt`;
+2. derives the GNU CPython 3.11 import library from the installed official CPython DLL;
+3. builds the official CFFI extension with its declared OpenMP flags;
+4. uses `delvewheel==1.13.0` to bundle the required MinGW/OpenMP runtime libraries; and
+5. installs the result into a second clean environment, runs `pip check`, imports the compiled extension, and executes its 64-bit sampler.
+
+Run from PowerShell with a 64-bit CPython 3.11 executable:
+
+```powershell
+.\tools\build_nrgboost_windows.ps1 -PythonExe C:\path\to\python.exe
+```
+
+The legacy MinGW backend requires an absent or empty ASCII-only `WorkRoot` no longer than 60 characters; the safe default is under `%LOCALAPPDATA%`. The command writes a local wheel and a provenance JSON file to `WorkRoot\output`. The wheel is a diagnostic local artifact, is not committed or redistributed by this repository, and is not an author-published Windows distribution. Its output digest is recorded per build rather than frozen as an official release digest because wheel ZIP metadata is build-time dependent.
+
+The procedure was exercised end to end on Windows x86-64 with CPython 3.11.15: the locked source compiled without patches, the repaired wheel installed in a clean environment, `pip check` passed, and the compiled extension sampler passed. This evidence supports Windows functional probes only; the retained Linux run remains the sole `native-parity-validated` authority.
 
 ## Adapter Semantics
 
