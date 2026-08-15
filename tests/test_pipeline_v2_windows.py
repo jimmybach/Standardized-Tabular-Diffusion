@@ -210,6 +210,20 @@ def test_v2_pip_check_only_accepts_an_exact_exercised_reviewed_waiver() -> None:
     assert result["status"] == "pass-with-reviewed-waiver"
     assert result["conflicts"][0]["requirement"] == "torch<2,>=1.7"
 
+    modern_success = _review_pip_check(
+        returncode=0,
+        stdout="No broken requirements found.\n",
+        stderr="",
+        packages={},
+        waivers=[],
+    )
+    assert modern_success == {
+        "status": "pass",
+        "output": ["No broken requirements found."],
+        "conflicts": [],
+        "reviewed_waivers": [],
+    }
+
     with pytest.raises(PipelineV2Error, match="lacks one exact reviewed waiver"):
         _review_pip_check(
             returncode=1,

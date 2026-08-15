@@ -96,6 +96,19 @@ def _without_removed_scheduler_verbose(official_scheduler: Callable[..., Any]) -
     return compatible_scheduler
 
 
+def _with_configured_num_workers(
+    official_loader: Callable[..., Any], num_workers: int
+) -> Callable[..., Any]:
+    """Set only the DataLoader worker count at the adapter boundary."""
+
+    @functools.wraps(official_loader)
+    def configured_loader(*loader_args: Any, **loader_kwargs: Any) -> Any:
+        loader_kwargs["num_workers"] = num_workers
+        return official_loader(*loader_args, **loader_kwargs)
+
+    return configured_loader
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Invoke the unmodified official TabSyn implementation through a compatibility boundary."
@@ -109,6 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lambd", type=float, default=0.7)
     parser.add_argument("--num-samples", type=int)
     parser.add_argument("--steps", type=int, default=50)
+    parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--save-path", type=Path)
     parser.add_argument("--runtime-root", type=Path, required=True)
     return parser
@@ -122,6 +136,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("TabSyn num_samples must be positive.")
     if args.steps < 2:
         raise ValueError("TabSyn diffusion sampling requires at least two steps.")
+    if args.num_workers < 0:
+        raise ValueError("TabSyn num_workers must be non-negative.")
     if args.action == "sample" and args.save_path is None:
         raise ValueError("TabSyn sampling requires --save-path.")
 
@@ -144,18 +160,26 @@ def main(argv: list[str] | None = None) -> int:
 
         vae_module.__file__ = str(args.runtime_root / "tabsyn" / "vae" / "main.py")
         official_scheduler = vae_module.ReduceLROnPlateau
+        official_loader = vae_module.DataLoader
         vae_module.ReduceLROnPlateau = _without_removed_scheduler_verbose(official_scheduler)
+        vae_module.DataLoader = _with_configured_num_workers(official_loader, args.num_workers)
         try:
             vae_module.main(upstream_args)
         finally:
             vae_module.ReduceLROnPlateau = official_scheduler
+            vae_module.DataLoader = official_loader
     elif args.action == "diffusion-train":
         from tabsyn import latent_utils
 
         latent_utils.__file__ = str(args.runtime_root / "tabsyn" / "latent_utils.py")
         from tabsyn import main as diffusion_module
 
-        diffusion_module.main(upstream_args)
+        official_loader = diffusion_module.DataLoader
+        diffusion_module.DataLoader = _with_configured_num_workers(official_loader, args.num_workers)
+        try:
+            diffusion_module.main(upstream_args)
+        finally:
+            diffusion_module.DataLoader = official_loader
     else:
         _run_sample(args, upstream_args)
     return 0

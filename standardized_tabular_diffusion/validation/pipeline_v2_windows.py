@@ -94,11 +94,11 @@ def _review_pip_check(
 
     lines = [line.strip() for line in f"{stdout}\n{stderr}".splitlines() if line.strip()]
     if returncode == 0:
-        if lines:
+        if lines not in ([], ["No broken requirements found."]):
             raise PipelineV2Error(f"pip check returned success with unexpected output: {lines}")
         if waivers:
             raise PipelineV2Error("Declared pip-check waivers were not exercised")
-        return {"status": "pass", "conflicts": [], "reviewed_waivers": []}
+        return {"status": "pass", "output": lines, "conflicts": [], "reviewed_waivers": []}
 
     if not lines:
         raise PipelineV2Error("pip check failed without a diagnostic")

@@ -2,7 +2,7 @@
   "model": "tabsyn",
   "dataset": "adult",
   "output_dir": "artifacts/validation/pipeline-v2/tabsyn",
-  "train": {"enabled": true, "seed": 13, "device": "cuda", "extra": {}},
+  "train": {"enabled": true, "seed": 13, "device": "cuda", "extra": {"num_workers": 0}},
   "sample": {
     "enabled": true,
     "seed": 17,

@@ -104,6 +104,11 @@ class TabSynAdapter(BaseModelAdapter):
             )
 
         runtime_args = ["--runtime-root", str(self._runtime_root(spec).resolve())]
+        if spec.extra.get("num_workers") is not None:
+            num_workers = spec.extra["num_workers"]
+            if not isinstance(num_workers, int) or isinstance(num_workers, bool) or num_workers < 0:
+                raise ValueError("TabSyn num_workers must be a non-negative integer.")
+            runtime_args.extend(["--num-workers", str(num_workers)])
         if not (skip_vae_if_present and self._has_vae_artifacts(spec)):
             vae_args = [
                 "--action",

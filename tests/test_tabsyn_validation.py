@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 
 import standardized_tabular_diffusion.validation.tabsyn as tabsyn_validation
-from standardized_tabular_diffusion.compat.tabsyn_launcher import _without_removed_scheduler_verbose
+from standardized_tabular_diffusion.compat.tabsyn_launcher import (
+    _with_configured_num_workers,
+    _without_removed_scheduler_verbose,
+)
 from standardized_tabular_diffusion.interfaces import RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
@@ -25,6 +28,18 @@ def test_tabsyn_scheduler_bridge_removes_only_the_logging_keyword() -> None:
     compatible = _without_removed_scheduler_verbose(scheduler)
     assert compatible("optimizer", mode="min", factor=0.95, patience=10, verbose=True) == "scheduler"
     assert observed == [(('optimizer',), {"mode": "min", "factor": 0.95, "patience": 10})]
+
+
+def test_tabsyn_worker_bridge_only_replaces_num_workers() -> None:
+    observed: list[tuple[tuple[object, ...], dict[str, object]]] = []
+
+    def loader(*args: object, **kwargs: object) -> str:
+        observed.append((args, kwargs))
+        return "loader"
+
+    configured = _with_configured_num_workers(loader, 0)
+    assert configured("dataset", batch_size=4096, shuffle=True, num_workers=4) == "loader"
+    assert observed == [(('dataset',), {"batch_size": 4096, "shuffle": True, "num_workers": 0})]
 
 
 def test_tabsyn_scoped_sources_match_frozen_official_manifest() -> None:

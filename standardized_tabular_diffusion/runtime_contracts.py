@@ -398,6 +398,7 @@ _ACTION_CONTROLS: dict[str, dict[str, set[str]]] = {
             "lambd",
             "max_beta",
             "min_beta",
+            "num_workers",
             "skip_vae_if_present",
             "vae_num_epochs",
         },

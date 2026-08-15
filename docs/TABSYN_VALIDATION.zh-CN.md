@@ -36,6 +36,8 @@
 
 PyTorch 2.8 删除了 `ReduceLROnPlateau` 中只控制日志的 `verbose` 参数，而冻结的 VAE 入口仍会传入它。隔离启动器在 V2 运行时只移除这一个关键字，其余影响调度数学行为的参数全部原样转发；官方调用结束后恢复原始类，并且绝不修改校验和锁定的上游文件。
 
+官方 VAE 和扩散入口将 DataLoader worker 数硬编码为 4。在 Windows 上，4,000 个 VAE epoch 每轮重新创建 worker 会产生极大的进程启动开销，但不会改变模型数学。V2 预设因此通过原生一致性协议已经使用过的局部 DataLoader 构造桥接选择 `num_workers=0`。batch size、shuffle、全部 4,000/10,001 epoch 上限、loss、optimizer、scheduler 和 checkpoint 均保持官方行为不变；每个阶段结束后都会恢复原始 DataLoader 类。
+
 采样会加载 PyTorch 序列化文件，而这类文件在加载时可能执行代码。只应使用在已审计 TabSyn 工作树中生成或经明确放置的检查点，并在执行前核验来源。
 
 ## 冻结环境
