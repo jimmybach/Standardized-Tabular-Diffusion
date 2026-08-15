@@ -17,6 +17,7 @@ These presets are small, reproducible configs for quickly validating newly integ
 - [configs/smoke/arf-shoppers-smoke.json](../configs/smoke/arf-shoppers-smoke.json)
 - [configs/smoke/great-adult-train-smoke.json](../configs/smoke/great-adult-train-smoke.json)
 - [configs/smoke/great-adult-tiny.json](../configs/smoke/great-adult-tiny.json)
+- [configs/smoke/great-adult-v2.json](../configs/smoke/great-adult-v2.json)
 - [configs/smoke/great-adult-distilgpt2-tiny.json](../configs/smoke/great-adult-distilgpt2-tiny.json)
 - [configs/smoke/great-adult-distilgpt2-strong.json](../configs/smoke/great-adult-distilgpt2-strong.json)
 - [configs/smoke/tabebm-adult-smoke.json](../configs/smoke/tabebm-adult-smoke.json)
@@ -58,6 +59,7 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/arf-adul
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/arf-shoppers-smoke.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-train-smoke.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-tiny.json
+python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-v2.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-distilgpt2-tiny.json
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/great-adult-distilgpt2-strong.json
 ```
@@ -82,6 +84,7 @@ python -m standardized_tabular_diffusion.cli run --config configs/smoke/tabebm-a
 - `arf-shoppers-smoke.json` is a second-dataset ARF validation preset to confirm the adapter is not adult-specific.
 - `great-adult-train-smoke.json` is the reliable GReaT integration check when you mainly want to validate training and artifact creation.
 - `great-adult-tiny.json` uses `sshleifer/tiny-gpt2` so the first sample-oriented adapter validation run is practical on CPU, and now includes fallback temperature and `max_length` schedules.
+- `great-adult-v2.json` is the bounded native-Windows real-function preset: it uses `distilgpt2`, all 256 validation rows, five epochs, and official guided sampling. It exists because the mechanical tiny checkpoint cannot reliably emit one complete 15-column Adult row; it is still not a quality benchmark profile.
 - `great-adult-distilgpt2-tiny.json` is the stronger-base follow-up check when you want to distinguish checkpoint weakness from adapter/runtime issues.
 - `great-adult-distilgpt2-strong.json` is the first GReaT preset intended to be sample-capable rather than train-only; it relies on ordered-column training and first-column prompting.
 - `tabebm-adult-smoke.json` is now the train-only integration check for TabEBM.

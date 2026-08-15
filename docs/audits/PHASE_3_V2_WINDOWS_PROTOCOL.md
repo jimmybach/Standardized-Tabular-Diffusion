@@ -35,6 +35,8 @@ CPU-only algorithms remain on CPU. Models locked to the validated PyTorch 2.3 ru
 
 The frozen CoDi, STaSy, and TabSyn snapshot imports `libzero==0.0.8`. That distribution's stale metadata declares `torch<2`, while the exact newer runtime has already passed the retained native-parity workflow. The plan therefore permits only that fully specified `libzero 0.0.8` versus `torch 2.8.0+cu128` diagnostic. The harness checks the installed versions, requires the waiver to be exercised exactly once, records it in evidence, and rejects every changed, additional, unrecognized, or unused waiver.
 
+GReaT uses the official `distilgpt2` backbone, five epochs over all 256 fixture rows, and official guided sampling at temperature `0.2`. The earlier `sshleifer/tiny-gpt2` mechanical preset trained successfully but produced zero parseable legacy rows; guided sampling still returned missing numerical fields. That small fixture remains useful for adapter mechanics, but it is not treated as a minimally functional Adult generator. The V2 replacement changes only declared model hyperparameters and uses unchanged `be-great==0.0.14` APIs.
+
 ## 4. Cost-controlled batches
 
 | Batch | Models |
