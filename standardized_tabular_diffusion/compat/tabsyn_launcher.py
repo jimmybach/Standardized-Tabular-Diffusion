@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import functools
 import os
 import random
@@ -109,6 +110,21 @@ def _with_configured_num_workers(
     return configured_loader
 
 
+@contextlib.contextmanager
+def _configured_training_runtime(module: Any, num_workers: int) -> Any:
+    """Patch and restore the two non-mathematical runtime compatibility controls."""
+
+    official_scheduler = module.ReduceLROnPlateau
+    official_loader = module.DataLoader
+    module.ReduceLROnPlateau = _without_removed_scheduler_verbose(official_scheduler)
+    module.DataLoader = _with_configured_num_workers(official_loader, num_workers)
+    try:
+        yield
+    finally:
+        module.ReduceLROnPlateau = official_scheduler
+        module.DataLoader = official_loader
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Invoke the unmodified official TabSyn implementation through a compatibility boundary."
@@ -159,27 +175,16 @@ def main(argv: list[str] | None = None) -> int:
         from tabsyn.vae import main as vae_module
 
         vae_module.__file__ = str(args.runtime_root / "tabsyn" / "vae" / "main.py")
-        official_scheduler = vae_module.ReduceLROnPlateau
-        official_loader = vae_module.DataLoader
-        vae_module.ReduceLROnPlateau = _without_removed_scheduler_verbose(official_scheduler)
-        vae_module.DataLoader = _with_configured_num_workers(official_loader, args.num_workers)
-        try:
+        with _configured_training_runtime(vae_module, args.num_workers):
             vae_module.main(upstream_args)
-        finally:
-            vae_module.ReduceLROnPlateau = official_scheduler
-            vae_module.DataLoader = official_loader
     elif args.action == "diffusion-train":
         from tabsyn import latent_utils
 
         latent_utils.__file__ = str(args.runtime_root / "tabsyn" / "latent_utils.py")
         from tabsyn import main as diffusion_module
 
-        official_loader = diffusion_module.DataLoader
-        diffusion_module.DataLoader = _with_configured_num_workers(official_loader, args.num_workers)
-        try:
+        with _configured_training_runtime(diffusion_module, args.num_workers):
             diffusion_module.main(upstream_args)
-        finally:
-            diffusion_module.DataLoader = official_loader
     else:
         _run_sample(args, upstream_args)
     return 0

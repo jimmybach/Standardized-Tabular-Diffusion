@@ -34,7 +34,7 @@
 - 官方 TabSyn 使用耦合的固定 VAE/扩散检查点目录，因此拒绝显式外部 `checkpoint_path`；
 - 内部潜变量与 PyTorch 检查点必须是 TabSyn 工作树内的普通文件，不能是符号链接。
 
-PyTorch 2.8 删除了 `ReduceLROnPlateau` 中只控制日志的 `verbose` 参数，而冻结的 VAE 入口仍会传入它。隔离启动器在 V2 运行时只移除这一个关键字，其余影响调度数学行为的参数全部原样转发；官方调用结束后恢复原始类，并且绝不修改校验和锁定的上游文件。
+PyTorch 2.8 删除了 `ReduceLROnPlateau` 中只控制日志的 `verbose` 参数，而冻结的 VAE 和扩散入口仍会传入它。隔离启动器在 V2 运行时只移除这一个关键字，其余影响调度数学行为的参数全部原样转发；每次官方调用结束后恢复原始类，并且绝不修改校验和锁定的上游文件。
 
 官方 VAE 和扩散入口将 DataLoader worker 数硬编码为 4。在 Windows 上，4,000 个 VAE epoch 每轮重新创建 worker 会产生极大的进程启动开销，但不会改变模型数学。V2 预设因此通过原生一致性协议已经使用过的局部 DataLoader 构造桥接选择 `num_workers=0`。batch size、shuffle、全部 4,000/10,001 epoch 上限、loss、optimizer、scheduler 和 checkpoint 均保持官方行为不变；每个阶段结束后都会恢复原始 DataLoader 类。
 

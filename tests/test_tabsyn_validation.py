@@ -8,6 +8,7 @@ import pytest
 
 import standardized_tabular_diffusion.validation.tabsyn as tabsyn_validation
 from standardized_tabular_diffusion.compat.tabsyn_launcher import (
+    _configured_training_runtime,
     _with_configured_num_workers,
     _without_removed_scheduler_verbose,
 )
@@ -40,6 +41,36 @@ def test_tabsyn_worker_bridge_only_replaces_num_workers() -> None:
     configured = _with_configured_num_workers(loader, 0)
     assert configured("dataset", batch_size=4096, shuffle=True, num_workers=4) == "loader"
     assert observed == [(('dataset',), {"batch_size": 4096, "shuffle": True, "num_workers": 0})]
+
+
+def test_tabsyn_training_runtime_bridge_scopes_scheduler_and_loader() -> None:
+    class Module:
+        pass
+
+    module = Module()
+    original_calls: list[tuple[str, dict[str, object]]] = []
+
+    def scheduler(*args: object, **kwargs: object) -> str:
+        del args
+        original_calls.append(("scheduler", kwargs))
+        return "scheduler"
+
+    def loader(*args: object, **kwargs: object) -> str:
+        del args
+        original_calls.append(("loader", kwargs))
+        return "loader"
+
+    module.ReduceLROnPlateau = scheduler
+    module.DataLoader = loader
+    with _configured_training_runtime(module, 0):
+        assert module.ReduceLROnPlateau("optimizer", factor=0.9, verbose=True) == "scheduler"
+        assert module.DataLoader("data", batch_size=4096, num_workers=4) == "loader"
+    assert module.ReduceLROnPlateau is scheduler
+    assert module.DataLoader is loader
+    assert original_calls == [
+        ("scheduler", {"factor": 0.9}),
+        ("loader", {"batch_size": 4096, "num_workers": 0}),
+    ]
 
 
 def test_tabsyn_scoped_sources_match_frozen_official_manifest() -> None:
