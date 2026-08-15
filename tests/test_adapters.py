@@ -1095,6 +1095,8 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
     )
 
     adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    training_metadata_path = Path(train_config.output_dir) / "nrgboost_metadata.json"
+    training_metadata_before_sample = training_metadata_path.read_bytes()
     bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
     assert (Path(train_config.output_dir) / "model.nrgboost").exists()
@@ -1117,9 +1119,16 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
         "seed": 0,
     }
     assert str(captured["dataset_frame"]["y"].dtype) == "category"  # type: ignore[index]
-    metadata = json.loads((Path(train_config.output_dir) / "nrgboost_metadata.json").read_text())
-    assert metadata["package_version"] == "0.0.3"
-    assert metadata["sampling"]["seed"] == 0
+    assert training_metadata_path.read_bytes() == training_metadata_before_sample
+    training_metadata = json.loads(training_metadata_path.read_text())
+    sample_metadata = json.loads(
+        (Path(train_config.output_dir) / "nrgboost_sample_metadata.json").read_text()
+    )
+    assert training_metadata["package_version"] == "0.0.3"
+    assert training_metadata["checkpoint_sha256"] == sample_metadata["checkpoint_sha256"]
+    assert sample_metadata["training_metadata_sha256"]
+    assert sample_metadata["sample_sha256"]
+    assert sample_metadata["sampling"]["seed"] == 0
 
 
 def test_nrgboost_rejects_missing_values_and_invalid_controls(tmp_path: Path) -> None:

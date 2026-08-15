@@ -392,13 +392,21 @@ def _run_adapter(
     after_train = np.random.get_state()
     train_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
     checkpoint_path = output_dir / "model.nrgboost"
+    training_metadata_path = output_dir / "nrgboost_metadata.json"
+    training_metadata_before_sample = training_metadata_path.read_bytes()
+    training_metadata_sha256 = _sha256_file(training_metadata_path)
     before_sample = np.random.get_state()
     sample_bundle = adapter.sample(RunSpec(**common, num_samples=EXPECTED_SAMPLE_ROWS))
     after_sample = np.random.get_state()
     sample_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
-    metadata = json.loads((output_dir / "nrgboost_metadata.json").read_text(encoding="utf-8"))
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("NRGBoost adapter did not declare a generated sample path")
+    if training_metadata_path.read_bytes() != training_metadata_before_sample:
+        raise AssertionError("NRGBoost sampling mutated immutable training metadata")
+    training_metadata = json.loads(training_metadata_path.read_text(encoding="utf-8"))
+    sample_metadata = json.loads(
+        (output_dir / "nrgboost_sample_metadata.json").read_text(encoding="utf-8")
+    )
     serialized = joblib.load(checkpoint_path)
     manifests_valid = (
         train_bundle.model == "nrgboost"
@@ -415,14 +423,16 @@ def _run_adapter(
         "serialized_version": serialized.get("version"),
         "serialized_tree_count": len(serialized["booster"]["trees"]),
         "transform_columns": list(serialized["transform"].columns),
-        "metadata": metadata,
+        "training_metadata": training_metadata,
+        "training_metadata_sha256": training_metadata_sha256,
+        "sample_metadata": sample_metadata,
         "manifests_valid": manifests_valid,
         "global_numpy_state_unchanged": _numpy_state_equal(before_train, after_train)
         and _numpy_state_equal(before_sample, after_sample),
     }
 
 
-def _expected_metadata(dataset_spec: DatasetSpec, output_dir: Path, seed: int) -> dict[str, Any]:
+def _expected_training_metadata(dataset_spec: DatasetSpec, output_dir: Path, seed: int) -> dict[str, Any]:
     category_columns = [*dataset_spec.categorical_columns]
     if dataset_spec.task_type == "classification":
         category_columns.extend(dataset_spec.target_columns)
@@ -436,12 +446,29 @@ def _expected_metadata(dataset_spec: DatasetSpec, output_dir: Path, seed: int) -
         "dataset_params": DATASET_PARAMS,
         "training_params": TRAINING_PARAMS,
         "checkpoint_path": str(output_dir / "model.nrgboost"),
+        "checkpoint_sha256": _sha256_file(output_dir / "model.nrgboost"),
+    }
+
+
+def _expected_sample_metadata(dataset_spec: DatasetSpec, output_dir: Path, seed: int) -> dict[str, Any]:
+    del dataset_spec
+    training_metadata_path = output_dir / "nrgboost_metadata.json"
+    checkpoint_path = output_dir / "model.nrgboost"
+    sample_path = output_dir / "samples.csv"
+    return {
+        "package": PACKAGE_NAME,
+        "package_version": PACKAGE_VERSION,
+        "training_metadata_path": str(training_metadata_path),
+        "training_metadata_sha256": _sha256_file(training_metadata_path),
+        "checkpoint_path": str(checkpoint_path),
+        "checkpoint_sha256": _sha256_file(checkpoint_path),
         "sampling": {
             "requested_rows": EXPECTED_SAMPLE_ROWS,
             **SAMPLING_PARAMS,
             "seed": seed,
         },
-        "sample_path": str(output_dir / "samples.csv"),
+        "sample_path": str(sample_path),
+        "sample_sha256": _sha256_file(sample_path),
     }
 
 
@@ -532,8 +559,14 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path, wheel
             adapter_samples, adapter_artifacts = _run_adapter(repo_root, dataset_spec, adapter_dir, seed)
             comparisons = {
                 "adapter_manifests_valid": adapter_artifacts["manifests_valid"],
-                "adapter_metadata_exact": adapter_artifacts["metadata"]
-                == _expected_metadata(dataset_spec, adapter_dir, seed),
+                "adapter_metadata_exact": (
+                    adapter_artifacts["training_metadata"]
+                    == _expected_training_metadata(dataset_spec, adapter_dir, seed)
+                    and adapter_artifacts["sample_metadata"]
+                    == _expected_sample_metadata(dataset_spec, adapter_dir, seed)
+                    and adapter_artifacts["training_metadata_sha256"]
+                    == _sha256_file(adapter_dir / "nrgboost_metadata.json")
+                ),
                 "checkpoint_bytes_exact": native_artifacts["checkpoint_sha256"]
                 == adapter_artifacts["checkpoint_sha256"],
                 "sample_bytes_exact": native_artifacts["sample_sha256"] == adapter_artifacts["sample_sha256"],

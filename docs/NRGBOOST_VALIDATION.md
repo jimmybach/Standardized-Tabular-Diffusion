@@ -40,6 +40,8 @@ The adapter remains a thin package wrapper:
 - saves and loads the official joblib-based checkpoint format; and
 - writes only the requested final-chain samples in canonical column order.
 
+Training writes immutable `nrgboost_metadata.json`, including the checkpoint SHA-256. Sampling verifies that digest before deserialization and writes a separate `nrgboost_sample_metadata.json`; it never rewrites the copied training record. This separation lets the pipeline prove that sampling consumed, but did not mutate, the exact trained artifact set.
+
 The checkpoint format can execute Python during loading. By default, the adapter therefore loads only a regular non-symlinked file inside the run output directory. Loading an external checkpoint requires an explicit unsafe override after provenance and integrity review.
 
 ## Supported Controls
