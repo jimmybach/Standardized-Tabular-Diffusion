@@ -36,6 +36,8 @@ The repository-owned launcher imports and calls the official implementation and 
 
 PyTorch 2.8 removed the logging-only `verbose` parameter from `ReduceLROnPlateau`, while the frozen VAE and diffusion entrypoints still pass it. The isolated launcher drops only that keyword on the V2 runtime, forwards every mathematical scheduler argument unchanged, restores the original class after each official call, and never edits the checksum-locked upstream files.
 
+The official inverse transform may return fractional values for columns that the admitted DatasetSpec explicitly declares as integers. At the standardized output boundary, TabSyn uses the shared `numpy.rint` nearest-integer policy without clipping. If any value changes, the byte-exact official CSV is retained as `tabsyn-native-samples.csv`, while the canonical table and `tabsyn-sample-metadata.json` record every changed-row count and both file digests.
+
 The official VAE and diffusion entrypoints hard-code four DataLoader workers. Recreating those workers in every one of 4,000 VAE epochs causes extreme process-spawn overhead on Windows without changing model mathematics. The V2 preset therefore selects `num_workers=0` through a scoped DataLoader-construction bridge already used by the native-parity protocol. Batch size, shuffling, all 4,000/10,001 epoch limits, losses, optimizer, scheduler, and checkpoints remain official and unchanged; the original DataLoader class is restored after each stage.
 
 Sampling uses PyTorch serialization files, which can execute code during loading. Only checkpoints produced or deliberately placed inside the audited TabSyn worktree should be used, and their provenance must be verified before execution.

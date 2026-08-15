@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 import standardized_tabular_diffusion.validation.tabsyn as tabsyn_validation
@@ -12,7 +13,7 @@ from standardized_tabular_diffusion.compat.tabsyn_launcher import (
     _with_configured_num_workers,
     _without_removed_scheduler_verbose,
 )
-from standardized_tabular_diffusion.interfaces import RunSpec
+from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -165,6 +166,94 @@ def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, m
         "7",
     ]
     assert bundle.generated_sample_path == (tmp_path / "artifacts" / "samples.csv").resolve()
+
+
+def test_tabsyn_decodes_declared_integers_and_retains_native_csv(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "TabSyn-main").mkdir()
+    output_dir = tmp_path / "artifacts"
+    runtime_root = output_dir / "tabsyn-runtime"
+    vae = runtime_root / "tabsyn" / "vae" / "ckpt" / "adult"
+    diffusion = runtime_root / "tabsyn" / "ckpt" / "adult"
+    vae.mkdir(parents=True)
+    diffusion.mkdir(parents=True)
+    checkpoints = {
+        "train_z.npy": vae / "train_z.npy",
+        "decoder.pt": vae / "decoder.pt",
+        "model.pt": diffusion / "model.pt",
+    }
+    for name, path in checkpoints.items():
+        path.write_bytes(f"trusted-{name}".encode())
+
+    metadata_path = tmp_path / "info.json"
+    metadata_path.write_text(json.dumps({"int_columns": ["x"]}), encoding="utf-8")
+    dataset_spec = DatasetSpec(
+        name="adult",
+        task_type="classification",
+        column_names=["x", "label"],
+        numerical_columns=["x"],
+        categorical_columns=[],
+        target_columns=["label"],
+        metadata_path=metadata_path,
+    )
+    binding = {"manifest_sha256": "b" * 64}
+    training_metadata_path = output_dir / "tabsyn-model-metadata.json"
+    training_metadata_path.write_text(
+        json.dumps(
+            {
+                "model": "tabsyn",
+                "dataset": "adult",
+                "dataset_binding": binding,
+                "checkpoints": {
+                    name: {
+                        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                    }
+                    for name, path in checkpoints.items()
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    training_metadata_before = training_metadata_path.read_bytes()
+    adapter = TabSynAdapter(tmp_path)
+    monkeypatch.setattr(adapter, "_dataset_binding", lambda spec: binding)
+    monkeypatch.setattr(adapter, "resolve_dataset_spec", lambda spec: dataset_spec)
+
+    native_bytes = b"x,label\n1.5,no\n2.5,yes\n"
+
+    def fake_run(args: list[str], *, seed: int) -> None:
+        assert seed == 17
+        Path(args[args.index("--save-path") + 1]).write_bytes(native_bytes)
+
+    monkeypatch.setattr(adapter, "_run_tabsyn", fake_run)
+    bundle = adapter.sample(
+        RunSpec(
+            model="tabsyn",
+            dataset="adult",
+            output_dir=output_dir,
+            device="cpu",
+            seed=17,
+            num_samples=2,
+            extra={"dataset_identity": {"name": "adult"}, "steps": 5},
+        )
+    )
+    assert training_metadata_path.read_bytes() == training_metadata_before
+    assert pd.read_csv(bundle.generated_sample_path)["x"].tolist() == [2, 2]
+    native_path = output_dir / "tabsyn-native-samples.csv"
+    assert native_path.read_bytes() == native_bytes
+    sample_metadata = json.loads(
+        (output_dir / "tabsyn-sample-metadata.json").read_text(encoding="utf-8")
+    )
+    assert sample_metadata["integer_decoding"]["x"] == {
+        "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
+        "changed_rows": 2,
+        "clipped_rows": 0,
+    }
+    assert sample_metadata["native_sample_sha256"] == hashlib.sha256(native_bytes).hexdigest()
+    assert sample_metadata["sample_sha256"] == hashlib.sha256(
+        bundle.generated_sample_path.read_bytes()
+    ).hexdigest()
 
 
 def test_tabsyn_rejects_symlinked_internal_checkpoint(tmp_path: Path) -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Any
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json, sha256_file
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
 from standardized_tabular_diffusion.runtime_contracts import bind_native_dataset_view
 
 
@@ -242,12 +244,56 @@ class TabSynAdapter(BaseModelAdapter):
             numeric = frame.select_dtypes(include=[np.number]).to_numpy()
             if numeric.size and not bool(np.isfinite(numeric).all()):
                 raise RuntimeError("TabSyn produced non-finite numerical values.")
+            frame, integer_decoding = decode_declared_integer_columns(
+                frame,
+                dataset_spec,
+                model_name="TabSyn",
+            )
+            native_sample_path = None
+            if any(record["changed_rows"] for record in integer_decoding.values()):
+                native_sample_path = spec.output_dir / "tabsyn-native-samples.csv"
+                if native_sample_path.exists() or native_sample_path.is_symlink():
+                    raise FileExistsError(f"Refusing to overwrite TabSyn native sample evidence: {native_sample_path}")
+                shutil.copy2(sample_path, native_sample_path)
+                self._write_dataframe_csv(frame, sample_path)
+            atomic_write_json(
+                spec.output_dir / "tabsyn-sample-metadata.json",
+                {
+                    "schema_version": 1,
+                    "model": self.model_name,
+                    "dataset": spec.dataset,
+                    "seed": spec.seed,
+                    "rows": len(frame),
+                    "columns": list(frame.columns),
+                    "sample_path": str(sample_path),
+                    "sample_sha256": sha256_file(sample_path),
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": (
+                        None if native_sample_path is None else str(native_sample_path.resolve())
+                    ),
+                    "native_sample_sha256": (
+                        None if native_sample_path is None else sha256_file(native_sample_path)
+                    ),
+                    "checkpoints": {
+                        name: {"path": str(path), "sha256": sha256_file(path)}
+                        for name, path in checkpoints.items()
+                    },
+                    "sampling": {
+                        "steps": int(spec.extra.get("steps", 50)),
+                        "requested_rows": spec.num_samples,
+                    },
+                },
+            )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint after the official inverse transform; "
+                "the byte-exact native CSV is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 
