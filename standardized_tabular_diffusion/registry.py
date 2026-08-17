@@ -553,7 +553,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TVAE_VALIDATION.md",
-            "docs/evidence/tvae/native-parity-run-30913867621.json",
+            "docs/evidence/tvae/native-parity-run-32052308431.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/tvae-validation.yml",
         ),

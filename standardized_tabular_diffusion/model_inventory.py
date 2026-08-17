@@ -404,7 +404,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         notes=[
             "The adapter now targets TVAE from the checksum-pinned official ctgan 0.12.1 wheel.",
             "The locally modified 0.5.2.dev0 snapshot and its obsolete wrappers were removed rather than presented as the official implementation.",
-            "Exact native parity passed for three fixed seeds on Linux/Python 3.11 in GitHub Actions run 30913867621.",
+            "Exact native parity passed for independent train/sample seed pairs (0, 101), (19, 7), and (73, 29) on Linux/Python 3.11 in GitHub Actions run 32052308431.",
             "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),

@@ -2,13 +2,13 @@
 
 Status: passed; adapter is `native-parity-validated`
 
-Protocol ID: `tvae-native-parity-v1`
+Protocol ID: `tvae-native-parity-v2`
 
 Supported validation platform: Linux, Python 3.11, PyTorch 2.3 CPU
 
 ## Scope and claim boundary
 
-This protocol tests whether the standardized TVAE adapter invokes `TVAE` from the checksum-pinned official `ctgan==0.12.1` package with the same data, constructor arguments, random seed, persistence API, and sample request as a direct native call. It covers package identity, real mixed-type training, save/load behavior, three deterministic seed cases, artifact manifests, and exact native-versus-adapter comparisons.
+This protocol tests whether the standardized TVAE adapter invokes `TVAE` from the checksum-pinned official `ctgan==0.12.1` package with the same data, constructor arguments, independently controlled training and sampling seeds, persistence API, and sample request as a direct native call. It covers package identity, real mixed-type training, save/load behavior, three deterministic seed pairs, artifact manifests, and exact native-versus-adapter comparisons.
 
 A passing mandatory run may promote TVAE to `native-parity-validated`. It does not make TVAE `benchmark-eligible`, admit it to Official Results, or make it `release-supported`. Dataset admission, model-quality evaluation, privacy and fairness review, runtime thresholds, dependency maintenance, and release ownership remain separate gates.
 
@@ -42,6 +42,7 @@ The repository-owned adapter:
 - maps CPU or default-visible-GPU training through the official `enable_gpu` parameter without modifying upstream source;
 - rejects non-default indexed CUDA requests because the official constructor does not expose an exact pre-fit device-index control;
 - calls the official `set_random_state` before fitting;
+- calls the official `set_random_state` again after loading and immediately before sampling, so generation is reproducible independently of the training seed;
 - marks categorical features and a classification target as discrete columns;
 - uses the official `save` and `load` APIs and sets the requested sampling device after loading;
 - refuses to load a symlinked or external code-executing checkpoint unless the user explicitly accepts the existing unsafe-external-checkpoint override; and
@@ -67,9 +68,9 @@ python -m pip check
 
 ## Frozen comparison
 
-For seeds `0`, `19`, and `73`, both paths receive the same 40-row, no-missing-value mixed-type binary-classification fixture with two numerical features, one categorical feature, and one categorical target. Both use one real training epoch, batch size 20, 16-dimensional embeddings, one 16-unit compression layer, one 16-unit decompression layer, CPU execution, and 12 requested samples. This bounded fixture tests execution and parity; it is not a model-quality benchmark.
+For training/sampling seed pairs `(0, 101)`, `(19, 7)`, and `(73, 29)`, both paths receive the same 40-row, no-missing-value mixed-type binary-classification fixture with two numerical features, one categorical feature, and one categorical target. Deliberately different seeds prove that generation does not silently reuse the post-training random stream. Both paths use one real training epoch, batch size 20, 16-dimensional embeddings, one 16-unit compression layer, one 16-unit decompression layer, CPU execution, and 12 requested samples. This bounded fixture tests execution and parity; it is not a model-quality benchmark.
 
-The native path directly constructs, seeds, fits, saves, loads, and samples the official `TVAE` class. The adapter path performs the same operations through `TVAEAdapter`. Every seed must satisfy all of the following:
+The native path directly constructs the official `TVAE` class, applies the training seed, fits, saves, loads, applies the independent sampling seed through the official API, and samples. The adapter path performs the same operations through `TVAEAdapter`. Every seed pair must satisfy all of the following:
 
 1. the wheel, installed package, license metadata, installed file hashes, and TVAE class identity match the lock;
 2. constructor parameters and resolved CPU devices are identical;
@@ -99,6 +100,6 @@ python -m standardized_tabular_diffusion.validation.tvae \
 
 ## Retained result
 
-[GitHub Actions run `30913867621`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621) passed on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. All required comparisons passed for seeds `0`, `19`, and `73`: official wheel and installed-file identity, constructor and device settings, all five retained decoder tensors including finite sigma, transformed fixture data, recorded losses, NumPy and PyTorch random states, manifest integrity, generated DataFrames, and CSV bytes.
+[GitHub Actions run `32052308431`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431) passed on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. All required comparisons passed for the independent training/sampling seed pairs `(0, 101)`, `(19, 7)`, and `(73, 29)`: official wheel and installed-file identity, constructor and device settings, all five retained decoder tensors including finite sigma, transformed fixture data, recorded losses, NumPy and PyTorch random states, manifest integrity, generated DataFrames, and CSV bytes.
 
-The raw workflow artifact was inspected and retained unchanged at `docs/evidence/tvae/native-parity-run-30913867621.json` with SHA-256 `ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7`. TVAE is therefore promoted to `native-parity-validated`, while remaining `experimental`, `unsupported`, and excluded from Official Results until the separate license, evaluation, dataset, and release gates are satisfied.
+The raw workflow artifact was inspected and retained unchanged at `docs/evidence/tvae/native-parity-run-32052308431.json` with SHA-256 `5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e`. Its GitHub artifact ID is `9295157218` and its artifact digest is `sha256:17fc9a204c3b3c4d59a5e34514d57a1b90cceb59a80df52d51d4836870c26462`. TVAE is therefore `native-parity-validated`, while remaining `experimental`, `unsupported`, and excluded from Official Results until the separate license, evaluation, dataset, and release gates are satisfied.

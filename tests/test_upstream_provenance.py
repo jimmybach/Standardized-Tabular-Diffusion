@@ -184,7 +184,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "tabularargn": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
         "tabula": "docs/evidence/tabula/native-parity-run-30974574505.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
-        "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
+        "tvae": "docs/evidence/tvae/native-parity-run-32052308431.json",
     }
     for model_id in (
         "arf",
@@ -596,10 +596,10 @@ def test_tvae_package_lock_and_retained_validation_are_exact_and_conservatively_
     validation = tvae["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30913867621
+    assert validation["workflow_run_id"] == 32052308431
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7"
+        "5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e"
     )
     assert str(tvae["official_eligibility"]).startswith("blocked-pending-license")
 

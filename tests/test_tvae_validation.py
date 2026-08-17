@@ -11,8 +11,8 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tvae" / "native-parity-run-30913867621.json"
-EVIDENCE_SHA256 = "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tvae" / "native-parity-run-32052308431.json"
+EVIDENCE_SHA256 = "5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e"
 
 
 def test_tvae_package_lock_matches_registry_and_protocol() -> None:
@@ -38,10 +38,16 @@ def test_retained_tvae_evidence_is_immutable_and_complete() -> None:
     assert hashlib.sha256(raw_evidence).hexdigest() == EVIDENCE_SHA256
     assert evidence["status"] == "pass"
     assert evidence["model_id"] == "tvae"
-    assert evidence["protocol_id"] == "tvae-native-parity-v1"
-    assert evidence["repository_commit"] == "64f3c23c617f2fc4cbebfba9d36845a812892355"
-    assert evidence["seed_cases"] == [0, 19, 73]
-    assert [case["seed"] for case in evidence["cases"]] == [0, 19, 73]
+    assert evidence["protocol_id"] == tvae_validation.PROTOCOL_ID
+    assert evidence["repository_commit"] == "b20e9a50ac95602d3348e870de94e3593f935862"
+    assert evidence["seed_cases"] == [
+        {"train_seed": 0, "sample_seed": 101},
+        {"train_seed": 19, "sample_seed": 7},
+        {"train_seed": 73, "sample_seed": 29},
+    ]
+    assert tuple(
+        (case["train_seed"], case["sample_seed"]) for case in evidence["cases"]
+    ) == tvae_validation.SEED_CASES
     assert all(case["status"] == "pass" for case in evidence["cases"])
     assert all(tvae_validation._case_passed(case["comparisons"]) for case in evidence["cases"])
     assert evidence["source"]["installed_distribution"]["record_files_verified"] == 20
