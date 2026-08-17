@@ -15,7 +15,7 @@ from standardized_tabular_diffusion.compat.tabdiff_seed_launcher import (
     load_patch_record,
 )
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
-from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
 from standardized_tabular_diffusion.runtime_contracts import materialize_bound_dataset_view
 
@@ -28,6 +28,77 @@ class TabDiffAdapter(BaseModelAdapter):
     def _runtime_root(spec: RunSpec) -> Path:
         return spec.output_dir / "tabdiff-runtime"
 
+    def _materialize_synthetic_view(
+        self,
+        dataset_spec: DatasetSpec,
+        destination: Path,
+    ) -> dict[str, object]:
+        """Build the official evaluation view from the registered canonical tables."""
+
+        sources = {
+            "real.csv": dataset_spec.train_data_path,
+            "test.csv": dataset_spec.test_data_path,
+        }
+        if dataset_spec.val_data_path is not None:
+            sources["val.csv"] = dataset_spec.val_data_path
+        missing = sorted(name for name, path in sources.items() if path is None)
+        if missing:
+            raise FileNotFoundError(
+                "TabDiff requires registered train and test tables for its official metrics; "
+                f"missing canonical sources for {missing}."
+            )
+
+        parent = destination.parent
+        if parent.is_symlink() or destination.is_symlink():
+            raise ValueError(f"TabDiff synthetic runtime view must not use symlinks: {destination}")
+        parent.mkdir(parents=True, exist_ok=True)
+        destination.mkdir(exist_ok=True)
+
+        unexpected = sorted(path.name for path in destination.iterdir() if path.name not in sources)
+        if unexpected:
+            raise FileExistsError(
+                f"TabDiff synthetic runtime view contains unexpected entries: {unexpected}"
+            )
+
+        records: dict[str, object] = {}
+        for name, source_value in sources.items():
+            if source_value is None:  # pragma: no cover - guarded above
+                raise AssertionError(f"TabDiff canonical source unexpectedly missing for {name}")
+            source = source_value
+            if source.is_symlink() or not source.is_file():
+                raise FileNotFoundError(f"TabDiff canonical table is missing or unsafe: {source}")
+            source = source.resolve(strict=True)
+            target = destination / name
+            source_sha256 = self._sha256_file(source)
+            if target.exists():
+                if target.is_symlink() or not target.is_file():
+                    raise ValueError(f"TabDiff synthetic runtime entry is unsafe: {target}")
+                if target.stat().st_size != source.stat().st_size or self._sha256_file(target) != source_sha256:
+                    raise FileExistsError(
+                        f"TabDiff synthetic runtime entry differs from its canonical source: {target}"
+                    )
+            else:
+                atomic_write_bytes(target, source.read_bytes())
+            records[name] = {
+                "canonical_path": str(source),
+                "runtime_path": str(target.resolve(strict=True)),
+                "bytes": source.stat().st_size,
+                "sha256": source_sha256,
+            }
+        return {
+            "schema_version": 1,
+            "runtime_root": str(destination.resolve(strict=True)),
+            "files": records,
+        }
+
+    def _dataset_info_path(self, spec: RunSpec) -> Path:
+        if "dataset_identity" in spec.extra:
+            path = self._runtime_root(spec) / "data" / spec.dataset / "info.json"
+            if path.is_symlink() or not path.is_file():
+                raise FileNotFoundError(f"TabDiff bound runtime metadata is missing or unsafe: {path}")
+            return path
+        return self.upstream_root / "data" / spec.dataset / "info.json"
+
     def _prepare_runtime(self, spec: RunSpec) -> dict[str, object]:
         runtime_root = self._runtime_root(spec)
         if runtime_root.is_symlink():
@@ -39,6 +110,10 @@ class TabDiffAdapter(BaseModelAdapter):
                 dataset_spec,
                 self.upstream_root / "data" / spec.dataset,
                 runtime_root / "data" / spec.dataset,
+            )
+            binding["synthetic_view"] = self._materialize_synthetic_view(
+                dataset_spec,
+                runtime_root / "synthetic" / spec.dataset,
             )
         else:
             binding = {"schema_version": 1, "status": "not-declared-at-direct-runspec-boundary"}
@@ -138,7 +213,7 @@ class TabDiffAdapter(BaseModelAdapter):
         return resolved
 
     def _validate_integer_restoration_config(self, spec: RunSpec, config_path: Path | None) -> None:
-        info_path = self.upstream_root / "data" / spec.dataset / "info.json"
+        info_path = self._dataset_info_path(spec)
         if not info_path.is_file():
             return
         info = json.loads(info_path.read_text(encoding="utf-8"))
@@ -156,7 +231,7 @@ class TabDiffAdapter(BaseModelAdapter):
             )
 
     def _validate_generated_sample_contract(self, spec: RunSpec, sample_path: Path) -> dict[str, object]:
-        info_path = self.upstream_root / "data" / spec.dataset / "info.json"
+        info_path = self._dataset_info_path(spec)
         if not info_path.is_file():
             return {"status": "not-evaluated", "reason": "upstream dataset info.json is unavailable"}
 

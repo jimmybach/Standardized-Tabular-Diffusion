@@ -424,3 +424,35 @@ def test_phase2_tabdiff_and_tabsyn_runtime_paths_are_run_owned(tmp_path: Path) -
     assert tabsyn._vae_ckpt_dir(spec).is_relative_to(spec.output_dir)
     assert tabsyn._diffusion_ckpt_dir(spec).is_relative_to(spec.output_dir)
     assert dataset_content_identity(_dataset(tmp_path / "identity"))["schema_version"] == 1
+
+
+def test_phase2_tabdiff_materializes_complete_run_owned_dataset_views(tmp_path: Path) -> None:
+    dataset = _dataset(tmp_path / "TabDiff-main")
+    default_config = tmp_path / "TabDiff-main" / "tabdiff" / "configs" / "tabdiff_configs.toml"
+    default_config.parent.mkdir(parents=True)
+    default_config.write_text("[data]\ndequant_dist = 'round'\n", encoding="utf-8")
+    spec = RunSpec(
+        model="tabdiff",
+        dataset=dataset.name,
+        output_dir=tmp_path / "run",
+        extra={
+            "dataset_spec": dataset.to_dict(),
+            "dataset_identity": dataset_content_identity(dataset),
+        },
+    )
+    adapter = TabDiffAdapter(tmp_path)
+
+    binding = adapter._prepare_runtime(spec)
+
+    runtime = spec.output_dir / "tabdiff-runtime"
+    assert (runtime / "data" / "toy" / "info.json").read_bytes() == dataset.metadata_path.read_bytes()
+    assert (runtime / "data" / "toy" / "train.csv").read_bytes() == dataset.train_data_path.read_bytes()
+    assert (runtime / "synthetic" / "toy" / "real.csv").read_bytes() == dataset.train_data_path.read_bytes()
+    assert (runtime / "synthetic" / "toy" / "test.csv").read_bytes() == dataset.test_data_path.read_bytes()
+    assert binding["synthetic_view"]["files"]["real.csv"]["canonical_path"] == str(
+        dataset.train_data_path.resolve()
+    )
+
+    (runtime / "synthetic" / "toy" / "real.csv").write_text("tampered\n", encoding="utf-8")
+    with pytest.raises(FileExistsError, match="differs from its canonical source"):
+        adapter._prepare_runtime(spec)
