@@ -158,7 +158,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/CODI_VALIDATION.md",
-            "docs/evidence/codi/native-parity-run-30941940893.json",
+            "docs/evidence/codi/native-parity-run-32043925805.json",
             "standardized_tabular_diffusion/resources/upstream/codi-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/codi-validation.yml",

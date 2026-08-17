@@ -75,7 +75,7 @@ The protocol requires exact continuous-checkpoint state, exact discrete-checkpoi
 
 The environment is frozen in `requirements-codi-validation.txt` with CPU PyTorch `2.3.0`. Evidence is uploaded even on failure.
 
-All nine cases passed in GitHub Actions [run `30941940893`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30941940893) on Linux, Python 3.11.15, and PyTorch 2.3.0 CPU. For every case, both checkpoint states were exactly equal, generated CSV files were equal byte-for-byte and frame-for-frame, all seven requested rows were present, and every safety and source-integrity assertion passed. The inspected evidence is permanently retained at [`docs/evidence/codi/native-parity-run-30941940893.json`](evidence/codi/native-parity-run-30941940893.json). This supports promotion to `native-parity-validated` for the pinned TabSyn snapshot only.
+All nine cases passed in GitHub Actions [run `32043925805`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32043925805) on Linux, Python 3.11.15, and PyTorch 2.3.0 CPU. This run revalidated the current adapter after fixing initialization of the optional sampling schema used for integer-column restoration. For every case, both checkpoint states were exactly equal, generated CSV files were equal byte-for-byte and frame-for-frame, all seven requested rows were present, and every safety and source-integrity assertion passed. The inspected evidence is permanently retained at [`docs/evidence/codi/native-parity-run-32043925805.json`](evidence/codi/native-parity-run-32043925805.json). This supports promotion to `native-parity-validated` for the pinned TabSyn snapshot only.
 
 ## Remaining Gates
 

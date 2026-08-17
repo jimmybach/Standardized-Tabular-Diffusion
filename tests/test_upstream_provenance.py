@@ -167,7 +167,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
         "arf": "docs/evidence/arf/native-parity-run-30964711614.json",
         "bn": "docs/evidence/bn/native-parity-run-30967779298.json",
-        "codi": "docs/evidence/codi/native-parity-run-30941940893.json",
+        "codi": "docs/evidence/codi/native-parity-run-32043925805.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
         "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
@@ -390,17 +390,23 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
     validation = codi["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30941940893
-    assert validation["pull_request_head_commit"] == "bcfc4dd1d6b219c578bac44c4bd85606158bfb83"
-    assert validation["repository_commit"] == "b0a380cd01ee08378742c231ec5811351103b20c"
+    assert validation["workflow_run_id"] == 32043925805
+    assert validation["workflow_event"] == "push"
+    assert validation["repository_commit"] == "d5a5192fccbbb7fa7af405dbf500c14ff82f516c"
     assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["parity_cases_total"] == 9
     assert validation["result_summary"]["continuous_checkpoint_state_exact"] is True
     assert validation["result_summary"]["discrete_checkpoint_state_exact"] is True
     assert validation["result_summary"]["sample_bytes_exact"] is True
     assert validation["result_summary"]["sample_frames_exact"] is True
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156"
+        "04f4f3ab1e50697a614fdf843cb29b6cb5d1700065343cd2c7d87a573ec75a4f"
     )
+    assert validation["artifact"]["artifact_id"] == 9292473608
+    assert validation["artifact"]["artifact_digest"] == (
+        "sha256:9b2b3efe69af567b8661439394f04a06013aaa129613106f317bee18b50ea4b8"
+    )
+    assert validation["artifact"]["expires_at"] == "2026-11-15T15:58:02Z"
     evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
     evidence_bytes = evidence_path.read_bytes()
     assert hashlib.sha256(evidence_bytes).hexdigest() == validation["artifact"][
@@ -412,6 +418,9 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
     ]
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == validation["protocol_id"]
+    assert evidence["repository_commit"] == validation["repository_commit"]
+    assert evidence["environment_lock"]["sha256"] == validation["environment_lock_sha256"]
     assert evidence["reproduction_target"] == "tabsyn-benchmark-snapshot"
     assert evidence["environment"]["tqdm"] == "4.66.5"
     assert len(evidence["cases"]) == 9

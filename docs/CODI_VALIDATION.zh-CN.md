@@ -75,7 +75,7 @@ Linux/Python 3.11 协议运行九个真实案例：
 
 验证环境由 `requirements-codi-validation.txt` 固定，并使用 CPU 版 PyTorch `2.3.0`。即使验证失败也会上传证据。
 
-九个案例均在 GitHub Actions [运行 `30941940893`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30941940893) 的 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。每个案例的两个 checkpoint 状态均精确一致，生成 CSV 在字节和 DataFrame 层面均精确一致，七行请求样本全部存在，而且所有安全性及源码完整性断言均通过。经审阅的证据已永久保留在 [`docs/evidence/codi/native-parity-run-30941940893.json`](evidence/codi/native-parity-run-30941940893.json)。这只支持把固定的 TabSyn 快照晋级为 `native-parity-validated`。
+九个案例均在 GitHub Actions [运行 `32043925805`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32043925805) 的 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。本次运行在修复整数列还原所用可选采样 schema 的初始化问题后，对当前适配器进行了重新验证。每个案例的两个 checkpoint 状态均精确一致，生成 CSV 在字节和 DataFrame 层面均精确一致，七行请求样本全部存在，而且所有安全性及源码完整性断言均通过。经审阅的证据已永久保留在 [`docs/evidence/codi/native-parity-run-32043925805.json`](evidence/codi/native-parity-run-32043925805.json)。这只支持把固定的 TabSyn 快照晋级为 `native-parity-validated`。
 
 ## 尚未完成的门槛
 

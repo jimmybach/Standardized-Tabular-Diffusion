@@ -371,7 +371,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "All 11 local CoDi source files match the Apache-2.0 TabSyn benchmark snapshot at commit cb5ac0f byte-for-byte.",
             "The 24-file execution scope is checksum-locked; deterministic device, checkpoint, and requested-row controls remain outside tracked upstream source.",
             "The method-author repository has no declared license and differs in 5 of 10 shared paths, so this entry targets TabSyn-snapshot parity only.",
-            "All nine exact TabSyn-snapshot parity cases passed on Linux/Python 3.11 in GitHub Actions run 30941940893; original-method, Official Results, and release support remain blocked.",
+            "All nine exact TabSyn-snapshot parity cases passed on Linux/Python 3.11 in GitHub Actions run 32043925805; original-method, Official Results, and release support remain blocked.",
         ],
     ),
     "ctab-gan": ModelInventoryEntry(
