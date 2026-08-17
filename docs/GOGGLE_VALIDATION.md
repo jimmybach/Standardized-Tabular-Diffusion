@@ -67,7 +67,7 @@ The adapter performs the following declared operations outside upstream source:
 
 1. verifies source and artifact identities and confines the official relative checkpoint write to `output_dir`;
 2. fits numerical standardization and deterministic categorical one-hot encoding on the real training split only;
-3. passes the requested row count to the unchanged `Goggle.model.sample` core and applies the recorded inverse transform;
+3. passes the requested row count to the unchanged `Goggle.model.sample` core, applies the recorded inverse transform, and restores only explicitly declared integer columns with the repository-wide nearest-integer decoder;
 4. supplies unused legacy Synthcity and heterogeneous-import names as fail-on-use placeholders; and
 5. injects the recorded pure-PyTorch graph backend while importing the unchanged Goggle source.
 
@@ -76,6 +76,8 @@ Model metadata schema 2 records the backend ID, version, semantic target, source
 ## Data Contract
 
 The adapter accepts classification and regression tables with any non-empty combination of numerical and categorical features, exactly one target column, canonical column order, finite numerical values, and no missing values. Missing values fail closed; users must first run the centralized train-split-fitted mean/mode imputer. The target remains part of the jointly synthesized vector.
+
+Goggle models numerical values continuously. After the train-fitted inverse standardization, columns explicitly declared as integer by the canonical `DatasetSpec` are decoded with `numpy.rint` (ties to even) and `int64`, without clipping or test-set information. Continuous columns are untouched. The native inverse table and a per-column changed-row report are retained with each applicable sample run; the central validator still rejects invalid output rather than silently repairing it.
 
 ## Validation
 

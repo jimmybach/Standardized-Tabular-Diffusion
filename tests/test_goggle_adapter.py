@@ -16,7 +16,7 @@ from standardized_tabular_diffusion.upstream_sources import UpstreamSourceIntegr
 def _classification_fixture(tmp_path: Path) -> tuple[GoggleAdapter, DatasetSpec, pd.DataFrame]:
     frame = pd.DataFrame(
         {
-            "amount": [1.0, 2.5, 4.0, 5.5, 7.0, 8.5],
+            "amount": [1, 2, 4, 5, 7, 8],
             "segment": ["b", "a", "c", "a", "b", "c"],
             "target": [1, 0, 1, 0, 1, 0],
         }
@@ -34,6 +34,7 @@ def _classification_fixture(tmp_path: Path) -> tuple[GoggleAdapter, DatasetSpec,
         target_columns=["target"],
         metadata_path=metadata_path,
         train_data_path=train_path,
+        extra={"integer_columns": ["amount"]},
     )
     return GoggleAdapter(tmp_path), spec, frame
 
@@ -48,6 +49,8 @@ def test_goggle_preprocessing_is_train_fitted_and_reversible(tmp_path: Path) -> 
     assert metadata["fit_scope"] == "real-training-split-only"
     assert metadata["input_dim"] == 5
     assert metadata["training_rows"] == len(expected)
+    assert metadata["integer_columns"] == ["amount"]
+    assert metadata["integer_decoding"].endswith("without-clipping")
     assert recovered.columns.tolist() == expected.columns.tolist()
     np.testing.assert_allclose(recovered["amount"], expected["amount"])
     assert recovered["segment"].tolist() == expected["segment"].tolist()
@@ -89,6 +92,16 @@ def test_goggle_rejects_missing_values_before_training(tmp_path: Path) -> None:
     frame.to_csv(dataset_spec.train_data_path, index=False)
 
     with pytest.raises(ValueError, match="centralized train-split-fitted"):
+        adapter._load_training_frame(dataset_spec)
+
+
+def test_goggle_rejects_fractional_values_declared_as_integer(tmp_path: Path) -> None:
+    adapter, dataset_spec, frame = _classification_fixture(tmp_path)
+    frame["amount"] = frame["amount"].astype(float)
+    frame.loc[2, "amount"] = 4.25
+    frame.to_csv(dataset_spec.train_data_path, index=False)
+
+    with pytest.raises(ValueError, match="declared integer training column contains fractional"):
         adapter._load_training_frame(dataset_spec)
 
 
@@ -196,7 +209,20 @@ def test_goggle_adapter_confines_artifacts_and_honors_requested_rows(tmp_path: P
     assert metadata["execution_config"]["graph_backend"] == adapter.graph_backend
     assert metadata["graph_backend"] == adapter.graph_backend
     assert bundle.generated_sample_path == output_dir / "samples.csv"
-    assert len(pd.read_csv(bundle.generated_sample_path)) == 5
+    samples = pd.read_csv(bundle.generated_sample_path)
+    assert len(samples) == 5
+    assert samples["amount"].tolist() == [4, 4, 4, 4, 4]
+    sample_metadata = json.loads(
+        (output_dir / "goggle-sample-metadata.json").read_text(encoding="utf-8")
+    )
+    assert sample_metadata["integer_decoding"]["amount"] == {
+        "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
+        "changed_rows": 5,
+        "clipped_rows": 0,
+    }
+    native_samples = pd.read_csv(sample_metadata["native_inverse_sample_path"])
+    assert native_samples["amount"].tolist() == [4.5, 4.5, 4.5, 4.5, 4.5]
+    assert sample_metadata["native_inverse_sample_sha256"]
     assert commands[1][commands[1].index("--num-samples") + 1] == "5"
     assert not any(path.name.startswith(".goggle-sample-") for path in output_dir.iterdir())
     assert not (source_root / "tmp").exists()

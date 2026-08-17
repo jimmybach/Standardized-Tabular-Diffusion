@@ -319,14 +319,34 @@ def test_phase2_goggle_sampling_passes_the_independent_sample_seed(
     checkpoint.write_bytes(b"weights")
     (output / "goggle-runtime-config.json").write_text("{}", encoding="utf-8")
     adapter = GoggleAdapter(tmp_path)
+    dataset_metadata = tmp_path / "dataset-metadata.json"
+    dataset_metadata.write_text("{}", encoding="utf-8")
+    dataset_spec = DatasetSpec(
+        name="toy",
+        task_type="regression",
+        column_names=["x"],
+        numerical_columns=[],
+        categorical_columns=[],
+        target_columns=["x"],
+        metadata_path=dataset_metadata,
+    )
     source_record = {"manifest_sha256": "a" * 64, "upstream_commit": adapter.upstream_commit}
     monkeypatch.setattr(goggle_module, "validate_upstream_source", lambda *_args, **_kwargs: source_record)
     monkeypatch.setattr(adapter, "_source_root", lambda _spec: source)
     monkeypatch.setattr(adapter, "_validate_trusted_executable_artifact", lambda *_args, **_kwargs: checkpoint)
+    monkeypatch.setattr(adapter, "resolve_dataset_spec", lambda _spec: dataset_spec)
     monkeypatch.setattr(
         adapter,
         "_load_metadata",
-        lambda *_args, **_kwargs: {"transform": {"training_rows": 2, "input_dim": 1}},
+        lambda *_args, **_kwargs: {
+            "transform": {
+                "training_rows": 2,
+                "input_dim": 1,
+                "column_names": ["x"],
+                "task_type": "regression",
+                "integer_columns": [],
+            }
+        },
     )
     monkeypatch.setattr(adapter, "_inverse_transform", lambda raw, _transform: pd.DataFrame({"x": raw[:, 0]}))
     calls: list[list[str]] = []
