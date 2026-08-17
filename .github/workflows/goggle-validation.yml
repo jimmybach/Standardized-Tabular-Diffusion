@@ -5,7 +5,10 @@ on:
     paths:
       - ".github/workflows/goggle-validation.yml"
       - "requirements-goggle-validation.txt"
+      - "requirements-goggle-windows-gpu.txt"
       - "standardized_tabular_diffusion/compat/goggle_launcher.py"
+      - "standardized_tabular_diffusion/compat/goggle_graph_contract.py"
+      - "standardized_tabular_diffusion/compat/goggle_torch_graph.py"
       - "standardized_tabular_diffusion/models/goggle.py"
       - "standardized_tabular_diffusion/registry.py"
       - "standardized_tabular_diffusion/runner.py"
@@ -14,6 +17,7 @@ on:
       - "standardized_tabular_diffusion/resources/upstream/goggle-source-manifest.json"
       - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
       - "tests/test_goggle_adapter.py"
+      - "tests/test_goggle_torch_graph.py"
       - "tests/test_upstream_sources.py"
       - "docs/GOGGLE_VALIDATION*.md"
       - "docs/evidence/goggle/**"
@@ -21,7 +25,10 @@ on:
     paths:
       - ".github/workflows/goggle-validation.yml"
       - "requirements-goggle-validation.txt"
+      - "requirements-goggle-windows-gpu.txt"
       - "standardized_tabular_diffusion/compat/goggle_launcher.py"
+      - "standardized_tabular_diffusion/compat/goggle_graph_contract.py"
+      - "standardized_tabular_diffusion/compat/goggle_torch_graph.py"
       - "standardized_tabular_diffusion/models/goggle.py"
       - "standardized_tabular_diffusion/registry.py"
       - "standardized_tabular_diffusion/runner.py"
@@ -30,6 +37,7 @@ on:
       - "standardized_tabular_diffusion/resources/upstream/goggle-source-manifest.json"
       - "standardized_tabular_diffusion/resources/upstream/source-lock.json"
       - "tests/test_goggle_adapter.py"
+      - "tests/test_goggle_torch_graph.py"
       - "tests/test_upstream_sources.py"
       - "docs/GOGGLE_VALIDATION*.md"
       - "docs/evidence/goggle/**"
@@ -43,8 +51,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  native-parity:
-    name: Linux / Python 3.11 / method-author native parity
+  graph-backend-parity:
+    name: Linux / Python 3.11 / DGL-to-PyTorch GCN parity
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -76,7 +84,7 @@ jobs:
 
       - name: Run focused contract tests
         run: |
-          python -m pytest tests/test_goggle_adapter.py tests/test_upstream_sources.py -q
+          python -m pytest tests/test_goggle_adapter.py tests/test_goggle_torch_graph.py tests/test_upstream_sources.py -q
 
       - name: Run real official-source-versus-adapter parity protocol
         run: |
@@ -89,7 +97,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: goggle-method-author-native-parity-evidence
+          name: goggle-pytorch-graph-backend-parity-evidence
           path: ${{ runner.temp }}/goggle-evidence.json
           if-no-files-found: warn
           retention-days: 90

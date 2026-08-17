@@ -211,7 +211,12 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
-        expected_modification = "compatibility-patched" if model_id == "realtabformer" else "adapter-only"
+        if model_id == "realtabformer":
+            expected_modification = "compatibility-patched"
+        elif model_id == "goggle":
+            expected_modification = "dependency-compatibility-reimplementation"
+        else:
+            expected_modification = "adapter-only"
         assert spec.modification_status == expected_modification
         assert spec.patch_set_ids == ()
         assert evidence_paths[model_id] in spec.evidence_records

@@ -33,5 +33,5 @@
     "smoke",
     "goggle"
   ],
-  "notes": "Small CPU smoke preset for checksum-locked method-author Goggle source; materialize the source before running."
+  "notes": "Small CPU smoke preset for checksum-locked method-author Goggle source plus the pure-PyTorch GCN graph backend; materialize the source before running."
 }

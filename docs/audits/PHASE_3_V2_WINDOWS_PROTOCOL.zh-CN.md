@@ -33,6 +33,8 @@ TabDDPM 和 TabDiff 已拥有更强的 Windows 代表性真实证据。TabEBM �
 
 仅支持 CPU 的算法保持使用 CPU。锁定到已验证 PyTorch 2.3 运行时的模型也保持使用 CPU，因为该运行时早于 RTX 5080 支持。运行时兼容且支持 CUDA 的适配器请求已声明的 RTX 5080。设备选择是保留证据的一部分，由适配器和运行时契约决定，而不会仅根据硬件可用性自动推断。
 
+Goggle 不再绑定旧版 CPU 批次。固定校验的 GCN 核心现在使用单独记录的纯 PyTorch 图兼容后端，因此 Windows V2 profile 会在没有 DGL 和 PyTorch Geometric 的情况下，使用 PyTorch 2.8.0+cu128 与声明的 RTX 5080 运行。DGL 1.1.3 只保留为 Linux 验证判定器，不属于 V2 运行时依赖。
+
 冻结的 CoDi、STaSy 和 TabSyn 快照会导入 `libzero==0.0.8`。该发行包的旧元数据声明 `torch<2`，但精确的新运行时已经通过保留的原生等价工作流。因此，计划只允许完整指定的 `libzero 0.0.8` 与 `torch 2.8.0+cu128` 这一条诊断。执行器会核对已安装版本，要求该豁免恰好实际出现一次，将其写入证据，并拒绝任何变化、新增、无法识别或未实际触发的豁免。
 
 GReaT 使用官方支持的 `distilgpt2` 骨干，在全部 256 行验证数据上训练 5 轮，并以温度 `0.2` 调用官方引导采样。此前的 `sshleifer/tiny-gpt2` 机械烟雾配置能够完成训练，但旧式采样无法产生可解析行，引导采样仍会产生缺失的数值字段。这个小型固件仍适合验证适配器机械行为，但不能视为具备最低 Adult 生成功能。V2 替换只改变公开记录的模型超参数，继续调用未修改的 `be-great==0.0.14` API。
@@ -46,8 +48,8 @@ TabuLa V2 配置使用官方随机初始化的 `distilgpt2` 结构，在全部 2
 | 批次 | 模型 |
 |---|---|
 | 快速 CPU | ARF、BN、SMOTE、NRGBoost、TabSDS |
-| 旧版/运行时锁定 CPU | NFlow、CTAB-GAN、CTAB-GAN+、Goggle、REaLTabFormer |
-| 神经网络 GPU | CTGAN、TVAE、CoDi、STaSy、TabSyn |
+| 旧版/运行时锁定 CPU | NFlow、CTAB-GAN、CTAB-GAN+、REaLTabFormer |
+| 神经网络 GPU | CTGAN、TVAE、CoDi、Goggle、STaSy、TabSyn |
 | LLM GPU | GReaT、TabuLa |
 | 重型 GPU | TabularARGN |
 

@@ -122,6 +122,16 @@ def test_goggle_rejects_unknown_controls_and_unpaired_prior(tmp_path: Path) -> N
     with pytest.raises(ValueError, match="both be supplied"):
         adapter._training_config(unpaired)
 
+    for decoder_arch in ("sage", "het"):
+        unsupported = RunSpec(
+            model="goggle",
+            dataset="fixture",
+            output_dir=tmp_path / "out",
+            extra={"decoder_arch": decoder_arch},
+        )
+        with pytest.raises(ValueError, match="supports decoder_arch='gcn' only"):
+            adapter._training_config(unsupported)
+
 
 def _source_record(source_root: Path) -> dict[str, object]:
     return {
@@ -180,8 +190,11 @@ def test_goggle_adapter_confines_artifacts_and_honors_requested_rows(tmp_path: P
     )
 
     metadata = json.loads((output_dir / "goggle-model-metadata.json").read_text(encoding="utf-8"))
+    assert metadata["schema_version"] == 2
     assert metadata["source"]["runtime_files_verified"] == 18
     assert metadata["execution_config"]["epochs"] == 1
+    assert metadata["execution_config"]["graph_backend"] == adapter.graph_backend
+    assert metadata["graph_backend"] == adapter.graph_backend
     assert bundle.generated_sample_path == output_dir / "samples.csv"
     assert len(pd.read_csv(bundle.generated_sample_path)) == 5
     assert commands[1][commands[1].index("--num-samples") + 1] == "5"

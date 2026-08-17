@@ -1,12 +1,20 @@
-# Goggle Source and Validation Record
+# Goggle Source, PyTorch Graph Backend, and Validation Record
 
-Status: native parity validated; benchmark and release gates remain pending<br>
-Protocol: `goggle-method-author-native-parity-v1`<br>
-Official environment: Linux and Python 3.11
+Status: method-author GCN core native parity retained; pure-PyTorch backend validation in progress<br>
+Current protocol: `goggle-pytorch-graph-backend-parity-v2`<br>
+Primary runtime: Windows 11, Python 3.11, PyTorch 2.8<br>
+Independent graph oracle: Linux, Python 3.11, DGL 1.1.3
 
 ## Scope
 
-This record defines what the repository means by `goggle`, which source is authoritative, what the adapter is allowed to change, and what evidence is required before the status can advance. It does not make the adapter benchmark-eligible or release-supported.
+This record separates two claims that must not be conflated:
+
+1. The checksum-locked method-author Goggle GCN core was already validated with DGL under historical protocol `goggle-method-author-native-parity-v1`.
+2. The current ordinary runtime keeps that Goggle source unchanged but replaces the unavailable Windows DGL dependency with a narrow, independently validated PyTorch graph backend.
+
+The second item is a dependency compatibility reimplementation, not an unmodified official DGL runtime. It does not by itself admit Goggle to Official Results, the formal leaderboard, or release support.
+
+## Authoritative Source
 
 The reproduction target is the method-author implementation for the ICLR 2023 paper *GOGGLE: Generative Modelling for Tabular Data by Learning Relational Structure*:
 
@@ -17,93 +25,91 @@ The reproduction target is the method-author implementation for the ICLR 2023 pa
 - license: MIT, copyright 2023 Tennison Liu; and
 - locked archive SHA-256: `62dc6c98a2067d950513b4fe6343715f03a6a096990241fc6143b18fb56aaf65`.
 
-The source manifest freezes 18 files: the license, authorship, README, declared environment and packaging files, and all runtime Python modules. The materializer verifies the archive size and digest, extracts only those paths, normalizes text under the declared rule, and then verifies every file again. Source is stored in an ignored cache, not committed as a mutable local copy.
+The source manifest freezes 18 files. Materialization verifies the archive and every selected file before use. Source is stored in an ignored cache and is verified again after training and sampling. There are no upstream patch files and no official executable statements are edited.
 
-## Retired Snapshot
+The former `TabSyn-main/baselines/goggle` snapshot was materially different from the method-author source and has been retired. It is not used as official evidence.
 
-The former `TabSyn-main/baselines/goggle` directory was not the method-author original. It contained 11 files; all nine paths shared with the official package differed after text normalization. Material changes included:
+## Why DGL Is Replaced
 
-- a different `fit` signature and externally supplied data loader;
-- different encoder/decoder widths and batch-size defaults;
-- removal of the official validation split and early-stopping behavior;
-- changed checkpoint placement and sampling constraints; and
-- changes to graph-decoder and RGCN imports.
+The supported environment is native Windows and Python 3.11. No official DGL wheel covers the selected Windows/Python/PyTorch runtime, and building a private DGL wheel would shift compiler and binary-maintenance risk to every user.
 
-That snapshot has been removed from the current tree without rewriting Git history. It is not used as native evidence and is not described as an official implementation.
+The validated Goggle GCN path executes only three DGL interfaces:
 
-## Adapter Boundary
+- construction of a directed homogeneous graph from ordered source and destination tensors;
+- disjoint batching of repeated graphs; and
+- weighted homogeneous `GraphConv`.
 
-The adapter calls the untouched official `GoggleModel.fit` method. The official model, graph learner, encoder, decoder, loss, optimizer alternation, seeded train/validation split, validation selection, early stopping, and state-dict serialization remain in upstream code.
+`standardized_tabular_diffusion.compat.goggle_torch_graph` implements only that audited surface. It is deliberately not a general DGL replacement. Ordinary Goggle installation and execution require neither DGL nor PyTorch Geometric. DGL remains installed only in the independent validation environment.
 
-Five operations remain outside upstream source:
+## Graph Semantics
 
-1. **Source and artifact safety.** Source bytes are verified before and after execution. Training is run with `output_dir` as the working directory so the official `tmp/<dataset>.pt` write cannot touch tracked source. The resulting state dict is moved to `output_dir/model.pt` without changing tensor content. Sampling uses `torch.load(..., weights_only=True)` and rejects unapproved external checkpoints.
-2. **Numeric table contract.** Official experiments pass a finite numeric `DataFrame`. Numerical feature transforms are fitted on the real training split only using population standardization, equivalent to `StandardScaler`. Categorical feature transforms are fitted on the same split and one-hot encoded deterministically. The single target remains part of the joint modeled vector.
-3. **Output contract.** The requested positive row count is passed directly to the unchanged `Goggle.model.sample` core. Numerical values are inverse-standardized, one-hot blocks use argmax over training categories, and classification targets are mapped to the nearest recorded class code. This replaces the method's dependency on an arbitrary reference-frame row count with an explicit interface contract.
-4. **Legacy Synthcity import boundary.** The official module eagerly imports Synthcity 0.2.2 metrics and `Schema`, although neither `fit` nor core sampling executes them. The Python 3.11 adapter supplies only those import names and fails if `Schema` is instantiated. Formal benchmark evaluation always uses the central versioned evaluator.
-5. **Unused RGCN import boundary.** Official `GraphDecoder.py` imports `RGCNConv` even when the default homogeneous GCN/SAGE decoder is used. If `torch-sparse` is absent, the unused symbol becomes a fail-on-instantiation placeholder. The validated GCN path never constructs it. `decoder_arch="het"` still requires the official compiled extension stack and remains outside the validated claim.
+Backend `standardized-goggle-torch-graph@1.0.0` targets DGL `GraphConv` 1.1.3 semantics used by Goggle:
 
-There are no upstream patch files and no modified official executable statements.
+- edge order and disjoint-batch node offsets are preserved;
+- structural out-degree and in-degree normalization follows `none`, `left`, `right`, and `both` modes;
+- edge weights scale messages but do not redefine structural degrees;
+- multiplication occurs before aggregation when input width exceeds output width and afterward otherwise;
+- weight initialization is Xavier uniform, bias initialization is zero, and state-dict keys remain `weight` and `bias`;
+- bias and activation ordering matches DGL; and
+- zero-in-degree nodes fail closed unless explicitly allowed.
+
+Goggle's learned adjacency includes diagonal edges, so its supported path normally has no zero-in-degree nodes. Inputs outside this narrow contract raise a compatibility error instead of silently approximating DGL.
+
+## Supported Model Path
+
+The public adapter supports `decoder_arch="gcn"` only. `sage` and `het` are rejected before training because they execute different operators and have no validated compatibility implementation. Their import names are supplied only as fail-on-use placeholders so the unchanged upstream package can load without installing unused compiled extensions.
+
+The official model, learned graph, encoder, GCN decoder structure, loss, optimizer alternation, seeded train/validation split, early stopping, and state-dict serialization remain in checksum-locked upstream code.
+
+## Remaining Adapter Boundary
+
+The adapter performs the following declared operations outside upstream source:
+
+1. verifies source and artifact identities and confines the official relative checkpoint write to `output_dir`;
+2. fits numerical standardization and deterministic categorical one-hot encoding on the real training split only;
+3. passes the requested row count to the unchanged `Goggle.model.sample` core and applies the recorded inverse transform;
+4. supplies unused legacy Synthcity and heterogeneous-import names as fail-on-use placeholders; and
+5. injects the recorded pure-PyTorch graph backend while importing the unchanged Goggle source.
+
+Model metadata schema 2 records the backend ID, version, semantic target, source identity, transform, runtime configuration, and artifact digests. Sampling rejects legacy schema-1 metadata and any backend, source, configuration, or checkpoint mismatch. Models trained before this backend transition must be retrained.
 
 ## Data Contract
 
-The adapter accepts classification and regression tables with:
+The adapter accepts classification and regression tables with any non-empty combination of numerical and categorical features, exactly one target column, canonical column order, finite numerical values, and no missing values. Missing values fail closed; users must first run the centralized train-split-fitted mean/mode imputer. The target remains part of the jointly synthesized vector.
 
-- any non-empty combination of numerical and categorical feature columns;
-- exactly one target column;
-- a non-empty real training CSV whose columns exactly match the canonical order;
-- finite numerical values; and
-- no missing values.
+## Validation
 
-Missing values fail closed. Users must first run the centralized imputer, which fits numerical means and categorical modes only on the real training split. The adapter does not silently impute.
+Historical retained run [`30945676747`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747) established exact native parity for the method-author GCN core under DGL 1.1.3. Its immutable evidence remains at `docs/evidence/goggle/native-parity-run-30945676747.json`; it does not validate the new dependency replacement.
 
-The model jointly synthesizes features and the target. The preprocessing metadata, training configuration, source identity, checkpoint digest, and transform fit scope are written to `goggle-model-metadata.json`. Sampling requires that metadata and the hashed runtime configuration; checkpoint or configuration tampering is rejected.
+Protocol v2 adds two independent layers:
 
-## Supported Controls
+1. graph-level comparison against DGL 1.1.3 for graph construction, batching, forward outputs, feature/edge/parameter gradients, state dictionaries, both multiplication branches, activation, and every normalization mode; and
+2. nine end-to-end cases spanning binary classification, multiclass classification, regression, and seeds `0`, `19`, and `73`.
 
-The public controls expose official constructor and fit parameters: encoder/decoder widths and layers, heterogeneous node encoding, GCN/SAGE/heterogeneous decoder selection, graph threshold, graph prior and mask, KL and graph-loss weights, iterative optimizer selection, learning rate, weight decay, epochs, batch size, patience, logging interval, seed, device, and thread count.
+For every end-to-end case, the reference path uses unchanged Goggle plus DGL while the candidate path uses the same source plus the PyTorch backend. The gate requires exact checkpoint tensors, exact raw samples, exact final frames and CSV bytes, exact row/column contracts, valid metadata, and unchanged source files. The formal v2 result is pending a clean Linux/DGL 1.1.3 workflow run; local Windows diagnostics cannot substitute for that oracle.
 
-Defaults match the method-author source: 64-wide encoder and decoder, two layers, GCN, threshold 0.1, `alpha=beta=0.1`, iterative optimization, learning rate 0.005, weight decay 0.001, 1,000 epochs, batch size 32, patience 50, and logging interval 100. Unknown controls, invalid ranges, non-square priors, and non-binary masks fail before execution.
-
-## Formal Parity Protocol
-
-The mandatory workflow installs a frozen CPU environment with PyTorch 2.3.0, DGL 1.1.3, torch-geometric 2.5.3, NumPy 1.26.4, pandas 2.2.3, and scikit-learn 1.5.2. It then materializes and verifies two isolated copies of the locked official source for each case.
-
-Nine cases cover:
-
-- binary classification, multiclass classification, and regression; and
-- seeds 0, 19, and 73.
-
-Each case uses 12 mixed-type training rows and requests seven samples. The independent native path calls official `GoggleModel.fit` and `Goggle.model.sample` directly. The standardized path invokes the public adapter with identical transformed input and effective model configuration. A case passes only when all of the following hold:
-
-- every checkpoint key, shape, dtype, and tensor value is exact;
-- raw core sample arrays are exact;
-- final sample frames and CSV bytes are exact;
-- requested row count and canonical column order are exact;
-- numerical output is finite and output contains no missing values;
-- adapter metadata describes the locked source and effective configuration exactly;
-- checkpoints remain outside source; and
-- all 18 source files still match the manifest after execution.
-
-All nine cases passed exactly in GitHub Actions run [`30945676747`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747). The inspected JSON was downloaded and committed byte-for-byte as `docs/evidence/goggle/native-parity-run-30945676747.json` with SHA-256 `1dbcf50194505820cac0650ba72d519f4f331008bbcaac635f8eb846bec7da59`. The workflow artifact remains available for 90 days; the permanent repository copy is the long-term evidence record.
+Windows GPU functionality is a separate gate. It must train and sample with PyTorch 2.8.0+cu128 on the declared RTX 5080 while DGL and PyTorch Geometric are absent, then pass the central structural validation route. This demonstrates real functionality, not generation quality or benchmark eligibility.
 
 ## Usage
 
 Materialize the locked source once:
 
-```bash
+```powershell
 python -m standardized_tabular_diffusion.cli materialize-model-source --model goggle
 python -m standardized_tabular_diffusion.cli model-source-status --model goggle
 ```
 
-Install the Linux/Python 3.11 runtime and run the smoke preset:
+For the validated Windows GPU profile, install PyTorch from its official CUDA index first and then install the model extra:
 
-```bash
-python -m pip install "standardized-tabular-diffusion[goggle]"
+```powershell
+python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+python -m pip install -e ".[goggle]"
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/goggle-adult-smoke.json
 ```
 
-Run the formal protocol:
+The smoke preset is intentionally small and defaults to CPU. The Windows V2 validation plan overrides its device to CUDA.
+
+Run the DGL oracle protocol only in the frozen Linux validation environment:
 
 ```bash
 python -m standardized_tabular_diffusion.validation.goggle \
@@ -114,4 +120,4 @@ python -m standardized_tabular_diffusion.validation.goggle \
 
 ## Remaining Gates
 
-Even after exact native parity passes, Goggle remains `experimental` and `unsupported`. Benchmark eligibility separately requires the frozen central evaluation protocol, approved dataset profiles, resource-policy qualification, representative-scale runs, and an explicit decision about the unvalidated SAGE/heterogeneous decoder paths. Release support additionally requires packaging, installation, security, documentation, and long-term maintenance review.
+The GCN core retains `native-parity-validated` provenance, but the current PyTorch backend needs retained formal v2 evidence. Goggle remains `experimental` and `unsupported`. Benchmark eligibility additionally requires approved datasets, the frozen central evaluation protocol, representative-scale resource qualification, and explicit admission. SAGE and heterogeneous decoding remain unsupported unless separately implemented and validated.

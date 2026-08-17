@@ -53,10 +53,13 @@ def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
         validate_action_controls(config.model, "train", config.train.extra)
         validate_action_controls(config.model, "sample", config.sample.extra)
     by_model = {row["model_id"]: row for row in plan["models"]}
-    for model_id in ("nflow", "ctab-gan", "ctab-gan-plus", "goggle", "realtabformer"):
+    for model_id in ("nflow", "ctab-gan", "ctab-gan-plus", "realtabformer"):
         assert by_model[model_id]["batch"] == "legacy-cpu"
         assert by_model[model_id]["device"] == "cpu"
         assert by_model[model_id]["required_packages"]["torch"] == "2.3.0"
+    assert by_model["goggle"]["batch"] == "neural-gpu"
+    assert by_model["goggle"]["device"] == "cuda"
+    assert by_model["goggle"]["required_packages"] == {"torch": "2.8.0"}
     for model_id in ("codi", "stasy", "tabsyn"):
         assert by_model[model_id]["required_packages"]["libzero"] == "0.0.8"
         assert len(by_model[model_id]["pip_check_waivers"]) == 1

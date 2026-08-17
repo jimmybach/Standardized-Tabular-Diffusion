@@ -33,6 +33,8 @@ For each scheduled model, the protocol:
 
 CPU-only algorithms remain on CPU. Models locked to the validated PyTorch 2.3 runtime also remain on CPU because that runtime predates RTX 5080 support. CUDA-capable adapters with a compatible validated runtime request the declared RTX 5080. Device choice is part of the retained evidence and is derived from the adapter/runtime contract, not inferred from hardware availability alone.
 
+Goggle is no longer tied to the legacy CPU batch. Its checksum-locked GCN core now uses the separately recorded pure-PyTorch graph compatibility backend, so the Windows V2 profile runs it with PyTorch 2.8.0+cu128 on the declared RTX 5080 without DGL or PyTorch Geometric. DGL 1.1.3 remains a Linux validation oracle, not a V2 runtime package.
+
 The frozen CoDi, STaSy, and TabSyn snapshot imports `libzero==0.0.8`. That distribution's stale metadata declares `torch<2`, while the exact newer runtime has already passed the retained native-parity workflow. The plan therefore permits only that fully specified `libzero 0.0.8` versus `torch 2.8.0+cu128` diagnostic. The harness checks the installed versions, requires the waiver to be exercised exactly once, records it in evidence, and rejects every changed, additional, unrecognized, or unused waiver.
 
 GReaT uses the official `distilgpt2` backbone, five epochs over all 256 fixture rows, and official guided sampling at temperature `0.2`. The earlier `sshleifer/tiny-gpt2` mechanical preset trained successfully but produced zero parseable legacy rows; guided sampling still returned missing numerical fields. That small fixture remains useful for adapter mechanics, but it is not treated as a minimally functional Adult generator. The V2 replacement changes only declared model hyperparameters and uses unchanged `be-great==0.0.14` APIs.
@@ -46,8 +48,8 @@ The TabuLa V2 preset uses the official randomly initialized `distilgpt2` archite
 | Batch | Models |
 |---|---|
 | Fast CPU | ARF, BN, SMOTE, NRGBoost, TabSDS |
-| Legacy/runtime-locked CPU | NFlow, CTAB-GAN, CTAB-GAN+, Goggle, REaLTabFormer |
-| Neural GPU | CTGAN, TVAE, CoDi, STaSy, TabSyn |
+| Legacy/runtime-locked CPU | NFlow, CTAB-GAN, CTAB-GAN+, REaLTabFormer |
+| Neural GPU | CTGAN, TVAE, CoDi, Goggle, STaSy, TabSyn |
 | LLM GPU | GReaT, TabuLa |
 | Heavy GPU | TabularARGN |
 

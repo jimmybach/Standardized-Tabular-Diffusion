@@ -677,10 +677,16 @@
           "semantic_effect": "Evaluation-only import names are supplied at module load. Official GoggleModel.fit and Goggle.model.sample never call them, and the central evaluator remains the only benchmark evaluator."
         },
         {
-          "classification": "adapter-only",
-          "id": "goggle-gcn-rgcn-import-boundary-v1",
-          "reason": "GraphDecoder imports the heterogeneous RGCN implementation eagerly even for the default homogeneous GCN/SAGE paths, forcing unused compiled torch-sparse extensions.",
-          "semantic_effect": "When torch-sparse is absent, only the unused RGCN symbol is replaced by a fail-on-instantiation placeholder. The validated GCN path does not construct or execute RGCNConv; the heterogeneous path still requires the official extension stack."
+        "classification": "adapter-only",
+        "id": "goggle-gcn-rgcn-import-boundary-v1",
+        "reason": "GraphDecoder imports the heterogeneous RGCN implementation eagerly even for the default homogeneous GCN path, forcing unused compiled torch-sparse extensions.",
+        "semantic_effect": "The unused RGCN symbol is replaced by a fail-on-instantiation placeholder. The validated GCN path does not construct or execute RGCNConv; SAGE and heterogeneous decoding are rejected before execution."
+      },
+      {
+        "classification": "dependency-compatibility-reimplementation",
+        "id": "goggle-pytorch-graph-backend-v1",
+        "reason": "No official DGL wheel compatible with the supported Windows/Python 3.11/RTX 5080 runtime exists, while Goggle's validated GCN path executes only dgl.graph, dgl.batch, and weighted homogeneous GraphConv.",
+        "semantic_effect": "A narrow auditable PyTorch backend implements the DGL 1.1.3 graph, disjoint-batch, GraphConv normalization, parameter, edge-weight, and gradient contract used by Goggle. The checksum-locked Goggle source is unmodified. DGL remains the independent Linux validation oracle and is not an ordinary runtime dependency."
         },
         {
           "classification": "adapter-only",
@@ -702,20 +708,29 @@
         }
       ],
       "component_id": "goggle",
-      "dependency_resolution": {
-        "declared_environment": "Python 3.8, torch 1.12.0, DGL 0.9.0, torch-geometric 2.2.0, torch-sparse 0.6.16, torch-scatter 2.1.0, and Synthcity 0.2.2",
-        "official_environment_status": "not directly installable as declared on Python 3.11",
-        "validation_environment_lock": "requirements-goggle-validation.txt"
+    "dependency_resolution": {
+      "declared_environment": "Python 3.8, torch 1.12.0, DGL 0.9.0, torch-geometric 2.2.0, torch-sparse 0.6.16, torch-scatter 2.1.0, and Synthcity 0.2.2",
+      "official_environment_status": "not directly installable as declared on Python 3.11",
+      "runtime_environment_lock": "requirements-goggle-windows-gpu.txt",
+      "runtime_graph_backend": "standardized-goggle-torch-graph@1.0.0",
+      "validation_environment_lock": "requirements-goggle-validation.txt",
+      "validation_graph_oracle": "DGL 1.1.3",
+      "validation_graph_oracle_source": {
+        "commit": "6e2c0f489ba4cfae4614d6f07da41e0ecd36b226",
+        "license": "Apache-2.0",
+        "repository": "https://github.com/dmlc/dgl",
+        "tag": "v1.1.3"
+      }
       },
       "distribution_form": "source-on-demand",
       "license": "MIT",
       "license_copyright": "Copyright (c) 2023 Tennison Liu",
       "license_path_in_locked_source": "LICENSE",
       "local_path": ".cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
-      "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-heterogeneous-decoder-runtime-and-release-gates",
+    "modification_status": "dependency-compatibility-reimplementation",
+    "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-pytorch-backend-formal-parity-sage-and-heterogeneous-decoder-runtime-and-release-gates",
       "patch_sets": [],
-      "reproduction_target": "method-author-original-core",
+    "reproduction_target": "method-author-original-gcn-core-with-pytorch-dependency-compatibility-backend",
       "retired_snapshot": {
         "disposition": "removed-from-current-tree-without-history-rewrite",
         "local_source_files": 11,
