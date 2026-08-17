@@ -13,7 +13,7 @@ from standardized_tabular_diffusion.compat.tabsyn_launcher import (
     _with_configured_num_workers,
     _without_removed_scheduler_verbose,
 )
-from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -166,6 +166,69 @@ def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, m
         "7",
     ]
     assert bundle.generated_sample_path == (tmp_path / "artifacts" / "samples.csv").resolve()
+
+
+def test_tabsyn_validation_reuses_the_run_owned_training_workspace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    upstream = tmp_path / "TabSyn-main"
+    upstream.mkdir()
+    output_root = tmp_path / "validation"
+    calls: list[tuple[str, Path]] = []
+
+    def fake_train(self: TabSynAdapter, spec: RunSpec) -> ArtifactBundle:
+        calls.append(("train", spec.output_dir))
+        self._ensure_output_dir(spec)
+        runtime_root = self._runtime_root(spec)
+        vae = runtime_root / "tabsyn" / "vae" / "ckpt" / spec.dataset
+        diffusion = runtime_root / "tabsyn" / "ckpt" / spec.dataset
+        vae.mkdir(parents=True)
+        diffusion.mkdir(parents=True)
+        for path in (vae / "train_z.npy", vae / "decoder.pt", diffusion / "model.pt"):
+            path.write_bytes(b"checkpoint")
+        return self._write_bundle(
+            ArtifactBundle(
+                model=self.model_name,
+                dataset=spec.dataset,
+                output_dir=spec.output_dir,
+                upstream_workdir=self.upstream_root,
+            )
+        )
+
+    def fake_sample(self: TabSynAdapter, spec: RunSpec) -> ArtifactBundle:
+        calls.append(("sample", spec.output_dir))
+        assert (self._vae_ckpt_dir(spec) / "train_z.npy").is_file()
+        assert (self._vae_ckpt_dir(spec) / "decoder.pt").is_file()
+        assert (self._diffusion_ckpt_dir(spec) / "model.pt").is_file()
+        sample_path = spec.output_dir / "samples.csv"
+        sample_path.write_text("x\n1\n", encoding="utf-8")
+        return self._write_bundle(
+            ArtifactBundle(
+                model=self.model_name,
+                dataset=spec.dataset,
+                output_dir=spec.output_dir,
+                upstream_workdir=self.upstream_root,
+                generated_sample_path=sample_path,
+            )
+        )
+
+    monkeypatch.setattr(TabSynAdapter, "train", fake_train)
+    monkeypatch.setattr(TabSynAdapter, "sample", fake_sample)
+    _, run_root, manifests = tabsyn_validation._adapter_run(
+        tmp_path,
+        upstream,
+        output_root,
+        17,
+    )
+
+    assert calls == [("train", run_root), ("sample", run_root)]
+    assert run_root == output_root / "run"
+    assert [json.loads(path.read_text(encoding="utf-8"))["model"] for path in manifests] == [
+        "tabsyn",
+        "tabsyn",
+    ]
+    assert manifests[0] != manifests[1]
 
 
 def test_tabsyn_decodes_declared_integers_and_retains_native_csv(
