@@ -35,6 +35,16 @@ PLAN_PATH = REPO_ROOT / "configs/validation/pipeline-v2-windows-v1.json"
 
 def test_v2_plan_covers_the_complete_runtime_inventory() -> None:
     plan = _load_plan(PLAN_PATH)
+    central = plan["central_evaluation"]
+    assert central["protocol"] == "p3-validity"
+    assert (REPO_ROOT / central["environment_lock"]).is_file()
+    assert central["required_packages"] == {
+        "jsonschema": "4.23.0",
+        "numpy": "1.26.4",
+        "pandas": "2.2.3",
+        "pyarrow": "18.1.0",
+        "PyYAML": "6.0.2",
+    }
     planned = {row["model_id"] for row in plan["models"]}
     passed = {row["model_id"] for row in plan["already_passed"]}
     blocked = {row["model_id"] for row in plan["external_blocks"]}

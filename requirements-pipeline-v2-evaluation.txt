@@ -1,0 +1,18 @@
+# Frozen native Windows 11/Python 3.11 runtime for Pipeline V2 central P3 evaluation.
+# Model training and generation run in model-specific environments; this small
+# environment consumes only the retained CSV sample and fixture metadata.
+attrs==26.1.0
+jsonschema==4.23.0
+jsonschema-specifications==2025.9.1
+numpy==1.26.4
+packaging==26.2
+pandas==2.2.3
+pyarrow==18.1.0
+python-dateutil==2.9.0.post0
+pytz==2026.3.post1
+PyYAML==6.0.2
+referencing==0.37.0
+rpds-py==2026.6.3
+six==1.17.0
+typing-extensions==4.16.0
+tzdata==2026.3

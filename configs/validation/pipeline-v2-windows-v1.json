@@ -20,7 +20,15 @@
   "central_evaluation": {
     "protocol": "p3-validity",
     "dataset_profile_path": "configs/datasets/adult-uci-2-v1.json",
-    "comparison_track": "native"
+    "comparison_track": "native",
+    "environment_lock": "requirements-pipeline-v2-evaluation.txt",
+    "required_packages": {
+      "jsonschema": "4.23.0",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pyarrow": "18.1.0",
+      "PyYAML": "6.0.2"
+    }
   },
   "models": [
     {"model_id": "arf", "batch": "fast-cpu", "config_path": "configs/smoke/arf-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-arf-validation.txt", "required_packages": {"arfpy": "0.1.1"}},

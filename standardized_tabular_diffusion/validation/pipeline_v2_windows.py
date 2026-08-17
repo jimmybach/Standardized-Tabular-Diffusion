@@ -63,6 +63,17 @@ def _load_plan(path: Path) -> dict[str, Any]:
     seeds = payload.get("generation_seeds")
     if not isinstance(seeds, list) or len(seeds) != 2 or len(set(seeds)) != 2:
         raise PipelineV2Error("V2 plan requires exactly two distinct generation seeds")
+    evaluation = payload.get("central_evaluation")
+    if not isinstance(evaluation, dict):
+        raise PipelineV2Error("V2 plan requires a central_evaluation object")
+    if not isinstance(evaluation.get("environment_lock"), str) or not evaluation[
+        "environment_lock"
+    ].strip():
+        raise PipelineV2Error("V2 central evaluation requires an environment lock")
+    if not isinstance(evaluation.get("required_packages"), dict) or not evaluation[
+        "required_packages"
+    ]:
+        raise PipelineV2Error("V2 central evaluation requires pinned runtime packages")
     return payload
 
 
@@ -685,7 +696,13 @@ def finalize_probe(
     if probe.get("repository_commit") != _git(repo_root, "rev-parse", "HEAD"):
         raise PipelineV2Error("Probe commit differs from the current repository commit")
     entry = _model_entry(plan, probe["model_id"])
-    environment = _environment(repo_root, pip_check_waivers=entry.get("pip_check_waivers", []))
+    evaluation = plan["central_evaluation"]
+    environment = _environment(repo_root)
+    environment_lock = _verify_environment_lock(
+        repo_root / evaluation["environment_lock"],
+        environment,
+        evaluation["required_packages"],
+    )
     dataset_spec = _dataset_from_record(probe)
     base = load_experiment_config(repo_root / entry["config_path"])
     first_sample = probe["samples"][0]
@@ -697,7 +714,6 @@ def finalize_probe(
         training_seed=int(plan["training_seed"]),
         sample_seed=int(first_sample["seed"]),
     )
-    evaluation = plan["central_evaluation"]
     config.train.enabled = False
     config.sample.enabled = False
     config.evaluation = EvaluationConfig(
@@ -725,6 +741,7 @@ def finalize_probe(
         "present_files": validation.present_files,
         "validation": validation.to_dict(),
         "environment": environment,
+        "environment_lock": environment_lock,
     }
     result["finalized_at"] = _utc_now()
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
