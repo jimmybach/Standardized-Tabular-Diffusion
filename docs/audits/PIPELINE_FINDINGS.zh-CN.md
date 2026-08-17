@@ -37,7 +37,7 @@
 | RF-INTERNAL-DATA-001 | T02 | S1 | `codi`、`stasy`、`tabddpm`、`tabdiff`、`tabsyn` | 模型原生视图现在按校验和绑定到规范 `DatasetSpec`，或在运行所有权下确定性物化。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；绑定回归 | fixed |
 | RF-TABDDPM-001 | T01 | S1 | `tabddpm` | 经过语义往返校验的运行 TOML 现在绑定训练/变换/采样种子、设备、请求行数、数据和输出，且不修改源 TOML。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；生效 TOML 受控模拟 | fixed |
 | RF-TABDDPM-002 | T03 | S1 | `tabddpm` | 适配器现在校验运行所有检查点、解码按种子隔离的规范表、保留原始数组并公开 `generated_sample_path`。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；TabDDPM 解码回归 | fixed |
-| RF-GOGGLE-001 | T01 | S1 | `goggle` | 独立采样种子现在传递给启动器并用于 Python、NumPy、PyTorch 和 `PYTHONHASHSEED`。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；Goggle 命令回归 | fixed |
+| RF-GOGGLE-001 | T01 | S1 | `goggle` | 独立采样种子会传给启动器，并在上游构造函数用训练种子重置 RNG 之后、实际采样之前，重新应用于 Python、NumPy 和 PyTorch。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；启动器 RNG 回归；Windows V2 真实功能探针 | fixed |
 | RF-CTGAN-FAMILY-001 | T01 | S1 | `ctgan`、`tvae` | 加载后的官方合成器现在会在生成前使用请求的采样种子重置随机状态。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；CTGAN 系列随机状态回归 | fixed |
 | RF-UPSTREAM-WORKSPACE-001 | T03 | S1 | `tabddpm`、`tabdiff`、`tabsyn` | 所有可变检查点和结果均重定向到模型专用的运行所有目录；权威源码树保持不变。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；运行路径回归 | fixed |
 

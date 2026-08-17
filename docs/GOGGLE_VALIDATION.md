@@ -67,7 +67,7 @@ The adapter performs the following declared operations outside upstream source:
 
 1. verifies source and artifact identities and confines the official relative checkpoint write to `output_dir`;
 2. fits numerical standardization and deterministic categorical one-hot encoding on the real training split only;
-3. passes the requested row count to the unchanged `Goggle.model.sample` core, applies the recorded inverse transform, and restores only explicitly declared integer columns with the repository-wide nearest-integer decoder;
+3. reapplies the independent generation seed immediately before the unchanged stochastic sampler (the upstream constructor resets PyTorch to its training seed), passes the requested row count, applies the recorded inverse transform, and restores only explicitly declared integer columns with the repository-wide nearest-integer decoder;
 4. supplies unused legacy Synthcity and heterogeneous-import names as fail-on-use placeholders; and
 5. injects the recorded pure-PyTorch graph backend while importing the unchanged Goggle source.
 

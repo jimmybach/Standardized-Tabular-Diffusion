@@ -24,7 +24,7 @@
 | `RF-INTERNAL-DATA-001` | CoDi、STaSy 和 TabSyn 将模型原生视图按校验和绑定到嵌入的规范数据集；TabDiff 物化字节校验后的运行所有视图；TabDDPM 创建运行所有输入视图，并记录不会参与拟合的单行验证兼容镜像。 | 原生/规范字节绑定、延迟内容变更拒绝及 TabDDPM 受控执行。 |
 | `RF-TABDDPM-001` | TabDDPM 现在生成经过语义往返校验的运行时 TOML，绑定训练种子、变换种子、采样种子、请求行数、设备、规范数据和运行所有输出。 | 受控训练/采样模拟检查两份生效 TOML。 |
 | `RF-TABDDPM-002` | TabDDPM 校验运行所有检查点，将原始数组解码为规范列顺序，保留按种子隔离的原始数组，并公开 `generated_sample_path`。 | 两行分类数据解码测试，覆盖整数恢复和目标标签映射。 |
-| `RF-GOGGLE-001` | Goggle 将采样种子传给兼容启动器；启动器把它应用于 Python、NumPy、PyTorch 和 `PYTHONHASHSEED`。 | 使用不同于训练种子的适配器命令断言。 |
+| `RF-GOGGLE-001` | Goggle 将采样种子传给兼容启动器，并在上游构造函数把 PyTorch 重置为训练种子之后、官方采样器执行之前重新应用该种子。 | 适配器命令断言、启动器 RNG 回归与 Windows V2 不同输出探针。 |
 | `RF-CTGAN-FAMILY-001` | CTGAN 和 TVAE 在调用 `sample` 前，使用请求的采样种子重置已加载的官方合成器。 | 已加载模型随机状态断言。 |
 | `RF-UPSTREAM-WORKSPACE-001` | TabDDPM 使用 `output_dir/tabddpm-runtime`，TabDiff 使用 `output_dir/tabdiff-runtime`，TabSyn 使用 `output_dir/tabsyn-runtime`。运行时覆盖只重定向官方路径推导，不改变上游源码字节。 | 运行所有路径断言和受控的上游无检查点写入检查。 |
 

@@ -276,6 +276,10 @@ def _run_sample(args: argparse.Namespace, GoggleModel: type[Any], config: dict[s
     model = GoggleModel(**_model_kwargs(config, device))
     state_dict = torch.load(checkpoint, map_location=device, weights_only=True)
     model.model.load_state_dict(state_dict)
+    # Upstream GoggleModel.__init__ resets PyTorch to the training seed. Reapply
+    # the independently requested generation seed immediately before the
+    # unchanged stochastic sampler consumes the global RNG.
+    _seed_everything(args.seed, args.num_threads)
     raw = model.model.sample(args.num_samples).detach().cpu().numpy()
     if raw.shape != (args.num_samples, config["input_dim"]):
         raise RuntimeError(

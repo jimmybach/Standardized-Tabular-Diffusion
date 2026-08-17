@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import sys
+from argparse import Namespace
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 torch = pytest.importorskip("torch")
 
 from standardized_tabular_diffusion.compat.goggle_graph_contract import BACKEND_VERSION
-from standardized_tabular_diffusion.compat.goggle_launcher import _official_import_boundary
+from standardized_tabular_diffusion.compat.goggle_launcher import _official_import_boundary, _run_sample
 from standardized_tabular_diffusion.compat.goggle_torch_graph import (
     GoggleGraphCompatibilityError,
     GraphConv,
@@ -78,6 +80,67 @@ def test_goggle_official_import_boundary_needs_neither_dgl_nor_pyg_at_runtime() 
         assert sys.modules["dgl"].__version__ == f"compat-{BACKEND_VERSION}"
         assert sys.modules["torch_geometric.utils"].dense_to_sparse is not None
     assert sys.modules.get("dgl") is prior_dgl
+
+
+def test_goggle_launcher_reapplies_generation_seed_after_model_construction(tmp_path: Path) -> None:
+    class Core:
+        @staticmethod
+        def load_state_dict(_state_dict):
+            return None
+
+        @staticmethod
+        def sample(rows: int):
+            return torch.randn(rows, 3)
+
+    class Model:
+        def __init__(self, **kwargs):
+            torch.manual_seed(kwargs["seed"])
+            self.model = Core()
+
+    config = {
+        "dataset": "fixture",
+        "input_dim": 3,
+        "encoder_dim": 8,
+        "encoder_l": 1,
+        "het_encoding": True,
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "threshold": 0.1,
+        "decoder_arch": "gcn",
+        "graph_prior": None,
+        "prior_mask": None,
+        "alpha": 0.1,
+        "beta": 0.1,
+        "seed": 13,
+        "iter_opt": True,
+        "learning_rate": 0.005,
+        "weight_decay": 0.001,
+        "epochs": 1,
+        "batch_size": 4,
+        "patience": 1,
+        "logging": 1,
+    }
+    checkpoint = tmp_path / "model.pt"
+    torch.save({}, checkpoint)
+
+    def sample(seed: int, filename: str):
+        output = tmp_path / filename
+        args = Namespace(
+            checkpoint=checkpoint,
+            seed=seed,
+            num_threads=1,
+            num_samples=4,
+            raw_output=output,
+            output_dir=tmp_path,
+        )
+        _run_sample(args, Model, config, "cpu")
+        return torch.from_numpy(np.load(output, allow_pickle=False))
+
+    seed_17_first = sample(17, "seed-17-first.npy")
+    seed_29 = sample(29, "seed-29.npy")
+    seed_17_second = sample(17, "seed-17-second.npy")
+    assert not torch.equal(seed_17_first, seed_29)
+    assert torch.equal(seed_17_first, seed_17_second)
 
 
 def test_goggle_graphconv_matches_dgl_forward_gradients_and_state_contract() -> None:
