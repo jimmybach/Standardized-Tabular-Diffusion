@@ -2,7 +2,7 @@
 
 英文原文：[TASK_05_CENTRAL_EVALUATION_INTEGRATION.md](TASK_05_CENTRAL_EVALUATION_INTEGRATION.md)
 
-- 状态：计划覆盖全部 21 个适配器
+- 状态：进行中；已保留 Goggle、TabuLa 和 TabularARGN 的 V2 最终化证据
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 - 风险类型：模型专属评测漂移，或错误地最终化结果
 
@@ -20,6 +20,7 @@
 - 验证逐作用域 Atomic Result 保留完整分母、状态、来源值、派生值和失败记录。
 - 验证 bundle finalization 最后发生；文件或身份存在任何不一致时都必须拒绝最终化。
 - 验证外部合成表也能直接评测，无需导入任何模型适配器。
+- 验证模型专属训练依赖与中央评测依赖分别冻结；最终化必须核验中央依赖锁，不能依赖模型环境中偶然存在的包。
 
 ## V2 最小真实探针
 

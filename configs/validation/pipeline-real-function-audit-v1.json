@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 2,
-    "minimal_real_pending": 16,
+    "minimal_real_passed": 3,
+    "minimal_real_pending": 15,
     "externally_blocked": 1
   },
   "baselines": [
@@ -115,7 +115,15 @@
         "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json"
       ]
     },
-    {"model_id": "tabularargn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "tabularargn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json",
+        "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json"
+      ]
+    },
     {"model_id": "tvae", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []}
   ]
 }

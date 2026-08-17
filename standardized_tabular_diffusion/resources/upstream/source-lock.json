@@ -879,6 +879,7 @@
         "generation_seeds": [17, 29],
         "graph_backend": "standardized-goggle-torch-graph@1.0.0",
         "hardware": "NVIDIA GeForce RTX 5080",
+        "initial_failure_evidence_file_sha256": "8a19d8245ac6c1611b27b420f8a99879a2b6f402f22aa52478d6b356bae67529",
         "level": "minimal-real-passed",
         "permanent_evidence_path": "docs/evidence/goggle/windows-v2-real-function-0a23a84.json",
         "protocol_id": "pipeline-v2-native-windows-v1",
@@ -1824,6 +1825,26 @@
         "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30961590047",
         "status": "pass",
         "workflow_run_id": 30961590047
+      },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json",
+          "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6f9e065fd69f094806794fab69b4e03874699a82",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.11.0+cu128"
       },
       "wheel_source_comparison": {
         "exact_shared_source_files": 50,

@@ -491,6 +491,8 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABULARARGN_VALIDATION.md",
             "docs/evidence/tabularargn/native-parity-run-30961590047.json",
+            "docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json",
+            "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json",
             "standardized_tabular_diffusion/resources/upstream/tabularargn-wheel-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/tabularargn-validation.yml",

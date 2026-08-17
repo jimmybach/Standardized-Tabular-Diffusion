@@ -1,18 +1,21 @@
 # TabularARGN 验证协议
 
-状态：已在 Linux/Python 3.11 通过；适配器为 `native-parity-validated`
+状态：已在 Linux/Python 3.11 通过原生等价验证；已在原生 Windows 通过 V2 最小真实功能验证
 
 协议：`tabularargn-official-package-parity-v2`
 
 目标：方法作者官方 `mostlyai-engine==2.6.2` 中的扁平表格 TabularARGN
 
-支持的验证环境：Linux、Python 3.11
+已验证环境：
+
+- 原生等价：Linux、Python 3.11；
+- 最小真实流水线：Windows 11、Python 3.11.15、PyTorch 2.11.0+cu128、CUDA 12.8、NVIDIA GeForce RTX 5080。
 
 ## 声明边界
 
 本协议验证标准化 `tabularargn` 适配器是否保留了选定官方扁平表格路径的执行语义。它使用相同的带类型训练表、构造参数、官方持久化 workspace、采样参数和随机种子，对比“直接调用经过校验的官方包”和“通过适配器调用”两条路径。
 
-强制验证通过后，该路径可以提升为 `native-parity-validated`。这不代表模型已经 `benchmark-eligible`，不代表它可以进入 Official Results，也不证明论文规模训练下的生成质量，更不等于 `release-supported`。差分隐私、序列与关系数据、条件生成、预测、概率估计、似然、插补、中心评测、数据集准入和资源预算仍是独立范围或门槛。
+强制验证通过后，该路径可以提升为 `native-parity-validated`。另一次 Windows V2 运行仅证明：在一个确定性的 Adult 派生固定数据上，受限的真实训练/生成以及中央 P3 结构与有效性 bundle 最终化可以完成。这两项结果都不代表模型已经 `benchmark-eligible`，不代表它可以进入 Official Results，也不证明论文规模训练下的生成质量，更不等于 `release-supported`。差分隐私、序列与关系数据、条件生成、预测、概率估计、似然、插补、中央质量/效用/隐私评测、数据集准入和资源预算仍是独立范围或门槛。
 
 ## 权威来源与发布制品
 
@@ -105,7 +108,7 @@ wheel 中的 50 个包源码文件与方法作者标签归档逐字节一致，�
 - 序列和双表上下文模式需要未来的关系数据集契约。
 - 当前适配器不声明支持官方预测、概率、似然、条件生成和插补接口。
 - 检查点不再包含原始逐行文件，但权重和聚合统计量仍可能敏感。
-- 进入正式榜单仍需要中心指标、数据集准入、资源配置和发布审查。
+- 进入正式榜单仍需要适用的中央质量、效用和隐私指标、数据集准入、资源配置和发布审查；当前保留的 Windows V2 结果只最终化了 `p3-validity`。
 
 ## 证据
 
@@ -113,4 +116,14 @@ wheel 中的 50 个包源码文件与方法作者标签归档逐字节一致，�
 
 9 个用例全部通过。每个用例中的官方检查点张量与文件、模型配置语义、目标统计量、按契约规范化后的样本值和生成 CSV 字节均完全一致。证据分别记录了 Pandas 原生路径的类别 dtype 标签 `string` 与适配器路径的 `str`，因此未规范化的 `DataFrame.equals` 为 false，但这没有掩盖完全一致的值和字节。每个用例都生成 7 行列顺序规范、数值有限、无缺失且类别不超出训练域的数据；官方包文件保持不变，保留的适配器制品不含原始或编码训练行。
 
-下载后的证据已逐字节保留在 `docs/evidence/tabularargn/native-parity-run-30961590047.json`，SHA-256 为 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`。因此，扁平单表无条件生成适配器现为 `native-parity-validated`。在中心评测、数据集准入、资源、治理和发布门槛分别通过之前，它仍为 `experimental`、`unsupported`，且不得进入 Official Results。
+下载后的证据已逐字节保留在 `docs/evidence/tabularargn/native-parity-run-30961590047.json`，SHA-256 为 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`。因此，扁平单表无条件生成适配器现为 `native-parity-validated`。
+
+### 原生 Windows V2 真实功能证据
+
+在仓库提交 `6f9e065fd69f094806794fab69b4e03874699a82` 上，官方包使用确定性的 256 行 Adult 派生 V2 固定数据完成了一次真实受限拟合；适配器按声明应用 `max_train_rows=64` 冒烟边界。环境为 Python 3.11.15、PyTorch 2.11.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080。训练在 19.219 秒内通过。随后从保持不变的 `ModelStore` 分别以预先声明的种子 17 和 29 生成 8 行数据。两张表均具有规范的 15 列结构、零缺失、有限数值和训练域内类别；SHA-256 分别为 `52f93d17e53317dfb43203075af0dd2fc473896674a3755f308fa8adc2596cf7` 和 `74046f3408f37a10383c74a72bdb5fad3ed70260a7a6765abca17074ba3dd672`，证明两个种子的输出不同。
+
+中央 `p3-validity` 最终化在独立的、受校验和锁定的 `requirements-pipeline-v2-evaluation.txt` 环境中运行。最终 bundle 没有 pending 文件，并通过 bundle 校验。完整成功记录保留在 `docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json`，SHA-256 为 `bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c`。
+
+提交 `ec53f98` 上的第一次最终化尝试没有被隐藏：模型训练和两次生成都已通过，但模型专属环境缺少 `jsonschema`，因此终审明确失败。精简失败记录保留在 `docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json`。修复提交 `6f9e065` 将模型环境和冻结的中央评测环境分离，增加封闭失败的依赖核验，并在保留成功证据前重新执行了完整探针。
+
+这为独立的原生等价结论增加了 Windows `minimal-real-passed` 功能证据。在其余数据集、科学指标、资源、治理和发布门槛分别通过之前，适配器仍为 `experimental`、`unsupported`，且不得进入 Official Results。

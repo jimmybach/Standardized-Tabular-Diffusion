@@ -27,6 +27,18 @@ from standardized_tabular_diffusion.validation.tabularargn import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabularargn" / "native-parity-run-30961590047.json"
 EVIDENCE_SHA256 = "411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec"
+WINDOWS_EVIDENCE_PATH = (
+    REPO_ROOT / "docs" / "evidence" / "tabularargn" / "windows-v2-real-function-6f9e065.json"
+)
+WINDOWS_EVIDENCE_SHA256 = "bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c"
+WINDOWS_FAILURE_PATH = (
+    REPO_ROOT
+    / "docs"
+    / "evidence"
+    / "tabularargn"
+    / "windows-v2-finalization-dependency-failure-ec53f98.json"
+)
+WINDOWS_FAILURE_SHA256 = "8a19d8245ac6c1611b27b420f8a99879a2b6f402f22aa52478d6b356bae67529"
 
 
 def test_locked_release_manifest_and_protocol_scope_are_exact() -> None:
@@ -80,6 +92,55 @@ def test_retained_native_parity_evidence_is_exact_and_complete() -> None:
     spec = get_adapter_spec("tabularargn")
     assert spec.validation_level.value == "native-parity-validated"
     assert str(EVIDENCE_PATH.relative_to(REPO_ROOT)).replace("\\", "/") in spec.evidence_records
+
+
+def test_retained_windows_v2_evidence_is_exact_complete_and_attempt_preserving() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "6f9e065fd69f094806794fab69b4e03874699a82"
+    assert evidence["train"]["status"] == "pass"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": True,
+        "cuda_runtime": "12.8",
+        "gpu": "NVIDIA GeForce RTX 5080",
+        "gpu_count": 1,
+        "torch": "2.11.0+cu128",
+    }
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [8, 8]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+
+    central = evidence["central_evaluation"]
+    assert central["status"] == "pass"
+    assert central["finalization_status"] == "finalized"
+    assert central["validation"]["pending_files"] == 0
+    assert central["environment_lock"]["sha256"] == (
+        "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca"
+    )
+    assert central["environment_lock"]["packages"]["jsonschema"]["observed"] == "4.23.0"
+
+    failure_bytes = WINDOWS_FAILURE_PATH.read_bytes()
+    assert hashlib.sha256(failure_bytes).hexdigest() == WINDOWS_FAILURE_SHA256
+    assert failure_bytes.endswith(b"\n")
+    failure = json.loads(failure_bytes)
+    assert failure["status"] == "fail"
+    assert failure["stage"] == "central-evaluation-finalization"
+    assert failure["model_probe"]["training_status"] == "pass"
+    assert failure["error"]["cause"] == "ModuleNotFoundError: No module named 'jsonschema'"
+    assert failure["resolution"]["passing_evidence_sha256"] == WINDOWS_EVIDENCE_SHA256
+
+    spec = get_adapter_spec("tabularargn")
+    for path in (WINDOWS_FAILURE_PATH, WINDOWS_EVIDENCE_PATH):
+        assert path.relative_to(REPO_ROOT).as_posix() in spec.evidence_records
 
 
 @pytest.mark.parametrize("variant", VARIANTS)

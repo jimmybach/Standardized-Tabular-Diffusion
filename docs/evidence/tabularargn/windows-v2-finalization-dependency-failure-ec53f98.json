@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "finding_id": "RF-CORE-006",
+  "protocol_id": "pipeline-v2-native-windows-v1",
+  "status": "fail",
+  "model_id": "tabularargn",
+  "stage": "central-evaluation-finalization",
+  "repository_commit": "ec53f98eb4753ce53301c0b458e8ac9137aa6ba1",
+  "model_probe": {
+    "status": "probe-pass-evaluation-pending",
+    "record_sha256": "d48544ab71a66130bef07f0d8e52ae89a231ae94226ace53f5ffe4159aa57236",
+    "training_status": "pass",
+    "generation_seeds": [17, 29],
+    "seed_outputs_distinct": true
+  },
+  "error": {
+    "type": "RuntimeError",
+    "message": "Schema validation requires the optional 'contracts' dependency",
+    "cause": "ModuleNotFoundError: No module named 'jsonschema'"
+  },
+  "root_cause": "Pipeline V2 finalization reused the model-specific runtime without declaring or verifying the independent central P3 evaluation dependencies.",
+  "resolution": {
+    "repository_commit": "6f9e065fd69f094806794fab69b4e03874699a82",
+    "model_runtime_separated_from_evaluation_runtime": true,
+    "evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+    "evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+    "passing_evidence": "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json",
+    "passing_evidence_sha256": "bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c"
+  },
+  "claim_boundary": "This record documents an explicit central-evaluation dependency failure after a passing model probe. It is not model-quality evidence and does not invalidate the later clean rerun bound to the resolution commit."
+}

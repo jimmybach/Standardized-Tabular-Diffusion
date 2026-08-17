@@ -122,6 +122,7 @@ The comparison counts are scoped evidence, not a claim about nested baselines or
 - No official source statement is patched. Output placement, DatasetSpec-directed categorical coercion, explicit sampling seeding, and the official rare-category `SAMPLE` option are adapter arguments or pre/postconditions.
 - The former adapter's unrestricted estimator pickle has been removed. The persistent artifact is the official `ModelStore`; official 2.6.2 uses `weights_only=True` for model weights. The adapter verifies all retained files and removes `OriginalData`, including raw and encoded row files, after fit.
 - All nine binary-classification, multiclass-classification, regression, and seed cases passed the retained Linux/Python 3.11 official-package parity protocol in run `30961590047`. The flat single-table unconditional-generation path is therefore `native-parity-validated`. Sequential, relational, differential-privacy, prediction, likelihood, and imputation APIs remain outside this validated scope.
+- A separate native-Windows/Python 3.11/RTX 5080 V2 run at `6f9e065` passed bounded official training, two distinct generation seeds, retained `ModelStore` immutability, strict decoded-table validation, and central `p3-validity` finalization. The model and central-evaluation runtimes are independently checksum-locked; the initial missing-`jsonschema` finalization failure is retained in the evidence chain. This is a minimal-real functionality result, not a quality, Official Results, or release claim.
 
 ## Artifact Disposition
 

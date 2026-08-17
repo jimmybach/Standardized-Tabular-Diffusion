@@ -1,18 +1,21 @@
 # TabularARGN Validation Protocol
 
-Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
+Status: native parity passed on Linux/Python 3.11; native-Windows V2 minimal-real functionality passed
 
 Protocol: `tabularargn-official-package-parity-v2`
 
 Target: method-author official `mostlyai-engine==2.6.2` flat TabularARGN package
 
-Supported validation environment: Linux, Python 3.11
+Validated environments:
+
+- native parity: Linux, Python 3.11;
+- minimal-real pipeline: Windows 11, Python 3.11.15, PyTorch 2.11.0+cu128, CUDA 12.8, NVIDIA GeForce RTX 5080.
 
 ## Claim Boundary
 
 This protocol tests whether the standardized `tabularargn` adapter preserves the selected official flat-table execution. It compares direct calls to the checksum-pinned method-author package with adapter calls using the same typed training table, constructor controls, official persistent workspace, sampling controls, and random seed.
 
-A passing mandatory run may promote this path to `native-parity-validated`. It does not make the model `benchmark-eligible`, admit it to Official Results, establish paper-scale generation quality, or make it `release-supported`. Differential privacy, sequential and relational data, conditional generation, prediction, probability estimation, likelihood, imputation, central evaluation, dataset admission, and resource budgets remain independent scopes or gates.
+A passing mandatory run may promote this path to `native-parity-validated`. A separate Windows V2 run establishes only bounded real train/sample functionality and central P3 structural/validity finalization for one deterministic Adult-derived fixture. Neither result makes the model `benchmark-eligible`, admits it to Official Results, establishes paper-scale generation quality, or makes it `release-supported`. Differential privacy, sequential and relational data, conditional generation, prediction, probability estimation, likelihood, imputation, central quality/utility/privacy evaluation, dataset admission, and resource budgets remain independent scopes or gates.
 
 ## Audited Authority and Distribution
 
@@ -105,7 +108,7 @@ Protocol v2 makes the distinction in criterion 4 explicit. The official package 
 - Sequential and two-table context modes require a future relational dataset contract.
 - Official prediction, probability, likelihood, conditional generation, and imputation APIs are not claimed by this adapter.
 - The checkpoint no longer contains raw row files, but learned weights and aggregate statistics may still be sensitive.
-- Benchmark eligibility still requires central metrics, dataset admission, resource profiles, and release review.
+- Benchmark eligibility still requires the applicable central quality, utility, and privacy metrics, dataset admission, resource profiles, and release review. The retained Windows V2 result finalizes only `p3-validity`.
 
 ## Evidence
 
@@ -113,4 +116,14 @@ The protocol passed in [GitHub Actions run 30961590047](https://github.com/jimmy
 
 All nine cases passed. Official checkpoint tensors and files, model-configuration semantics, target statistics, contract-normalized sample values, and generated CSV bytes were exact in every case. The evidence separately records Pandas' native `string` and adapter `str` categorical dtype labels, so unnormalized `DataFrame.equals` is false without hiding the exact values or bytes. Every case produced seven canonical, finite, missing-free, in-domain rows; package files remained unchanged and raw/encoded training rows were absent from the retained adapter artifacts.
 
-The downloaded evidence is retained byte-for-byte at `docs/evidence/tabularargn/native-parity-run-30961590047.json` with SHA-256 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`. Accordingly, the flat single-table unconditional-generation adapter is `native-parity-validated`. It remains `experimental`, `unsupported`, and excluded from Official Results until central evaluation, dataset admission, resource, governance, and release gates pass independently.
+The downloaded evidence is retained byte-for-byte at `docs/evidence/tabularargn/native-parity-run-30961590047.json` with SHA-256 `411d24cd5b06090ea0d2d96e22232198fc83d0731b3371c14e9b4c50165850ec`. Accordingly, the flat single-table unconditional-generation adapter is `native-parity-validated`.
+
+### Native-Windows V2 real-function evidence
+
+At repository commit `6f9e065fd69f094806794fab69b4e03874699a82`, the official package performed a real bounded fit on the deterministic 256-row Adult-derived V2 fixture, with the adapter's declared `max_train_rows=64` smoke bound. The run used Python 3.11.15, PyTorch 2.11.0+cu128, CUDA 12.8, and an NVIDIA GeForce RTX 5080. Training passed in 19.219 seconds. The unchanged retained `ModelStore` then generated eight rows for each predeclared seed 17 and 29. Both tables had the canonical 15-column schema, zero missing cells, finite numerical values, and in-domain categories. Their SHA-256 values were respectively `52f93d17e53317dfb43203075af0dd2fc473896674a3755f308fa8adc2596cf7` and `74046f3408f37a10383c74a72bdb5fad3ed70260a7a6765abca17074ba3dd672`, proving that the two seed outputs were distinct.
+
+Central `p3-validity` finalization ran separately in the checksum-locked `requirements-pipeline-v2-evaluation.txt` environment. The finalized bundle had no pending files and passed bundle validation. The complete passing record is retained at `docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json` with SHA-256 `bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c`.
+
+The first finalization attempt at commit `ec53f98` is not hidden: model training and both samples passed, but finalization failed explicitly because the model-specific environment did not contain `jsonschema`. The compact failure record is retained at `docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json`. Resolution commit `6f9e065` separated the model runtime from a frozen central-evaluation runtime, added fail-closed dependency verification, and reran the complete probe before retaining the passing evidence.
+
+This adds `minimal-real-passed` Windows functionality to the independent native-parity claim. The adapter remains `experimental`, `unsupported`, and excluded from Official Results until the remaining dataset, scientific metric, resource, governance, and release gates pass independently.

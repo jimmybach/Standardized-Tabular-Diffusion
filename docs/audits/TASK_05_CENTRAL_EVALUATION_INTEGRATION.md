@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md](TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: in progress; Goggle, TabuLa, and TabularARGN V2 finalization retained
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: model-specific evaluation drift or invalid result finalization
 
@@ -20,6 +20,7 @@ Prove that every public adapter path hands its untouched decoded sample to the s
 - Verify per-scope Atomic Results retain complete denominators, states, source values, derived values, and failure records.
 - Verify bundle finalization occurs last, is checksum-complete, and is rejected if any declared file or identity is inconsistent.
 - Verify evaluation can also accept an external synthetic table without importing a model adapter.
+- Verify model-specific training dependencies and central-evaluation dependencies are independently frozen; finalization must validate the central lock rather than rely on packages incidentally present in a model environment.
 
 ## V2 minimal-real probe
 
