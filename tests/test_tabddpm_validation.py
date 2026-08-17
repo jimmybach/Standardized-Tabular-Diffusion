@@ -7,8 +7,19 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from standardized_tabular_diffusion.interfaces import ArtifactBundle
 from standardized_tabular_diffusion.models.tabddpm import build_tabddpm_environment
-from standardized_tabular_diffusion.validation.tabddpm import MANIFEST_RELATIVE_PATH, _sha256_lf, verify_sources
+from standardized_tabular_diffusion.runtime_contracts import dataset_content_identity
+from standardized_tabular_diffusion.validation import tabddpm as validation_module
+from standardized_tabular_diffusion.validation.tabddpm import (
+    MANIFEST_RELATIVE_PATH,
+    _run_adapter,
+    _sha256_lf,
+    _write_fixture,
+    verify_sources,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabddpm" / "native-parity-run-30863212268.json"
@@ -60,6 +71,90 @@ def test_tabddpm_modern_sklearn_bridge_preserves_integral_subsample() -> None:
     completed = subprocess.run(command, check=True, capture_output=True, text=True, env=environment)
 
     assert completed.stdout.strip() == "IntegralSubsampleQuantileTransformer 1000000000"
+
+
+def test_tabddpm_parity_fixture_embeds_an_identity_checked_dataset_spec(tmp_path: Path) -> None:
+    summary, dataset_spec = _write_fixture(tmp_path / "data")
+
+    assert summary["train_rows"] == 24
+    assert dataset_spec.name == "tabddpm-parity-fixture"
+    assert dataset_spec.column_names == ["feature_0", "feature_1", "feature_2", "target"]
+    assert dataset_spec.train_data_path is not None
+    assert dataset_spec.train_data_path.read_text(encoding="utf-8").count("\n") == 25
+    identity = dataset_content_identity(dataset_spec)
+    assert identity["name"] == dataset_spec.name
+    assert all(record["exists"] for record in identity["files"].values())
+
+
+def test_tabddpm_parity_adapter_uses_one_run_owned_workspace_and_embedded_spec(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, dataset_spec = _write_fixture(tmp_path / "data")
+    captured = []
+
+    class FakeAdapter:
+        def __init__(self, repo_root: Path) -> None:
+            self.repo_root = repo_root
+
+        @staticmethod
+        def _runtime_root(spec: object) -> Path:
+            return spec.output_dir / "tabddpm-runtime"  # type: ignore[attr-defined]
+
+        def _bundle(self, spec: object, *, sample: bool) -> ArtifactBundle:
+            output_dir = spec.output_dir  # type: ignore[attr-defined]
+            output_dir.mkdir(parents=True, exist_ok=True)
+            runtime_root = self._runtime_root(spec)
+            runtime_root.mkdir(parents=True, exist_ok=True)
+            action = "sample" if sample else "train"
+            (runtime_root / f"config-{action}-seed-{spec.seed}.toml").write_text(  # type: ignore[attr-defined]
+                "seed = 0\n",
+                encoding="utf-8",
+            )
+            sample_path = output_dir / f"samples-seed-{spec.seed}.csv"  # type: ignore[attr-defined]
+            if sample:
+                sample_path.write_text("feature_0,feature_1,feature_2,target\n", encoding="utf-8")
+            bundle = ArtifactBundle(
+                model="tabddpm",
+                dataset=spec.dataset,  # type: ignore[attr-defined]
+                output_dir=output_dir,
+                upstream_workdir=self.repo_root / "TabDDPM-main",
+                generated_sample_path=sample_path if sample else None,
+            )
+            (output_dir / "artifacts.json").write_text(
+                json.dumps(bundle.to_dict(), sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            return bundle
+
+        def train(self, spec: object) -> ArtifactBundle:
+            captured.append(spec)
+            return self._bundle(spec, sample=False)
+
+        def sample(self, spec: object) -> ArtifactBundle:
+            captured.append(spec)
+            return self._bundle(spec, sample=True)
+
+    monkeypatch.setattr(validation_module, "TabDDPMAdapter", FakeAdapter)
+    config_path = tmp_path / "config.toml"
+    config_path.write_text("seed = 0\n", encoding="utf-8")
+    output_dir = tmp_path / "adapter-run"
+
+    result = _run_adapter(
+        tmp_path,
+        config_path,
+        output_dir,
+        dataset_spec,
+        training_seed=17,
+        sampling_seed=47,
+    )
+
+    assert len(captured) == 2
+    assert captured[0].output_dir == captured[1].output_dir == output_dir
+    assert captured[0].extra["dataset_spec"]["name"] == dataset_spec.name
+    assert captured[0].extra["dataset_identity"] == captured[1].extra["dataset_identity"]
+    assert result["manifests_valid"] is True
+    assert Path(result["runtime_root"]).is_relative_to(output_dir)
 
 
 def test_tabddpm_native_parity_evidence_is_complete_and_immutable() -> None:

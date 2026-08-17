@@ -13,10 +13,12 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-from standardized_tabular_diffusion.interfaces import RunSpec
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, sha256_file
+from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter, build_tabddpm_environment
+from standardized_tabular_diffusion.runtime_contracts import dataset_content_identity
 
-PROTOCOL_ID = "tabddpm-native-parity-v1"
+PROTOCOL_ID = "tabddpm-native-parity-v2"
 MANIFEST_RELATIVE_PATH = Path(
     "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json"
 )
@@ -81,7 +83,7 @@ def verify_sources(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _write_fixture(data_dir: Path) -> dict[str, Any]:
+def _write_fixture(data_dir: Path) -> tuple[dict[str, Any], DatasetSpec]:
     import numpy as np
 
     data_dir.mkdir(parents=True)
@@ -100,9 +102,15 @@ def _write_fixture(data_dir: Path) -> dict[str, Any]:
     for split in ("train", "val", "test"):
         np.save(data_dir / f"X_num_{split}.npy", features[split])
         np.save(data_dir / f"y_{split}.npy", targets[split])
+        header = "feature_0,feature_1,feature_2,target\n"
+        rows = "".join(
+            f"{values[0]},{values[1]},{values[2]},{int(target)}\n"
+            for values, target in zip(features[split], targets[split])
+        )
+        (data_dir / f"{split}.csv").write_text(header + rows, encoding="utf-8")
     info = {"name": "tabddpm-parity-fixture", "task_type": "binclass", "n_classes": 2}
     (data_dir / "info.json").write_text(json.dumps(info, indent=2) + "\n", encoding="utf-8")
-    return {
+    summary = {
         "kind": "deterministic-numeric-binary-classification",
         "train_rows": 24,
         "validation_rows": 8,
@@ -110,6 +118,28 @@ def _write_fixture(data_dir: Path) -> dict[str, Any]:
         "numerical_features": 3,
         "categorical_features": 0,
     }
+    dataset_spec = DatasetSpec(
+        name="tabddpm-parity-fixture",
+        task_type="classification",
+        column_names=["feature_0", "feature_1", "feature_2", "target"],
+        numerical_columns=["feature_0", "feature_1", "feature_2"],
+        categorical_columns=[],
+        target_columns=["target"],
+        metadata_path=data_dir / "info.json",
+        train_data_path=data_dir / "train.csv",
+        val_data_path=data_dir / "val.csv",
+        test_data_path=data_dir / "test.csv",
+        provenance=["deterministic-tabddpm-native-parity-fixture"],
+        extra={
+            "column_info": {
+                "feature_0": "float",
+                "feature_1": "float",
+                "feature_2": "float",
+                "target": "int",
+            }
+        },
+    )
+    return summary, dataset_spec
 
 
 def _toml_string(value: Path | str) -> str:
@@ -195,49 +225,133 @@ def _run_native(upstream_root: Path, config_path: Path) -> list[list[str]]:
 def _run_adapter(
     repo_root: Path,
     config_path: Path,
-    manifest_root: Path,
+    output_dir: Path,
+    dataset_spec: DatasetSpec,
     *,
     training_seed: int,
     sampling_seed: int,
-) -> list[str]:
+) -> dict[str, Any]:
     adapter = TabDDPMAdapter(repo_root)
-    train_bundle = adapter.train(
-        RunSpec(
-            model="tabddpm",
-            dataset="tabddpm-parity-fixture",
-            output_dir=manifest_root / "train",
-            device="cpu",
-            seed=training_seed,
-            upstream_config_path=config_path,
-        )
+    dataset_extra = {
+        "dataset_spec": dataset_spec.to_dict(),
+        "dataset_identity": dataset_content_identity(dataset_spec),
+    }
+    train_spec = RunSpec(
+        model="tabddpm",
+        dataset=dataset_spec.name,
+        output_dir=output_dir,
+        device="cpu",
+        seed=training_seed,
+        upstream_config_path=config_path,
+        extra=dict(dataset_extra),
     )
-    sample_bundle = adapter.sample(
-        RunSpec(
-            model="tabddpm",
-            dataset="tabddpm-parity-fixture",
-            output_dir=manifest_root / "sample",
-            device="cpu",
-            seed=sampling_seed,
-            num_samples=12,
-            upstream_config_path=config_path,
-        )
+    sample_spec = RunSpec(
+        model="tabddpm",
+        dataset=dataset_spec.name,
+        output_dir=output_dir,
+        device="cpu",
+        seed=sampling_seed,
+        num_samples=12,
+        upstream_config_path=config_path,
+        extra=dict(dataset_extra),
     )
-    manifests = [train_bundle.output_dir / "artifacts.json", sample_bundle.output_dir / "artifacts.json"]
-    for path in manifests:
+    snapshots = output_dir / "validation-manifests"
+    train_bundle = adapter.train(train_spec)
+    train_manifest = train_bundle.output_dir / "artifacts.json"
+    train_snapshot = snapshots / "train-artifacts.json"
+    atomic_write_bytes(train_snapshot, train_manifest.read_bytes())
+    sample_bundle = adapter.sample(sample_spec)
+    if sample_bundle.generated_sample_path is None:
+        raise AssertionError("TabDDPM adapter did not expose its decoded generated table.")
+    sample_manifest = sample_bundle.output_dir / "artifacts.json"
+    sample_snapshot = snapshots / "sample-artifacts.json"
+    atomic_write_bytes(sample_snapshot, sample_manifest.read_bytes())
+    manifests = [train_snapshot, sample_snapshot]
+    manifests_valid = True
+    for action, path in zip(("train", "sample"), manifests):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload["model"] != "tabddpm" or payload["dataset"] != "tabddpm-parity-fixture":
-            raise AssertionError(f"Invalid adapter artifact manifest: {path}")
-    return [str(path) for path in manifests]
+        expected_sample_path = None if action == "train" else str(sample_bundle.generated_sample_path)
+        valid = (
+            payload["model"] == "tabddpm"
+            and payload["dataset"] == dataset_spec.name
+            and payload["output_dir"] == str(output_dir)
+            and payload["generated_sample_path"] == expected_sample_path
+        )
+        manifests_valid = manifests_valid and valid
+    runtime_root = adapter._runtime_root(train_spec)
+    return {
+        "commands": [
+            [
+                sys.executable,
+                str(UPSTREAM_ENTRYPOINT),
+                "--config",
+                str(runtime_root / f"config-train-seed-{training_seed}.toml"),
+                "--train",
+            ],
+            [
+                sys.executable,
+                str(UPSTREAM_ENTRYPOINT),
+                "--config",
+                str(runtime_root / f"config-sample-seed-{sampling_seed}.toml"),
+                "--sample",
+            ],
+        ],
+        "generated_sample_path": str(sample_bundle.generated_sample_path),
+        "manifests": [str(path) for path in manifests],
+        "manifests_valid": manifests_valid,
+        "output_dir": str(output_dir),
+        "runtime_root": str(runtime_root),
+        "runtime_configs": {
+            "train": str(runtime_root / f"config-train-seed-{training_seed}.toml"),
+            "sample": str(runtime_root / f"config-sample-seed-{sampling_seed}.toml"),
+        },
+    }
 
 
-def _compare_configs(native_config: Path, adapter_config: Path) -> bool:
+def _compare_configs(native_config: Path, adapter_config: Path, *, action: str) -> bool:
     with native_config.open("rb") as stream:
         native = tomllib.load(stream)
     with adapter_config.open("rb") as stream:
         adapter = tomllib.load(stream)
-    native.pop("parent_dir")
-    adapter.pop("parent_dir")
+    for payload in (native, adapter):
+        payload.pop("parent_dir")
+        payload.pop("real_data_path")
+        if action == "sample":
+            # The global seed is consumed only by evaluation; sampling uses sample.seed.
+            payload.pop("seed")
     return native == adapter
+
+
+def _inspect_decoded_sample(path: Path, dataset_spec: DatasetSpec, expected_rows: int) -> dict[str, Any]:
+    import numpy as np
+    import pandas as pd
+
+    frame = pd.read_csv(path)
+    train = pd.read_csv(dataset_spec.train_data_path)
+    columns_exact = list(frame.columns) == dataset_spec.column_names
+    rows_exact = len(frame) == expected_rows
+    missing_values = int(frame.isna().sum().sum())
+    numerical_finite = bool(
+        np.isfinite(frame[dataset_spec.numerical_columns].to_numpy(dtype=float)).all()
+    )
+    target = dataset_spec.target_columns[0]
+    target_domain_valid = set(frame[target]).issubset(set(train[target]))
+    return {
+        "columns_exact": columns_exact,
+        "rows": len(frame),
+        "rows_exact": rows_exact,
+        "missing_values": missing_values,
+        "numerical_finite": numerical_finite,
+        "target_domain_valid": target_domain_valid,
+        "sha256": sha256_file(path),
+        "valid": (
+            columns_exact
+            and rows_exact
+            and missing_values == 0
+            and numerical_finite
+            and target_domain_valid
+        ),
+    }
 
 
 def _compare_state_dicts(native_path: Path, adapter_path: Path) -> dict[str, Any]:
@@ -299,13 +413,13 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         raise FileExistsError(f"Validation output directory must be empty: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
     source_evidence = verify_sources(repo_root)
-    fixture = _write_fixture(output_dir / "data")
+    fixture, dataset_spec = _write_fixture(output_dir / "data")
     seed_cases = [(0, 23), (17, 47), (101, 89)]
     cases: list[dict[str, Any]] = []
     for index, (training_seed, sampling_seed) in enumerate(seed_cases, start=1):
         case_root = output_dir / f"case-{index:02d}"
         native_root = case_root / "native"
-        adapter_root = case_root / "adapter"
+        adapter_output = case_root / "adapter-run"
         native_config = case_root / "native.toml"
         adapter_config = case_root / "adapter.toml"
         case_root.mkdir(parents=True)
@@ -319,26 +433,44 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         _write_config(
             adapter_config,
             data_dir=output_dir / "data",
-            parent_dir=adapter_root,
+            parent_dir=adapter_output / "source-config-placeholder",
             training_seed=training_seed,
             sampling_seed=sampling_seed,
         )
         native_commands = _run_native(repo_root / "TabDDPM-main", native_config)
-        adapter_manifests = _run_adapter(
+        adapter_run = _run_adapter(
             repo_root,
             adapter_config,
-            case_root / "adapter-manifests",
+            adapter_output,
+            dataset_spec,
             training_seed=training_seed,
             sampling_seed=sampling_seed,
         )
-        config_exact = _compare_configs(native_config, adapter_config)
+        adapter_root = Path(adapter_run["runtime_root"])
+        train_config_exact = _compare_configs(
+            native_config,
+            Path(adapter_run["runtime_configs"]["train"]),
+            action="train",
+        )
+        sample_config_exact = _compare_configs(
+            native_config,
+            Path(adapter_run["runtime_configs"]["sample"]),
+            action="sample",
+        )
         model = _compare_state_dicts(native_root / "model.pt", adapter_root / "model.pt")
         ema_model = _compare_state_dicts(native_root / "model_ema.pt", adapter_root / "model_ema.pt")
         arrays = _compare_arrays(native_root, adapter_root)
         loss_exact = (native_root / "loss.csv").read_bytes() == (adapter_root / "loss.csv").read_bytes()
         sample_rows = int(arrays["y_train.npy"]["shape"][0])
+        decoded_sample = _inspect_decoded_sample(
+            Path(adapter_run["generated_sample_path"]),
+            dataset_spec,
+            expected_rows=12,
+        )
+        output_isolated = adapter_root.is_relative_to(adapter_output)
         case_passed = (
-            config_exact
+            train_config_exact
+            and sample_config_exact
             and model["keys_equal"]
             and model["tensor_values_exact"]
             and ema_model["keys_equal"]
@@ -346,6 +478,9 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             and all(record["exact"] and record["finite"] for record in arrays.values())
             and loss_exact
             and sample_rows == 12
+            and decoded_sample["valid"]
+            and adapter_run["manifests_valid"]
+            and output_isolated
         )
         cases.append(
             {
@@ -354,31 +489,39 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
                 "training_seed": training_seed,
                 "sampling_seed": sampling_seed,
                 "native_commands": native_commands,
-                "adapter_commands": [
-                    [sys.executable, str(UPSTREAM_ENTRYPOINT), "--config", str(adapter_config), "--train"],
-                    [sys.executable, str(UPSTREAM_ENTRYPOINT), "--config", str(adapter_config), "--sample"],
-                ],
+                "adapter_commands": adapter_run["commands"],
                 "comparisons": {
-                    "config_exact": config_exact,
+                    "effective_train_config_exact": train_config_exact,
+                    "effective_sample_config_exact": sample_config_exact,
                     "model": model,
                     "ema_model": ema_model,
                     "generated_arrays": arrays,
                     "loss_csv_exact": loss_exact,
                     "sample_rows": sample_rows,
+                    "decoded_sample": decoded_sample,
+                    "adapter_manifests_valid": adapter_run["manifests_valid"],
+                    "output_isolated": output_isolated,
                 },
-                "adapter_manifests": adapter_manifests,
+                "adapter_manifests": adapter_run["manifests"],
             }
         )
-    passed = all(case["status"] == "pass" for case in cases)
+    source_after = verify_sources(repo_root)
+    source_remained_exact = source_after == source_evidence
+    passed = source_remained_exact and all(case["status"] == "pass" for case in cases)
     evidence: dict[str, Any] = {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "model_id": "tabddpm",
         "status": "pass" if passed else "fail",
         "comparison_policy": {
-            "deterministic_config_mapping": "exact after excluding output-only parent_dir",
+            "deterministic_config_mapping": (
+                "exact effective train/sample runtime configuration after excluding only output/data paths "
+                "and the sample-irrelevant global evaluation seed"
+            ),
+            "dataset_binding": "embedded DatasetSpec plus byte identity; run-owned native mirror",
             "model_state": "exact tensor equality",
             "generated_arrays": "exact element equality",
+            "decoded_table": "exact schema/row count, finite numerical values, no missing values, valid target domain",
             "numeric_integrity": "all generated numeric values must be finite",
             "seed_cases": [
                 {"training": training_seed, "sampling": sampling_seed}
@@ -386,6 +529,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             ],
         },
         "source": source_evidence,
+        "source_remained_exact": source_remained_exact,
         "repository_commit": _repository_commit(repo_root),
         "environment_lock": {
             "path": "requirements-tabddpm-validation.txt",
