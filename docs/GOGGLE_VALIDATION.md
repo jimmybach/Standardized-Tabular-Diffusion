@@ -1,6 +1,6 @@
 # Goggle Source, PyTorch Graph Backend, and Validation Record
 
-Status: method-author GCN core native parity retained; Windows GPU real-function validation passed; formal DGL-oracle backend validation pending<br>
+Status: method-author GCN core native parity retained; Windows GPU real-function validation passed; formal DGL-oracle backend parity passed and retained<br>
 Current protocol: `goggle-pytorch-graph-backend-parity-v2`<br>
 Primary runtime: Windows 11, Python 3.11, PyTorch 2.8<br>
 Independent graph oracle: Linux, Python 3.11, DGL 1.1.3
@@ -88,7 +88,9 @@ Protocol v2 adds two independent layers:
 1. graph-level comparison against DGL 1.1.3 for graph construction, batching, forward outputs, feature/edge/parameter gradients, state dictionaries, both multiplication branches, activation, and every normalization mode; and
 2. nine end-to-end cases spanning binary classification, multiclass classification, regression, and seeds `0`, `19`, and `73`.
 
-For every end-to-end case, the reference path uses unchanged Goggle plus DGL while the candidate path uses the same source plus the PyTorch backend. The gate requires exact checkpoint tensors, exact raw samples, exact final frames and CSV bytes, exact row/column contracts, valid metadata, and unchanged source files. The formal v2 result is pending a clean Linux/DGL 1.1.3 workflow run; local Windows diagnostics cannot substitute for that oracle.
+For every end-to-end case, the reference path uses unchanged Goggle plus DGL while the candidate path uses the same source plus the PyTorch backend. The gate requires exact checkpoint tensors, exact raw samples, exact final frames and CSV bytes, exact row/column contracts, valid metadata, and unchanged source files.
+
+Formal workflow run [`32042446422`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32042446422) passed on Linux/Python 3.11 with DGL 1.1.3 at commit `cf821a0dae803f523697c75888375feef9724145`. All five graph-level oracle cases and all nine end-to-end cases passed, including exact checkpoints, raw samples, final frames, and CSV bytes. The permanent record is [`pytorch-backend-parity-run-32042446422.json`](evidence/goggle/pytorch-backend-parity-run-32042446422.json), SHA-256 `77a4b3feb289703cbd78d2e03dd8338f2ae45c0eec0833fa6a0f25a769d54640`.
 
 Windows GPU functionality passed at adapter commit `0a23a84`: PyTorch 2.8.0+cu128 on the declared RTX 5080 trained the 256-row Adult-derived fixture and produced valid, distinct 16-row outputs for generation seeds `17` and `29` while DGL and PyTorch Geometric were absent. Both runs preserved checkpoint bytes; the first output passed central `p3-validity` evaluation and finalized its Result Bundle. The retained record is [`windows-v2-real-function-0a23a84.json`](evidence/goggle/windows-v2-real-function-0a23a84.json). This demonstrates real functionality, not generation quality or benchmark eligibility.
 
@@ -122,4 +124,4 @@ python -m standardized_tabular_diffusion.validation.goggle \
 
 ## Remaining Gates
 
-The GCN core retains `native-parity-validated` provenance and the current Windows path is `minimal-real-passed`, but the PyTorch backend still needs retained formal Linux/DGL 1.1.3 v2 evidence. Goggle remains `experimental` and `unsupported`. Benchmark eligibility additionally requires approved datasets, the frozen central evaluation protocol, representative-scale resource qualification, and explicit admission. SAGE and heterogeneous decoding remain unsupported unless separately implemented and validated.
+The GCN core retains `native-parity-validated` provenance, the PyTorch backend now has retained formal Linux/DGL 1.1.3 v2 parity evidence, and the current Windows path is `minimal-real-passed`. This clears the dependency-reimplementation parity gate only. Goggle remains `experimental` and `unsupported`. Benchmark eligibility additionally requires approved datasets, the frozen central evaluation protocol, representative-scale resource qualification, and explicit admission. SAGE and heterogeneous decoding remain unsupported unless separately implemented and validated.

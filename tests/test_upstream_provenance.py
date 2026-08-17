@@ -324,6 +324,42 @@ def test_goggle_retained_method_author_validation_is_exact_and_conservatively_ga
     assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
     assert all(case["comparisons"]["adapter_source_remained_exact"] for case in evidence["cases"])
 
+    backend_validation = goggle["dependency_backend_validation"]
+    assert backend_validation["status"] == "pass"
+    assert backend_validation["level"] == "native-parity-validated"
+    assert backend_validation["claim_classification"] == "dependency-compatibility-reimplementation-parity"
+    assert backend_validation["workflow_run_id"] == 32042446422
+    assert backend_validation["repository_commit"] == "cf821a0dae803f523697c75888375feef9724145"
+    assert backend_validation["environment"]["dgl"] == "1.1.3"
+    assert backend_validation["environment_lock_sha256"] == (
+        "6284c53e4fb63d8d8c1df7933687e183056bb866c8812f015ca879f840406f76"
+    )
+    backend_summary = backend_validation["result_summary"]
+    assert backend_summary["graph_oracle_cases_passed"] == backend_summary["graph_oracle_cases_total"] == 5
+    assert backend_summary["parity_cases_passed"] == backend_summary["parity_cases_total"] == 9
+    assert backend_summary["checkpoint_state_exact"] is True
+    assert backend_summary["graph_gradients_exact"] is True
+    assert backend_summary["raw_samples_exact"] is True
+    assert backend_summary["sample_frames_exact"] is True
+    assert backend_summary["sample_bytes_exact"] is True
+    backend_artifact = backend_validation["artifact"]
+    assert backend_artifact["evidence_file_sha256"] == backend_artifact["downloaded_evidence_sha256"]
+    backend_evidence_path = REPO_ROOT / backend_artifact["permanent_evidence_path"]
+    backend_evidence_bytes = backend_evidence_path.read_bytes()
+    assert hashlib.sha256(backend_evidence_bytes).hexdigest() == backend_artifact["evidence_file_sha256"]
+    backend_evidence = json.loads(backend_evidence_bytes)
+    assert backend_evidence["status"] == "pass"
+    assert backend_evidence["protocol_id"] == backend_validation["protocol_id"]
+    assert backend_evidence["repository_commit"] == backend_validation["repository_commit"]
+    assert backend_evidence["graph_backend_validation"]["status"] == "pass"
+    assert len(backend_evidence["graph_backend_validation"]["cases"]) == 5
+    assert len(backend_evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["checkpoints"]["tensors_exact"] for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["raw_samples_exact"] for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in backend_evidence["cases"])
+    assert backend_artifact["permanent_evidence_path"] in get_adapter_spec("goggle").evidence_records
+
     windows_validation = goggle["windows_real_function"]
     assert windows_validation["status"] == "pass"
     assert windows_validation["level"] == "minimal-real-passed"

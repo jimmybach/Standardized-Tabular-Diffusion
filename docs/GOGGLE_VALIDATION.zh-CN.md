@@ -1,6 +1,6 @@
 # Goggle 源码、PyTorch 图后端与验证记录
 
-状态：已保留方法作者 GCN 核心的原生等价证据；Windows GPU 真实功能验证已通过；DGL 判定器正式后端验证待完成<br>
+状态：已保留方法作者 GCN 核心的原生等价证据；Windows GPU 真实功能验证已通过；DGL 判定器正式后端等价验证已通过并留存<br>
 当前协议：`goggle-pytorch-graph-backend-parity-v2`<br>
 主要运行环境：Windows 11、Python 3.11、PyTorch 2.8<br>
 独立图算子判定环境：Linux、Python 3.11、DGL 1.1.3
@@ -88,7 +88,9 @@ Goggle 会把数值当作连续变量建模。完成只在训练集上拟合的�
 1. 使用 DGL 1.1.3 对照图构造、批处理、前向输出、特征/边权/参数梯度、state dict、两种矩阵乘法顺序、激活函数及全部归一化模式；
 2. 执行二分类、多分类、回归与随机种子 `0`、`19`、`73` 组合成的九个端到端案例。
 
-每个端到端案例中，参考路径使用“未修改 Goggle + DGL”，候选路径使用“同一份 Goggle + PyTorch 后端”。通过条件包括：检查点张量完全一致、原始样本完全一致、最终 DataFrame 和 CSV 字节完全一致、行列接口准确、元数据有效、源码执行前后不变。正式 v2 结论仍需一次干净的 Linux/DGL 1.1.3 工作流；本地 Windows 诊断不能替代这一判定环境。
+每个端到端案例中，参考路径使用“未修改 Goggle + DGL”，候选路径使用“同一份 Goggle + PyTorch 后端”。通过条件包括：检查点张量完全一致、原始样本完全一致、最终 DataFrame 和 CSV 字节完全一致、行列接口准确、元数据有效、源码执行前后不变。
+
+正式工作流 [`32042446422`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32042446422) 已在提交 `cf821a0dae803f523697c75888375feef9724145` 上使用 Linux、Python 3.11 与 DGL 1.1.3 通过。五个图算子判定案例和九个端到端案例全部通过，包括检查点、原始样本、最终表格和 CSV 字节的精确一致。永久证据记录为 [`pytorch-backend-parity-run-32042446422.json`](evidence/goggle/pytorch-backend-parity-run-32042446422.json)，SHA-256 为 `77a4b3feb289703cbd78d2e03dd8338f2ae45c0eec0833fa6a0f25a769d54640`。
 
 Windows GPU 真实功能已在适配器提交 `0a23a84` 上通过：在没有 DGL 和 PyTorch Geometric 的环境中，使用 PyTorch 2.8.0+cu128 与声明的 RTX 5080 训练了 256 行 Adult 派生夹具，并分别用生成种子 `17`、`29` 产出结构有效且彼此不同的 16 行结果。两次运行均保持 checkpoint 字节不变；第一份结果通过中央 `p3-validity` 评测并完成 Result Bundle 定稿。保留记录见 [`windows-v2-real-function-0a23a84.json`](evidence/goggle/windows-v2-real-function-0a23a84.json)。这只能证明真实功能可运行，不代表生成质量或榜单资格。
 
@@ -122,4 +124,4 @@ python -m standardized_tabular_diffusion.validation.goggle \
 
 ## 尚未完成的门槛
 
-GCN 核心仍保留 `native-parity-validated` 来源结论，当前 Windows 路径已达到 `minimal-real-passed`，但 PyTorch 后端仍需要正式 Linux/DGL 1.1.3 v2 保留证据。Goggle 仍是 `experimental` 和 `unsupported`。正式榜单资格还要求获批数据集、冻结的中央评测协议、代表性规模资源验证和单独准入。除非未来分别实现并验证，否则 SAGE 和异构解码继续保持不支持。
+GCN 核心仍保留 `native-parity-validated` 来源结论，PyTorch 后端现已有正式 Linux/DGL 1.1.3 v2 等价证据，当前 Windows 路径也已达到 `minimal-real-passed`。这只代表依赖兼容重实现的等价门槛已经通过。Goggle 仍是 `experimental` 和 `unsupported`。正式榜单资格还要求获批数据集、冻结的中央评测协议、代表性规模资源验证和单独准入。除非未来分别实现并验证，否则 SAGE 和异构解码继续保持不支持。
