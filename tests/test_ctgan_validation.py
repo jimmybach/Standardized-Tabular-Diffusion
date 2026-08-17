@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -43,13 +45,13 @@ def test_ctgan_package_lock_matches_registry_and_protocol() -> None:
     assert source_lock["license"] == ctgan_validation.LICENSE_EXPRESSION
 
 
-def test_retained_ctgan_evidence_is_immutable_and_complete() -> None:
+def test_retained_ctgan_v1_evidence_is_immutable_and_complete() -> None:
     evidence_bytes = EVIDENCE_PATH.read_bytes()
     evidence = json.loads(evidence_bytes)
 
     assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
     assert evidence["status"] == "pass"
-    assert evidence["protocol_id"] == ctgan_validation.PROTOCOL_ID
+    assert evidence["protocol_id"] == "ctgan-native-parity-v1"
     assert evidence["repository_commit"] == "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e"
     assert evidence["environment"]["platform"].startswith("Linux-")
     assert evidence["environment"]["python"] == "3.11.15"
@@ -112,3 +114,49 @@ def test_ctgan_parity_gate_requires_every_comparison() -> None:
     assert ctgan_validation._case_passed(comparisons) is True
     comparisons["samples"]["frame_exact"] = False
     assert ctgan_validation._case_passed(comparisons) is False
+
+
+def test_ctgan_native_control_reseeds_loaded_model_for_independent_sampling(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import pandas as pd
+
+    class FakeCTGAN:
+        instances: list[FakeCTGAN] = []
+
+        def __init__(self, **_kwargs: object) -> None:
+            self.seeds: list[int] = []
+            self.__class__.instances.append(self)
+
+        def set_random_state(self, seed: int) -> None:
+            self.seeds.append(seed)
+
+        def fit(self, _frame: pd.DataFrame, *, discrete_columns: list[str]) -> None:
+            assert discrete_columns == ["category"]
+
+        @staticmethod
+        def save(path: Path) -> None:
+            path.write_bytes(b"checkpoint")
+
+        @staticmethod
+        def sample(rows: int) -> pd.DataFrame:
+            return pd.DataFrame({"value": range(rows), "category": ["a"] * rows})
+
+    monkeypatch.setitem(sys.modules, "ctgan", SimpleNamespace(CTGAN=FakeCTGAN))
+    monkeypatch.setattr(
+        ctgan_validation,
+        "_load_official",
+        lambda _path: FakeCTGAN.instances[-1],
+    )
+
+    _model, samples, _artifacts = ctgan_validation._run_native(
+        pd.DataFrame({"value": [1, 2], "category": ["a", "b"]}),
+        ["category"],
+        tmp_path / "native",
+        train_seed=17,
+        sample_seed=83,
+    )
+
+    assert FakeCTGAN.instances[-1].seeds == [17, 83]
+    assert len(samples) == ctgan_validation.EXPECTED_SAMPLE_ROWS

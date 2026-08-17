@@ -21,7 +21,7 @@ import pandas as pd
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter
 
-PROTOCOL_ID = "ctgan-native-parity-v1"
+PROTOCOL_ID = "ctgan-native-parity-v2"
 PACKAGE_NAME = "ctgan"
 PACKAGE_VERSION = "0.12.1"
 WHEEL_FILENAME = "ctgan-0.12.1-py3-none-any.whl"
@@ -32,7 +32,11 @@ UPSTREAM_COMMIT = "826da23f8f9385ad15fd206ecad691e04cb0ccdc"
 UPSTREAM_TREE = "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
 LICENSE_EXPRESSION = "BUSL-1.1"
 EXPECTED_SAMPLE_ROWS = 12
-SEED_CASES = (0, 19, 73)
+# Each case deliberately uses a different training and sampling seed.  The
+# adapter contract treats sampling as an independently reproducible action,
+# so the native control must exercise the same public set_random_state API
+# immediately before generation.
+SEED_CASES = ((0, 101), (19, 7), (73, 29))
 EXPECTED_DISTRIBUTION_VERSIONS = {
     "Faker": "37.12.0",
     "ctgan": "0.12.1",
@@ -247,17 +251,19 @@ def _run_native(
     frame: pd.DataFrame,
     discrete_columns: list[str],
     output_dir: Path,
-    seed: int,
+    train_seed: int,
+    sample_seed: int,
 ) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
     from ctgan import CTGAN
 
     output_dir.mkdir(parents=True, exist_ok=True)
     model = CTGAN(**_constructor_kwargs())
-    model.set_random_state(seed)
+    model.set_random_state(train_seed)
     model.fit(frame.copy(), discrete_columns=discrete_columns)
     checkpoint = output_dir / "model.pkl"
     model.save(checkpoint)
     loaded = _load_official(checkpoint)
+    loaded.set_random_state(sample_seed)
     samples = loaded.sample(EXPECTED_SAMPLE_ROWS)
     sample_path = output_dir / "samples.csv"
     samples.to_csv(sample_path, index=False)
@@ -273,7 +279,8 @@ def _run_adapter(
     repo_root: Path,
     dataset_spec: DatasetSpec,
     output_dir: Path,
-    seed: int,
+    train_seed: int,
+    sample_seed: int,
 ) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
     adapter = CTGANAdapter(repo_root)
     common = {
@@ -281,10 +288,9 @@ def _run_adapter(
         "dataset": dataset_spec.name,
         "output_dir": output_dir,
         "device": "cpu",
-        "seed": seed,
         "extra": _adapter_extra(dataset_spec),
     }
-    train_bundle = adapter.train(RunSpec(**common))
+    train_bundle = adapter.train(RunSpec(**common, seed=train_seed))
     train_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
     checkpoint = output_dir / adapter.checkpoint_filename
     sampled_models: list[Any] = []
@@ -296,7 +302,9 @@ def _run_adapter(
         return model
 
     adapter._load_model = capture_loaded_model  # type: ignore[method-assign]
-    sample_bundle = adapter.sample(RunSpec(**common, num_samples=EXPECTED_SAMPLE_ROWS))
+    sample_bundle = adapter.sample(
+        RunSpec(**common, seed=sample_seed, num_samples=EXPECTED_SAMPLE_ROWS)
+    )
     sample_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("CTGAN adapter did not declare a generated sample path")
@@ -509,18 +517,21 @@ def run_validation(
     frame, dataset_spec, fixture = _write_fixture(output_dir / "fixture")
     discrete_columns = [*dataset_spec.categorical_columns, *dataset_spec.target_columns]
     cases: list[dict[str, Any]] = []
-    for seed in SEED_CASES:
+    for train_seed, sample_seed in SEED_CASES:
+        case_dir = output_dir / f"train-{train_seed}-sample-{sample_seed}"
         native_model, native_samples, native_artifacts = _run_native(
             frame,
             discrete_columns,
-            output_dir / f"seed-{seed}" / "native",
-            seed,
+            case_dir / "native",
+            train_seed,
+            sample_seed,
         )
         adapter_model, adapter_samples, adapter_artifacts = _run_adapter(
             repo_root,
             dataset_spec,
-            output_dir / f"seed-{seed}" / "adapter",
-            seed,
+            case_dir / "adapter",
+            train_seed,
+            sample_seed,
         )
         comparisons = {
             "adapter_manifests_valid": adapter_artifacts["manifests_valid"],
@@ -532,7 +543,8 @@ def run_validation(
         }
         cases.append(
             {
-                "seed": seed,
+                "train_seed": train_seed,
+                "sample_seed": sample_seed,
                 "status": "pass" if _case_passed(comparisons) else "fail",
                 "native_artifacts": native_artifacts,
                 "adapter_artifacts": adapter_artifacts,
@@ -562,7 +574,10 @@ def run_validation(
             "discriminator_dim": list(_constructor_kwargs()["discriminator_dim"]),
             "sample_rows": EXPECTED_SAMPLE_ROWS,
         },
-        "seed_cases": list(SEED_CASES),
+        "seed_cases": [
+            {"train_seed": train_seed, "sample_seed": sample_seed}
+            for train_seed, sample_seed in SEED_CASES
+        ],
         "cases": cases,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
