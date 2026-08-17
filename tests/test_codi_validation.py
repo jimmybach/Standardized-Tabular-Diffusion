@@ -121,7 +121,12 @@ def test_codi_cpu_proxy_exposes_one_logical_loader_device_without_global_patch()
     assert original.cuda.device_count() == 8
 
 
-def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_path: Path, monkeypatch) -> None:
+@pytest.mark.parametrize("with_dataset_identity", [False, True])
+def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(
+    tmp_path: Path,
+    monkeypatch,
+    with_dataset_identity: bool,
+) -> None:
     _write_dataset(tmp_path)
     adapter = CoDiAdapter(tmp_path)
     source = _source_record(tmp_path)
@@ -163,6 +168,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
 
     monkeypatch.setattr(adapter, "_run_codi", fake_run)
     output_dir = tmp_path / "artifacts" / "codi"
+    dataset_extra = {"dataset_identity": {"test": True}} if with_dataset_identity else {}
     adapter.train(
         RunSpec(
             model="codi",
@@ -170,7 +176,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
             output_dir=output_dir,
             device="cpu",
             seed=19,
-            extra={**_small_config(), "dataset_identity": {"test": True}},
+            extra={**_small_config(), **dataset_extra},
         )
     )
     bundle = adapter.sample(
@@ -181,7 +187,7 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
             device="cpu",
             seed=19,
             num_samples=5,
-            extra={"num_threads": 1, "dataset_identity": {"test": True}},
+            extra={"num_threads": 1, **dataset_extra},
         )
     )
 
@@ -193,10 +199,16 @@ def test_codi_adapter_confines_checkpoint_pair_and_honors_requested_rows(tmp_pat
     assert metadata["source"]["runtime_files_verified"] == 24
     assert metadata["training_config"]["encoder_dim_con"] == [8, 8]
     assert sample_metadata["rows"] == 5
-    assert sample_metadata["integer_decoding"]["num"]["changed_rows"] == 5
-    assert sample_metadata["integer_decoding"]["num"]["clipped_rows"] == 0
-    assert pd.read_csv(output_dir / "samples.csv")["num"].tolist() == [2] * 5
-    assert pd.read_csv(output_dir / "codi-native-samples.csv")["num"].tolist() == [1.5] * 5
+    if with_dataset_identity:
+        assert sample_metadata["integer_decoding"]["num"]["changed_rows"] == 5
+        assert sample_metadata["integer_decoding"]["num"]["clipped_rows"] == 0
+        assert pd.read_csv(output_dir / "samples.csv")["num"].tolist() == [2] * 5
+        assert pd.read_csv(output_dir / "codi-native-samples.csv")["num"].tolist() == [1.5] * 5
+    else:
+        assert sample_metadata["integer_decoding"] == {}
+        assert sample_metadata["native_sample_path"] is None
+        assert pd.read_csv(output_dir / "samples.csv")["num"].tolist() == [1.5] * 5
+        assert not (output_dir / "codi-native-samples.csv").exists()
     assert bundle.generated_sample_path == output_dir.resolve() / "samples.csv"
     assert commands[1][commands[1].index("--num-samples") + 1] == "5"
 

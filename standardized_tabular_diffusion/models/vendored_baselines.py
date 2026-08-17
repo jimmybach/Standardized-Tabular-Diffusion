@@ -729,7 +729,6 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._prepare_output(spec)
         dataset = self._validate_dataset(spec.dataset)
         dataset_binding = None
-        dataset_spec = None
         if "dataset_identity" in spec.extra:
             dataset_spec = self.resolve_dataset_spec(spec)
             dataset_binding = bind_native_dataset_view(
@@ -804,6 +803,7 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._prepare_output(spec)
         dataset = self._validate_dataset(spec.dataset)
         dataset_binding = None
+        dataset_spec = None
         if "dataset_identity" in spec.extra:
             dataset_spec = self.resolve_dataset_spec(spec)
             dataset_binding = bind_native_dataset_view(
