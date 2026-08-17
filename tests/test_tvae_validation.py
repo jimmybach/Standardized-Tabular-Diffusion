@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import standardized_tabular_diffusion.validation.tvae as tvae_validation
 from standardized_tabular_diffusion.registry import get_adapter_spec
@@ -99,3 +101,49 @@ def test_tvae_parity_gate_requires_every_comparison() -> None:
     assert tvae_validation._case_passed(comparisons) is True
     comparisons["model"]["decoder"]["sigma_finite"] = False
     assert tvae_validation._case_passed(comparisons) is False
+
+
+def test_tvae_native_control_reseeds_loaded_model_for_independent_sampling(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    import pandas as pd
+
+    class FakeTVAE:
+        instances: list[FakeTVAE] = []
+
+        def __init__(self, **_kwargs: object) -> None:
+            self.seeds: list[int] = []
+            self.__class__.instances.append(self)
+
+        def set_random_state(self, seed: int) -> None:
+            self.seeds.append(seed)
+
+        def fit(self, _frame: pd.DataFrame, *, discrete_columns: list[str]) -> None:
+            assert discrete_columns == ["category"]
+
+        @staticmethod
+        def save(path: Path) -> None:
+            path.write_bytes(b"checkpoint")
+
+        @staticmethod
+        def sample(rows: int) -> pd.DataFrame:
+            return pd.DataFrame({"value": range(rows), "category": ["a"] * rows})
+
+    monkeypatch.setitem(sys.modules, "ctgan", SimpleNamespace(TVAE=FakeTVAE))
+    monkeypatch.setattr(
+        tvae_validation,
+        "_load_official",
+        lambda _path: FakeTVAE.instances[-1],
+    )
+
+    _model, samples, _artifacts = tvae_validation._run_native(
+        pd.DataFrame({"value": [1, 2], "category": ["a", "b"]}),
+        ["category"],
+        tmp_path / "native",
+        train_seed=17,
+        sample_seed=83,
+    )
+
+    assert FakeTVAE.instances[-1].seeds == [17, 83]
+    assert len(samples) == tvae_validation.EXPECTED_SAMPLE_ROWS
