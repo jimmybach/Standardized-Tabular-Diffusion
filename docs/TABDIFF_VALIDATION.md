@@ -2,7 +2,7 @@
 
 Status: native parity validated; configurable-seed and Windows/Adult real-function validation passed
 
-Protocols: `tabdiff-native-parity-v1`, `tabdiff-adult-real-function-windows-v1`
+Protocols: `tabdiff-native-parity-v2`, `tabdiff-adult-real-function-windows-v1`
 
 ## Claim boundary
 
@@ -31,11 +31,15 @@ The tracked `TabDiff-main` source remains unchanged. The adapter applies only fa
 
 The adapter also maps CPU/CUDA devices, enables deterministic execution, disables online logging by default, isolates each seed's copied `samples.csv`, records run identities, and requires explicit trust before loading external PyTorch checkpoints.
 
+The current adapter treats the verified upstream checkout as read-only. It materializes a byte-verified model data tree and the official metrics view (`real.csv`, `test.csv`, and optional `val.csv`) beneath `output_dir/tabdiff-runtime`. Training and sampling share that run-owned workspace and its internal checkpoint. Reusing a data view succeeds only when every file still matches its registered canonical source; links, unexpected entries, and changed bytes fail closed.
+
 ## Seed and native-parity validation
 
-The original Linux/Python 3.11/PyTorch 2.3 CPU protocol compares isolated native and adapter executions using the same mixed-type fixture and bounded runtime TOML. It requires exact cached configuration, checkpoint tensors, generated CSV bytes, and upstream metrics. That protocol passed in [GitHub Actions run 30866879879](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879); the immutable evidence remains at `docs/evidence/tabdiff/native-parity-run-30866879879.json`.
+The current V2 Linux/Python 3.11/PyTorch 2.3 CPU protocol compares isolated native and adapter executions using the same mixed-type fixture and bounded runtime TOML. The adapter path uses the same registered-data and shared run-owned train/sample workspace as the public pipeline. It snapshots both action manifests and requires exact cached configuration, checkpoint tensors, training samples, generated CSV bytes, and upstream metrics.
 
 The extended protocol preserves seed-0 exactness and adds configurable-seed checks: the same nonzero seed must reproduce exact bytes, a different seed must produce different bytes, and every run record must retain the effective seed. Native-parity diagnostics may explicitly bypass standardized integer-output enforcement because they compare the official default configuration, whose `dequant_dist="none"` intentionally does not round integer columns.
+
+V2 passed in [GitHub Actions run 32058517599](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599) at repository commit `bf3869776fbc975052426732dbd6a167566124f4`. The retained artifact ID is `9297294246`, with digest `sha256:45a6d26f32a18d1b79281ac57873e517c62ebb15d71a8d6d0a6754702dbf4b32`. Its permanent evidence copy is `docs/evidence/tabdiff/native-parity-run-32058517599.json`, SHA-256 `d4630b50924e345a112fc4ff717e27dd15f930e1a6069db7b43dadf5f0479a19`.
 
 ## Integer restoration finding
 

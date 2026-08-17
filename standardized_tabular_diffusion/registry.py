@@ -442,7 +442,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABDIFF_VALIDATION.md",
-            "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+            "docs/evidence/tabdiff/native-parity-run-32058517599.json",
             "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
             "docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json",
             "configs/validation/tabdiff-adult-real-function-v1.toml",

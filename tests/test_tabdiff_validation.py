@@ -25,7 +25,7 @@ from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.validation.tabdiff import MANIFEST_RELATIVE_PATH, verify_sources
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabdiff" / "native-parity-run-30866879879.json"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabdiff" / "native-parity-run-32058517599.json"
 REAL_FUNCTION_EVIDENCE_PATH = (
     REPO_ROOT / "docs" / "evidence" / "tabdiff" / "adult-real-function-windows-rtx5080-20260814.json"
 )
@@ -56,10 +56,12 @@ def test_tabdiff_native_parity_evidence_is_complete_and_immutable() -> None:
     evidence = json.loads(evidence_bytes)
 
     assert (
-        hashlib.sha256(evidence_bytes).hexdigest() == "d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234"
+        hashlib.sha256(evidence_bytes).hexdigest() == "d4630b50924e345a112fc4ff717e27dd15f930e1a6069db7b43dadf5f0479a19"
     )
+    assert evidence["protocol_id"] == "tabdiff-native-parity-v2"
     assert evidence["status"] == "pass"
-    assert evidence["repository_commit"] == "230adafe96dc7ec224bada220e1ee184972b61ad"
+    assert evidence["repository_commit"] == "bf3869776fbc975052426732dbd6a167566124f4"
+    assert Path(evidence["adapter_run_root"]).name == "run"
     comparisons = evidence["comparisons"]
     assert comparisons["config_exact"] is True
     assert comparisons["checkpoint"]["tensor_values_exact"] is True
@@ -69,6 +71,8 @@ def test_tabdiff_native_parity_evidence_is_complete_and_immutable() -> None:
     assert comparisons["training_metrics_exact"] is True
     assert comparisons["generated_metrics_exact"] is True
     assert comparisons["adapter_manifests_valid"] is True
+    assert comparisons["configurable_seed"]["same_seed_exact_bytes"] is True
+    assert comparisons["configurable_seed"]["different_seed_varies"] is True
 
 
 def test_tabdiff_adult_real_function_evidence_is_complete_and_immutable() -> None:

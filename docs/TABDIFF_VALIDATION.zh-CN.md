@@ -2,7 +2,7 @@
 
 状态：已完成原生一致性验证；可配置随机种子与 Windows/Adult 真实功能验证均已通过
 
-协议：`tabdiff-native-parity-v1`、`tabdiff-adult-real-function-windows-v1`
+协议：`tabdiff-native-parity-v2`、`tabdiff-adult-real-function-windows-v1`
 
 ## 声明边界
 
@@ -31,11 +31,15 @@
 
 适配器还负责 CPU/CUDA 映射、确定性执行、默认关闭在线日志、把不同种子的 `samples.csv` 隔离到各自目录、记录实际运行身份，以及在加载外部 PyTorch checkpoint 前要求明确的信任授权。
 
+当前适配器把已验证的上游源码副本视为只读。它在 `output_dir/tabdiff-runtime` 下建立经过逐字节校验的模型数据树，以及官方指标需要的视图（`real.csv`、`test.csv` 和可选 `val.csv`）。训练与采样共享这个运行自有工作区及其内部 checkpoint。复用数据视图时，只有全部文件仍与注册的规范数据源一致才会继续；符号链接、意外文件或字节变化都会立即报错。
+
 ## 随机种子与原生一致性
 
-原 Linux + Python 3.11 + PyTorch 2.3 CPU 协议会在两个隔离副本中，用完全相同的混合类型夹具和缩短 TOML 对比原生命令与适配器。缓存配置、checkpoint 张量、生成 CSV 字节和上游指标都必须严格一致。该协议已在 [GitHub Actions run 30866879879](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879) 通过；不可变证据保存在 `docs/evidence/tabdiff/native-parity-run-30866879879.json`。
+当前 V2 Linux + Python 3.11 + PyTorch 2.3 CPU 协议会在两个隔离副本中，用完全相同的混合类型夹具和缩短 TOML 对比原生命令与适配器。适配器路径与公开 pipeline 一样，使用已注册数据和训练/采样共享的运行自有工作区。协议会分别快照两个动作的清单，并要求缓存配置、checkpoint 张量、训练样本、生成 CSV 字节和上游指标全部严格一致。
 
 扩展协议在保持 seed 0 严格一致的同时，增加了可配置种子检查：相同非零种子必须得到字节完全一致的样本，不同种子必须产生不同样本，每份运行记录必须保存实际种子。由于官方默认 `dequant_dist="none"` 明确不会还原整数列，原生一致性诊断可以显式绕过标准整数输出门；这个绕过不能用于标准化结果。
+
+V2 已在 [GitHub Actions run 32058517599](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599) 通过，对应仓库提交 `bf3869776fbc975052426732dbd6a167566124f4`。保留产物 ID 为 `9297294246`，摘要为 `sha256:45a6d26f32a18d1b79281ac57873e517c62ebb15d71a8d6d0a6754702dbf4b32`。永久证据副本位于 `docs/evidence/tabdiff/native-parity-run-32058517599.json`，文件 SHA-256 为 `d4630b50924e345a112fc4ff717e27dd15f930e1a6069db7b43dadf5f0479a19`。
 
 ## 整数还原问题及修复
 

@@ -180,7 +180,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabsds": "docs/evidence/tabsds/native-parity-run-30974574593.json",
         "tabddpm": "docs/evidence/tabddpm/native-parity-run-32045685956.json",
-        "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "tabdiff": "docs/evidence/tabdiff/native-parity-run-32058517599.json",
         "tabularargn": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
         "tabula": "docs/evidence/tabula/native-parity-run-30974574505.json",
         "tabsyn": "docs/evidence/tabsyn/native-parity-run-32055783087.json",
