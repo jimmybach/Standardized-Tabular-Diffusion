@@ -235,6 +235,13 @@ def _run_native(
         sample_model = _construct_native(GoggleModel, execution)
         state = torch.load(checkpoint, map_location="cpu", weights_only=True)
         sample_model.model.load_state_dict(state)
+        # Match the adapter's declared generation boundary. Constructing the
+        # upstream model resets and then consumes the training RNG while it
+        # initializes parameters, even though those parameters are immediately
+        # replaced by the checkpoint. Reapply the requested sampling seed so
+        # this DGL oracle and the PyTorch candidate exercise the same unchanged
+        # stochastic sampler from the same RNG state.
+        _seed_native(execution["seed"])
         raw = sample_model.model.sample(EXPECTED_SAMPLE_ROWS).detach().cpu().numpy()
     return checkpoint, raw
 
@@ -569,8 +576,7 @@ def run_validation(
                             np.isfinite(adapter_frame[["first", "second"]].to_numpy()).all()
                         ),
                         "adapter_metadata_valid": metadata_valid,
-                        "adapter_source_remained_exact": source_after["manifest_sha256"]
-                        == source["manifest_sha256"],
+                        "adapter_source_remained_exact": source_after["manifest_sha256"] == source["manifest_sha256"],
                         "adapter_checkpoint_outside_source": source_pure,
                     },
                 }
@@ -597,6 +603,7 @@ def run_validation(
             "runtime_graph_backend": f"{BACKEND_ID}@{BACKEND_VERSION}",
             "reference_graph_backend": f"DGL {DGL_SEMANTIC_TARGET}",
             "sampling_target": "official Goggle.model.sample before centralized inverse transformation",
+            "sampling_seed_boundary": "reapplied after model construction and checkpoint loading",
         },
         "seed_cases": list(SEED_CASES),
         "variants": list(VARIANTS),

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from argparse import Namespace
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +18,7 @@ from standardized_tabular_diffusion.compat.goggle_torch_graph import (
     batch,
     graph,
 )
+from standardized_tabular_diffusion.validation import goggle as goggle_validation
 
 
 def _fixture_graph():
@@ -141,6 +143,54 @@ def test_goggle_launcher_reapplies_generation_seed_after_model_construction(tmp_
     seed_17_second = sample(17, "seed-17-second.npy")
     assert not torch.equal(seed_17_first, seed_29)
     assert torch.equal(seed_17_first, seed_17_second)
+
+
+def test_goggle_dgl_oracle_reapplies_the_same_generation_seed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import pandas as pd
+
+    class Core:
+        @staticmethod
+        def load_state_dict(_state_dict):
+            return None
+
+        @staticmethod
+        def sample(rows: int):
+            return torch.randn(rows, 3)
+
+    class Model:
+        def __init__(self, **kwargs):
+            torch.manual_seed(kwargs["seed"])
+            torch.randn(11)
+            self.dataset = kwargs["ds_name"]
+            self.model = Core()
+
+        def fit(self, _frame):
+            checkpoint_dir = Path("tmp")
+            checkpoint_dir.mkdir()
+            torch.save({}, checkpoint_dir / f"{self.dataset}.pt")
+
+    @contextmanager
+    def fake_import_boundary(_source_root: Path, *, graph_backend: str):
+        assert graph_backend == "dgl-reference"
+        yield Model
+
+    monkeypatch.setattr(goggle_validation, "_official_import_boundary", fake_import_boundary)
+    execution = {
+        **goggle_validation._adapter_config(),
+        "dataset": "fixture",
+        "input_dim": 3,
+        "seed": 29,
+    }
+    _, observed = goggle_validation._run_native(
+        tmp_path / "source",
+        tmp_path / "native-output",
+        pd.DataFrame(np.zeros((4, 3))),
+        execution,
+    )
+    torch.manual_seed(29)
+    expected = torch.randn(goggle_validation.EXPECTED_SAMPLE_ROWS, 3).numpy()
+
+    assert np.array_equal(observed, expected)
 
 
 def test_goggle_graphconv_matches_dgl_forward_gradients_and_state_contract() -> None:
