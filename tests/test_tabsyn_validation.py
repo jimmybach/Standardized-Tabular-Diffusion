@@ -17,7 +17,7 @@ from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpe
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsyn" / "native-parity-run-30871758645.json"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsyn" / "native-parity-run-32055783087.json"
 
 
 def test_tabsyn_scheduler_bridge_removes_only_the_logging_keyword() -> None:
@@ -86,11 +86,12 @@ def test_tabsyn_scoped_sources_match_frozen_official_manifest() -> None:
 
 def test_tabsyn_retained_native_parity_evidence_is_exact_and_complete() -> None:
     assert hashlib.sha256(EVIDENCE_PATH.read_bytes()).hexdigest() == (
-        "3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089"
+        "8cbfa66a57b99e5f9fdb0381b21b02eb9f5b062a4f8e4f1ef13de24be3862e48"
     )
     evidence = json.loads(EVIDENCE_PATH.read_text(encoding="utf-8"))
+    assert evidence["protocol_id"] == "tabsyn-native-parity-v2"
     assert evidence["status"] == "pass"
-    assert evidence["repository_commit"] == "54d419642842d7146d6afa4aa1b3d5167301c51c"
+    assert evidence["repository_commit"] == "4668853b5d0acf7bff779453fb1a6e67f5838384"
     assert evidence["seed_cases"] == [0, 19, 73]
     assert [case["status"] for case in evidence["cases"]] == ["pass", "pass", "pass"]
     for case in evidence["cases"]:
@@ -98,6 +99,7 @@ def test_tabsyn_retained_native_parity_evidence_is_exact_and_complete() -> None:
         assert comparisons["adapter_manifests_valid"] is True
         assert comparisons["latent_embeddings"]["exact"] is True
         assert comparisons["samples"]["exact_bytes"] is True
+        assert Path(case["adapter_run_root"]).name == "run"
         assert all(
             checkpoint["keys_exact"] and checkpoint["tensor_values_exact"]
             for checkpoint in comparisons["checkpoints"].values()

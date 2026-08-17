@@ -431,7 +431,7 @@ pytest tests/test_reproducibility.py tests/test_adapters.py
 ## Notes
 
 - Adapter-local evaluation is retired; TabDiff, TabSyn, TabDDPM, and every other public adapter path use the same central protocol engine after sample generation.
-- `TabSyn` uses an unmodified, checksum-frozen official source scope. Device, seed, row-count, and sampling-step controls are isolated in the repository-owned invocation boundary, and three exact seed cases passed the retained native-parity protocol.
+- `TabSyn` uses an unmodified, checksum-frozen official source scope. Device, seed, row-count, and sampling-step controls are isolated in the repository-owned invocation boundary. Three exact seed cases passed the current run-owned-workspace V2 protocol in [GitHub Actions run `32055783087`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087).
 - Some upstream code has been patched locally to support standardization and reproducibility; these changes should be treated as part of the benchmark integration layer unless they are later upstreamed.
 - This layer still tries to minimize changes to the original research code unless standardization or reproducibility requires them.
 - The broader baseline roadmap and literature map now live in `docs/tabular_generation_landscape.md`.

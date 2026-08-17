@@ -2,7 +2,7 @@
 
 Status: passed on Linux/Python 3.11; native parity validated
 
-Protocol ID: `tabsyn-native-parity-v1`
+Protocol ID: `tabsyn-native-parity-v2`
 
 Supported validation platform: Linux, Python 3.11, PyTorch 2.3 CPU
 
@@ -32,7 +32,7 @@ The repository-owned launcher imports and calls the official implementation and 
 - VAE and diffusion training still use the official hard-coded training schedules and architecture;
 - former local VAE/diffusion epoch controls are rejected because the official source does not expose them;
 - explicit external checkpoint paths are rejected because official TabSyn uses a coupled fixed VAE/diffusion layout; and
-- internal latent and PyTorch checkpoint paths must be regular, non-symlinked files inside the TabSyn worktree.
+- internal latent and PyTorch checkpoint paths must be regular, non-symlinked files inside the declared run-owned `tabsyn-runtime` directory.
 
 PyTorch 2.8 removed the logging-only `verbose` parameter from `ReduceLROnPlateau`, while the frozen VAE and diffusion entrypoints still pass it. The isolated launcher drops only that keyword on the V2 runtime, forwards every mathematical scheduler argument unchanged, restores the original class after each official call, and never edits the checksum-locked upstream files.
 
@@ -40,7 +40,7 @@ The official inverse transform may return fractional values for columns that the
 
 The official VAE and diffusion entrypoints hard-code four DataLoader workers. Recreating those workers in every one of 4,000 VAE epochs causes extreme process-spawn overhead on Windows without changing model mathematics. The V2 preset therefore selects `num_workers=0` through a scoped DataLoader-construction bridge already used by the native-parity protocol. Batch size, shuffling, all 4,000/10,001 epoch limits, losses, optimizer, scheduler, and checkpoints remain official and unchanged; the original DataLoader class is restored after each stage.
 
-Sampling uses PyTorch serialization files, which can execute code during loading. Only checkpoints produced or deliberately placed inside the audited TabSyn worktree should be used, and their provenance must be verified before execution.
+Sampling uses PyTorch serialization files, which can execute code during loading. Only checkpoints produced inside the declared run-owned workspace should be used, and their provenance and recorded digests must be verified before execution.
 
 ## Frozen environment
 
@@ -62,6 +62,8 @@ For each seed in `0`, `19`, and `73`, the protocol creates two isolated copies f
 Official TabSyn hard-codes 4,000 VAE epochs, 10,001 diffusion epochs, four data-loader workers, a 1,024-wide diffusion MLP, and a CUDA-default sampler call. After source integrity succeeds, both disposable copies receive identical predeclared execution overrides: two VAE epochs, two diffusion epochs, zero workers, diffusion width 64, four sampling steps, 12 output rows, and explicit CPU device propagation. These bounded controls are never written to tracked upstream source. They make real CI execution feasible while preserving identical official functions and mathematics on both comparison paths. The fixture is an execution/parity case, not a model-quality benchmark.
 
 The native path calls the official root `main.py` for VAE training, diffusion training, and sampling. A validation-only `sitecustomize.py` initializes the selected seed before the official entrypoint runs. The adapter path calls the repository launcher with the same seed and runtime controls. For every seed, all of the following must pass:
+
+Protocol V2 runs adapter training and sampling in one shared run-owned `output_dir`, exactly as the public pipeline does. The training artifact manifest is snapshotted before the sample action updates the run manifest. All adapter checkpoints are then compared from `output_dir/tabsyn-runtime`; no mutable model artifact is read from or written to the verified upstream source checkout.
 
 1. all 20 scoped source hashes match the pinned manifest;
 2. the native and adapter runtime overrides are identical;
@@ -87,6 +89,6 @@ python -m standardized_tabular_diffusion.validation.tabsyn \
 
 `.github/workflows/tabsyn-validation.yml` executes this command and retains the JSON evidence for 90 days. Any later source, dependency, adapter-command, or protocol change invalidates the record and requires another run.
 
-The protocol passed in [GitHub Actions run 30871758645](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645) at repository commit `54d419642842d7146d6afa4aa1b3d5167301c51c`. The retained artifact ID is `8878140935`, with digest `sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c`. An exact permanent copy is stored at `docs/evidence/tabsyn/native-parity-run-30871758645.json` with file SHA-256 `3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089`.
+Protocol V2 passed in [GitHub Actions run 32055783087](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087) at repository commit `4668853b5d0acf7bff779453fb1a6e67f5838384`. The retained artifact ID is `9296369638`, with digest `sha256:1e5a8a6563a4ee05cbd77ad5567ff07f9dd50e5503d3d8198a4583705f6a8920`. An exact permanent copy is stored at `docs/evidence/tabsyn/native-parity-run-32055783087.json` with file SHA-256 `8cbfa66a57b99e5f9fdb0381b21b02eb9f5b062a4f8e4f1ef13de24be3862e48`.
 
 Accordingly, TabSyn is `native-parity-validated` while remaining `experimental`, `unsupported`, and ineligible for Official Results until the separate dataset, central-evaluation, governance, runtime, and release gates pass.

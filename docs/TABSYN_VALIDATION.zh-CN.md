@@ -2,7 +2,7 @@
 
 状态：已在 Linux/Python 3.11 通过；已完成原生一致性验证
 
-协议 ID：`tabsyn-native-parity-v1`
+协议 ID：`tabsyn-native-parity-v2`
 
 支持的验证平台：Linux、Python 3.11、PyTorch 2.3 CPU
 
@@ -32,7 +32,7 @@
 - VAE 与扩散训练仍使用官方硬编码的正式训练周期和模型结构；
 - 由于官方源码没有暴露 VAE/扩散 epoch 参数，适配器会拒绝以前的本地 epoch 控制；
 - 官方 TabSyn 使用耦合的固定 VAE/扩散检查点目录，因此拒绝显式外部 `checkpoint_path`；
-- 内部潜变量与 PyTorch 检查点必须是 TabSyn 工作树内的普通文件，不能是符号链接。
+- 内部潜变量与 PyTorch 检查点必须是所声明运行目录下 `tabsyn-runtime` 中的普通文件，不能是符号链接。
 
 PyTorch 2.8 删除了 `ReduceLROnPlateau` 中只控制日志的 `verbose` 参数，而冻结的 VAE 和扩散入口仍会传入它。隔离启动器在 V2 运行时只移除这一个关键字，其余影响调度数学行为的参数全部原样转发；每次官方调用结束后恢复原始类，并且绝不修改校验和锁定的上游文件。
 
@@ -40,7 +40,7 @@ PyTorch 2.8 删除了 `ReduceLROnPlateau` 中只控制日志的 `verbose` 参数
 
 官方 VAE 和扩散入口将 DataLoader worker 数硬编码为 4。在 Windows 上，4,000 个 VAE epoch 每轮重新创建 worker 会产生极大的进程启动开销，但不会改变模型数学。V2 预设因此通过原生一致性协议已经使用过的局部 DataLoader 构造桥接选择 `num_workers=0`。batch size、shuffle、全部 4,000/10,001 epoch 上限、loss、optimizer、scheduler 和 checkpoint 均保持官方行为不变；每个阶段结束后都会恢复原始 DataLoader 类。
 
-采样会加载 PyTorch 序列化文件，而这类文件在加载时可能执行代码。只应使用在已审计 TabSyn 工作树中生成或经明确放置的检查点，并在执行前核验来源。
+采样会加载 PyTorch 序列化文件，而这类文件在加载时可能执行代码。只应使用在所声明运行自有工作区中生成的检查点，并在执行前核验来源和已记录摘要。
 
 ## 冻结环境
 
@@ -62,6 +62,8 @@ python -m pip install --no-deps .
 官方 TabSyn 硬编码了 4,000 个 VAE epoch、10,001 个扩散 epoch、4 个数据加载 worker、宽度 1,024 的扩散 MLP，以及默认指向 CUDA 的采样调用。源码完整性检查通过后，协议只在两份一次性副本中应用完全相同且预先声明的运行控制：2 个 VAE epoch、2 个扩散 epoch、0 个 worker、扩散宽度 64、4 个采样步、12 行输出，并显式传递 CPU 设备。这些控制不会写入仓库跟踪的上游源码；它们使真实 CI 可执行，同时让两条路径使用完全相同的官方函数和数学过程。该夹具只用于运行和一致性验证，不是模型质量 benchmark。
 
 原生路径直接调用官方根目录 `main.py` 完成 VAE 训练、扩散训练和采样；仅验证环境中的 `sitecustomize.py` 会在官方入口执行前设置选定种子。适配器路径使用同一随机种子和运行控制调用仓库启动器。每个随机种子均必须满足：
+
+V2 协议让适配器的训练和采样共享同一个运行自有 `output_dir`，与公开 pipeline 的实际行为完全一致。采样动作更新统一运行清单之前，协议会先快照训练产物清单；随后从 `output_dir/tabsyn-runtime` 比较全部适配器检查点。任何可变模型产物都不会从已验证的上游源码目录读取或写入该目录。
 
 1. 冻结范围内 20 个源码哈希全部匹配；
 2. 原生路径与适配器路径的运行覆盖完全一致；
@@ -87,6 +89,6 @@ python -m standardized_tabular_diffusion.validation.tabsyn \
 
 `.github/workflows/tabsyn-validation.yml` 执行该命令，并保留 JSON 证据 90 天。源码、依赖、适配器命令或协议若发生变化，已有证据立即失效，必须重新运行。
 
-本协议已在 [GitHub Actions run 30871758645](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645) 中通过，对应仓库提交 `54d419642842d7146d6afa4aa1b3d5167301c51c`。保留产物 ID 为 `8878140935`，摘要为 `sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c`。证据的精确永久副本位于 `docs/evidence/tabsyn/native-parity-run-30871758645.json`，文件 SHA-256 为 `3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089`。
+V2 协议已在 [GitHub Actions run 32055783087](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087) 中通过，对应仓库提交 `4668853b5d0acf7bff779453fb1a6e67f5838384`。保留产物 ID 为 `9296369638`，摘要为 `sha256:1e5a8a6563a4ee05cbd77ad5567ff07f9dd50e5503d3d8198a4583705f6a8920`。证据的精确永久副本位于 `docs/evidence/tabsyn/native-parity-run-32055783087.json`，文件 SHA-256 为 `8cbfa66a57b99e5f9fdb0381b21b02eb9f5b062a4f8e4f1ef13de24be3862e48`。
 
 因此，TabSyn 当前状态为 `native-parity-validated`，但仍保持 `experimental` 与 `unsupported`；在数据集、中央评测、治理、运行资源和发布门槛分别通过之前，不得进入 Official Results。

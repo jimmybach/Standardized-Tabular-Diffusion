@@ -534,7 +534,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABSYN_VALIDATION.md",
-            "docs/evidence/tabsyn/native-parity-run-30871758645.json",
+            "docs/evidence/tabsyn/native-parity-run-32055783087.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             "standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json",
             ".github/workflows/tabsyn-validation.yml",
