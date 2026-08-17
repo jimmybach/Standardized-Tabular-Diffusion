@@ -18,6 +18,10 @@ pytestmark = pytest.mark.core
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabula" / "native-parity-run-30974574505.json"
 EVIDENCE_SHA256 = "35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c"
+WINDOWS_EVIDENCE_PATH = (
+    REPO_ROOT / "docs" / "evidence" / "tabula" / "windows-v2-real-function-8d72ee8.json"
+)
+WINDOWS_EVIDENCE_SHA256 = "8bfa58cfde52ab0f4b5d5d61ea42d4b7e1d39818444da550302667534d5d13ec"
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
@@ -118,3 +122,37 @@ def test_tabula_retained_native_parity_evidence_is_exact() -> None:
     assert validation["workflow_run_id"] == 30974574505
     assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
     assert get_adapter_spec("tabula").validation_level.value == "native-parity-validated"
+
+
+def test_tabula_windows_real_function_evidence_is_complete_and_immutable() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    evidence = json.loads(evidence_bytes)
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["model_id"] == "tabula"
+    assert evidence["repository_commit"] == "8d72ee85e85712c473d7fcf9b7eda3a3cbf9cf62"
+    assert evidence["adapter"]["upstream_revision"] == TabulaAdapter.upstream_commit
+    hardware = evidence["environment"]["hardware"]
+    assert hardware["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert hardware["torch"] == "2.8.0+cu128"
+    assert hardware["cuda_available"] is True
+    assert evidence["seed_outputs_distinct"] is True
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert all(sample["rows"] == 4 for sample in evidence["samples"])
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert len({sample["sha256"] for sample in evidence["samples"]}) == 2
+    central = evidence["central_evaluation"]
+    assert central["status"] == "pass"
+    assert central["protocol"] == "p3-validity"
+    assert central["finalization_status"] == "finalized"
+
+    source_lock = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))
+    validation = source_lock["components"]["tabula"]["windows_real_function"]
+    assert validation["status"] == "pass"
+    assert validation["level"] == "minimal-real-passed"
+    assert validation["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert validation["repository_commit"] == evidence["repository_commit"]
+    assert validation["permanent_evidence_path"] in get_adapter_spec("tabula").evidence_records

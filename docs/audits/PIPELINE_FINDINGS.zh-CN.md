@@ -4,7 +4,7 @@
 
 - 状态：持续更新
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
-- 最近同步：2026-08-14
+- 最近同步：2026-08-17
 
 ## 规则
 
@@ -34,6 +34,7 @@
 | RF-CORE-002 | T02 | S1 | 全部 21 个适配器的直接 `run`/`run-action` 路径 | 共享预检和公共 `RunSpec` 现在绑定常规文件状态、字节数和 SHA-256，并拒绝构建后发生的内容变化。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；内容变更回归 | fixed |
 | RF-CORE-003 | T03 | S1 | 全部 21 个适配器的直接 `run`/`run-action` 路径 | 直接输出目录现在携带共享且不可变的数据集身份以及逐动作运行身份；冲突数据、种子或配置会被拒绝，兼容动作可合并到同一声明运行。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；输出身份回归 | fixed |
 | RF-CORE-004 | T04 | S2 | `great` 训练、`tabula` 训练、`nrgboost`、`smote`、`tabddpm`、`tabsds` | CPU-only 适配器拒绝 CUDA；trainer 适配器明确选择并观察设备；TabDDPM 在运行 TOML 中绑定设备并拒绝不可用 CUDA。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；设备回归 | fixed |
+| RF-CORE-005 | T02 | S2 | 公开 `DatasetSpec` 消费者；在 `tabula` Windows 采样和 `show-dataset` 中实际发现 | `DatasetSpec.extra` 内的嵌套 `Path` 会原样跨过公开 JSON 边界，导致规范 Adult 采样在隔离子进程启动前失败。现在公开接口 payload 会递归序列化映射和序列中的路径。 | [TabuLa Windows V2 证据](../evidence/tabula/windows-v2-real-function-8d72ee8.json)；递归接口序列化回归 | verified |
 | RF-INTERNAL-DATA-001 | T02 | S1 | `codi`、`stasy`、`tabddpm`、`tabdiff`、`tabsyn` | 模型原生视图现在按校验和绑定到规范 `DatasetSpec`，或在运行所有权下确定性物化。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；绑定回归 | fixed |
 | RF-TABDDPM-001 | T01 | S1 | `tabddpm` | 经过语义往返校验的运行 TOML 现在绑定训练/变换/采样种子、设备、请求行数、数据和输出，且不修改源 TOML。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；生效 TOML 受控模拟 | fixed |
 | RF-TABDDPM-002 | T03 | S1 | `tabddpm` | 适配器现在校验运行所有检查点、解码按种子隔离的规范表、保留原始数组并公开 `generated_sample_path`。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；TabDDPM 解码回归 | fixed |

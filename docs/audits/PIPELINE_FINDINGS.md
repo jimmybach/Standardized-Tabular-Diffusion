@@ -4,7 +4,7 @@ Chinese translation: [PIPELINE_FINDINGS.zh-CN.md](PIPELINE_FINDINGS.zh-CN.md)
 
 - Status: active ledger
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
-- Last synchronized: 2026-08-14
+- Last synchronized: 2026-08-17
 
 ## Rules
 
@@ -34,6 +34,7 @@ Every new row must include: finding ID, task, severity, affected adapters, obser
 | RF-CORE-002 | T02 | S1 | all 21 adapters through direct `run`/`run-action` | Shared preflight and public `RunSpec` construction now bind regular-file status, byte size, and SHA-256 and reject content changed after construction. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); content-mutation regression | fixed |
 | RF-CORE-003 | T03 | S1 | all 21 adapters through direct `run`/`run-action` | Direct output directories now carry a shared immutable dataset identity plus per-action run identities. Conflicting data, seeds, or configurations are rejected while compatible actions merge into one declared run. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); output-identity regression | fixed |
 | RF-CORE-004 | T04 | S2 | `great` training, `tabula` training, `nrgboost`, `smote`, `tabddpm`, `tabsds` | CPU-only adapters reject CUDA; trainer adapters explicitly select and observe the device; TabDDPM binds the device in runtime TOML and rejects unavailable CUDA. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); device regressions | fixed |
+| RF-CORE-005 | T02 | S2 | public `DatasetSpec` consumers; observed in `tabula` Windows sampling and `show-dataset` | Nested `Path` values in `DatasetSpec.extra` crossed the public JSON boundary unchanged, so canonical Adult sampling failed before the isolated child process started. Public interface payloads now recursively serialize paths in mappings and sequences. | [TabuLa Windows V2 evidence](../evidence/tabula/windows-v2-real-function-8d72ee8.json); recursive interface serialization regression | verified |
 | RF-INTERNAL-DATA-001 | T02 | S1 | `codi`, `stasy`, `tabddpm`, `tabdiff`, `tabsyn` | Model-native views are now checksum-bound to the canonical `DatasetSpec` or deterministically materialized beneath run ownership. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); binding regressions | fixed |
 | RF-TABDDPM-001 | T01 | S1 | `tabddpm` | A semantically round-tripped runtime TOML now binds training/transformation/sample seeds, device, requested rows, data, and output without editing the source TOML. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); controlled effective-TOML simulation | fixed |
 | RF-TABDDPM-002 | T03 | S1 | `tabddpm` | The adapter now validates run-owned checkpoints, decodes a seed-specific canonical table, retains raw arrays, and exposes `generated_sample_path`. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); TabDDPM decode regression | fixed |

@@ -2060,7 +2060,7 @@
           "classification": "adapter-only",
           "id": "tabula-bounded-sampling-v1",
           "reason": "The official sample loop has no retry limit when generated rows repeatedly fail parsing.",
-          "semantic_effect": "Linux execution applies an external wall-clock alarm without changing the loop body; unsupported platforms fail closed unless unbounded execution is explicitly accepted."
+          "semantic_effect": "POSIX execution applies an external wall-clock alarm without changing the loop body; Windows executes the same call in a disposable child process under a parent-enforced hard timeout."
         },
         {
           "classification": "adapter-only",
@@ -2146,6 +2146,20 @@
         },
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505/job/92205832208",
         "workflow_run_id": 30974574505
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "evidence_file_sha256": "8bfa58cfde52ab0f4b5d5d61ea42d4b7e1d39818444da550302667534d5d13ec",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "8d72ee85e85712c473d7fcf9b7eda3a3cbf9cf62",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
       }
     },
     "tabsds": {

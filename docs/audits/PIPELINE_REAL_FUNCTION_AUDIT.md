@@ -2,9 +2,9 @@
 
 Chinese translation: [PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 
-- Status: Phase 2 remediation complete; V2 execution pending
+- Status: Phase 2 remediation complete; V2 execution in progress (2 minimal-real passes retained)
 - Plan version: 1.0
-- Snapshot date: 2026-08-14
+- Snapshot date: 2026-08-17
 - Primary target: native Windows 11 x86-64, Python 3.11, and the requested CUDA device
 - Machine-readable snapshot: [`pipeline-real-function-audit-v1.json`](../../configs/validation/pipeline-real-function-audit-v1.json)
 - Phase 1 report: [Cross-Baseline Logic Audit Report](PHASE_1_LOGIC_AUDIT_REPORT.md)
@@ -27,10 +27,11 @@ The runtime registry contains **21 baselines**:
 - TabEBM is `smoke-validated`; its full generation path requires externally gated TabPFN-v2 access.
 - TabDDPM has a representative native-Windows Adult train/sample run with three generation seeds and finalized P5 bundles.
 - TabDiff has a representative native-Windows Adult train/sample run with three generation seeds and finalized central P2/P3 bundles.
-- The other 18 baselines have not yet passed this new native-Windows cross-cutting real-function audit. `pending` means untested by this plan, not failed.
+- Goggle and TabuLa have each passed the minimal-real native-Windows V2 protocol with two distinct generation seeds, immutable training artifacts, strict decoded-table validation, and finalized central `p3-validity` bundles.
+- The other 16 planned baselines have not yet passed this new native-Windows cross-cutting real-function audit. `pending` means untested by this plan, not failed.
 - SMOTE remains a classification-only classical reference and is excluded from generative-model ranking, but its adapter still receives the same pipeline contract audit.
 
-Phase 1 completed all 84 T01-T04 V0/V1 task/model cells and confirmed ten findings: nine S1 and one S2. Phase 2 fixed all ten root causes and passed the full dependency-light regression suite. Their ledger state remains `fixed`, not `verified`, because no new authoritative V2 execution was performed for every affected model. V2 status and registry lifecycle levels are unchanged.
+Phase 1 completed all 84 T01-T04 V0/V1 task/model cells and confirmed ten findings: nine S1 and one S2. Phase 2 fixed all ten root causes and passed the full dependency-light regression suite. V2 is now proceeding model by model; two minimal-real passes are retained, while finding states that cover additional models remain `fixed` until every applicable real-function probe passes. Registry lifecycle levels are unchanged.
 
 ## 3. Validation layers and claim boundaries
 

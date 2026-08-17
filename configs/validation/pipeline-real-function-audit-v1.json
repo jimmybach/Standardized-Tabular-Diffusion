@@ -1,7 +1,7 @@
 {
   "plan_id": "pipeline-real-function-audit",
   "version": "1.0",
-  "snapshot_date": "2026-08-14",
+  "snapshot_date": "2026-08-17",
   "state_authority": "audit-only; does not replace registry validation, benchmark, or support status",
   "primary_environment": {
     "operating_system": "native Windows 11 x86-64",
@@ -53,7 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_pending": 18,
+    "minimal_real_passed": 2,
+    "minimal_real_pending": 16,
     "externally_blocked": 1
   },
   "baselines": [
@@ -63,7 +64,14 @@
     {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan-plus", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctgan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "goggle", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "goggle",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/goggle/windows-v2-real-function-0a23a84.json"
+      ]
+    },
     {"model_id": "great", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "nflow", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "nrgboost", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
@@ -99,7 +107,14 @@
     },
     {"model_id": "tabsds", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "tabsyn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "tabula", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "tabula",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json"
+      ]
+    },
     {"model_id": "tabularargn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "tvae", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []}
   ]

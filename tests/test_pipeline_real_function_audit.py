@@ -66,6 +66,7 @@ def test_audit_summary_is_derived_from_declared_rows() -> None:
         "registry_native_parity_validated": registry_levels.count("native-parity-validated"),
         "registry_smoke_validated": registry_levels.count("smoke-validated"),
         "representative_real_passed": audit_states.count("representative-real-passed"),
+        "minimal_real_passed": audit_states.count("minimal-real-passed"),
         "minimal_real_pending": audit_states.count("minimal-real-pending"),
         "externally_blocked": audit_states.count("externally-blocked"),
     }

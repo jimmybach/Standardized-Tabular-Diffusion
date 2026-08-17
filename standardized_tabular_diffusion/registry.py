@@ -513,6 +513,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABULA_VALIDATION.md",
             "docs/evidence/tabula/native-parity-run-30974574505.json",
+            "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json",
             "standardized_tabular_diffusion/resources/upstream/tabula-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/tabula-validation.yml",

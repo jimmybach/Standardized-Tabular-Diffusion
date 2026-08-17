@@ -1,16 +1,18 @@
 # TabuLa Validation Protocol
 
-Status: `native-parity-validated` by a retained authoritative Linux run
+Status: `native-parity-validated` by a retained authoritative Linux run; native-Windows GPU minimal-real functionality passed
 
 Protocol: `tabula-method-author-source-parity-v1`
 
 Target: method-author original source
 
-Supported validation environment: Linux, Python 3.11
+Validated environments: Linux/Python 3.11 for native parity; Windows/Python 3.11/RTX 5080 for minimal-real functionality
 
 ## Claim Boundary
 
 This protocol tests whether the standardized `tabula` adapter preserves the locked method-author execution. A passing retained run may promote the tested path to `native-parity-validated`. It does not establish paper-scale generation quality, benchmark eligibility, privacy, or release support. The upstream repository has no declared license, so redistribution and formal release remain blocked regardless of technical parity.
+
+The separate Windows V2 probe establishes only that the same locked source can train, reload, generate two seed-distinct valid tables, preserve its safe checkpoint, and reach finalized central evaluation on the tested Windows identity. It does not strengthen the scientific or release claim.
 
 ## Audited Source
 
@@ -36,9 +38,11 @@ The gate also verifies archive and six-file source identity, unchanged source af
 
 - The tiny offline checkpoint establishes wrapper parity, not useful synthesis quality.
 - The official parser cannot safely represent arbitrary spaces or commas in column names and may reject malformed generated rows.
-- Dataset-specific model selection, training budgets, evaluation, and resource limits remain pending.
+- Paper-scale model selection, training budgets, quality evaluation, and resource limits remain pending. The retained Windows probe validates only the central `p3-validity` route on its bounded fixture.
 - No upstream license is declared; source is fetched to an ignored cache and is not redistributed by this repository.
 
 ## Evidence
 
 GitHub Actions run [`30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505) passed on Linux with Python 3.11.15. All three seeds matched every trained tensor, exact-row sample DataFrame, and CSV byte; source identity and immutability, safe persistence, bounded sampling, and caller-state restoration also passed. The inspected JSON is retained byte-for-byte at `docs/evidence/tabula/native-parity-run-30974574505.json` with SHA-256 `35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c` and is cross-linked from the source lock. The absent upstream license still blocks redistribution and release.
+
+The Windows V2 probe at adapter commit `8d72ee8` used the locked 256-row Adult-derived fixture, training seed `13`, and generation seeds `17` and `29`. PyTorch `2.8.0+cu128` observed the requested NVIDIA GeForce RTX 5080. Training completed in 26.34 seconds; the two bounded child-process samples completed in 8.25 and 8.14 seconds, returned distinct four-row CSVs with the exact 15-column schema, no missing or out-of-domain categorical values, finite numerical values, and integral declared integer columns. Both samples preserved every copied training-artifact byte. The first sample finalized the central `p3-validity` Result Bundle. The immutable record is [`windows-v2-real-function-8d72ee8.json`](evidence/tabula/windows-v2-real-function-8d72ee8.json), SHA-256 `8bfa58cfde52ab0f4b5d5d61ea42d4b7e1d39818444da550302667534d5d13ec`.

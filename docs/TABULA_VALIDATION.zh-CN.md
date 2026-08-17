@@ -1,16 +1,18 @@
 # TabuLa 验证协议
 
-状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`；原生 Windows GPU 最小真实功能已通过
 
 协议：`tabula-method-author-source-parity-v1`
 
 目标：方法作者原始源码
 
-支持的验证环境：Linux、Python 3.11
+已验证环境：Linux/Python 3.11 用于原生等价；Windows/Python 3.11/RTX 5080 用于最小真实功能
 
 ## 声明边界
 
 本协议检验标准化 `tabula` 适配器是否保留锁定的方法作者执行路径。保留证据的权威运行通过后，所测路径可提升为 `native-parity-validated`。这不代表论文规模生成质量、榜单资格、隐私或发布支持。由于上游仓库未声明许可证，即使技术等价通过，再分发和正式发布仍然被阻止。
+
+单独的 Windows V2 探针只证明同一份锁定源码能在被测 Windows 身份上完成训练、重载、生成两份不同种子的合规表、保持安全检查点不变，并到达已最终化的中央评测。它不会扩大科学或发布结论。
 
 ## 已审计源码
 
@@ -36,9 +38,11 @@
 
 - 微型离线模型只证明封装等价，不证明实用质量。
 - 官方解析器不能安全表达列名中的任意空格或逗号，并会丢弃格式错误的生成行。
-- 数据集模型选择、训练预算、评测和资源限制仍待确定。
+- 论文规模的模型选择、训练预算、质量评测和资源限制仍待确定。已保留的 Windows 探针仅验证了受限夹具上的中央 `p3-validity` 路径。
 - 上游未声明许可证；源码只获取到忽略缓存，本仓库不再分发。
 
 ## 证据
 
 GitHub Actions 运行 [`30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505) 已在 Linux、Python 3.11.15 环境通过。三个种子的全部训练张量、精确行数样本 DataFrame 与 CSV 字节均一致，源码身份与运行前后不变、安全持久化、受限采样和调用者状态恢复也全部通过。经审阅的 JSON 已逐字节保留在 `docs/evidence/tabula/native-parity-run-30974574505.json`，SHA-256 为 `35b9c8bdab2828763a72fe3fa55aa6c9fa6308dc36740217d6479c296da3ca1c`，并已从 source lock 交叉引用。上游许可证缺失仍然阻止再分发与发布。
+
+Windows V2 探针在适配器提交 `8d72ee8` 上使用锁定的 256 行 Adult 派生夹具、训练种子 `13` 以及生成种子 `17`、`29`。PyTorch `2.8.0+cu128` 实际观测到指定的 NVIDIA GeForce RTX 5080。训练用时 26.34 秒；两次受限子进程采样分别用时 8.25 秒和 8.14 秒，返回两份不同的 4 行 CSV，均严格包含 15 列、无缺失、无越界类别值、数值有限，且声明的整数列仍为整数。两次采样均保持了所有复制训练产物的每个字节不变。第一份样本已完成中央 `p3-validity` Result Bundle 最终化。不可变记录为 [`windows-v2-real-function-8d72ee8.json`](evidence/tabula/windows-v2-real-function-8d72ee8.json)，SHA-256 为 `8bfa58cfde52ab0f4b5d5d61ea42d4b7e1d39818444da550302667534d5d13ec`。
