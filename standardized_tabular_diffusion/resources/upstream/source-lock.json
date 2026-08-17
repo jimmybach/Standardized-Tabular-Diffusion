@@ -1556,12 +1556,12 @@
       },
       "validation": {
         "artifact": {
-          "digest": "sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757",
-          "evidence_file_sha256": "8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e",
-          "expires_at": "2026-11-01T23:43:15Z",
-          "github_artifact_id": 8875144833,
+          "digest": "sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3",
+          "evidence_file_sha256": "cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65",
+          "expires_at": "2026-11-15T16:27:27Z",
+          "github_artifact_id": 9292848862,
           "name": "tabddpm-native-parity-evidence",
-          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-30863212268.json"
+          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-32045685956.json"
         },
         "environment": {
           "libzero": "0.0.8-exact-vendored-source",
@@ -1573,23 +1573,29 @@
           "scikit-learn": "1.5.2",
           "torch": "2.3.0+cpu"
         },
+        "environment_lock_sha256": "a0f45b382eedecfa177610d9c8cf5eb5822830f1b842e34d72e3e27c102d1ce7",
         "level": "native-parity-validated",
-        "protocol_id": "tabddpm-native-parity-v1",
-        "repository_commit": "3339af2603bac7a4736e68d7f369194b6b095653",
+        "protocol_id": "tabddpm-native-parity-v2",
+        "repository_commit": "ebe706fe64c1601a0d3f02c6ef43c0754468ea57",
         "result_summary": {
           "adapter_manifests_valid": true,
           "config_mapping_exact": true,
+          "dataset_identity_checked": true,
+          "decoded_tables_valid": true,
           "generated_arrays_exact": true,
           "model_and_ema_state_exact": true,
           "numeric_integrity_passed": true,
+          "output_isolated": true,
           "seed_cases_passed": 3,
-          "seed_cases_total": 3
+          "seed_cases_total": 3,
+          "source_remained_exact": true
         },
         "status": "pass",
-        "validated_at": "2026-08-03T23:44:47Z",
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268/job/91849440286",
-        "workflow_run_id": 30863212268,
-        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268"
+        "validated_at": "2026-08-17T16:29:16Z",
+        "workflow_event": "push",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956/job/95432939940",
+        "workflow_run_id": 32045685956,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956"
       },
       "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
       "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"

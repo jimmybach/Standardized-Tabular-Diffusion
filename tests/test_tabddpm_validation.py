@@ -22,7 +22,7 @@ from standardized_tabular_diffusion.validation.tabddpm import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabddpm" / "native-parity-run-30863212268.json"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabddpm" / "native-parity-run-32045685956.json"
 
 
 def test_tabddpm_source_manifest_matches_pinned_sources() -> None:
@@ -161,16 +161,22 @@ def test_tabddpm_native_parity_evidence_is_complete_and_immutable() -> None:
     evidence_bytes = EVIDENCE_PATH.read_bytes()
     evidence = json.loads(evidence_bytes)
 
-    assert hashlib.sha256(evidence_bytes).hexdigest() == "8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e"
+    assert hashlib.sha256(evidence_bytes).hexdigest() == "cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65"
     assert evidence["status"] == "pass"
-    assert evidence["repository_commit"] == "3339af2603bac7a4736e68d7f369194b6b095653"
+    assert evidence["protocol_id"] == "tabddpm-native-parity-v2"
+    assert evidence["repository_commit"] == "ebe706fe64c1601a0d3f02c6ef43c0754468ea57"
+    assert evidence["source_remained_exact"] is True
     assert len(evidence["cases"]) == 3
     for case in evidence["cases"]:
         assert case["status"] == "pass"
         comparisons = case["comparisons"]
-        assert comparisons["config_exact"] is True
+        assert comparisons["effective_train_config_exact"] is True
+        assert comparisons["effective_sample_config_exact"] is True
         assert comparisons["model"]["tensor_values_exact"] is True
         assert comparisons["ema_model"]["tensor_values_exact"] is True
         assert comparisons["loss_csv_exact"] is True
         assert comparisons["sample_rows"] == 12
+        assert comparisons["decoded_sample"]["valid"] is True
+        assert comparisons["adapter_manifests_valid"] is True
+        assert comparisons["output_isolated"] is True
         assert all(record["exact"] and record["finite"] for record in comparisons["generated_arrays"].values())

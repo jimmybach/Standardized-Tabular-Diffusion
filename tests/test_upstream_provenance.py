@@ -179,7 +179,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabsds": "docs/evidence/tabsds/native-parity-run-30974574593.json",
-        "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
+        "tabddpm": "docs/evidence/tabddpm/native-parity-run-32045685956.json",
         "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
         "tabularargn": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
         "tabula": "docs/evidence/tabula/native-parity-run-30974574505.json",
@@ -524,8 +524,38 @@ def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> Non
 
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30863212268
+    assert validation["workflow_run_id"] == 32045685956
+    assert validation["workflow_event"] == "push"
+    assert validation["repository_commit"] == "ebe706fe64c1601a0d3f02c6ef43c0754468ea57"
+    assert validation["protocol_id"] == "tabddpm-native-parity-v2"
+    assert validation["environment_lock_sha256"] == (
+        "a0f45b382eedecfa177610d9c8cf5eb5822830f1b842e34d72e3e27c102d1ce7"
+    )
     assert validation["result_summary"]["seed_cases_passed"] == 3
+    assert validation["result_summary"]["seed_cases_total"] == 3
+    assert validation["result_summary"]["dataset_identity_checked"] is True
+    assert validation["result_summary"]["decoded_tables_valid"] is True
+    assert validation["result_summary"]["output_isolated"] is True
+    assert validation["result_summary"]["source_remained_exact"] is True
+    artifact = validation["artifact"]
+    assert artifact["github_artifact_id"] == 9292848862
+    assert artifact["digest"] == (
+        "sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3"
+    )
+    assert artifact["evidence_file_sha256"] == (
+        "cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65"
+    )
+    evidence_path = REPO_ROOT / artifact["permanent_evidence_path"]
+    evidence_bytes = evidence_path.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == artifact["evidence_file_sha256"]
+    evidence = json.loads(evidence_bytes)
+    assert evidence["protocol_id"] == validation["protocol_id"]
+    assert evidence["repository_commit"] == validation["repository_commit"]
+    assert evidence["environment_lock"]["sha256"] == validation["environment_lock_sha256"]
+    assert evidence["source_remained_exact"] is True
+    assert len(evidence["cases"]) == 3
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert get_adapter_spec("tabddpm").requires_dataset_paths is True
     assert tabddpm["official_eligibility"] == "pending-separate-official-track-review"
 
 

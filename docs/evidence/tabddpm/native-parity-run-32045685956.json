@@ -1,0 +1,386 @@
+{
+  "cases": [
+    {
+      "adapter_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-01/adapter-run/tabddpm-runtime/config-train-seed-0.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-01/adapter-run/tabddpm-runtime/config-sample-seed-23.toml",
+          "--sample"
+        ]
+      ],
+      "adapter_manifests": [
+        "/home/runner/work/_temp/tabddpm-validation/case-01/adapter-run/validation-manifests/train-artifacts.json",
+        "/home/runner/work/_temp/tabddpm-validation/case-01/adapter-run/validation-manifests/sample-artifacts.json"
+      ],
+      "case": 1,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "decoded_sample": {
+          "columns_exact": true,
+          "missing_values": 0,
+          "numerical_finite": true,
+          "rows": 12,
+          "rows_exact": true,
+          "sha256": "bd7251f594bde6c790eb5a48f5135afac014966e691ec38369d46e961b9a31d3",
+          "target_domain_valid": true,
+          "valid": true
+        },
+        "effective_sample_config_exact": true,
+        "effective_train_config_exact": true,
+        "ema_model": {
+          "adapter_sha256": "ea926b12da61088d9b2429129b58ba37800694ffb1b7a68f05d6be8fe993632b",
+          "keys_equal": true,
+          "native_sha256": "ea926b12da61088d9b2429129b58ba37800694ffb1b7a68f05d6be8fe993632b",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "generated_arrays": {
+          "X_num_train.npy": {
+            "adapter_sha256": "1647cc83de09cfe67b9d93515b2b65baaa311e9791232b2bf36ad8b9e7ebce04",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "1647cc83de09cfe67b9d93515b2b65baaa311e9791232b2bf36ad8b9e7ebce04",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "X_num_unnorm.npy": {
+            "adapter_sha256": "203609e9b4896c3142f351aa05ec6c3943ddf7df239e5c2008c319996c5e0d64",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "203609e9b4896c3142f351aa05ec6c3943ddf7df239e5c2008c319996c5e0d64",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "y_train.npy": {
+            "adapter_sha256": "5a9e2363ce16ffd98f3b3ed23fa0ae085e28b4093202d507a1ba454b790c8d76",
+            "dtype": "int64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "5a9e2363ce16ffd98f3b3ed23fa0ae085e28b4093202d507a1ba454b790c8d76",
+            "shape": [
+              12
+            ]
+          }
+        },
+        "loss_csv_exact": true,
+        "model": {
+          "adapter_sha256": "3b2f357a01f6ca63c2c2f6d8ba2581712578a8f2883d1a59c414775508b1b9a5",
+          "keys_equal": true,
+          "native_sha256": "3b2f357a01f6ca63c2c2f6d8ba2581712578a8f2883d1a59c414775508b1b9a5",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "output_isolated": true,
+        "sample_rows": 12
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-01/native.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-01/native.toml",
+          "--sample"
+        ]
+      ],
+      "sampling_seed": 23,
+      "status": "pass",
+      "training_seed": 0
+    },
+    {
+      "adapter_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-02/adapter-run/tabddpm-runtime/config-train-seed-17.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-02/adapter-run/tabddpm-runtime/config-sample-seed-47.toml",
+          "--sample"
+        ]
+      ],
+      "adapter_manifests": [
+        "/home/runner/work/_temp/tabddpm-validation/case-02/adapter-run/validation-manifests/train-artifacts.json",
+        "/home/runner/work/_temp/tabddpm-validation/case-02/adapter-run/validation-manifests/sample-artifacts.json"
+      ],
+      "case": 2,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "decoded_sample": {
+          "columns_exact": true,
+          "missing_values": 0,
+          "numerical_finite": true,
+          "rows": 12,
+          "rows_exact": true,
+          "sha256": "d0b14ced6633da242a67fc7495a5b38905229de8d3d3d7d18bf988d3ed270f05",
+          "target_domain_valid": true,
+          "valid": true
+        },
+        "effective_sample_config_exact": true,
+        "effective_train_config_exact": true,
+        "ema_model": {
+          "adapter_sha256": "e4c2d9e9376da1fb6a168b3f8e013fa68bf546efc26ec92af70db55bb4b42689",
+          "keys_equal": true,
+          "native_sha256": "e4c2d9e9376da1fb6a168b3f8e013fa68bf546efc26ec92af70db55bb4b42689",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "generated_arrays": {
+          "X_num_train.npy": {
+            "adapter_sha256": "ab05eb65cbabdcb2116101719d1fcf07f973dd7a6c14dd0cdb12dac5e1b117e1",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "ab05eb65cbabdcb2116101719d1fcf07f973dd7a6c14dd0cdb12dac5e1b117e1",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "X_num_unnorm.npy": {
+            "adapter_sha256": "ace8c96b7935b6177bbd52a0c1cc8b397173de5cef71606492535da209cc2b2f",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "ace8c96b7935b6177bbd52a0c1cc8b397173de5cef71606492535da209cc2b2f",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "y_train.npy": {
+            "adapter_sha256": "b297be01473a2492f0343a471386f421b6043d99b60e5af5338e834f4f262202",
+            "dtype": "int64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "b297be01473a2492f0343a471386f421b6043d99b60e5af5338e834f4f262202",
+            "shape": [
+              12
+            ]
+          }
+        },
+        "loss_csv_exact": true,
+        "model": {
+          "adapter_sha256": "0565a80a1c80bbc90b62f95cfe96360dfd4ea77b998436329485fc1087ec013e",
+          "keys_equal": true,
+          "native_sha256": "0565a80a1c80bbc90b62f95cfe96360dfd4ea77b998436329485fc1087ec013e",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "output_isolated": true,
+        "sample_rows": 12
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-02/native.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-02/native.toml",
+          "--sample"
+        ]
+      ],
+      "sampling_seed": 47,
+      "status": "pass",
+      "training_seed": 17
+    },
+    {
+      "adapter_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-03/adapter-run/tabddpm-runtime/config-train-seed-101.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-03/adapter-run/tabddpm-runtime/config-sample-seed-89.toml",
+          "--sample"
+        ]
+      ],
+      "adapter_manifests": [
+        "/home/runner/work/_temp/tabddpm-validation/case-03/adapter-run/validation-manifests/train-artifacts.json",
+        "/home/runner/work/_temp/tabddpm-validation/case-03/adapter-run/validation-manifests/sample-artifacts.json"
+      ],
+      "case": 3,
+      "comparisons": {
+        "adapter_manifests_valid": true,
+        "decoded_sample": {
+          "columns_exact": true,
+          "missing_values": 0,
+          "numerical_finite": true,
+          "rows": 12,
+          "rows_exact": true,
+          "sha256": "0e1f0a0d87757364f0c21e32a00a27edc83099004d7e33d8b16ad53493cc7d07",
+          "target_domain_valid": true,
+          "valid": true
+        },
+        "effective_sample_config_exact": true,
+        "effective_train_config_exact": true,
+        "ema_model": {
+          "adapter_sha256": "4b5e01e8851def705769c3a1c401561458c23838eb05a72d153be32825b5233d",
+          "keys_equal": true,
+          "native_sha256": "4b5e01e8851def705769c3a1c401561458c23838eb05a72d153be32825b5233d",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "generated_arrays": {
+          "X_num_train.npy": {
+            "adapter_sha256": "19876145cceba5839dfac94d51f1cfd9b6aa079fbe2c1baf9c1754e0061a6410",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "19876145cceba5839dfac94d51f1cfd9b6aa079fbe2c1baf9c1754e0061a6410",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "X_num_unnorm.npy": {
+            "adapter_sha256": "03fdedb0f46951013726b5a4c2810c68850500b1d7614e20fbf0b57740a61cb0",
+            "dtype": "float64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "03fdedb0f46951013726b5a4c2810c68850500b1d7614e20fbf0b57740a61cb0",
+            "shape": [
+              12,
+              3
+            ]
+          },
+          "y_train.npy": {
+            "adapter_sha256": "fdb990a7c04c88179b849eed65a3a9406ab5d8e2e3792642478b7a5eb9dfc693",
+            "dtype": "int64",
+            "exact": true,
+            "finite": true,
+            "native_sha256": "fdb990a7c04c88179b849eed65a3a9406ab5d8e2e3792642478b7a5eb9dfc693",
+            "shape": [
+              12
+            ]
+          }
+        },
+        "loss_csv_exact": true,
+        "model": {
+          "adapter_sha256": "ea30c740ce649a85064a6b2a0f10fc69ce826747f4e739097ea07d74ad246ee2",
+          "keys_equal": true,
+          "native_sha256": "ea30c740ce649a85064a6b2a0f10fc69ce826747f4e739097ea07d74ad246ee2",
+          "tensor_mismatches": [],
+          "tensor_values_exact": true
+        },
+        "output_isolated": true,
+        "sample_rows": 12
+      },
+      "native_commands": [
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-03/native.toml",
+          "--train"
+        ],
+        [
+          "/opt/hostedtoolcache/Python/3.11.15/x64/bin/python",
+          "scripts/pipeline.py",
+          "--config",
+          "/home/runner/work/_temp/tabddpm-validation/case-03/native.toml",
+          "--sample"
+        ]
+      ],
+      "sampling_seed": 89,
+      "status": "pass",
+      "training_seed": 101
+    }
+  ],
+  "comparison_policy": {
+    "dataset_binding": "embedded DatasetSpec plus byte identity; run-owned native mirror",
+    "decoded_table": "exact schema/row count, finite numerical values, no missing values, valid target domain",
+    "deterministic_config_mapping": "exact effective train/sample runtime configuration after excluding only output/data paths and the sample-irrelevant global evaluation seed",
+    "generated_arrays": "exact element equality",
+    "model_state": "exact tensor equality",
+    "numeric_integrity": "all generated numeric values must be finite",
+    "seed_cases": [
+      {
+        "sampling": 23,
+        "training": 0
+      },
+      {
+        "sampling": 47,
+        "training": 17
+      },
+      {
+        "sampling": 89,
+        "training": 101
+      }
+    ]
+  },
+  "environment": {
+    "libzero": "0.0.8-exact-vendored-source",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "rtdl": "0.0.9",
+    "scikit_learn": "1.5.2",
+    "torch": "2.3.0+cpu"
+  },
+  "environment_lock": {
+    "path": "requirements-tabddpm-validation.txt",
+    "sha256": "a0f45b382eedecfa177610d9c8cf5eb5822830f1b842e34d72e3e27c102d1ce7"
+  },
+  "fixture": {
+    "categorical_features": 0,
+    "kind": "deterministic-numeric-binary-classification",
+    "numerical_features": 3,
+    "test_rows": 8,
+    "train_rows": 24,
+    "validation_rows": 8
+  },
+  "model_id": "tabddpm",
+  "protocol_id": "tabddpm-native-parity-v2",
+  "repository_commit": "ebe706fe64c1601a0d3f02c6ef43c0754468ea57",
+  "schema_version": 1,
+  "source": {
+    "libzero_distribution_sha256": "f7bb46c71433ca19b61c5127d010147bccc6b29d250f30ad48a393ce676a5e9d",
+    "libzero_modules_verified": 7,
+    "manifest_path": "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json",
+    "manifest_sha256": "e0d342be44b53216a159ea726a60817e0800476b67a9e8d42b2ffba75e653813",
+    "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
+    "upstream_files_verified": 64
+  },
+  "source_remained_exact": true,
+  "status": "pass"
+}

@@ -2,13 +2,13 @@
 
 Status: passed on Linux/Python 3.11; native parity validated
 
-Protocol ID: `tabddpm-native-parity-v1`
+Protocol ID: `tabddpm-native-parity-v2`
 
 Supported validation platform: Linux, Python 3.11, CPU
 
 ## Scope and claim boundary
 
-This protocol validates that the standardized TabDDPM train and sample adapter invokes the pinned method-author implementation without changing its configuration or deterministic outputs. It covers source integrity, a real end-to-end smoke run, adapter/native parity, generated-artifact integrity, and reproducibility across three predeclared seed pairs.
+This protocol validates that the standardized TabDDPM train and sample adapter invokes the pinned method-author implementation without changing its effective configuration or deterministic outputs. Version 2 also exercises the current public adapter contract: an identity-checked embedded `DatasetSpec`, one shared run-owned train/sample workspace, the actual generated runtime TOMLs, the decoded canonical table, and source immutability. It covers source integrity, a real end-to-end smoke run, adapter/native parity, generated-artifact integrity, and reproducibility across three predeclared seed pairs.
 
 Passing this protocol is sufficient to promote the adapter validation level through `smoke-validated` to `native-parity-validated`. It is not sufficient to make TabDDPM `benchmark-eligible`, assign it to the Official Results track, or declare it `release-supported`. Dataset admission, the central evaluation protocol, privacy/fairness review, dependency maintenance, and release ownership remain separate gates.
 
@@ -64,13 +64,15 @@ The three `(training seed, sampling seed)` pairs are `(0, 23)`, `(17, 47)`, and 
 
 1. the native path runs `scripts/pipeline.py --train` and `scripts/pipeline.py --sample` directly;
 2. the standardized adapter runs its train and sample operations using an otherwise identical config;
-3. configs must be exactly equal after removing only the output-specific `parent_dir`;
-4. raw and EMA model state dictionaries must have identical keys and tensor values;
-5. every generated NumPy array must have an identical inventory, dtype, shape, and element values;
-6. generated numeric values must all be finite;
-7. the loss CSV must match exactly;
-8. exactly twelve label rows must be generated; and
-9. both adapter artifact manifests must be valid and identify the expected model and fixture.
+3. the fixture's complete `DatasetSpec` and content identity must be embedded rather than looked up as a registered dataset;
+4. training and sampling must use the same run-owned workspace, with checkpoints and mutable artifacts outside the upstream source tree;
+5. the effective train and sample configurations actually executed by the adapter must be exactly equal to the native configuration after excluding only the output/data paths and the global evaluation seed that the official sampling path does not consume;
+6. raw and EMA model state dictionaries must have identical keys and tensor values;
+7. every generated NumPy array must have an identical inventory, dtype, shape, and element values;
+8. generated numeric values must all be finite and the loss CSV must match exactly;
+9. the decoded table must contain exactly twelve rows, the declared columns, finite numerical values, no missing values, and only known target labels;
+10. both adapter artifact manifests must be valid; and
+11. the checksum-locked upstream source must remain exact after execution.
 
 There is no numerical tolerance in this protocol: all deterministic comparisons are exact.
 
@@ -87,6 +89,6 @@ python -m standardized_tabular_diffusion.validation.tabddpm \
 
 `.github/workflows/tabddpm-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence artifact for 90 days. The registry remained `adapter-complete` until the successful retained run was linked in the source lock. Any later source, dependency, adapter-command, or protocol change invalidates the evidence and requires rerunning the workflow.
 
-The protocol passed in [GitHub Actions run 30863212268](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268) at repository commit `3339af2603bac7a4736e68d7f369194b6b095653`. All three seed cases passed every exact comparison. The retained artifact digest is `sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757`, and an exact permanent copy of the evidence is stored at `docs/evidence/tabddpm/native-parity-run-30863212268.json` with file SHA-256 `8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e`.
+The current protocol passed in [GitHub Actions run 32045685956](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956) at repository commit `ebe706fe64c1601a0d3f02c6ef43c0754468ea57`. All three seed cases passed every exact comparison, including both runtime configurations, raw and EMA checkpoints, all generated arrays, loss files, decoded tables, manifests, output isolation, and post-run source integrity. The retained artifact digest is `sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3`, and an exact permanent copy of the evidence is stored at `docs/evidence/tabddpm/native-parity-run-32045685956.json` with file SHA-256 `cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65`.
 
 Accordingly, TabDDPM is `native-parity-validated` while remaining `experimental`, `unsupported`, and pending a separate official-track eligibility decision.

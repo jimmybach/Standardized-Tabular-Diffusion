@@ -2,13 +2,13 @@
 
 状态：已在 Linux/Python 3.11 通过，完成原生一致性验证
 
-协议 ID：`tabddpm-native-parity-v1`
+协议 ID：`tabddpm-native-parity-v2`
 
 支持的验证平台：Linux、Python 3.11、CPU
 
 ## 范围与结论边界
 
-本协议用于验证标准化 TabDDPM 训练与采样适配器是否在不改变配置和确定性输出的前提下调用固定版本的作者官方实现。验证范围包括源码完整性、真实端到端 smoke 运行、适配器与原生路径的一致性、生成产物完整性，以及三个预先声明种子组合下的可复现性。
+本协议用于验证标准化 TabDDPM 训练与采样适配器是否在不改变有效配置和确定性输出的前提下调用固定版本的作者官方实现。v2 还覆盖当前公共适配器契约：带内容身份校验的内嵌 `DatasetSpec`、训练和采样共用的运行目录、实际执行的运行时 TOML、解码后的标准表格，以及运行前后的源码不变性。验证范围包括源码完整性、真实端到端 smoke 运行、适配器与原生路径的一致性、生成产物完整性，以及三个预先声明种子组合下的可复现性。
 
 协议通过后，适配器验证等级可以依次提升到 `smoke-validated` 和 `native-parity-validated`。但这不足以让 TabDDPM 自动成为 `benchmark-eligible`，也不代表它可以进入正式榜单或达到 `release-supported`。数据集准入、统一评测协议、隐私与公平性审阅、依赖维护和发布负责人仍是彼此独立的门槛。
 
@@ -53,13 +53,15 @@ python -m pip install --no-deps .
 
 1. 原生路径直接执行 `scripts/pipeline.py --train` 和 `scripts/pipeline.py --sample`；
 2. 标准化适配器使用其训练和采样接口执行同一配置；
-3. 除输出专用的 `parent_dir` 外，两个配置必须完全一致；
-4. 原始模型和 EMA 模型必须具有完全一致的参数键与张量值；
-5. 所有 NumPy 生成文件的清单、数据类型、形状和元素必须完全一致；
-6. 所有数值型生成结果必须为有限值；
-7. loss CSV 必须完全一致；
-8. 必须生成十二行标签；
-9. 两个适配器产物清单必须有效，并正确标识模型和测试数据。
+3. 测试数据的完整 `DatasetSpec` 与内容身份必须显式内嵌，不能把临时测试数据误当成仓库注册数据集查询；
+4. 训练和采样必须共用同一个运行目录，checkpoint 和其他可变产物必须位于上游源码树之外；
+5. 适配器实际执行的训练、采样配置，在仅排除输出/数据路径以及官方采样路径不会使用的全局评测种子后，必须与原生配置完全一致；
+6. 原始模型和 EMA 模型必须具有完全一致的参数键与张量值；
+7. 所有 NumPy 生成文件的清单、数据类型、形状和元素必须完全一致；
+8. 所有数值型生成结果必须为有限值，loss CSV 必须完全一致；
+9. 解码表必须恰好包含十二行、声明的全部列、有限数值、零缺失值和有效目标标签；
+10. 训练和采样的适配器产物清单必须有效；
+11. 运行结束后，校验和锁定的上游源码必须保持完全一致。
 
 本协议不设置数值容差：所有确定性对照都要求精确相等。
 
@@ -76,6 +78,6 @@ python -m standardized_tabular_diffusion.validation.tabddpm \
 
 `.github/workflows/tabddpm-validation.yml` 会在 Linux/Python 3.11 上执行该命令，并将 JSON 证据保留 90 天。在成功运行及其来源锁定记录建立前，注册表一直保持 `adapter-complete`。以后只要源码、依赖、适配器命令或协议发生变化，原证据就失效，必须重新运行验证。
 
-协议已在仓库提交 `3339af2603bac7a4736e68d7f369194b6b095653` 对应的 [GitHub Actions 运行 30863212268](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268) 中通过。三个种子组合的全部精确对照均通过。留存 artifact 的摘要为 `sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757`；证据的永久逐字节副本位于 `docs/evidence/tabddpm/native-parity-run-30863212268.json`，文件 SHA-256 为 `8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e`。
+当前协议已在仓库提交 `ebe706fe64c1601a0d3f02c6ef43c0754468ea57` 对应的 [GitHub Actions 运行 32045685956](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956) 中通过。三个种子组合的运行时配置、原始与 EMA checkpoint、全部生成数组、loss 文件、解码表、产物清单、输出隔离和运行后源码完整性检查均精确通过。留存 artifact 的摘要为 `sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3`；证据的永久逐字节副本位于 `docs/evidence/tabddpm/native-parity-run-32045685956.json`，文件 SHA-256 为 `cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65`。
 
 因此，TabDDPM 当前为 `native-parity-validated`，但仍保持 `experimental` 和 `unsupported`，正式榜单资格需要另行审阅决定。

@@ -463,7 +463,6 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         modification="adapter-only",
         install_extra="evaluation",
         evaluation_input="sample-file",
-        requires_dataset_paths=False,
         source_root="TabDDPM-main",
         upstream_repository="https://github.com/yandex-research/tab-ddpm",
         upstream_revision="b476257dd460b778ba09eb97f7a51d6490fa17f8",
@@ -472,7 +471,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABDDPM_VALIDATION.md",
-            "docs/evidence/tabddpm/native-parity-run-30863212268.json",
+            "docs/evidence/tabddpm/native-parity-run-32045685956.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             "standardized_tabular_diffusion/resources/upstream/tabddpm-source-manifest.json",
             ".github/workflows/tabddpm-validation.yml",
