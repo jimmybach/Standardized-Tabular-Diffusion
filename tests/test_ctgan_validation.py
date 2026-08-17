@@ -14,8 +14,8 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-30910275922.json"
-EVIDENCE_SHA256 = "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-32047234665.json"
+EVIDENCE_SHA256 = "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24"
 
 
 def _write_test_wheel(path: Path, *, unsafe_member: str | None = None) -> str:
@@ -45,21 +45,27 @@ def test_ctgan_package_lock_matches_registry_and_protocol() -> None:
     assert source_lock["license"] == ctgan_validation.LICENSE_EXPRESSION
 
 
-def test_retained_ctgan_v1_evidence_is_immutable_and_complete() -> None:
+def test_retained_ctgan_v2_evidence_is_immutable_and_complete() -> None:
     evidence_bytes = EVIDENCE_PATH.read_bytes()
     evidence = json.loads(evidence_bytes)
 
     assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
     assert evidence["status"] == "pass"
-    assert evidence["protocol_id"] == "ctgan-native-parity-v1"
-    assert evidence["repository_commit"] == "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e"
+    assert evidence["protocol_id"] == ctgan_validation.PROTOCOL_ID
+    assert evidence["repository_commit"] == "9d5d7e9415f41976bc5524ce5547595ea11e2043"
     assert evidence["environment"]["platform"].startswith("Linux-")
     assert evidence["environment"]["python"] == "3.11.15"
     assert evidence["environment"]["torch"] == "2.3.0+cpu"
     assert evidence["source"]["installed_distribution"]["record_files_verified"] == 20
     assert evidence["source"]["wheel"]["sha256"] == ctgan_validation.WHEEL_SHA256
-    assert evidence["seed_cases"] == [0, 19, 73]
-    assert [case["seed"] for case in evidence["cases"]] == [0, 19, 73]
+    assert evidence["seed_cases"] == [
+        {"train_seed": 0, "sample_seed": 101},
+        {"train_seed": 19, "sample_seed": 7},
+        {"train_seed": 73, "sample_seed": 29},
+    ]
+    assert tuple(
+        (case["train_seed"], case["sample_seed"]) for case in evidence["cases"]
+    ) == ctgan_validation.SEED_CASES
     assert all(case["status"] == "pass" for case in evidence["cases"])
     assert all(ctgan_validation._case_passed(case["comparisons"]) for case in evidence["cases"])
     assert all(

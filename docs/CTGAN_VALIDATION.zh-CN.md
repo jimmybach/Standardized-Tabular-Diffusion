@@ -2,13 +2,13 @@
 
 状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
 
-协议 ID：`ctgan-native-parity-v1`
+协议 ID：`ctgan-native-parity-v2`
 
 支持的验证平台：Linux、Python 3.11、PyTorch 2.3 CPU
 
 ## 范围与声明边界
 
-本协议验证标准化 CTGAN 适配器是否使用与原生直接调用完全相同的数据、构造参数、随机种子、持久化 API 和采样请求，调用经校验和锁定的官方 `ctgan==0.12.1` 包。验证范围包括包身份、真实混合类型训练、保存与加载、三个确定性随机种子、产物清单，以及原生路径与适配器路径的精确比较。
+本协议验证标准化 CTGAN 适配器是否使用与原生直接调用完全相同的数据、构造参数、相互独立的训练与采样随机种子、持久化 API 和采样请求，调用经校验和锁定的官方 `ctgan==0.12.1` 包。验证范围包括包身份、真实混合类型训练、保存与加载、三组确定性种子对、产物清单，以及原生路径与适配器路径的精确比较。
 
 强制运行通过后，CTGAN 可以提升为 `native-parity-validated`。这不代表 CTGAN 已经 `benchmark-eligible`、可以进入 Official Results，或已经 `release-supported`。数据集准入、模型质量评测、隐私与公平性审查、运行资源阈值、依赖维护和发布责任仍是独立门槛。
 
@@ -38,6 +38,7 @@ BUSL-1.1 不是 OSI 开源许可证。0.12.1 允许非生产使用，并在上�
 - 通过官方 `enable_gpu` 和 `set_device` 接口映射基准的 CPU/GPU 请求；
 - 转发官方公开的构造参数，不修改上游源码；
 - 在训练前调用官方 `set_random_state`；
+- 加载检查点后、采样前再次调用官方 `set_random_state`，使采样操作可以独立于训练种子复现；
 - 将类别特征和分类目标标记为离散列；
 - 使用官方 `save` 与 `load` API；
 - 拒绝加载符号链接或输出目录外可执行代码的检查点，除非用户显式启用现有的不安全外部检查点选项；
@@ -63,9 +64,9 @@ python -m pip check
 
 ## 冻结对照
 
-对于随机种子 `0`、`19` 和 `73`，两条路径使用相同的 40 行无缺失值混合类型二分类夹具：两个数值特征、一个类别特征和一个类别目标。两者均使用一个真实训练 epoch、批大小 20、PacGAN 分组大小 10、16 维嵌入、宽度为 16 的生成器/判别器层、CPU 执行，并请求 12 行样本。该有界夹具只用于执行与一致性验证，不是模型质量 benchmark。
+对于训练/采样种子对 `(0, 101)`、`(19, 7)` 和 `(73, 29)`，两条路径使用相同的 40 行无缺失值混合类型二分类夹具：两个数值特征、一个类别特征和一个类别目标。训练种子与采样种子刻意不同，用于证明生成过程不会暗中沿用训练结束后的随机流。两者均使用一个真实训练 epoch、批大小 20、PacGAN 分组大小 10、16 维嵌入、宽度为 16 的生成器/判别器层、CPU 执行，并请求 12 行样本。该有界夹具只用于执行与一致性验证，不是模型质量 benchmark。
 
-原生路径直接构造、设种子、训练、保存、加载并采样官方 `CTGAN` 类；适配器路径通过 `CTGANAdapter` 完成相同操作。每个随机种子必须同时满足：
+原生路径直接构造官方 `CTGAN` 类、设置训练种子、训练、保存、加载，再通过官方 API 设置独立采样种子并采样；适配器路径通过 `CTGANAdapter` 完成相同操作。每组种子对必须同时满足：
 
 1. wheel、已安装包、许可证元数据和已安装文件哈希均与锁定记录一致；
 2. 构造参数完全一致；
@@ -81,9 +82,9 @@ python -m pip check
 
 ## 留存结果
 
-GitHub Actions 运行 [`30910275922`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922) 在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过了全部三个随机种子用例。该运行验证了已安装包中 20 个带哈希的文件记录，并且每个随机种子的原生路径与适配器路径样本 CSV 都逐字节一致。经审阅的 JSON 已永久留存在 `docs/evidence/ctgan/native-parity-run-30910275922.json`，其 SHA-256 为 `748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570`。
+GitHub Actions 运行 [`32047234665`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665) 在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过了全部三组独立训练/采样种子对。该运行验证了已安装包中 20 个带哈希的文件记录，并且每组种子对的原生路径与适配器路径样本 CSV 都逐字节一致。经审阅的 JSON 已永久留存在 `docs/evidence/ctgan/native-parity-run-32047234665.json`，其 SHA-256 为 `ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24`。
 
-对应的 GitHub artifact ID 为 `8892774473`，artifact 摘要为 `sha256:96ba5b9dde6eed95fa1972990c6a4231e43f204bdcb99a4a0d7837099ff3b71a`。临时 artifact 到期后，仓库内的永久副本仍是权威证据。
+对应的 GitHub artifact ID 为 `9293339264`，artifact 摘要为 `sha256:1a72389c7ffcebca6f095e857a32d955b1d28ab08c40ae89dbb9df6ca336578d`。临时 artifact 到期后，仓库内的永久副本仍是权威证据。
 
 ## 执行与状态提升规则
 

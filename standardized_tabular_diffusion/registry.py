@@ -221,7 +221,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         evidence_records=(
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/CTGAN_VALIDATION.md",
-            "docs/evidence/ctgan/native-parity-run-30910275922.json",
+            "docs/evidence/ctgan/native-parity-run-32047234665.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/ctgan-validation.yml",
         ),

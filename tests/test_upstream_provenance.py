@@ -170,7 +170,7 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "codi": "docs/evidence/codi/native-parity-run-32043925805.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
-        "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
+        "ctgan": "docs/evidence/ctgan/native-parity-run-32047234665.json",
         "goggle": "docs/evidence/goggle/native-parity-run-30945676747.json",
         "great": "docs/evidence/great/native-parity-run-30974574472.json",
         "nflow": "docs/evidence/nflow/native-parity-run-30970260840.json",
@@ -577,10 +577,10 @@ def test_ctgan_package_lock_is_exact_and_conservatively_gated() -> None:
     validation = ctgan["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30910275922
+    assert validation["workflow_run_id"] == 32047234665
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
+        "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24"
     )
     assert str(ctgan["official_eligibility"]).startswith("blocked-pending-license")
 

@@ -435,7 +435,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         repository_url="https://github.com/sdv-dev/CTGAN",
         notes=[
             "The adapter now targets the checksum-pinned official ctgan 0.12.1 wheel instead of the legacy embedded 0.5.2.dev0 source snapshot.",
-            "The mandatory Linux/Python 3.11 native-parity protocol passed all exact comparisons for seeds 0, 19, and 73 in GitHub Actions run 30910275922.",
+            "The mandatory Linux/Python 3.11 native-parity protocol passed all exact comparisons for independent train/sample seed pairs (0, 101), (19, 7), and (73, 29) in GitHub Actions run 32047234665.",
             "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),

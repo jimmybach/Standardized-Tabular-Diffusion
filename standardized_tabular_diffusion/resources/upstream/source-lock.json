@@ -621,12 +621,12 @@
       },
       "validation": {
         "artifact": {
-          "digest": "sha256:96ba5b9dde6eed95fa1972990c6a4231e43f204bdcb99a4a0d7837099ff3b71a",
-          "evidence_file_sha256": "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570",
-          "expires_at": "2026-11-02T12:42:21Z",
-          "github_artifact_id": 8892774473,
+          "digest": "sha256:1a72389c7ffcebca6f095e857a32d955b1d28ab08c40ae89dbb9df6ca336578d",
+          "evidence_file_sha256": "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24",
+          "expires_at": "2026-11-15T16:47:16Z",
+          "github_artifact_id": 9293339264,
           "name": "ctgan-native-parity-evidence",
-          "permanent_evidence_path": "docs/evidence/ctgan/native-parity-run-30910275922.json"
+          "permanent_evidence_path": "docs/evidence/ctgan/native-parity-run-32047234665.json"
         },
         "environment": {
           "ctgan": "0.12.1",
@@ -639,8 +639,8 @@
           "torch": "2.3.0+cpu"
         },
         "level": "native-parity-validated",
-        "protocol_id": "ctgan-native-parity-v1",
-        "repository_commit": "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e",
+        "protocol_id": "ctgan-native-parity-v2",
+        "repository_commit": "9d5d7e9415f41976bc5524ce5547595ea11e2043",
         "result_summary": {
           "adapter_manifests_valid": true,
           "installed_record_files_verified": 20,
@@ -651,10 +651,10 @@
           "wheel_identity_verified": true
         },
         "status": "pass",
-        "validated_at": "2026-08-04T12:43:12Z",
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922/job/91995021120",
-        "workflow_run_id": 30910275922,
-        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922"
+        "validated_at": "2026-08-17T16:48:13Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665/job/95437833366",
+        "workflow_run_id": 32047234665,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
       "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
