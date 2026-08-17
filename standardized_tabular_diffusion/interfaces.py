@@ -1,8 +1,20 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any
+
+
+def _serialize_paths(value: Any) -> Any:
+    """Recursively convert path values at a public JSON boundary."""
+
+    if isinstance(value, PurePath):
+        return str(value)
+    if isinstance(value, dict):
+        return {key: _serialize_paths(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_serialize_paths(item) for item in value]
+    return value
 
 
 @dataclass
@@ -21,11 +33,7 @@ class DatasetSpec:
     extra: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        payload = asdict(self)
-        for key in ("metadata_path", "train_data_path", "val_data_path", "test_data_path"):
-            value = payload[key]
-            payload[key] = None if value is None else str(value)
-        return payload
+        return _serialize_paths(asdict(self))
 
 
 @dataclass
@@ -41,11 +49,7 @@ class RunSpec:
     extra: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        payload = asdict(self)
-        for key in ("output_dir", "checkpoint_path", "upstream_config_path"):
-            value = payload[key]
-            payload[key] = None if value is None else str(value)
-        return payload
+        return _serialize_paths(asdict(self))
 
 
 @dataclass
@@ -61,15 +65,4 @@ class ArtifactBundle:
     notes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        payload = asdict(self)
-        for key in (
-            "output_dir",
-            "upstream_workdir",
-            "generated_sample_path",
-            "upstream_metrics_path",
-            "evaluation_bundle_path",
-            "standardized_summary_path",
-        ):
-            value = payload[key]
-            payload[key] = None if value is None else str(value)
-        return payload
+        return _serialize_paths(asdict(self))
