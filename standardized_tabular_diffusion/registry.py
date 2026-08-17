@@ -243,6 +243,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/GOGGLE_VALIDATION.md",
             "docs/evidence/goggle/native-parity-run-30945676747.json",
+            "docs/evidence/goggle/windows-v2-real-function-0a23a84.json",
             "standardized_tabular_diffusion/resources/upstream/goggle-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/goggle-validation.yml",

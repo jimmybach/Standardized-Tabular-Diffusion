@@ -1,6 +1,6 @@
 # Goggle Source, PyTorch Graph Backend, and Validation Record
 
-Status: method-author GCN core native parity retained; pure-PyTorch backend validation in progress<br>
+Status: method-author GCN core native parity retained; Windows GPU real-function validation passed; formal DGL-oracle backend validation pending<br>
 Current protocol: `goggle-pytorch-graph-backend-parity-v2`<br>
 Primary runtime: Windows 11, Python 3.11, PyTorch 2.8<br>
 Independent graph oracle: Linux, Python 3.11, DGL 1.1.3
@@ -90,7 +90,7 @@ Protocol v2 adds two independent layers:
 
 For every end-to-end case, the reference path uses unchanged Goggle plus DGL while the candidate path uses the same source plus the PyTorch backend. The gate requires exact checkpoint tensors, exact raw samples, exact final frames and CSV bytes, exact row/column contracts, valid metadata, and unchanged source files. The formal v2 result is pending a clean Linux/DGL 1.1.3 workflow run; local Windows diagnostics cannot substitute for that oracle.
 
-Windows GPU functionality is a separate gate. It must train and sample with PyTorch 2.8.0+cu128 on the declared RTX 5080 while DGL and PyTorch Geometric are absent, then pass the central structural validation route. This demonstrates real functionality, not generation quality or benchmark eligibility.
+Windows GPU functionality passed at adapter commit `0a23a84`: PyTorch 2.8.0+cu128 on the declared RTX 5080 trained the 256-row Adult-derived fixture and produced valid, distinct 16-row outputs for generation seeds `17` and `29` while DGL and PyTorch Geometric were absent. Both runs preserved checkpoint bytes; the first output passed central `p3-validity` evaluation and finalized its Result Bundle. The retained record is [`windows-v2-real-function-0a23a84.json`](evidence/goggle/windows-v2-real-function-0a23a84.json). This demonstrates real functionality, not generation quality or benchmark eligibility.
 
 ## Usage
 
@@ -122,4 +122,4 @@ python -m standardized_tabular_diffusion.validation.goggle \
 
 ## Remaining Gates
 
-The GCN core retains `native-parity-validated` provenance, but the current PyTorch backend needs retained formal v2 evidence. Goggle remains `experimental` and `unsupported`. Benchmark eligibility additionally requires approved datasets, the frozen central evaluation protocol, representative-scale resource qualification, and explicit admission. SAGE and heterogeneous decoding remain unsupported unless separately implemented and validated.
+The GCN core retains `native-parity-validated` provenance and the current Windows path is `minimal-real-passed`, but the PyTorch backend still needs retained formal Linux/DGL 1.1.3 v2 evidence. Goggle remains `experimental` and `unsupported`. Benchmark eligibility additionally requires approved datasets, the frozen central evaluation protocol, representative-scale resource qualification, and explicit admission. SAGE and heterogeneous decoding remain unsupported unless separately implemented and validated.

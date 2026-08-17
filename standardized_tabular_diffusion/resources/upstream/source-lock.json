@@ -698,13 +698,19 @@
           "classification": "adapter-only",
           "id": "goggle-standardized-data-contract-v1",
           "reason": "Official experiments consume a finite numeric DataFrame, whereas the benchmark accepts named numerical and categorical columns.",
-          "semantic_effect": "Numerical features are population-standardized and categorical features are train-fitted one-hot encoded before official training. Official raw samples are inversely transformed afterward; the target is included in the jointly modeled vector and no validation/test row is used to fit transforms."
+          "semantic_effect": "Numerical features are population-standardized and categorical features are train-fitted one-hot encoded before official training. Official raw samples are inversely transformed afterward; only DatasetSpec-declared integer columns are decoded with numpy.rint and int64 without clipping, and the native inverse table is retained. The target is included in the jointly modeled vector and no validation/test row is used to fit transforms."
         },
         {
           "classification": "adapter-only",
           "id": "goggle-exact-sample-count-v1",
           "reason": "Official GoggleModel.sample derives its count from an arbitrary reference DataFrame and couples sampling to the legacy Synthcity Schema postprocessor.",
           "semantic_effect": "The requested positive count is passed directly to the unchanged Goggle.model.sample core. Categorical and target domain recovery is performed by the recorded train-fitted standardized transform; model state and latent sampling equations are unchanged."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-independent-generation-seed-v1",
+          "reason": "The upstream GoggleModel constructor resets PyTorch to its recorded training seed, which otherwise overrides an independently requested generation seed before the stochastic core sampler runs.",
+          "semantic_effect": "The launcher reapplies the requested non-negative generation seed to Python, NumPy, and PyTorch immediately after model construction and checkpoint loading and immediately before the unchanged Goggle.model.sample call. It changes RNG selection, not the latent distribution or sampling equations."
         }
       ],
       "component_id": "goggle",
@@ -801,6 +807,21 @@
         "variants": ["binary", "multiclass", "regression"],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747/job/92114929225",
         "workflow_run_id": 30945676747
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "evidence_file_sha256": "39270c5deffa45673e994f46b06e38ea656b49640e75843eaef7d16abf50bef6",
+        "generation_seeds": [17, 29],
+        "graph_backend": "standardized-goggle-torch-graph@1.0.0",
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/goggle/windows-v2-real-function-0a23a84.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "0a23a84a2b32a07da19b89fcfe015d322f75aad8",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
       }
     },
     "nflow": {

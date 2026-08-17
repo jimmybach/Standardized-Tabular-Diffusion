@@ -323,6 +323,25 @@ def test_goggle_retained_method_author_validation_is_exact_and_conservatively_ga
     assert all(case["comparisons"]["raw_samples_exact"] for case in evidence["cases"])
     assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
     assert all(case["comparisons"]["adapter_source_remained_exact"] for case in evidence["cases"])
+
+    windows_validation = goggle["windows_real_function"]
+    assert windows_validation["status"] == "pass"
+    assert windows_validation["level"] == "minimal-real-passed"
+    assert windows_validation["seed_outputs_distinct"] is True
+    assert windows_validation["central_evaluation"] == "p3-validity-finalized"
+    windows_evidence_path = REPO_ROOT / windows_validation["permanent_evidence_path"]
+    windows_evidence_bytes = windows_evidence_path.read_bytes()
+    assert hashlib.sha256(windows_evidence_bytes).hexdigest() == windows_validation["evidence_file_sha256"]
+    windows_evidence = json.loads(windows_evidence_bytes)
+    assert windows_evidence["status"] == "pass"
+    assert windows_evidence["repository_commit"] == windows_validation["repository_commit"]
+    assert windows_evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert windows_evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert windows_evidence["seed_outputs_distinct"] is True
+    assert [sample["seed"] for sample in windows_evidence["samples"]] == [17, 29]
+    assert windows_evidence["central_evaluation"]["status"] == "pass"
+    assert windows_evidence["central_evaluation"]["finalization_status"] == "finalized"
+    assert windows_validation["permanent_evidence_path"] in get_adapter_spec("goggle").evidence_records
     assert "heterogeneous-decoder-runtime" in goggle["official_eligibility"]
     assert "release-gates" in goggle["official_eligibility"]
 
