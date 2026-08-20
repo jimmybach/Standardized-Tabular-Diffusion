@@ -1,10 +1,10 @@
 # ARF 验证协议
 
-状态：已通过；已保留 Linux/Python 3.11 官方包等价性证据
+状态：已通过；已保留 Linux 官方包等价性证据与原生 Windows 最小真实运行证据
 
 协议 ID：`arfpy-official-package-parity-v1`
 
-支持的验证平台：Linux、Python 3.11、CPU
+权威等价性验证平台：Linux、Python 3.11、CPU；原生 Windows 最小真实运行也已通过
 
 ## 范围与声明边界
 
@@ -103,5 +103,13 @@ python -m standardized_tabular_diffusion.validation.arf \
 ## 已保留结果
 
 GitHub Actions 运行 [`30964711614`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614) 已在 Linux 和 Python 3.11.15 环境通过。二分类、多分类、回归与随机种子组合形成的全部九个案例均通过所有精确比较，其中包括恢复后的 FORGE 状态和生成 CSV 字节。经审阅的证据已逐字节保留在 `docs/evidence/arf/native-parity-run-30964711614.json`，其 SHA-256 为 `959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f`，并已从 source lock 交叉引用。
+
+## 原生 Windows 最小真实运行结果
+
+仓库提交 `eb3729031189ce6b06b1b4201e1028f1c8258d73` 在原生 Windows 11、Python 3.11.15 和 CPU 环境中，使用精确锁定的 `arfpy==0.1.1` 通过了 `pipeline-v2-native-windows-v1`。该运行先在确定性的 256 行 Adult 派生夹具上训练一次，再从同一安全 JSON FORGE 状态分别以生成种子 `17` 和 `29` 恢复并生成数据。两份结果均包含 16 行规范数据、没有缺失单元、结构有效、训练产物保持不变；两份结果的 SHA-256 按要求不同。随后，种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+提交 `c84a869` 上的首次尝试保留了已通过的模型探针，但最终化失败：纯评测路径不必要地导入了 ARF 适配器，导致中央评测器也被迫需要模型专属的 `sklearn`。问题 `RF-CORE-007` 移除了这项耦合，并增加回归测试，禁止直接和流水线纯评测路径导入模型适配器。失败尝试保留在 `docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json`；干净重跑的通过证据保留在 `docs/evidence/arf/windows-v2-real-function-eb37290.json`，SHA-256 为 `056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca`。
+
+该结果只证明被测官方 Python 包、夹具、配置和 Windows 环境下的有界最小真实功能；它不证明完整数据规模的合成质量、不证明与 R 包跨语言等价，也不意味着已获得榜单资格、Official Results 准入或发布支持。
 
 因此，ARF 针对这一精确官方 Python 包的状态已晋级为 `native-parity-validated`。在独立的 benchmark、数据集、运行资源、治理和发布门槛通过前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。本结论不声称 R/Python 跨语言等价性。

@@ -17,6 +17,7 @@ from standardized_tabular_diffusion.config import (
 )
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.final_wave_baselines import ARFAdapter
+from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.runner import validate_action_inputs
 from standardized_tabular_diffusion.validation import arf as arf_validation
 
@@ -25,6 +26,17 @@ pytestmark = pytest.mark.adapter
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "arf" / "native-parity-run-30964711614.json"
 EVIDENCE_SHA256 = "959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "arf" / "windows-v2-real-function-eb37290.json"
+WINDOWS_EVIDENCE_SHA256 = "056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca"
+WINDOWS_FAILURE_PATH = (
+    REPO_ROOT
+    / "docs"
+    / "evidence"
+    / "arf"
+    / "windows-v2-finalization-adapter-import-failure-c84a869.json"
+)
+WINDOWS_FAILURE_SHA256 = "01318e65bd5c735d058198ca4232a1ed4c44a1449a67a6bde768b5ed51eeed4a"
+SOURCE_LOCK_PATH = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def _dataset_spec(tmp_path: Path) -> DatasetSpec:
@@ -99,6 +111,70 @@ def test_arf_retained_evidence_is_exact_and_complete() -> None:
     assert all(case["comparisons"]["forge_state"]["safe_json_checkpoint"] for case in evidence["cases"])
     assert all(case["comparisons"]["forge_state"]["row_level_training_data_absent"] for case in evidence["cases"])
     assert all(case["comparisons"]["forge_state"]["random_forest_absent"] for case in evidence["cases"])
+
+
+def test_arf_retained_windows_v2_evidence_is_exact_complete_and_attempt_preserving() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "eb3729031189ce6b06b1b4201e1028f1c8258d73"
+    assert evidence["train"]["status"] == "pass"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": False,
+        "cuda_runtime": None,
+        "gpu": None,
+        "torch": None,
+    }
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [16, 16]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+
+    central = evidence["central_evaluation"]
+    assert central["status"] == "pass"
+    assert central["protocol"] == "p3-validity"
+    assert central["finalization_status"] == "finalized"
+    assert central["validation"]["pending_files"] == 0
+    assert central["environment"]["hardware"]["torch"] is None
+    assert central["environment_lock"]["sha256"] == (
+        "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca"
+    )
+
+    failure_bytes = WINDOWS_FAILURE_PATH.read_bytes()
+    assert hashlib.sha256(failure_bytes).hexdigest() == WINDOWS_FAILURE_SHA256
+    assert failure_bytes.endswith(b"\n")
+    failure = json.loads(failure_bytes)
+    assert failure["status"] == "fail"
+    assert failure["finding_id"] == "RF-CORE-007"
+    assert failure["stage"] == "central-evaluation-finalization"
+    assert failure["model_probe"]["training_status"] == "pass"
+    assert failure["error"]["cause"] == "ModuleNotFoundError: No module named 'sklearn'"
+    assert failure["resolution"]["model_runtime_imported_for_central_evaluation"] is False
+    assert failure["resolution"]["passing_evidence_sha256"] == WINDOWS_EVIDENCE_SHA256
+
+    spec = get_adapter_spec("arf")
+    for path in (WINDOWS_FAILURE_PATH, WINDOWS_EVIDENCE_PATH):
+        assert path.relative_to(REPO_ROOT).as_posix() in spec.evidence_records
+
+    source_lock = json.loads(SOURCE_LOCK_PATH.read_text(encoding="utf-8"))
+    windows_validation = source_lock["components"]["arf"]["windows_real_function"]
+    assert windows_validation["status"] == "pass"
+    assert windows_validation["level"] == "minimal-real-passed"
+    assert windows_validation["repository_commit"] == evidence["repository_commit"]
+    assert windows_validation["attempt_chain"] == [
+        WINDOWS_FAILURE_PATH.relative_to(REPO_ROOT).as_posix(),
+        WINDOWS_EVIDENCE_PATH.relative_to(REPO_ROOT).as_posix(),
+    ]
+    assert windows_validation["failure_evidence_file_sha256"] == WINDOWS_FAILURE_SHA256
+    assert windows_validation["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
 
 
 def test_arf_checkpoint_codec_round_trips_nonfinite_bounds_without_pickle() -> None:

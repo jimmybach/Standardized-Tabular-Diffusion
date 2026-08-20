@@ -138,6 +138,30 @@
         ],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614/job/92176072429",
         "workflow_run_id": 30964711614
+      },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json",
+          "docs/evidence/arf/windows-v2-real-function-eb37290.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca",
+        "failure_evidence_file_sha256": "01318e65bd5c735d058198ca4232a1ed4c44a1449a67a6bde768b5ed51eeed4a",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/arf/windows-v2-real-function-eb37290.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "eb3729031189ce6b06b1b4201e1028f1c8258d73",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
       }
     },
     "bn": {

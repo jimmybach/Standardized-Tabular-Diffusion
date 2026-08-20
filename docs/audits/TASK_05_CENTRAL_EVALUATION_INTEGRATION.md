@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md](TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md)
 
-- Status: in progress; Goggle, TabuLa, and TabularARGN V2 finalization retained
+- Status: in progress; Goggle, TabuLa, TabularARGN, and ARF V2 finalization retained
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: model-specific evaluation drift or invalid result finalization
 

@@ -1,7 +1,7 @@
 {
   "plan_id": "pipeline-real-function-audit",
   "version": "1.0",
-  "snapshot_date": "2026-08-17",
+  "snapshot_date": "2026-08-20",
   "state_authority": "audit-only; does not replace registry validation, benchmark, or support status",
   "primary_environment": {
     "operating_system": "native Windows 11 x86-64",
@@ -53,12 +53,20 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 3,
-    "minimal_real_pending": 15,
+    "minimal_real_passed": 4,
+    "minimal_real_pending": 14,
     "externally_blocked": 1
   },
   "baselines": [
-    {"model_id": "arf", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "arf",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json",
+        "docs/evidence/arf/windows-v2-real-function-eb37290.json"
+      ]
+    },
     {"model_id": "bn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "codi", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},

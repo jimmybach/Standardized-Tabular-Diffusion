@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "finding_id": "RF-CORE-007",
+  "protocol_id": "pipeline-v2-native-windows-v1",
+  "status": "fail",
+  "model_id": "arf",
+  "stage": "central-evaluation-finalization",
+  "repository_commit": "c84a869a0c8a23359d15dfe919ba63cf9da9815a",
+  "model_probe": {
+    "status": "probe-pass-evaluation-pending",
+    "record_sha256": "46770520801c7f07b1d3adc90af4672306db030333bf9ee59e6f9778393273fd",
+    "training_status": "pass",
+    "generation_seeds": [17, 29],
+    "seed_outputs_distinct": true
+  },
+  "error": {
+    "type": "AdapterDependencyError",
+    "message": "Adapter 'arf' cannot import optional dependency 'sklearn'",
+    "cause": "ModuleNotFoundError: No module named 'sklearn'"
+  },
+  "root_cause": "The central evaluation route imported the selected model adapter before consuming its generated CSV, coupling the independent evaluator to model-only runtime dependencies that it neither needs nor declares.",
+  "resolution": {
+    "repository_commit": "eb3729031189ce6b06b1b4201e1028f1c8258d73",
+    "model_runtime_imported_for_central_evaluation": false,
+    "evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+    "evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+    "passing_evidence": "docs/evidence/arf/windows-v2-real-function-eb37290.json",
+    "passing_evidence_sha256": "056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca"
+  },
+  "claim_boundary": "This record preserves a central-evaluation isolation failure after a passing ARF model probe. It is not model-quality evidence and does not invalidate the later clean rerun bound to the resolution commit."
+}

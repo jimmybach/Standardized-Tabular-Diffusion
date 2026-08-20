@@ -120,7 +120,11 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
         upstream_repository="https://github.com/bips-hb/arfpy",
         upstream_revision="6f737baaaa589f7ac3ff59f0d739ce04b0f1381c",
         revision_status="pinned-official-package-native-parity-validated",
-        evidence_records=("docs/evidence/arf/native-parity-run-30964711614.json",),
+        evidence_records=(
+            "docs/evidence/arf/native-parity-run-30964711614.json",
+            "docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json",
+            "docs/evidence/arf/windows-v2-real-function-eb37290.json",
+        ),
         license_status="MIT; source-and-package-license-verified; transitive-review-pending",
         validation_level=AdapterValidationLevel.NATIVE_PARITY_VALIDATED,
     ),
