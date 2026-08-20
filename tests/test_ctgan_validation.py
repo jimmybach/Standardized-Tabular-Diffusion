@@ -16,6 +16,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-32047234665.json"
 EVIDENCE_SHA256 = "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "windows-v2-real-function-5bf59b0.json"
+WINDOWS_EVIDENCE_SHA256 = "b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea"
 
 
 def _write_test_wheel(path: Path, *, unsafe_member: str | None = None) -> str:
@@ -72,6 +74,46 @@ def test_retained_ctgan_v2_evidence_is_immutable_and_complete() -> None:
         case["adapter_artifacts"]["sample_sha256"] == case["native_artifacts"]["sample_sha256"]
         for case in evidence["cases"]
     )
+
+
+def test_retained_ctgan_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "5bf59b0effa29a0c2694cdbe05b1a8f40443c481"
+    assert evidence["entry"]["device"] == "cuda"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert evidence["environment"]["hardware"]["cuda_runtime"] == "12.8"
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert "libzero" not in evidence["environment"]["packages"]
+    assert evidence["environment_lock"]["sha256"] == (
+        "2697509472a3a9acfdafcc8b781e2906b82c216ffd64d5a214510ac43b9cc9e9"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["ctgan"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json" in get_adapter_spec(
+        "ctgan"
+    ).evidence_records
 
 
 def test_ctgan_wheel_validation_checks_identity_and_license(tmp_path: Path, monkeypatch) -> None:

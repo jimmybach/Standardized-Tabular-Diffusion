@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 8,
-    "minimal_real_pending": 10,
+    "minimal_real_passed": 11,
+    "minimal_real_pending": 7,
     "externally_blocked": 1
   },
   "baselines": [
@@ -76,7 +76,12 @@
     {"model_id": "codi", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan-plus", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "ctgan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "ctgan",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json"]
+    },
     {
       "model_id": "goggle",
       "registry_validation_level": "native-parity-validated",
@@ -86,7 +91,12 @@
       ]
     },
     {"model_id": "great", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "nflow", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "nflow",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/nflow/windows-v2-real-function-5bf59b0.json"]
+    },
     {
       "model_id": "nrgboost",
       "registry_validation_level": "native-parity-validated",
@@ -156,6 +166,11 @@
         "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json"
       ]
     },
-    {"model_id": "tvae", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []}
+    {
+      "model_id": "tvae",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tvae/windows-v2-real-function-5bf59b0.json"]
+    }
   ]
 }

@@ -13,6 +13,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tvae" / "native-parity-run-32052308431.json"
 EVIDENCE_SHA256 = "5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tvae" / "windows-v2-real-function-5bf59b0.json"
+WINDOWS_EVIDENCE_SHA256 = "a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301"
 
 
 def test_tvae_package_lock_matches_registry_and_protocol() -> None:
@@ -56,6 +58,46 @@ def test_retained_tvae_evidence_is_immutable_and_complete() -> None:
         "legacy_snapshot_absent": True,
         "module": "ctgan.synthesizers.tvae",
     }
+
+
+def test_retained_tvae_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "5bf59b0effa29a0c2694cdbe05b1a8f40443c481"
+    assert evidence["entry"]["device"] == "cuda"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert evidence["environment"]["hardware"]["cuda_runtime"] == "12.8"
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert "libzero" not in evidence["environment"]["packages"]
+    assert evidence["environment_lock"]["sha256"] == (
+        "cd2cca53950203df9d772cffd8ca57e91fc9874d9663f6af4e08948b48733f7b"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tvae"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/tvae/windows-v2-real-function-5bf59b0.json" in get_adapter_spec(
+        "tvae"
+    ).evidence_records
 
 
 def test_legacy_tvae_snapshot_is_recorded_and_removed() -> None:

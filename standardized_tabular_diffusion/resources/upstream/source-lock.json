@@ -700,7 +700,28 @@
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
-      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-ctgan-validation.txt",
+        "environment_lock_sha256": "2697509472a3a9acfdafcc8b781e2906b82c216ffd64d5a214510ac43b9cc9e9",
+        "evidence_file_sha256": "b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "ctgan==0.12.1",
+        "permanent_evidence_path": "docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
+      }
     },
     "goggle": {
       "adapter_ids": [
@@ -1062,6 +1083,27 @@
         "variants": ["binary", "multiclass", "regression"],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840/job/92192839468",
         "workflow_run_id": 30970260840
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-nflow-validation.txt",
+        "environment_lock_sha256": "a05b0c1a8c3f14ec2c285038ede6c9d61c327400ce0986aa05361c970fbbc319",
+        "evidence_file_sha256": "0616c1677ffe4922bc910e5c0f234920a2e22e8155364d464273bffc7bbf6fb3",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "official_package": "nflows==0.14",
+        "permanent_evidence_path": "docs/evidence/nflow/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu",
+        "validated_scope": "official nflows package plus declared mixed-type MAF recipe on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "nrgboost": {
@@ -1594,7 +1636,28 @@
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
-      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-tvae-validation.txt",
+        "environment_lock_sha256": "cd2cca53950203df9d772cffd8ca57e91fc9874d9663f6af4e08948b48733f7b",
+        "evidence_file_sha256": "a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "ctgan==0.12.1",
+        "permanent_evidence_path": "docs/evidence/tvae/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
+      }
     },
     "tabddpm": {
       "adapter_ids": [

@@ -2,7 +2,7 @@
 
 英文原文：[TASK_05_CENTRAL_EVALUATION_INTEGRATION.md](TASK_05_CENTRAL_EVALUATION_INTEGRATION.md)
 
-- 状态：进行中；已保留 Goggle、TabuLa、TabularARGN、ARF、BN、SMOTE、NRGBoost 和 TabSDS 的 V2 最终化证据
+- 状态：进行中；已保留 Goggle、TabuLa、TabularARGN、ARF、BN、SMOTE、NRGBoost、TabSDS、CTGAN、TVAE 和 NFlow 的 V2 最终化证据
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 - 风险类型：模型专属评测漂移，或错误地最终化结果
 

@@ -1,10 +1,10 @@
 # TVAE 验证协议
 
-状态：已通过；适配器为 `native-parity-validated`
+状态：已通过；适配器为 `native-parity-validated`；原生 Windows GPU V2 功能已通过
 
 协议 ID：`tvae-native-parity-v2`
 
-支持的验证平台：Linux、Python 3.11、PyTorch 2.3 CPU
+支持的验证平台：Linux/Python 3.11/PyTorch 2.3 CPU 用于等价验证；原生 Windows/Python 3.11/PyTorch 2.8 CUDA 用于有界 V2 功能验证
 
 ## 范围与声明边界
 
@@ -103,3 +103,9 @@ python -m standardized_tabular_diffusion.validation.tvae \
 [GitHub Actions 运行 `32052308431`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431) 已在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。独立训练/采样种子对 `(0, 101)`、`(19, 7)` 和 `(73, 29)` 的所有强制比较均通过：官方 wheel 与安装文件身份、构造参数与设备、全部五个保留的 decoder 张量（包括有限的 sigma）、转换后的夹具数据、记录的损失、NumPy 与 PyTorch 随机状态、清单完整性、生成的 DataFrame 以及 CSV 字节。
 
 原始工作流产物经审阅后未作修改，永久保存在 `docs/evidence/tvae/native-parity-run-32052308431.json`，其 SHA-256 为 `5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e`。对应 GitHub artifact ID 为 `9295157218`，artifact 摘要为 `sha256:17fc9a204c3b3c4d59a5e34514d57a1b90cceb59a80df52d51d4836870c26462`。因此 TVAE 为 `native-parity-validated`；但在许可证、统一评测、数据集准入和发布门槛分别完成前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。
+
+## 原生 Windows V2 结果
+
+仓库提交 `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` 使用未修改的官方 `ctgan==0.12.1` 包中的 `TVAE`，在 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 32 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/tvae/windows-v2-real-function-5bf59b0.json`，SHA-256 为 `a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301`。这项有界功能结论不代表代表性质量、隐私、Official Results 准入或发布支持；BUSL-1.1 审阅仍是独立事项。

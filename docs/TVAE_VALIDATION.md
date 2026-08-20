@@ -1,10 +1,10 @@
 # TVAE Validation Protocol
 
-Status: passed; adapter is `native-parity-validated`
+Status: passed; adapter is `native-parity-validated`; native-Windows GPU V2 functionality passed
 
 Protocol ID: `tvae-native-parity-v2`
 
-Supported validation platform: Linux, Python 3.11, PyTorch 2.3 CPU
+Supported validation platforms: Linux/Python 3.11/PyTorch 2.3 CPU for parity; native Windows/Python 3.11/PyTorch 2.8 CUDA for bounded V2 functionality
 
 ## Scope and claim boundary
 
@@ -103,3 +103,9 @@ python -m standardized_tabular_diffusion.validation.tvae \
 [GitHub Actions run `32052308431`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431) passed on Linux with Python 3.11.15 and PyTorch 2.3.0 CPU. All required comparisons passed for the independent training/sampling seed pairs `(0, 101)`, `(19, 7)`, and `(73, 29)`: official wheel and installed-file identity, constructor and device settings, all five retained decoder tensors including finite sigma, transformed fixture data, recorded losses, NumPy and PyTorch random states, manifest integrity, generated DataFrames, and CSV bytes.
 
 The raw workflow artifact was inspected and retained unchanged at `docs/evidence/tvae/native-parity-run-32052308431.json` with SHA-256 `5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e`. Its GitHub artifact ID is `9295157218` and its artifact digest is `sha256:17fc9a204c3b3c4d59a5e34514d57a1b90cceb59a80df52d51d4836870c26462`. TVAE is therefore `native-parity-validated`, while remaining `experimental`, `unsupported`, and excluded from Official Results until the separate license, evaluation, dataset, and release gates are satisfied.
+
+## Native-Windows V2 result
+
+Repository commit `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` passed `pipeline-v2-native-windows-v1` with `TVAE` from the unmodified official `ctgan==0.12.1` package on Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and NVIDIA GeForce RTX 5080. One bounded real epoch on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 32 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling left the copied training artifacts unchanged. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+Evidence is retained at `docs/evidence/tvae/windows-v2-real-function-5bf59b0.json` with SHA-256 `a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301`. This bounded functionality result does not establish representative quality, privacy, Official Results admission, or release support; BUSL-1.1 review remains independent.

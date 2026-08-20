@@ -1,10 +1,10 @@
 # CTGAN Validation Protocol
 
-Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
+Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`; native-Windows GPU V2 functionality passed
 
 Protocol ID: `ctgan-native-parity-v2`
 
-Supported validation platform: Linux, Python 3.11, PyTorch 2.3 CPU
+Supported validation platforms: Linux/Python 3.11/PyTorch 2.3 CPU for parity; native Windows/Python 3.11/PyTorch 2.8 CUDA for bounded V2 functionality
 
 ## Scope and claim boundary
 
@@ -99,3 +99,9 @@ python -m standardized_tabular_diffusion.validation.ctgan \
 ```
 
 `.github/workflows/ctgan-validation.yml` runs this command and retains the workflow artifact for 90 days. Any package, dependency, adapter, or protocol change requires a new run. The inspected passing evidence promotes CTGAN to `native-parity-validated`; it remains `experimental`, `unsupported`, and excluded from Official Results pending every separate gate described above.
+
+## Native-Windows V2 result
+
+Repository commit `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` passed `pipeline-v2-native-windows-v1` with the unmodified official `ctgan==0.12.1` package on Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and NVIDIA GeForce RTX 5080. One bounded real epoch on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 32 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling did not change the copied training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+Evidence is retained at `docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json` with SHA-256 `b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea`. This bounded functionality result does not establish representative quality, privacy, Official Results admission, or release support; BUSL-1.1 review remains independent.

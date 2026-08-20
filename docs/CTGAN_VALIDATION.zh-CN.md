@@ -1,10 +1,10 @@
 # CTGAN 验证协议
 
-状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
+状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`；原生 Windows GPU V2 功能已通过
 
 协议 ID：`ctgan-native-parity-v2`
 
-支持的验证平台：Linux、Python 3.11、PyTorch 2.3 CPU
+支持的验证平台：Linux/Python 3.11/PyTorch 2.3 CPU 用于等价验证；原生 Windows/Python 3.11/PyTorch 2.8 CUDA 用于有界 V2 功能验证
 
 ## 范围与声明边界
 
@@ -99,3 +99,9 @@ python -m standardized_tabular_diffusion.validation.ctgan \
 ```
 
 `.github/workflows/ctgan-validation.yml` 执行该命令并将工作流 artifact 保留 90 天。包、依赖、适配器或协议一旦变化，都必须重新运行。经审阅并永久固化的通过证据使 CTGAN 提升为 `native-parity-validated`；在完成上述所有独立门槛之前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。
+
+## 原生 Windows V2 结果
+
+仓库提交 `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` 使用未修改的官方 `ctgan==0.12.1` 包，在 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 32 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json`，SHA-256 为 `b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea`。这项有界功能结论不代表代表性质量、隐私、Official Results 准入或发布支持；BUSL-1.1 审阅仍是独立事项。

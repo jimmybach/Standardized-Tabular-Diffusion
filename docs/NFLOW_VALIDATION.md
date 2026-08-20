@@ -1,10 +1,10 @@
 # NFlow Validation Protocol
 
-Status: passed; retained Linux/Python 3.11 official-package recipe-parity evidence
+Status: passed; retained Linux/Python 3.11 official-package recipe-parity evidence; native-Windows CPU V2 functionality passed
 
 Protocol ID: `nflows-maf-tabular-recipe-parity-v1`
 
-Supported validation platform: Linux, Python 3.11, CPU
+Supported validation platforms: Linux/Python 3.11 CPU for parity; native Windows/Python 3.11 CPU for bounded V2 functionality
 
 ## Scope and claim boundary
 
@@ -125,3 +125,9 @@ GitHub Actions run [`30970260840`](https://github.com/jimmybach/Standardized-Tab
 The source protocol verified 96 archive members, 80 regular source-distribution files, all 42 package files against the locked Git tree, nine critical runtime files, 48 installed `RECORD` hashes, and unchanged installed source after all cases. The inspected evidence is retained byte-for-byte at `docs/evidence/nflow/native-parity-run-30970260840.json` with SHA-256 `940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923`. The GitHub artifact ID is `8916246279`, and its archive digest is `sha256:635028a4962884284e8592144e5fa2b77272bafa4c4279f54d421650552ec044`.
 
 NFlow is therefore `native-parity-validated` against the exact official nflows package plus the repository-declared mixed-type MAF recipe. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent central-evaluation, dataset-admission, runtime, governance, and release gates pass. No paper-native or alternative-recipe equivalence is claimed.
+
+## Native-Windows V2 result
+
+Repository commit `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` passed `pipeline-v2-native-windows-v1` with the unmodified official `nflows==0.14` package and the declared mixed-type MAF recipe on Windows 11, Python 3.11.15, and CPU-only PyTorch 2.3.0. Two real bounded training epochs on the deterministic 256-row Adult-derived missing-free fixture produced the safe JSON/NumPy checkpoint reused for generation seeds `17` and `29`. Each output contained 16 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling left the copied training artifacts unchanged. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+Evidence is retained at `docs/evidence/nflow/windows-v2-real-function-5bf59b0.json` with SHA-256 `0616c1677ffe4922bc910e5c0f234920a2e22e8155364d464273bffc7bbf6fb3`. This remains a bounded official-library-plus-declared-recipe result, not a paper-native, representative-quality, privacy, Official Results, or release claim.
