@@ -11,10 +11,15 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from standardized_tabular_diffusion.compat.goggle_graph_contract import graph_backend_record
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import (
+    declared_integer_columns,
+    decode_declared_integer_columns,
+)
 from standardized_tabular_diffusion.upstream_sources import (
     default_source_path,
     validate_upstream_source,
@@ -28,8 +33,16 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     upstream_dirname = ".cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
     upstream_commit = "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0"
     checkpoint_filename = "model.pt"
+    graph_backend = graph_backend_record()
 
-    _STANDARD_EXTRA_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+    _STANDARD_EXTRA_KEYS = {
+        "action_extras",
+        "config",
+        "dataset_identity",
+        "dataset_spec",
+        "evaluation",
+        "tags",
+    }
     _TRAIN_KEYS = {
         "alpha",
         "batch_size",
@@ -130,8 +143,11 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         config["threshold"] = self._finite_float("threshold", config["threshold"])
         if not 0 <= config["threshold"] <= 1:
             raise ValueError("Goggle threshold must be between zero and one.")
-        if config["decoder_arch"] not in {"gcn", "sage", "het"}:
-            raise ValueError("Goggle decoder_arch must be 'gcn', 'sage', or 'het'.")
+        if config["decoder_arch"] != "gcn":
+            raise ValueError(
+                "Goggle currently supports decoder_arch='gcn' only. The upstream SAGE and heterogeneous "
+                "paths are outside the validated pure-PyTorch compatibility contract."
+            )
         for key in ("het_encoding", "iter_opt"):
             if not isinstance(config[key], bool):
                 raise ValueError(f"Goggle {key} must be a boolean.")
@@ -200,8 +216,13 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         for column in numerical:
             if not pd.api.types.is_numeric_dtype(frame[column]):
                 raise ValueError(f"Goggle numerical column must have a numeric dtype: {column}")
-            if not bool(np.isfinite(frame[column].to_numpy(dtype=np.float64)).all()):
+            values = frame[column].to_numpy(dtype=np.float64)
+            if not bool(np.isfinite(values).all()):
                 raise ValueError(f"Goggle numerical column contains non-finite values: {column}")
+        for column in declared_integer_columns(dataset_spec, model_name="Goggle"):
+            values = frame[column].to_numpy(dtype=np.float64)
+            if not bool(np.equal(values, np.rint(values)).all()):
+                raise ValueError(f"Goggle declared integer training column contains fractional values: {column}")
         return frame
 
     def _transform_training_frame(
@@ -264,6 +285,8 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             "fit_scope": "real-training-split-only",
             "numerical_transform": "population-standardization-equivalent-to-StandardScaler",
             "categorical_transform": "deterministic-train-fitted-one-hot",
+            "integer_columns": declared_integer_columns(dataset_spec, model_name="Goggle"),
+            "integer_decoding": "numpy-rint-ties-to-even-at-adapter-decoding-boundary-without-clipping",
         }
         return transformed_frame, metadata
 
@@ -297,7 +320,6 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             [str(launcher), *args],
             self.repo_root,
             env={
-                "DGLBACKEND": "pytorch",
                 "PYTHONPATH": os.pathsep.join(filter(None, [str(self.repo_root), os.environ.get("PYTHONPATH")])),
             },
         )
@@ -318,6 +340,7 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             "seed": spec.seed,
             "input_dim": transform["input_dim"],
             "training_rows": transform["training_rows"],
+            "graph_backend": self.graph_backend,
         }
         runtime_config_path = self._runtime_config_path(spec)
         atomic_write_json(runtime_config_path, execution_config)
@@ -356,7 +379,7 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         atomic_write_json(
             self._metadata_path(spec),
             {
-                "schema_version": 1,
+                "schema_version": 2,
                 "model": self.model_name,
                 "dataset": spec.dataset,
                 "seed": spec.seed,
@@ -368,7 +391,8 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "execution_config": execution_config,
                 "transform": transform,
                 "source": source,
-                "compatibility_boundary": "goggle-official-adapter-runtime-v1",
+                "graph_backend": self.graph_backend,
+                "compatibility_boundary": "goggle-official-source-pytorch-graph-runtime-v2",
                 "sampling_boundary": "official Goggle.model.sample followed by centralized inverse transformation",
             },
         )
@@ -378,8 +402,8 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             output_dir=spec.output_dir,
             upstream_workdir=source_root,
             notes=[
-                "Training invoked checksum-locked, unmodified method-author Goggle source.",
-                "Only train-fitted format adaptation, source verification, and output isolation occur outside upstream code.",
+                "Training invoked checksum-locked, unmodified method-author Goggle source for the model core.",
+                "The GCN graph operations use the recorded pure-PyTorch compatibility backend instead of DGL.",
             ],
         )
         return self._write_bundle(bundle)
@@ -389,7 +413,7 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         if path.is_symlink() or not path.is_file():
             raise FileNotFoundError(f"Goggle model metadata is missing: {path}")
         metadata = read_json(path)
-        if not isinstance(metadata, dict) or metadata.get("schema_version") != 1:
+        if not isinstance(metadata, dict) or metadata.get("schema_version") != 2:
             raise ValueError("Goggle model metadata is malformed or unsupported.")
         if metadata.get("model") != self.model_name or metadata.get("dataset") != spec.dataset:
             raise ValueError("Goggle model metadata does not match the requested model and dataset.")
@@ -398,11 +422,16 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         recorded_source = metadata.get("source")
         if not isinstance(recorded_source, dict) or recorded_source.get("upstream_commit") != source["upstream_commit"]:
             raise ValueError("Goggle training metadata does not match the verified official source revision.")
+        if metadata.get("graph_backend") != self.graph_backend:
+            raise ValueError("Goggle training metadata does not match the supported graph backend.")
         runtime_config = self._runtime_config_path(spec)
         if runtime_config.is_symlink() or not runtime_config.is_file():
             raise FileNotFoundError(f"Goggle runtime configuration is missing: {runtime_config}")
         if metadata.get("runtime_config_sha256") != self._sha256(runtime_config):
             raise ValueError("Goggle runtime configuration checksum does not match its training metadata.")
+        runtime_payload = read_json(runtime_config)
+        if not isinstance(runtime_payload, dict) or runtime_payload.get("graph_backend") != self.graph_backend:
+            raise ValueError("Goggle runtime configuration does not match the supported graph backend.")
         return metadata
 
     def _inverse_transform(self, raw: np.ndarray, transform: dict[str, Any]) -> pd.DataFrame:
@@ -446,6 +475,15 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             format_name="PyTorch weights-only checkpoint",
         )
         metadata = self._load_metadata(spec, checkpoint, source)
+        dataset_spec = self.resolve_dataset_spec(spec)
+        transform = metadata["transform"]
+        if (
+            transform.get("column_names") != dataset_spec.column_names
+            or transform.get("task_type") != dataset_spec.task_type
+            or transform.get("integer_columns")
+            != declared_integer_columns(dataset_spec, model_name="Goggle")
+        ):
+            raise ValueError("Goggle sampling DatasetSpec differs from the recorded output-decoding contract.")
         num_samples = spec.num_samples or int(metadata["transform"]["training_rows"])
         self._positive_int("num_samples", num_samples)
         num_threads = self._positive_int("num_threads", spec.extra.get("num_threads", 1))
@@ -470,14 +508,48 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                     str(num_threads),
                     "--num-samples",
                     str(num_samples),
+                    "--seed",
+                    str(spec.seed),
                     "--raw-output",
                     str(raw_path.resolve()),
                 ],
             )
             raw = np.load(raw_path, allow_pickle=False)
-        sample_frame = self._inverse_transform(raw, metadata["transform"])
+        native_sample_frame = self._inverse_transform(raw, transform)
+        sample_frame, integer_decoding = decode_declared_integer_columns(
+            native_sample_frame,
+            dataset_spec,
+            model_name="Goggle",
+        )
+        native_sample_path = None
+        if integer_decoding:
+            native_sample_path = spec.output_dir / "goggle-native-inverse-samples.csv"
+            self._write_dataframe_csv(native_sample_frame, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_frame, sample_path)
+        atomic_write_json(
+            spec.output_dir / "goggle-sample-metadata.json",
+            {
+                "schema_version": 1,
+                "model": self.model_name,
+                "dataset": dataset_spec.name,
+                "seed": spec.seed,
+                "requested_rows": int(num_samples),
+                "source": source,
+                "graph_backend": self.graph_backend,
+                "checkpoint_path": str(checkpoint),
+                "checkpoint_sha256": self._sha256(checkpoint),
+                "sample_path": str(sample_path.resolve()),
+                "sample_sha256": self._sha256(sample_path),
+                "integer_decoding": integer_decoding,
+                "native_inverse_sample_path": (
+                    None if native_sample_path is None else str(native_sample_path.resolve())
+                ),
+                "native_inverse_sample_sha256": (
+                    None if native_sample_path is None else self._sha256(native_sample_path)
+                ),
+            },
+        )
         source_after = validate_upstream_source(self.model_name, source_root)
         if source_after["manifest_sha256"] != source["manifest_sha256"]:
             raise ValueError("Goggle source identity changed during sampling.")
@@ -489,7 +561,9 @@ class GoggleAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             generated_sample_path=sample_path,
             notes=[
                 "Sampling loaded a checksum-verified weights-only checkpoint under the recorded official source.",
-                "Requested row count and categorical reconstruction are adapter-only output-contract operations.",
+                "The recorded pure-PyTorch GCN graph backend was required before checkpoint execution.",
+                "Requested row count, categorical reconstruction, and declared integer decoding are adapter-only "
+                "output-contract operations; native inverse samples are retained when integer decoding applies.",
             ],
         )
         return self._write_bundle(bundle)

@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "protocol_id": "pipeline-v2-native-windows-v1",
+  "claim_boundary": "Minimal real authoritative train/sample functionality on a deterministic Adult-derived validation fixture under native Windows 11 and Python 3.11. This is not full-data quality, native parity, benchmark eligibility, Official Results admission, or release support.",
+  "target_environment": {
+    "platform_system": "Windows",
+    "python_major_minor": "3.11",
+    "gpu_name": "NVIDIA GeForce RTX 5080"
+  },
+  "fixture": {
+    "fixture_id": "pipeline-v2-adult-256-v1",
+    "source_dataset": "adult",
+    "train_rows": 256,
+    "test_rows": 128,
+    "selection_seed": 20260814,
+    "selection_policy": "greedy categorical-domain coverage followed by deterministic stratified fill"
+  },
+  "training_seed": 13,
+  "generation_seeds": [17, 29],
+  "central_evaluation": {
+    "protocol": "p3-validity",
+    "dataset_profile_path": "configs/datasets/adult-uci-2-v1.json",
+    "comparison_track": "native",
+    "environment_lock": "requirements-pipeline-v2-evaluation.txt",
+    "required_packages": {
+      "jsonschema": "4.23.0",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pyarrow": "18.1.0",
+      "PyYAML": "6.0.2"
+    }
+  },
+  "models": [
+    {"model_id": "arf", "batch": "fast-cpu", "config_path": "configs/smoke/arf-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-arf-validation.txt", "required_packages": {"arfpy": "0.1.1"}},
+    {"model_id": "bn", "batch": "fast-cpu", "config_path": "configs/smoke/bn-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-bn-validation.txt", "required_packages": {"pgmpy": "1.1.2"}},
+    {"model_id": "smote", "batch": "fast-cpu", "config_path": "configs/smoke/smote-adult-v2.json", "device": "cpu", "environment_lock": "requirements-smote-validation.txt", "required_packages": {"imbalanced-learn": "0.14.2"}},
+    {"model_id": "nrgboost", "batch": "fast-cpu", "config_path": "configs/smoke/nrgboost-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-nrgboost-windows-v2.txt", "required_packages": {"nrgboost": "0.0.3"}},
+    {"model_id": "tabsds", "batch": "fast-cpu", "config_path": "configs/smoke/tabsds-adult-v2.json", "device": "cpu", "environment_lock": "requirements-tabsds-validation.txt", "required_packages": {}},
+    {"model_id": "ctgan", "batch": "neural-gpu", "config_path": "configs/smoke/ctgan-adult-v2.json", "device": "cuda", "environment_lock": "requirements-ctgan-validation.txt", "required_packages": {"ctgan": "0.12.1", "torch": "2.8.0"}},
+    {"model_id": "tvae", "batch": "neural-gpu", "config_path": "configs/smoke/tvae-adult-v2.json", "device": "cuda", "environment_lock": "requirements-tvae-validation.txt", "required_packages": {"ctgan": "0.12.1", "torch": "2.8.0"}},
+    {"model_id": "nflow", "batch": "legacy-cpu", "config_path": "configs/smoke/nflow-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-nflow-validation.txt", "required_packages": {"nflows": "0.14", "torch": "2.3.0"}},
+    {"model_id": "ctab-gan", "batch": "legacy-cpu", "config_path": "configs/smoke/ctab-gan-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-ctabgan-validation.txt", "required_packages": {"torch": "2.3.0"}},
+    {"model_id": "ctab-gan-plus", "batch": "legacy-cpu", "config_path": "configs/smoke/ctab-gan-plus-adult-smoke.json", "device": "cpu", "environment_lock": "requirements-ctabgan-plus-validation.txt", "required_packages": {"torch": "2.3.0"}},
+    {"model_id": "goggle", "batch": "neural-gpu", "config_path": "configs/smoke/goggle-adult-smoke.json", "device": "cuda", "environment_lock": "requirements-goggle-windows-gpu.txt", "required_packages": {"torch": "2.8.0"}},
+    {"model_id": "codi", "batch": "neural-gpu", "config_path": "configs/smoke/codi-adult-smoke.json", "device": "cuda", "environment_lock": "requirements-codi-validation.txt", "required_packages": {"libzero": "0.0.8", "torch": "2.8.0"}, "pip_check_waivers": [{"distribution": "libzero", "version": "0.0.8", "requirement": "torch<2,>=1.7", "installed_dependency": "torch", "installed_dependency_version": "2.8.0+cu128", "reason": "The frozen upstream snapshot imports libzero 0.0.8, whose stale distribution metadata caps torch below 2; the exact compatibility has already passed the retained native-parity workflow and this V2 run records the observed conflict."}]},
+    {"model_id": "stasy", "batch": "neural-gpu", "config_path": "configs/smoke/stasy-adult-smoke.json", "device": "cuda", "environment_lock": "requirements-stasy-validation.txt", "required_packages": {"libzero": "0.0.8", "torch": "2.8.0"}, "pip_check_waivers": [{"distribution": "libzero", "version": "0.0.8", "requirement": "torch<2,>=1.7", "installed_dependency": "torch", "installed_dependency_version": "2.8.0+cu128", "reason": "The frozen upstream snapshot imports libzero 0.0.8, whose stale distribution metadata caps torch below 2; the exact compatibility has already passed the retained native-parity workflow and this V2 run records the observed conflict."}]},
+    {"model_id": "tabsyn", "batch": "neural-gpu", "config_path": "configs/smoke/tabsyn-adult-v2.json", "device": "cuda", "environment_lock": "requirements-tabsyn-validation.txt", "required_packages": {"libzero": "0.0.8", "torch": "2.8.0"}, "pip_check_waivers": [{"distribution": "libzero", "version": "0.0.8", "requirement": "torch<2,>=1.7", "installed_dependency": "torch", "installed_dependency_version": "2.8.0+cu128", "reason": "The frozen upstream snapshot imports libzero 0.0.8, whose stale distribution metadata caps torch below 2; the exact compatibility has already passed the retained native-parity workflow and this V2 run records the observed conflict."}]},
+    {"model_id": "great", "batch": "llm-gpu", "config_path": "configs/smoke/great-adult-v2.json", "device": "cuda", "environment_lock": "requirements-great-validation.txt", "required_packages": {"be-great": "0.0.14", "torch": "2.8.0"}},
+    {"model_id": "realtabformer", "batch": "legacy-cpu", "config_path": "configs/smoke/realtabformer-adult-tiny.json", "device": "cpu", "environment_lock": "requirements-realtabformer-validation.txt", "required_packages": {"realtabformer": "0.2.4", "torch": "2.3.0"}},
+    {"model_id": "tabula", "batch": "llm-gpu", "config_path": "configs/smoke/tabula-adult-v2.json", "device": "cuda", "environment_lock": "requirements-tabula-validation.txt", "required_packages": {"torch": "2.8.0"}},
+    {"model_id": "tabularargn", "batch": "heavy-gpu", "config_path": "configs/smoke/tabularargn-adult-v2.json", "device": "cuda", "environment_lock": "requirements-tabularargn-validation.txt", "required_packages": {"mostlyai-engine": "2.6.2", "torch": "2.11.0"}}
+  ],
+  "already_passed": [
+    {"model_id": "tabddpm", "state": "representative-real-passed", "evidence": "docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json"},
+    {"model_id": "tabdiff", "state": "representative-real-passed", "evidence": "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json"}
+  ],
+  "external_blocks": [
+    {"model_id": "tabebm", "state": "externally-blocked", "reason": "Real generation requires accepted gated TabPFN-v2 model access.", "evidence": "docs/evidence/tabebm/smoke-validation-run-30974574544.json"}
+  ]
+}

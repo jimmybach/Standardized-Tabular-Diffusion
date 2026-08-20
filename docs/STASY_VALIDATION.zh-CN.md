@@ -37,6 +37,8 @@
 
 Python 3.11 环境使用 scikit-learn 1.5.2，其中 `OneHotEncoder` 已将快照使用的 `sparse` 参数更名为 `sparse_output`。适配器外的 `stasy-sklearn-onehot-keyword-v1` 桥接会把未改变的 `False` 值转发给新参数；编码器和稠密输出均不会改变。
 
+PyTorch 2.6 将 `torch.load` 的默认值改为 `weights_only=True`，而冻结的 STaSy 快照会在 checkpoint 中保存 optimizer、EMA 和 NumPy 标量状态，且没有传入该参数。因此，在 V2 的 PyTorch 2.8 运行时中，隔离启动器只针对适配器已经限制路径并核验 SHA-256 的准确运行内 checkpoint 设置 `weights_only=False`。任何其他路径都会被拒绝；官方采样调用结束后会立即恢复原加载函数；上游源码保持不变。该兼容桥接不授权加载任意外部 pickle。
+
 这些控制项配置快照自身 `get_config` 返回的对象，并调用其原生预处理、score model、SDE loss、EMA、检查点、采样和逆变换函数。本项目没有使用替代性重实现模型。
 
 原快照根 CLI 虽然接受 epoch 和采样行数参数，但 STaSy 实际并不读取它们；STaSy 模块内部还会无条件选择 CUDA，并把检查点写进源码目录。专用兼容边界使这些行为变为明确且可测试的契约，避免把无效参数误报为已生效。
@@ -68,6 +70,7 @@ STaSy 检查点采用可执行 pickle 的 PyTorch 格式。因此适配器会：
 - 拒绝符号链接或外部提供的检查点；
 - 记录检查点 SHA-256、源码清单身份、实际训练配置、随机种子和设备；
 - 采样前复核检查点哈希和源码身份；
+- 将 PyTorch 2.8 的旧格式加载桥接限制到这一份已核验 checkpoint，并在采样后恢复；
 - 记录样本 SHA-256、行数、列和采样配置。
 
 smoke preset 故意使用很小的网络和 predictor-corrector 步数，只用于证明集成行为，不能作为生成质量配置。
@@ -100,4 +103,12 @@ Linux/Python 3.11 工作流会执行 9 个真实案例：
 
 ## 尚未完成的门槛
 
-快照一致性通过也不会自动使 STaSy 成为 `benchmark-eligible` 或 `release-supported`。剩余门槛包括中央指标执行、数据集 Profile 准入、全规模运行特征验证、配置审批和发布审查。若要声明论文原始实现一致性，还必须获得具有明确许可证的论文作者源码，并单独作出等价性判断。
+快照一致性通过也不会自动使 STaSy 成为 `benchmark-eligible` 或 `release-supported`。剩余门槛包括数据集 Profile 准入、代表性规模的运行与质量验证、配置审批和发布审查。若要声明论文原始实现一致性，还必须获得具有明确许可证的论文作者源码，并单独作出等价性判断。
+
+## 原生 Windows V2 结果
+
+仓库提交 `17fc74e2f9be8a507ec1f921bb3b509881937154` 使用校验和完全一致的 TabSyn benchmark 快照，在 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 16 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+运行记录了唯一一项 `pip check` 冲突：`libzero==0.0.8` 的旧元数据要求 `torch<2`，而冻结的兼容路径使用 PyTorch 2.8.0。该精确冲突与方案中预先审阅的白名单完全匹配；其他依赖冲突均不会被接受。证据保留在 `docs/evidence/stasy/windows-v2-real-function-17fc74e.json`，SHA-256 为 `7c6b31f09ea9f4ea58b1e4b194f62d13e0145c53d991810eb69124ae783d8ec6`。
+
+这项有界功能结论不代表代表性质量、隐私、论文原始实现等价、Official Results 准入或发布支持。被验证的身份仍是未经修改的 TabSyn benchmark 快照，而不是许可状态不同的方法作者源码。

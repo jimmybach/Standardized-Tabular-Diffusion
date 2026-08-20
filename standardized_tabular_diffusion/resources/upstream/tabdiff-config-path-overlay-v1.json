@@ -1,0 +1,25 @@
+{
+  "patch_schema_version": "1.0.0",
+  "patch_id": "tabdiff-config-path-overlay-v1",
+  "status": "maintainer-approved",
+  "approved_at": "2026-08-14",
+  "scope": "interface-only",
+  "purpose": "Allow the common RunSpec upstream_config_path field to select a complete TabDiff TOML configuration while preserving the official TOML as the default.",
+  "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
+  "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+  "source_path": "tabdiff/main.py",
+  "input_treatment": "applied after tabdiff-configurable-seed-overlay-v1 in the same in-memory module",
+  "input_sha256_lf": "ed5b386f84cc143f81054f1cda79becba850d019a757141868db0242919a1cea",
+  "patched_sha256_lf": "53d67252eae1c3df9c7bfebc2093492fe2719557d59747522497a4937d5590a8",
+  "edit": {
+    "before": "    config_path = f'{curr_dir}/configs/tabdiff_configs.toml'",
+    "after": "    config_path = args.config_path or f'{curr_dir}/configs/tabdiff_configs.toml'",
+    "expected_occurrences": 1
+  },
+  "invariants": [
+    "The official configuration remains the default when no path is supplied.",
+    "The selected TOML is passed unchanged to the official src.load_config implementation.",
+    "No configuration key, model equation, training operation, or sampling operation is changed by this overlay.",
+    "The distributed TabDiff-main source remains byte-identical to the pinned official commit."
+  ]
+}

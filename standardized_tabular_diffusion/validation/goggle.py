@@ -16,7 +16,21 @@ from typing import Any
 
 import numpy as np
 
+from standardized_tabular_diffusion.compat.goggle_graph_contract import (
+    BACKEND_ID,
+    BACKEND_VERSION,
+    DGL_SEMANTIC_TARGET,
+)
 from standardized_tabular_diffusion.compat.goggle_launcher import _official_import_boundary
+from standardized_tabular_diffusion.compat.goggle_torch_graph import (
+    GraphConv as TorchGraphConv,
+)
+from standardized_tabular_diffusion.compat.goggle_torch_graph import (
+    batch as torch_graph_batch,
+)
+from standardized_tabular_diffusion.compat.goggle_torch_graph import (
+    graph as torch_graph,
+)
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.goggle import GoggleAdapter
 from standardized_tabular_diffusion.upstream_sources import (
@@ -25,7 +39,7 @@ from standardized_tabular_diffusion.upstream_sources import (
     validate_upstream_source,
 )
 
-PROTOCOL_ID = "goggle-method-author-native-parity-v1"
+PROTOCOL_ID = "goggle-pytorch-graph-backend-parity-v2"
 SEED_CASES = (0, 19, 73)
 VARIANTS = ("binary", "multiclass", "regression")
 TRAIN_ROWS = 12
@@ -205,7 +219,7 @@ def _run_native(
     transformed.to_csv(input_path, index=False)
     native_input = pd.read_csv(input_path)
     _seed_native(execution["seed"])
-    with _official_import_boundary(source_root) as GoggleModel:
+    with _official_import_boundary(source_root, graph_backend="dgl-reference") as GoggleModel:
         model = _construct_native(GoggleModel, execution)
         previous_cwd = Path.cwd()
         try:
@@ -217,10 +231,17 @@ def _run_native(
     if not checkpoint.is_file():
         raise FileNotFoundError(f"Native Goggle checkpoint is missing: {checkpoint}")
     _seed_native(execution["seed"])
-    with _official_import_boundary(source_root) as GoggleModel:
+    with _official_import_boundary(source_root, graph_backend="dgl-reference") as GoggleModel:
         sample_model = _construct_native(GoggleModel, execution)
         state = torch.load(checkpoint, map_location="cpu", weights_only=True)
         sample_model.model.load_state_dict(state)
+        # Match the adapter's declared generation boundary. Constructing the
+        # upstream model resets and then consumes the training RNG while it
+        # initializes parameters, even though those parameters are immediately
+        # replaced by the checkpoint. Reapply the requested sampling seed so
+        # this DGL oracle and the PyTorch candidate exercise the same unchanged
+        # stochastic sampler from the same RNG state.
+        _seed_native(execution["seed"])
         raw = sample_model.model.sample(EXPECTED_SAMPLE_ROWS).detach().cpu().numpy()
     return checkpoint, raw
 
@@ -302,6 +323,109 @@ def _checkpoint_comparison(native_path: Path, adapter_path: Path) -> dict[str, A
     }
 
 
+def _graph_backend_comparison() -> dict[str, Any]:
+    """Compare the narrow PyTorch backend with the frozen DGL oracle."""
+
+    import dgl
+    import torch
+    from dgl.nn import GraphConv as DGLGraphConv
+
+    source = torch.tensor([0, 0, 1, 1, 2, 2, 3, 3], dtype=torch.int64)
+    destination = torch.tensor([0, 1, 1, 2, 2, 3, 3, 0], dtype=torch.int64)
+    dgl_graph = dgl.graph((source, destination), num_nodes=4)
+    candidate_graph = torch_graph((source, destination), num_nodes=4)
+    dgl_batch = dgl.batch([dgl_graph, dgl_graph])
+    candidate_batch = torch_graph_batch([candidate_graph, candidate_graph])
+    dgl_batch_source, dgl_batch_destination = dgl_batch.edges(order="eid")
+    graph_contract_exact = (
+        torch.equal(candidate_graph.in_degrees(), dgl_graph.in_degrees())
+        and torch.equal(candidate_graph.out_degrees(), dgl_graph.out_degrees())
+        and torch.equal(candidate_batch.source, dgl_batch_source)
+        and torch.equal(candidate_batch.destination, dgl_batch_destination)
+        and torch.equal(candidate_batch.in_degrees(), dgl_batch.in_degrees())
+        and torch.equal(candidate_batch.out_degrees(), dgl_batch.out_degrees())
+    )
+    cases: list[dict[str, Any]] = []
+    for case_number, (in_features, out_features, norm, activation) in enumerate(
+        (
+            (5, 2, "both", None),
+            (2, 5, "both", torch.nn.Tanh()),
+            (3, 3, "left", None),
+            (3, 3, "right", None),
+            (3, 3, "none", None),
+        ),
+        start=1,
+    ):
+        generator = torch.Generator().manual_seed(8000 + case_number)
+        features_reference = torch.randn(4, in_features, generator=generator, dtype=torch.float64).requires_grad_()
+        features_candidate = features_reference.detach().clone().requires_grad_()
+        weights_reference = torch.randn(8, generator=generator, dtype=torch.float64).requires_grad_()
+        weights_candidate = weights_reference.detach().clone().requires_grad_()
+        reference = DGLGraphConv(in_features, out_features, norm=norm, activation=activation).to(torch.float64)
+        candidate = TorchGraphConv(in_features, out_features, norm=norm, activation=activation).to(torch.float64)
+        candidate.load_state_dict(reference.state_dict(), strict=True)
+        reference_output = reference(
+            dgl_graph,
+            features_reference,
+            edge_weight=weights_reference,
+        )
+        candidate_output = candidate(
+            candidate_graph,
+            features_candidate,
+            edge_weight=weights_candidate,
+        )
+        output_close = torch.allclose(reference_output, candidate_output, rtol=1e-12, atol=1e-12)
+        reference_output.square().sum().backward()
+        candidate_output.square().sum().backward()
+        gradient_pairs = {
+            "features": (features_reference.grad, features_candidate.grad),
+            "edge_weights": (weights_reference.grad, weights_candidate.grad),
+            "weight": (reference.weight.grad, candidate.weight.grad),
+            "bias": (reference.bias.grad, candidate.bias.grad),
+        }
+        gradients_close = all(
+            left is not None and right is not None and torch.allclose(left, right, rtol=1e-11, atol=1e-12)
+            for left, right in gradient_pairs.values()
+        )
+        maximum_output_error = float(torch.max(torch.abs(reference_output - candidate_output)).item())
+        maximum_gradient_error = max(
+            float(torch.max(torch.abs(left - right)).item())
+            for left, right in gradient_pairs.values()
+            if left is not None and right is not None
+        )
+        state_contract_exact = list(reference.state_dict()) == list(candidate.state_dict()) and all(
+            reference.state_dict()[key].shape == candidate.state_dict()[key].shape
+            and reference.state_dict()[key].dtype == candidate.state_dict()[key].dtype
+            for key in reference.state_dict()
+        )
+        cases.append(
+            {
+                "case": case_number,
+                "in_features": in_features,
+                "out_features": out_features,
+                "norm": norm,
+                "activation": None if activation is None else type(activation).__name__,
+                "output_close": output_close,
+                "gradients_close": gradients_close,
+                "state_contract_exact": state_contract_exact,
+                "maximum_absolute_output_error": maximum_output_error,
+                "maximum_absolute_gradient_error": maximum_gradient_error,
+            }
+        )
+    passed = graph_contract_exact and all(
+        case["output_close"] and case["gradients_close"] and case["state_contract_exact"] for case in cases
+    )
+    return {
+        "status": "pass" if passed else "fail",
+        "backend_id": BACKEND_ID,
+        "backend_version": BACKEND_VERSION,
+        "semantic_target": f"DGL GraphConv {DGL_SEMANTIC_TARGET}",
+        "oracle_version": dgl.__version__,
+        "graph_and_batch_contract_exact": graph_contract_exact,
+        "cases": cases,
+    }
+
+
 def _version(distribution: str) -> str:
     try:
         return importlib.metadata.version(distribution)
@@ -365,6 +489,7 @@ def run_validation(
     selected_source = selected_source.resolve(strict=True)
     source = validate_upstream_source("goggle", selected_source)
     environment = _environment_versions()
+    graph_backend = _graph_backend_comparison()
     cases: list[dict[str, Any]] = []
     case_number = 0
     for variant in VARIANTS:
@@ -385,6 +510,7 @@ def run_validation(
                 "seed": seed,
                 "input_dim": transform["input_dim"],
                 "training_rows": transform["training_rows"],
+                "graph_backend": preparation_adapter.graph_backend,
             }
             native_checkpoint, native_raw = _run_native(
                 native_source, case_root / "native-output", transformed, execution
@@ -412,6 +538,7 @@ def run_validation(
                 and metadata["source"]["runtime_files_verified"] == 18
                 and metadata["execution_config"] == execution
                 and metadata["transform"] == transform
+                and metadata["graph_backend"] == preparation_adapter.graph_backend
             )
             case_passed = (
                 checkpoints["tensors_exact"]
@@ -449,18 +576,17 @@ def run_validation(
                             np.isfinite(adapter_frame[["first", "second"]].to_numpy()).all()
                         ),
                         "adapter_metadata_valid": metadata_valid,
-                        "adapter_source_remained_exact": source_after["manifest_sha256"]
-                        == source["manifest_sha256"],
+                        "adapter_source_remained_exact": source_after["manifest_sha256"] == source["manifest_sha256"],
                         "adapter_checkpoint_outside_source": source_pure,
                     },
                 }
             )
-    passed = all(case["status"] == "pass" for case in cases)
+    passed = graph_backend["status"] == "pass" and all(case["status"] == "pass" for case in cases)
     evidence: dict[str, Any] = {
         "schema_version": 1,
         "protocol_id": PROTOCOL_ID,
         "model_id": "goggle",
-        "reproduction_target": "method-author-original-core",
+        "reproduction_target": "method-author-original-core-with-pytorch-gcn-compatibility-backend",
         "status": "pass" if passed else "fail",
         "repository_commit": _repository_commit(repo_root),
         "source": source,
@@ -469,11 +595,15 @@ def run_validation(
             "sha256": _sha256_file(repo_root / "requirements-goggle-validation.txt"),
         },
         "environment": {"platform": platform.platform(), "python": platform.python_version(), **environment},
+        "graph_backend_validation": graph_backend,
         "compatibility_boundary": {
             "source_patches": [],
             "synthcity_import_bridge": "evaluation-only imports are stubbed; fit and core sample do not execute them",
             "rgcn_import_bridge": "used only when torch-sparse is absent; gcn parity does not instantiate RGCNConv",
+            "runtime_graph_backend": f"{BACKEND_ID}@{BACKEND_VERSION}",
+            "reference_graph_backend": f"DGL {DGL_SEMANTIC_TARGET}",
             "sampling_target": "official Goggle.model.sample before centralized inverse transformation",
+            "sampling_seed_boundary": "reapplied after model construction and checkpoint loading",
         },
         "seed_cases": list(SEED_CASES),
         "variants": list(VARIANTS),

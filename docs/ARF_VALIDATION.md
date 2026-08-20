@@ -1,10 +1,10 @@
 # ARF Validation Protocol
 
-Status: passed; retained Linux/Python 3.11 official-package parity evidence
+Status: passed; retained Linux official-package parity and native-Windows minimal-real evidence
 
 Protocol ID: `arfpy-official-package-parity-v1`
 
-Supported validation platform: Linux, Python 3.11, CPU
+Authoritative parity platform: Linux, Python 3.11, CPU; minimal-real runtime also validated on native Windows
 
 ## Scope and claim boundary
 
@@ -103,5 +103,13 @@ python -m standardized_tabular_diffusion.validation.arf \
 ## Retained result
 
 GitHub Actions run [`30964711614`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614) passed on Linux with Python 3.11.15. All nine binary-classification, multiclass-classification, regression, and seed cases passed every exact comparison, including restored FORGE state and generated CSV bytes. The inspected evidence is retained byte-for-byte at `docs/evidence/arf/native-parity-run-30964711614.json` with SHA-256 `959753701a3a615afe841c32a37bb2f2610be3a6ad421ac6476ab6f50573783f` and is cross-linked from the source lock.
+
+## Native-Windows minimal-real result
+
+Repository commit `eb3729031189ce6b06b1b4201e1028f1c8258d73` passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU with the exact `arfpy==0.1.1` lock. The run trained once on the deterministic 256-row Adult-derived fixture, then restored the same safe JSON FORGE state for generation seeds `17` and `29`. Both outputs contained 16 canonical rows, no missing cells, valid schemas, and unchanged training artifacts; their SHA-256 values differed as required. The seed-17 output then finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+The first attempt at commit `c84a869` retained a passing model probe but failed finalization because the evaluate-only route unnecessarily imported the ARF adapter and therefore required model-only `sklearn` inside the evaluator. Finding `RF-CORE-007` removed that coupling and added regressions that prohibit model-adapter imports from direct and pipeline evaluate-only routes. The failed attempt is retained at `docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json`; the clean passing evidence is retained at `docs/evidence/arf/windows-v2-real-function-eb37290.json` with SHA-256 `056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca`.
+
+This result establishes only bounded minimal-real functionality for the tested official Python package, fixture, configuration, and Windows environment. It does not establish full-data synthesis quality, cross-language equivalence with the R package, benchmark eligibility, Official Results admission, or release support.
 
 ARF is therefore `native-parity-validated` against the exact official Python package. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent benchmark, dataset, runtime, governance, and release gates pass. No R/Python cross-language equivalence is claimed.

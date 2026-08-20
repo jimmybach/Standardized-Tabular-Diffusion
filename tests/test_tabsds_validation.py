@@ -18,6 +18,8 @@ pytestmark = pytest.mark.core
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsds" / "native-parity-run-30974574593.json"
 EVIDENCE_SHA256 = "11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsds" / "windows-v2-real-function-a5f83ae.json"
+WINDOWS_EVIDENCE_SHA256 = "b5288ff5f0d0ea5556028ed9b859e8f666abe570e2e61cc0e69df8343370f4a3"
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
@@ -71,3 +73,52 @@ def test_tabsds_retained_native_parity_evidence_is_exact() -> None:
     assert validation["workflow_run_id"] == 30974574593
     assert validation["artifact"]["evidence_file_sha256"] == EVIDENCE_SHA256
     assert get_adapter_spec("tabsds").validation_level.value == "native-parity-validated"
+
+
+def test_tabsds_retained_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "a5f83ae4b7035ebe87bff0230160a77d80a21252"
+    assert evidence["train"]["status"] == "pass"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["platform"].startswith("Windows-")
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": False,
+        "cuda_runtime": None,
+        "gpu": None,
+        "torch": None,
+    }
+    assert evidence["environment_lock"]["sha256"] == (
+        "d03d355188ff0037407241a8b4573d368d25b27ee1f82d1d85fe6252a0f524d9"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["finalization_status"] == "finalized"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tabsds"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert get_adapter_spec("tabsds").evidence_records == (
+        "docs/UPSTREAM_SOURCE_AUDIT.md",
+        "docs/TABSDS_VALIDATION.md",
+        "docs/evidence/tabsds/native-parity-run-30974574593.json",
+        "docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json",
+        "standardized_tabular_diffusion/resources/upstream/tabsds-source-manifest.json",
+        "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+        ".github/workflows/tabsds-validation.yml",
+    )

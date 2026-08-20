@@ -1,12 +1,12 @@
 # NRGBoost Validation Protocol
 
-Status: passed and permanently retained
+Status: passed; retained Linux native-parity and native-Windows minimal-real evidence
 
 Protocol: `nrgboost-native-parity-v1`
 
 Target: official method-author `nrgboost==0.0.3` package
 
-Supported validation environment: Linux, Python 3.11
+Authoritative parity environment: Linux, Python 3.11
 
 ## Claim Boundary
 
@@ -27,6 +27,26 @@ The protocol checks the wheel name and digest, safe archive paths, package metad
 
 NRGBoost 0.0.3 publishes Linux and macOS wheels and does not support Windows. Source builds require a C compiler and OpenMP. The repository therefore treats Linux/Python 3.11 as authoritative and does not reinterpret a Windows source build as equivalent evidence.
 
+## Diagnostic Windows Source Build
+
+Windows is the repository's primary user platform, so a separate, explicitly lower-strength path verifies that the official implementation can execute there. `tools/build_nrgboost_windows.ps1` downloads the official PyPI source distribution `nrgboost-0.0.3.tar.gz`, requires SHA-256 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0`, and never edits the extracted source. It then:
+
+1. creates the exact conda-forge MinGW-w64 5.3.0 environment recorded, with archive MD5 values, in `tools/nrgboost-windows-toolchain.explicit.txt`;
+2. derives the GNU CPython 3.11 import library from the installed official CPython DLL;
+3. builds the official CFFI extension with its declared OpenMP flags;
+4. uses `delvewheel==1.13.0` to bundle the required MinGW/OpenMP runtime libraries; and
+5. installs the result into a second clean environment, runs `pip check`, imports the compiled extension, and executes its 64-bit sampler.
+
+Run from PowerShell with a 64-bit CPython 3.11 executable:
+
+```powershell
+.\tools\build_nrgboost_windows.ps1 -PythonExe C:\path\to\python.exe
+```
+
+The legacy MinGW backend requires an absent or empty ASCII-only `WorkRoot` no longer than 60 characters; the safe default is under `%LOCALAPPDATA%`. The command writes a local wheel and a provenance JSON file to `WorkRoot\output`. The wheel is a diagnostic local artifact, is not committed or redistributed by this repository, and is not an author-published Windows distribution. Its output digest is recorded per build rather than frozen as an official release digest because wheel ZIP metadata is build-time dependent.
+
+The procedure was exercised end to end on Windows x86-64 with CPython 3.11.15: the locked source compiled without patches, the repaired wheel installed in a clean environment, `pip check` passed, and the compiled extension sampler passed. This evidence supports Windows functional probes only; the retained Linux run remains the sole `native-parity-validated` authority.
+
 ## Adapter Semantics
 
 The adapter remains a thin package wrapper:
@@ -39,6 +59,8 @@ The adapter remains a thin package wrapper:
 - passes `RunSpec.seed` to both `NRGBooster.fit` and `NRGBooster.sample`;
 - saves and loads the official joblib-based checkpoint format; and
 - writes only the requested final-chain samples in canonical column order.
+
+Training writes immutable `nrgboost_metadata.json`, including the checkpoint SHA-256. Sampling verifies that digest before deserialization and writes a separate `nrgboost_sample_metadata.json`; it never rewrites the copied training record. This separation lets the pipeline prove that sampling consumed, but did not mutate, the exact trained artifact set.
 
 The checkpoint format can execute Python during loading. By default, the adapter therefore loads only a regular non-symlinked file inside the run output directory. Loading an external checkpoint requires an explicit unsafe override after provenance and integrity review.
 
@@ -89,3 +111,13 @@ Any mismatch, missing artifact, wrong platform, dependency drift, unsafe wheel p
 [GitHub Actions run `30922326384`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384) passed all six task/seed cases on Linux with Python 3.11.15. It verified all 22 hash-bearing installed files against the locked wheel, ran classification and regression fixtures with seeds 0, 19, and 73, and produced byte-exact native/adapter checkpoints and sample CSV files in every case.
 
 The permanent evidence record is `docs/evidence/nrgboost/native-parity-run-30922326384.json`, SHA-256 `5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c`. The run is bound to repository commit `4cd32c8beedd116c6385463d41cf9cba8b1d5438`; the downloaded GitHub artifact is additionally recorded by artifact ID and digest in the source lock. NRGBoost is therefore `native-parity-validated`, while benchmark eligibility and release support remain pending.
+
+## Retained native-Windows minimal-real result
+
+The audited Windows build procedure was rerun from the official source distribution with SHA-256 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0`. It used the checksum-locked MinGW-w64/OpenMP toolchain, changed no source file, produced diagnostic wheel SHA-256 `24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739`, and passed clean-environment installation, `pip check`, import, and compiled 64-bit sampler checks. The wheel is not committed or redistributed. Reviewed provenance is retained at `docs/evidence/nrgboost/windows-source-build-provenance-20260820.json`.
+
+The first Pipeline V2 attempt at commit `3271298` stopped before model execution because the clean model runtime exposed a missing validation-harness dependency: `packaging` was used by Pipeline V2 but absent from the NRGBoost lock. Finding `RF-CORE-008` added exact `packaging==26.3` declarations to the install extra and a separate Windows V2 lock, keeping the Linux authoritative parity lock unchanged. The failed attempt is retained at `docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json`.
+
+The clean rerun at repository commit `64eec7d590f3610e74795036a1fb188e554741a0` passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU using the separate `requirements-nrgboost-windows-v2.txt` lock. One bounded five-tree fit on the deterministic 256-row Adult-derived fixture was reused for generation seeds `17` and `29`; each output contained 16 canonical, missing-free rows, both schemas were valid, the outputs differed, and training artifacts remained unchanged. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files. Passing evidence is retained at `docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json` with SHA-256 `1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c`.
+
+This establishes Windows minimal-real functionality only for the recorded diagnostic build and bounded configuration. It neither turns the local wheel into an official distribution nor replaces the Linux official-wheel native-parity authority, and it does not establish representative-scale quality, benchmark eligibility, Official Results admission, or release support.

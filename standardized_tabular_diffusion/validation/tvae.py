@@ -17,7 +17,7 @@ from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.sample_baselines import TVAEAdapter
 from standardized_tabular_diffusion.validation import ctgan as package_validation
 
-PROTOCOL_ID = "tvae-native-parity-v1"
+PROTOCOL_ID = "tvae-native-parity-v2"
 PACKAGE_NAME = package_validation.PACKAGE_NAME
 PACKAGE_VERSION = package_validation.PACKAGE_VERSION
 WHEEL_FILENAME = package_validation.WHEEL_FILENAME
@@ -28,7 +28,10 @@ UPSTREAM_COMMIT = package_validation.UPSTREAM_COMMIT
 UPSTREAM_TREE = package_validation.UPSTREAM_TREE
 LICENSE_EXPRESSION = package_validation.LICENSE_EXPRESSION
 EXPECTED_SAMPLE_ROWS = 12
-SEED_CASES = (0, 19, 73)
+# TVAE training and sampling are independently reproducible actions. Each
+# native-parity case therefore uses distinct seeds and exercises the official
+# set_random_state API again after loading, immediately before generation.
+SEED_CASES = ((0, 101), (19, 7), (73, 29))
 EXPECTED_DISTRIBUTION_VERSIONS = package_validation.EXPECTED_DISTRIBUTION_VERSIONS
 
 
@@ -119,17 +122,19 @@ def _run_native(
     frame: pd.DataFrame,
     discrete_columns: list[str],
     output_dir: Path,
-    seed: int,
+    train_seed: int,
+    sample_seed: int,
 ) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
     from ctgan import TVAE
 
     output_dir.mkdir(parents=True, exist_ok=True)
     model = TVAE(**_constructor_kwargs())
-    model.set_random_state(seed)
+    model.set_random_state(train_seed)
     model.fit(frame.copy(), discrete_columns=discrete_columns)
     checkpoint = output_dir / "model.pkl"
     model.save(checkpoint)
     loaded = _load_official(checkpoint)
+    loaded.set_random_state(sample_seed)
     samples = loaded.sample(EXPECTED_SAMPLE_ROWS)
     sample_path = output_dir / "samples.csv"
     samples.to_csv(sample_path, index=False)
@@ -145,7 +150,8 @@ def _run_adapter(
     repo_root: Path,
     dataset_spec: DatasetSpec,
     output_dir: Path,
-    seed: int,
+    train_seed: int,
+    sample_seed: int,
 ) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
     adapter = TVAEAdapter(repo_root)
     common = {
@@ -153,10 +159,9 @@ def _run_adapter(
         "dataset": dataset_spec.name,
         "output_dir": output_dir,
         "device": "cpu",
-        "seed": seed,
         "extra": _adapter_extra(dataset_spec),
     }
-    train_bundle = adapter.train(RunSpec(**common))
+    train_bundle = adapter.train(RunSpec(**common, seed=train_seed))
     train_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
     checkpoint = output_dir / adapter.checkpoint_filename
     sampled_models: list[Any] = []
@@ -168,7 +173,9 @@ def _run_adapter(
         return model
 
     adapter._load_model = capture_loaded_model  # type: ignore[method-assign]
-    sample_bundle = adapter.sample(RunSpec(**common, num_samples=EXPECTED_SAMPLE_ROWS))
+    sample_bundle = adapter.sample(
+        RunSpec(**common, seed=sample_seed, num_samples=EXPECTED_SAMPLE_ROWS)
+    )
     sample_manifest = json.loads((output_dir / "artifacts.json").read_text(encoding="utf-8"))
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("TVAE adapter did not declare a generated sample path")
@@ -365,12 +372,21 @@ def run_validation(
     frame, dataset_spec, fixture = _write_fixture(output_dir / "fixture")
     discrete_columns = [*dataset_spec.categorical_columns, *dataset_spec.target_columns]
     cases: list[dict[str, Any]] = []
-    for seed in SEED_CASES:
+    for train_seed, sample_seed in SEED_CASES:
+        case_dir = output_dir / f"train-{train_seed}-sample-{sample_seed}"
         native_model, native_samples, native_artifacts = _run_native(
-            frame, discrete_columns, output_dir / f"seed-{seed}" / "native", seed
+            frame,
+            discrete_columns,
+            case_dir / "native",
+            train_seed,
+            sample_seed,
         )
         adapter_model, adapter_samples, adapter_artifacts = _run_adapter(
-            repo_root, dataset_spec, output_dir / f"seed-{seed}" / "adapter", seed
+            repo_root,
+            dataset_spec,
+            case_dir / "adapter",
+            train_seed,
+            sample_seed,
         )
         comparisons = {
             "adapter_manifests_valid": adapter_artifacts["manifests_valid"],
@@ -382,7 +398,8 @@ def run_validation(
         }
         cases.append(
             {
-                "seed": seed,
+                "train_seed": train_seed,
+                "sample_seed": sample_seed,
                 "status": "pass" if _case_passed(comparisons) else "fail",
                 "native_artifacts": native_artifacts,
                 "adapter_artifacts": adapter_artifacts,
@@ -417,7 +434,10 @@ def run_validation(
             "decompress_dims": list(_constructor_kwargs()["decompress_dims"]),
             "sample_rows": EXPECTED_SAMPLE_ROWS,
         },
-        "seed_cases": list(SEED_CASES),
+        "seed_cases": [
+            {"train_seed": train_seed, "sample_seed": sample_seed}
+            for train_seed, sample_seed in SEED_CASES
+        ],
         "cases": cases,
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)

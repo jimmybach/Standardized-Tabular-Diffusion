@@ -1,0 +1,22 @@
+{
+  "record_schema_version": "1.0.0",
+  "component_id": "tabdiff",
+  "bridge_id": "tabdiff-pytorch-reduce-lr-verbose-bridge-v1",
+  "status": "maintainer-approved",
+  "approved_at": "2026-08-14",
+  "scope": "dependency-api-compatibility",
+  "trigger": "Activate only when torch.optim.lr_scheduler.ReduceLROnPlateau no longer declares the deprecated verbose parameter.",
+  "behavior": "Accept and discard the upstream verbose argument, then delegate every scheduling argument and operation to the installed PyTorch implementation.",
+  "scientific_effect": "none; the removed argument controlled deprecation-era logging only and does not alter learning-rate values",
+  "source_treatment": "The checksum-locked TabDiff source remains unchanged. The bridge is installed in the isolated model subprocess before importing the official trainer.",
+  "windows_process_environment": {
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "purpose": "Allow the unchanged upstream SDMetrics diagnostics to print Unicode status marks on Windows without changing scientific outputs."
+  },
+  "validation_requirements": [
+    "The bridge must remain inactive when the installed PyTorch API still accepts verbose.",
+    "The bridge must forward all non-verbose arguments unchanged.",
+    "Windows GPU execution must retain the observed PyTorch and CUDA identities."
+  ]
+}

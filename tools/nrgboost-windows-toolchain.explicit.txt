@@ -1,0 +1,29 @@
+# Exact conda-forge win-64 toolchain used by build_nrgboost_windows.ps1.
+# Package archive MD5 values are part of the explicit environment contract.
+@EXPLICIT
+https://conda.anaconda.org/conda-forge/win-64/msys2-conda-epoch-20160418-1.tar.bz2#b0309b72560df66f71a9d5e34a5efdfa
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gmp-6.1.0-2.tar.bz2#53a1c73e1e3d185516d7e3af177596d9
+https://conda.anaconda.org/conda-forge/win-64/m2w64-headers-git-5.0.0.4636.c0ad18a-2.tar.bz2#8f626e9bfef28b4315d7d27837a59940
+https://conda.anaconda.org/conda-forge/win-64/m2w64-isl-0.16.1-2.tar.bz2#b1808761f01786336d40c7851830c6a4
+https://conda.anaconda.org/conda-forge/win-64/m2w64-libiconv-1.14-6.tar.bz2#e701397b4fc0cf3fae3d93ab16223206
+https://conda.anaconda.org/conda-forge/win-64/m2w64-libmangle-git-5.0.0.4509.2e5a9a2-2.tar.bz2#0d0771c17e68257870e54a1b8331a2e0
+https://conda.anaconda.org/conda-forge/win-64/m2w64-libwinpthread-git-5.0.0.4634.697f757-2.tar.bz2#774130a326dee16f1ceb05cc687ee4f0
+https://conda.anaconda.org/conda-forge/win-64/m2w64-make-4.1.2351.a80a8b8-2.tar.bz2#c643173cf6472a59987047abe13ff81f
+https://conda.anaconda.org/conda-forge/win-64/m2w64-windows-default-manifest-6.4-3.tar.bz2#d11b679f10d4d6ce30a3e519e0cf20f8
+https://conda.anaconda.org/conda-forge/win-64/m2w64-crt-git-5.0.0.4636.2595836-2.tar.bz2#37448f28faca6064fafeb8e6aa6ca5e8
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libs-core-5.3.0-7.tar.bz2#4289d80fb4d272f1f3b56cfe87ac90bd
+https://conda.anaconda.org/conda-forge/win-64/m2w64-mpfr-3.1.4-4.tar.bz2#c06ce7a4ec998764e3e3c38f9985bceb
+https://conda.anaconda.org/conda-forge/win-64/m2w64-pkg-config-0.29.1-2.tar.bz2#4ed300fbe71af8e329e6ba832cc05b23
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libgfortran-5.3.0-6.tar.bz2#066552ac6b907ec6d72c0ddab29050dc
+https://conda.anaconda.org/conda-forge/win-64/m2w64-mpc-1.0.3-3.tar.bz2#72502d5f62355d8df26b026653e79486
+https://conda.anaconda.org/conda-forge/win-64/m2w64-winpthreads-git-5.0.0.4634.697f757-2.tar.bz2#711689d5ea33b80960d1e1b0f11a2519
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-libs-5.3.0-7.tar.bz2#fe759119b8b3bfa720b8762c6fdc35de
+https://conda.anaconda.org/conda-forge/win-64/m2w64-bzip2-1.0.6-6.tar.bz2#3ab4872b978c1c0bd97a925374966348
+https://conda.anaconda.org/conda-forge/win-64/m2w64-tools-git-5.0.0.4592.90b8472-2.tar.bz2#5a3b75f4186ca90f831dd6366de93a6b
+https://conda.anaconda.org/conda-forge/win-64/m2w64-zlib-1.2.8-10.tar.bz2#12b579f376a3215bebab449647d1203f
+https://conda.anaconda.org/conda-forge/win-64/m2w64-binutils-2.25.1-5.tar.bz2#e449e1bb577b67ea7c2017f6239d5684
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-5.3.0-6.tar.bz2#797648133d4bdba6a4e1e1208ccbfe95
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-ada-5.3.0-6.tar.bz2#c8a8e0901a7bdcd17162ae3673c07b13
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-fortran-5.3.0-6.tar.bz2#39d0476d211ceff2401c85e11226061c
+https://conda.anaconda.org/conda-forge/win-64/m2w64-gcc-objc-5.3.0-6.tar.bz2#02329f315cb49e40d9d480a3b78fbf84
+https://conda.anaconda.org/conda-forge/win-64/m2w64-toolchain-5.3.0-7.tar.bz2#03df12802fce730797d040e4349b4ea6

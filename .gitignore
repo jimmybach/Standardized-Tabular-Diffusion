@@ -227,6 +227,7 @@ __marimo__/
 /TabDiff-main/data/sick/
 /TabDiff-main/synthetic/sick/
 /TabSyn-main/data/adult/
+/TabSyn-main/data/pipeline-v2-*/
 /TabSyn-main/synthetic/adult/
 /TabSyn-main/data/sick/
 /TabSyn-main/synthetic/sick/

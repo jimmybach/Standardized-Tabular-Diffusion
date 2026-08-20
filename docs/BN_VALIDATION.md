@@ -1,10 +1,10 @@
 # BN Validation Protocol
 
-Status: passed; retained Linux/Python 3.11 official-package recipe-parity evidence
+Status: passed; retained Linux recipe-parity and native-Windows minimal-real evidence
 
 Protocol ID: `pgmpy-bn-recipe-parity-v1`
 
-Supported validation platform: Linux, Python 3.11, CPU
+Authoritative parity platform: Linux, Python 3.11, CPU; minimal-real runtime also validated on native Windows
 
 ## Scope and claim boundary
 
@@ -108,5 +108,11 @@ python -m standardized_tabular_diffusion.validation.bn \
 GitHub Actions run [`30967779298`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298) passed on Linux with Python 3.11.15. All nine binary-classification, multiclass-classification, regression, and seed cases passed every exact comparison. This includes preprocessing and the discrete training frame, learned graph edges, all CPDs, the JSON-restored official model, raw discrete samples, final DataFrames and CSV bytes, artifact metadata, safe-state declarations, and restoration of the caller's NumPy state.
 
 The inspected evidence is retained byte-for-byte at `docs/evidence/bn/native-parity-run-30967779298.json` with SHA-256 `6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8`. The GitHub artifact ID is `8915417956`, its archive digest is `sha256:6dbedd1970b51ab5243e8da35b052d8d8df780cd2c2e81ac2adf756b4cae5654`, and the source lock cross-references both records.
+
+## Native-Windows minimal-real result
+
+Repository commit `ae3cb5037eb9afb2af62e0a7c1fdb580c1b42af9` passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU with official `pgmpy==1.1.2`. One bounded fit on the deterministic 256-row Adult-derived fixture produced a safe JSON graph/CPD checkpoint. Independent generation seeds `17` and `29` each returned 16 canonical, missing-free rows; both schemas were valid, the outputs differed, and neither sample action changed the training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independent evaluation environment. Evidence is retained at `docs/evidence/bn/windows-v2-real-function-ae3cb50.json` with SHA-256 `22b7f857c1e296e442c9383d5c08a6546a4f2f33f162eb84131a5739cac601a7`.
+
+This is bounded functionality evidence for the declared package-plus-recipe identity. It does not establish representative-scale quality, alternative BN recipe equivalence, benchmark eligibility, Official Results admission, or release support.
 
 BN is therefore `native-parity-validated` against the exact official pgmpy package plus the repository-declared recipe. It remains `experimental`, `unsupported`, and excluded from Official Results until its independent central-evaluation, dataset-admission, runtime, governance, and release gates pass. No paper-native or alternative-recipe equivalence is claimed.

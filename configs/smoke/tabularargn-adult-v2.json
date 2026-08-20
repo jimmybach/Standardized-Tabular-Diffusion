@@ -1,0 +1,31 @@
+{
+  "model": "tabularargn",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/tabularargn",
+  "train": {
+    "enabled": true,
+    "seed": 13,
+    "device": "cuda",
+    "extra": {
+      "model": "MOSTLY_AI/Small",
+      "max_epochs": 1,
+      "max_training_time": 900,
+      "max_train_rows": 64,
+      "batch_size": 8,
+      "gradient_accumulation_steps": 1,
+      "enable_flexible_generation": true,
+      "value_protection": true,
+      "verbose": 0
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "seed": 17,
+    "num_samples": 8,
+    "checkpoint_path": null,
+    "extra": {"batch_size": 8, "sampling_temperature": 1.0, "sampling_top_p": 1.0}
+  },
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Bounded official mostlyai-engine TabularARGN V2 configuration."
+}

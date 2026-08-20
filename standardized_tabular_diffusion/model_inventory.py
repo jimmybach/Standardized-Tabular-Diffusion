@@ -90,6 +90,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         notes=[
             "Already standardized in this repository.",
             "Passed the retained Linux/Python 3.11 three-seed native-parity protocol; this is not an Official Results or release-support claim.",
+            "A separate native-Windows/Python 3.11/RTX 5080 minimal-real run passed the official native-schedule VAE/diffusion chain, two generation seeds, artifact immutability, and independent central P3 finalization.",
             "Vendors several baseline implementations that can be reused for future adapters.",
         ],
     ),
@@ -120,6 +121,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The former benchmark-vendored implementation has been replaced by the checksum-locked method-author be-great 0.0.14 package.",
             "Typed missing-free input, scoped randomness, exact-row postconditions, and safe safetensors-plus-JSON checkpoints are enforced outside unchanged package APIs.",
             "All three seed cases passed exact official-package parity in retained Linux/Python 3.11 run 30974574472.",
+            "A separate native-Windows/Python 3.11/RTX 5080 minimal-real run passed official-package training, two generation seeds, artifact immutability, and independent central P3 finalization.",
             "Pretrained-model quality, benchmark evaluation, resource budgets, privacy, and release support remain separate gates.",
         ],
     ),
@@ -371,7 +373,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "All 11 local CoDi source files match the Apache-2.0 TabSyn benchmark snapshot at commit cb5ac0f byte-for-byte.",
             "The 24-file execution scope is checksum-locked; deterministic device, checkpoint, and requested-row controls remain outside tracked upstream source.",
             "The method-author repository has no declared license and differs in 5 of 10 shared paths, so this entry targets TabSyn-snapshot parity only.",
-            "All nine exact TabSyn-snapshot parity cases passed on Linux/Python 3.11 in GitHub Actions run 30941940893; original-method, Official Results, and release support remain blocked.",
+            "All nine exact TabSyn-snapshot parity cases passed on Linux/Python 3.11 in GitHub Actions run 32043925805; original-method, Official Results, and release support remain blocked.",
         ],
     ),
     "ctab-gan": ModelInventoryEntry(
@@ -404,7 +406,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         notes=[
             "The adapter now targets TVAE from the checksum-pinned official ctgan 0.12.1 wheel.",
             "The locally modified 0.5.2.dev0 snapshot and its obsolete wrappers were removed rather than presented as the official implementation.",
-            "Exact native parity passed for three fixed seeds on Linux/Python 3.11 in GitHub Actions run 30913867621.",
+            "Exact native parity passed for independent train/sample seed pairs (0, 101), (19, 7), and (73, 29) on Linux/Python 3.11 in GitHub Actions run 32052308431.",
             "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),
@@ -435,7 +437,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
         repository_url="https://github.com/sdv-dev/CTGAN",
         notes=[
             "The adapter now targets the checksum-pinned official ctgan 0.12.1 wheel instead of the legacy embedded 0.5.2.dev0 source snapshot.",
-            "The mandatory Linux/Python 3.11 native-parity protocol passed all exact comparisons for seeds 0, 19, and 73 in GitHub Actions run 30910275922.",
+            "The mandatory Linux/Python 3.11 native-parity protocol passed all exact comparisons for independent train/sample seed pairs (0, 101), (19, 7), and (73, 29) in GitHub Actions run 32047234665.",
             "Version 0.12.1 uses BUSL-1.1; Official Results and release support require a separate license decision.",
         ],
     ),
@@ -539,6 +541,7 @@ MODEL_INVENTORY: dict[str, ModelInventoryEntry] = {
             "The selected wheel and method-author v0.2.4 source share 11 byte-exact source files and carry MIT licensing.",
             "The tabular adapter now enforces typed missing-free input, output-local artifacts, deterministic seeds, and checkpoint integrity metadata.",
             "All nine binary, multiclass, regression, and seed cases passed exact official-package parity in retained Linux/Python 3.11 run 30950369908.",
+            "A separate native-Windows/Python 3.11 CPU minimal-real run passed official single-table training, two generation seeds, artifact immutability, and independent central P3 finalization.",
             "Sensitivity stopping and relational mode remain outside the current validation claim; benchmark and release gates remain pending.",
         ],
     ),

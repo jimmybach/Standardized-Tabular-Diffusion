@@ -1,0 +1,16 @@
+{
+  "model": "tabsyn",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/tabsyn",
+  "train": {"enabled": true, "seed": 13, "device": "cuda", "extra": {"num_workers": 0}},
+  "sample": {
+    "enabled": true,
+    "seed": 17,
+    "num_samples": 32,
+    "checkpoint_path": null,
+    "extra": {"steps": 5}
+  },
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Official unmodified TabSyn V2 configuration on the bounded real-data fixture."
+}

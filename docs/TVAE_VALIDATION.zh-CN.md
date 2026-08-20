@@ -1,14 +1,14 @@
 # TVAE 验证协议
 
-状态：已通过；适配器为 `native-parity-validated`
+状态：已通过；适配器为 `native-parity-validated`；原生 Windows GPU V2 功能已通过
 
-协议 ID：`tvae-native-parity-v1`
+协议 ID：`tvae-native-parity-v2`
 
-支持的验证平台：Linux、Python 3.11、PyTorch 2.3 CPU
+支持的验证平台：Linux/Python 3.11/PyTorch 2.3 CPU 用于等价验证；原生 Windows/Python 3.11/PyTorch 2.8 CUDA 用于有界 V2 功能验证
 
 ## 范围与声明边界
 
-本协议验证标准化 TVAE 适配器是否使用与原生直接调用完全相同的数据、构造参数、随机种子、持久化 API 和采样请求，调用经校验和锁定的官方 `ctgan==0.12.1` 包中的 `TVAE`。验证范围包括包身份、真实混合类型训练、保存与加载、三个确定性随机种子、产物清单，以及原生路径与适配器路径的精确比较。
+本协议验证标准化 TVAE 适配器是否使用与原生直接调用完全相同的数据、构造参数、相互独立的训练与采样随机种子、持久化 API 和采样请求，调用经校验和锁定的官方 `ctgan==0.12.1` 包中的 `TVAE`。验证范围包括包身份、真实混合类型训练、保存与加载、三组确定性种子对、产物清单，以及原生路径与适配器路径的精确比较。
 
 强制运行通过后，TVAE 可以提升为 `native-parity-validated`。这不代表 TVAE 已经 `benchmark-eligible`、可以进入 Official Results，或已经 `release-supported`。数据集准入、模型质量评测、隐私与公平性审查、运行资源阈值、依赖维护和发布责任仍是独立门槛。
 
@@ -42,6 +42,7 @@ BUSL-1.1 不是 OSI 开源许可证。0.12.1 允许非生产使用，并在上�
 - 通过官方 `enable_gpu` 参数映射 CPU 或默认可见 GPU 训练，不修改上游源码；
 - 由于官方构造函数不提供训练前的精确设备序号控制，拒绝非默认的带序号 CUDA 请求；
 - 在训练前调用官方 `set_random_state`；
+- 加载检查点后、采样前再次调用官方 `set_random_state`，使生成过程可以独立于训练种子复现；
 - 将类别特征和分类目标标记为离散列；
 - 使用官方 `save` 和 `load` API，并在加载后设置采样设备；
 - 拒绝加载符号链接或输出目录外可执行代码的检查点，除非用户显式启用现有的不安全外部检查点选项；
@@ -67,9 +68,9 @@ python -m pip check
 
 ## 冻结对照
 
-对于随机种子 `0`、`19` 和 `73`，两条路径使用相同的 40 行无缺失值混合类型二分类夹具：两个数值特征、一个类别特征和一个类别目标。两者均使用一个真实训练 epoch、批大小 20、16 维嵌入、一个 16 单元压缩层、一个 16 单元解压缩层、CPU 执行，并请求 12 行样本。该有界夹具只用于执行与一致性验证，不是模型质量 benchmark。
+对于训练/采样种子对 `(0, 101)`、`(19, 7)` 和 `(73, 29)`，两条路径使用相同的 40 行无缺失值混合类型二分类夹具：两个数值特征、一个类别特征和一个类别目标。训练种子与采样种子刻意不同，用于证明生成过程不会暗中沿用训练结束后的随机流。两者均使用一个真实训练 epoch、批大小 20、16 维嵌入、一个 16 单元压缩层、一个 16 单元解压缩层、CPU 执行，并请求 12 行样本。该有界夹具只用于执行与一致性验证，不是模型质量 benchmark。
 
-原生路径直接构造、设种子、训练、保存、加载并采样官方 `TVAE` 类；适配器路径通过 `TVAEAdapter` 完成相同操作。每个随机种子必须同时满足：
+原生路径直接构造官方 `TVAE` 类、设置训练种子、训练、保存、加载，再通过官方 API 设置独立采样种子并采样；适配器路径通过 `TVAEAdapter` 完成相同操作。每组种子对必须同时满足：
 
 1. wheel、已安装包、许可证元数据、已安装文件哈希和 TVAE 类身份均与锁定记录一致；
 2. 构造参数和最终 CPU 设备完全一致；
@@ -99,6 +100,12 @@ python -m standardized_tabular_diffusion.validation.tvae \
 
 ## 已保留的验证结果
 
-[GitHub Actions 运行 `30913867621`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621) 已在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。随机种子 `0`、`19` 和 `73` 的所有强制比较均通过：官方 wheel 与安装文件身份、构造参数与设备、全部五个保留的 decoder 张量（包括有限的 sigma）、转换后的夹具数据、记录的损失、NumPy 与 PyTorch 随机状态、清单完整性、生成的 DataFrame 以及 CSV 字节。
+[GitHub Actions 运行 `32052308431`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431) 已在 Linux、Python 3.11.15 和 PyTorch 2.3.0 CPU 环境中通过。独立训练/采样种子对 `(0, 101)`、`(19, 7)` 和 `(73, 29)` 的所有强制比较均通过：官方 wheel 与安装文件身份、构造参数与设备、全部五个保留的 decoder 张量（包括有限的 sigma）、转换后的夹具数据、记录的损失、NumPy 与 PyTorch 随机状态、清单完整性、生成的 DataFrame 以及 CSV 字节。
 
-原始工作流产物经审阅后未作修改，永久保存在 `docs/evidence/tvae/native-parity-run-30913867621.json`，其 SHA-256 为 `ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7`。因此 TVAE 已提升为 `native-parity-validated`；但在许可证、统一评测、数据集准入和发布门槛分别完成前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。
+原始工作流产物经审阅后未作修改，永久保存在 `docs/evidence/tvae/native-parity-run-32052308431.json`，其 SHA-256 为 `5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e`。对应 GitHub artifact ID 为 `9295157218`，artifact 摘要为 `sha256:17fc9a204c3b3c4d59a5e34514d57a1b90cceb59a80df52d51d4836870c26462`。因此 TVAE 为 `native-parity-validated`；但在许可证、统一评测、数据集准入和发布门槛分别完成前，它仍为 `experimental`、`unsupported`，并排除在 Official Results 之外。
+
+## 原生 Windows V2 结果
+
+仓库提交 `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` 使用未修改的官方 `ctgan==0.12.1` 包中的 `TVAE`，在 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 32 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/tvae/windows-v2-real-function-5bf59b0.json`，SHA-256 为 `a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301`。这项有界功能结论不代表代表性质量、隐私、Official Results 准入或发布支持；BUSL-1.1 审阅仍是独立事项。

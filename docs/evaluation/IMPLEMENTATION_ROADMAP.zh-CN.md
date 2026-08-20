@@ -88,7 +88,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | 版本化指标、协议、评测器与来源身份资源 | 包含独立 P4 冻结证据，以及 P5 已解决/被阻止指标记录；被阻止项是机器可读 exclusion |
 | [`configs/datasets/`](../../configs/datasets) | 已审阅的 Adult 与 Sick Dataset Profile | 仅属于诊断集合；当前均不具备正式资格 |
 | [`orchestration/`](../../standardized_tabular_diffusion/orchestration) | 七阶段隔离执行、内容寻址 cache/resume、资源边界、脱敏日志与观测硬件/软件身份 | P6 活跃执行路径；运行层聚合与 P7 排行榜聚合明确分离 |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table`、P6 `benchmark` 命令与旧版命令 | 表格协议仍默认 P2；P3/P4/P5 显式选择，P6 执行在 P8 迁移前显式启用 |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result 检查、可选协议的 `evaluate-table`、P6 `benchmark` 命令与旧版命令 | 表格协议仍默认 P2；P3/P4/P5 显式选择，适配器 `evaluate`、顶层 `run` 与 `benchmark run` 已使用 P8 中央评测路径 |
 | [`pyproject.toml`](../../pyproject.toml)、[`core-ci.yml`](../../.github/workflows/core-ci.yml) 与 [`p6-orchestration-validation.yml`](../../.github/workflows/p6-orchestration-validation.yml) | Python 3.11 打包、依赖组、测试边界、lint、类型检查、构建与 P6 退出验证 | 托管 Windows 主要平台家族 CI 与 Linux 次要 CI；参考代码树不进入默认发现或分发包 |
 | [`tests/evaluation/`](../../tests/evaluation) 与 [`tests/orchestration/`](../../tests/orchestration) | 科学契约/等价测试，以及进程、cache、resume、资源、硬件和 CLI 失败边界测试 | 科学声明与运行声明按依赖、marker 和 workflow 边界分离 |
 
@@ -102,7 +102,7 @@ EvaluationRequest + 已审阅有效性契约 + 参考表/合成表
 - P6 已实现资源感知隔离执行、观测硬件/软件 profile、精确的内容寻址 cache/resume、结构化失败语义与诊断性 Efficiency 核算。cache reuse 不具备 Efficiency 证据资格，跨 profile 比较采用 fail-closed。正式 Efficiency 准入和 warm 重复生成政策仍属于未来协议/发布决定。
 - P6 强制边界退出门已在提交 `da47011` 的 Windows/AMD64 与 Python 3.11.15 环境通过；其[留存证据](../evidence/evaluation/p6-windows-py311-da47011.json)锁定实现并保留非 Official 的声明边界。
 - Adult 与 Sick 是已审阅的诊断 profile，不是已冻结的 Universal Core Dataset Suite。
-- 跨科学 bundle 的兼容性分组、声明 P5 区间之外的不确定性、聚合、不可变 leaderboard snapshot 与发布准入仍属于 P7 工作。
+- P7 已提供科学 bundle 兼容性分组、已声明的不确定性、聚合、不可变 leaderboard snapshot 与 fail-closed 发布准入；这些工程能力本身不会准入任何具体结果。
 - 模型等价性证据本身不会授予 benchmark eligibility 或 release support。
 
 ## 4. 目标架构
@@ -174,8 +174,8 @@ tests/evaluation/
 | P4 | Local 与 Global Utility | P1、P3 | 完整精确 Windows GPU 验证后，已在 `p4-utility@1.0.0` 冻结；具体结果仍需独立准入 | 保持冻结身份，并完成发布、数据集、模型、track 和结果准入门 |
 | P5 | 高阶 Fidelity 与经验 Privacy 工作包 | P2、P3 | 数据角色/威胁模型已审阅，独立预注册确认性试验通过，已完成条件式协议冻结 | 继续保持数据集/模型/运行/发布独立准入；release support 仍待完成 |
 | P6 | 资源感知编排、效率、缓存与恢复 | P2 | 工程退出门已通过；已留存 [Windows/Python 3.11 证据](../evidence/evaluation/p6-windows-py311-da47011.json) | 在声明硬件 profile 下通过阶段核算与复用完整性验证 |
-| P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 未开始 | 不兼容结果无法合并；覆盖率和发布门通过 |
-| P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | 未开始 | 所声明发布类别的 public-preview 或 official-release 门通过 |
+| P7 | 数据集聚合、不确定性、兼容组和 leaderboard snapshot | 视情况依赖 P2-P6 | 工程退出门已通过；已留存 [Windows/Python 3.11 证据](../evidence/evaluation/p7-windows-py311-4c8da76.json) | 不兼容结果无法合并；覆盖率和发布门通过 |
+| P8 | Legacy 迁移、文档、打包、CI 和发布证据 | P0-P7 | `0.1.0rc1` 工程退出门已通过；已留存[原生 Windows 证据](../evidence/evaluation/p8-native-windows11-py311-bb09085.json)，且[托管 Windows/Linux 门已通过](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871) | 所声明软件候选版本的 public-preview 工程门通过；这不代表 Official Results 准入 |
 
 依赖稳定后，P3、P4、P5 和 P6 的部分工作可以并行。每个参与指标和数据集分别通过准入门之前，P7 不能用于发布排名。
 
@@ -331,7 +331,7 @@ Privacy 任务：
 
 ### 6.7 P6 — Orchestration、Efficiency、cache 与 resume
 
-当前实现：七阶段子进程引擎、内容寻址产物缓存、尝试祖先链、强制资源边界、结构化脱敏日志、观测硬件 profile、兼容性守卫、验证器以及 Windows/Linux CI 退出门均已实现。运行层的 aggregate/report 不执行 P7 排行榜聚合。在 P8 把中央 P2–P5 表格评测接入该引擎前，标准 CLI 适配器计划仍保留一个 evaluate 阶段。
+当前实现：七阶段子进程引擎、内容寻址产物缓存、尝试祖先链、强制资源边界、结构化脱敏日志、观测硬件 profile、兼容性守卫、验证器以及 Windows/Linux CI 退出门均已实现。运行层的 aggregate/report 不执行 P7 排行榜聚合。P8 已完成中央 P2–P5 表格评测路径，适配器评测、顶层 `run` 与 `benchmark run` 均使用该路径。
 
 任务：
 
@@ -485,7 +485,7 @@ P2 已在 [GitHub Actions run 31025796906](https://github.com/jimmybach/Standard
 
 ## 11. 紧接着的实现增量
 
-P8 是当前规划的最后一个工程阶段；本路线图不会自动延伸为 P9。P8 发布候选 PR 通过审阅并留存 Windows、Linux 与原生目标环境证据后，剩余工作属于正式发布与科学准入：批准具体模型、数据集、指标和运行身份，解决第 9 节的待定事项，并且只在发布清单全部通过后标记 `0.1.0`。这些决定以后可以形成单独界定范围的里程碑，但不能被视作 P0-P8 的隐含续篇。
+P8 是当前规划的最后一个工程阶段；本路线图不会自动延伸为 P9。其发布候选 PR、原生 Windows 留存证据及托管 Windows/Linux 门均已通过。剩余工作首先是实际功能验证；只有未来确有需要时，才进入正式发布与科学准入：运行具体模型/数据集/指标组合，在证据充分时批准对应身份，并解决第 9 节中适用的待定事项。仓库作为内部开发项目期间，`0.1.0` 标签、标签签名、包发布和项目网站均明确推迟；这些事项必须由单独的发布决定启动，不属于 P0-P8 的隐含续篇。
 
 ## 12. 相关规范
 

@@ -94,7 +94,14 @@ _FIT_KEYS = {
     "save_full_every_epoch",
     "target_col",
 }
-_COMMON_INTERNAL_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+_COMMON_INTERNAL_KEYS = {
+    "action_extras",
+    "config",
+    "dataset_identity",
+    "dataset_spec",
+    "evaluation",
+    "tags",
+}
 _TRAIN_INTERNAL_KEYS = _COMMON_INTERNAL_KEYS | {
     "max_train_rows",
     "tabular_config",

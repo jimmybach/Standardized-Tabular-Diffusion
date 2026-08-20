@@ -167,10 +167,10 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
     evidence_paths = {
         "arf": "docs/evidence/arf/native-parity-run-30964711614.json",
         "bn": "docs/evidence/bn/native-parity-run-30967779298.json",
-        "codi": "docs/evidence/codi/native-parity-run-30941940893.json",
+        "codi": "docs/evidence/codi/native-parity-run-32043925805.json",
         "ctab-gan": "docs/evidence/ctabgan/native-parity-run-30930939961.json",
         "ctab-gan-plus": "docs/evidence/ctabgan-plus/native-parity-run-30926267432.json",
-        "ctgan": "docs/evidence/ctgan/native-parity-run-30910275922.json",
+        "ctgan": "docs/evidence/ctgan/native-parity-run-32047234665.json",
         "goggle": "docs/evidence/goggle/native-parity-run-30945676747.json",
         "great": "docs/evidence/great/native-parity-run-30974574472.json",
         "nflow": "docs/evidence/nflow/native-parity-run-30970260840.json",
@@ -179,12 +179,12 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         "smote": "docs/evidence/smote/native-parity-run-30918785254.json",
         "stasy": "docs/evidence/stasy/native-parity-run-30936275831.json",
         "tabsds": "docs/evidence/tabsds/native-parity-run-30974574593.json",
-        "tabddpm": "docs/evidence/tabddpm/native-parity-run-30863212268.json",
-        "tabdiff": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
+        "tabddpm": "docs/evidence/tabddpm/native-parity-run-32045685956.json",
+        "tabdiff": "docs/evidence/tabdiff/native-parity-run-32058517599.json",
         "tabularargn": "docs/evidence/tabularargn/native-parity-run-30961590047.json",
         "tabula": "docs/evidence/tabula/native-parity-run-30974574505.json",
-        "tabsyn": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
-        "tvae": "docs/evidence/tvae/native-parity-run-30913867621.json",
+        "tabsyn": "docs/evidence/tabsyn/native-parity-run-32055783087.json",
+        "tvae": "docs/evidence/tvae/native-parity-run-32052308431.json",
     }
     for model_id in (
         "arf",
@@ -211,7 +211,12 @@ def test_audited_primary_adapters_fail_closed_for_release_claims() -> None:
         spec = get_adapter_spec(model_id)
         assert spec.upstream_revision is not None
         assert spec.validation_level.value == "native-parity-validated"
-        expected_modification = "compatibility-patched" if model_id == "realtabformer" else "adapter-only"
+        if model_id == "realtabformer":
+            expected_modification = "compatibility-patched"
+        elif model_id == "goggle":
+            expected_modification = "dependency-compatibility-reimplementation"
+        else:
+            expected_modification = "adapter-only"
         assert spec.modification_status == expected_modification
         assert spec.patch_set_ids == ()
         assert evidence_paths[model_id] in spec.evidence_records
@@ -318,6 +323,61 @@ def test_goggle_retained_method_author_validation_is_exact_and_conservatively_ga
     assert all(case["comparisons"]["raw_samples_exact"] for case in evidence["cases"])
     assert all(case["comparisons"]["sample_bytes_exact"] for case in evidence["cases"])
     assert all(case["comparisons"]["adapter_source_remained_exact"] for case in evidence["cases"])
+
+    backend_validation = goggle["dependency_backend_validation"]
+    assert backend_validation["status"] == "pass"
+    assert backend_validation["level"] == "native-parity-validated"
+    assert backend_validation["claim_classification"] == "dependency-compatibility-reimplementation-parity"
+    assert backend_validation["workflow_run_id"] == 32042446422
+    assert backend_validation["repository_commit"] == "cf821a0dae803f523697c75888375feef9724145"
+    assert backend_validation["environment"]["dgl"] == "1.1.3"
+    assert backend_validation["environment_lock_sha256"] == (
+        "6284c53e4fb63d8d8c1df7933687e183056bb866c8812f015ca879f840406f76"
+    )
+    backend_summary = backend_validation["result_summary"]
+    assert backend_summary["graph_oracle_cases_passed"] == backend_summary["graph_oracle_cases_total"] == 5
+    assert backend_summary["parity_cases_passed"] == backend_summary["parity_cases_total"] == 9
+    assert backend_summary["checkpoint_state_exact"] is True
+    assert backend_summary["graph_gradients_exact"] is True
+    assert backend_summary["raw_samples_exact"] is True
+    assert backend_summary["sample_frames_exact"] is True
+    assert backend_summary["sample_bytes_exact"] is True
+    backend_artifact = backend_validation["artifact"]
+    assert backend_artifact["evidence_file_sha256"] == backend_artifact["downloaded_evidence_sha256"]
+    backend_evidence_path = REPO_ROOT / backend_artifact["permanent_evidence_path"]
+    backend_evidence_bytes = backend_evidence_path.read_bytes()
+    assert hashlib.sha256(backend_evidence_bytes).hexdigest() == backend_artifact["evidence_file_sha256"]
+    backend_evidence = json.loads(backend_evidence_bytes)
+    assert backend_evidence["status"] == "pass"
+    assert backend_evidence["protocol_id"] == backend_validation["protocol_id"]
+    assert backend_evidence["repository_commit"] == backend_validation["repository_commit"]
+    assert backend_evidence["graph_backend_validation"]["status"] == "pass"
+    assert len(backend_evidence["graph_backend_validation"]["cases"]) == 5
+    assert len(backend_evidence["cases"]) == 9
+    assert all(case["status"] == "pass" for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["checkpoints"]["tensors_exact"] for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["raw_samples_exact"] for case in backend_evidence["cases"])
+    assert all(case["comparisons"]["sample_bytes_exact"] for case in backend_evidence["cases"])
+    assert backend_artifact["permanent_evidence_path"] in get_adapter_spec("goggle").evidence_records
+
+    windows_validation = goggle["windows_real_function"]
+    assert windows_validation["status"] == "pass"
+    assert windows_validation["level"] == "minimal-real-passed"
+    assert windows_validation["seed_outputs_distinct"] is True
+    assert windows_validation["central_evaluation"] == "p3-validity-finalized"
+    windows_evidence_path = REPO_ROOT / windows_validation["permanent_evidence_path"]
+    windows_evidence_bytes = windows_evidence_path.read_bytes()
+    assert hashlib.sha256(windows_evidence_bytes).hexdigest() == windows_validation["evidence_file_sha256"]
+    windows_evidence = json.loads(windows_evidence_bytes)
+    assert windows_evidence["status"] == "pass"
+    assert windows_evidence["repository_commit"] == windows_validation["repository_commit"]
+    assert windows_evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert windows_evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert windows_evidence["seed_outputs_distinct"] is True
+    assert [sample["seed"] for sample in windows_evidence["samples"]] == [17, 29]
+    assert windows_evidence["central_evaluation"]["status"] == "pass"
+    assert windows_evidence["central_evaluation"]["finalization_status"] == "finalized"
+    assert windows_validation["permanent_evidence_path"] in get_adapter_spec("goggle").evidence_records
     assert "heterogeneous-decoder-runtime" in goggle["official_eligibility"]
     assert "release-gates" in goggle["official_eligibility"]
 
@@ -330,17 +390,23 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
     validation = codi["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30941940893
-    assert validation["pull_request_head_commit"] == "bcfc4dd1d6b219c578bac44c4bd85606158bfb83"
-    assert validation["repository_commit"] == "b0a380cd01ee08378742c231ec5811351103b20c"
+    assert validation["workflow_run_id"] == 32043925805
+    assert validation["workflow_event"] == "push"
+    assert validation["repository_commit"] == "d5a5192fccbbb7fa7af405dbf500c14ff82f516c"
     assert validation["result_summary"]["parity_cases_passed"] == 9
+    assert validation["result_summary"]["parity_cases_total"] == 9
     assert validation["result_summary"]["continuous_checkpoint_state_exact"] is True
     assert validation["result_summary"]["discrete_checkpoint_state_exact"] is True
     assert validation["result_summary"]["sample_bytes_exact"] is True
     assert validation["result_summary"]["sample_frames_exact"] is True
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156"
+        "04f4f3ab1e50697a614fdf843cb29b6cb5d1700065343cd2c7d87a573ec75a4f"
     )
+    assert validation["artifact"]["artifact_id"] == 9292473608
+    assert validation["artifact"]["artifact_digest"] == (
+        "sha256:9b2b3efe69af567b8661439394f04a06013aaa129613106f317bee18b50ea4b8"
+    )
+    assert validation["artifact"]["expires_at"] == "2026-11-15T15:58:02Z"
     evidence_path = REPO_ROOT / validation["artifact"]["permanent_evidence_path"]
     evidence_bytes = evidence_path.read_bytes()
     assert hashlib.sha256(evidence_bytes).hexdigest() == validation["artifact"][
@@ -352,6 +418,9 @@ def test_codi_retained_tabsyn_snapshot_validation_is_exact_and_conservatively_ga
     ]
     evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
     assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == validation["protocol_id"]
+    assert evidence["repository_commit"] == validation["repository_commit"]
+    assert evidence["environment_lock"]["sha256"] == validation["environment_lock_sha256"]
     assert evidence["reproduction_target"] == "tabsyn-benchmark-snapshot"
     assert evidence["environment"]["tqdm"] == "4.66.5"
     assert len(evidence["cases"]) == 9
@@ -455,8 +524,38 @@ def test_tabddpm_source_lock_records_native_parity_without_overclaiming() -> Non
 
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30863212268
+    assert validation["workflow_run_id"] == 32045685956
+    assert validation["workflow_event"] == "push"
+    assert validation["repository_commit"] == "ebe706fe64c1601a0d3f02c6ef43c0754468ea57"
+    assert validation["protocol_id"] == "tabddpm-native-parity-v2"
+    assert validation["environment_lock_sha256"] == (
+        "a0f45b382eedecfa177610d9c8cf5eb5822830f1b842e34d72e3e27c102d1ce7"
+    )
     assert validation["result_summary"]["seed_cases_passed"] == 3
+    assert validation["result_summary"]["seed_cases_total"] == 3
+    assert validation["result_summary"]["dataset_identity_checked"] is True
+    assert validation["result_summary"]["decoded_tables_valid"] is True
+    assert validation["result_summary"]["output_isolated"] is True
+    assert validation["result_summary"]["source_remained_exact"] is True
+    artifact = validation["artifact"]
+    assert artifact["github_artifact_id"] == 9292848862
+    assert artifact["digest"] == (
+        "sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3"
+    )
+    assert artifact["evidence_file_sha256"] == (
+        "cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65"
+    )
+    evidence_path = REPO_ROOT / artifact["permanent_evidence_path"]
+    evidence_bytes = evidence_path.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == artifact["evidence_file_sha256"]
+    evidence = json.loads(evidence_bytes)
+    assert evidence["protocol_id"] == validation["protocol_id"]
+    assert evidence["repository_commit"] == validation["repository_commit"]
+    assert evidence["environment_lock"]["sha256"] == validation["environment_lock_sha256"]
+    assert evidence["source_remained_exact"] is True
+    assert len(evidence["cases"]) == 3
+    assert all(case["status"] == "pass" for case in evidence["cases"])
+    assert get_adapter_spec("tabddpm").requires_dataset_paths is True
     assert tabddpm["official_eligibility"] == "pending-separate-official-track-review"
 
 
@@ -478,10 +577,10 @@ def test_ctgan_package_lock_is_exact_and_conservatively_gated() -> None:
     validation = ctgan["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30910275922
+    assert validation["workflow_run_id"] == 32047234665
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
+        "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24"
     )
     assert str(ctgan["official_eligibility"]).startswith("blocked-pending-license")
 
@@ -497,10 +596,10 @@ def test_tvae_package_lock_and_retained_validation_are_exact_and_conservatively_
     validation = tvae["validation"]
     assert validation["level"] == "native-parity-validated"
     assert validation["status"] == "pass"
-    assert validation["workflow_run_id"] == 30913867621
+    assert validation["workflow_run_id"] == 32052308431
     assert validation["result_summary"]["seed_cases_passed"] == 3
     assert validation["artifact"]["evidence_file_sha256"] == (
-        "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7"
+        "5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e"
     )
     assert str(tvae["official_eligibility"]).startswith("blocked-pending-license")
 

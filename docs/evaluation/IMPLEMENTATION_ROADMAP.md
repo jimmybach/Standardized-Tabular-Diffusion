@@ -88,7 +88,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 | [`resources/evaluation/`](../../standardized_tabular_diffusion/resources/evaluation) | Versioned metric, protocol, evaluator, and source identity resources | Includes explicit P4 freeze evidence and resolved/blocked P5 metric records; blocked metrics are machine-readable exclusions |
 | [`configs/datasets/`](../../configs/datasets) | Adult and Sick reviewed Dataset Profiles | Diagnostic membership only; neither profile is currently official-eligible |
 | [`orchestration/`](../../standardized_tabular_diffusion/orchestration) | Seven-stage isolated execution, content-addressed cache/resume, resource boundaries, redacted logs, and observed hardware/software identity | P6 active execution path; operational aggregation is explicitly separate from P7 leaderboard aggregation |
-| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, P6 `benchmark` commands, and legacy commands | P2 remains the default table protocol; P3/P4/P5 are explicit, while P6 execution is opt-in pending P8 migration |
+| [`cli.py`](../../standardized_tabular_diffusion/cli.py) | Registry/profile/result inspection, protocol-selectable `evaluate-table`, P6 `benchmark` commands, and legacy commands | P2 remains the default table protocol; P3/P4/P5 are explicit, and adapter `evaluate`, top-level `run`, and `benchmark run` use the P8 central evaluation route |
 | [`pyproject.toml`](../../pyproject.toml), [`core-ci.yml`](../../.github/workflows/core-ci.yml), and [`p6-orchestration-validation.yml`](../../.github/workflows/p6-orchestration-validation.yml) | Python 3.11 packaging, dependency groups, test boundaries, lint, typing, build, and P6 exit validation | Hosted Windows primary-family and Linux secondary CI; reference trees are excluded from default discovery and distribution |
 | [`tests/evaluation/`](../../tests/evaluation) and [`tests/orchestration/`](../../tests/orchestration) | Scientific contracts/parity plus process, cache, resume, resource, hardware, and CLI failure-boundary tests | Scientific and operational claims remain separated by dependency, marker, and workflow boundaries |
 
@@ -102,7 +102,7 @@ The legacy path remains diagnostic-only. The P1 contract path remains available 
 - P6 now implements resource-aware isolated execution, observed hardware/software profiles, exact content-addressed cache/resume, structured failure semantics, and diagnostic efficiency accounting. Cache reuse is ineligible as efficiency evidence, and cross-profile comparison fails closed. Formal efficiency admission and warm repeated-generation policy remain future protocol/release decisions.
 - The P6 forced-boundary exit gate passed on Windows/AMD64 and Python 3.11.15 at commit `da47011`; its [retained evidence](../evidence/evaluation/p6-windows-py311-da47011.json) locks the implementation and preserves the non-Official claim boundary.
 - Adult and Sick are reviewed diagnostic profiles, not a frozen Universal Core Dataset Suite.
-- Compatibility grouping across scientific bundles, uncertainty beyond the declared P5 intervals, aggregation, immutable leaderboard snapshots, and publication admission remain P7 work.
+- P7 now provides compatibility grouping, declared uncertainty, aggregation, immutable leaderboard snapshots, and fail-closed publication admission. These engineering capabilities do not admit any concrete result by themselves.
 - Model parity evidence does not by itself grant benchmark eligibility or release support.
 
 ## 4. Target architecture
@@ -174,8 +174,8 @@ A node records its content-addressed inputs, outputs, implementation version, se
 | P4 | Local and Global Utility | P1, P3 | Protocol-frozen at `p4-utility@1.0.0` after complete exact Windows GPU validation; concrete results still require independent admission | Preserve the frozen identity and complete release, dataset, model, track, and result admission gates |
 | P5 | High-order fidelity and empirical privacy work packages | P2, P3 | Conditionally protocol-frozen after reviewed roles/threat model and a passed preregistered independent confirmation | Preserve independent dataset/model/run/publication gates; release support remains pending |
 | P6 | Resource-aware orchestration, efficiency, cache, and resume | P2 | Passed engineering exit gate; [Windows/Python 3.11 evidence retained](../evidence/evaluation/p6-windows-py311-da47011.json) | Phase accounting and reuse integrity pass under declared hardware profiles |
-| P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Not started | Incompatible results cannot be merged; coverage and publication gates pass |
-| P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Not started | Public-preview or official-release gate passes for the claimed release class |
+| P7 | Dataset aggregation, uncertainty, compatibility groups, and leaderboard snapshots | P2-P6 as applicable | Passed engineering exit gate; [Windows/Python 3.11 evidence retained](../evidence/evaluation/p7-windows-py311-4c8da76.json) | Incompatible results cannot be merged; coverage and publication gates pass |
+| P8 | Legacy migration, documentation, packaging, CI, and release evidence | P0-P7 | Passed `0.1.0rc1` engineering exit gates; [native Windows evidence retained](../evidence/evaluation/p8-native-windows11-py311-bb09085.json) and [hosted Windows/Linux gates passed](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/31760027871) | Public-preview engineering gate passes for the claimed software release-candidate class; this is not an Official Results admission |
 
 P3, P4, P5, and parts of P6 may proceed concurrently after their dependencies are stable. P7 must not be used to publish rankings before each contributing metric and dataset independently passes its admission gate.
 
@@ -331,7 +331,7 @@ The complete Adult/Sick identity-surrogate path passed under Windows 11 and Pyth
 
 ### 6.7 P6 — orchestration, efficiency, cache, and resume
 
-Current implementation: the seven-stage subprocess engine, content-addressed artifact cache, attempt ancestry, forced resource boundaries, structured redacted logs, observed hardware profiles, compatibility guard, validator, and Windows/Linux CI exit gate are implemented. The operational aggregate/report stages do not perform P7 leaderboard aggregation. The standard CLI adapter plan retains one evaluation stage until P8 routes central P2-P5 table evaluation through the engine.
+Current implementation: the seven-stage subprocess engine, content-addressed artifact cache, attempt ancestry, forced resource boundaries, structured redacted logs, observed hardware profiles, compatibility guard, validator, and Windows/Linux CI exit gate are implemented. The operational aggregate/report stages do not perform P7 leaderboard aggregation. P8 completed the central P2-P5 table-evaluation route used by adapter evaluation, top-level `run`, and `benchmark run`.
 
 Tasks:
 
@@ -485,7 +485,7 @@ The implementation is not done because code exists, a mocked test passes, or one
 
 ## 11. Immediate next implementation increment
 
-P8 is the final planned engineering phase; this roadmap does not automatically extend to P9. After the P8 release-candidate PR passes review and retained Windows/Linux/native-target evidence is complete, the remaining work is release and scientific admission: approve concrete model/dataset/metric/run identities, resolve the decisions in Section 9, and tag `0.1.0` only after the release checklist passes. Those decisions may create separately scoped future milestones, but they must not be treated as an implicit continuation of P0-P8.
+P8 is the final planned engineering phase; this roadmap does not automatically extend to P9. Its release-candidate PR, retained native Windows evidence, and hosted Windows/Linux gates have passed. Remaining work is practical validation and, only when desired, formal release and scientific admission: run concrete model/dataset/metric combinations, approve their identities when evidence warrants it, and resolve the applicable decisions in Section 9. Tagging `0.1.0`, signing tags, publishing packages, and creating a project website are explicitly deferred while the repository is used for internal development. Those activities require a separate release decision; they are not an implicit continuation of P0-P8.
 
 ## 12. Related specifications
 

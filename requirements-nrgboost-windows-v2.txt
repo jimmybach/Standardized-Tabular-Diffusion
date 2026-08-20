@@ -1,0 +1,18 @@
+# Frozen NRGBoost native-Windows Pipeline V2 environment.
+# The diagnostic wheel is built separately, without source edits, by
+# tools/build_nrgboost_windows.ps1 and is not redistributed.
+cffi==1.17.1
+colorama==0.4.6; sys_platform == "win32"
+joblib==1.5.3
+llvmlite==0.44.0
+numba==0.61.2
+numpy==1.26.4
+packaging==26.3
+pandas==2.2.3
+pycparser==2.22
+python-dateutil==2.9.0.post0
+pytz==2026.3.post1
+scipy==1.13.1
+six==1.17.0
+tqdm==4.66.5
+tzdata==2026.3

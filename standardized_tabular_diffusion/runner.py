@@ -8,8 +8,14 @@ from typing import Any
 from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
-from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.registry import get_adapter, get_adapter_spec
+from standardized_tabular_diffusion.runtime_contracts import (
+    claim_output_identity,
+    dataset_content_identity,
+    inspect_regular_file,
+    validate_action_controls,
+)
 from standardized_tabular_diffusion.upstream_sources import source_status
 
 
@@ -18,30 +24,111 @@ def validate_dataset_spec(dataset_spec: DatasetSpec) -> dict[str, Any]:
         "name": dataset_spec.name,
         "task_type": dataset_spec.task_type,
         "paths": {
-            "metadata_path": {
-                "path": str(dataset_spec.metadata_path),
-                "exists": dataset_spec.metadata_path.exists(),
-            },
-            "train_data_path": {
-                "path": None if dataset_spec.train_data_path is None else str(dataset_spec.train_data_path),
-                "exists": None if dataset_spec.train_data_path is None else dataset_spec.train_data_path.exists(),
-            },
-            "val_data_path": {
-                "path": None if dataset_spec.val_data_path is None else str(dataset_spec.val_data_path),
-                "exists": None if dataset_spec.val_data_path is None else dataset_spec.val_data_path.exists(),
-            },
-            "test_data_path": {
-                "path": None if dataset_spec.test_data_path is None else str(dataset_spec.test_data_path),
-                "exists": None if dataset_spec.test_data_path is None else dataset_spec.test_data_path.exists(),
-            },
+            "metadata_path": inspect_regular_file(dataset_spec.metadata_path),
+            "train_data_path": inspect_regular_file(dataset_spec.train_data_path),
+            "val_data_path": inspect_regular_file(dataset_spec.val_data_path),
+            "test_data_path": inspect_regular_file(dataset_spec.test_data_path),
         },
     }
 
 
-def build_run_context(config: ExperimentConfig, repo_root: Path | None = None) -> dict[str, Any]:
-    adapter = get_adapter(config.model, repo_root=repo_root)
-    dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
-    run_spec = adapter.build_run_spec(config, dataset_spec=dataset_spec)
+def _action_identity(
+    config: ExperimentConfig,
+    action: str,
+    dataset_spec: DatasetSpec,
+) -> dict[str, Any]:
+    if action == "train":
+        controls = config.train.extra
+        seed = config.train.seed
+        device = config.train.device
+        num_samples = None
+        checkpoint_path = None
+        upstream_config = config.upstream_config_path
+    elif action == "sample":
+        controls = config.sample.extra
+        seed = config.sample.seed if config.sample.seed is not None else config.train.seed
+        device = config.train.device
+        num_samples = config.sample.num_samples
+        checkpoint_path = config.sample.checkpoint_path
+        upstream_config = config.upstream_config_path
+    elif action == "evaluate":
+        controls = config.evaluation.extra
+        seed = config.sample.seed if config.sample.seed is not None else config.train.seed
+        device = "cpu"
+        num_samples = config.sample.num_samples
+        checkpoint_path = None
+        upstream_config = None
+    else:
+        raise ValueError(f"Unsupported action: {action}")
+    return {
+        "schema_version": 1,
+        "action": action,
+        "model": config.model,
+        "dataset": config.dataset,
+        "seed": seed,
+        "device": device,
+        "num_samples": num_samples,
+        "checkpoint_path": checkpoint_path,
+        "upstream_config": inspect_regular_file(None if upstream_config is None else Path(upstream_config)),
+        "controls": controls,
+        "dataset_identity": dataset_content_identity(dataset_spec),
+    }
+
+
+def _claim_action_output(config: ExperimentConfig, action: str, dataset_spec: DatasetSpec) -> Path:
+    action_identity = _action_identity(config, action, dataset_spec)
+    return claim_output_identity(
+        Path(config.output_dir),
+        model=config.model,
+        dataset=config.dataset,
+        actions={
+            "dataset": {
+                "schema_version": 1,
+                "dataset_identity": action_identity["dataset_identity"],
+            },
+            action: action_identity,
+        },
+    )
+
+
+def _declared_upstream_root(model: str, repo_root: Path | None) -> Path:
+    """Resolve provenance metadata without importing a model runtime."""
+
+    resolved_root = (repo_root or Path(__file__).resolve().parents[1]).resolve()
+    source_root = get_adapter_spec(model).source_root
+    return resolved_root if source_root is None else resolved_root / source_root
+
+
+def _build_run_spec(config: ExperimentConfig, dataset_spec: DatasetSpec) -> RunSpec:
+    """Build the shared public RunSpec without loading optional model dependencies."""
+
+    spec = config.to_run_spec()
+    spec.extra.setdefault("dataset_spec", dataset_spec.to_dict())
+    spec.extra.setdefault("dataset_identity", dataset_content_identity(dataset_spec))
+    spec.extra.setdefault("config", config.to_dict())
+    return spec
+
+
+def _write_artifact_bundle(bundle: ArtifactBundle) -> ArtifactBundle:
+    """Persist a central-evaluation bundle without constructing a model adapter."""
+
+    bundle.output_dir.mkdir(parents=True, exist_ok=True)
+    atomic_write_json(bundle.output_dir / "artifacts.json", bundle.to_dict())
+    return bundle
+
+
+def build_run_context(
+    config: ExperimentConfig,
+    repo_root: Path | None = None,
+    *,
+    dataset_spec: DatasetSpec | None = None,
+) -> dict[str, Any]:
+    dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
+    if dataset_spec.name != config.dataset:
+        raise ValueError(
+            f"Explicit DatasetSpec name {dataset_spec.name!r} does not match config dataset {config.dataset!r}."
+        )
+    run_spec = _build_run_spec(config, dataset_spec)
     return {
         "config": config.to_dict(),
         "dataset_spec": dataset_spec.to_dict(),
@@ -53,15 +140,37 @@ def build_run_context(config: ExperimentConfig, repo_root: Path | None = None) -
         },
         "run_spec": run_spec.to_dict(),
         "adapter": {
-            "model_name": adapter.model_name,
-            "upstream_root": str(adapter.upstream_root),
+            "model_name": config.model,
+            "upstream_root": str(_declared_upstream_root(config.model, repo_root)),
         },
     }
 
 
 def save_run_context(context: dict[str, Any], output_dir: str | Path) -> Path:
     output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    config = context.get("config")
+    run_spec = context.get("run_spec")
+    if not isinstance(config, dict) or not isinstance(run_spec, dict):
+        raise ValueError("Run context must contain object-valued config and run_spec records.")
+    model = config.get("model")
+    dataset = config.get("dataset")
+    if not isinstance(model, str) or not isinstance(dataset, str):
+        raise ValueError("Run context config must contain string-valued model and dataset identities.")
+    run_extra = run_spec.get("extra")
+    dataset_identity = run_extra.get("dataset_identity") if isinstance(run_extra, dict) else None
+    if not isinstance(dataset_identity, dict):
+        raise ValueError("Run context run_spec must contain an object-valued dataset_identity record.")
+    claim_output_identity(
+        output_dir,
+        model=model,
+        dataset=dataset,
+        actions={
+            "dataset": {
+                "schema_version": 1,
+                "dataset_identity": dataset_identity,
+            }
+        },
+    )
     path = output_dir / "run_context.json"
     atomic_write_json(path, context)
     return path
@@ -71,22 +180,30 @@ def run_action(
     config: ExperimentConfig,
     action: str,
     repo_root: Path | None = None,
+    *,
+    dataset_spec: DatasetSpec | None = None,
 ):
-    adapter = get_adapter(config.model, repo_root=repo_root)
-    dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
+    dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
+    if dataset_spec.name != config.dataset:
+        raise ValueError(
+            f"Explicit DatasetSpec name {dataset_spec.name!r} does not match config dataset {config.dataset!r}."
+        )
     readiness = validate_action_inputs(config, action, dataset_spec=dataset_spec, repo_root=repo_root)
     if not readiness["ready"]:
         raise FileNotFoundError(
             f"Cannot run {action} for model={config.model}, dataset={config.dataset}. Missing inputs: "
             + "; ".join(readiness["missing"])
         )
+    _claim_action_output(config, action, dataset_spec)
 
+    if action == "evaluate":
+        return run_central_evaluation(config, dataset_spec=dataset_spec, repo_root=repo_root)
+
+    adapter = get_adapter(config.model, repo_root=repo_root)
     if action == "train":
         return adapter.train_from_config(config, dataset_spec=dataset_spec)
     if action == "sample":
         return adapter.sample_from_config(config, dataset_spec=dataset_spec)
-    if action == "evaluate":
-        return run_central_evaluation(config, dataset_spec=dataset_spec, repo_root=repo_root)
 
     raise ValueError(f"Unsupported action: {action}")
 
@@ -119,9 +236,10 @@ def run_central_evaluation(
         else dataset_spec.test_data_path
     )
     bundle_root = Path(config.output_dir) / "evaluation-result"
+    generation_seed = config.sample.seed if config.sample.seed is not None else config.train.seed
     outcome = evaluate_adapter_output(
         model_id=config.model,
-        generation_seed=config.train.seed,
+        generation_seed=generation_seed,
         synthetic_path=sample_value,
         output_dir=bundle_root,
         protocol_id=config.evaluation.protocol,
@@ -134,12 +252,11 @@ def run_central_evaluation(
         ),
         expected_rows=config.sample.num_samples,
     )
-    adapter = get_adapter(config.model, repo_root=repo_root)
     result = ArtifactBundle(
         model=config.model,
         dataset=config.dataset,
         output_dir=Path(config.output_dir),
-        upstream_workdir=adapter.upstream_root,
+        upstream_workdir=_declared_upstream_root(config.model, repo_root),
         generated_sample_path=Path(sample_value),
         evaluation_bundle_path=bundle_root,
         notes=[
@@ -148,15 +265,19 @@ def run_central_evaluation(
             "Legacy standardized_summary.json generation is disabled.",
         ],
     )
-    return adapter._write_bundle(result)
+    return _write_artifact_bundle(result)
 
 
 def run_pipeline(
     config: ExperimentConfig,
     repo_root: Path | None = None,
 ) -> dict[str, Any]:
-    adapter = get_adapter(config.model, repo_root=repo_root)
     dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
+    adapter = (
+        get_adapter(config.model, repo_root=repo_root)
+        if config.train.enabled or config.sample.enabled
+        else None
+    )
 
     context = build_run_context(config, repo_root=repo_root)
     phase_results: dict[str, Any] = {"context": context, "phases": {}}
@@ -164,22 +285,28 @@ def run_pipeline(
     sample_path: str | None = config.evaluation.extra.get("sample_path")
 
     if config.train.enabled:
+        if adapter is None:  # pragma: no cover - guarded by adapter construction above
+            raise RuntimeError("Training requires a model adapter")
         readiness = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
                 f"Cannot run train for model={config.model}, dataset={config.dataset}. Missing inputs: "
                 + "; ".join(readiness["missing"])
             )
+        _claim_action_output(config, "train", dataset_spec)
         bundle = adapter.train_from_config(config, dataset_spec=dataset_spec)
         phase_results["phases"]["train"] = bundle.to_dict()
 
     if config.sample.enabled:
+        if adapter is None:  # pragma: no cover - guarded by adapter construction above
+            raise RuntimeError("Sampling requires a model adapter")
         readiness = validate_action_inputs(config, "sample", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
                 f"Cannot run sample for model={config.model}, dataset={config.dataset}. Missing inputs: "
                 + "; ".join(readiness["missing"])
             )
+        _claim_action_output(config, "sample", dataset_spec)
         bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
         phase_results["phases"]["sample"] = bundle.to_dict()
         if bundle.generated_sample_path is not None:
@@ -196,6 +323,7 @@ def run_pipeline(
                 f"Cannot run evaluate for model={config.model}, dataset={config.dataset}. Missing inputs: "
                 + "; ".join(readiness["missing"])
             )
+        _claim_action_output(eval_config, "evaluate", dataset_spec)
         bundle = run_central_evaluation(eval_config, dataset_spec=dataset_spec, repo_root=repo_root)
         phase_results["phases"]["evaluate"] = bundle.to_dict()
 
@@ -223,6 +351,14 @@ def validate_action_inputs(
     adapter_spec = get_adapter_spec(config.model)
     missing: list[str] = []
     checked: dict[str, Any] = {}
+    action_controls = (
+        config.train.extra
+        if action == "train"
+        else config.sample.extra
+        if action == "sample"
+        else config.evaluation.extra
+    )
+    validate_action_controls(config.model, action, action_controls)
 
     def record_user_checkpoint(
         checkpoint_path: str,
@@ -258,15 +394,22 @@ def validate_action_inputs(
         missing.append(f"action {action!r} is not supported by adapter {config.model!r}")
 
     if action in {"train", "sample"} and adapter_spec.requires_dataset_paths:
+        identity = dataset_content_identity(dataset_spec)
+        checked["dataset_identity"] = identity
         checked["metadata_path"] = str(dataset_spec.metadata_path)
-        if not dataset_spec.metadata_path.exists():
-            missing.append(f"metadata_path missing: {dataset_spec.metadata_path}")
+        metadata_record = identity["files"]["metadata"]
+        if not metadata_record["exists"] or metadata_record.get("unsafe"):
+            missing.append(f"metadata_path missing or unsafe: {dataset_spec.metadata_path}")
         checked["train_data_path"] = None if dataset_spec.train_data_path is None else str(dataset_spec.train_data_path)
-        if dataset_spec.train_data_path is None or not dataset_spec.train_data_path.exists():
-            missing.append(f"train_data_path missing: {dataset_spec.train_data_path}")
+        train_record = identity["files"]["train"]
+        if dataset_spec.train_data_path is None or not train_record["exists"] or train_record.get("unsafe"):
+            missing.append(f"train_data_path missing or unsafe: {dataset_spec.train_data_path}")
         checked["test_data_path"] = None if dataset_spec.test_data_path is None else str(dataset_spec.test_data_path)
-        if dataset_spec.test_data_path is not None and not dataset_spec.test_data_path.exists():
-            missing.append(f"test_data_path missing: {dataset_spec.test_data_path}")
+        test_record = identity["files"]["test"]
+        if dataset_spec.test_data_path is not None and (
+            not test_record["exists"] or test_record.get("unsafe")
+        ):
+            missing.append(f"test_data_path missing or unsafe: {dataset_spec.test_data_path}")
 
     if dataset_spec.task_type not in adapter_spec.task_types:
         checked["task_type"] = dataset_spec.task_type
@@ -493,38 +636,68 @@ def validate_action_inputs(
             missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
 
     if config.model == "tabsyn":
-        method = config.sample.extra.get("method") or config.train.extra.get("method") or "tabsyn"
-        vae_ckpt_dir = resolved_root / "TabSyn-main" / "tabsyn" / "vae" / "ckpt" / config.dataset
-        diffusion_ckpt_dir = resolved_root / "TabSyn-main" / "tabsyn" / "ckpt" / config.dataset
-        if method == "tabsyn":
-            if action == "train":
-                checked["tabsyn_stage_model"] = "vae_then_diffusion"
-            elif action == "sample":
-                checked["tabsyn_train_z"] = str(vae_ckpt_dir / "train_z.npy")
-                checked["tabsyn_decoder"] = str(vae_ckpt_dir / "decoder.pt")
-                checked["tabsyn_diffusion_model"] = str(diffusion_ckpt_dir / "model.pt")
-                if not (vae_ckpt_dir / "train_z.npy").exists():
-                    missing.append(f"tabsyn prerequisite missing: {vae_ckpt_dir / 'train_z.npy'}")
-                if not (vae_ckpt_dir / "decoder.pt").exists():
-                    missing.append(f"tabsyn prerequisite missing: {vae_ckpt_dir / 'decoder.pt'}")
-                if not (diffusion_ckpt_dir / "model.pt").exists():
-                    missing.append(f"tabsyn prerequisite missing: {diffusion_ckpt_dir / 'model.pt'}")
+        runtime_root = Path(config.output_dir) / "tabsyn-runtime" / "tabsyn"
+        vae_ckpt_dir = runtime_root / "vae" / "ckpt" / config.dataset
+        diffusion_ckpt_dir = runtime_root / "ckpt" / config.dataset
+        if action == "train":
+            checked["tabsyn_stage_model"] = "vae_then_diffusion"
+        elif action == "sample":
+            metadata_path = Path(config.output_dir) / "tabsyn-model-metadata.json"
+            checked["tabsyn_metadata"] = str(metadata_path)
+            checked["tabsyn_train_z"] = str(vae_ckpt_dir / "train_z.npy")
+            checked["tabsyn_decoder"] = str(vae_ckpt_dir / "decoder.pt")
+            checked["tabsyn_diffusion_model"] = str(diffusion_ckpt_dir / "model.pt")
+            if not (vae_ckpt_dir / "train_z.npy").is_file():
+                missing.append(f"tabsyn prerequisite missing: {vae_ckpt_dir / 'train_z.npy'}")
+            if not (vae_ckpt_dir / "decoder.pt").is_file():
+                missing.append(f"tabsyn prerequisite missing: {vae_ckpt_dir / 'decoder.pt'}")
+            if not (diffusion_ckpt_dir / "model.pt").is_file():
+                missing.append(f"tabsyn prerequisite missing: {diffusion_ckpt_dir / 'model.pt'}")
+            if not metadata_path.is_file():
+                missing.append(f"tabsyn training metadata missing: {metadata_path}")
+
+    if action == "sample" and config.model == "tabdiff":
+        if config.sample.checkpoint_path is not None:
+            record_user_checkpoint(config.sample.checkpoint_path)
+        else:
+            exp_name = config.sample.extra.get("exp_name", Path(config.output_dir).name)
+            checkpoint_root = (
+                Path(config.output_dir)
+                / "tabdiff-runtime"
+                / "tabdiff"
+                / "ckpt"
+                / config.dataset
+                / exp_name
+            )
+            inferred = sorted(checkpoint_root.glob("best_ema_model*"))
+            checked["checkpoint_root"] = str(checkpoint_root)
+            if not inferred:
+                missing.append(f"tabdiff checkpoint missing under: {checkpoint_root}")
 
     if action == "sample" and config.model == "tabddpm":
         if config.upstream_config_path is None:
             missing.append("upstream_config_path missing for tabddpm sample")
         else:
             checked["upstream_config_path"] = config.upstream_config_path
-            if not Path(config.upstream_config_path).exists():
-                missing.append(f"upstream_config_path missing: {config.upstream_config_path}")
+            if not Path(config.upstream_config_path).is_file() or Path(config.upstream_config_path).is_symlink():
+                missing.append(f"upstream_config_path missing or unsafe: {config.upstream_config_path}")
+        metadata_path = Path(config.output_dir) / "tabddpm-model-metadata.json"
+        checked["checkpoint_metadata_path"] = str(metadata_path)
+        if not metadata_path.is_file():
+            missing.append(f"checkpoint_metadata_path missing: {metadata_path}")
+        for name in ("model.pt", "model_ema.pt"):
+            checkpoint = Path(config.output_dir) / "tabddpm-runtime" / name
+            checked[f"tabddpm_{name}_path"] = str(checkpoint)
+            if not checkpoint.is_file():
+                missing.append(f"tabddpm checkpoint missing: {checkpoint}")
 
     if action == "train" and config.model == "tabddpm":
         if config.upstream_config_path is None:
             missing.append("upstream_config_path missing for tabddpm train")
         else:
             checked["upstream_config_path"] = config.upstream_config_path
-            if not Path(config.upstream_config_path).exists():
-                missing.append(f"upstream_config_path missing: {config.upstream_config_path}")
+            if not Path(config.upstream_config_path).is_file() or Path(config.upstream_config_path).is_symlink():
+                missing.append(f"upstream_config_path missing or unsafe: {config.upstream_config_path}")
 
     if action == "evaluate":
         sample_path = config.evaluation.extra.get("sample_path") or config.sample.extra.get("sample_path")

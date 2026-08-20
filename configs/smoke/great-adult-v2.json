@@ -1,0 +1,50 @@
+{
+  "model": "great",
+  "dataset": "adult",
+  "output_dir": "artifacts/test/great-adult-v2",
+  "train": {
+    "enabled": true,
+    "seed": 0,
+    "device": "cuda",
+    "extra": {
+      "llm": "distilgpt2",
+      "epochs": 5,
+      "batch_size": 8,
+      "max_train_rows": 256,
+      "conditional_col": "income",
+      "random_conditional_col": false,
+      "num_threads": 1,
+      "train_kwargs": {
+        "learning_rate": 0.0005,
+        "logging_steps": 32,
+        "save_steps": 1000
+      }
+    }
+  },
+  "sample": {
+    "enabled": true,
+    "num_samples": 4,
+    "checkpoint_path": null,
+    "extra": {
+      "k": 4,
+      "max_length": 224,
+      "temperature": 0.2,
+      "guided_sampling": true,
+      "random_feature_order": false,
+      "num_threads": 1
+    }
+  },
+  "evaluation": {
+    "enabled": false,
+    "total_time_limit_seconds": 900,
+    "extra": {}
+  },
+  "upstream_config_path": null,
+  "tags": [
+    "smoke",
+    "great",
+    "windows-v2",
+    "gpu"
+  ],
+  "notes": "Bounded Windows V2 real-function preset. It uses a pretrained distilgpt2 backbone because the sshleifer/tiny-gpt2 fixture establishes adapter mechanics but cannot reliably produce a complete 15-column Adult row."
+}

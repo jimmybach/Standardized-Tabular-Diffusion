@@ -118,3 +118,9 @@ GitHub Actions [运行 `30926267432`](https://github.com/jimmybach/Standardized-
 分类/回归与三个随机种子组成的六个用例全部通过。每个用例的原生路径与适配器路径均具有完全一致的 checkpoint 状态签名和逐字节一致的样本 CSV，同时满足清单、元数据、随机状态恢复、13 行列顺序、无缺失值、数值有限性和类别取值域要求。该运行还依据源码清单 SHA-256 `a76cb5e64fec6d99aae2df2d66a51598bd72ae26bc7f2e0e3104bf5a1dc1652a` 验证了全部五个官方运行时文件。
 
 经审阅的 JSON 已永久保存在 `docs/evidence/ctabgan-plus/native-parity-run-30926267432.json`，其 SHA-256 为 `df3bbf0dd46d34e8d57551048c7b7abe60340eddb3738e31d400e44344c5e5f2`。对应的 GitHub artifact ID 为 `8899232990`，压缩包摘要为 `sha256:f3abfc1e2bbd69d7858e2ce1e5b1ab0099e9b8fa06b95711a762dd16a06a2729`，到期日为 2026-11-02。该证据只提升适配器的验证级别；在上游许可证和其他独立准入门槛解决前，CTAB-GAN+ 仍为 `experimental`、`unsupported`，不得进入 Official Results，也不得作为发布支持模型。
+
+## 原生 Windows V2 结果
+
+仓库提交 `17fc74e2f9be8a507ec1f921bb3b509881937154` 使用按需下载、校验和锁定且未经修改的官方源码，在 Windows 11、Python 3.11.15 和 PyTorch 2.3.0 CPU 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 16 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/ctabgan-plus/windows-v2-real-function-17fc74e.json`，SHA-256 为 `ce7834d0abab284f026230fdcd64bb91f9738b3d65fc77ed01c01fbe1e534127`。这项有界功能结论不代表代表性质量、隐私、Official Results 准入或发布支持；方法作者仓库缺少许可证仍是独立的发布阻塞项。

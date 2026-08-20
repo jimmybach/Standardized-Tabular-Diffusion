@@ -37,6 +37,8 @@ Tracked upstream source remains unchanged. `standardized_tabular_diffusion/compa
 
 Python 3.11 uses scikit-learn 1.5.2, where `OneHotEncoder` renamed the snapshot's `sparse` keyword to `sparse_output`. The adapter-only `stasy-sklearn-onehot-keyword-v1` bridge forwards the unchanged `False` value to the renamed keyword. It changes neither the encoder nor its dense output.
 
+PyTorch 2.6 changed `torch.load` to default to `weights_only=True`, while the frozen STaSy snapshot stores optimizer, EMA, and NumPy scalar state in its checkpoint and does not pass that argument. On the V2 PyTorch 2.8 runtime, the isolated launcher therefore supplies `weights_only=False` only for the exact run-owned checkpoint that the adapter has already path-confined and SHA-256 verified. Any other path is rejected, the override is restored immediately after the official sampling call, and upstream source remains unchanged. This compatibility bridge does not authorize arbitrary external pickle loading.
+
 These controls configure objects returned by the snapshot's own `get_config` and call its own preprocessing, score model, SDE loss, EMA, checkpoint, sampling, and inverse-transform functions. No repository-side substitute model is used.
 
 The original snapshot's root CLI accepted epoch and row-count flags that STaSy did not consume, selected CUDA unconditionally inside the STaSy modules, and wrote checkpoints under tracked source. The dedicated boundary makes those behaviors explicit and testable instead of silently reporting unsupported controls as effective.
@@ -68,6 +70,7 @@ STaSy checkpoints use PyTorch's pickle-capable format. The adapter therefore:
 - rejects symlinked or externally supplied checkpoints;
 - records the checkpoint SHA-256, source-manifest identity, effective training configuration, seed, and device;
 - verifies the checksum and source identity before sampling; and
+- confines the PyTorch 2.8 legacy-load bridge to that exact verified checkpoint and restores it after sampling; and
 - records sample SHA-256, row count, columns, and sampler configuration.
 
 The smoke preset uses a deliberately small architecture and predictor-corrector schedule. It proves integration behavior only and is not a quality benchmark configuration.
@@ -100,4 +103,12 @@ All nine cases passed. For every case, model, optimizer, EMA, step, and epoch st
 
 ## Remaining Gates
 
-Successful snapshot parity will not make STaSy benchmark-eligible or release-supported. Remaining gates include central metric execution, dataset-profile admission, full-scale runtime characterization, configuration approval, and release review. Original-method claims additionally require a licensed method-author source and a separate equivalence decision.
+Successful snapshot parity will not make STaSy benchmark-eligible or release-supported. Remaining gates include dataset-profile admission, representative-scale runtime and quality characterization, configuration approval, and release review. Original-method claims additionally require a licensed method-author source and a separate equivalence decision.
+
+## Native-Windows V2 result
+
+Repository commit `17fc74e2f9be8a507ec1f921bb3b509881937154` passed `pipeline-v2-native-windows-v1` with the checksum-exact TabSyn benchmark snapshot on Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and NVIDIA GeForce RTX 5080. One bounded real epoch on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 16 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling did not change the copied training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+The run explicitly recorded the sole `pip check` conflict: `libzero==0.0.8` has stale metadata requiring `torch<2`, while the frozen compatibility path uses PyTorch 2.8.0. This exact conflict was reviewed and matched the plan-declared waiver; no other dependency conflict was accepted. Evidence is retained at `docs/evidence/stasy/windows-v2-real-function-17fc74e.json` with SHA-256 `7c6b31f09ea9f4ea58b1e4b194f62d13e0145c53d991810eb69124ae783d8ec6`.
+
+This bounded functionality result does not establish representative quality, privacy, original-method equivalence, Official Results admission, or release support. The validated identity remains the unmodified TabSyn benchmark snapshot, not the differently licensed method-author source.

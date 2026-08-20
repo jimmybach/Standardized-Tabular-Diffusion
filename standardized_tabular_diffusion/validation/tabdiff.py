@@ -15,13 +15,20 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-from standardized_tabular_diffusion.interfaces import RunSpec
-from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
-
-PROTOCOL_ID = "tabdiff-native-parity-v1"
-MANIFEST_RELATIVE_PATH = Path(
-    "standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json"
+from standardized_tabular_diffusion.compat.tabdiff_seed_launcher import (
+    DIAGNOSTIC_PLOT_BYPASS_RECORD_PATH,
+    PATCH_RECORD_PATH,
+    apply_diagnostic_plot_bypass,
+    load_diagnostic_plot_bypass_record,
+    load_patch_record,
 )
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes
+from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
+from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
+from standardized_tabular_diffusion.runtime_contracts import dataset_content_identity
+
+PROTOCOL_ID = "tabdiff-native-parity-v2"
+MANIFEST_RELATIVE_PATH = Path("standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json")
 DATASET_NAME = "tabdiff_parity_dcr"
 EXPERIMENT_NAME = "native-parity-v1"
 EXPECTED_SAMPLE_ROWS = 12
@@ -147,6 +154,30 @@ def _write_fixture(upstream_root: Path) -> dict[str, Any]:
     }
 
 
+def _fixture_dataset_spec(upstream_root: Path) -> DatasetSpec:
+    data_dir = upstream_root / "data" / DATASET_NAME
+    return DatasetSpec(
+        name=DATASET_NAME,
+        task_type="classification",
+        column_names=["0", "1", "2", "3"],
+        numerical_columns=["0", "1"],
+        categorical_columns=["2"],
+        target_columns=["3"],
+        metadata_path=data_dir / "info.json",
+        train_data_path=data_dir / "train.csv",
+        test_data_path=data_dir / "test.csv",
+        provenance=["deterministic-tabdiff-native-parity-fixture"],
+        extra={
+            "column_info": {
+                "0": "float",
+                "1": "int",
+                "2": "categorical",
+                "3": "categorical",
+            }
+        },
+    )
+
+
 def _configure_runtime(upstream_root: Path) -> dict[str, Any]:
     import tomli_w
 
@@ -178,6 +209,27 @@ def _configure_runtime(upstream_root: Path) -> dict[str, Any]:
     }
 
 
+def _configure_native_diagnostic_plot_bypass(upstream_root: Path) -> dict[str, Any]:
+    """Apply the same diagnostic-only overlay to the isolated native comparison copy."""
+
+    record = load_diagnostic_plot_bypass_record()
+    source_path = upstream_root / record["source_path"]
+    if _sha256_lf(source_path) != record["source_sha256_lf"]:
+        raise RuntimeError("Native TabDiff trainer differs from the approved diagnostic-plot bypass authority.")
+    source = source_path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    patched = apply_diagnostic_plot_bypass(source, record)
+    normalized = patched.rstrip("\n") + "\n"
+    if _sha256_bytes(normalized.encode("utf-8")) != record["patched_sha256_lf"]:
+        raise RuntimeError("Native TabDiff diagnostic-plot bypass produced an unexpected digest.")
+    source_path.write_text(normalized, encoding="utf-8")
+    return {
+        "patch_id": record["patch_id"],
+        "scope": record["scope"],
+        "scientific_effect": record["scientific_effect"],
+        "treatment": "validation-only disk overlay in the isolated native comparison copy",
+    }
+
+
 def _common_command(mode: str, checkpoint_path: Path | None = None) -> list[str]:
     command = [
         sys.executable,
@@ -190,17 +242,46 @@ def _common_command(mode: str, checkpoint_path: Path | None = None) -> list[str]
         EXPERIMENT_NAME,
     ]
     if checkpoint_path is not None:
-        command.extend(
-            ["--ckpt_path", str(checkpoint_path), "--num_samples_to_generate", str(EXPECTED_SAMPLE_ROWS)]
-        )
+        command.extend(["--ckpt_path", str(checkpoint_path), "--num_samples_to_generate", str(EXPECTED_SAMPLE_ROWS)])
         command.extend(["--report", "--num_runs", "1"])
     command.extend(["--gpu", "-1", "--no_wandb", "--deterministic"])
+    return command
+
+
+def _adapter_command(
+    mode: str,
+    *,
+    runtime_root: Path,
+    seed: int,
+    checkpoint_path: Path | None = None,
+    report: bool = False,
+) -> list[str]:
+    command = [
+        sys.executable,
+        "-m",
+        "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
+        "--runtime-root",
+        str(runtime_root.resolve()),
+        "--dataname",
+        DATASET_NAME,
+        "--mode",
+        mode,
+        "--exp_name",
+        EXPERIMENT_NAME,
+    ]
+    if checkpoint_path is not None:
+        command.extend(["--ckpt_path", str(checkpoint_path), "--num_samples_to_generate", str(EXPECTED_SAMPLE_ROWS)])
+        if report:
+            command.extend(["--report", "--num_runs", "1"])
+    command.extend(["--gpu", "-1", "--seed", str(seed), "--no_wandb", "--deterministic"])
     return command
 
 
 def _run_command(command: list[str], cwd: Path) -> None:
     environment = os.environ.copy()
     environment["PYTHONHASHSEED"] = "0"
+    environment["PYTHONUTF8"] = "1"
+    environment["PYTHONIOENCODING"] = "utf-8"
     subprocess.run(command, cwd=cwd, check=True, env=environment)
 
 
@@ -339,10 +420,12 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
     _copy_verified_source(repo_root, adapter_root)
     fixture = _write_fixture(native_root)
     _write_fixture(adapter_root)
+    adapter_dataset_spec = _fixture_dataset_spec(adapter_root)
     native_runtime_config = _configure_runtime(native_root)
     adapter_runtime_config = _configure_runtime(adapter_root)
     if native_runtime_config != adapter_runtime_config:
         raise AssertionError("Native and adapter runtime config overrides differ.")
+    native_diagnostic_plot_bypass = _configure_native_diagnostic_plot_bypass(native_root)
 
     native_train_command = _common_command("train")
     _run_command(native_train_command, native_root)
@@ -355,39 +438,64 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
 
     os.environ["PYTHONHASHSEED"] = "0"
     adapter = TabDiffAdapter(adapter_repo)
-    train_bundle = adapter.train(
-        RunSpec(
-            model="tabdiff",
-            dataset=DATASET_NAME,
-            output_dir=output_dir / "adapter-manifests" / "train",
-            device="cpu",
-            seed=0,
-            extra={"deterministic": True, "exp_name": EXPERIMENT_NAME},
-        )
+    adapter_run_root = output_dir / "adapter-manifests" / "run"
+    adapter_runtime_root = adapter_run_root / "tabdiff-runtime"
+    dataset_extra = {
+        "dataset_spec": adapter_dataset_spec.to_dict(),
+        "dataset_identity": dataset_content_identity(adapter_dataset_spec),
+    }
+
+    def adapter_extra(**overrides: object) -> dict[str, object]:
+        extra: dict[str, object] = {
+            **dataset_extra,
+            "allow_unstandardized_integer_output": True,
+            "deterministic": True,
+            "exp_name": EXPERIMENT_NAME,
+        }
+        extra.update(overrides)
+        return extra
+
+    train_spec = RunSpec(
+        model="tabdiff",
+        dataset=DATASET_NAME,
+        output_dir=adapter_run_root,
+        device="cpu",
+        seed=0,
+        extra=adapter_extra(),
     )
-    adapter_training = _snapshot_training_outputs(adapter_root, output_dir / "adapter-training")
-    sample_bundle = adapter.sample(
-        RunSpec(
-            model="tabdiff",
-            dataset=DATASET_NAME,
-            output_dir=output_dir / "adapter-manifests" / "sample",
-            device="cpu",
-            seed=0,
-            num_samples=EXPECTED_SAMPLE_ROWS,
-            checkpoint_path=adapter_training["checkpoint"],
-            extra={
-                "allow_unsafe_external_checkpoint": True,
-                "deterministic": True,
-                "exp_name": EXPERIMENT_NAME,
-                "num_runs": 1,
-                "report": True,
-            },
-        )
+    train_bundle = adapter.train(train_spec)
+    train_manifest = output_dir / "adapter-manifests" / "train-artifacts.json"
+    atomic_write_bytes(train_manifest, (train_bundle.output_dir / "artifacts.json").read_bytes())
+    adapter_training = _snapshot_training_outputs(adapter_runtime_root, output_dir / "adapter-training")
+    adapter_checkpoint = (
+        adapter_runtime_root / "tabdiff" / "ckpt" / DATASET_NAME / EXPERIMENT_NAME / "model_4.pt"
     )
+    sample_spec = RunSpec(
+        model="tabdiff",
+        dataset=DATASET_NAME,
+        output_dir=adapter_run_root,
+        device="cpu",
+        seed=0,
+        num_samples=EXPECTED_SAMPLE_ROWS,
+        checkpoint_path=adapter_checkpoint,
+        extra=adapter_extra(num_runs=1, report=True),
+    )
+    sample_bundle = adapter.sample(sample_spec)
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("TabDiff adapter did not record the generated sample path.")
-    adapter_sample = sample_bundle.generated_sample_path
-    adapter_metrics = adapter_root / "eval" / "report_runs" / EXPERIMENT_NAME / DATASET_NAME / "4" / "all_results.json"
+    sample_manifest = output_dir / "adapter-manifests" / "sample-artifacts.json"
+    atomic_write_bytes(sample_manifest, (sample_bundle.output_dir / "artifacts.json").read_bytes())
+    adapter_sample = output_dir / "adapter-sampling" / "samples.csv"
+    atomic_write_bytes(adapter_sample, sample_bundle.generated_sample_path.read_bytes())
+    adapter_metrics = (
+        adapter_runtime_root
+        / "eval"
+        / "report_runs"
+        / EXPERIMENT_NAME
+        / DATASET_NAME
+        / "4"
+        / "all_results.json"
+    )
 
     config_exact = _normalized_cached_config(native_training["config"]) == _normalized_cached_config(
         adapter_training["config"]
@@ -399,10 +507,38 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         adapter_training["metrics"].read_text()
     )
     generated_metrics_exact = json.loads(native_metrics.read_text()) == json.loads(adapter_metrics.read_text())
-    manifests = [train_bundle.output_dir / "artifacts.json", sample_bundle.output_dir / "artifacts.json"]
-    manifests_valid = all(
-        json.loads(path.read_text(encoding="utf-8"))["model"] == "tabdiff" for path in manifests
-    )
+
+    def configurable_sample(seed: int, label: str) -> tuple[Path, dict[str, Any]]:
+        bundle = adapter.sample(
+            RunSpec(
+                model="tabdiff",
+                dataset=DATASET_NAME,
+                output_dir=adapter_run_root,
+                device="cpu",
+                seed=seed,
+                num_samples=EXPECTED_SAMPLE_ROWS,
+                checkpoint_path=adapter_checkpoint,
+                extra=adapter_extra(num_runs=1, report=True),
+            )
+        )
+        if bundle.generated_sample_path is None:
+            raise AssertionError(f"TabDiff configurable-seed case {label} did not produce a sample.")
+        snapshot_root = output_dir / "configurable-seed" / label
+        sample_snapshot = snapshot_root / "samples.csv"
+        metadata_snapshot = snapshot_root / "tabdiff_run.json"
+        atomic_write_bytes(sample_snapshot, bundle.generated_sample_path.read_bytes())
+        atomic_write_bytes(metadata_snapshot, (bundle.output_dir / "tabdiff_run.json").read_bytes())
+        return sample_snapshot, json.loads(metadata_snapshot.read_text(encoding="utf-8"))
+
+    seed_17_a, metadata_17_a = configurable_sample(17, "seed-17-a")
+    seed_17_b, metadata_17_b = configurable_sample(17, "seed-17-b")
+    seed_23, metadata_23 = configurable_sample(23, "seed-23")
+    same_seed_exact = seed_17_a.read_bytes() == seed_17_b.read_bytes()
+    different_seed_varies = seed_17_a.read_bytes() != seed_23.read_bytes()
+    configurable_metadata = [metadata_17_a, metadata_17_b, metadata_23]
+    configurable_metadata_valid = [record["seed"] for record in configurable_metadata] == [17, 17, 23]
+    manifests = [train_manifest, sample_manifest]
+    manifests_valid = all(json.loads(path.read_text(encoding="utf-8"))["model"] == "tabdiff" for path in manifests)
     passed = (
         config_exact
         and checkpoint["tensor_values_exact"]
@@ -415,6 +551,9 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         and training_metrics_exact
         and generated_metrics_exact
         and manifests_valid
+        and same_seed_exact
+        and different_seed_varies
+        and configurable_metadata_valid
     )
 
     evidence: dict[str, Any] = {
@@ -439,15 +578,55 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
         },
         "fixture": fixture,
         "runtime_config": native_runtime_config,
+        "diagnostic_plot_bypass": {
+            **native_diagnostic_plot_bypass,
+            "path": str(DIAGNOSTIC_PLOT_BYPASS_RECORD_PATH.relative_to(repo_root)),
+            "sha256": _sha256_file(DIAGNOSTIC_PLOT_BYPASS_RECORD_PATH),
+            "adapter_treatment": "in-memory overlay before importing the verified official trainer",
+        },
         "seed_contract": {
             "official_cli_capability": "deterministic mode fixes Python, NumPy, and PyTorch to seed 0",
-            "validated_seed": 0,
-            "configurable_seed_claim": False,
+            "overlay": {
+                "patch_id": load_patch_record()["patch_id"],
+                "path": str(PATCH_RECORD_PATH.relative_to(repo_root)),
+                "sha256": _sha256_file(PATCH_RECORD_PATH),
+            },
+            "official_parity_seed": 0,
+            "configurable_seed_claim": True,
+            "same_seed_panel": [17, 17],
+            "different_seed": 23,
         },
         "native_commands": [native_train_command, native_sample_command],
         "adapter_commands": [
-            _common_command("train"),
-            _common_command("test", adapter_training["checkpoint"]),
+            _adapter_command("train", runtime_root=adapter_runtime_root, seed=0),
+            _adapter_command(
+                "test",
+                runtime_root=adapter_runtime_root,
+                seed=0,
+                checkpoint_path=adapter_checkpoint,
+                report=True,
+            ),
+            _adapter_command(
+                "test",
+                runtime_root=adapter_runtime_root,
+                seed=17,
+                checkpoint_path=adapter_checkpoint,
+                report=True,
+            ),
+            _adapter_command(
+                "test",
+                runtime_root=adapter_runtime_root,
+                seed=17,
+                checkpoint_path=adapter_checkpoint,
+                report=True,
+            ),
+            _adapter_command(
+                "test",
+                runtime_root=adapter_runtime_root,
+                seed=23,
+                checkpoint_path=adapter_checkpoint,
+                report=True,
+            ),
         ],
         "comparisons": {
             "config_exact": config_exact,
@@ -457,8 +636,19 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
             "training_metrics_exact": training_metrics_exact,
             "generated_metrics_exact": generated_metrics_exact,
             "adapter_manifests_valid": manifests_valid,
+            "configurable_seed": {
+                "same_seed_exact_bytes": same_seed_exact,
+                "different_seed_varies": different_seed_varies,
+                "metadata_valid": configurable_metadata_valid,
+                "sample_sha256": {
+                    "seed_17_a": _sha256_file(seed_17_a),
+                    "seed_17_b": _sha256_file(seed_17_b),
+                    "seed_23": _sha256_file(seed_23),
+                },
+            },
         },
         "adapter_manifests": [str(path) for path in manifests],
+        "adapter_run_root": str(adapter_run_root),
     }
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
     evidence_path.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8")

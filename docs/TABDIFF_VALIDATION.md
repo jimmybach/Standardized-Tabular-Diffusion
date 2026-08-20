@@ -1,74 +1,85 @@
-# TabDiff Validation Protocol
+# TabDiff validation
 
-Status: passed on Linux/Python 3.11; native parity validated
+Status: native parity validated; configurable-seed and Windows/Adult real-function validation passed
 
-Protocol ID: `tabdiff-native-parity-v1`
+Protocols: `tabdiff-native-parity-v2`, `tabdiff-adult-real-function-windows-v1`
 
-Supported validation platform: Linux, Python 3.11, CPU
+## Claim boundary
 
-## Scope and claim boundary
+The retained evidence establishes that the checksum-locked method-author implementation can be invoked through the standardized adapter, that seed 0 preserves the official deterministic path, and that a real TabDiff model can train and generate three complete Adult tables on the primary Windows/Python 3.11/GPU environment.
 
-This protocol tests whether the standardized TabDiff adapter invokes the pinned method-author implementation without changing training, sampling, or deterministic outputs. It covers source integrity, a real mixed-type train-and-sample smoke run, native-versus-adapter parity, artifact integrity, and explicit handling of the upstream seed limitation.
+This does not make TabDiff `benchmark-eligible` or `release-supported`, and it does not admit Adult, the diagnostic scores, or any concrete run to Official Results. Dataset, model, result, full central-evaluation, governance, and release admission remain separate gates.
 
-A passing run may promote the adapter through `smoke-validated` to `native-parity-validated`. It does not make TabDiff `benchmark-eligible`, admit it to the Official Results track, or make it `release-supported`. Dataset admission, central metric validation, privacy and fairness review, dependency maintenance, and release ownership remain independent gates.
+## Source authority
 
-## Source authority and evaluator disposition
+- Repository: `MinkaiXu/TabDiff`.
+- Commit: `5ecdb3356261aea72716cc9a779f31d7ad083bf4`.
+- Tree: `052a505cb1fbee5cbc705eeb0717d90d706ffb91`.
+- Manifest: `standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json`.
+- License: MIT.
 
-- Method source: `MinkaiXu/TabDiff` at `5ecdb3356261aea72716cc9a779f31d7ad083bf4`.
-- Method tree: `052a505cb1fbee5cbc705eeb0717d90d706ffb91`.
-- Integrity manifest: `standardized_tabular_diffusion/resources/upstream/tabdiff-source-manifest.json`.
+All 27 frozen files match the method-author source after canonical line-ending normalization. The former local semantic modification to `eval/mle/mle.py` remains removed. Upstream evaluation code is retained for source fidelity and runtime diagnostics; formal repository evaluation uses the separately versioned central engine.
 
-The repository previously carried a semantic modification to `eval/mle/mle.py`. That patch changed estimator settings, device behavior, objectives, randomness, error handling, and edge-case metric semantics. It has been removed, and the pinned official file has been restored exactly after canonical line-ending normalization. All 27 files in the frozen source scope now match the pinned method-author source. A mismatch fails before model execution.
+## Audited adapter boundaries
 
-The restored upstream evaluator is retained for source fidelity and for exercising the native runtime. It is not the authority for formal leaderboard metrics. Official benchmark results must use the repository's separately versioned and reviewed central evaluation engine.
+The tracked `TabDiff-main` source remains unchanged. The adapter applies only fail-closed, checksum-verified runtime boundaries:
 
-## Adapter contract
+1. `tabdiff-configurable-seed-overlay-v1` replaces the six official seed-0 constants in memory with the requested non-negative seed. Model, loss, optimizer, schedule, preprocessing, and sampling equations are unchanged.
+2. `tabdiff-config-path-overlay-v1` exposes the common `RunSpec.upstream_config_path`. The complete supplied TOML is passed unchanged; omitting it retains the official default.
+3. `tabdiff-pytorch-reduce-lr-verbose-bridge-v1` accepts and discards the deprecated logging-only `verbose` argument removed in PyTorch 2.8.
+4. `tabdiff-diagnostic-plot-bypass-v1` disables only optional `density_plots.png` rendering that fails on some Windows non-ASCII paths. Synthetic tables and all serialized metrics remain enabled.
 
-The adapter makes only invocation-level mappings:
+The adapter also maps CPU/CUDA devices, enables deterministic execution, disables online logging by default, isolates each seed's copied `samples.csv`, records run identities, and requires explicit trust before loading external PyTorch checkpoints.
 
-- `device="cpu"` maps to the official `--gpu -1` option;
-- `cuda` and `cuda:<index>` map to the corresponding official GPU index;
-- Weights & Biases is disabled by default for controlled runs;
-- the official `--deterministic` option is enabled by default; and
-- explicit PyTorch checkpoints outside the artifact directory require an affirmative trust override because loading them can execute code.
+The current adapter treats the verified upstream checkout as read-only. It materializes a byte-verified model data tree and the official metrics view (`real.csv`, `test.csv`, and optional `val.csv`) beneath `output_dir/tabdiff-runtime`. Training and sampling share that run-owned workspace and its internal checkpoint. Reusing a data view succeeds only when every file still matches its registered canonical source; links, unexpected entries, and changed bytes fail closed.
 
-The pinned CLI does not expose a configurable seed. Its deterministic mode fixes Python, NumPy, and PyTorch to seed 0. The adapter therefore rejects nonzero `RunSpec.seed` values instead of silently ignoring them. This protocol validates seed 0 and makes no multi-seed or configurable-seed claim. Adding configurable seeds would require a separately reviewed upstream-source change.
+## Seed and native-parity validation
 
-## Frozen environment
+The current V2 Linux/Python 3.11/PyTorch 2.3 CPU protocol compares isolated native and adapter executions using the same mixed-type fixture and bounded runtime TOML. The adapter path uses the same registered-data and shared run-owned train/sample workspace as the public pipeline. It snapshots both action manifests and requires exact cached configuration, checkpoint tensors, training samples, generated CSV bytes, and upstream metrics.
 
-The workflow installs CPython 3.11, PyTorch 2.3.0 CPU, and the exact packages in `requirements-tabdiff-validation.txt`. This is a supported benchmark validation environment, not a claim that the upstream project's original Python 3.10/CUDA 11.7 environment was byte-identically recreated.
+The extended protocol preserves seed-0 exactness and adds configurable-seed checks: the same nonzero seed must reproduce exact bytes, a different seed must produce different bytes, and every run record must retain the effective seed. Native-parity diagnostics may explicitly bypass standardized integer-output enforcement because they compare the official default configuration, whose `dequant_dist="none"` intentionally does not round integer columns.
 
-Equivalent local installation commands are:
+V2 passed in [GitHub Actions run 32058517599](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599) at repository commit `bf3869776fbc975052426732dbd6a167566124f4`. The retained artifact ID is `9297294246`, with digest `sha256:45a6d26f32a18d1b79281ac57873e517c62ebb15d71a8d6d0a6754702dbf4b32`. Its permanent evidence copy is `docs/evidence/tabdiff/native-parity-run-32058517599.json`, SHA-256 `d4630b50924e345a112fc4ff717e27dd15f930e1a6069db7b43dadf5f0479a19`.
 
-```bash
-python -m pip install "torch==2.3.0" --index-url https://download.pytorch.org/whl/cpu
-python -m pip install -r requirements-tabdiff-validation.txt
-python -m pip install --no-deps .
-```
+## Integer restoration finding
 
-## Frozen comparison
+The first real Adult run exposed a genuine output-contract problem. With the official default `dequant_dist="none"`, TabDiff successfully generated 32,561 rows, but six Adult integer columns contained fractional values. The validation failed rather than repairing or accepting that table.
 
-The protocol creates two isolated copies from the verified source manifest so that validation never writes data, checkpoints, or results into the working source tree. Each copy receives the same deterministic mixed-type binary-classification fixture: 30 training rows, 14 test rows, two numerical features, one categorical feature, one categorical target, and no missing values.
+The official TabDiff preprocessing code already supports `dequant_dist="round"`: its training transform is a no-op, while its official inverse transform applies `numpy.rint` to declared integer columns. The retained real-function preset therefore selects this native mode. A repeated training run produced the exact same checkpoint SHA-256 as the failed-default run (`4319e6938a1ae4619cdd17a995d71f5de0d50c450ff096754e6ef6ab2e0a26f0`), confirming that the change affected only inverse output restoration. The adapter now rejects fractional generated integer columns and instructs standardized runs to use the upstream `round` mode; no silent synthetic-data repair is performed.
 
-The upstream `--debug` flag is not suitable for a smoke test: it leaves training at 8,000 epochs and sets the sampling batch to 10,000 rows. Instead, after source integrity is verified, both isolated copies receive the same predeclared TOML hyperparameter override: one transformer layer, time dimension 64, four optimizer epochs, four diffusion timesteps, batch size 32, validation every two epochs, and sampling batch size 32. This changes experimental configuration only; it does not modify Python algorithm source. Both paths use CPU execution, disabled online logging, and deterministic seed 0. The numeric-looking fixture column names exercise the upstream plotting path. The fixture is an execution/parity case, not a model-quality benchmark.
+## Windows/Adult real-function protocol
 
-The native path calls `main.py` directly for training and sampling. Sampling uses the official `--report --num_runs 1` mode. This matters because the pinned ordinary test path attempts to save DCR NumPy detail arrays through code that accepts only DataFrames and dictionaries; report mode is the upstream-provided path that handles those arrays. The adapter invokes the same report mode and maps its first generated sample into the standardized artifact manifest. The following must all pass:
+The retained bounded preset keeps the official 10,622,977-parameter architecture, optimizer, training batch size, learned schedules, and 50-step diffusion horizon. It changes only:
 
-1. all 27 scoped source hashes match the pinned manifest;
-2. the two predeclared runtime TOML overrides and cached runtime configs are semantically exact;
-3. every tensor in the epoch-4 checkpoint is exactly equal;
-4. training-time samples and density metrics are exact;
-5. final generated CSV files are byte-for-byte exact;
-6. final upstream DCR metrics are exact;
-7. exactly 12 rows with the expected four-column schema are generated;
-8. all generated numerical values are finite; and
-9. both standardized artifact manifests identify TabDiff correctly.
+- `data.dequant_dist`: `none` to the official `round` mode for schema-valid inverse restoration;
+- training epochs: 8,000 to 20;
+- periodic validation: every 2,000 epochs to the final epoch; and
+- sampling batch size: 10,000 to 4,096 for the 16 GB GPU.
 
-There is no numerical tolerance: deterministic parity is exact.
+This is a real end-to-end functionality run over the complete reviewed Adult split, not a final-quality training experiment. It ran on Windows, Python 3.11.15, PyTorch 2.8.0+cu128, and an NVIDIA GeForce RTX 5080:
 
-## Execution and promotion rule
+- one training run with seed 0;
+- one checkpoint reused for generation seeds 3, 4, and 5;
+- 32,561 rows and 15 columns per table;
+- no missing or non-finite values;
+- all integer columns integral and within reviewed ranges;
+- all categorical values within reviewed domains; and
+- three distinct sample hashes.
 
-The authoritative command is:
+The model run evidence is `docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json`.
+
+## Central evaluation integration
+
+Seed 3 was then passed through the repository's public `evaluate-table` route without synthetic repair:
+
+- P3 finalized successfully, the structural gate passed, and the fully valid row rate was 1.0.
+- P2 finalized successfully with 27 computed Atomic Results; diagnostic Column Shapes and Column Pair Trends values were produced under the frozen central implementation.
+
+The exact fingerprints and bundle checksums are retained in `docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json`. These numerical values are diagnostic and are not Official Results.
+
+## Reproduction
+
+Run source/seed parity in its locked validation environment:
 
 ```bash
 python -m standardized_tabular_diffusion.validation.tabdiff \
@@ -77,8 +88,13 @@ python -m standardized_tabular_diffusion.validation.tabdiff \
   --evidence-path /tmp/tabdiff-evidence.json
 ```
 
-`.github/workflows/tabdiff-validation.yml` executes this command on Linux/Python 3.11 and retains the JSON evidence for 90 days. Any later source, dependency, adapter-command, or protocol change invalidates that evidence and requires another run.
+Run the bounded Windows real-function protocol in the TabDiff GPU environment:
 
-The protocol passed in [GitHub Actions run 30866879879](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879) at repository commit `230adafe96dc7ec224bada220e1ee184972b61ad`. The retained artifact digest is `sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8`. An exact permanent copy is stored at `docs/evidence/tabdiff/native-parity-run-30866879879.json` with file SHA-256 `d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234`.
+```powershell
+python -m standardized_tabular_diffusion.validation.tabdiff_adult_real_function `
+  --repo-root . `
+  --output-root artifacts/tabdiff-real-function/adult-windows-rtx5080-real-function-v2 `
+  --evidence-path docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json
+```
 
-Accordingly, TabDiff is `native-parity-validated` while remaining `experimental`, `unsupported`, and ineligible for Official Results until the separate dataset, central-evaluation, governance, and release gates pass.
+The output root and upstream experiment directory must not already exist. Data, samples, and checkpoints remain ignored local artifacts.

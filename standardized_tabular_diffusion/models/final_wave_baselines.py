@@ -27,6 +27,10 @@ from standardized_tabular_diffusion.models._runtime import (
     temporary_sys_path,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import (
+    declared_integer_columns,
+    decode_declared_integer_columns,
+)
 
 
 @contextlib.contextmanager
@@ -436,6 +440,17 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             frame[column] = frame[column].astype("category")
         return frame
 
+    @staticmethod
+    def _declared_integer_columns(dataset_spec: DatasetSpec) -> list[str]:
+        return declared_integer_columns(dataset_spec, model_name="ARF")
+
+    @staticmethod
+    def _decode_declared_integer_columns(
+        frame: pd.DataFrame,
+        dataset_spec: DatasetSpec,
+    ) -> tuple[pd.DataFrame, dict[str, dict[str, Any]]]:
+        return decode_declared_integer_columns(frame, dataset_spec, model_name="ARF")
+
     @classmethod
     def _encode_value(cls, value: Any) -> Any:
         if isinstance(value, np.generic):
@@ -735,28 +750,46 @@ class ARFAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             numerical.extend(dataset_spec.target_columns)
         if numerical and not np.isfinite(sample_df[numerical].to_numpy(dtype=float)).all():
             raise ValueError("Official ARF forge produced non-finite numerical values.")
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = self._decode_declared_integer_columns(sample_df, dataset_spec)
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "arf_native_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        atomic_write_json(
-            spec.output_dir / "arf_sample_metadata.json",
-            {
-                "package": self.package_name,
-                "package_version": self.package_version,
-                "seed": spec.seed,
-                "requested_rows": num_samples,
-                "checkpoint_path": str(trusted_checkpoint),
-                "checkpoint_sha256": sha256_file(trusted_checkpoint),
-                "sample_path": str(sample_path),
-                "sample_sha256": sha256_file(sample_path),
-                "columns": dataset_spec.column_names,
-            },
-        )
+        sample_metadata = {
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "seed": spec.seed,
+            "requested_rows": num_samples,
+            "checkpoint_path": str(trusted_checkpoint),
+            "checkpoint_sha256": sha256_file(trusted_checkpoint),
+            "sample_path": str(sample_path),
+            "sample_sha256": sha256_file(sample_path),
+            "columns": dataset_spec.column_names,
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_sample_path": None if native_sample_path is None else str(native_sample_path),
+                    "native_sample_sha256": (
+                        None if native_sample_path is None else sha256_file(native_sample_path)
+                    ),
+                }
+            )
+        atomic_write_json(spec.output_dir / "arf_sample_metadata.json", sample_metadata)
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,
             output_dir=spec.output_dir,
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint at the adapter boundary; "
+                "the unmodified official output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 

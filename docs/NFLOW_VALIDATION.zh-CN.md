@@ -1,10 +1,10 @@
 # NFlow 验证协议
 
-状态：已通过；已保留 Linux/Python 3.11 官方包配方等价性证据
+状态：已通过；已保留 Linux/Python 3.11 官方包配方等价性证据；原生 Windows CPU V2 功能已通过
 
 协议 ID：`nflows-maf-tabular-recipe-parity-v1`
 
-支持的验证平台：Linux、Python 3.11、CPU
+支持的验证平台：Linux/Python 3.11 CPU 用于等价验证；原生 Windows/Python 3.11 CPU 用于有界 V2 功能验证
 
 ## 范围与声明边界
 
@@ -112,3 +112,9 @@ GitHub Actions 运行 [`30970260840`](https://github.com/jimmybach/Standardized-
 来源协议验证了 96 个归档成员、80 个源码发行包普通文件、与锁定 Git tree 一致的全部 42 个包文件、9 个关键运行文件、48 个已安装 `RECORD` 哈希，并确认全部案例结束后安装源码仍未改变。经审阅的证据原样保存在 `docs/evidence/nflow/native-parity-run-30970260840.json`，SHA-256 为 `940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923`。GitHub artifact ID 为 `8916246279`，归档摘要为 `sha256:635028a4962884284e8592144e5fa2b77272bafa4c4279f54d421650552ec044`。
 
 因此，NFlow 已针对“精确官方 nflows 包 + 本仓库声明的混合类型 MAF 配方”达到 `native-parity-validated`。在独立的中心评测、数据集准入、运行时、治理与发布门槛全部通过之前，它仍为 `experimental`、`unsupported`，并继续排除在 Official Results 之外。本结果不声明论文原生等价性或其他配方等价性。
+
+## 原生 Windows V2 结果
+
+仓库提交 `5bf59b0effa29a0c2694cdbe05b1a8f40443c481` 使用未修改的官方 `nflows==0.14` 包和明确声明的混合类型 MAF 配方，在 Windows 11、Python 3.11.15 和 CPU-only PyTorch 2.3.0 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成两个真实有界训练 epoch，生成的安全 JSON/NumPy checkpoint 复用于种子 `17` 与 `29`。每份结果均包含 16 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/nflow/windows-v2-real-function-5bf59b0.json`，SHA-256 为 `0616c1677ffe4922bc910e5c0f234920a2e22e8155364d464273bffc7bbf6fb3`。这仍是有界的“官方工具库 + 明确声明配方”结论，不代表论文原生实现、代表性质量、隐私、Official Results 或发布结论。

@@ -138,6 +138,30 @@
         ],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30964711614/job/92176072429",
         "workflow_run_id": 30964711614
+      },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json",
+          "docs/evidence/arf/windows-v2-real-function-eb37290.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "056bb96d381374caa41cbb54e304b3f84bd96a3e87f310ad0262c993cc29baca",
+        "failure_evidence_file_sha256": "01318e65bd5c735d058198ca4232a1ed4c44a1449a67a6bde768b5ed51eeed4a",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/arf/windows-v2-real-function-eb37290.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "eb3729031189ce6b06b1b4201e1028f1c8258d73",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
       }
     },
     "bn": {
@@ -280,6 +304,25 @@
         ],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298/job/92185376267",
         "workflow_run_id": 30967779298
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "22b7f857c1e296e442c9383d5c08a6546a4f2f33f162eb84131a5739cac601a7",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/bn/windows-v2-real-function-ae3cb50.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "ae3cb5037eb9afb2af62e0a7c1fdb580c1b42af9",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
       }
     },
     "codi": {
@@ -340,7 +383,7 @@
         "tree": "6b41bd82ada37535d2405bb0cb14285e92858a21"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "reproduction_target": "tabsyn-benchmark-snapshot",
       "selected_runtime_files": 24,
@@ -355,15 +398,16 @@
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
       "upstream_model_tree": "85c16ccfb76fbf00db6b30450ca47e9928efa8d3",
       "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
-      "validation": {
-        "artifact": {
-          "artifact_digest": "sha256:2f009d9abe9ff65e3e0641739543ad0888d6e83e91f8e2cea3ae17b7728d2957",
-          "artifact_id": 8905564052,
-          "downloaded_evidence_sha256": "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156",
-          "evidence_file_sha256": "14d188b856e44dfc7cb7cf5ab16c5cfd7a03aa4b4d7d71e2bcb4226f13f1f156",
-          "permanent_evidence_path": "docs/evidence/codi/native-parity-run-30941940893.json",
-          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization.",
-          "retention_days": 90
+        "validation": {
+          "artifact": {
+            "artifact_digest": "sha256:9b2b3efe69af567b8661439394f04a06013aaa129613106f317bee18b50ea4b8",
+            "artifact_id": 9292473608,
+            "downloaded_evidence_sha256": "04f4f3ab1e50697a614fdf843cb29b6cb5d1700065343cd2c7d87a573ec75a4f",
+            "evidence_file_sha256": "04f4f3ab1e50697a614fdf843cb29b6cb5d1700065343cd2c7d87a573ec75a4f",
+            "expires_at": "2026-11-15T15:58:02Z",
+            "permanent_evidence_path": "docs/evidence/codi/native-parity-run-32043925805.json",
+            "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization.",
+            "retention_days": 90
         },
         "environment": {
           "category_encoders": "2.6.4",
@@ -377,11 +421,10 @@
           "torch": "2.3.0+cpu",
           "tqdm": "4.66.5"
         },
-        "environment_lock_sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149",
-        "level": "native-parity-validated",
-        "pull_request_head_commit": "bcfc4dd1d6b219c578bac44c4bd85606158bfb83",
-        "protocol_id": "codi-tabsyn-snapshot-parity-v1",
-        "repository_commit": "b0a380cd01ee08378742c231ec5811351103b20c",
+          "environment_lock_sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149",
+          "level": "native-parity-validated",
+          "protocol_id": "codi-tabsyn-snapshot-parity-v1",
+          "repository_commit": "d5a5192fccbbb7fa7af405dbf500c14ff82f516c",
         "result_summary": {
           "adapter_checkpoint_outside_source": true,
           "adapter_manifests_valid": true,
@@ -390,17 +433,41 @@
           "continuous_checkpoint_state_exact": true,
           "discrete_checkpoint_state_exact": true,
           "finite_numerical_output": true,
-          "missing_values": 0,
-          "parity_cases_passed": 9,
-          "requested_rows_per_case": 7,
+            "missing_values": 0,
+            "parity_cases_passed": 9,
+            "parity_cases_total": 9,
+            "requested_rows_per_case": 7,
           "sample_bytes_exact": true,
           "sample_frames_exact": true
         },
-        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30941940893",
-        "seed_cases": [0, 19, 73],
+          "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32043925805",
+          "seed_cases": [0, 19, 73],
+          "status": "pass",
+          "variants": ["binary", "multiclass", "regression"],
+          "workflow_event": "push",
+          "workflow_run_id": 32043925805
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-codi-validation.txt",
+        "environment_lock_sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149",
+        "evidence_file_sha256": "6530e7b20740267bcb993687fae47d08e3f606ca368ac7ce6c581cd35d55ffe1",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/codi/windows-v2-real-function-17fc74e.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
         "status": "pass",
-        "variants": ["binary", "multiclass", "regression"],
-        "workflow_run_id": 30941940893
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact TabSyn benchmark CoDi snapshot on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "ctab-gan": {
@@ -441,7 +508,7 @@
       "license_notice_path": "TabDDPM-main/CTAB-GAN/License.txt",
       "local_path": "TabDDPM-main/CTAB-GAN",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "patch_sets": [],
       "selected_files": 7,
       "source_hash_normalization": "lf-one-final-newline",
@@ -501,6 +568,25 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961/job/92065163118",
         "workflow_run_id": 30930939961,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-ctabgan-validation.txt",
+        "environment_lock_sha256": "d89bb9ceec70c0de16d38b5652a57dbff58f097925a524d67deb0cb2677b60fb",
+        "evidence_file_sha256": "22144b71cf3eea455ba77631553377fe769b5fd543a125073977fa2f778898fa",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu"
       }
     },
     "ctab-gan-plus": {
@@ -532,7 +618,7 @@
         "status": "upstream-public-no-license-declared"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-no-upstream-license-dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "source_manifest": "standardized_tabular_diffusion/resources/upstream/ctabgan-plus-source-manifest.json",
       "source_treatment": "download-five-byte-exact-runtime-files-to-ignored-local-cache",
@@ -588,6 +674,25 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432/job/92049288002",
         "workflow_run_id": 30926267432,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-ctabgan-plus-validation.txt",
+        "environment_lock_sha256": "5eca4d5b6f590ab4916a3cbb829a8fc5aa25dc4b24834e6120c74a4815f52949",
+        "evidence_file_sha256": "ce7834d0abab284f026230fdcd64bb91f9738b3d65fc77ed01c01fbe1e534127",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/ctabgan-plus/windows-v2-real-function-17fc74e.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu"
       }
     },
     "ctgan": {
@@ -619,12 +724,12 @@
       },
       "validation": {
         "artifact": {
-          "digest": "sha256:96ba5b9dde6eed95fa1972990c6a4231e43f204bdcb99a4a0d7837099ff3b71a",
-          "evidence_file_sha256": "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570",
-          "expires_at": "2026-11-02T12:42:21Z",
-          "github_artifact_id": 8892774473,
+          "digest": "sha256:1a72389c7ffcebca6f095e857a32d955b1d28ab08c40ae89dbb9df6ca336578d",
+          "evidence_file_sha256": "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24",
+          "expires_at": "2026-11-15T16:47:16Z",
+          "github_artifact_id": 9293339264,
           "name": "ctgan-native-parity-evidence",
-          "permanent_evidence_path": "docs/evidence/ctgan/native-parity-run-30910275922.json"
+          "permanent_evidence_path": "docs/evidence/ctgan/native-parity-run-32047234665.json"
         },
         "environment": {
           "ctgan": "0.12.1",
@@ -637,8 +742,8 @@
           "torch": "2.3.0+cpu"
         },
         "level": "native-parity-validated",
-        "protocol_id": "ctgan-native-parity-v1",
-        "repository_commit": "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e",
+        "protocol_id": "ctgan-native-parity-v2",
+        "repository_commit": "9d5d7e9415f41976bc5524ce5547595ea11e2043",
         "result_summary": {
           "adapter_manifests_valid": true,
           "installed_record_files_verified": 20,
@@ -649,13 +754,34 @@
           "wheel_identity_verified": true
         },
         "status": "pass",
-        "validated_at": "2026-08-04T12:43:12Z",
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922/job/91995021120",
-        "workflow_run_id": 30910275922,
-        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30910275922"
+        "validated_at": "2026-08-17T16:48:13Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665/job/95437833366",
+        "workflow_run_id": 32047234665,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32047234665"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
-      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-ctgan-validation.txt",
+        "environment_lock_sha256": "2697509472a3a9acfdafcc8b781e2906b82c216ffd64d5a214510ac43b9cc9e9",
+        "evidence_file_sha256": "b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "ctgan==0.12.1",
+        "permanent_evidence_path": "docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
+      }
     },
     "goggle": {
       "adapter_ids": [
@@ -677,10 +803,16 @@
           "semantic_effect": "Evaluation-only import names are supplied at module load. Official GoggleModel.fit and Goggle.model.sample never call them, and the central evaluator remains the only benchmark evaluator."
         },
         {
-          "classification": "adapter-only",
-          "id": "goggle-gcn-rgcn-import-boundary-v1",
-          "reason": "GraphDecoder imports the heterogeneous RGCN implementation eagerly even for the default homogeneous GCN/SAGE paths, forcing unused compiled torch-sparse extensions.",
-          "semantic_effect": "When torch-sparse is absent, only the unused RGCN symbol is replaced by a fail-on-instantiation placeholder. The validated GCN path does not construct or execute RGCNConv; the heterogeneous path still requires the official extension stack."
+        "classification": "adapter-only",
+        "id": "goggle-gcn-rgcn-import-boundary-v1",
+        "reason": "GraphDecoder imports the heterogeneous RGCN implementation eagerly even for the default homogeneous GCN path, forcing unused compiled torch-sparse extensions.",
+        "semantic_effect": "The unused RGCN symbol is replaced by a fail-on-instantiation placeholder. The validated GCN path does not construct or execute RGCNConv; SAGE and heterogeneous decoding are rejected before execution."
+      },
+      {
+        "classification": "dependency-compatibility-reimplementation",
+        "id": "goggle-pytorch-graph-backend-v1",
+        "reason": "No official DGL wheel compatible with the supported Windows/Python 3.11/RTX 5080 runtime exists, while Goggle's validated GCN path executes only dgl.graph, dgl.batch, and weighted homogeneous GraphConv.",
+        "semantic_effect": "A narrow auditable PyTorch backend implements the DGL 1.1.3 graph, disjoint-batch, GraphConv normalization, parameter, edge-weight, and gradient contract used by Goggle. The checksum-locked Goggle source is unmodified. DGL remains the independent Linux validation oracle and is not an ordinary runtime dependency."
         },
         {
           "classification": "adapter-only",
@@ -692,30 +824,45 @@
           "classification": "adapter-only",
           "id": "goggle-standardized-data-contract-v1",
           "reason": "Official experiments consume a finite numeric DataFrame, whereas the benchmark accepts named numerical and categorical columns.",
-          "semantic_effect": "Numerical features are population-standardized and categorical features are train-fitted one-hot encoded before official training. Official raw samples are inversely transformed afterward; the target is included in the jointly modeled vector and no validation/test row is used to fit transforms."
+          "semantic_effect": "Numerical features are population-standardized and categorical features are train-fitted one-hot encoded before official training. Official raw samples are inversely transformed afterward; only DatasetSpec-declared integer columns are decoded with numpy.rint and int64 without clipping, and the native inverse table is retained. The target is included in the jointly modeled vector and no validation/test row is used to fit transforms."
         },
         {
           "classification": "adapter-only",
           "id": "goggle-exact-sample-count-v1",
           "reason": "Official GoggleModel.sample derives its count from an arbitrary reference DataFrame and couples sampling to the legacy Synthcity Schema postprocessor.",
           "semantic_effect": "The requested positive count is passed directly to the unchanged Goggle.model.sample core. Categorical and target domain recovery is performed by the recorded train-fitted standardized transform; model state and latent sampling equations are unchanged."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "goggle-independent-generation-seed-v1",
+          "reason": "The upstream GoggleModel constructor resets PyTorch to its recorded training seed, which otherwise overrides an independently requested generation seed before the stochastic core sampler runs.",
+          "semantic_effect": "The launcher reapplies the requested non-negative generation seed to Python, NumPy, and PyTorch immediately after model construction and checkpoint loading and immediately before the unchanged Goggle.model.sample call. It changes RNG selection, not the latent distribution or sampling equations."
         }
       ],
       "component_id": "goggle",
-      "dependency_resolution": {
-        "declared_environment": "Python 3.8, torch 1.12.0, DGL 0.9.0, torch-geometric 2.2.0, torch-sparse 0.6.16, torch-scatter 2.1.0, and Synthcity 0.2.2",
-        "official_environment_status": "not directly installable as declared on Python 3.11",
-        "validation_environment_lock": "requirements-goggle-validation.txt"
+    "dependency_resolution": {
+      "declared_environment": "Python 3.8, torch 1.12.0, DGL 0.9.0, torch-geometric 2.2.0, torch-sparse 0.6.16, torch-scatter 2.1.0, and Synthcity 0.2.2",
+      "official_environment_status": "not directly installable as declared on Python 3.11",
+      "runtime_environment_lock": "requirements-goggle-windows-gpu.txt",
+      "runtime_graph_backend": "standardized-goggle-torch-graph@1.0.0",
+      "validation_environment_lock": "requirements-goggle-validation.txt",
+      "validation_graph_oracle": "DGL 1.1.3",
+      "validation_graph_oracle_source": {
+        "commit": "6e2c0f489ba4cfae4614d6f07da41e0ecd36b226",
+        "license": "Apache-2.0",
+        "repository": "https://github.com/dmlc/dgl",
+        "tag": "v1.1.3"
+      }
       },
       "distribution_form": "source-on-demand",
       "license": "MIT",
       "license_copyright": "Copyright (c) 2023 Tennison Liu",
       "license_path_in_locked_source": "LICENSE",
       "local_path": ".cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
-      "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-heterogeneous-decoder-runtime-and-release-gates",
+    "modification_status": "dependency-compatibility-reimplementation",
+    "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-sage-and-heterogeneous-decoder-runtime-and-release-gates",
       "patch_sets": [],
-      "reproduction_target": "method-author-original-core",
+    "reproduction_target": "method-author-original-gcn-core-with-pytorch-dependency-compatibility-backend",
       "retired_snapshot": {
         "disposition": "removed-from-current-tree-without-history-rewrite",
         "local_source_files": 11,
@@ -784,8 +931,87 @@
         "status": "pass",
         "validated_at": "2026-08-04T20:00:06Z",
         "variants": ["binary", "multiclass", "regression"],
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747/job/92114929225",
-        "workflow_run_id": 30945676747
+      "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747/job/92114929225",
+      "workflow_run_id": 30945676747
+    },
+      "dependency_backend_validation": {
+        "artifact": {
+          "artifact_digest": "sha256:f96715fbc7cadf4e3d3aed56597d2f0de55f9ac27713124a0aa42bb4da3c3022",
+          "artifact_id": 9292208691,
+          "downloaded_evidence_sha256": "77a4b3feb289703cbd78d2e03dd8338f2ae45c0eec0833fa6a0f25a769d54640",
+          "evidence_file_sha256": "77a4b3feb289703cbd78d2e03dd8338f2ae45c0eec0833fa6a0f25a769d54640",
+          "expires_at": "2026-11-15T15:28:44Z",
+          "name": "goggle-pytorch-graph-backend-parity-evidence",
+          "permanent_evidence_path": "docs/evidence/goggle/pytorch-backend-parity-run-32042446422.json",
+          "retention_days": 90,
+          "retention_treatment": "The downloaded evidence JSON is retained byte-for-byte without normalization."
+        },
+        "claim_classification": "dependency-compatibility-reimplementation-parity",
+        "environment": {
+          "dgl": "1.1.3",
+          "networkx": "3.3",
+          "numpy": "1.26.4",
+          "pandas": "2.2.3",
+          "platform": "Linux / x86_64",
+          "psutil": "6.0.0",
+          "pytest": "8.3.5",
+          "python": "3.11.15",
+          "requests": "2.32.3",
+          "scikit_learn": "1.5.2",
+          "scipy": "1.13.1",
+          "torch": "2.3.0+cpu",
+          "torch_geometric": "2.5.3",
+          "tqdm": "4.66.5"
+        },
+        "environment_lock_sha256": "6284c53e4fb63d8d8c1df7933687e183056bb866c8812f015ca879f840406f76",
+        "level": "native-parity-validated",
+        "protocol_id": "goggle-pytorch-graph-backend-parity-v2",
+        "repository_commit": "cf821a0dae803f523697c75888375feef9724145",
+        "result_summary": {
+          "adapter_metadata_valid": true,
+          "adapter_source_remained_exact": true,
+          "checkpoint_state_exact": true,
+          "graph_and_batch_contract_exact": true,
+          "graph_gradients_exact": true,
+          "graph_oracle_cases_passed": 5,
+          "graph_oracle_cases_total": 5,
+          "graph_outputs_exact": true,
+          "parity_cases_passed": 9,
+          "parity_cases_total": 9,
+          "raw_samples_exact": true,
+          "requested_rows_per_case": 7,
+          "sample_bytes_exact": true,
+          "sample_frames_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32042446422",
+        "seed_cases": [0, 19, 73],
+        "status": "pass",
+        "validated_at": "2026-08-17T15:30:17Z",
+        "validated_scope": {
+          "candidate_graph_backend": "standardized-goggle-torch-graph@1.0.0",
+          "implementation": "method-author-original-gcn-core-with-pytorch-dependency-compatibility-backend",
+          "reference_graph_backend": "DGL 1.1.3",
+          "unsupported_paths": ["sage", "heterogeneous-rgcn"]
+        },
+        "variants": ["binary", "multiclass", "regression"],
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32042446422/job/95424063850",
+        "workflow_run_id": 32042446422
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "evidence_file_sha256": "39270c5deffa45673e994f46b06e38ea656b49640e75843eaef7d16abf50bef6",
+        "generation_seeds": [17, 29],
+        "graph_backend": "standardized-goggle-torch-graph@1.0.0",
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "initial_failure_evidence_file_sha256": "8a19d8245ac6c1611b27b420f8a99879a2b6f402f22aa52478d6b356bae67529",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/goggle/windows-v2-real-function-0a23a84.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "0a23a84a2b32a07da19b89fcfe015d322f75aad8",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
       }
     },
     "nflow": {
@@ -917,6 +1143,27 @@
         "variants": ["binary", "multiclass", "regression"],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30970260840/job/92192839468",
         "workflow_run_id": 30970260840
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-nflow-validation.txt",
+        "environment_lock_sha256": "a05b0c1a8c3f14ec2c285038ede6c9d61c327400ce0986aa05361c970fbbc319",
+        "evidence_file_sha256": "0616c1677ffe4922bc910e5c0f234920a2e22e8155364d464273bffc7bbf6fb3",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "official_package": "nflows==0.14",
+        "permanent_evidence_path": "docs/evidence/nflow/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu",
+        "validated_scope": "official nflows package plus declared mixed-type MAF recipe on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "nrgboost": {
@@ -990,6 +1237,37 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384/job/92035794936",
         "workflow_run_id": 30922326384,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384"
+      },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
+          "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
+          "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "diagnostic_windows_wheel_sha256": "24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739",
+        "environment_lock": "requirements-nrgboost-windows-v2.txt",
+        "environment_lock_sha256": "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e",
+        "evidence_file_sha256": "1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c",
+        "failure_evidence_file_sha256": "5d95f7a752ea0747b4809b26d960b9b31688c0f537d7588aea4226bd864bf1ed",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "provenance_evidence_file_sha256": "65b5e7b2a21ed39fe621207065fc3120d6bed6ee5a8a64f4575344be11e802f0",
+        "python": "3.11.15",
+        "repository_commit": "64eec7d590f3610e74795036a1fb188e554741a0",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": null,
+        "windows_distribution_claim": "diagnostic-local-build-not-official-distribution-not-native-parity"
       }
     },
     "realtabformer": {
@@ -1045,7 +1323,7 @@
       "license": "MIT",
       "license_url": "https://github.com/worldbank/REaLTabFormer/blob/v0.2.4/LICENSE",
       "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
       "package_lock": {
         "bytes": 49890,
         "filename": "realtabformer-0.2.4-py3-none-any.whl",
@@ -1137,6 +1415,28 @@
         "exact_shared_source_files": 11,
         "shared_source_files": 11,
         "wheel_only_empty_file": "realtabformer/rtf_tokenizer.py"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-realtabformer-validation.txt",
+        "environment_lock_sha256": "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e",
+        "evidence_file_sha256": "98738815256389be1c6dcc5283f40293f49a8cb5d8a28d242c288f705b662543",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "official_package": "realtabformer==0.2.4",
+        "permanent_evidence_path": "docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu",
+        "validated_scope": "official single-table REaLTabFormer 0.2.4 tabular path with n_critic=0 and a deterministic 128-row training limit on the 256-row Adult-derived missing-free fixture"
       }
     },
     "smote": {
@@ -1208,6 +1508,26 @@
         "workflow_run_id": 30918785254,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254"
       },
+      "windows_real_function": {
+        "benchmark_role": "classification-only-classical-reference-excluded-from-joint-generative-ranking",
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "8852c287035b45d2178f35270199f5cc77ea6d97545b34a42d24ee5ec01bde5a",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/smote/windows-v2-real-function-2ae7aa3.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "2ae7aa37221870aa9546a84a33cd226ead64eb07",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
+      },
       "upstream_commit": "8504e95f0160f61d1b617ca66f779646d2ee609e",
       "upstream_tree": "af452de62e0f5c3d7e65fdc44a32dc97078152f2"
     },
@@ -1254,7 +1574,7 @@
         "tree": "6a1307d4a0bf0819e70b15a13fb3a0a65fbbee57"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "reproduction_target": "tabsyn-benchmark-snapshot",
       "selected_runtime_files": 30,
@@ -1315,6 +1635,28 @@
         "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831",
         "status": "pass",
         "workflow_run_id": 30936275831
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-stasy-validation.txt",
+        "environment_lock_sha256": "1af4bb8eae6781a55c0b7fa355a43ad330c06b6556ab43f5360efc964dc9ebca",
+        "evidence_file_sha256": "7c6b31f09ea9f4ea58b1e4b194f62d13e0145c53d991810eb69124ae783d8ec6",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/stasy/windows-v2-real-function-17fc74e.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact TabSyn benchmark STaSy snapshot on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tvae": {
@@ -1359,12 +1701,12 @@
       },
       "validation": {
         "artifact": {
-          "digest": "sha256:daf6dd3e7502e819bce916dfe8474ea3ea8355158450345fe27b6a41379291b7",
-          "evidence_file_sha256": "ad539ffdb637084a25dc3ab4ec5d54374ff6831525ca63adca2cfa48c3ef95f7",
-          "expires_at": "2026-11-02T13:27:00Z",
-          "github_artifact_id": 8894224963,
+          "digest": "sha256:17fc9a204c3b3c4d59a5e34514d57a1b90cceb59a80df52d51d4836870c26462",
+          "evidence_file_sha256": "5c1a050af546b1b4fa0c7a7bd354430f34c130ca4d0f4c1875d42ae0ebd5fd7e",
+          "expires_at": "2026-11-15T17:53:03Z",
+          "github_artifact_id": 9295157218,
           "name": "tvae-native-parity-evidence",
-          "permanent_evidence_path": "docs/evidence/tvae/native-parity-run-30913867621.json"
+          "permanent_evidence_path": "docs/evidence/tvae/native-parity-run-32052308431.json"
         },
         "environment": {
           "ctgan": "0.12.1",
@@ -1377,8 +1719,8 @@
           "torch": "2.3.0+cpu"
         },
         "level": "native-parity-validated",
-        "protocol_id": "tvae-native-parity-v1",
-        "repository_commit": "64f3c23c617f2fc4cbebfba9d36845a812892355",
+        "protocol_id": "tvae-native-parity-v2",
+        "repository_commit": "b20e9a50ac95602d3348e870de94e3593f935862",
         "result_summary": {
           "adapter_manifests_valid": true,
           "installed_record_files_verified": 20,
@@ -1392,13 +1734,34 @@
           "wheel_identity_verified": true
         },
         "status": "pass",
-        "validated_at": "2026-08-04T13:28:12Z",
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621/job/92006958402",
-        "workflow_run_id": 30913867621,
-        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30913867621"
+        "validated_at": "2026-08-17T17:53:59Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431/job/95454359133",
+        "workflow_run_id": 32052308431,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32052308431"
       },
       "upstream_commit": "826da23f8f9385ad15fd206ecad691e04cb0ccdc",
-      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb"
+      "upstream_tree": "164a4e877a6db2ca51b3cd7dbb22cbc18af536cb",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-tvae-validation.txt",
+        "environment_lock_sha256": "cd2cca53950203df9d772cffd8ca57e91fc9874d9663f6af4e08948b48733f7b",
+        "evidence_file_sha256": "a6bcb8eefd81141d5e0f485b9aecb50666d3490e97eb18ce11c6c2a170250301",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "ctgan==0.12.1",
+        "permanent_evidence_path": "docs/evidence/tvae/windows-v2-real-function-5bf59b0.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "5bf59b0effa29a0c2694cdbe05b1a8f40443c481",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
+      }
     },
     "tabddpm": {
       "adapter_ids": [
@@ -1455,12 +1818,12 @@
       },
       "validation": {
         "artifact": {
-          "digest": "sha256:910e005039d569017898902ea1cd5ca8fe086ad1b3af97b81b5928c550580757",
-          "evidence_file_sha256": "8fd277aef64a2e7225626a95379ecf67462ac686a4d688a56748f9ef965dd29e",
-          "expires_at": "2026-11-01T23:43:15Z",
-          "github_artifact_id": 8875144833,
+          "digest": "sha256:424821b320390a0d2ccb96d15a3f8a37d6b040f8706d2a86a87a65f5e4e104c3",
+          "evidence_file_sha256": "cad319c6141a3c2c91bab43cb1159322bdfcd844765d62293c53ca156c9a7c65",
+          "expires_at": "2026-11-15T16:27:27Z",
+          "github_artifact_id": 9292848862,
           "name": "tabddpm-native-parity-evidence",
-          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-30863212268.json"
+          "permanent_evidence_path": "docs/evidence/tabddpm/native-parity-run-32045685956.json"
         },
         "environment": {
           "libzero": "0.0.8-exact-vendored-source",
@@ -1472,23 +1835,29 @@
           "scikit-learn": "1.5.2",
           "torch": "2.3.0+cpu"
         },
+        "environment_lock_sha256": "a0f45b382eedecfa177610d9c8cf5eb5822830f1b842e34d72e3e27c102d1ce7",
         "level": "native-parity-validated",
-        "protocol_id": "tabddpm-native-parity-v1",
-        "repository_commit": "3339af2603bac7a4736e68d7f369194b6b095653",
+        "protocol_id": "tabddpm-native-parity-v2",
+        "repository_commit": "ebe706fe64c1601a0d3f02c6ef43c0754468ea57",
         "result_summary": {
           "adapter_manifests_valid": true,
           "config_mapping_exact": true,
+          "dataset_identity_checked": true,
+          "decoded_tables_valid": true,
           "generated_arrays_exact": true,
           "model_and_ema_state_exact": true,
           "numeric_integrity_passed": true,
+          "output_isolated": true,
           "seed_cases_passed": 3,
-          "seed_cases_total": 3
+          "seed_cases_total": 3,
+          "source_remained_exact": true
         },
         "status": "pass",
-        "validated_at": "2026-08-03T23:44:47Z",
-        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268/job/91849440286",
-        "workflow_run_id": 30863212268,
-        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30863212268"
+        "validated_at": "2026-08-17T16:29:16Z",
+        "workflow_event": "push",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956/job/95432939940",
+        "workflow_run_id": 32045685956,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32045685956"
       },
       "upstream_commit": "b476257dd460b778ba09eb97f7a51d6490fa17f8",
       "upstream_tree": "b0b380892ae2fdcedadaac52a6334ad36a5d60ce"
@@ -1499,6 +1868,32 @@
       ],
       "authoritative_repository": "https://github.com/MinkaiXu/TabDiff",
       "authority": "method-author",
+      "compatibility_shims": [
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-configurable-seed-overlay-v1",
+          "reason": "The official deterministic entry point hard-codes seed 0 and does not expose the common generation-seed contract.",
+          "semantic_effect": "After an exact source digest check, six seed constants are replaced in memory with args.seed. Seed 0 remains exact; nonzero same-seed repeatability and cross-seed variation are validated."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-config-path-overlay-v1",
+          "reason": "The official module hard-codes its TOML path and cannot consume RunSpec.upstream_config_path.",
+          "semantic_effect": "A checksum-locked in-memory edit selects the supplied complete TOML or retains the official default. No configuration value is rewritten by the overlay."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-pytorch-reduce-lr-verbose-bridge-v1",
+          "reason": "PyTorch 2.8 removed the deprecated ReduceLROnPlateau verbose argument used by the pinned source.",
+          "semantic_effect": "The bridge accepts and discards only the removed logging argument, then delegates every scheduling operation to installed PyTorch."
+        },
+        {
+          "classification": "adapter-only",
+          "id": "tabdiff-diagnostic-plot-bypass-v1",
+          "reason": "Optional Kaleido density-PNG rendering fails under some Windows non-ASCII paths.",
+          "semantic_effect": "Only density_plots.png rendering is disabled in memory. Synthetic tables, density metrics, and serialized metric results remain enabled."
+        }
+      ],
       "component_id": "tabdiff",
       "distribution_form": "source",
       "imported_at_repository_commit": "1caea9aee653d6d220765728951fe2de437268ad",
@@ -1506,7 +1901,7 @@
       "license_path": "TabDiff-main/LICENSE",
       "local_path": "TabDiff-main",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-and-release-gates",
+      "official_eligibility": "blocked-pending-complete-central-evaluation-dataset-model-result-and-release-admission-gates",
       "patch_sets": [],
       "snapshot_comparison": {
         "excluded_scopes": [
@@ -1522,15 +1917,50 @@
       "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
       "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91",
       "validation": {
-        "artifact_digest": "sha256:32c26456f4eb0c59811945919d72b87e3132068023abc7136a37dae29347bcf8",
-        "artifact_id": 8876454339,
+        "artifact_digest": "sha256:45a6d26f32a18d1b79281ac57873e517c62ebb15d71a8d6d0a6754702dbf4b32",
+        "artifact_expires_at": "2026-11-15T19:06:35Z",
+        "artifact_id": 9297294246,
         "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
-        "evidence_path": "docs/evidence/tabdiff/native-parity-run-30866879879.json",
-        "evidence_sha256": "d879512416994a60a86d3718c611aa1e1fc13d87d3b1cd71e7afdfec8ed5f234",
-        "protocol_id": "tabdiff-native-parity-v1",
-        "repository_commit": "230adafe96dc7ec224bada220e1ee184972b61ad",
-        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30866879879",
-        "status": "passed-native-parity-validated"
+        "evidence_path": "docs/evidence/tabdiff/native-parity-run-32058517599.json",
+        "evidence_sha256": "d4630b50924e345a112fc4ff717e27dd15f930e1a6069db7b43dadf5f0479a19",
+        "protocol_id": "tabdiff-native-parity-v2",
+        "repository_commit": "bf3869776fbc975052426732dbd6a167566124f4",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "checkpoint_tensors_exact": true,
+          "config_exact": true,
+          "configurable_seed_contract_passed": true,
+          "generated_metrics_exact": true,
+          "generated_sample_bytes_exact": true,
+          "registered_data_materialization_verified": true,
+          "run_owned_workspace_verified": true,
+          "source_files_verified": 27,
+          "training_metrics_exact": true,
+          "training_sample_bytes_exact": true
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599",
+        "status": "passed-native-parity-validated",
+        "validated_at": "2026-08-17T19:08:37Z",
+        "workflow_event": "push",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599/job/95474119283",
+        "workflow_run_id": 32058517599,
+        "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32058517599"
+      },
+      "real_function_validation": {
+        "protocol_id": "tabdiff-adult-real-function-windows-v1",
+        "status": "passed",
+        "repository_commit": "f9626e199119da87a5d6df1f621b0b110738e3fc",
+        "environment": "Windows / Python 3.11.15 / torch 2.8.0+cu128 / NVIDIA GeForce RTX 5080",
+        "dataset": "Adult official 32561/16281 split with train-only imputation",
+        "training_runs": 1,
+        "training_seed": 0,
+        "generation_seeds": [3, 4, 5],
+        "rows_per_generated_table": 32561,
+        "checkpoint_sha256": "4319e6938a1ae4619cdd17a995d71f5de0d50c450ff096754e6ef6ab2e0a26f0",
+        "evidence_path": "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
+        "central_route_evidence_path": "docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json",
+        "official_results_admitted": false,
+        "release_support_admitted": false
       }
     },
     "tabularargn": {
@@ -1657,6 +2087,26 @@
         "status": "pass",
         "workflow_run_id": 30961590047
       },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json",
+          "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "bfd636f15c51bfee3a94a8041dbe928a235f95e77ea8204b1cb3f8fc9ed0c45c",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6f9e065fd69f094806794fab69b4e03874699a82",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.11.0+cu128"
+      },
       "wheel_source_comparison": {
         "exact_shared_source_files": 50,
         "shared_source_files": 50,
@@ -1677,7 +2127,7 @@
       "license_path": "TabSyn-main/LICENSE",
       "local_path": "TabSyn-main",
       "modification_status": "official-unmodified",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -1723,16 +2173,29 @@
         "reason": "The imported zero research-utility API is provided by libzero; the zero distribution is an unrelated circuit-analysis package. Its stale torch<2 dependency metadata is overridden while all actual dependencies are locked separately for the validated torch 2.3 environment."
       },
       "validation": {
-        "artifact_digest": "sha256:72e6488aa48357f03b685e101e0c218ef73fbefc40229963ca4eee80b9dca57c",
-        "artifact_id": 8878140935,
+        "artifact_digest": "sha256:1e5a8a6563a4ee05cbd77ad5567ff07f9dd50e5503d3d8198a4583705f6a8920",
+        "artifact_expires_at": "2026-11-15T18:37:15Z",
+        "artifact_id": 9296369638,
         "environment": "Linux / Python 3.11 / torch 2.3.0 CPU",
-        "evidence_path": "docs/evidence/tabsyn/native-parity-run-30871758645.json",
-        "evidence_sha256": "3b74600a9c6d5e4e841cf56bd128ac7d17b70a6d186b48a3de78d8ca476d8089",
-        "protocol_id": "tabsyn-native-parity-v1",
-        "repository_commit": "54d419642842d7146d6afa4aa1b3d5167301c51c",
-        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30871758645",
+        "evidence_path": "docs/evidence/tabsyn/native-parity-run-32055783087.json",
+        "evidence_sha256": "8cbfa66a57b99e5f9fdb0381b21b02eb9f5b062a4f8e4f1ef13de24be3862e48",
+        "protocol_id": "tabsyn-native-parity-v2",
+        "repository_commit": "4668853b5d0acf7bff779453fb1a6e67f5838384",
+        "result_summary": {
+          "adapter_manifests_valid": true,
+          "checkpoint_states_exact": true,
+          "latent_array_exact": true,
+          "run_owned_workspace_verified": true,
+          "sample_bytes_exact": true,
+          "seed_cases_passed": 3,
+          "seed_cases_total": 3,
+          "source_files_verified": 20
+        },
+        "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087",
         "seed_cases": [0, 19, 73],
-        "status": "passed-native-parity-validated"
+        "status": "passed-native-parity-validated",
+        "validated_at": "2026-08-17T18:39:01Z",
+        "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087/job/95465490811"
       },
       "snapshot_comparison": {
         "excluded_scopes": [
@@ -1747,7 +2210,29 @@
         "relation": "The initial import contained five compatibility edits, followed by additional local shims. The 20-file primary TabSyn execution scope has now been restored to the pinned official tree and is fail-closed through a frozen source manifest; seven unverified checkpoint artifacts remain removed."
       },
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
-      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-tabsyn-validation.txt",
+        "environment_lock_sha256": "d81eda4aa77e35ece1c7dee18b29a14bba7b72c4c62279eae690072b1f8a995f",
+        "evidence_file_sha256": "8f2c21d38c64484b019d43995d79c7a5d9cc837a1ae3c22d061db3b361758ccf",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact official TabSyn VAE, latent-diffusion, and decoding path with native training schedules on the deterministic 256-row Adult-derived missing-free fixture"
+      }
     },
     "great": {
       "adapter_ids": [
@@ -1784,7 +2269,7 @@
       "license": "MIT",
       "license_url": "https://github.com/tabularis-ai/be_great/blob/b300f6123cf1d9590b76ea45cc23298df944a319/LICENSE",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "package_lock": {
         "bytes": 54019,
         "filename": "be_great-0.0.14-py3-none-any.whl",
@@ -1859,6 +2344,29 @@
         },
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472/job/92205832162",
         "workflow_run_id": 30974574472
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-great-validation.txt",
+        "environment_lock_sha256": "8667dbd7f2ac67eec6a8b573a54a13ce54527abcfa4fd5bbaca085d42203cfdd",
+        "evidence_file_sha256": "93c2dfd9d071d12ed5350899e2db62c0e84dfdfb38b4aa009cf401c4314940a9",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "be-great==0.0.14",
+        "permanent_evidence_path": "docs/evidence/great/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "official be-great 0.0.14 package with pretrained distilgpt2, five training epochs, and four generated rows per seed on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tabula": {
@@ -1879,7 +2387,7 @@
           "classification": "adapter-only",
           "id": "tabula-bounded-sampling-v1",
           "reason": "The official sample loop has no retry limit when generated rows repeatedly fail parsing.",
-          "semantic_effect": "Linux execution applies an external wall-clock alarm without changing the loop body; unsupported platforms fail closed unless unbounded execution is explicitly accepted."
+          "semantic_effect": "POSIX execution applies an external wall-clock alarm without changing the loop body; Windows executes the same call in a disposable child process under a parent-enforced hard timeout."
         },
         {
           "classification": "adapter-only",
@@ -1965,6 +2473,20 @@
         },
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505/job/92205832208",
         "workflow_run_id": 30974574505
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "evidence_file_sha256": "8bfa58cfde52ab0f4b5d5d61ea42d4b7e1d39818444da550302667534d5d13ec",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "8d72ee85e85712c473d7fcf9b7eda3a3cbf9cf62",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": "2.8.0+cu128"
       }
     },
     "tabsds": {
@@ -2061,6 +2583,26 @@
         "variants": ["binary", "multiclass", "regression"],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593/job/92205832345",
         "workflow_run_id": 30974574593
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-tabsds-validation.txt",
+        "environment_lock_sha256": "d03d355188ff0037407241a8b4573d368d25b27ee1f82d1d85fe6252a0f524d9",
+        "evidence_file_sha256": "b5288ff5f0d0ea5556028ed9b859e8f666abe570e2e61cc0e69df8343370f4a3",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "a5f83ae4b7035ebe87bff0230160a77d80a21252",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": null,
+        "validated_scope": "method-author Python simple-shuffle path on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tabebm": {
@@ -2168,6 +2710,6 @@
       }
     }
   },
-  "generated_date": "2026-08-04",
+  "generated_date": "2026-08-17",
   "source_lock_schema_version": "1.0.0"
 }

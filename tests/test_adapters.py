@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
+import os
 import pickle
+import subprocess
 import sys
 import types
 from pathlib import Path
@@ -36,7 +39,7 @@ from standardized_tabular_diffusion.models.next_wave_baselines import (
 from standardized_tabular_diffusion.models.paper_gap_baselines import TabSDSAdapter
 from standardized_tabular_diffusion.models.sample_baselines import CTGANAdapter, SMOTEAdapter, TVAEAdapter
 from standardized_tabular_diffusion.models.structured_baselines import BNAdapter, NFlowAdapter
-from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter, build_tabddpm_environment
+from standardized_tabular_diffusion.models.tabddpm import TabDDPMAdapter
 from standardized_tabular_diffusion.models.tabdiff import TabDiffAdapter
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 from standardized_tabular_diffusion.models.tabula import TabulaAdapter
@@ -226,9 +229,34 @@ def test_tabsyn_train_uses_unmodified_official_stages_and_does_not_reuse_checkpo
 
     adapter.train(spec)
 
+    runtime_root = str((tmp_path / "artifacts" / "tabsyn-runtime").resolve())
     assert commands == [
-        (["--action", "vae-train", "--dataname", "adult", "--gpu", "-1"], 0),
-        (["--action", "diffusion-train", "--dataname", "adult", "--gpu", "-1"], 0),
+        (
+            [
+                "--action",
+                "vae-train",
+                "--dataname",
+                "adult",
+                "--gpu",
+                "-1",
+                "--runtime-root",
+                runtime_root,
+            ],
+            0,
+        ),
+        (
+            [
+                "--action",
+                "diffusion-train",
+                "--dataname",
+                "adult",
+                "--gpu",
+                "-1",
+                "--runtime-root",
+                runtime_root,
+            ],
+            0,
+        ),
     ]
 
 
@@ -236,10 +264,13 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     tmp_path: Path,
     monkeypatch,
 ) -> None:
+    monkeypatch.delenv("PYTHONPATH", raising=False)
     repo_root = tmp_path
     upstream_root = repo_root / "TabDiff-main"
-    ckpt_dir = upstream_root / "tabdiff" / "ckpt" / "adult" / "exp-smoke"
-    result_dir = upstream_root / "tabdiff" / "result" / "adult" / "exp-smoke" / "7"
+    output_dir = tmp_path / "artifacts" / "tabdiff-sample"
+    runtime_root = output_dir / "tabdiff-runtime"
+    ckpt_dir = runtime_root / "tabdiff" / "ckpt" / "adult" / "exp-smoke"
+    result_dir = runtime_root / "tabdiff" / "result" / "adult" / "exp-smoke" / "7"
     ckpt_dir.mkdir(parents=True)
     result_dir.mkdir(parents=True)
 
@@ -251,80 +282,6 @@ def test_tabdiff_sample_infers_generated_sample_path_and_builds_expected_command
     adapter = TabDiffAdapter(repo_root)
     commands: list[tuple[list[str], Path]] = []
 
-    def fake_run_python(args: list[str], cwd: Path, *, module: bool = False) -> None:
-        assert not module
-        commands.append((args, cwd))
-
-    monkeypatch.setattr(adapter, "_run_python", fake_run_python)
-    dataset_spec = DatasetSpec(
-        name="adult",
-        task_type="classification",
-        column_names=["a", "b"],
-        numerical_columns=["a"],
-        categorical_columns=[],
-        target_columns=["b"],
-        metadata_path=tmp_path / "info.json",
-        train_data_path=tmp_path / "train.csv",
-        test_data_path=tmp_path / "test.csv",
-    )
-    dataset_spec.metadata_path.write_text("{}")
-    dataset_spec.train_data_path.write_text("a,b\n1,0\n")
-    dataset_spec.test_data_path.write_text("a,b\n1,0\n")
-
-    config = ExperimentConfig(
-        model="tabdiff",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabdiff-sample"),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(
-            enabled=True,
-            num_samples=512,
-            extra={"exp_name": "exp-smoke", "gpu": 1, "no_wandb": True},
-        ),
-        evaluation=EvaluationConfig(enabled=False),
-    )
-
-    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
-
-    assert commands == [
-        (
-            [
-                "main.py",
-                "--dataname",
-                "adult",
-                "--mode",
-                "test",
-                "--exp_name",
-                "exp-smoke",
-                "--ckpt_path",
-                str(checkpoint_path),
-                "--num_samples_to_generate",
-                "512",
-                "--gpu",
-                "1",
-                "--no_wandb",
-                "--deterministic",
-            ],
-            upstream_root,
-        )
-    ]
-    assert bundle.generated_sample_path == sample_path
-    assert json.loads((bundle.output_dir / "artifacts.json").read_text())["generated_sample_path"] == str(sample_path)
-
-
-def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_evaluation_is_retired(
-    tmp_path: Path,
-    monkeypatch,
-) -> None:
-    monkeypatch.delenv("PYTHONPATH", raising=False)
-    repo_root = tmp_path
-    upstream_root = repo_root / "TabDDPM-main"
-    upstream_root.mkdir(parents=True)
-    config_path = tmp_path / "adult.toml"
-    config_path.write_text("seed = 42\n")
-
-    adapter = TabDDPMAdapter(repo_root)
-    commands: list[tuple[list[str], Path]] = []
     environments: list[dict[str, str] | None] = []
 
     def fake_run_python(
@@ -334,7 +291,7 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_eval
         module: bool = False,
         env: dict[str, str] | None = None,
     ) -> None:
-        assert not module
+        assert module
         commands.append((args, cwd))
         environments.append(env)
 
@@ -350,53 +307,90 @@ def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_eval
         train_data_path=tmp_path / "train.csv",
         test_data_path=tmp_path / "test.csv",
     )
-    dataset_spec.metadata_path.write_text("{}")
+    dataset_spec.metadata_path.write_text('{"column_names":["a","b"],"int_col_idx":[]}')
     dataset_spec.train_data_path.write_text("a,b\n1,0\n")
     dataset_spec.test_data_path.write_text("a,b\n1,0\n")
+    native_data = upstream_root / "data" / "adult"
+    native_data.mkdir(parents=True)
+    for path in (dataset_spec.metadata_path, dataset_spec.train_data_path, dataset_spec.test_data_path):
+        (native_data / path.name).write_bytes(path.read_bytes())
+    default_config = upstream_root / "tabdiff" / "configs" / "tabdiff_configs.toml"
+    default_config.parent.mkdir(parents=True)
+    default_config.write_text("[data]\ndequant_dist = 'round'\n", encoding="utf-8")
 
-    train_config = ExperimentConfig(
-        model="tabddpm",
+    config = ExperimentConfig(
+        model="tabdiff",
         dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-train"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=True),
-        sample=SampleConfig(enabled=False),
+        output_dir=str(output_dir),
+        train=TrainConfig(enabled=False),
+        sample=SampleConfig(
+            enabled=True,
+            num_samples=512,
+            extra={"exp_name": "exp-smoke", "gpu": 1, "no_wandb": True},
+        ),
         evaluation=EvaluationConfig(enabled=False),
     )
-    sample_config = ExperimentConfig(
-        model="tabddpm",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-sample"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=True),
-        evaluation=EvaluationConfig(enabled=False),
-    )
 
-    train_bundle = adapter.train_from_config(train_config, dataset_spec=dataset_spec)
-    sample_bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
-
-    eval_config = ExperimentConfig(
-        model="tabddpm",
-        dataset="adult",
-        output_dir=str(tmp_path / "artifacts" / "tabddpm-eval"),
-        upstream_config_path=str(config_path),
-        train=TrainConfig(enabled=False),
-        sample=SampleConfig(enabled=False),
-        evaluation=EvaluationConfig(enabled=True),
-    )
-    with pytest.raises(RuntimeError, match="central runner"):
-        adapter.evaluate_from_config(eval_config, dataset_spec=dataset_spec)
+    bundle = adapter.sample_from_config(config, dataset_spec=dataset_spec)
 
     assert commands == [
-        (["scripts/pipeline.py", "--config", str(config_path), "--train"], upstream_root),
-        (["scripts/pipeline.py", "--config", str(config_path), "--sample"], upstream_root),
+        (
+            [
+                "standardized_tabular_diffusion.compat.tabdiff_seed_launcher",
+                "--runtime-root",
+                str(runtime_root.resolve()),
+                "--dataname",
+                "adult",
+                "--mode",
+                "test",
+                "--exp_name",
+                "exp-smoke",
+                "--ckpt_path",
+                str(checkpoint_path),
+                "--num_samples_to_generate",
+                "512",
+                "--gpu",
+                "1",
+                "--seed",
+                "0",
+                "--no_wandb",
+                "--deterministic",
+            ],
+            upstream_root,
+        )
     ]
-    expected_environment = build_tabddpm_environment(upstream_root)
-    assert environments == [expected_environment, expected_environment]
-    assert train_bundle.output_dir.joinpath("artifacts.json").exists()
-    assert sample_bundle.output_dir.joinpath("artifacts.json").exists()
-    assert not Path(eval_config.output_dir).joinpath("standardized_summary.json").exists()
+    assert environments == [
+        {
+            "PYTHONHASHSEED": "0",
+            "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+            "PYTHONUTF8": "1",
+            "PYTHONIOENCODING": "utf-8",
+            "PYTHONPATH": os.pathsep.join([str(Path(__file__).resolve().parents[1]), str(repo_root)]),
+        }
+    ]
+    copied_sample_path = bundle.output_dir / "samples.csv"
+    assert bundle.generated_sample_path == copied_sample_path
+    assert copied_sample_path.read_bytes() == sample_path.read_bytes()
+    assert json.loads((bundle.output_dir / "artifacts.json").read_text())["generated_sample_path"] == str(
+        copied_sample_path
+    )
+    run_metadata = json.loads((bundle.output_dir / "tabdiff_run.json").read_text())
+    assert run_metadata["seed"] == 0
+    assert run_metadata["seed_interface"]["patch_id"] == "tabdiff-configurable-seed-overlay-v1"
+
+
+def test_tabddpm_train_and_sample_require_upstream_config_and_adapter_local_evaluation_is_retired(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    del monkeypatch
+    adapter = TabDDPMAdapter(tmp_path)
+    spec = RunSpec(model="tabddpm", dataset="adult", output_dir=tmp_path / "artifacts")
+    with pytest.raises(ValueError, match="upstream_config_path"):
+        adapter.train(spec)
+    with pytest.raises(RuntimeError, match="central runner"):
+        adapter.evaluate(spec)
+    assert not spec.output_dir.joinpath("standardized_summary.json").exists()
 
 
 def test_validate_action_inputs_covers_tabddpm_and_tabdiff_contracts(tmp_path: Path) -> None:
@@ -792,9 +786,7 @@ def test_ctab_gan_plus_train_and_sample_use_pickle_checkpoint(tmp_path: Path, mo
 
     @contextlib.contextmanager
     def fake_runtime(source_path):
-        yield PickleableFakeCTABGAN, object(), {
-            name: expected for name, expected in adapter.expected_versions.items()
-        }
+        yield PickleableFakeCTABGAN, object(), {name: expected for name, expected in adapter.expected_versions.items()}
 
     @contextlib.contextmanager
     def fake_seeded(seed, torch_module, num_threads):
@@ -968,6 +960,115 @@ def test_tabula_checkpoint_convention(tmp_path: Path) -> None:
     assert adapter._state_path(adapter._model_root(spec)).name == "tabula-state.json"
     assert adapter._integrity_path(adapter._model_root(spec)).name == "tabula-integrity.json"
 
+    start_col, start_dist, translated = adapter._default_sampling_start(
+        {
+            "official_state": {
+                "conditional_col": "label",
+                "conditional_col_dist": {"no": 0.75, "yes": 0.25},
+                "label_encoders": [
+                    {"column": "label", "classes": ["no", "yes"]},
+                ],
+            }
+        }
+    )
+    assert (start_col, start_dist, translated) == (
+        "label",
+        {"0": 0.75, "1": 0.25},
+        True,
+    )
+
+
+def test_tabula_windows_subprocess_boundary_verifies_response_and_times_out(
+    tmp_path: Path, monkeypatch
+) -> None:
+    adapter = TabulaAdapter(REPO_ROOT)
+    dataset_spec = DatasetSpec(
+        name="tabula-subprocess",
+        task_type="classification",
+        column_names=["age", "label"],
+        numerical_columns=["age"],
+        categorical_columns=[],
+        target_columns=["label"],
+        metadata_path=tmp_path / "info.json",
+    )
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    observed: dict[str, object] = {}
+
+    def successful_run(command, **kwargs):
+        observed["command"] = command
+        observed["kwargs"] = kwargs
+        response_path = Path(command[command.index("--response") + 1])
+        sample_path = Path(command[command.index("--sample") + 1])
+        sample = pd.DataFrame({"age": [21, 22], "label": ["no", "yes"]})
+        sample.to_csv(sample_path, index=False)
+        response_path.write_text(
+            json.dumps(
+                {
+                    "status": "pass",
+                    "rows": 2,
+                    "columns": ["age", "label"],
+                    "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
+                }
+            ),
+            encoding="utf-8",
+        )
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr("standardized_tabular_diffusion.models.tabula.subprocess.run", successful_run)
+    result = adapter._sample_in_subprocess(
+        dataset_spec=dataset_spec,
+        model_root=tmp_path / "model",
+        source_root=tmp_path / "source",
+        source={"manifest_sha256": "a" * 64},
+        seed=17,
+        requested=2,
+        start_col="label",
+        start_dist={"no": 0.5, "yes": 0.5},
+        temperature=0.5,
+        k=2,
+        max_length=64,
+        device="cuda",
+        num_threads=1,
+        max_empty_batches=4,
+        timeout_seconds=9,
+        output_dir=output_dir,
+    )
+    assert result.to_dict(orient="records") == [
+        {"age": 21, "label": "no"},
+        {"age": 22, "label": "yes"},
+    ]
+    assert observed["command"][:3] == [
+        sys.executable,
+        "-m",
+        "standardized_tabular_diffusion.compat.tabula_sampling_launcher",
+    ]
+    assert observed["kwargs"]["timeout"] == 9  # type: ignore[index]
+
+    def timed_out(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr("standardized_tabular_diffusion.models.tabula.subprocess.run", timed_out)
+    with pytest.raises(TimeoutError, match="9-second timeout"):
+        adapter._sample_in_subprocess(
+            dataset_spec=dataset_spec,
+            model_root=tmp_path / "model",
+            source_root=tmp_path / "source",
+            source={"manifest_sha256": "a" * 64},
+            seed=17,
+            requested=2,
+            start_col="label",
+            start_dist=None,
+            temperature=0.5,
+            k=2,
+            max_length=64,
+            device="cuda",
+            num_threads=1,
+            max_empty_batches=4,
+            timeout_seconds=9,
+            output_dir=output_dir,
+        )
+
 
 def test_tabsds_train_and_sample_round_trip(tmp_path: Path, monkeypatch) -> None:
     adapter = TabSDSAdapter(tmp_path)
@@ -1105,6 +1206,8 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
     )
 
     adapter.train_from_config(train_config, dataset_spec=dataset_spec)
+    training_metadata_path = Path(train_config.output_dir) / "nrgboost_metadata.json"
+    training_metadata_before_sample = training_metadata_path.read_bytes()
     bundle = adapter.sample_from_config(sample_config, dataset_spec=dataset_spec)
 
     assert (Path(train_config.output_dir) / "model.nrgboost").exists()
@@ -1127,9 +1230,16 @@ def test_nrgboost_train_and_sample_with_stubbed_package(tmp_path: Path, monkeypa
         "seed": 0,
     }
     assert str(captured["dataset_frame"]["y"].dtype) == "category"  # type: ignore[index]
-    metadata = json.loads((Path(train_config.output_dir) / "nrgboost_metadata.json").read_text())
-    assert metadata["package_version"] == "0.0.3"
-    assert metadata["sampling"]["seed"] == 0
+    assert training_metadata_path.read_bytes() == training_metadata_before_sample
+    training_metadata = json.loads(training_metadata_path.read_text())
+    sample_metadata = json.loads(
+        (Path(train_config.output_dir) / "nrgboost_sample_metadata.json").read_text()
+    )
+    assert training_metadata["package_version"] == "0.0.3"
+    assert training_metadata["checkpoint_sha256"] == sample_metadata["checkpoint_sha256"]
+    assert sample_metadata["training_metadata_sha256"]
+    assert sample_metadata["sample_sha256"]
+    assert sample_metadata["sampling"]["seed"] == 0
 
 
 def test_nrgboost_rejects_missing_values_and_invalid_controls(tmp_path: Path) -> None:

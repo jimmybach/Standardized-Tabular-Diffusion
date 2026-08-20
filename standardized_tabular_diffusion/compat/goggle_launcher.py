@@ -10,6 +10,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
+from standardized_tabular_diffusion.compat.goggle_graph_contract import graph_backend_record
+
 
 def _seed_everything(seed: int, num_threads: int) -> None:
     import numpy as np
@@ -59,20 +61,44 @@ class _UnavailableSchema:
         )
 
 
-@contextmanager
-def _official_import_boundary(source_dir: Path) -> Iterator[type[Any]]:
-    """Import the untouched official package without its unused Synthcity evaluator stack."""
-
-    module_names = (
-        "synthcity",
-        "synthcity.metrics",
-        "synthcity.plugins",
-        "synthcity.plugins.core",
-        "synthcity.plugins.core.schema",
+def _unavailable_dense_to_sparse(*_: Any, **__: Any) -> None:
+    raise RuntimeError(
+        "Goggle heterogeneous decoding requires the official PyTorch Geometric extension path; "
+        "the validated pure-PyTorch backend supports decoder_arch='gcn' only."
     )
-    previous = {name: sys.modules.get(name) for name in module_names}
+
+
+def _unavailable_rgcn_module(module_name: str) -> types.ModuleType:
+    module = types.ModuleType(module_name)
+
+    class _UnavailableRGCNConv:
+        def __init__(self, *_: Any, **__: Any) -> None:
+            raise RuntimeError(
+                "Goggle decoder_arch='het' requires the official PyTorch Geometric and "
+                "torch-sparse/torch-scatter extension stack; only decoder_arch='gcn' is supported."
+            )
+
+    module.RGCNConv = _UnavailableRGCNConv  # type: ignore[attr-defined]
+    return module
+
+
+@contextmanager
+def _official_import_boundary(
+    source_dir: Path,
+    *,
+    graph_backend: str = "torch",
+) -> Iterator[type[Any]]:
+    """Import untouched upstream Goggle through an explicit dependency boundary.
+
+    ``torch`` is the public runtime and replaces only the DGL calls executed by
+    Goggle's validated GCN path. ``dgl-reference`` is private validation
+    plumbing that keeps the installed DGL package as the comparison oracle.
+    """
+
+    if graph_backend not in {"torch", "dgl-reference"}:
+        raise ValueError("Goggle graph_backend must be 'torch' or 'dgl-reference'.")
+
     rgcn_module_name = "goggle.model.RGCNConv"
-    previous_rgcn = sys.modules.get(rgcn_module_name)
     synthcity = types.ModuleType("synthcity")
     synthcity.__path__ = []  # type: ignore[attr-defined]
     metrics = types.ModuleType("synthcity.metrics")
@@ -91,25 +117,36 @@ def _official_import_boundary(source_dir: Path) -> Iterator[type[Any]]:
         "synthcity.plugins.core": core,
         "synthcity.plugins.core.schema": schema,
     }
+    if graph_backend == "torch":
+        from standardized_tabular_diffusion.compat.goggle_torch_graph import dgl_compatibility_modules
+
+        torch_geometric = types.ModuleType("torch_geometric")
+        torch_geometric.__path__ = []  # type: ignore[attr-defined]
+        geometric_utils = types.ModuleType("torch_geometric.utils")
+        geometric_utils.dense_to_sparse = _unavailable_dense_to_sparse  # type: ignore[attr-defined]
+        torch_geometric.utils = geometric_utils  # type: ignore[attr-defined]
+        replacements.update(dgl_compatibility_modules())
+        replacements.update(
+            {
+                "torch_geometric": torch_geometric,
+                "torch_geometric.utils": geometric_utils,
+                rgcn_module_name: _unavailable_rgcn_module(rgcn_module_name),
+            }
+        )
+    else:
+        try:
+            import torch_sparse  # noqa: F401
+        except ModuleNotFoundError:
+            replacements[rgcn_module_name] = _unavailable_rgcn_module(rgcn_module_name)
+    previous = {name: sys.modules.get(name) for name in replacements}
     source_path = str((source_dir / "src").resolve())
     existing_source = source_path in sys.path
+    previous_goggle = {
+        name: module for name, module in sys.modules.items() if name == "goggle" or name.startswith("goggle.")
+    }
     for name in tuple(sys.modules):
         if name == "goggle" or name.startswith("goggle."):
             sys.modules.pop(name, None)
-    try:
-        import torch_sparse  # noqa: F401
-    except ModuleNotFoundError:
-        rgcn = types.ModuleType(rgcn_module_name)
-
-        class _UnavailableRGCNConv:
-            def __init__(self, *_: Any, **__: Any) -> None:
-                raise ModuleNotFoundError(
-                    "Goggle decoder_arch='het' requires the official torch-sparse/torch-scatter extension stack. "
-                    "The validated gcn and sage paths do not execute RGCNConv."
-                )
-
-        rgcn.RGCNConv = _UnavailableRGCNConv  # type: ignore[attr-defined]
-        sys.modules[rgcn_module_name] = rgcn
     sys.modules.update(replacements)
     if not existing_source:
         sys.path.insert(0, source_path)
@@ -121,11 +158,10 @@ def _official_import_boundary(source_dir: Path) -> Iterator[type[Any]]:
         for name in tuple(sys.modules):
             if name == "goggle" or name.startswith("goggle."):
                 sys.modules.pop(name, None)
-        if previous_rgcn is not None:
-            sys.modules[rgcn_module_name] = previous_rgcn
+        sys.modules.update(previous_goggle)
         if not existing_source:
             sys.path.remove(source_path)
-        for name in module_names:
+        for name in replacements:
             sys.modules.pop(name, None)
             if previous[name] is not None:
                 sys.modules[name] = previous[name]
@@ -200,6 +236,15 @@ def _load_config(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _validate_runtime_contract(config: dict[str, Any], graph_backend: str) -> None:
+    if config.get("decoder_arch") != "gcn":
+        raise ValueError("The supported Goggle runtime requires decoder_arch='gcn'.")
+    if graph_backend == "torch":
+        expected = graph_backend_record()
+        if config.get("graph_backend") != expected:
+            raise ValueError("Goggle runtime configuration does not identify the supported graph backend.")
+
+
 def _run_train(args: argparse.Namespace, GoggleModel: type[Any], config: dict[str, Any], device: str) -> None:
     import pandas as pd
 
@@ -231,6 +276,10 @@ def _run_sample(args: argparse.Namespace, GoggleModel: type[Any], config: dict[s
     model = GoggleModel(**_model_kwargs(config, device))
     state_dict = torch.load(checkpoint, map_location=device, weights_only=True)
     model.model.load_state_dict(state_dict)
+    # Upstream GoggleModel.__init__ resets PyTorch to the training seed. Reapply
+    # the independently requested generation seed immediately before the
+    # unchanged stochastic sampler consumes the global RNG.
+    _seed_everything(args.seed, args.num_threads)
     raw = model.model.sample(args.num_samples).detach().cpu().numpy()
     if raw.shape != (args.num_samples, config["input_dim"]):
         raise RuntimeError(
@@ -256,7 +305,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--num-threads", type=int, default=1)
     parser.add_argument("--input-csv", type=Path)
     parser.add_argument("--num-samples", type=int)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--raw-output", type=Path)
+    parser.add_argument(
+        "--graph-backend",
+        choices=("torch", "dgl-reference"),
+        default="torch",
+        help=argparse.SUPPRESS,
+    )
     return parser
 
 
@@ -272,20 +328,25 @@ def main(argv: list[str] | None = None) -> int:
     required = args.source_dir / "src" / "goggle" / "GoggleModel.py"
     _regular_file(required, "official source entry point")
     config = _load_config(args.config)
+    _validate_runtime_contract(config, args.graph_backend)
     _safe_dataset_id(str(config.get("dataset", "")))
     if args.action == "train" and args.input_csv is None:
         raise ValueError("Goggle training requires --input-csv.")
     if args.action == "sample":
-        if args.num_samples is None or args.num_samples <= 0 or args.raw_output is None:
-            raise ValueError("Goggle sampling requires positive --num-samples and --raw-output.")
-    os.environ.setdefault("DGLBACKEND", "pytorch")
-    os.environ.setdefault("PYTHONHASHSEED", str(config["seed"]))
+        if args.num_samples is None or args.num_samples <= 0 or args.raw_output is None or args.seed is None:
+            raise ValueError("Goggle sampling requires positive --num-samples, --seed, and --raw-output.")
+        if args.seed < 0:
+            raise ValueError("Goggle sample seed must be non-negative.")
+    if args.graph_backend == "dgl-reference":
+        os.environ.setdefault("DGLBACKEND", "pytorch")
+    execution_seed = config["seed"] if args.action == "train" else args.seed
+    os.environ["PYTHONHASHSEED"] = str(execution_seed)
     cache_dir = args.output_dir / ".runtime-cache"
     cache_dir.mkdir(exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(cache_dir / "matplotlib"))
     device = _resolve_device(args.device)
-    _seed_everything(config["seed"], args.num_threads)
-    with _official_import_boundary(args.source_dir) as GoggleModel:
+    _seed_everything(execution_seed, args.num_threads)
+    with _official_import_boundary(args.source_dir, graph_backend=args.graph_backend) as GoggleModel:
         if args.action == "train":
             _run_train(args, GoggleModel, config, device)
         else:

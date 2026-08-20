@@ -26,6 +26,8 @@ pytestmark = pytest.mark.adapter
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "bn" / "native-parity-run-30967779298.json"
 EVIDENCE_SHA256 = "6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "bn" / "windows-v2-real-function-ae3cb50.json"
+WINDOWS_EVIDENCE_SHA256 = "22b7f857c1e296e442c9383d5c08a6546a4f2f33f162eb84131a5739cac601a7"
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
@@ -111,6 +113,39 @@ def test_bn_retained_evidence_is_exact_and_complete() -> None:
     assert all(case["comparisons"]["model_state"]["safe_json_checkpoint"] for case in evidence["cases"])
 
 
+def test_bn_retained_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "ae3cb5037eb9afb2af62e0a7c1fdb580c1b42af9"
+    assert evidence["train"]["status"] == "pass"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": False,
+        "cuda_runtime": None,
+        "gpu": None,
+        "torch": None,
+    }
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [16, 16]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["bn"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+
+
 def test_bn_source_lock_and_registry_promote_only_the_validated_recipe() -> None:
     component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["bn"]
     spec = get_adapter_spec("bn")
@@ -135,7 +170,10 @@ def test_bn_source_lock_and_registry_promote_only_the_validated_recipe() -> None
     assert spec.validation_level.value == "native-parity-validated"
     assert spec.modification_status == "adapter-only"
     assert spec.revision_status == "pinned-canonical-package-native-parity-validated"
-    assert spec.evidence_records == ("docs/evidence/bn/native-parity-run-30967779298.json",)
+    assert spec.evidence_records == (
+        "docs/evidence/bn/native-parity-run-30967779298.json",
+        "docs/evidence/bn/windows-v2-real-function-ae3cb50.json",
+    )
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
 

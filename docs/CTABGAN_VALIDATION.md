@@ -112,4 +112,10 @@ The inspected JSON is permanently retained at `docs/evidence/ctabgan/native-pari
 
 ## Current decision
 
-The inspected Linux evidence promotes CTAB-GAN to `native-parity-validated`. It remains `experimental`, `unsupported`, and excluded from Official Results. Apache-2.0 resolves source redistribution, but dataset admission, central evaluation, full-scale runtime qualification, governance, and release testing remain pending.
+The inspected Linux evidence promotes CTAB-GAN to `native-parity-validated`. It remains `experimental`, `unsupported`, and excluded from Official Results. Apache-2.0 resolves source redistribution, but dataset admission, representative-scale runtime and quality qualification, governance, and release testing remain pending.
+
+## Native-Windows V2 result
+
+Repository commit `17fc74e2f9be8a507ec1f921bb3b509881937154` passed `pipeline-v2-native-windows-v1` with the checksum-locked, unmodified official source on Windows 11, Python 3.11.15, and PyTorch 2.3.0 CPU. One bounded real epoch on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 16 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling did not change the copied training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+Evidence is retained at `docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json` with SHA-256 `22144b71cf3eea455ba77631553377fe769b5fd543a125073977fa2f778898fa`. This bounded functionality result does not establish representative quality, privacy, Official Results admission, or release support.

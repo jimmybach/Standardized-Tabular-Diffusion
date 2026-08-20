@@ -32,11 +32,14 @@ class TrainConfig:
 @dataclass
 class SampleConfig:
     enabled: bool = True
+    seed: int | None = None
     num_samples: int | None = None
     checkpoint_path: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        if self.seed is not None and (not isinstance(self.seed, int) or isinstance(self.seed, bool) or self.seed < 0):
+            raise ValueError("sample.seed must be a non-negative integer when provided")
         if self.num_samples is not None and (
             not isinstance(self.num_samples, int) or isinstance(self.num_samples, bool) or self.num_samples <= 0
         ):
@@ -125,12 +128,15 @@ class ExperimentConfig:
             if reserved_collisions:
                 raise ValueError(f"Action extras use reserved RunSpec keys: {reserved_collisions}")
             extra.update(selected_extras)
+        run_seed = self.train.seed
+        if action == "sample" and self.sample.seed is not None:
+            run_seed = self.sample.seed
         return RunSpec(
             model=self.model,
             dataset=self.dataset,
             output_dir=Path(self.output_dir),
             device=self.train.device,
-            seed=self.train.seed,
+            seed=run_seed,
             num_samples=self.sample.num_samples,
             checkpoint_path=None if self.sample.checkpoint_path is None else Path(self.sample.checkpoint_path),
             upstream_config_path=None if self.upstream_config_path is None else Path(self.upstream_config_path),

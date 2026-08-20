@@ -1,0 +1,921 @@
+{
+  "cases": [
+    {
+      "case": 1,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "ac58ce652c5d13edd3cf1d897a744662e2921bdd4c605b4e208cf39bce668090",
+          "adapter_state_sha256": "e973dd80c9950ec376b352d9811db7bf29a537a48bf2560482b8184856cf4c5e",
+          "keys_exact": true,
+          "native_file_sha256": "ac58ce652c5d13edd3cf1d897a744662e2921bdd4c605b4e208cf39bce668090",
+          "native_state_sha256": "e973dd80c9950ec376b352d9811db7bf29a537a48bf2560482b8184856cf4c5e",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "08cfe2e989023a31aaf67b9d06b6743bee5592a0e2923a20d4e40f978c4331b6",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "91680e36b27b4668d091104841731b716c6ed140b7feff10caf4e778e6a6a696"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 2,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "3ec0f5989448642057328dcd60a6cb7976cf103fb60e00a5beb65a943b7d74c4",
+          "adapter_state_sha256": "540a50e9c081a5f2500f13d7d11ed6257693851f34f4b30c6e06d8c08e28fcf1",
+          "keys_exact": true,
+          "native_file_sha256": "3ec0f5989448642057328dcd60a6cb7976cf103fb60e00a5beb65a943b7d74c4",
+          "native_state_sha256": "540a50e9c081a5f2500f13d7d11ed6257693851f34f4b30c6e06d8c08e28fcf1",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "c6a7a7b771d23537f0fab15a3a0330c79e3d29fe0d8f40e2fd3afbb492874349",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "36819b44c7d7ec4b87d87d6100efdd29d964cbff3cbe9b79d86a464780cc3bff"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 3,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "c05c696bbe6dcabc2990f5f5b71fecc5a884d4c729c5a48a01c4a795c178f1b4",
+          "adapter_state_sha256": "876b842d6bb50ab0a4285682dedbb1a97819b65ee4adc525bfa8650a5f7823cd",
+          "keys_exact": true,
+          "native_file_sha256": "c05c696bbe6dcabc2990f5f5b71fecc5a884d4c729c5a48a01c4a795c178f1b4",
+          "native_state_sha256": "876b842d6bb50ab0a4285682dedbb1a97819b65ee4adc525bfa8650a5f7823cd",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "77e68f16eb486d3ae3a5a13f14946c53b8090390102dd7b6741bbf66eec36c4d",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "c9ef0a922275d4122f93655e990ead4142d729c909f3a437e58bf3cee4d16412"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_binary",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_binary",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "binary"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "binary"
+    },
+    {
+      "case": 4,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "ba277c30f2d35d4dba1635b062f7c428bcd26012c3b7845d1ac5f377b2fd192d",
+          "adapter_state_sha256": "b72d85c53fbfb25cf142cbd6e083f436880ee6a140e9ef4afe88168d33beff4e",
+          "keys_exact": true,
+          "native_file_sha256": "ba277c30f2d35d4dba1635b062f7c428bcd26012c3b7845d1ac5f377b2fd192d",
+          "native_state_sha256": "b72d85c53fbfb25cf142cbd6e083f436880ee6a140e9ef4afe88168d33beff4e",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "3a6188e44b6ae65230e34f2dc6e0d8bfa818c7fc7dccf11638148d0b4d57aee1",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "17ca9e732d4ee828ba5f912b78d48bd0064d98079570b6e4c1f2125d6a0c5964"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 5,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "82300430ec97673d84e4a7a228411b3563d2e8389155cf1f54ea6ea9425bdaa2",
+          "adapter_state_sha256": "2afa7c594fbca37c5668cb221f9f8afb685c452343285bcc3b202ff1d13b0b8d",
+          "keys_exact": true,
+          "native_file_sha256": "82300430ec97673d84e4a7a228411b3563d2e8389155cf1f54ea6ea9425bdaa2",
+          "native_state_sha256": "2afa7c594fbca37c5668cb221f9f8afb685c452343285bcc3b202ff1d13b0b8d",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "c6a7a7b771d23537f0fab15a3a0330c79e3d29fe0d8f40e2fd3afbb492874349",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "36819b44c7d7ec4b87d87d6100efdd29d964cbff3cbe9b79d86a464780cc3bff"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 6,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "b17a6d31502e762fa05b596ffeb8204900c8c19400a0b2b99ba855446c1cf675",
+          "adapter_state_sha256": "611103408ca16e4fa1e3e16bf3d1d9e30acbd11c002b8278f9fe0a5abd574cf6",
+          "keys_exact": true,
+          "native_file_sha256": "b17a6d31502e762fa05b596ffeb8204900c8c19400a0b2b99ba855446c1cf675",
+          "native_state_sha256": "611103408ca16e4fa1e3e16bf3d1d9e30acbd11c002b8278f9fe0a5abd574cf6",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "ea7c59e135123c748c7635f6bd88e80c4a168d83c7c0da1e145963d9ee07b0e7",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "b02fab53c27b8227f39c6d2257fa044fcaa41bd8fba48fb0c4ac4de37fa1e495"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_multiclass",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_multiclass",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "classification",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "multiclass"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "multiclass"
+    },
+    {
+      "case": 7,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "410cb316dd09d4d044326983070cad9684b551d1c0329ef64f49f7ed7def4728",
+          "adapter_state_sha256": "28b31162dbbabfb86b21e2acfb589f101f78221909b53a23079d9b2a50304a40",
+          "keys_exact": true,
+          "native_file_sha256": "410cb316dd09d4d044326983070cad9684b551d1c0329ef64f49f7ed7def4728",
+          "native_state_sha256": "28b31162dbbabfb86b21e2acfb589f101f78221909b53a23079d9b2a50304a40",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "d6cf352f9ea3ffa6a12f4983c6d02c2cdd9c1923318834279073451c3f715e4c",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "cc142d68ae8c0a271886d99f4aadd8bce411793801279613f1b8d08a9441f03e"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 0,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 0,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 8,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "557afa67102069fb2c2f6ffc6b1f58d1b72ad3a54f6487529373b699bd6ef82d",
+          "adapter_state_sha256": "e0767e765855fb4c363757de894825dec71a3956689c55be4a9f8bbd164790eb",
+          "keys_exact": true,
+          "native_file_sha256": "557afa67102069fb2c2f6ffc6b1f58d1b72ad3a54f6487529373b699bd6ef82d",
+          "native_state_sha256": "e0767e765855fb4c363757de894825dec71a3956689c55be4a9f8bbd164790eb",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "0cbf8bda9865bcfbab41a7d182e5bc43e8f447d86c46a77864d5483c471e3f3e",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "e960fa43be32102a93abb8efc27c1fdfe5de3ed349120d8f16cf523e81b3984c"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 19,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 19,
+      "status": "pass",
+      "variant": "regression"
+    },
+    {
+      "case": 9,
+      "comparisons": {
+        "adapter_checkpoint_outside_source": true,
+        "adapter_metadata_valid": true,
+        "adapter_source_remained_exact": true,
+        "checkpoints": {
+          "adapter_file_sha256": "915ad31ce2f14ba8fc32968106bd0d5c1907d2c5d1a76c6246b176a9becabbee",
+          "adapter_state_sha256": "3648c066387b295eaab025936a5f284eade6a0b74402afcf2d2fdd2a3bcea49b",
+          "keys_exact": true,
+          "native_file_sha256": "915ad31ce2f14ba8fc32968106bd0d5c1907d2c5d1a76c6246b176a9becabbee",
+          "native_state_sha256": "3648c066387b295eaab025936a5f284eade6a0b74402afcf2d2fdd2a3bcea49b",
+          "tensor_count": 9,
+          "tensors_exact": true
+        },
+        "finite_numerical_output": true,
+        "missing_values": 0,
+        "raw_sample_sha256": "2ec71ddedb2e29695f1e643e67125dff23a575e6f30187101af1feede70c2fc3",
+        "raw_samples_exact": true,
+        "sample_bytes_exact": true,
+        "sample_columns": [
+          "first",
+          "second",
+          "group",
+          "target"
+        ],
+        "sample_frames_exact": true,
+        "sample_rows": 7,
+        "sample_sha256": "e70fca5421a9ec0c2b19d759bc49582e9c78b2d77b3e7783345962262060216d"
+      },
+      "execution_config": {
+        "alpha": 0.1,
+        "batch_size": 4,
+        "beta": 0.1,
+        "dataset": "goggle_parity_regression",
+        "decoder_arch": "gcn",
+        "decoder_dim": 8,
+        "decoder_l": 1,
+        "encoder_dim": 8,
+        "encoder_l": 2,
+        "epochs": 1,
+        "graph_backend": {
+          "id": "standardized-goggle-torch-graph",
+          "scope": "Goggle homogeneous GCN path only",
+          "semantic_target": "DGL GraphConv 1.1.3",
+          "version": "1.0.0"
+        },
+        "graph_prior": null,
+        "het_encoding": true,
+        "input_dim": 6,
+        "iter_opt": true,
+        "learning_rate": 0.005,
+        "logging": 1,
+        "num_threads": 1,
+        "patience": 2,
+        "prior_mask": null,
+        "seed": 73,
+        "threshold": 0.1,
+        "training_rows": 12,
+        "weight_decay": 0.001
+      },
+      "fixture": {
+        "categorical_features": 1,
+        "dataset_name": "goggle_parity_regression",
+        "missing_values": 0,
+        "numerical_features": 2,
+        "requested_sample_rows": 7,
+        "target_features": 1,
+        "task_type": "regression",
+        "test_rows": 6,
+        "training_rows": 12,
+        "variant": "regression"
+      },
+      "seed": 73,
+      "status": "pass",
+      "variant": "regression"
+    }
+  ],
+  "compatibility_boundary": {
+    "reference_graph_backend": "DGL 1.1.3",
+    "rgcn_import_bridge": "used only when torch-sparse is absent; gcn parity does not instantiate RGCNConv",
+    "runtime_graph_backend": "standardized-goggle-torch-graph@1.0.0",
+    "sampling_seed_boundary": "reapplied after model construction and checkpoint loading",
+    "sampling_target": "official Goggle.model.sample before centralized inverse transformation",
+    "source_patches": [],
+    "synthcity_import_bridge": "evaluation-only imports are stubbed; fit and core sample do not execute them"
+  },
+  "environment": {
+    "dgl": "1.1.3",
+    "networkx": "3.3",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "psutil": "6.0.0",
+    "pytest": "8.3.5",
+    "python": "3.11.15",
+    "requests": "2.32.3",
+    "scikit_learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.0+cpu",
+    "torch_geometric": "2.5.3",
+    "tqdm": "4.66.5"
+  },
+  "environment_lock": {
+    "path": "requirements-goggle-validation.txt",
+    "sha256": "6284c53e4fb63d8d8c1df7933687e183056bb866c8812f015ca879f840406f76"
+  },
+  "graph_backend_validation": {
+    "backend_id": "standardized-goggle-torch-graph",
+    "backend_version": "1.0.0",
+    "cases": [
+      {
+        "activation": null,
+        "case": 1,
+        "gradients_close": true,
+        "in_features": 5,
+        "maximum_absolute_gradient_error": 0.0,
+        "maximum_absolute_output_error": 0.0,
+        "norm": "both",
+        "out_features": 2,
+        "output_close": true,
+        "state_contract_exact": true
+      },
+      {
+        "activation": "Tanh",
+        "case": 2,
+        "gradients_close": true,
+        "in_features": 2,
+        "maximum_absolute_gradient_error": 0.0,
+        "maximum_absolute_output_error": 0.0,
+        "norm": "both",
+        "out_features": 5,
+        "output_close": true,
+        "state_contract_exact": true
+      },
+      {
+        "activation": null,
+        "case": 3,
+        "gradients_close": true,
+        "in_features": 3,
+        "maximum_absolute_gradient_error": 0.0,
+        "maximum_absolute_output_error": 0.0,
+        "norm": "left",
+        "out_features": 3,
+        "output_close": true,
+        "state_contract_exact": true
+      },
+      {
+        "activation": null,
+        "case": 4,
+        "gradients_close": true,
+        "in_features": 3,
+        "maximum_absolute_gradient_error": 0.0,
+        "maximum_absolute_output_error": 0.0,
+        "norm": "right",
+        "out_features": 3,
+        "output_close": true,
+        "state_contract_exact": true
+      },
+      {
+        "activation": null,
+        "case": 5,
+        "gradients_close": true,
+        "in_features": 3,
+        "maximum_absolute_gradient_error": 0.0,
+        "maximum_absolute_output_error": 0.0,
+        "norm": "none",
+        "out_features": 3,
+        "output_close": true,
+        "state_contract_exact": true
+      }
+    ],
+    "graph_and_batch_contract_exact": true,
+    "oracle_version": "1.1.3",
+    "semantic_target": "DGL GraphConv 1.1.3",
+    "status": "pass"
+  },
+  "model_id": "goggle",
+  "protocol_id": "goggle-pytorch-graph-backend-parity-v2",
+  "repository_commit": "cf821a0dae803f523697c75888375feef9724145",
+  "reproduction_target": "method-author-original-core-with-pytorch-gcn-compatibility-backend",
+  "schema_version": 1,
+  "seed_cases": [
+    0,
+    19,
+    73
+  ],
+  "source": {
+    "license": {
+      "copyright": "Copyright (c) 2023 Tennison Liu",
+      "declared_expression": "MIT",
+      "license_file_present": true,
+      "redistribution_status": "authorized",
+      "review_status": "upstream-mit-license-retained-in-locked-source"
+    },
+    "manifest_sha256": "9cf77633d1553ed76bbfbd729baa2c1e0b430ca671ee90a116c3574c7165e1eb",
+    "model_id": "goggle",
+    "repository": "https://github.com/vanderschaarlab/GOGGLE",
+    "runtime_files": [
+      {
+        "bytes": 1069,
+        "path": "LICENSE",
+        "sha256": "6b7e98942d686b85f11ee77a588209491b003902d9091c0958a2981e2957fb9e"
+      },
+      {
+        "bytes": 72,
+        "path": "AUTHORS.rst",
+        "sha256": "ec21f618b8ce69f0c20fea2c814144a9510539878f5349c6aa8f948a5dd2eafa"
+      },
+      {
+        "bytes": 2325,
+        "path": "README.md",
+        "sha256": "edc3b8c11777d6379bd5c1686b1c2b32316232944d86d40a9cacd19b420ac9ca"
+      },
+      {
+        "bytes": 448,
+        "path": "requirements.txt",
+        "sha256": "c3fd17c460f4ba1ec2be4f8f99aa0c1351ab5368f1b55e20618bc37905e41b20"
+      },
+      {
+        "bytes": 703,
+        "path": "setup.py",
+        "sha256": "feef0d6e4bedb717f397ac30233a50730b66ee48f7196db89661ce08ab3b0420"
+      },
+      {
+        "bytes": 3930,
+        "path": "setup.cfg",
+        "sha256": "bc8c6f8887ef9a31a5b5a13d4900078c4abb6cf57714f9d7afb97106b38cb66c"
+      },
+      {
+        "bytes": 378,
+        "path": "pyproject.toml",
+        "sha256": "77c535a10b0573710b99d8c243bef57ca8b81279a2c538f2a6177e725cdf1d68"
+      },
+      {
+        "bytes": 1,
+        "path": "src/goggle/__init__.py",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 8856,
+        "path": "src/goggle/GoggleModel.py",
+        "sha256": "3142d4b9c0fc2728e495fb0976cd88bec32263dced310e4d4bdb85650e377642"
+      },
+      {
+        "bytes": 1076,
+        "path": "src/goggle/data_utils.py",
+        "sha256": "751dd1ecefafbb3e4c9647ec38e06375dfd377413a6ca0c30a47fb84dab706d9"
+      },
+      {
+        "bytes": 1,
+        "path": "src/goggle/model/__init__.py",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "bytes": 998,
+        "path": "src/goggle/model/Encoder.py",
+        "sha256": "713014734a6e3fdc59bc2f881642bebb70fae667293c751603010ee53d0c0764"
+      },
+      {
+        "bytes": 2407,
+        "path": "src/goggle/model/Goggle.py",
+        "sha256": "a999cb392b564b98b182837cc494b4f2a19e20aa8e58a01fc18130d332d024f2"
+      },
+      {
+        "bytes": 1043,
+        "path": "src/goggle/model/GoggleLoss.py",
+        "sha256": "5728c4d2529adce91abbe3ed1e219e2a0d56c05fd5f1c39a2711608645e5aaf7"
+      },
+      {
+        "bytes": 3585,
+        "path": "src/goggle/model/GraphDecoder.py",
+        "sha256": "8d17f7a54fd44106ff729bdaa879ef583472bdec406f279db92f8bc1f3442cc8"
+      },
+      {
+        "bytes": 4235,
+        "path": "src/goggle/model/GraphInputProcessor.py",
+        "sha256": "8e99433a4181122d91f78c940d015e4f7bbcf820ef43cc3ebbff170e654adf73"
+      },
+      {
+        "bytes": 1437,
+        "path": "src/goggle/model/LearnedGraph.py",
+        "sha256": "e5462185b562b0c66e10b54e2e4a8d7c1106274a80c89167ca28eb0678891b12"
+      },
+      {
+        "bytes": 11562,
+        "path": "src/goggle/model/RGCNConv.py",
+        "sha256": "b59dfd7385a8ffbe654c31b3e998a93123c8693ed2222bda878e41e262da023a"
+      }
+    ],
+    "runtime_files_verified": 18,
+    "source_dir": "/home/runner/work/Standardized-Tabular-Diffusion/Standardized-Tabular-Diffusion/.cache/upstream-sources/goggle/1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+    "upstream_commit": "1a3d87ad8a5dffe0f67f844e7b10f1f0dcef73e0",
+    "upstream_model_tree": "6dcaae801859f63e173537445548a50cd1f8625b",
+    "upstream_tree": "2d6a54f6d6f4d156890bf4e035119dbb483a46d0"
+  },
+  "status": "pass",
+  "variants": [
+    "binary",
+    "multiclass",
+    "regression"
+  ]
+}

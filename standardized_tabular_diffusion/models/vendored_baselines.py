@@ -10,6 +10,8 @@ from standardized_tabular_diffusion.evaluation.serialization import atomic_write
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, RunSpec
 from standardized_tabular_diffusion.models._runtime import SampleFileEvaluatorMixin
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
+from standardized_tabular_diffusion.runtime_contracts import bind_native_dataset_view
 from standardized_tabular_diffusion.upstream_sources import validate_upstream_source
 
 
@@ -17,7 +19,14 @@ class STaSyAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "stasy"
     upstream_dirname = "TabSyn-main"
 
-    _STANDARD_EXTRA_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+    _STANDARD_EXTRA_KEYS = {
+        "action_extras",
+        "config",
+        "dataset_identity",
+        "dataset_spec",
+        "evaluation",
+        "tags",
+    }
     _TRAIN_KEYS = {
         "batch_size",
         "epochs",
@@ -206,6 +215,13 @@ class STaSyAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._validate_extra(spec, action="train")
         self._ensure_output_dir(spec)
         self._validate_dataset(spec.dataset)
+        dataset_binding = None
+        if "dataset_identity" in spec.extra:
+            dataset_spec = self.resolve_dataset_spec(spec)
+            dataset_binding = bind_native_dataset_view(
+                dataset_spec,
+                self.upstream_root / "data" / spec.dataset,
+            )
         source = validate_upstream_source(self.model_name, self.upstream_root)
         config = self._training_config(spec.extra)
         args = [
@@ -239,6 +255,7 @@ class STaSyAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "checkpoint_path": str(checkpoint),
                 "checkpoint_sha256": self._sha256(checkpoint),
                 "training_config": config,
+                "dataset_binding": dataset_binding,
                 "source": source,
                 "compatibility_boundary": "stasy-adapter-runtime-v1",
             },
@@ -259,6 +276,13 @@ class STaSyAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._validate_extra(spec, action="sample")
         self._ensure_output_dir(spec)
         self._validate_dataset(spec.dataset)
+        dataset_binding = None
+        if "dataset_identity" in spec.extra:
+            dataset_spec = self.resolve_dataset_spec(spec)
+            dataset_binding = bind_native_dataset_view(
+                dataset_spec,
+                self.upstream_root / "data" / spec.dataset,
+            )
         source = validate_upstream_source(self.model_name, self.upstream_root)
         if spec.checkpoint_path is not None:
             raise ValueError("STaSy uses the trusted checkpoint and metadata inside output_dir; checkpoint_path is unsupported.")
@@ -272,6 +296,8 @@ class STaSyAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             raise ValueError("STaSy checkpoint metadata does not match the requested model and dataset.")
         if metadata.get("source", {}).get("manifest_sha256") != source["manifest_sha256"]:
             raise ValueError("STaSy source manifest changed after training; refusing checkpoint reuse.")
+        if dataset_binding is not None and metadata.get("dataset_binding") != dataset_binding:
+            raise ValueError("STaSy native dataset content changed after training; refusing checkpoint reuse.")
         checkpoint = self._validate_trusted_executable_artifact(
             spec,
             self._checkpoint_path(spec),
@@ -350,7 +376,14 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
     model_name = "codi"
     upstream_dirname = "TabSyn-main"
 
-    _STANDARD_EXTRA_KEYS = {"action_extras", "config", "dataset_spec", "evaluation", "tags"}
+    _STANDARD_EXTRA_KEYS = {
+        "action_extras",
+        "config",
+        "dataset_identity",
+        "dataset_spec",
+        "evaluation",
+        "tags",
+    }
     _TRAIN_KEYS = {
         "T",
         "activation",
@@ -695,6 +728,13 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._validate_extra(spec, action="train")
         self._prepare_output(spec)
         dataset = self._validate_dataset(spec.dataset)
+        dataset_binding = None
+        if "dataset_identity" in spec.extra:
+            dataset_spec = self.resolve_dataset_spec(spec)
+            dataset_binding = bind_native_dataset_view(
+                dataset_spec,
+                self.upstream_root / "data" / spec.dataset,
+            )
         source = validate_upstream_source(self.model_name, self.upstream_root)
         config = self._training_config(spec.extra)
         self._run_codi(
@@ -738,6 +778,7 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                     key: dataset[key]
                     for key in ("task_type", "columns", "continuous_columns", "discrete_columns", "train_rows")
                 },
+                "dataset_binding": dataset_binding,
                 "source": source,
                 "compatibility_boundary": "codi-tabsyn-adapter-runtime-v1",
             },
@@ -761,6 +802,14 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         self._validate_extra(spec, action="sample")
         self._prepare_output(spec)
         dataset = self._validate_dataset(spec.dataset)
+        dataset_binding = None
+        dataset_spec = None
+        if "dataset_identity" in spec.extra:
+            dataset_spec = self.resolve_dataset_spec(spec)
+            dataset_binding = bind_native_dataset_view(
+                dataset_spec,
+                self.upstream_root / "data" / spec.dataset,
+            )
         source = validate_upstream_source(self.model_name, self.upstream_root)
         if spec.checkpoint_path is not None:
             raise ValueError("CoDi uses the trusted checkpoint pair inside output_dir; checkpoint_path is unsupported.")
@@ -776,6 +825,8 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             raise ValueError("CoDi source manifest changed after training; refusing checkpoint reuse.")
         if metadata.get("dataset_contract", {}).get("columns") != dataset["columns"]:
             raise ValueError("CoDi dataset schema changed after training; refusing checkpoint reuse.")
+        if dataset_binding is not None and metadata.get("dataset_binding") != dataset_binding:
+            raise ValueError("CoDi native dataset content changed after training; refusing checkpoint reuse.")
         checkpoint_con, checkpoint_dis = self._checkpoint_paths(spec)
         checkpoint_con = self._validate_trusted_executable_artifact(
             spec, checkpoint_con, format_name="PyTorch continuous-model checkpoint"
@@ -830,6 +881,19 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             observed = set(frame[column].astype(str).unique().tolist())
             if not observed.issubset(set(allowed)):
                 raise RuntimeError(f"CoDi produced values outside the fitted domain for {column!r}.")
+        integer_decoding: dict[str, dict[str, Any]] = {}
+        native_sample_path = None
+        if dataset_spec is not None:
+            native_frame = frame.copy()
+            frame, integer_decoding = decode_declared_integer_columns(
+                frame,
+                dataset_spec,
+                model_name="CoDi",
+            )
+            if any(record["changed_rows"] for record in integer_decoding.values()):
+                native_sample_path = spec.output_dir / "codi-native-samples.csv"
+                self._write_dataframe_csv(native_frame, native_sample_path)
+                self._write_dataframe_csv(frame, sample_path)
         atomic_write_json(
             spec.output_dir / "codi-sample-metadata.json",
             {
@@ -840,6 +904,11 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "rows": len(frame),
                 "columns": list(frame.columns),
                 "sample_sha256": self._sha256(sample_path),
+                "integer_decoding": integer_decoding,
+                "native_sample_path": None if native_sample_path is None else str(native_sample_path.resolve()),
+                "native_sample_sha256": (
+                    None if native_sample_path is None else self._sha256(native_sample_path)
+                ),
                 "checkpoint_con_sha256": metadata["checkpoint_con_sha256"],
                 "checkpoint_dis_sha256": metadata["checkpoint_dis_sha256"],
                 "sampling_config": {"T": config["T"], "num_threads": config["num_threads"]},
@@ -852,7 +921,8 @@ class CoDiAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             upstream_workdir=self.upstream_root,
             generated_sample_path=sample_path,
             notes=[
-                "Sampling verified source identity, both trusted checkpoint hashes, exact rows, schema, domains, and finite output."
+                "Sampling verified source identity, both trusted checkpoint hashes, exact rows, schema, domains, and finite output.",
+                "Declared integer columns are decoded with numpy.rint at the adapter boundary; changed native output is retained without clipping.",
             ],
         )
         return self._write_bundle(bundle)

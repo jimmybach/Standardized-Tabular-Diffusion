@@ -12,6 +12,7 @@ import pytest
 from standardized_tabular_diffusion.config import EvaluationConfig, ExperimentConfig, SampleConfig, TrainConfig
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.structured_baselines import NFlowAdapter, NFlowPreprocessor
+from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.runner import validate_action_inputs
 from standardized_tabular_diffusion.validation import nflow as nflow_validation
 
@@ -20,6 +21,9 @@ pytestmark = pytest.mark.adapter
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "nflow" / "native-parity-run-30970260840.json"
 EVIDENCE_SHA256 = "940be2b0668baf990d640040544a4f16c7cccd9e9f6df7d0f7a582e8d2999923"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "nflow" / "windows-v2-real-function-5bf59b0.json"
+WINDOWS_EVIDENCE_SHA256 = "0616c1677ffe4922bc910e5c0f234920a2e22e8155364d464273bffc7bbf6fb3"
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 
 
 def _dataset_spec(tmp_path: Path, *, task_type: str = "classification") -> DatasetSpec:
@@ -99,6 +103,44 @@ def test_nflow_retained_evidence_is_exact_and_complete() -> None:
     assert all(case["comparisons"]["safe_json_numpy_checkpoint"] for case in evidence["cases"])
     assert all(case["comparisons"]["row_level_training_data_absent"] for case in evidence["cases"])
     assert all(case["comparisons"]["privacy_not_overclaimed"] for case in evidence["cases"])
+
+
+def test_nflow_retained_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "5bf59b0effa29a0c2694cdbe05b1a8f40443c481"
+    assert evidence["entry"]["device"] == "cpu"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["torch"] == "2.3.0+cpu"
+    assert evidence["environment"]["hardware"]["cuda_available"] is False
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert evidence["environment_lock"]["sha256"] == (
+        "a05b0c1a8c3f14ec2c285038ede6c9d61c327400ce0986aa05361c970fbbc319"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [16, 16]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["nflow"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/nflow/windows-v2-real-function-5bf59b0.json" in get_adapter_spec(
+        "nflow"
+    ).evidence_records
 
 
 def test_nflow_preprocessor_safe_payload_round_trip_is_exact(tmp_path: Path) -> None:

@@ -1,11 +1,11 @@
 # P2 Shape 与 Trend 评测
 
-- 状态：已通过 Linux/Python 3.11 权威验证；仍仅为诊断协议
+- 状态：诊断协议已通过权威 Linux/Python 3.11 等价证据验证，并保留原生 Windows 执行记录
 - 协议：`p2-shape-trend@0.2.0`（draft、诊断用途）
 - 指标身份：`sdmetrics-column-shapes@1.0.0` 与 `sdmetrics-column-pair-trends@1.0.0`
-- 发布环境：已有托管 Windows/Python 3.11 主要平台家族 CI；精确 Windows 11 准入仍待完成；已留存的等价证据来自 Linux/Python 3.11
+- 发布环境：TabDiff 代表性中央路由记录已保留原生 Windows 11/Python 3.11 执行；精确 SDMetrics 源码等价性的权威环境仍为 Linux/Python 3.11
 - Official Results 准入：否
-- 最后更新：2026-08-05
+- 最后更新：2026-08-20
 
 ## 范围与信任边界
 

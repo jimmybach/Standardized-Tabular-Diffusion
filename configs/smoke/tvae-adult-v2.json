@@ -1,0 +1,22 @@
+{
+  "model": "tvae",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/tvae",
+  "train": {
+    "enabled": true,
+    "seed": 13,
+    "device": "cuda",
+    "extra": {
+      "epochs": 1,
+      "batch_size": 100,
+      "embedding_dim": 16,
+      "compress_dims": [32],
+      "decompress_dims": [32],
+      "verbose": false
+    }
+  },
+  "sample": {"enabled": true, "seed": 17, "num_samples": 32, "checkpoint_path": null, "extra": {}},
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Bounded official-package TVAE V2 configuration; not a benchmark-quality fit."
+}

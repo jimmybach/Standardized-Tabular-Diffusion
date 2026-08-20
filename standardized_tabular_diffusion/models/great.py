@@ -17,6 +17,10 @@ from standardized_tabular_diffusion.models._runtime import (
     disable_torchvision_for_transformers,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.runtime_contracts import (
+    observe_torch_model_device,
+    resolve_torch_training_device,
+)
 
 GREAT_PACKAGE_VERSION = "0.0.14"
 GREAT_UPSTREAM_COMMIT = "b300f6123cf1d9590b76ea45cc23298df944a319"
@@ -332,6 +336,9 @@ class GReaTAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         package = verify_great_distribution()
         model_class = self._import_model_class()
         parameters = self._training_parameters(spec)
+        device_contract = resolve_torch_training_device(spec.device)
+        parameters["train_kwargs"]["use_cpu"] = device_contract["trainer_use_cpu"]
+        parameters["device_contract"] = device_contract
         conditional_col = parameters["conditional_col"]
         if conditional_col is not None and conditional_col not in dataset_spec.column_names:
             raise ValueError(f"GReaT conditional_col is unknown: {conditional_col!r}")
@@ -350,6 +357,7 @@ class GReaTAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 conditional_col=conditional_col,
                 random_conditional_col=parameters["random_conditional_col"],
             )
+        device_contract["observed"] = observe_torch_model_device(model, device_contract["requested"])
         model_root = self._model_root(spec)
         if model_root.exists() and any(model_root.iterdir()):
             raise FileExistsError(f"Refusing to overwrite non-empty GReaT model directory: {model_root}")

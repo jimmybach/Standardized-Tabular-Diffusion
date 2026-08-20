@@ -1,6 +1,6 @@
 # REaLTabFormer 验证协议
 
-状态：已通过并永久保留证据
+状态：原生等价已通过并永久保留证据；原生 Windows 最小真实功能已通过
 
 协议：`realtabformer-official-package-parity-v1`
 
@@ -12,7 +12,7 @@
 
 本协议检查标准化 `realtabformer` 适配器是否保留了选定的官方表格模型执行语义。它让“直接调用经校验和锁定的官方包”和“通过适配器调用”使用相同的带类型训练表、GPT-2 配置、训练控制、检查点重载方式、采样控制和随机种子，并比较二者结果。
 
-强制验证通过后，适配器可以在已测试的表格路径上提升为 `native-parity-validated`。这不代表 REaLTabFormer 已经 `benchmark-eligible`，不代表它可以进入 Official Results，不证明完整论文规模下的统计质量，也不等于 `release-supported`。官方 sensitivity-based stopping 路径、关系表模型、数据集准入、中心评测、资源预算和发布责任仍是独立门槛。
+强制验证通过后，适配器可以在已测试的表格路径上提升为 `native-parity-validated`。这不代表 REaLTabFormer 已经 `benchmark-eligible`，不代表它可以进入 Official Results，不证明完整论文规模下的统计质量，也不等于 `release-supported`。官方 sensitivity-based stopping 路径、关系表模型、数据集准入、资源预算和发布责任仍是独立门槛。
 
 ## 已审计的权威来源与发行制品
 
@@ -103,7 +103,7 @@
 - 官方关系模型接收相互关联的父表和子表。当前仓库的规范契约是单表，因此关系模式不在本适配器已验证范围内。
 - Transformer 训练和自回归采样明显重于传统 baseline；各数据集的序列长度、时间和显存预算仍待研究。
 - 条件 seed input 和高级生成参数是官方专家接口；进入 Official Results 前必须在 benchmark profile 中冻结。
-- 官方包支持早于 3.11 的 Python。该适配器当前留存的等价证据来自 Linux/Python 3.11；本仓库针对该适配器的精确 Windows 11/Python 3.11 发布目标准入仍待完成。
+- 保留的原生等价权威证据仍来自 Linux/Python 3.11。独立的 Windows 11/Python 3.11 最小真实运行现已通过，但代表性规模的 Windows 资源与质量准入仍待完成。
 
 ## 证据
 
@@ -111,4 +111,10 @@
 
 永久证据记录为 `docs/evidence/realtabformer/native-parity-run-30950369908.json`，SHA-256 为 `0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07`。该文件从制品 `8908863813` 逐字节保留；制品归档摘要为 `sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147`。PR head 为 `7db46e00452ce5cc25d28d8b484c9d6ee14de5b3`，证据中记录的 PR merge checkout 提交为 `fb2f03dd579bb4d1847fa18395696ed698c8ce58`。
 
-因此，REaLTabFormer 在官方表格 `n_critic=0` 路径上现为 `native-parity-validated`。它仍然是 `experimental` 和 `unsupported`；本证据不会提升 sensitivity stopping、关系模式、中心 benchmark 评测、数据集准入、资源预算或发布支持状态。
+因此，REaLTabFormer 在官方表格 `n_critic=0` 路径上现为 `native-parity-validated`。它仍然是 `experimental` 和 `unsupported`；本证据不会提升 sensitivity stopping、关系模式、数据集准入、资源预算或发布支持状态。
+
+## 原生 Windows 最小真实证据
+
+独立的 `pipeline-v2-native-windows-v1` 运行基于仓库提交 `6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7`，在原生 Windows 11、Python 3.11.15 和 CPU-only PyTorch 2.3.0 环境中使用未修改的官方 `realtabformer==0.2.4` 包。它执行已验证的单表表格路径，设置 `n_critic=0`，并从 256 行 Adult 衍生测试数据中使用确定性的 128 行训练上限。种子 17 与 29 各生成 4 行结构合规且无缺失值的数据；两份输出不同，训练产物保持不变，独立锁定的中央环境成功最终化并校验了 `p3-validity`。
+
+该结果只证明受限 Windows 功能，不验证 sensitivity stopping、关系生成、代表性规模质量或 Official Results 资格。永久记录为 `docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json`，SHA-256 为 `98738815256389be1c6dcc5283f40293f49a8cb5d8a28d242c288f705b662543`。

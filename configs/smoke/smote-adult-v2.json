@@ -1,0 +1,16 @@
+{
+  "model": "smote",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/smote",
+  "train": {"enabled": true, "seed": 13, "device": "cpu", "extra": {}},
+  "sample": {
+    "enabled": true,
+    "seed": 17,
+    "num_samples": 32,
+    "checkpoint_path": null,
+    "extra": {"k_neighbors": 3, "sampling_strategy": "auto"}
+  },
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real", "reference-only"],
+  "notes": "Bounded official-package SMOTE reference V2 configuration; excluded from generative ranking."
+}

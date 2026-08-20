@@ -1,12 +1,20 @@
-# Goggle 源码与验证记录
+# Goggle 源码、PyTorch 图后端与验证记录
 
-状态：原生等价性已验证；榜单与发布门槛仍未完成<br>
-协议：`goggle-method-author-native-parity-v1`<br>
-正式环境：Linux + Python 3.11
+状态：已保留方法作者 GCN 核心的原生等价证据；Windows GPU 真实功能验证已通过；DGL 判定器正式后端等价验证已通过并留存<br>
+当前协议：`goggle-pytorch-graph-backend-parity-v2`<br>
+主要运行环境：Windows 11、Python 3.11、PyTorch 2.8<br>
+独立图算子判定环境：Linux、Python 3.11、DGL 1.1.3
 
 ## 范围
 
-本文明确本仓库中的 `goggle` 指向哪份权威源码、适配层允许改变什么，以及状态升级前必须取得什么证据。本文不代表该模型已具备正式榜单资格或发布支持。
+本文严格区分两个不能混为一谈的结论：
+
+1. 固定校验的方法作者版 Goggle GCN 核心，已经在历史协议 `goggle-method-author-native-parity-v1` 中使用 DGL 完成原生等价验证。
+2. 当前普通运行环境不修改 Goggle 源码，但会用一个范围很小、可独立验证的 PyTorch 图后端，替代 Windows 上不可用的 DGL 依赖。
+
+第二项属于“依赖兼容性重实现”，不能表述成“未修改的官方 DGL 运行路径”。它本身不会让 Goggle 自动获得 Official Results、正式榜单或发布支持资格。
+
+## 权威源码
 
 复现目标是 ICLR 2023 论文 *GOGGLE: Generative Modelling for Tabular Data by Learning Relational Structure* 的方法作者实现：
 
@@ -17,93 +25,95 @@
 - 许可证：MIT，Copyright 2023 Tennison Liu；
 - 固定压缩包 SHA-256：`62dc6c98a2067d950513b4fe6343715f03a6a096990241fc6143b18fb56aaf65`。
 
-源码清单固定了 18 个文件，包括许可证、作者信息、README、官方环境和构建声明，以及所有运行时 Python 模块。物化器先校验压缩包大小与摘要，只解压清单内路径，再按已声明规则规范化文本并逐文件复验。源码保存在被 Git 忽略的缓存中，不作为可被随意修改的本地副本提交。
+源码清单固定了 18 个文件。物化时会校验压缩包及每个选定文件，训练和采样后再次复验。源码保存在 Git 忽略的缓存中；仓库没有上游补丁文件，也没有改写任何官方可执行语句。
 
-## 已退役的旧副本
+旧的 `TabSyn-main/baselines/goggle` 副本与方法作者源码存在实质差异，现已退役，不作为官方证据。
 
-原 `TabSyn-main/baselines/goggle` 并不是方法作者原版。它包含 11 个文件；与官方包共享的 9 个路径在文本规范化后全部不同。实质差异包括：
+## 为什么替换 DGL
 
-- 不同的 `fit` 接口和外部数据加载器；
-- 不同的编码器/解码器宽度及批大小默认值；
-- 移除了官方验证集划分和早停逻辑；
-- 改变了检查点位置和采样约束；
-- 改变了图解码器和 RGCN 的导入。
+本项目主要支持原生 Windows 与 Python 3.11。官方 DGL 没有覆盖当前 Windows/Python/PyTorch 组合的 wheel；如果自行编译并发布私有 wheel，就会把编译器、二进制兼容和长期维护风险转移给每位用户。
 
-当前代码树已经删除该副本，但没有重写 Git 历史。它不再作为原生证据，也不会被描述为官方实现。
+经源码审计，已验证的 Goggle GCN 路径只执行三类 DGL 接口：
 
-## 适配边界
+- 根据有序源节点和目标节点张量构造有向同构图；
+- 对重复图进行不相交批处理；
+- 执行带边权的同构 `GraphConv`。
 
-适配器直接调用未修改的官方 `GoggleModel.fit`。官方模型、图结构学习器、编码器、解码器、损失函数、交替优化器、带随机种子的训练/验证划分、验证选择、早停和 state-dict 序列化均保留在上游源码中。
+`standardized_tabular_diffusion.compat.goggle_torch_graph` 只实现这段已审计接口，明确不是通用 DGL 替代品。普通安装和运行 Goggle 不再需要 DGL 或 PyTorch Geometric；DGL 只保留在独立验证环境中。
 
-只有以下五类操作位于上游源码之外：
+## 图算子语义
 
-1. **源码与产物安全。** 执行前后都校验源码。训练时把 `output_dir` 设为工作目录，使官方的 `tmp/<dataset>.pt` 不会写入源码树；随后只移动未改变张量内容的 state dict 到 `output_dir/model.pt`。采样使用 `torch.load(..., weights_only=True)`，并拒绝未经明确授权的外部检查点。
-2. **数值表接口。** 官方实验接收有限数值 `DataFrame`。数值特征只用真实训练集拟合总体标准化，与 `StandardScaler` 等价；类别特征也只用训练集确定类别并进行确定性 one-hot 编码。唯一目标列仍在联合建模向量内。
-3. **输出接口。** 请求的正整数行数直接传给未修改的 `Goggle.model.sample` 核心。数值列做逆标准化，one-hot 块用训练类别上的 argmax 恢复，分类目标映射到最近的已记录类别编码。这样把官方接口中“参考 DataFrame 的行数”改成明确的行数参数。
-4. **旧 Synthcity 导入边界。** 官方模块会提前导入 Synthcity 0.2.2 的指标和 `Schema`，但训练与核心采样都不会执行它们。Python 3.11 适配层只提供这些导入名称；如果真的实例化 `Schema`，立即报错。正式评测始终使用仓库的中央版本化评测器。
-5. **未使用的 RGCN 导入边界。** 官方 `GraphDecoder.py` 在默认同构 GCN/SAGE 路径下也会提前导入 `RGCNConv`。当 `torch-sparse` 不存在时，未使用的符号被替换为“一旦实例化就报错”的占位符。已验证的 GCN 路径从不构造它；`decoder_arch="het"` 仍必须安装官方编译扩展栈，并且不在当前验证结论内。
+后端 `standardized-goggle-torch-graph@1.0.0` 对齐 Goggle 使用的 DGL `GraphConv` 1.1.3 语义：
 
-没有上游补丁文件，也没有修改任何官方可执行语句。
+- 保留边顺序和批图节点偏移；
+- 按 `none`、`left`、`right`、`both` 模式使用结构出度和入度归一化；
+- 边权只缩放消息，不会重新定义结构度数；
+- 输入维度大于输出维度时先乘权重再聚合，否则先聚合再乘权重；
+- 权重使用 Xavier uniform 初始化、偏置初始化为零，state dict 键仍为 `weight` 和 `bias`；
+- 偏置与激活顺序和 DGL 一致；
+- 除非显式允许，否则零入度节点直接报错。
+
+Goggle 学到的邻接矩阵包含对角边，因此受支持路径通常不会出现零入度节点。任何超出上述小范围契约的输入都会明确报兼容性错误，而不是静默近似 DGL。
+
+## 支持的模型路径
+
+公开适配器只支持 `decoder_arch="gcn"`。`sage` 和 `het` 使用不同算子，目前没有经过验证的兼容实现，因此会在训练前被拒绝。为保证未修改的上游包能够导入，适配层只为这些未执行导入提供“一旦使用就报错”的占位符，不需要安装无关的编译扩展。
+
+官方模型、图结构学习器、编码器、GCN 解码器结构、损失函数、交替优化器、带种子的训练/验证划分、早停和 state-dict 序列化仍全部位于固定校验的上游源码中。
+
+## 其余适配边界
+
+以下操作明确位于上游源码之外：
+
+1. 校验源码和产物身份，并把官方相对检查点写入限制在 `output_dir`；
+2. 只在真实训练集上拟合数值标准化和确定性类别 one-hot 编码；
+3. 在调用未修改的随机采样器前重新应用独立生成种子（上游构造函数会把 PyTorch 重置为训练种子），再传入请求行数、执行已记录的逆变换，并用全仓库统一的最近整数解码器恢复且仅恢复显式声明的整数列；
+4. 为未使用的旧 Synthcity 与异构导入提供 fail-on-use 占位符；
+5. 导入未修改的 Goggle 源码时，注入已记录的纯 PyTorch 图后端。
+
+模型元数据 schema 2 会记录后端 ID、版本、语义目标、源码身份、变换、运行配置和产物摘要。采样会拒绝旧 schema 1 元数据，以及任何后端、源码、配置或检查点不一致。后端迁移前训练的模型需要重新训练。
 
 ## 数据接口
 
-适配器支持分类和回归表格，要求：
+适配器支持分类和回归表格：数值与类别特征至少有一类非空，恰好一个目标列，列顺序必须规范，数值必须有限，并且不允许缺失值。缺失值默认报错，用户必须先调用只在真实训练集上拟合的均值/众数中央填补模块。目标列仍与特征联合生成。
 
-- 至少包含数值或类别特征中的一种；
-- 恰好一个目标列；
-- 非空的真实训练 CSV，且列及顺序与规范数据集完全一致；
-- 数值必须有限；
-- 不允许缺失值。
+Goggle 会把数值当作连续变量建模。完成只在训练集上拟合的逆标准化后，适配器仅对规范 `DatasetSpec` 明确声明的整数列执行 `numpy.rint`（中点取偶）并转换为 `int64`，不裁剪，也不读取测试集信息；连续列保持不变。每次适用的采样都会保留原生逆变换表以及逐列修改行数报告；中央验收器仍负责拒绝无效输出，不会静默修补结果。
 
-遇到缺失值默认报错。用户必须先调用中央填补模块；该模块仅在真实训练集上拟合数值均值和类别众数。适配器不会静默填补。
+## 验证
 
-模型联合生成特征和目标。预处理元数据、训练配置、源码身份、检查点摘要和变换拟合范围记录在 `goggle-model-metadata.json`。采样必须同时拥有该元数据和带哈希的运行配置；检查点或配置被篡改时会拒绝运行。
+历史保留运行 [`30945676747`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747) 已在 DGL 1.1.3 下证明方法作者 GCN 核心的精确原生等价性。不可变证据保存在 `docs/evidence/goggle/native-parity-run-30945676747.json`；它不证明这次新增的依赖替换。
 
-## 支持的参数
+协议 v2 新增两层独立检查：
 
-公开参数覆盖官方构造与训练参数：编码器/解码器宽度和层数、异构节点编码、GCN/SAGE/异构解码器选择、图阈值、图先验与掩码、KL 与图损失权重、交替优化开关、学习率、权重衰减、轮数、批大小、耐心值、日志间隔、随机种子、设备和线程数。
+1. 使用 DGL 1.1.3 对照图构造、批处理、前向输出、特征/边权/参数梯度、state dict、两种矩阵乘法顺序、激活函数及全部归一化模式；
+2. 执行二分类、多分类、回归与随机种子 `0`、`19`、`73` 组合成的九个端到端案例。
 
-默认值与方法作者源码一致：编码器和解码器宽度 64、两层、GCN、阈值 0.1、`alpha=beta=0.1`、交替优化、学习率 0.005、权重衰减 0.001、1,000 轮、批大小 32、耐心值 50、日志间隔 100。未知参数、非法范围、非方阵先验和非二值掩码都会在执行前报错。
+每个端到端案例中，参考路径使用“未修改 Goggle + DGL”，候选路径使用“同一份 Goggle + PyTorch 后端”。通过条件包括：检查点张量完全一致、原始样本完全一致、最终 DataFrame 和 CSV 字节完全一致、行列接口准确、元数据有效、源码执行前后不变。
 
-## 正式等价性协议
+正式工作流 [`32042446422`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32042446422) 已在提交 `cf821a0dae803f523697c75888375feef9724145` 上使用 Linux、Python 3.11 与 DGL 1.1.3 通过。五个图算子判定案例和九个端到端案例全部通过，包括检查点、原始样本、最终表格和 CSV 字节的精确一致。永久证据记录为 [`pytorch-backend-parity-run-32042446422.json`](evidence/goggle/pytorch-backend-parity-run-32042446422.json)，SHA-256 为 `77a4b3feb289703cbd78d2e03dd8338f2ae45c0eec0833fa6a0f25a769d54640`。
 
-强制工作流安装固定的 CPU 环境：PyTorch 2.3.0、DGL 1.1.3、torch-geometric 2.5.3、NumPy 1.26.4、pandas 2.2.3 和 scikit-learn 1.5.2。随后每个案例都会物化并校验两份相互隔离的官方源码。
-
-九个案例覆盖：
-
-- 二分类、多分类和回归；
-- 随机种子 0、19 和 73。
-
-每个案例使用 12 行混合类型训练数据并请求 7 行样本。独立原生路径直接调用官方 `GoggleModel.fit` 与 `Goggle.model.sample`；标准路径使用相同的变换后输入和有效配置调用公开适配器。只有同时满足以下条件，案例才通过：
-
-- 检查点的所有键、形状、类型和张量值完全一致；
-- 核心原始采样数组完全一致；
-- 最终样本 DataFrame 与 CSV 字节完全一致；
-- 行数和规范列顺序完全一致；
-- 数值有限且无缺失；
-- 适配器元数据精确描述固定源码与有效配置；
-- 检查点位于源码树之外；
-- 执行后 18 个源码文件仍全部匹配清单。
-
-九个案例已在 GitHub Actions 运行 [`30945676747`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30945676747) 中全部精确通过。经检查的 JSON 以原始字节提交为 `docs/evidence/goggle/native-parity-run-30945676747.json`，SHA-256 为 `1dbcf50194505820cac0650ba72d519f4f331008bbcaac635f8eb846bec7da59`。工作流产物保留 90 天；仓库中的永久副本是长期证据记录。
+Windows GPU 真实功能已在适配器提交 `0a23a84` 上通过：在没有 DGL 和 PyTorch Geometric 的环境中，使用 PyTorch 2.8.0+cu128 与声明的 RTX 5080 训练了 256 行 Adult 派生夹具，并分别用生成种子 `17`、`29` 产出结构有效且彼此不同的 16 行结果。两次运行均保持 checkpoint 字节不变；第一份结果通过中央 `p3-validity` 评测并完成 Result Bundle 定稿。保留记录见 [`windows-v2-real-function-0a23a84.json`](evidence/goggle/windows-v2-real-function-0a23a84.json)。这只能证明真实功能可运行，不代表生成质量或榜单资格。
 
 ## 使用方式
 
 首次使用先物化固定源码：
 
-```bash
+```powershell
 python -m standardized_tabular_diffusion.cli materialize-model-source --model goggle
 python -m standardized_tabular_diffusion.cli model-source-status --model goggle
 ```
 
-在 Linux/Python 3.11 安装运行环境并执行 smoke preset：
+验证过的 Windows GPU profile 需要先从 PyTorch 官方 CUDA 源安装 PyTorch，再安装模型 extra：
 
-```bash
-python -m pip install "standardized-tabular-diffusion[goggle]"
+```powershell
+python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+python -m pip install -e ".[goggle]"
 python -m standardized_tabular_diffusion.cli run --config configs/smoke/goggle-adult-smoke.json
 ```
 
-正式协议：
+smoke 配置刻意保持很小，默认使用 CPU；Windows V2 验证计划会把设备覆盖为 CUDA。
+
+只有在冻结的 Linux 验证环境中才运行 DGL 判定协议：
 
 ```bash
 python -m standardized_tabular_diffusion.validation.goggle \
@@ -114,4 +124,4 @@ python -m standardized_tabular_diffusion.validation.goggle \
 
 ## 尚未完成的门槛
 
-即使精确原生等价性通过，Goggle 仍保持 `experimental` 和 `unsupported`。正式榜单资格还需要冻结的中央评测协议、获批的数据集档案、资源策略验证、代表性规模运行，以及对尚未验证的 SAGE/异构解码器路径作出明确决定。正式发布支持还需要完成打包、安装、安全、文档和长期维护审查。
+GCN 核心仍保留 `native-parity-validated` 来源结论，PyTorch 后端现已有正式 Linux/DGL 1.1.3 v2 等价证据，当前 Windows 路径也已达到 `minimal-real-passed`。这只代表依赖兼容重实现的等价门槛已经通过。Goggle 仍是 `experimental` 和 `unsupported`。正式榜单资格还要求获批数据集、冻结的中央评测协议、代表性规模资源验证和单独准入。除非未来分别实现并验证，否则 SAGE 和异构解码继续保持不支持。

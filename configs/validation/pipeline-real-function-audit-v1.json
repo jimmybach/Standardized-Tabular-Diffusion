@@ -1,0 +1,224 @@
+{
+  "plan_id": "pipeline-real-function-audit",
+  "version": "1.0",
+  "snapshot_date": "2026-08-20",
+  "overall_state": "complete-with-one-external-block",
+  "state_authority": "audit-only; does not replace registry validation, benchmark, or support status",
+  "primary_environment": {
+    "operating_system": "native Windows 11 x86-64",
+    "python": "3.11",
+    "device_policy": "use the explicitly requested CUDA device and fail closed on unintended fallback"
+  },
+  "phase_1_logic_audit": {
+    "state": "complete-with-confirmed-findings",
+    "scope": "T01-T04 V0/V1 only; no authoritative model training",
+    "models_audited": 21,
+    "task_model_cells_completed": 84,
+    "configuration_projection_passed": 21,
+    "confirmed_findings": 10,
+    "severity_counts": {
+      "S0": 0,
+      "S1": 9,
+      "S2": 1,
+      "S3": 0
+    },
+    "v2_minimal_real_execution_started": false,
+    "report": "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.md",
+    "report_zh_cn": "docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.zh-CN.md",
+    "evidence": "docs/evidence/audits/pipeline-phase1-logic-audit-20260814.json"
+  },
+  "phase_2_remediation": {
+    "state": "complete-v2-pending",
+    "scope": "root-cause remediation and V0/V1 regression for all ten Phase 1 findings",
+    "findings_fixed": 10,
+    "findings_verified": 0,
+    "v2_minimal_real_execution_started": false,
+    "upstream_mathematics_modified": false,
+    "targeted_tests_passed": 27,
+    "full_repository_tests_passed": 579,
+    "full_repository_tests_skipped": 8,
+    "report": "docs/audits/PHASE_2_REMEDIATION_REPORT.md",
+    "report_zh_cn": "docs/audits/PHASE_2_REMEDIATION_REPORT.zh-CN.md",
+    "evidence": "docs/evidence/audits/pipeline-phase2-remediation-20260814.json"
+  },
+  "phase_3_v2_windows": {
+    "state": "complete",
+    "scope": "native-Windows real fit, two-seed generation, decoded-table validation, artifact immutability, and independent central P3 finalization",
+    "scheduled_minimal_real": 18,
+    "minimal_real_passed": 18,
+    "representative_real_retained": 2,
+    "externally_blocked": 1,
+    "registered_identities_accounted_for": 21,
+    "minimal_real_pending": 0,
+    "report": "docs/audits/PHASE_3_V2_WINDOWS_PROTOCOL.md",
+    "report_zh_cn": "docs/audits/PHASE_3_V2_WINDOWS_PROTOCOL.zh-CN.md"
+  },
+  "task_files": [
+    "docs/audits/TASK_01_SEED_AND_CONFIG.md",
+    "docs/audits/TASK_02_DATA_AND_OUTPUT_CONTRACT.md",
+    "docs/audits/TASK_03_CHECKPOINT_AND_ARTIFACT_ISOLATION.md",
+    "docs/audits/TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md",
+    "docs/audits/TASK_05_CENTRAL_EVALUATION_INTEGRATION.md",
+    "docs/audits/TASK_06_FAILURE_AND_RECOVERY.md"
+  ],
+  "inventory_summary": {
+    "registered": 21,
+    "registry_native_parity_validated": 20,
+    "registry_smoke_validated": 1,
+    "representative_real_passed": 2,
+    "minimal_real_passed": 18,
+    "minimal_real_pending": 0,
+    "externally_blocked": 1
+  },
+  "baselines": [
+    {
+      "model_id": "arf",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/arf/windows-v2-finalization-adapter-import-failure-c84a869.json",
+        "docs/evidence/arf/windows-v2-real-function-eb37290.json"
+      ]
+    },
+    {
+      "model_id": "bn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/bn/windows-v2-real-function-ae3cb50.json"]
+    },
+    {
+      "model_id": "codi",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/codi/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "ctab-gan",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "ctab-gan-plus",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctabgan-plus/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "ctgan",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json"]
+    },
+    {
+      "model_id": "goggle",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/goggle/windows-v2-real-function-0a23a84.json"
+      ]
+    },
+    {
+      "model_id": "great",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/great/windows-v2-real-function-6b3f2bc.json"]
+    },
+    {
+      "model_id": "nflow",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/nflow/windows-v2-real-function-5bf59b0.json"]
+    },
+    {
+      "model_id": "nrgboost",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
+        "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
+        "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json"
+      ]
+    },
+    {
+      "model_id": "realtabformer",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json"]
+    },
+    {
+      "model_id": "smote",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/smote/windows-v2-real-function-2ae7aa3.json"]
+    },
+    {
+      "model_id": "stasy",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/stasy/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "tabddpm",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "representative-real-passed",
+      "evidence": [
+        "docs/evidence/evaluation/p5-tabddpm-adult-confirmatory-windows-py311-8351b93.json"
+      ]
+    },
+    {
+      "model_id": "tabdiff",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "representative-real-passed",
+      "evidence": [
+        "docs/evidence/tabdiff/adult-real-function-windows-rtx5080-20260814.json",
+        "docs/evidence/tabdiff/adult-central-route-windows-rtx5080-20260814.json"
+      ]
+    },
+    {
+      "model_id": "tabebm",
+      "registry_validation_level": "smoke-validated",
+      "windows_real_function_state": "externally-blocked",
+      "blocker": "Full real generation requires externally gated TabPFN-v2 access.",
+      "evidence": [
+        "docs/TABEBM_VALIDATION.md",
+        "docs/evidence/tabebm/smoke-validation-run-30974574544.json"
+      ]
+    },
+    {
+      "model_id": "tabsds",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json"]
+    },
+    {
+      "model_id": "tabsyn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json"]
+    },
+    {
+      "model_id": "tabula",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/tabula/windows-v2-real-function-8d72ee8.json"
+      ]
+    },
+    {
+      "model_id": "tabularargn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/tabularargn/windows-v2-finalization-dependency-failure-ec53f98.json",
+        "docs/evidence/tabularargn/windows-v2-real-function-6f9e065.json"
+      ]
+    },
+    {
+      "model_id": "tvae",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tvae/windows-v2-real-function-5bf59b0.json"]
+    }
+  ]
+}

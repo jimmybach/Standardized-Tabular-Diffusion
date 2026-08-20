@@ -14,13 +14,15 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json
+from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json, read_json, sha256_file
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models._runtime import (
     SampleFileEvaluatorMixin,
     isolated_module_tree,
 )
 from standardized_tabular_diffusion.models.base import BaseModelAdapter
+from standardized_tabular_diffusion.output_decoding import decode_declared_integer_columns
+from standardized_tabular_diffusion.runtime_contracts import require_cpu_device
 from standardized_tabular_diffusion.upstream_sources import (
     default_source_path,
     validate_upstream_source,
@@ -351,22 +353,45 @@ class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 encoded = model.synthesizer.sample(int(num_samples))
                 sample_df = model.data_prep.inverse_prep(encoded)
         sample_df = sample_df[dataset_spec.column_names].copy()
+        if len(sample_df) != int(num_samples) or bool(sample_df.isna().any().any()):
+            raise ValueError("CTAB-GAN+ returned an invalid row count or missing sample values")
+        native_sample_df = sample_df.copy()
+        sample_df, integer_decoding = decode_declared_integer_columns(
+            sample_df,
+            dataset_spec,
+            model_name="CTAB-GAN+",
+        )
+        native_sample_path = None
+        if any(record["changed_rows"] for record in integer_decoding.values()):
+            native_sample_path = spec.output_dir / "ctabgan_plus_native_inverse_samples.csv"
+            self._write_dataframe_csv(native_sample_df, native_sample_path)
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
+        sample_metadata = {
+            "model": self.model_name,
+            "dataset": dataset_spec.name,
+            "seed": spec.seed,
+            "requested_rows": int(num_samples),
+            "source": source,
+            "runtime_versions": versions,
+            "checkpoint_path": str(trusted_checkpoint),
+            "checkpoint_sha256": observed_checkpoint_sha256,
+            "sample_path": str(sample_path),
+            "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
+        }
+        if integer_decoding:
+            sample_metadata.update(
+                {
+                    "integer_decoding": integer_decoding,
+                    "native_inverse_sample_path": str(native_sample_path),
+                    "native_inverse_sample_sha256": hashlib.sha256(
+                        native_sample_path.read_bytes()
+                    ).hexdigest(),
+                }
+            )
         atomic_write_json(
             spec.output_dir / "ctabgan_plus_sample_metadata.json",
-            {
-                "model": self.model_name,
-                "dataset": dataset_spec.name,
-                "seed": spec.seed,
-                "requested_rows": int(num_samples),
-                "source": source,
-                "runtime_versions": versions,
-                "checkpoint_path": str(trusted_checkpoint),
-                "checkpoint_sha256": observed_checkpoint_sha256,
-                "sample_path": str(sample_path),
-                "sample_sha256": hashlib.sha256(sample_path.read_bytes()).hexdigest(),
-            },
+            sample_metadata,
         )
         bundle = ArtifactBundle(
             model=self.model_name,
@@ -374,6 +399,10 @@ class CTABGANPlusAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             output_dir=spec.output_dir,
             upstream_workdir=source_root,
             generated_sample_path=sample_path,
+            notes=[
+                "Declared integer columns are decoded with numpy.rint after the official inverse transform; "
+                "the unmodified inverse output is retained whenever values change."
+            ],
         )
         return self._write_bundle(bundle)
 
@@ -542,6 +571,7 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return params
 
     def train(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
@@ -573,6 +603,7 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
                 "dataset_params": dataset_params,
                 "training_params": training_params,
                 "checkpoint_path": str(checkpoint_path),
+                "checkpoint_sha256": sha256_file(checkpoint_path),
             },
         )
         bundle = ArtifactBundle(
@@ -585,6 +616,7 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
         return self._write_bundle(bundle)
 
     def sample(self, spec: RunSpec) -> ArtifactBundle:
+        require_cpu_device(self.model_name, spec.device)
         self._ensure_output_dir(spec)
         dataset_spec = self.resolve_dataset_spec(spec)
         train_df = self._load_training_frame(dataset_spec)
@@ -597,6 +629,32 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             checkpoint_path,
             format_name="NRGBoost joblib model",
         )
+        training_metadata_path = spec.output_dir / "nrgboost_metadata.json"
+        if not training_metadata_path.is_file() or training_metadata_path.is_symlink():
+            raise FileNotFoundError(
+                f"Missing trusted NRGBoost training metadata: {training_metadata_path}"
+            )
+        training_metadata = read_json(training_metadata_path)
+        if not isinstance(training_metadata, dict):
+            raise ValueError("NRGBoost training metadata must be a JSON object.")
+        expected_training_identity = {
+            "package": self.package_name,
+            "package_version": self.package_version,
+            "columns": dataset_spec.column_names,
+        }
+        observed_training_identity = {
+            key: training_metadata.get(key) for key in expected_training_identity
+        }
+        if observed_training_identity != expected_training_identity:
+            raise ValueError(
+                "NRGBoost training metadata does not match the requested model and dataset: "
+                f"expected={expected_training_identity}, observed={observed_training_identity}"
+            )
+        checkpoint_sha256 = sha256_file(trusted_checkpoint)
+        if training_metadata.get("checkpoint_sha256") != checkpoint_sha256:
+            raise ValueError(
+                "NRGBoost checkpoint bytes do not match the immutable training metadata."
+            )
         model = NRGBooster.load(str(trusted_checkpoint))
         num_samples = len(train_df) if spec.num_samples is None else spec.num_samples
         if num_samples < 1:
@@ -617,14 +675,23 @@ class NRGBoostAdapter(BaseModelAdapter, SampleFileEvaluatorMixin):
             raise ValueError("NRGBoost produced missing values; refusing to write an invalid benchmark sample.")
         sample_path = spec.output_dir / "samples.csv"
         self._write_dataframe_csv(sample_df, sample_path)
-        metadata_path = spec.output_dir / "nrgboost_metadata.json"
-        metadata = read_json(metadata_path) if metadata_path.is_file() else {}
-        metadata["sampling"] = {
-            "requested_rows": num_samples,
-            **sampling_params,
-        }
-        metadata["sample_path"] = str(sample_path)
-        atomic_write_json(metadata_path, metadata)
+        atomic_write_json(
+            spec.output_dir / "nrgboost_sample_metadata.json",
+            {
+                "package": self.package_name,
+                "package_version": self.package_version,
+                "training_metadata_path": str(training_metadata_path),
+                "training_metadata_sha256": sha256_file(training_metadata_path),
+                "checkpoint_path": str(trusted_checkpoint),
+                "checkpoint_sha256": checkpoint_sha256,
+                "sampling": {
+                    "requested_rows": num_samples,
+                    **sampling_params,
+                },
+                "sample_path": str(sample_path),
+                "sample_sha256": sha256_file(sample_path),
+            },
+        )
         bundle = ArtifactBundle(
             model=self.model_name,
             dataset=spec.dataset,

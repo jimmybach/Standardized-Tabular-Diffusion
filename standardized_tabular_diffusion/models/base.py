@@ -10,6 +10,11 @@ from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_bytes, atomic_write_json
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
+from standardized_tabular_diffusion.runtime_contracts import (
+    dataset_content_identity,
+    require_dataset_content_identity,
+    validate_action_controls,
+)
 
 
 class BaseModelAdapter(ABC):
@@ -33,6 +38,8 @@ class BaseModelAdapter(ABC):
         raise NotImplementedError
 
     def _ensure_output_dir(self, spec: RunSpec) -> None:
+        if spec.output_dir.is_symlink():
+            raise ValueError(f"output_dir must not be a symlink: {spec.output_dir}")
         spec.output_dir.mkdir(parents=True, exist_ok=True)
 
     def _validate_trusted_executable_artifact(
@@ -87,7 +94,7 @@ class BaseModelAdapter(ABC):
     def resolve_dataset_spec(self, spec: RunSpec) -> DatasetSpec:
         embedded_spec = spec.extra.get("dataset_spec")
         if embedded_spec:
-            return DatasetSpec(
+            dataset_spec = DatasetSpec(
                 name=embedded_spec["name"],
                 task_type=embedded_spec["task_type"],
                 column_names=list(embedded_spec["column_names"]),
@@ -107,7 +114,14 @@ class BaseModelAdapter(ABC):
                 provenance=list(embedded_spec.get("provenance", [])),
                 extra=dict(embedded_spec.get("extra", {})),
             )
-        return get_dataset_spec(spec.dataset, repo_root=self.repo_root)
+        else:
+            dataset_spec = get_dataset_spec(spec.dataset, repo_root=self.repo_root)
+        expected_identity = spec.extra.get("dataset_identity")
+        if expected_identity is not None:
+            if not isinstance(expected_identity, dict):
+                raise TypeError("RunSpec dataset_identity must be a mapping")
+            require_dataset_content_identity(dataset_spec, expected_identity)
+        return dataset_spec
 
     def build_run_spec(
         self,
@@ -119,6 +133,7 @@ class BaseModelAdapter(ABC):
         dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=self.repo_root)
         spec = config.to_run_spec(action=action)
         spec.extra.setdefault("dataset_spec", dataset_spec.to_dict())
+        spec.extra.setdefault("dataset_identity", dataset_content_identity(dataset_spec))
         spec.extra.setdefault("config", config.to_dict())
         return spec
 
@@ -127,6 +142,7 @@ class BaseModelAdapter(ABC):
         config: ExperimentConfig,
         dataset_spec: DatasetSpec | None = None,
     ) -> ArtifactBundle:
+        validate_action_controls(config.model, "train", config.train.extra)
         return self.train(self.build_run_spec(config, dataset_spec=dataset_spec, action="train"))
 
     def sample_from_config(
@@ -134,6 +150,7 @@ class BaseModelAdapter(ABC):
         config: ExperimentConfig,
         dataset_spec: DatasetSpec | None = None,
     ) -> ArtifactBundle:
+        validate_action_controls(config.model, "sample", config.sample.extra)
         return self.sample(self.build_run_spec(config, dataset_spec=dataset_spec, action="sample"))
 
     def evaluate_from_config(

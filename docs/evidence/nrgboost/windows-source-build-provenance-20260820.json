@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "status": "pass",
+  "claim": "diagnostic-windows-source-build-not-authoritative-native-parity",
+  "created_at_utc": "2026-08-20T16:06:57.1094656Z",
+  "source": {
+    "project": "nrgboost",
+    "version": "0.0.3",
+    "url": "https://files.pythonhosted.org/packages/de/36/57e57957b5c66d9c86021bf3b26f6b3c6a9d9810af55997ee11b7f2603cb/nrgboost-0.0.3.tar.gz",
+    "sha256": "7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0",
+    "source_code_modified": false
+  },
+  "build": {
+    "script": "tools/build_nrgboost_windows.ps1",
+    "toolchain_lock": "tools/nrgboost-windows-toolchain.explicit.txt",
+    "toolchain_lock_sha256": "eaf5ad5b4513ca2c528130bff4737a391220dec812969d2ccc482bdbdaeb8658",
+    "conda": "25.5.1",
+    "compiler": "gcc.exe (Rev5, Built by MSYS2 project) 5.3.0",
+    "compiler_backend": "mingw32",
+    "openmp_runtime_bundled_by": "delvewheel==1.13.0",
+    "python": "3.11.15",
+    "architecture": "64bit",
+    "platform": "Microsoft Windows NT 10.0.26200.0"
+  },
+  "output": {
+    "filename": "nrgboost-0.0.3-cp311-cp311-win_amd64.whl",
+    "sha256": "24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739",
+    "committed_or_redistributed": false,
+    "pip_check": "pass",
+    "compiled_extension_smoke_check": "pass"
+  },
+  "v2_runtime": {
+    "environment_lock": "requirements-nrgboost-windows-v2.txt",
+    "environment_lock_sha256": "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e",
+    "repository_commit": "64eec7d590f3610e74795036a1fb188e554741a0",
+    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json",
+    "passing_evidence_sha256": "1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c"
+  },
+  "authoritative_parity_evidence": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
+  "claim_boundary": "The local wheel is a non-redistributed diagnostic build from unmodified official source. It supports Windows functional testing only; retained Linux official-wheel evidence remains the sole native-parity authority."
+}

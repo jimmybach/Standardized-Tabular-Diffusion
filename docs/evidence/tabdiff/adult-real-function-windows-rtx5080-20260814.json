@@ -1,0 +1,164 @@
+{
+  "assertions": {
+    "all_structural_checks_passed": true,
+    "complete_row_count_each_seed": true,
+    "official_results_admitted": false,
+    "one_training_run": true,
+    "real_official_dataset": true,
+    "real_tabdiff_training": true,
+    "release_support_admitted": false,
+    "three_distinct_generation_seeds": true,
+    "windows_python311_rtx5080": true
+  },
+  "claim_boundary": "Development real-function acceptance only. The shortened training preset does not measure final model quality and does not admit TabDiff, Adult, or these samples to Official Results.",
+  "completed_at": "2026-08-14T15:58:18.132447+00:00",
+  "dataset": {
+    "columns": [
+      "age",
+      "workclass",
+      "fnlwgt",
+      "education",
+      "education.num",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week",
+      "native.country",
+      "income"
+    ],
+    "info_sha256": "1d3d1d72144ed74b1b95d7b3b8a14286e708b596220df0523e00e0967e47e573",
+    "materialization": "reviewed official UCI split with train-only imputation",
+    "metric_real_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4",
+    "metric_test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+    "missing_values": 0,
+    "test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+    "test_rows": 16281,
+    "train_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4",
+    "train_rows": 32561
+  },
+  "duration_seconds": 608.623566100001,
+  "environment": {
+    "dependencies": {
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "scikit-learn": "1.5.2",
+      "sdmetrics": "0.12.1",
+      "torch": "2.8.0+cu128",
+      "xgboost": "2.1.1"
+    },
+    "hardware": {
+      "compute_capability": [
+        12,
+        0
+      ],
+      "cuda_available": true,
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 5080",
+      "gpu_count": 1,
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.11.15",
+      "torch": "2.8.0+cu128"
+    }
+  },
+  "evidence_schema_version": "1.0.0",
+  "model": {
+    "checkpoint_path": "C:\\Users\\zhili\\Documents\\\u8868\u683c\u6570\u636e\u5408\u6210benchmark\u4ed3\u5e93\\TabDiff-main\\tabdiff\\ckpt\\adult\\adult-windows-rtx5080-real-function-v2\\model_20.pt",
+    "checkpoint_reused_across_seeds": true,
+    "checkpoint_sha256": "4319e6938a1ae4619cdd17a995d71f5de0d50c450ff096754e6ef6ab2e0a26f0",
+    "configuration": {
+      "claim": "bounded real-function acceptance; not an official-quality training run",
+      "differences": {
+        "data.dequant_dist": {
+          "official": "none",
+          "runtime": "round"
+        },
+        "sample.batch_size": {
+          "official": 10000,
+          "runtime": 4096
+        },
+        "train.main.check_val_every": {
+          "official": 2000,
+          "runtime": 20
+        },
+        "train.main.steps": {
+          "official": 8000,
+          "runtime": 20
+        }
+      },
+      "official_path": "TabDiff-main/tabdiff/configs/tabdiff_configs.toml",
+      "official_sha256": "f54c1592571295818789dad25ee388537b84962d541bcaed744bc0ab3198e175",
+      "runtime_path": "configs/validation/tabdiff-adult-real-function-v1.toml",
+      "runtime_sha256": "06f6fcef063cf10c7cdc148b42d0c496cccec561abe049fc754bdf48e1136d7c"
+    },
+    "generation_seeds": [
+      3,
+      4,
+      5
+    ],
+    "model_id": "tabdiff",
+    "source_integrity": {
+      "manifest_path": "standardized_tabular_diffusion\\resources\\upstream\\tabdiff-source-manifest.json",
+      "manifest_sha256": "c1e72d2d65c5478125f5938a8a113bc06e358a8e580fb7482e09aac2627efceb",
+      "upstream_commit": "5ecdb3356261aea72716cc9a779f31d7ad083bf4",
+      "upstream_files_verified": 27,
+      "upstream_tree": "052a505cb1fbee5cbc705eeb0717d90d706ffb91"
+    },
+    "train_run_metadata_sha256": "9db0a86dba7d97c5e0038065fa9036654e8bfeba77389a997b2017e34643272a",
+    "training_runs": 1,
+    "training_seed": 0
+  },
+  "protocol_id": "tabdiff-adult-real-function-windows-v1",
+  "repository": {
+    "branch": "codex/adult-three-model-benchmark",
+    "head": "f9626e199119da87a5d6df1f621b0b110738e3fc",
+    "working_tree_dirty": true,
+    "working_tree_note": "The prior failed-attempt evidence file was present and untracked when the successful run began; execution source was fixed at the recorded committed head."
+  },
+  "samples": [
+    {
+      "categorical_domains_valid": true,
+      "columns": 15,
+      "finite_numerical_values": true,
+      "generation_seed": 3,
+      "integer_columns_integral": true,
+      "missing_values": 0,
+      "numerical_ranges_valid": true,
+      "path": "C:\\Users\\zhili\\Documents\\\u8868\u683c\u6570\u636e\u5408\u6210benchmark\u4ed3\u5e93\\artifacts\\tabdiff-real-function\\adult-windows-rtx5080-real-function-v2\\seed-3\\samples.csv",
+      "rows": 32561,
+      "run_metadata_sha256": "4163210827c385c759f5e101681dc40def1e4a6471497b75cc22c4c49e6aac18",
+      "sha256": "c45689e95b3b5f914d87f1707f57bb875978a3d31749667668edc58e9a76dbd2"
+    },
+    {
+      "categorical_domains_valid": true,
+      "columns": 15,
+      "finite_numerical_values": true,
+      "generation_seed": 4,
+      "integer_columns_integral": true,
+      "missing_values": 0,
+      "numerical_ranges_valid": true,
+      "path": "C:\\Users\\zhili\\Documents\\\u8868\u683c\u6570\u636e\u5408\u6210benchmark\u4ed3\u5e93\\artifacts\\tabdiff-real-function\\adult-windows-rtx5080-real-function-v2\\seed-4\\samples.csv",
+      "rows": 32561,
+      "run_metadata_sha256": "1b09f3e422317736ca1fda667e68955443e11ba6bc8bcf7b6dd74d0767c9fe91",
+      "sha256": "5ae4733a41b6792306e10571f12091f617c909d96dc19c27cb0b075c3388f196"
+    },
+    {
+      "categorical_domains_valid": true,
+      "columns": 15,
+      "finite_numerical_values": true,
+      "generation_seed": 5,
+      "integer_columns_integral": true,
+      "missing_values": 0,
+      "numerical_ranges_valid": true,
+      "path": "C:\\Users\\zhili\\Documents\\\u8868\u683c\u6570\u636e\u5408\u6210benchmark\u4ed3\u5e93\\artifacts\\tabdiff-real-function\\adult-windows-rtx5080-real-function-v2\\seed-5\\samples.csv",
+      "rows": 32561,
+      "run_metadata_sha256": "57423e18b0e1dfdc6d2a910b49b83310f207dbd289f29585522f3b50a9fd74a3",
+      "sha256": "205be4731fcdb55d6e34a923f0e748d31e1fd55b8479f840e0c56db0e46011b4"
+    }
+  ],
+  "started_at": "2026-08-14T15:48:09.508950+00:00",
+  "status": "passed"
+}

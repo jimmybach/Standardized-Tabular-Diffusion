@@ -10,10 +10,11 @@
       "llm": "sshleifer/tiny-gpt2",
       "epochs": 1,
       "batch_size": 2,
-      "logging_steps": 1,
-      "save_steps": 1000,
       "max_train_rows": 32,
-      "report_to": "none"
+      "train_kwargs": {
+        "logging_steps": 1,
+        "save_steps": 1000
+      }
     }
   },
   "sample": {

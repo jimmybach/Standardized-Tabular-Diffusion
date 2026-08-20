@@ -112,4 +112,10 @@ Pull Request 工作流运行 [`30930939961`](https://github.com/jimmybach/Standa
 
 ## 当前决定
 
-经审阅的 Linux 证据将 CTAB-GAN 提升为 `native-parity-validated`。它仍是 `experimental`、`unsupported`，且不进入 Official Results。Apache-2.0 已解决源码再分发问题，但数据集准入、中央评测、完整规模运行资格、治理和发布测试仍待完成。
+经审阅的 Linux 证据将 CTAB-GAN 提升为 `native-parity-validated`。它仍是 `experimental`、`unsupported`，且不进入 Official Results。Apache-2.0 已解决源码再分发问题，但数据集准入、代表性规模的运行与质量验证、治理和发布测试仍待完成。
+
+## 原生 Windows V2 结果
+
+仓库提交 `17fc74e2f9be8a507ec1f921bb3b509881937154` 使用校验和锁定且未经修改的官方源码，在 Windows 11、Python 3.11.15 和 PyTorch 2.3.0 CPU 上通过了 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生无缺失夹具完成一个有界真实训练 epoch，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 16 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+证据保留在 `docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json`，SHA-256 为 `22144b71cf3eea455ba77631553377fe769b5fd543a125073977fa2f778898fa`。这项有界功能结论不代表代表性质量、隐私、Official Results 准入或发布支持。

@@ -1,0 +1,670 @@
+{
+  "adapter": {
+    "actions": [
+      "train",
+      "sample",
+      "evaluate"
+    ],
+    "benchmark_track": "experimental",
+    "class_name": "TabularARGNAdapter",
+    "distribution_form": "package",
+    "evaluation_input": "sample-file",
+    "evidence_records": [
+      "docs/UPSTREAM_SOURCE_AUDIT.md",
+      "docs/TABULARARGN_VALIDATION.md",
+      "docs/evidence/tabularargn/native-parity-run-30961590047.json",
+      "standardized_tabular_diffusion/resources/upstream/tabularargn-wheel-manifest.json",
+      "standardized_tabular_diffusion/resources/upstream/source-lock.json",
+      ".github/workflows/tabularargn-validation.yml"
+    ],
+    "install_extra": "tabularargn",
+    "license_status": "Apache-2.0 package dependency; native parity passed; release gates pending",
+    "model_id": "tabularargn",
+    "modification_status": "adapter-only",
+    "module": "standardized_tabular_diffusion.models.tabularargn",
+    "patch_set_ids": [],
+    "reproduction_target": "original-method",
+    "requires_dataset_paths": true,
+    "revision_status": "pinned-official-package-native-parity-validated",
+    "source_authority": "method-author",
+    "source_root": null,
+    "support_level": "unsupported",
+    "task_types": [
+      "classification",
+      "regression"
+    ],
+    "upstream_repository": "https://github.com/mostly-ai/mostlyai-engine",
+    "upstream_revision": "0b96f02e4fad47c7c19c985fda4311230e20bbb5",
+    "validation_level": "native-parity-validated"
+  },
+  "attempts": [],
+  "central_evaluation": {
+    "bundle_id": "run-01e45b97fa014befab8ea98727f4920c",
+    "bundle_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-17\\evaluation-result",
+    "elapsed_seconds": 8.875,
+    "environment": {
+      "hardware": {
+        "cuda_available": false,
+        "cuda_runtime": null,
+        "gpu": null,
+        "torch": null
+      },
+      "packages": {
+        "attrs": "26.1.0",
+        "jsonschema": "4.23.0",
+        "jsonschema-specifications": "2025.9.1",
+        "numpy": "1.26.4",
+        "packaging": "26.2",
+        "pandas": "2.2.3",
+        "pip": "25.1.1",
+        "pyarrow": "18.1.0",
+        "python-dateutil": "2.9.0.post0",
+        "pytz": "2026.3.post1",
+        "pyyaml": "6.0.2",
+        "referencing": "0.37.0",
+        "rpds-py": "2026.6.3",
+        "setuptools": "79.0.1",
+        "six": "1.17.0",
+        "standardized-tabular-diffusion": "0.1.0rc1",
+        "typing_extensions": "4.16.0",
+        "tzdata": "2026.3"
+      },
+      "packages_sha256": "716c3de3f7b5883955f38d7a1402100de4b0e2eda0118d89effeb6f7f034b5e9",
+      "pip_check": {
+        "conflicts": [],
+        "output": [
+          "No broken requirements found."
+        ],
+        "reviewed_waivers": [],
+        "status": "pass"
+      },
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.11.15",
+      "python_executable": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-envs\\central-evaluation\\Scripts\\python.exe"
+    },
+    "environment_lock": {
+      "packages": {
+        "attrs": {
+          "observed": "26.1.0",
+          "required": "==26.1.0"
+        },
+        "jsonschema": {
+          "observed": "4.23.0",
+          "required": "==4.23.0"
+        },
+        "jsonschema-specifications": {
+          "observed": "2025.9.1",
+          "required": "==2025.9.1"
+        },
+        "numpy": {
+          "observed": "1.26.4",
+          "required": "==1.26.4"
+        },
+        "packaging": {
+          "observed": "26.2",
+          "required": "==26.2"
+        },
+        "pandas": {
+          "observed": "2.2.3",
+          "required": "==2.2.3"
+        },
+        "pyarrow": {
+          "observed": "18.1.0",
+          "required": "==18.1.0"
+        },
+        "python-dateutil": {
+          "observed": "2.9.0.post0",
+          "required": "==2.9.0.post0"
+        },
+        "pytz": {
+          "observed": "2026.3.post1",
+          "required": "==2026.3.post1"
+        },
+        "pyyaml": {
+          "observed": "6.0.2",
+          "required": "==6.0.2"
+        },
+        "referencing": {
+          "observed": "0.37.0",
+          "required": "==0.37.0"
+        },
+        "rpds-py": {
+          "observed": "2026.6.3",
+          "required": "==2026.6.3"
+        },
+        "six": {
+          "observed": "1.17.0",
+          "required": "==1.17.0"
+        },
+        "typing-extensions": {
+          "observed": "4.16.0",
+          "required": "==4.16.0"
+        },
+        "tzdata": {
+          "observed": "2026.3",
+          "required": "==2026.3"
+        }
+      },
+      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\requirements-pipeline-v2-evaluation.txt",
+      "sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+      "status": "pass"
+    },
+    "finalization_status": "finalized",
+    "present_files": 18,
+    "protocol": "p3-validity",
+    "status": "pass",
+    "validation": {
+      "bundle_id": "run-01e45b97fa014befab8ea98727f4920c",
+      "finalization_status": "finalized",
+      "not_applicable_files": 2,
+      "pending_files": 0,
+      "present_files": 18,
+      "root": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-17\\evaluation-result"
+    }
+  },
+  "claim_boundary": "Minimal real authoritative train/sample functionality on a deterministic Adult-derived validation fixture under native Windows 11 and Python 3.11. This is not full-data quality, native parity, benchmark eligibility, Official Results admission, or release support.",
+  "completed_at": "2026-08-17T23:12:34.660880+00:00",
+  "configuration": {
+    "path": "configs/smoke/tabularargn-adult-v2.json",
+    "sha256": "20f13be366891919f5920a5fc768d2b6a78ea991ffecacaa51c207394899776e"
+  },
+  "dataset_spec": {
+    "categorical_columns": [
+      "workclass",
+      "education",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "native.country"
+    ],
+    "column_names": [
+      "age",
+      "workclass",
+      "fnlwgt",
+      "education",
+      "education.num",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week",
+      "native.country",
+      "income"
+    ],
+    "extra": {
+      "column_info": {
+        "age": "int",
+        "capital.gain": "int",
+        "capital.loss": "int",
+        "education": "str",
+        "education.num": "int",
+        "fnlwgt": "int",
+        "hours.per.week": "int",
+        "income": "str",
+        "marital.status": "str",
+        "native.country": "str",
+        "occupation": "str",
+        "race": "str",
+        "relationship": "str",
+        "sex": "str",
+        "workclass": "str"
+      },
+      "validation_fixture": {
+        "files": {
+          "X_cat_test.npy": {
+            "bytes": 106624,
+            "sha256": "daac84d22a10c833118e97f346bafba40d13b549ff4e9c6fd7799a40b3bb0a67"
+          },
+          "X_cat_train.npy": {
+            "bytes": 213120,
+            "sha256": "f96fecd9f8abbb04c0e2e2b16065f218d2f7d46c9154643a339c31f32b258ace"
+          },
+          "X_num_test.npy": {
+            "bytes": 3200,
+            "sha256": "43fa9f1662fd03e255b2d82bd0b6877929adf146450ddd413cbe34a98f83c68c"
+          },
+          "X_num_train.npy": {
+            "bytes": 6272,
+            "sha256": "ba2ccb8d6b918f9ac38cba400985354a62f726019f79fd9505dace5138886be0"
+          },
+          "info.json": {
+            "bytes": 6689,
+            "sha256": "b4c08f10340c9a9f3d50c43353bff95938f8135ab987421dc067e4954367c0e8"
+          },
+          "test.csv": {
+            "bytes": 15954,
+            "sha256": "da0a66fef31414bc7872453ff833cde74f10d0ca4e5a1e9e4a42a183229f9a07"
+          },
+          "train.csv": {
+            "bytes": 31713,
+            "sha256": "95f40d7f3b8df34c33598f92fdf3d5ec9265b5bd17d32bad79d9539a84b1af1e"
+          },
+          "y_test.npy": {
+            "bytes": 2688,
+            "sha256": "bda4fda6dc779daf149152b25bc1e9949643c0c3aa7a431d07d02a80d933a285"
+          },
+          "y_train.npy": {
+            "bytes": 5248,
+            "sha256": "a6d46f74de849b48cc926c86799f4b581d8df4a28efc010863e5223c53aa4902"
+          }
+        },
+        "fixture_id": "pipeline-v2-adult-256-v1",
+        "plan_fixture": {
+          "fixture_id": "pipeline-v2-adult-256-v1",
+          "selection_policy": "greedy categorical-domain coverage followed by deterministic stratified fill",
+          "selection_seed": 20260814,
+          "source_dataset": "adult",
+          "test_rows": 128,
+          "train_rows": 256
+        },
+        "schema_version": "1.0.0",
+        "selection": {
+          "test_indices_sha256": "aeea79da5c21da51dbeda37a01e1214516b4b9cdef4f58bb1dc46a05012537d2",
+          "train_indices_sha256": "df1e32e1769690793e102ba8fbb251109ecad0185e90915bfc963ece37a6b871"
+        },
+        "source": {
+          "info_sha256": "1d3d1d72144ed74b1b95d7b3b8a14286e708b596220df0523e00e0967e47e573",
+          "test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+          "train_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4"
+        }
+      }
+    },
+    "metadata_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\shared-fixture\\pipeline-v2-adult-256-v1\\info.json",
+    "name": "pipeline-v2-adult-256-v1",
+    "numerical_columns": [
+      "age",
+      "fnlwgt",
+      "education.num",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week"
+    ],
+    "provenance": [
+      "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\shared-fixture\\pipeline-v2-adult-256-v1\\fixture-manifest.json"
+    ],
+    "target_columns": [
+      "income"
+    ],
+    "task_type": "classification",
+    "test_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\shared-fixture\\pipeline-v2-adult-256-v1\\test.csv",
+    "train_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\shared-fixture\\pipeline-v2-adult-256-v1\\train.csv",
+    "val_data_path": null
+  },
+  "elapsed_seconds": 44.48399999999674,
+  "entry": {
+    "batch": "heavy-gpu",
+    "config_path": "configs/smoke/tabularargn-adult-v2.json",
+    "device": "cuda",
+    "environment_lock": "requirements-tabularargn-validation.txt",
+    "model_id": "tabularargn",
+    "required_packages": {
+      "mostlyai-engine": "2.6.2",
+      "torch": "2.11.0"
+    }
+  },
+  "environment": {
+    "hardware": {
+      "cuda_available": true,
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA GeForce RTX 5080",
+      "gpu_count": 1,
+      "torch": "2.11.0+cu128"
+    },
+    "packages": {
+      "accelerate": "1.12.0",
+      "aiohappyeyeballs": "2.7.1",
+      "aiohttp": "3.14.3",
+      "aiosignal": "1.4.0",
+      "annotated-doc": "0.0.5",
+      "annotated-types": "0.8.0",
+      "anyio": "4.14.2",
+      "attrs": "26.1.0",
+      "certifi": "2026.7.22",
+      "charset-normalizer": "3.5.0",
+      "colorama": "0.4.6",
+      "datasets": "4.6.1",
+      "dill": "0.4.0",
+      "filelock": "3.32.3",
+      "frozenlist": "1.8.0",
+      "fsspec": "2026.2.0",
+      "h11": "0.16.0",
+      "hf-xet": "1.6.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface_hub": "1.12.2",
+      "idna": "3.18",
+      "iniconfig": "2.3.0",
+      "jinja2": "3.1.6",
+      "joblib": "1.5.3",
+      "json_repair": "0.58.1",
+      "markdown-it-py": "4.2.0",
+      "markupsafe": "3.0.3",
+      "mdurl": "0.1.2",
+      "mostlyai-engine": "2.6.2",
+      "mpmath": "1.3.0",
+      "multidict": "6.7.1",
+      "multiprocess": "0.70.18",
+      "networkx": "3.6.1",
+      "numpy": "2.2.6",
+      "opacus": "1.6.0",
+      "opt_einsum": "3.4.0",
+      "packaging": "26.3",
+      "pandas": "3.0.2",
+      "peft": "0.19.1",
+      "pillow": "12.3.0",
+      "pip": "25.1.1",
+      "pluggy": "1.6.0",
+      "propcache": "0.5.2",
+      "psutil": "5.9.8",
+      "pyarrow": "23.0.1",
+      "pydantic": "2.13.4",
+      "pydantic_core": "2.46.4",
+      "pygments": "2.20.0",
+      "pytest": "8.3.5",
+      "python-dateutil": "2.9.0.post0",
+      "pyyaml": "6.0.3",
+      "regex": "2026.7.19",
+      "requests": "2.34.2",
+      "rich": "15.0.0",
+      "safetensors": "0.8.0",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1",
+      "setuptools": "80.10.2",
+      "shellingham": "1.5.4",
+      "six": "1.17.0",
+      "standardized-tabular-diffusion": "0.1.0rc1",
+      "sympy": "1.14.0",
+      "threadpoolctl": "3.6.0",
+      "tokenizers": "0.22.2",
+      "torch": "2.11.0+cu128",
+      "torchaudio": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "tqdm": "4.70.0",
+      "transformers": "5.7.0",
+      "typer": "0.27.1",
+      "typing-inspection": "0.4.4",
+      "typing_extensions": "4.16.0",
+      "tzdata": "2026.3",
+      "urllib3": "2.7.0",
+      "xgrammar": "0.1.33",
+      "xxhash": "4.0.0",
+      "yarl": "1.24.5"
+    },
+    "packages_sha256": "952834c322276a56dd7763f30e54155eb273f66701463356cebd1c490b89140c",
+    "pip_check": {
+      "conflicts": [],
+      "output": [
+        "No broken requirements found."
+      ],
+      "reviewed_waivers": [],
+      "status": "pass"
+    },
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "python_executable": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-envs\\heavy-gpu\\Scripts\\python.exe"
+  },
+  "environment_lock": {
+    "packages": {
+      "accelerate": {
+        "observed": "1.12.0",
+        "required": "==1.12.0"
+      },
+      "datasets": {
+        "observed": "4.6.1",
+        "required": "==4.6.1"
+      },
+      "huggingface-hub": {
+        "observed": "1.12.2",
+        "required": "==1.12.2"
+      },
+      "joblib": {
+        "observed": "1.5.3",
+        "required": "==1.5.3"
+      },
+      "json-repair": {
+        "observed": "0.58.1",
+        "required": "==0.58.1"
+      },
+      "mostlyai-engine": {
+        "observed": "2.6.2",
+        "required": "==2.6.2"
+      },
+      "numpy": {
+        "observed": "2.2.6",
+        "required": "==2.2.6"
+      },
+      "opacus": {
+        "observed": "1.6.0",
+        "required": "==1.6.0"
+      },
+      "pandas": {
+        "observed": "3.0.2",
+        "required": "==3.0.2"
+      },
+      "peft": {
+        "observed": "0.19.1",
+        "required": "==0.19.1"
+      },
+      "psutil": {
+        "observed": "5.9.8",
+        "required": "==5.9.8"
+      },
+      "pyarrow": {
+        "observed": "23.0.1",
+        "required": "==23.0.1"
+      },
+      "pytest": {
+        "observed": "8.3.5",
+        "required": "==8.3.5"
+      },
+      "scikit-learn": {
+        "observed": "1.8.0",
+        "required": "==1.8.0"
+      },
+      "setuptools": {
+        "observed": "80.10.2",
+        "required": "==80.10.2"
+      },
+      "tokenizers": {
+        "observed": "0.22.2",
+        "required": "==0.22.2"
+      },
+      "torch": {
+        "observed": "2.11.0+cu128",
+        "required": "==2.11.0"
+      },
+      "transformers": {
+        "observed": "5.7.0",
+        "required": "==5.7.0"
+      },
+      "xgrammar": {
+        "observed": "0.1.33",
+        "required": "==0.1.33"
+      }
+    },
+    "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\requirements-tabularargn-validation.txt",
+    "sha256": "3af2ad2c9748dceeb5e8aaf80cc7b208b980a1b4baf938cca3432f4e0b08c877",
+    "status": "pass"
+  },
+  "finalized_at": "2026-08-17T23:12:57.537316+00:00",
+  "fixture_manifest": {
+    "files": {
+      "X_cat_test.npy": {
+        "bytes": 106624,
+        "sha256": "daac84d22a10c833118e97f346bafba40d13b549ff4e9c6fd7799a40b3bb0a67"
+      },
+      "X_cat_train.npy": {
+        "bytes": 213120,
+        "sha256": "f96fecd9f8abbb04c0e2e2b16065f218d2f7d46c9154643a339c31f32b258ace"
+      },
+      "X_num_test.npy": {
+        "bytes": 3200,
+        "sha256": "43fa9f1662fd03e255b2d82bd0b6877929adf146450ddd413cbe34a98f83c68c"
+      },
+      "X_num_train.npy": {
+        "bytes": 6272,
+        "sha256": "ba2ccb8d6b918f9ac38cba400985354a62f726019f79fd9505dace5138886be0"
+      },
+      "info.json": {
+        "bytes": 6689,
+        "sha256": "b4c08f10340c9a9f3d50c43353bff95938f8135ab987421dc067e4954367c0e8"
+      },
+      "test.csv": {
+        "bytes": 15954,
+        "sha256": "da0a66fef31414bc7872453ff833cde74f10d0ca4e5a1e9e4a42a183229f9a07"
+      },
+      "train.csv": {
+        "bytes": 31713,
+        "sha256": "95f40d7f3b8df34c33598f92fdf3d5ec9265b5bd17d32bad79d9539a84b1af1e"
+      },
+      "y_test.npy": {
+        "bytes": 2688,
+        "sha256": "bda4fda6dc779daf149152b25bc1e9949643c0c3aa7a431d07d02a80d933a285"
+      },
+      "y_train.npy": {
+        "bytes": 5248,
+        "sha256": "a6d46f74de849b48cc926c86799f4b581d8df4a28efc010863e5223c53aa4902"
+      }
+    },
+    "fixture_id": "pipeline-v2-adult-256-v1",
+    "plan_fixture": {
+      "fixture_id": "pipeline-v2-adult-256-v1",
+      "selection_policy": "greedy categorical-domain coverage followed by deterministic stratified fill",
+      "selection_seed": 20260814,
+      "source_dataset": "adult",
+      "test_rows": 128,
+      "train_rows": 256
+    },
+    "schema_version": "1.0.0",
+    "selection": {
+      "test_indices_sha256": "aeea79da5c21da51dbeda37a01e1214516b4b9cdef4f58bb1dc46a05012537d2",
+      "train_indices_sha256": "df1e32e1769690793e102ba8fbb251109ecad0185e90915bfc963ece37a6b871"
+    },
+    "source": {
+      "info_sha256": "1d3d1d72144ed74b1b95d7b3b8a14286e708b596220df0523e00e0967e47e573",
+      "test_csv_sha256": "574bbbbdd0fe5f3b79a68528f12512eeec0d9e0e365065f3ccd4a82a72665596",
+      "train_csv_sha256": "262d41aa70495045b16ce36bea075f85a193443481f26b449e3d3f12a9440db4"
+    }
+  },
+  "model_id": "tabularargn",
+  "plan": {
+    "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\configs\\validation\\pipeline-v2-windows-v1.json",
+    "sha256": "4975609bb0827269e2dbaa8b10c25ebfdfedb3f569311ec69ab687754749a614"
+  },
+  "protocol_id": "pipeline-v2-native-windows-v1",
+  "repository_commit": "6f9e065fd69f094806794fab69b4e03874699a82",
+  "samples": [
+    {
+      "bytes": 1069,
+      "columns": [
+        "age",
+        "workclass",
+        "fnlwgt",
+        "education",
+        "education.num",
+        "marital.status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "capital.gain",
+        "capital.loss",
+        "hours.per.week",
+        "native.country",
+        "income"
+      ],
+      "copied_training_manifest_sha256": "bad814dc3170c0e900faead0fd8915a405271df6ff9fcd99acf007dc016ecea3",
+      "elapsed_seconds": 0.2649999999994179,
+      "missing_cells": 0,
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-17",
+      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-17\\samples.csv",
+      "rows": 8,
+      "schema_valid": true,
+      "seed": 17,
+      "sha256": "52f93d17e53317dfb43203075af0dd2fc473896674a3755f308fa8adc2596cf7",
+      "training_artifacts_unchanged": true
+    },
+    {
+      "bytes": 996,
+      "columns": [
+        "age",
+        "workclass",
+        "fnlwgt",
+        "education",
+        "education.num",
+        "marital.status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "capital.gain",
+        "capital.loss",
+        "hours.per.week",
+        "native.country",
+        "income"
+      ],
+      "copied_training_manifest_sha256": "bad814dc3170c0e900faead0fd8915a405271df6ff9fcd99acf007dc016ecea3",
+      "elapsed_seconds": 0.18699999999807915,
+      "missing_cells": 0,
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-29",
+      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\sample-seed-29\\samples.csv",
+      "rows": 8,
+      "schema_valid": true,
+      "seed": 29,
+      "sha256": "74046f3408f37a10383c74a72bdb5fad3ed70260a7a6765abca17074ba3dd672",
+      "training_artifacts_unchanged": true
+    }
+  ],
+  "schema_version": "1.0.0",
+  "seed_outputs_distinct": true,
+  "started_at": "2026-08-17T23:11:50.173406+00:00",
+  "status": "pass",
+  "tracked_repository_unchanged": true,
+  "train": {
+    "artifact_manifest": {
+      "tabularargn-model-metadata.json": {
+        "bytes": 16213,
+        "sha256": "ec3e265ee26f358b55c8adf1c79d79ec8f29a8e0788f16851cd5b5523b74825b"
+      },
+      "tabularargn_workspace/ModelStore/model-data/model-configs.json": {
+        "bytes": 2015,
+        "sha256": "e9b0bd2a8e47a387849115ea8ed6895f71fafc638ea2a30dcc2d823eb365ad02"
+      },
+      "tabularargn_workspace/ModelStore/model-data/model-weights.pt": {
+        "bytes": 89877,
+        "sha256": "a60bd3462e3d86888141eb7f11a8d2450649b85068d08bfbc88f369ceeccb754"
+      },
+      "tabularargn_workspace/ModelStore/model-data/progress-messages.csv": {
+        "bytes": 146,
+        "sha256": "b494ef3543ef1a39ad3bb9285c2ed584ea395e26746c9b92362ce1fec61bb48a"
+      },
+      "tabularargn_workspace/ModelStore/tgt-stats/stats.json": {
+        "bytes": 13646,
+        "sha256": "c1c7c046ebe03a1f1bfb93a860d09d6c4b19b3e52ebf06ccf1aeef0b3287ef15"
+      }
+    },
+    "artifact_manifest_sha256": "bad814dc3170c0e900faead0fd8915a405271df6ff9fcd99acf007dc016ecea3",
+    "bundle": {
+      "dataset": "pipeline-v2-adult-256-v1",
+      "evaluation_bundle_path": null,
+      "generated_sample_path": null,
+      "model": "tabularargn",
+      "notes": [
+        "Official TabularARGN workspace written to C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\train\\tabularargn_workspace.",
+        "OriginalData was removed after training; ModelStore remains integrity-manifested for generation."
+      ],
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\train",
+      "standardized_summary_path": null,
+      "upstream_metrics_path": null,
+      "upstream_workdir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-envs\\heavy-gpu\\Lib\\site-packages"
+    },
+    "elapsed_seconds": 19.218999999997322,
+    "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\6f9e065\\tabularargn\\tabularargn\\train",
+    "status": "pass"
+  }
+}

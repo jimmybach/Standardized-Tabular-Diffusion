@@ -16,7 +16,7 @@ from typing import Any
 from standardized_tabular_diffusion.interfaces import RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
 
-PROTOCOL_ID = "tabsyn-native-parity-v1"
+PROTOCOL_ID = "tabsyn-native-parity-v2"
 MANIFEST_RELATIVE_PATH = Path("standardized_tabular_diffusion/resources/upstream/tabsyn-source-manifest.json")
 DATASET_NAME = "tabsyn_parity"
 EXPECTED_SAMPLE_ROWS = 12
@@ -233,18 +233,21 @@ def _adapter_run(
     upstream_root: Path,
     output_root: Path,
     seed: int,
-) -> tuple[TabSynAdapter, list[Path]]:
+) -> tuple[TabSynAdapter, Path, list[Path]]:
     os.environ["STANDARDIZED_TABSYN_NUM_THREADS"] = "1"
     adapter = TabSynAdapter(repo_root)
     adapter.upstream_root = upstream_root
+    run_root = output_root / "run"
     train_bundle = adapter.train(
-        RunSpec(model="tabsyn", dataset=DATASET_NAME, output_dir=output_root / "train", device="cpu", seed=seed)
+        RunSpec(model="tabsyn", dataset=DATASET_NAME, output_dir=run_root, device="cpu", seed=seed)
     )
+    train_manifest = output_root / "train-artifacts.json"
+    shutil.copy2(train_bundle.output_dir / "artifacts.json", train_manifest)
     sample_bundle = adapter.sample(
         RunSpec(
             model="tabsyn",
             dataset=DATASET_NAME,
-            output_dir=output_root / "sample",
+            output_dir=run_root,
             device="cpu",
             seed=seed,
             num_samples=EXPECTED_SAMPLE_ROWS,
@@ -253,8 +256,8 @@ def _adapter_run(
     )
     if sample_bundle.generated_sample_path is None:
         raise AssertionError("TabSyn adapter did not record its generated sample path.")
-    manifests = [train_bundle.output_dir / "artifacts.json", sample_bundle.output_dir / "artifacts.json"]
-    return adapter, manifests
+    manifests = [train_manifest, sample_bundle.output_dir / "artifacts.json"]
+    return adapter, run_root, manifests
 
 
 def _compare_state_dicts(native_path: Path, adapter_path: Path) -> dict[str, Any]:
@@ -380,15 +383,21 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
 
         native_sample = case_root / "native-samples.csv"
         native_commands = _native_commands(native_root, native_sample, seed)
-        adapter, manifests = _adapter_run(repo_root, adapter_root, case_root / "adapter-manifests", seed)
-        adapter_sample = case_root / "adapter-manifests" / "sample" / "samples.csv"
+        adapter, adapter_run_root, manifests = _adapter_run(
+            repo_root,
+            adapter_root,
+            case_root / "adapter-manifests",
+            seed,
+        )
+        adapter_runtime_root = adapter_run_root / "tabsyn-runtime"
+        adapter_sample = adapter_run_root / "samples.csv"
         checkpoints = {
-            relative: _compare_state_dicts(native_root / relative, adapter_root / relative)
+            relative: _compare_state_dicts(native_root / relative, adapter_runtime_root / relative)
             for relative in relative_checkpoints
         }
         latent = _compare_array(
             native_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
-            adapter_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
+            adapter_runtime_root / "tabsyn/vae/ckpt/tabsyn_parity/train_z.npy",
         )
         samples = _compare_samples(native_sample, adapter_sample)
         manifests_valid = all(
@@ -430,6 +439,7 @@ def run_validation(repo_root: Path, output_dir: Path, evidence_path: Path) -> di
                     "adapter_manifests_valid": manifests_valid,
                 },
                 "adapter_upstream_root": str(adapter.upstream_root),
+                "adapter_run_root": str(adapter_run_root),
             }
         )
     if fixture is None or runtime_config is None:

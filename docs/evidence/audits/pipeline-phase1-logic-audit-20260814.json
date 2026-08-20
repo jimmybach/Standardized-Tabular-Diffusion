@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.0",
+  "phase": "pipeline-real-function-phase-1",
+  "protocol_id": "pipeline-v0-v1-logic-audit-v1",
+  "status": "passed-with-confirmed-findings",
+  "audited_repository_commit": "e80296340f6a083eead55fded24a5ea6027d5c93",
+  "audited_at": "2026-08-14",
+  "primary_target": "native Windows 11 x86-64, Python 3.11, requested CUDA device",
+  "scope": {
+    "models": 21,
+    "tasks_per_model": 4,
+    "task_model_cells": 84,
+    "tasks": [
+      "T01-seed-and-config",
+      "T02-data-and-output-contract",
+      "T03-checkpoint-and-artifact-isolation",
+      "T04-windows-gpu-and-dependencies"
+    ],
+    "execution_level": "V0-static-plus-V1-controlled-simulation",
+    "real_model_training_performed": false
+  },
+  "claim_boundary": "This evidence completes the dependency-light Phase 1 audit only. It confirms configuration projection, source-level contract observations, and controlled simulations against the bound repository snapshot. It does not establish native-Windows real model execution, output quality, native parity beyond retained model-specific evidence, benchmark eligibility, Official Results admission, or release support. Confirmed findings remain open for Phase 2 remediation.",
+  "methods": {
+    "configuration_projection": {
+      "state": "passed",
+      "models_checked": 21,
+      "train_seed": 1729,
+      "sample_seed": 2718,
+      "device": "cuda:7",
+      "num_samples": 37,
+      "assertions": [
+        "train and sample action extras remain separated",
+        "all adapters receive the embedded DatasetSpec",
+        "all adapters receive the declared train/sample seeds at RunSpec construction",
+        "all adapters receive the requested device and row count at RunSpec construction"
+      ]
+    },
+    "source_review": {
+      "state": "completed",
+      "model_classes": 21,
+      "reviewed_boundaries": [
+        "configuration precedence and downstream consumption",
+        "training and sampling seed consumption",
+        "DatasetSpec path and content identity",
+        "decoded row/column/missing-value postconditions",
+        "checkpoint and sample ownership",
+        "non-empty and symlinked output behavior",
+        "device validation and unintended fallback",
+        "subprocess path and environment handling"
+      ]
+    },
+    "controlled_simulations": {
+      "tabddpm_argument_invariance": {
+        "state": "confirmed-finding",
+        "input_variations": [
+          "seed 11 versus 29",
+          "device cpu versus cuda:7",
+          "num_samples 37 versus 53",
+          "two distinct output directories"
+        ],
+        "observed_command_identical": true,
+        "observed_command": [
+          "scripts/pipeline.py",
+          "--config",
+          "<same-config-path>",
+          "--sample"
+        ],
+        "generated_sample_path_in_both_bundles": null
+      },
+      "data_preflight_content_identity": {
+        "state": "confirmed-finding",
+        "observation": "Direct preflight records paths and existence but no file size or cryptographic digest."
+      },
+      "sample_seed_consumption": {
+        "state": "confirmed-findings",
+        "observation": "CTGAN/TVAE load and sample without applying RunSpec.seed; Goggle sampling reseeds from the training runtime configuration."
+      }
+    }
+  },
+  "audited_files_sha256": {
+    "standardized_tabular_diffusion/config.py": "251e65d52072e8d78da754afbbaf4db3207e666bfcd44493e9faaf9ab6e52b22",
+    "standardized_tabular_diffusion/interfaces.py": "7093a5f30d9f0a57092e65cb129bf16f8bef0d20e1c9ffdc219df4c5a47f12d4",
+    "standardized_tabular_diffusion/models/base.py": "6d4e05bccad1067e77105dc57aec68e231c833a80ef5785d70f60a19584aa2db",
+    "standardized_tabular_diffusion/runner.py": "e647e89600fdb1f9d5f26be3584ff3a08b9179456b21e883a45ae81af7fa0596",
+    "standardized_tabular_diffusion/models/final_wave_baselines.py": "3a9fe6c8aae7d40a3164639c97823247c7e1d34a0143140d6638a78b8a91b89b",
+    "standardized_tabular_diffusion/models/structured_baselines.py": "d2b65c6c035c85e919218e30a52b443db51611394ecde3a06d01cb25bb3d612a",
+    "standardized_tabular_diffusion/models/vendored_baselines.py": "970d52af5318e16aa9ef26a6b819f5a500a2495a34e35f458bd39718ad5ec72b",
+    "standardized_tabular_diffusion/models/ctabgan.py": "381884be8eec48d1b4e4f66dc954cf32f2ebb1304f436352caafd373f02dbe15",
+    "standardized_tabular_diffusion/models/next_wave_baselines.py": "f52a49e361183107f75e00c3f3a986743b376c0e5016cde75a5ad3afd09cddd3",
+    "standardized_tabular_diffusion/models/sample_baselines.py": "716036b2125ece25c54941e7baa5fe8d76930839484b01fbe8c548ed3b2cfc95",
+    "standardized_tabular_diffusion/models/goggle.py": "19cf7ed88eb8728847eb93064f24781aed90a1224492acd2f83ae74b70f4d331",
+    "standardized_tabular_diffusion/models/great.py": "5212f93993bfb310412ee190b26e4c29fe4cd1dff0e79120b5f64064cec97bcd",
+    "standardized_tabular_diffusion/models/realtabformer.py": "92c8373acde85d4790d85389352651556803e0b872eb332ddffdb0043eb4b462",
+    "standardized_tabular_diffusion/models/paper_gap_baselines.py": "e8d79ff8da7b796c0ece578bb573abde2a448d54a52bbf49f0af8ad2ab08d6a3",
+    "standardized_tabular_diffusion/models/tabddpm.py": "05311bf7bde209ad31ec0894f7e0eb700f4558f027154127c073583c2cbd6b18",
+    "standardized_tabular_diffusion/models/tabdiff.py": "4945b4efc214ca85b221fb2ea368c35d3dd87a121495097bd029ad4d12fcceac",
+    "standardized_tabular_diffusion/models/tabebm.py": "f384bf7f239239d95797fcc39be5af62cd19d7893cd5b64fb1a2217de88219f5",
+    "standardized_tabular_diffusion/models/tabsyn.py": "577f4feb29160be276d8d35f26d110d814a500257da9c1431341611cc47322af",
+    "standardized_tabular_diffusion/models/tabula.py": "66c5781fc36b9c72a7ddfb49b7059cb6660b4ae5b72150658e5813707fa26ab7",
+    "standardized_tabular_diffusion/models/tabularargn.py": "7b38bd31c425c2a49edbcc40f4c794682d3a14cb2a5f7f731f993022df5fbd0f",
+    "standardized_tabular_diffusion/compat/goggle_launcher.py": "67baa004645965652317c6802e4924a3a566aae8245f2cfb1b984bd5aa8fc378",
+    "standardized_tabular_diffusion/compat/tabsyn_launcher.py": "a88b96b69f98a7945816e297d80cc44f4e087bb82ff6eadfc160964161055942",
+    "TabDDPM-main/scripts/pipeline.py": "811bf54fbf23e6b3d7e09e1c8af3c914208bb03aca0d67072af5b4dd1d29717e",
+    "TabDiff-main/tabdiff/main.py": "988a2bb26dfa3db97570ff7723864cf0de1cf47dd279842b44725b1089d86711",
+    "TabSyn-main/tabsyn/main.py": "e3f75dc56f5367e66b78818a9c398c5b48b6e0324a8bea7d5789356199742508",
+    "TabSyn-main/tabsyn/vae/main.py": "ccb1ab85a0672727c50a64b28b5547b3310bbe2332aa106d4242e5a954106346"
+  },
+  "findings": [
+    {
+      "id": "RF-CORE-001",
+      "task": "T01",
+      "severity": "S1",
+      "title": "Unknown action controls are not uniformly rejected",
+      "affected_models": ["arf", "bn", "ctab-gan", "ctab-gan-plus", "ctgan", "great", "nflow", "nrgboost", "smote", "tabddpm", "tabdiff", "tabebm", "tabsds", "tabsyn", "tabula", "tvae"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-CORE-002",
+      "task": "T02",
+      "severity": "S1",
+      "title": "Direct runner preflight does not bind dataset files by content",
+      "affected_models": ["arf", "bn", "codi", "ctab-gan", "ctab-gan-plus", "ctgan", "goggle", "great", "nflow", "nrgboost", "realtabformer", "smote", "stasy", "tabddpm", "tabdiff", "tabebm", "tabsds", "tabsyn", "tabula", "tabularargn", "tvae"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-CORE-003",
+      "task": "T03",
+      "severity": "S1",
+      "title": "Direct runs do not universally reject reused output directories or isolate sample seeds",
+      "affected_models": ["arf", "bn", "codi", "ctab-gan", "ctab-gan-plus", "ctgan", "goggle", "great", "nflow", "nrgboost", "realtabformer", "smote", "stasy", "tabddpm", "tabdiff", "tabebm", "tabsds", "tabsyn", "tabula", "tabularargn", "tvae"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-CORE-004",
+      "task": "T04",
+      "severity": "S2",
+      "title": "Requested device is ignored or delegated without fail-closed observation on selected paths",
+      "affected_models": ["great", "nrgboost", "smote", "tabddpm", "tabsds", "tabula"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-INTERNAL-DATA-001",
+      "task": "T02",
+      "severity": "S1",
+      "title": "Native-layout adapters are not bound to the canonical DatasetSpec content",
+      "affected_models": ["codi", "stasy", "tabddpm", "tabdiff", "tabsyn"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-TABDDPM-001",
+      "task": "T01",
+      "severity": "S1",
+      "title": "TabDDPM RunSpec seed, device, and row count do not reach the upstream command",
+      "affected_models": ["tabddpm"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-TABDDPM-002",
+      "task": "T03",
+      "severity": "S1",
+      "title": "TabDDPM output ownership remains in TOML and sample bundles expose no generated table",
+      "affected_models": ["tabddpm"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-GOGGLE-001",
+      "task": "T01",
+      "severity": "S1",
+      "title": "Goggle sampling uses the training seed instead of the requested sampling seed",
+      "affected_models": ["goggle"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-CTGAN-FAMILY-001",
+      "task": "T01",
+      "severity": "S1",
+      "title": "CTGAN and TVAE do not apply the requested sampling seed after checkpoint load",
+      "affected_models": ["ctgan", "tvae"],
+      "state": "confirmed"
+    },
+    {
+      "id": "RF-UPSTREAM-WORKSPACE-001",
+      "task": "T03",
+      "severity": "S1",
+      "title": "Selected native adapters keep mutable checkpoints or results in upstream worktrees",
+      "affected_models": ["tabddpm", "tabdiff", "tabsyn"],
+      "state": "confirmed"
+    }
+  ],
+  "baselines": [
+    {"model_id": "arf", "source_file": "standardized_tabular_diffusion/models/final_wave_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "bn", "source_file": "standardized_tabular_diffusion/models/structured_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "codi", "source_file": "standardized_tabular_diffusion/models/vendored_baselines.py", "t01": [], "t02": ["RF-CORE-002", "RF-INTERNAL-DATA-001"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "ctab-gan", "source_file": "standardized_tabular_diffusion/models/ctabgan.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "ctab-gan-plus", "source_file": "standardized_tabular_diffusion/models/next_wave_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "ctgan", "source_file": "standardized_tabular_diffusion/models/sample_baselines.py", "t01": ["RF-CORE-001", "RF-CTGAN-FAMILY-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "goggle", "source_file": "standardized_tabular_diffusion/models/goggle.py", "t01": ["RF-GOGGLE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "great", "source_file": "standardized_tabular_diffusion/models/great.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": ["RF-CORE-004"]},
+    {"model_id": "nflow", "source_file": "standardized_tabular_diffusion/models/structured_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "nrgboost", "source_file": "standardized_tabular_diffusion/models/next_wave_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": ["RF-CORE-004"]},
+    {"model_id": "realtabformer", "source_file": "standardized_tabular_diffusion/models/realtabformer.py", "t01": [], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "smote", "source_file": "standardized_tabular_diffusion/models/sample_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": ["RF-CORE-004"]},
+    {"model_id": "stasy", "source_file": "standardized_tabular_diffusion/models/vendored_baselines.py", "t01": [], "t02": ["RF-CORE-002", "RF-INTERNAL-DATA-001"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "tabddpm", "source_file": "standardized_tabular_diffusion/models/tabddpm.py", "t01": ["RF-CORE-001", "RF-TABDDPM-001"], "t02": ["RF-CORE-002", "RF-INTERNAL-DATA-001"], "t03": ["RF-CORE-003", "RF-TABDDPM-002", "RF-UPSTREAM-WORKSPACE-001"], "t04": ["RF-CORE-004"]},
+    {"model_id": "tabdiff", "source_file": "standardized_tabular_diffusion/models/tabdiff.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002", "RF-INTERNAL-DATA-001"], "t03": ["RF-CORE-003", "RF-UPSTREAM-WORKSPACE-001"], "t04": []},
+    {"model_id": "tabebm", "source_file": "standardized_tabular_diffusion/models/tabebm.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "tabsds", "source_file": "standardized_tabular_diffusion/models/paper_gap_baselines.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": ["RF-CORE-004"]},
+    {"model_id": "tabsyn", "source_file": "standardized_tabular_diffusion/models/tabsyn.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002", "RF-INTERNAL-DATA-001"], "t03": ["RF-CORE-003", "RF-UPSTREAM-WORKSPACE-001"], "t04": []},
+    {"model_id": "tabula", "source_file": "standardized_tabular_diffusion/models/tabula.py", "t01": ["RF-CORE-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": ["RF-CORE-004"]},
+    {"model_id": "tabularargn", "source_file": "standardized_tabular_diffusion/models/tabularargn.py", "t01": [], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []},
+    {"model_id": "tvae", "source_file": "standardized_tabular_diffusion/models/sample_baselines.py", "t01": ["RF-CORE-001", "RF-CTGAN-FAMILY-001"], "t02": ["RF-CORE-002"], "t03": ["RF-CORE-003"], "t04": []}
+  ],
+  "summary": {
+    "models_audited": 21,
+    "task_model_cells_completed": 84,
+    "configuration_projection_passed": 21,
+    "confirmed_findings": 10,
+    "severity_counts": {"S0": 0, "S1": 9, "S2": 1, "S3": 0},
+    "phase_2_required": true,
+    "v2_minimal_real_execution_started": false
+  }
+}

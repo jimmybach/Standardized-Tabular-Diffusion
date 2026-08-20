@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -12,8 +14,10 @@ from standardized_tabular_diffusion.registry import get_adapter_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
-EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-30910275922.json"
-EVIDENCE_SHA256 = "748501c8671c272a1e5d54c85fdb6550182d0e5578d550a3ca7681cc712f4570"
+EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "native-parity-run-32047234665.json"
+EVIDENCE_SHA256 = "ce9698605f13c641b033d221a56721a957a90135fb2ea639ad2730922e73ae24"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctgan" / "windows-v2-real-function-5bf59b0.json"
+WINDOWS_EVIDENCE_SHA256 = "b5028b249a696cc8e3401da82bfb09aea323fcd0c01d1005080e96997cb9b5ea"
 
 
 def _write_test_wheel(path: Path, *, unsafe_member: str | None = None) -> str:
@@ -43,27 +47,73 @@ def test_ctgan_package_lock_matches_registry_and_protocol() -> None:
     assert source_lock["license"] == ctgan_validation.LICENSE_EXPRESSION
 
 
-def test_retained_ctgan_evidence_is_immutable_and_complete() -> None:
+def test_retained_ctgan_v2_evidence_is_immutable_and_complete() -> None:
     evidence_bytes = EVIDENCE_PATH.read_bytes()
     evidence = json.loads(evidence_bytes)
 
     assert hashlib.sha256(evidence_bytes).hexdigest() == EVIDENCE_SHA256
     assert evidence["status"] == "pass"
     assert evidence["protocol_id"] == ctgan_validation.PROTOCOL_ID
-    assert evidence["repository_commit"] == "18528f7f28ec2d8aa1a3f2b7d94c6d2cf8163d0e"
+    assert evidence["repository_commit"] == "9d5d7e9415f41976bc5524ce5547595ea11e2043"
     assert evidence["environment"]["platform"].startswith("Linux-")
     assert evidence["environment"]["python"] == "3.11.15"
     assert evidence["environment"]["torch"] == "2.3.0+cpu"
     assert evidence["source"]["installed_distribution"]["record_files_verified"] == 20
     assert evidence["source"]["wheel"]["sha256"] == ctgan_validation.WHEEL_SHA256
-    assert evidence["seed_cases"] == [0, 19, 73]
-    assert [case["seed"] for case in evidence["cases"]] == [0, 19, 73]
+    assert evidence["seed_cases"] == [
+        {"train_seed": 0, "sample_seed": 101},
+        {"train_seed": 19, "sample_seed": 7},
+        {"train_seed": 73, "sample_seed": 29},
+    ]
+    assert tuple(
+        (case["train_seed"], case["sample_seed"]) for case in evidence["cases"]
+    ) == ctgan_validation.SEED_CASES
     assert all(case["status"] == "pass" for case in evidence["cases"])
     assert all(ctgan_validation._case_passed(case["comparisons"]) for case in evidence["cases"])
     assert all(
         case["adapter_artifacts"]["sample_sha256"] == case["native_artifacts"]["sample_sha256"]
         for case in evidence["cases"]
     )
+
+
+def test_retained_ctgan_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "5bf59b0effa29a0c2694cdbe05b1a8f40443c481"
+    assert evidence["entry"]["device"] == "cuda"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert evidence["environment"]["hardware"]["cuda_runtime"] == "12.8"
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert "libzero" not in evidence["environment"]["packages"]
+    assert evidence["environment_lock"]["sha256"] == (
+        "2697509472a3a9acfdafcc8b781e2906b82c216ffd64d5a214510ac43b9cc9e9"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["ctgan"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/ctgan/windows-v2-real-function-5bf59b0.json" in get_adapter_spec(
+        "ctgan"
+    ).evidence_records
 
 
 def test_ctgan_wheel_validation_checks_identity_and_license(tmp_path: Path, monkeypatch) -> None:
@@ -112,3 +162,49 @@ def test_ctgan_parity_gate_requires_every_comparison() -> None:
     assert ctgan_validation._case_passed(comparisons) is True
     comparisons["samples"]["frame_exact"] = False
     assert ctgan_validation._case_passed(comparisons) is False
+
+
+def test_ctgan_native_control_reseeds_loaded_model_for_independent_sampling(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import pandas as pd
+
+    class FakeCTGAN:
+        instances: list[FakeCTGAN] = []
+
+        def __init__(self, **_kwargs: object) -> None:
+            self.seeds: list[int] = []
+            self.__class__.instances.append(self)
+
+        def set_random_state(self, seed: int) -> None:
+            self.seeds.append(seed)
+
+        def fit(self, _frame: pd.DataFrame, *, discrete_columns: list[str]) -> None:
+            assert discrete_columns == ["category"]
+
+        @staticmethod
+        def save(path: Path) -> None:
+            path.write_bytes(b"checkpoint")
+
+        @staticmethod
+        def sample(rows: int) -> pd.DataFrame:
+            return pd.DataFrame({"value": range(rows), "category": ["a"] * rows})
+
+    monkeypatch.setitem(sys.modules, "ctgan", SimpleNamespace(CTGAN=FakeCTGAN))
+    monkeypatch.setattr(
+        ctgan_validation,
+        "_load_official",
+        lambda _path: FakeCTGAN.instances[-1],
+    )
+
+    _model, samples, _artifacts = ctgan_validation._run_native(
+        pd.DataFrame({"value": [1, 2], "category": ["a", "b"]}),
+        ["category"],
+        tmp_path / "native",
+        train_seed=17,
+        sample_seed=83,
+    )
+
+    assert FakeCTGAN.instances[-1].seeds == [17, 83]
+    assert len(samples) == ctgan_validation.EXPECTED_SAMPLE_ROWS

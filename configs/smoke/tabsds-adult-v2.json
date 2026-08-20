@@ -1,0 +1,10 @@
+{
+  "model": "tabsds",
+  "dataset": "adult",
+  "output_dir": "artifacts/validation/pipeline-v2/tabsds",
+  "train": {"enabled": true, "seed": 13, "device": "cpu", "extra": {"n_levels": 4}},
+  "sample": {"enabled": true, "seed": 17, "num_samples": 32, "checkpoint_path": null, "extra": {}},
+  "evaluation": {"enabled": false, "extra": {}},
+  "tags": ["v2", "windows", "bounded-real"],
+  "notes": "Bounded checksum-locked TabSDS V2 configuration."
+}
