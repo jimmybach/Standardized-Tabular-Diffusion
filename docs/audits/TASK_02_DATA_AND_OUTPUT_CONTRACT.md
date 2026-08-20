@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_02_DATA_AND_OUTPUT_CONTRACT.zh-CN.md](TASK_02_DATA_AND_OUTPUT_CONTRACT.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: complete for all 21 registered identities at V0/V1; all 20 non-blocked identities retain a passing decoded-table observation and TabEBM retains its explicit external-access block
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: leakage, schema corruption, or silent output repair
 
@@ -46,3 +46,7 @@ The structural gate must inspect the generated table as produced. Any separate d
 ## Exit gate
 
 Every supported task type has contract coverage, every non-blocked adapter has a V2 decoded-table observation, and all silent mutations have either been removed or documented as an authoritative decoding operation with parity evidence.
+
+## Completion record
+
+Shared input identity, train-only preprocessing, schema, row-count, and immutable-output gates are regression-tested. The 18 minimal-real Windows probes and the two representative-real records all produced tables that passed the declared structural contract and central P3 finalization without synthetic-data repair. TabEBM remains externally blocked before full generation. This record establishes functionality only for the retained identities; it does not admit a dataset, model, or result to an official leaderboard.

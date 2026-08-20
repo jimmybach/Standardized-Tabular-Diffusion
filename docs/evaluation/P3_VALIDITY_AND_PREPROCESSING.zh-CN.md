@@ -2,10 +2,10 @@
 
 英文原文：[P3_VALIDITY_AND_PREPROCESSING.md](P3_VALIDITY_AND_PREPROCESSING.md)
 
-- 状态：已留存 Linux/Python 3.11 证据的诊断性实现；Windows 准入尚待完成
+- 状态：诊断性实现已留存 Linux/Python 3.11 协议证据，并覆盖全部未阻塞 baseline 的原生 Windows 执行
 - 协议：`p3-validity@0.3.0`
 - 指标版本：`1.0.0`
-- 发布环境：已有托管 Windows/Python 3.11 主要平台家族 CI；精确原生 Windows 11 准入仍待完成；Linux/Python 3.11 为次要环境
+- 发布环境：原生 Windows 11/Python 3.11 为主要平台家族，全部 20 个未阻塞身份均保留最终化 bundle；Linux/Python 3.11 继续作为次要协议验证环境
 - 是否允许进入 Official Results：否
 
 ## 1. 范围

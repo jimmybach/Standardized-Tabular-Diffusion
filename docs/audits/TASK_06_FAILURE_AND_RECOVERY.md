@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_06_FAILURE_AND_RECOVERY.zh-CN.md](TASK_06_FAILURE_AND_RECOVERY.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: complete at the shared pipeline boundary; real failures and linked clean reruns are retained, and the sole external block remains explicit
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: false success, irrecoverable partial state, or leaked sensitive context
 
@@ -43,3 +43,7 @@ Do not inject failures that risk the user's primary checkpoints or uncommitted d
 ## Exit gate
 
 Each shared failure class has deterministic tests, all adapter-specific exceptions map to structured states, safe retry is demonstrated, and no S0/S1 failure-handling finding remains unresolved except an explicit release blocker.
+
+## Completion record
+
+The orchestration suite verifies structured failure states, non-zero child failure, timeout handling, checksum-complete cache reuse, attempt ancestry, and successful linked retry. Phase 3 retained rather than erased the first failed attempts for TabularARGN, ARF, and NRGBoost, then recorded the exact environment remediation and clean rerun. TabuLa's upstream unbounded sampling loop is contained by a Windows child-process timeout, and TabEBM's gated dependency is reported as an external block. No unresolved S0/S1 failure-handling finding remains.

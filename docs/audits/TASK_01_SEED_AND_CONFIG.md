@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_01_SEED_AND_CONFIG.zh-CN.md](TASK_01_SEED_AND_CONFIG.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: complete for all 21 registered identities at V0/V1; all 20 non-blocked identities retain passing Windows V2 or stronger evidence, and TabEBM retains its explicit external-access block
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: silent scientific error
 
@@ -43,3 +43,7 @@ Use a small valid dataset and the fastest model-specific configuration that stil
 ## Exit gate
 
 Every non-blocked adapter has an argument/configuration trace plus a V2 observation. Each confirmed defect has an entry in [PIPELINE_FINDINGS.md](PIPELINE_FINDINGS.md), a root-cause fix, and a regression test at the narrowest shared boundary.
+
+## Completion record
+
+Phase 1 completed the configuration-projection audit for all 21 adapters. Phase 2 fixed the confirmed shared and model-specific propagation defects. Phase 3 then retained a passing native-Windows observation for every non-blocked identity: 18 minimal-real probes plus the stronger representative-real TabDDPM and TabDiff records. TabEBM is recorded separately as externally blocked rather than passed or failed. This closes the audit task without promoting any model to Official Results or release support.

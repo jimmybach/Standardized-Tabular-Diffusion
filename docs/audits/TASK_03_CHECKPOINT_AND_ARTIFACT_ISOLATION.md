@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_03_CHECKPOINT_AND_ARTIFACT_ISOLATION.zh-CN.md](TASK_03_CHECKPOINT_AND_ARTIFACT_ISOLATION.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: complete at the shared pipeline boundary; all 20 non-blocked identities retain isolated, immutable Windows V2 or stronger artifacts, and TabEBM retains its explicit external-access block
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: stale-result reuse, cross-run contamination, or destructive overwrite
 
@@ -40,3 +40,7 @@ Prove that every run owns its checkpoint, logs, decoded samples, metadata, and e
 ## Exit gate
 
 Every adapter has a complete path map and isolation test. All real probes create reproducible manifests, stale-artifact sentinels fail safely, and retry/resume behavior is covered by regression tests.
+
+## Completion record
+
+Run identity, dataset identity, seed-specific output ownership, atomic finalization, cache validation, and retry ancestry are enforced at shared boundaries and covered by regressions. Every retained Windows real-function pass records immutable training artifacts and separate hashes for the two declared generation seeds; the representative TabDDPM and TabDiff records satisfy the stronger V3 boundary. No tracked upstream source is used as a mutable runtime workspace. This does not claim that every upstream implementation offers native resume semantics.

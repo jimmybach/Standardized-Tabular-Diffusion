@@ -2,7 +2,7 @@
 
 英文原文：[TASK_01_SEED_AND_CONFIG.md](TASK_01_SEED_AND_CONFIG.md)
 
-- 状态：计划覆盖全部 21 个适配器
+- 状态：全部 21 个注册身份已完成 V0/V1；20 个未阻塞身份均保留通过的 Windows V2 或更强证据，TabEBM 保留明确的外部访问阻塞
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 - 风险类型：无声的科学错误
 
@@ -43,3 +43,7 @@
 ## 退出条件
 
 每个未被阻塞的适配器都具有参数/配置追踪和 V2 观察。每个已确认缺陷都写入 [PIPELINE_FINDINGS.zh-CN.md](PIPELINE_FINDINGS.zh-CN.md)，完成根因修复，并在最窄的公共边界添加回归测试。
+
+## 完成记录
+
+第一阶段完成了全部 21 个适配器的配置传递审计；第二阶段修复了已确认的共享及模型专属传递缺陷；第三阶段为每个未阻塞身份保留了通过的原生 Windows 观察，包括 18 个最小真实探针，以及证据更强的 TabDDPM 和 TabDiff 代表性真实记录。TabEBM 作为外部阻塞单独记录，不计为通过或失败。该任务由此完成，但不会自动把任何模型提升到 Official Results 或发布支持状态。

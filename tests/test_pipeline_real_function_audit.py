@@ -21,6 +21,8 @@ PHASE_1_EVIDENCE = REPO_ROOT / "docs/evidence/audits/pipeline-phase1-logic-audit
 PHASE_2_REPORT = REPO_ROOT / "docs/audits/PHASE_2_REMEDIATION_REPORT.md"
 PHASE_2_REPORT_ZH = REPO_ROOT / "docs/audits/PHASE_2_REMEDIATION_REPORT.zh-CN.md"
 PHASE_2_EVIDENCE = REPO_ROOT / "docs/evidence/audits/pipeline-phase2-remediation-20260814.json"
+PHASE_3_REPORT = REPO_ROOT / "docs/audits/PHASE_3_V2_WINDOWS_PROTOCOL.md"
+PHASE_3_REPORT_ZH = REPO_ROOT / "docs/audits/PHASE_3_V2_WINDOWS_PROTOCOL.zh-CN.md"
 LOCAL_LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
 FINDING_ID = re.compile(r"RF-[A-Z0-9-]+")
 SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -85,6 +87,8 @@ def test_audit_assets_and_declared_evidence_exist() -> None:
         PHASE_2_REPORT,
         PHASE_2_REPORT_ZH,
         PHASE_2_EVIDENCE,
+        PHASE_3_REPORT,
+        PHASE_3_REPORT_ZH,
     ]
     for relative in audit["task_files"]:
         task = REPO_ROOT / relative
@@ -106,6 +110,8 @@ def test_audit_document_local_links_resolve() -> None:
         PHASE_1_REPORT_ZH,
         PHASE_2_REPORT,
         PHASE_2_REPORT_ZH,
+        PHASE_3_REPORT,
+        PHASE_3_REPORT_ZH,
     }
     audit = _load_audit()
     for relative in audit["task_files"]:
@@ -237,3 +243,29 @@ def test_phase_2_evidence_records_all_fixes_without_overclaiming_v2() -> None:
             cwd=REPO_ROOT,
         )
         assert hashlib.sha256(retained_bytes).hexdigest() == digest, relative
+
+
+def test_phase_3_snapshot_records_completed_windows_execution() -> None:
+    audit = _load_audit()
+    phase = audit["phase_3_v2_windows"]
+    summary = audit["inventory_summary"]
+
+    assert audit["overall_state"] == "complete-with-one-external-block"
+    assert phase["state"] == "complete"
+    assert phase["scheduled_minimal_real"] == phase["minimal_real_passed"] == 18
+    assert phase["minimal_real_passed"] == summary["minimal_real_passed"]
+    assert phase["representative_real_retained"] == summary["representative_real_passed"] == 2
+    assert phase["externally_blocked"] == summary["externally_blocked"] == 1
+    assert phase["minimal_real_pending"] == summary["minimal_real_pending"] == 0
+    assert phase["registered_identities_accounted_for"] == summary["registered"] == 21
+    for field in ("report", "report_zh_cn"):
+        assert (REPO_ROOT / phase[field]).is_file()
+
+
+def test_current_audit_task_documents_do_not_remain_planned() -> None:
+    audit = _load_audit()
+    for relative in audit["task_files"]:
+        task = REPO_ROOT / relative
+        translated = task.with_name(f"{task.stem}.zh-CN{task.suffix}")
+        assert "planned across all 21 adapters" not in task.read_text(encoding="utf-8")
+        assert "计划覆盖全部 21 个适配器" not in translated.read_text(encoding="utf-8")

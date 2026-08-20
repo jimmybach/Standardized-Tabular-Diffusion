@@ -1,11 +1,11 @@
 # P2 Shape and Trend Evaluation
 
-- Status: passed on authoritative Linux/Python 3.11; diagnostic protocol only
+- Status: diagnostic protocol validated by authoritative Linux/Python 3.11 parity evidence and retained native-Windows execution
 - Protocol: `p2-shape-trend@0.2.0` (draft, diagnostic)
 - Metric identities: `sdmetrics-column-shapes@1.0.0` and `sdmetrics-column-pair-trends@1.0.0`
-- Release environment: hosted Windows/Python 3.11 primary-family CI is present; exact Windows 11 qualification remains pending; retained parity evidence is Linux/Python 3.11
+- Release environment: native Windows 11/Python 3.11 execution is retained through the representative TabDiff central-route record; exact SDMetrics source-parity authority remains Linux/Python 3.11
 - Official Results admission: no
-- Last updated: 2026-08-05
+- Last updated: 2026-08-20
 
 ## Scope and trust boundary
 

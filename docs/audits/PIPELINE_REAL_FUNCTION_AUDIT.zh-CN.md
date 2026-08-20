@@ -11,6 +11,7 @@
 - 第一阶段证据：[`pipeline-phase1-logic-audit-20260814.json`](../evidence/audits/pipeline-phase1-logic-audit-20260814.json)
 - 第二阶段报告：[跨 Baseline 修复报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)
 - 第二阶段证据：[`pipeline-phase2-remediation-20260814.json`](../evidence/audits/pipeline-phase2-remediation-20260814.json)
+- 第三阶段协议与完成记录：[原生 Windows V2 协议](PHASE_3_V2_WINDOWS_PROTOCOL.zh-CN.md)
 
 ## 1. 目的
 

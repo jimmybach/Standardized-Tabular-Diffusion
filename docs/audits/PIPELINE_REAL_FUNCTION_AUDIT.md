@@ -11,6 +11,7 @@ Chinese translation: [PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md](PIPELINE_REAL_FUNCT
 - Phase 1 evidence: [`pipeline-phase1-logic-audit-20260814.json`](../evidence/audits/pipeline-phase1-logic-audit-20260814.json)
 - Phase 2 report: [Cross-Baseline Remediation Report](PHASE_2_REMEDIATION_REPORT.md)
 - Phase 2 evidence: [`pipeline-phase2-remediation-20260814.json`](../evidence/audits/pipeline-phase2-remediation-20260814.json)
+- Phase 3 protocol and completion record: [Native-Windows V2 Protocol](PHASE_3_V2_WINDOWS_PROTOCOL.md)
 
 ## 1. Purpose
 

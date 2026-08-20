@@ -2,10 +2,10 @@
 
 Chinese translation: [P3_VALIDITY_AND_PREPROCESSING.zh-CN.md](P3_VALIDITY_AND_PREPROCESSING.zh-CN.md)
 
-- Status: diagnostic implementation with retained Linux/Python 3.11 evidence; Windows qualification pending
+- Status: diagnostic implementation with retained Linux/Python 3.11 protocol evidence and native-Windows execution across every non-blocked baseline
 - Protocol: `p3-validity@0.3.0`
 - Metric versions: `1.0.0`
-- Release environment: hosted Windows/Python 3.11 primary-family CI is present; exact native Windows 11 qualification remains pending; Linux/Python 3.11 is secondary
+- Release environment: native Windows 11/Python 3.11 is the primary family and retains finalized bundles for all 20 non-blocked identities; Linux/Python 3.11 remains the secondary protocol-validation environment
 - Official Results allowed: no
 
 ## 1. Scope
