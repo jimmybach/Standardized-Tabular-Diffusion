@@ -4,7 +4,7 @@ Chinese translation: [PIPELINE_FINDINGS.zh-CN.md](PIPELINE_FINDINGS.zh-CN.md)
 
 - Status: active ledger
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
-- Last synchronized: 2026-08-17
+- Last synchronized: 2026-08-20
 
 ## Rules
 
@@ -45,7 +45,7 @@ Every new row must include: finding ID, task, severity, affected adapters, obser
 | RF-CTGAN-FAMILY-001 | T01 | S1 | `ctgan`, `tvae` | The loaded official synthesizer now resets its random state from the requested sample seed immediately before generation. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); CTGAN-family random-state regression | fixed |
 | RF-UPSTREAM-WORKSPACE-001 | T03 | S1 | `tabddpm`, `tabdiff`, `tabsyn` | All mutable checkpoints and results are redirected below model-specific run-owned runtime directories; authoritative source trees remain unchanged. | [Phase 2 report](PHASE_2_REMEDIATION_REPORT.md); runtime-path regressions | fixed |
 
-The ten Phase 1 findings have completed remediation and V1 regression, but remain `fixed` rather than `verified` until their applicable V2 real-function probes pass.
+The ten Phase 1 findings have completed remediation and V1 regression, and every non-blocked affected adapter has now passed V2. Rows whose declared scope also includes externally blocked TabEBM remain conservatively `fixed`; the block is not treated as a passing probe.
 
 ## New finding template
 

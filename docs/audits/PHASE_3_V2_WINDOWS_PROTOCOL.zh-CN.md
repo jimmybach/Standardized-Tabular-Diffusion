@@ -5,7 +5,7 @@
 - 协议：`pipeline-v2-native-windows-v1`
 - 计划：[`pipeline-v2-windows-v1.json`](../../configs/validation/pipeline-v2-windows-v1.json)
 - 主要环境：原生 Windows 11 x86-64 与 Python 3.11
-- 状态：执行协议已实现；只有通过探针才会生成可保留的模型执行证据
+- 状态：已完成；18 个计划内适配器全部通过，唯一外部阻塞保持明确
 
 ## 1. 目的与结论边界
 
@@ -60,3 +60,7 @@ TabuLa V2 配置使用官方随机初始化的 `distilgpt2` 结构，在全部 2
 只有当拟合、两次指定种子生成、结构检查、checkpoint 不可变检查、中央评测和 Result Bundle 验证都在同一已提交适配器版本上通过时，适配器才能成为 `minimal-real-passed`。某个模型的 V2 结果可以验证适用的第二阶段问题，但不会自动提升注册表生命周期等级。
 
 只有当 18 个已安排适配器全部通过、两份既有代表性真实记录仍有效、TabEBM 的外部阻塞仍可独立处理、汇总证据中 21 个身份每个恰好出现一次，且中英文审计文档一致时，本阶段才算完成。
+
+## 6. 完成记录
+
+18 个计划内适配器现均已保留 `minimal-real-passed` 证据。此前的 TabDDPM 与 TabDiff 代表性真实记录继续有效，TabEBM 仍是唯一受外部条件阻塞的身份。汇总审计恰好包含全部 21 个已注册身份，且计划内待测项为 0。此前保留的首次失败、模型专属边界和注册表生命周期边界均不改变。详见[汇总审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)及其[机器可读快照](../../configs/validation/pipeline-real-function-audit-v1.json)。

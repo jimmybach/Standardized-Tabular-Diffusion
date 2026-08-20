@@ -2,7 +2,7 @@
 
 英文原文：[PIPELINE_REAL_FUNCTION_AUDIT.md](PIPELINE_REAL_FUNCTION_AUDIT.md)
 
-- 状态：第二阶段修复已完成；V2 真实执行进行中（已保留 15 个最小真实通过证据）
+- 状态：第二阶段修复已完成；计划内未阻塞 V2 执行已完成（保留 18 个最小真实通过证据和 1 个外部阻塞）
 - 方案版本：1.0
 - 快照日期：2026-08-20
 - 主要目标环境：原生 Windows 11 x86-64、Python 3.11，以及用户指定的 CUDA 设备
@@ -27,11 +27,11 @@
 - TabEBM 为 `smoke-validated`；完整生成依赖受外部访问限制的 TabPFN-v2。
 - TabDDPM 已完成原生 Windows 上 Adult 数据集的代表性真实训练/生成，包含 3 个生成种子和最终化的 P5 bundle。
 - TabDiff 已完成原生 Windows 上 Adult 数据集的代表性真实训练/生成，包含 3 个生成种子和最终化的中央 P2/P3 bundle。
-- Goggle、TabuLa、TabularARGN、ARF、BN、SMOTE、NRGBoost、TabSDS、CTGAN、TVAE、NFlow、CTAB-GAN、CTAB-GAN+、CoDi 和 STaSy 已分别通过原生 Windows V2 最小真实协议：两个不同生成种子、训练产物不变、解码表严格验收，以及最终化的中央 `p3-validity` bundle。CTGAN、TVAE、CoDi 与 STaSy 使用声明的 RTX 5080 路径；ARF、BN、TabSDS、NFlow、CTAB-GAN 与 CTAB-GAN+ 使用声明的 CPU 路径。SMOTE 仍是仅支持分类的传统参考方法。由于作者没有发布 Windows 轮子，NRGBoost 使用未经源码修改且不再分发的本地诊断轮子；其 Linux 官方轮子证据仍是唯一原生等价依据。TabSDS 执行校验和锁定的方法作者 simple-shuffle 源码且没有修改源码；上游缺少许可证仍是独立发布阻塞项。NFlow 仍是“权威工具库 + 明确声明配方”的目标，不作论文原生实现声明。CoDi 与 STaSy 仍只对应完全一致的 TabSyn benchmark 快照，不作论文原始实现声明。CTAB-GAN+ 仍因上游缺少许可证而被独立阻止再分发。所有首次失败均已保留。
-- 另外 3 个计划内 baseline 尚未通过本次新增的原生 Windows 横向真实功能审计。`pending` 只表示尚未按本方案测试，不表示失败。
+- 计划内 18 个未被外部条件阻塞的最小真实 baseline 已全部通过原生 Windows V2 协议：两个不同生成种子、训练产物不变、解码表严格验收，以及最终化的中央 `p3-validity` bundle。GReaT 与 TabSyn 和 CTGAN、TVAE、CoDi、STaSy、Goggle、TabuLa、TabularARGN 一样使用声明的 RTX 5080 路径；REaLTabFormer 使用声明的 CPU 路径。GReaT 使用未修改的官方 `be-great==0.0.14` 包；REaLTabFormer 在单表 `n_critic=0` 路径上使用未修改的官方 `realtabformer==0.2.4` 包；TabSyn 按原生训练日程执行校验和完全匹配的官方 VAE、潜空间扩散与解码源码。此前记录的模型范围、许可证、包分发与再分发边界均不改变，所有首次失败也继续保留。
+- 计划内未阻塞 baseline 已没有 `pending`。TabEBM 是唯一外部阻塞项，因为完整生成需要受限的 TabPFN-v2 访问；这不计为运行失败。
 - SMOTE 是仅支持分类的传统参考方法，不参与生成模型排名，但它的适配器仍要接受同一套流水线契约审计。
 
-第一阶段已完成全部 84 个 T01-T04 V0/V1 任务/模型审计单元，并确认了 10 个问题：9 个 S1 和 1 个 S2。第二阶段已修复这 10 个问题的根因，并通过全部轻依赖回归测试。V2 现在正逐模型推进；已保留 15 个最小真实通过证据。TabularARGN 与 ARF 又分别暴露出一个 T05 S2 环境边界问题，NRGBoost 暴露出一个 T04 S2 验证依赖漏项；三者均已加入回归测试并由干净重跑验证。覆盖更多模型的问题在全部适用真实探针通过前仍保持 `fixed`。注册表生命周期等级未改变。
+第一阶段已完成全部 84 个 T01-T04 V0/V1 任务/模型审计单元，并确认了 10 个问题：9 个 S1 和 1 个 S2。第二阶段已修复这 10 个问题的根因，并通过全部轻依赖回归测试。V2 现已覆盖全部 18 个未阻塞的最小真实 baseline。TabularARGN 与 ARF 又分别暴露出一个 T05 S2 环境边界问题，NRGBoost 暴露出一个 T04 S2 验证依赖漏项；三者均已加入回归测试并由干净重跑验证。受影响范围包含外部阻塞 TabEBM 的问题仍保守保持 `fixed`；V2 完成不会改变任何注册表生命周期等级。
 
 ## 3. 验证层级与结论边界
 

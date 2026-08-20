@@ -21,7 +21,10 @@ from standardized_tabular_diffusion.validation.realtabformer import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "realtabformer" / "native-parity-run-30950369908.json"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "realtabformer" / "windows-v2-real-function-6b3f2bc.json"
+WINDOWS_EVIDENCE_SHA256 = "98738815256389be1c6dcc5283f40293f49a8cb5d8a28d242c288f705b662543"
 
 
 def test_locked_wheel_manifest_and_protocol_scope_are_exact() -> None:
@@ -120,3 +123,53 @@ def test_retained_native_parity_evidence_is_exact_and_conservatively_scoped() ->
         "0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07"
     )
     assert validation["artifact"]["downloaded_evidence_sha256"] == validation["artifact"]["evidence_file_sha256"]
+
+
+def test_realtabformer_retained_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7"
+    assert evidence["entry"]["device"] == "cpu"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["packages"]["realtabformer"] == "0.2.4"
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": False,
+        "cuda_runtime": None,
+        "gpu": None,
+        "gpu_count": 0,
+        "torch": "2.3.0+cpu",
+    }
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert evidence["environment_lock"]["sha256"] == (
+        "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [4, 4]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["environment_lock"]["sha256"] == (
+        "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca"
+    )
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    windows = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["realtabformer"][
+        "windows_real_function"
+    ]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["official_package"] == "realtabformer==0.2.4"
+    assert windows["source_code_modified"] is False
+    assert (
+        "docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json"
+        in get_adapter_spec("realtabformer").evidence_records
+    )

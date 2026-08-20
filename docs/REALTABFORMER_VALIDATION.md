@@ -1,6 +1,6 @@
 # REaLTabFormer Validation Protocol
 
-Status: passed and permanently retained
+Status: native parity passed and permanently retained; native-Windows minimal-real functionality passed
 
 Protocol: `realtabformer-official-package-parity-v1`
 
@@ -12,7 +12,7 @@ Supported validation environment: Linux, Python 3.11
 
 This protocol tests whether the standardized `realtabformer` adapter preserves the selected official tabular execution. It compares a direct call to the checksum-pinned official package with the adapter on the same typed training table, GPT-2 configuration, training controls, checkpoint reload, sampling controls, and random seed.
 
-A passing mandatory run may promote the adapter to `native-parity-validated` for the tested tabular path. It does not make REaLTabFormer `benchmark-eligible`, admit it to Official Results, establish full-paper statistical quality, or make it `release-supported`. The official sensitivity-based stopping path, relational model, dataset admission, central evaluation, resource budgets, and release ownership remain separate gates.
+A passing mandatory run may promote the adapter to `native-parity-validated` for the tested tabular path. It does not make REaLTabFormer `benchmark-eligible`, admit it to Official Results, establish full-paper statistical quality, or make it `release-supported`. The official sensitivity-based stopping path, relational model, dataset admission, resource budgets, and release ownership remain separate gates.
 
 ## Audited Authority and Distribution
 
@@ -103,7 +103,7 @@ Any mismatch, dependency drift, wrong platform, unsafe artifact, ambiguous model
 - The official relational model accepts linked parent and child tables. The repository's current canonical contract is single-table, so relational mode is outside this adapter's validated scope.
 - Transformer training and autoregressive sampling are substantially heavier than classical baselines. Dataset-specific sequence-length, runtime, and memory budgets remain pending.
 - Conditional seed inputs and advanced generation controls are official expert interfaces; benchmark profiles must freeze them before Official Results.
-- The official package supports Python versions older than 3.11. This adapter's retained parity evidence is Linux/Python 3.11; the repository's exact Windows 11/Python 3.11 release-target qualification for this adapter remains pending.
+- The retained parity authority remains Linux/Python 3.11. A separate minimal-real Windows 11/Python 3.11 execution now passes, while representative-scale Windows resource and quality qualification remains pending.
 
 ## Evidence
 
@@ -111,4 +111,10 @@ Any mismatch, dependency drift, wrong platform, unsafe artifact, ambiguous model
 
 The permanent evidence record is `docs/evidence/realtabformer/native-parity-run-30950369908.json`, SHA-256 `0c6047efc3463aa21fa4b2e6aeed66858cbc29bfd5a9e836f330d975ec0cfa07`. It is retained byte-for-byte from artifact `8908863813`, whose archive digest is `sha256:03ae72ed21ea357c466a9c7f9ee3b29a1c2e5e29ec8fcc2305c9dc7a7f2f8147`. The PR head was `7db46e00452ce5cc25d28d8b484c9d6ee14de5b3`, and the checked-out PR merge commit recorded by the evidence was `fb2f03dd579bb4d1847fa18395696ed698c8ce58`.
 
-REaLTabFormer is therefore `native-parity-validated` for the official tabular `n_critic=0` path. It remains `experimental` and `unsupported`; sensitivity stopping, relational mode, central benchmark evaluation, dataset admission, resource budgets, and release support are not promoted by this evidence.
+REaLTabFormer is therefore `native-parity-validated` for the official tabular `n_critic=0` path. It remains `experimental` and `unsupported`; sensitivity stopping, relational mode, dataset admission, resource budgets, and release support are not promoted by this evidence.
+
+## Native-Windows Minimal-Real Evidence
+
+The separate `pipeline-v2-native-windows-v1` run at repository commit `6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7` used the unchanged official `realtabformer==0.2.4` package on native Windows 11 with Python 3.11.15 and CPU-only PyTorch 2.3.0. It exercised the validated single-table tabular path with `n_critic=0` and a deterministic 128-row training limit drawn from the 256-row Adult-derived fixture. Seeds 17 and 29 each produced four valid, missing-free rows; the outputs differed, the training artifacts stayed immutable, and the independently locked central environment finalized and validated `p3-validity`.
+
+This is a bounded Windows functionality result, not validation of sensitivity stopping, relational generation, representative-scale quality, or Official Results eligibility. The permanent record is `docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json`, SHA-256 `98738815256389be1c6dcc5283f40293f49a8cb5d8a28d242c288f705b662543`.

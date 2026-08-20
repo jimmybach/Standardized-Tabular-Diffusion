@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 15,
-    "minimal_real_pending": 3,
+    "minimal_real_passed": 18,
+    "minimal_real_pending": 0,
     "externally_blocked": 1
   },
   "baselines": [
@@ -105,7 +105,12 @@
         "docs/evidence/goggle/windows-v2-real-function-0a23a84.json"
       ]
     },
-    {"model_id": "great", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "great",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/great/windows-v2-real-function-6b3f2bc.json"]
+    },
     {
       "model_id": "nflow",
       "registry_validation_level": "native-parity-validated",
@@ -122,7 +127,12 @@
         "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json"
       ]
     },
-    {"model_id": "realtabformer", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "realtabformer",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json"]
+    },
     {
       "model_id": "smote",
       "registry_validation_level": "native-parity-validated",
@@ -168,7 +178,12 @@
       "windows_real_function_state": "minimal-real-passed",
       "evidence": ["docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json"]
     },
-    {"model_id": "tabsyn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "tabsyn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json"]
+    },
     {
       "model_id": "tabula",
       "registry_validation_level": "native-parity-validated",

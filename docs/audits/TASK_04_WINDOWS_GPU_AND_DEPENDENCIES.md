@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.zh-CN.md](TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.zh-CN.md)
 
-- Status: in progress; fifteen native-Windows V2 passes retained, including CTGAN/TVAE/CoDi/STaSy on RTX 5080, NFlow/CTAB-GAN/CTAB-GAN+ on CPU, the NRGBoost diagnostic source-build path, and the unchanged TabSDS method-author source path
+- Status: complete for all 18 non-blocked minimal-real baselines; GReaT and TabSyn completed the RTX 5080 path, REaLTabFormer completed its declared CPU path, and TabEBM retains its independent external-access block
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: platform-only failure or unintended device/runtime drift
 

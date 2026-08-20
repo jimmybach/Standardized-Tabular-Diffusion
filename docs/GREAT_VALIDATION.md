@@ -1,6 +1,6 @@
 # GReaT Validation Protocol
 
-Status: `native-parity-validated` by a retained authoritative Linux run
+Status: `native-parity-validated` by a retained authoritative Linux run; native-Windows minimal-real functionality passed
 
 Protocol: `be-great-official-package-parity-v1`
 
@@ -35,8 +35,14 @@ The gate also requires exact wheel identity, unchanged installed package files, 
 - The tiny offline checkpoint establishes wrapper parity, not useful synthesis quality.
 - Production profiles still need a selected pretrained model, resource limits, and dataset-specific sequence-length controls.
 - Generated rows and trained artifacts have no differential-privacy guarantee and require normal access controls.
-- Central evaluation, dataset admission, benchmark eligibility, and release ownership remain separate gates.
+- Dataset admission, benchmark eligibility, and release ownership remain separate gates.
 
 ## Evidence
 
 GitHub Actions run [`30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472) passed on Linux with Python 3.11.15. All three seeds matched every trained tensor, guided-sample DataFrame, and CSV byte exactly; package identity, safe persistence, and caller-state restoration also passed. The inspected JSON is retained byte-for-byte at `docs/evidence/great/native-parity-run-30974574472.json` with SHA-256 `c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf` and is cross-linked from the source lock.
+
+## Native-Windows Minimal-Real Evidence
+
+The separate `pipeline-v2-native-windows-v1` run at repository commit `6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7` trained the unchanged official `be-great==0.0.14` package for five epochs with pretrained `distilgpt2` on the deterministic 256-row Adult-derived fixture. It ran on native Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and an NVIDIA GeForce RTX 5080. Sampling produced four valid, missing-free rows for each of seeds 17 and 29; the outputs differed, training artifacts remained unchanged, and the independently locked central environment finalized and validated `p3-validity`.
+
+This establishes minimal real Windows functionality for that bounded identity, not full-data quality or Official Results eligibility. The permanent record is `docs/evidence/great/windows-v2-real-function-6b3f2bc.json`, SHA-256 `93c2dfd9d071d12ed5350899e2db62c0e84dfdfb38b4aa009cf401c4314940a9`.

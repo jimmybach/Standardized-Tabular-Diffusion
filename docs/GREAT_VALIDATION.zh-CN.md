@@ -1,6 +1,6 @@
 # GReaT 验证协议
 
-状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`；原生 Windows 最小真实功能已通过
 
 协议：`be-great-official-package-parity-v1`
 
@@ -35,8 +35,14 @@ wheel 中 14 个包文件与标签源码分发物逐字节一致，确定性聚�
 - 微型离线模型只证明封装等价，不证明实用生成质量。
 - 正式配置仍需确定预训练模型、资源预算和数据集序列长度控制。
 - 合成数据和训练产物没有差分隐私保证，仍需访问控制。
-- 中央评测、数据集准入、榜单资格和发布责任是独立门槛。
+- 数据集准入、榜单资格和发布责任是独立门槛。
 
 ## 证据
 
 GitHub Actions 运行 [`30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472) 已在 Linux、Python 3.11.15 环境通过。三个种子的全部训练张量、guided sampling DataFrame 与 CSV 字节均精确一致，包身份、安全持久化和调用者状态恢复也全部通过。经审阅的 JSON 已逐字节保留在 `docs/evidence/great/native-parity-run-30974574472.json`，SHA-256 为 `c8b70277dc43eac109533e82e970a4fceecc742c13f420a20838e15cdf16b2bf`，并已从 source lock 交叉引用。
+
+## 原生 Windows 最小真实证据
+
+独立的 `pipeline-v2-native-windows-v1` 运行基于仓库提交 `6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7`，在确定性的 256 行 Adult 衍生测试数据上，用预训练 `distilgpt2` 对未修改的官方 `be-great==0.0.14` 包训练 5 个 epoch。实际环境为原生 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080。种子 17 与 29 各生成 4 行结构合规且无缺失值的数据；两份输出不同，训练产物保持不变，独立锁定的中央环境成功最终化并校验了 `p3-validity`。
+
+该证据只证明上述受限身份在 Windows 上具备最小真实功能，不证明完整数据质量或 Official Results 资格。永久记录为 `docs/evidence/great/windows-v2-real-function-6b3f2bc.json`，SHA-256 为 `93c2dfd9d071d12ed5350899e2db62c0e84dfdfb38b4aa009cf401c4314940a9`。

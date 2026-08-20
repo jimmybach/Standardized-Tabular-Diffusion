@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md](TASK_05_CENTRAL_EVALUATION_INTEGRATION.zh-CN.md)
 
-- Status: in progress; Goggle, TabuLa, TabularARGN, ARF, BN, SMOTE, NRGBoost, TabSDS, CTGAN, TVAE, NFlow, CTAB-GAN, CTAB-GAN+, CoDi, and STaSy V2 finalization retained
+- Status: complete for all 18 non-blocked minimal-real baselines; GReaT, REaLTabFormer, and TabSyn now also retain independently locked, finalized `p3-validity` bundles
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: model-specific evaluation drift or invalid result finalization
 

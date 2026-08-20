@@ -4,7 +4,7 @@
 
 - 状态：持续更新
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
-- 最近同步：2026-08-17
+- 最近同步：2026-08-20
 
 ## 规则
 
@@ -45,7 +45,7 @@
 | RF-CTGAN-FAMILY-001 | T01 | S1 | `ctgan`、`tvae` | 加载后的官方合成器现在会在生成前使用请求的采样种子重置随机状态。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；CTGAN 系列随机状态回归 | fixed |
 | RF-UPSTREAM-WORKSPACE-001 | T03 | S1 | `tabddpm`、`tabdiff`、`tabsyn` | 所有可变检查点和结果均重定向到模型专用的运行所有目录；权威源码树保持不变。 | [第二阶段报告](PHASE_2_REMEDIATION_REPORT.zh-CN.md)；运行路径回归 | fixed |
 
-第一阶段的 10 个发现已经完成修复和 V1 回归，但在适用的 V2 真实功能探针通过前，状态仍为 `fixed`，而不是 `verified`。
+第一阶段的 10 个发现已完成修复和 V1 回归，且所有未阻塞的受影响适配器现已通过 V2。声明范围还包含外部阻塞 TabEBM 的条目仍保守保持 `fixed`；该阻塞不会被当作探针通过。
 
 ## 新问题模板
 

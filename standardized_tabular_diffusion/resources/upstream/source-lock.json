@@ -1323,7 +1323,7 @@
       "license": "MIT",
       "license_url": "https://github.com/worldbank/REaLTabFormer/blob/v0.2.4/LICENSE",
       "modification_status": "compatibility-patched",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-sensitivity-and-relational-scope-resource-and-release-gates",
       "package_lock": {
         "bytes": 49890,
         "filename": "realtabformer-0.2.4-py3-none-any.whl",
@@ -1415,6 +1415,28 @@
         "exact_shared_source_files": 11,
         "shared_source_files": 11,
         "wheel_only_empty_file": "realtabformer/rtf_tokenizer.py"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-realtabformer-validation.txt",
+        "environment_lock_sha256": "c1effb896dfbf077e54a4524e4d9f407e986873e0a9295ff992f69a6b676271e",
+        "evidence_file_sha256": "98738815256389be1c6dcc5283f40293f49a8cb5d8a28d242c288f705b662543",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "official_package": "realtabformer==0.2.4",
+        "permanent_evidence_path": "docs/evidence/realtabformer/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu",
+        "validated_scope": "official single-table REaLTabFormer 0.2.4 tabular path with n_critic=0 and a deterministic 128-row training limit on the 256-row Adult-derived missing-free fixture"
       }
     },
     "smote": {
@@ -2105,7 +2127,7 @@
       "license_path": "TabSyn-main/LICENSE",
       "local_path": "TabSyn-main",
       "modification_status": "official-unmodified",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "removed_unverified_artifacts": [
         {
           "bytes": 42472849,
@@ -2188,7 +2210,29 @@
         "relation": "The initial import contained five compatibility edits, followed by additional local shims. The 20-file primary TabSyn execution scope has now been restored to the pinned official tree and is fail-closed through a frozen source manifest; seven unverified checkpoint artifacts remain removed."
       },
       "upstream_commit": "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7",
-      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca"
+      "upstream_tree": "cb10c6da6e4b5c6f27261dfa0e4c593df9cc19ca",
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-tabsyn-validation.txt",
+        "environment_lock_sha256": "d81eda4aa77e35ece1c7dee18b29a14bba7b72c4c62279eae690072b1f8a995f",
+        "evidence_file_sha256": "8f2c21d38c64484b019d43995d79c7a5d9cc837a1ae3c22d061db3b361758ccf",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact official TabSyn VAE, latent-diffusion, and decoding path with native training schedules on the deterministic 256-row Adult-derived missing-free fixture"
+      }
     },
     "great": {
       "adapter_ids": [
@@ -2225,7 +2269,7 @@
       "license": "MIT",
       "license_url": "https://github.com/tabularis-ai/be_great/blob/b300f6123cf1d9590b76ea45cc23298df944a319/LICENSE",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "package_lock": {
         "bytes": 54019,
         "filename": "be_great-0.0.14-py3-none-any.whl",
@@ -2300,6 +2344,29 @@
         },
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472/job/92205832162",
         "workflow_run_id": 30974574472
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-great-validation.txt",
+        "environment_lock_sha256": "8667dbd7f2ac67eec6a8b573a54a13ce54527abcfa4fd5bbaca085d42203cfdd",
+        "evidence_file_sha256": "93c2dfd9d071d12ed5350899e2db62c0e84dfdfb38b4aa009cf401c4314940a9",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "official_package": "be-great==0.0.14",
+        "permanent_evidence_path": "docs/evidence/great/windows-v2-real-function-6b3f2bc.json",
+        "pip_check_status": "pass",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "official be-great 0.0.14 package with pretrained distilgpt2, five training epochs, and four generated rows per seed on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tabula": {

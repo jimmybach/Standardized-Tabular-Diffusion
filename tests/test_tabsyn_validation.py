@@ -15,9 +15,13 @@ from standardized_tabular_diffusion.compat.tabsyn_launcher import (
 )
 from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.tabsyn import TabSynAdapter
+from standardized_tabular_diffusion.registry import get_adapter_spec
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsyn" / "native-parity-run-32055783087.json"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "tabsyn" / "windows-v2-real-function-6b3f2bc.json"
+WINDOWS_EVIDENCE_SHA256 = "8f2c21d38c64484b019d43995d79c7a5d9cc837a1ae3c22d061db3b361758ccf"
 
 
 def test_tabsyn_scheduler_bridge_removes_only_the_logging_keyword() -> None:
@@ -29,7 +33,7 @@ def test_tabsyn_scheduler_bridge_removes_only_the_logging_keyword() -> None:
 
     compatible = _without_removed_scheduler_verbose(scheduler)
     assert compatible("optimizer", mode="min", factor=0.95, patience=10, verbose=True) == "scheduler"
-    assert observed == [(('optimizer',), {"mode": "min", "factor": 0.95, "patience": 10})]
+    assert observed == [(("optimizer",), {"mode": "min", "factor": 0.95, "patience": 10})]
 
 
 def test_tabsyn_worker_bridge_only_replaces_num_workers() -> None:
@@ -41,7 +45,7 @@ def test_tabsyn_worker_bridge_only_replaces_num_workers() -> None:
 
     configured = _with_configured_num_workers(loader, 0)
     assert configured("dataset", batch_size=4096, shuffle=True, num_workers=4) == "loader"
-    assert observed == [(('dataset',), {"batch_size": 4096, "shuffle": True, "num_workers": 0})]
+    assert observed == [(("dataset",), {"batch_size": 4096, "shuffle": True, "num_workers": 0})]
 
 
 def test_tabsyn_training_runtime_bridge_scopes_scheduler_and_loader() -> None:
@@ -76,9 +80,7 @@ def test_tabsyn_training_runtime_bridge_scopes_scheduler_and_loader() -> None:
 
 def test_tabsyn_scoped_sources_match_frozen_official_manifest() -> None:
     evidence = tabsyn_validation.verify_sources(REPO_ROOT)
-    manifest = json.loads(
-        (REPO_ROOT / tabsyn_validation.MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8")
-    )
+    manifest = json.loads((REPO_ROOT / tabsyn_validation.MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8"))
     assert evidence["upstream_commit"] == "cb5ac0f74ec36ee88e7a974a393dfbef50d42da7"
     assert evidence["upstream_files_verified"] == len(manifest["files"]) == 20
     assert not list((REPO_ROOT / "TabSyn-main" / "zero").glob("*.py"))
@@ -104,6 +106,65 @@ def test_tabsyn_retained_native_parity_evidence_is_exact_and_complete() -> None:
             checkpoint["keys_exact"] and checkpoint["tensor_values_exact"]
             for checkpoint in comparisons["checkpoints"].values()
         )
+
+
+def test_tabsyn_retained_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7"
+    assert evidence["entry"]["device"] == "cuda"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["packages"]["libzero"] == "0.0.8"
+    assert evidence["environment"]["hardware"] == {
+        "cuda_available": True,
+        "cuda_runtime": "12.8",
+        "gpu": "NVIDIA GeForce RTX 5080",
+        "gpu_count": 1,
+        "torch": "2.8.0+cu128",
+    }
+    pip_check = evidence["environment"]["pip_check"]
+    assert pip_check["status"] == "pass-with-reviewed-waiver"
+    assert pip_check["reviewed_waivers"] == [
+        {
+            "distribution": "libzero",
+            "installed_dependency": "torch",
+            "installed_dependency_version": "2.8.0+cu128",
+            "reason": (
+                "The frozen upstream snapshot imports libzero 0.0.8, whose stale distribution metadata caps "
+                "torch below 2; the exact compatibility has already passed the retained native-parity workflow "
+                "and this V2 run records the observed conflict."
+            ),
+            "requirement": "torch<2,>=1.7",
+            "version": "0.0.8",
+        }
+    ]
+    assert evidence["environment_lock"]["sha256"] == (
+        "d81eda4aa77e35ece1c7dee18b29a14bba7b72c4c62279eae690072b1f8a995f"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["environment_lock"]["sha256"] == (
+        "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca"
+    )
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    windows = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["tabsyn"]["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json" in get_adapter_spec("tabsyn").evidence_records
 
 
 def test_tabsyn_rejects_epoch_controls_missing_from_official_source(tmp_path: Path) -> None:
@@ -132,6 +193,7 @@ def test_tabsyn_sample_maps_controls_at_compatibility_boundary(tmp_path: Path, m
 
     adapter = TabSynAdapter(tmp_path)
     calls: list[tuple[list[str], int]] = []
+
     def fake_run(args: list[str], *, seed: int) -> None:
         calls.append((args, seed))
         Path(args[args.index("--save-path") + 1]).write_text("x\n1\n", encoding="utf-8")
@@ -307,18 +369,14 @@ def test_tabsyn_decodes_declared_integers_and_retains_native_csv(
     assert pd.read_csv(bundle.generated_sample_path)["x"].tolist() == [2, 2]
     native_path = output_dir / "tabsyn-native-samples.csv"
     assert native_path.read_bytes() == native_bytes
-    sample_metadata = json.loads(
-        (output_dir / "tabsyn-sample-metadata.json").read_text(encoding="utf-8")
-    )
+    sample_metadata = json.loads((output_dir / "tabsyn-sample-metadata.json").read_text(encoding="utf-8"))
     assert sample_metadata["integer_decoding"]["x"] == {
         "policy": "numpy-rint-ties-to-even-at-adapter-decoding-boundary",
         "changed_rows": 2,
         "clipped_rows": 0,
     }
     assert sample_metadata["native_sample_sha256"] == hashlib.sha256(native_bytes).hexdigest()
-    assert sample_metadata["sample_sha256"] == hashlib.sha256(
-        bundle.generated_sample_path.read_bytes()
-    ).hexdigest()
+    assert sample_metadata["sample_sha256"] == hashlib.sha256(bundle.generated_sample_path.read_bytes()).hexdigest()
 
 
 def test_tabsyn_rejects_symlinked_internal_checkpoint(tmp_path: Path) -> None:
@@ -334,6 +392,4 @@ def test_tabsyn_rejects_symlinked_internal_checkpoint(tmp_path: Path) -> None:
         pytest.skip("Symlink creation is unavailable in this test environment.")
     adapter = TabSynAdapter(tmp_path)
     with pytest.raises(PermissionError, match="symlinked"):
-        adapter.sample(
-            RunSpec(model="tabsyn", dataset="adult", output_dir=tmp_path / "artifacts")
-        )
+        adapter.sample(RunSpec(model="tabsyn", dataset="adult", output_dir=tmp_path / "artifacts"))

@@ -1,6 +1,6 @@
 # TabSyn 验证协议
 
-状态：已在 Linux/Python 3.11 通过；已完成原生一致性验证
+状态：已在 Linux/Python 3.11 通过原生一致性验证；原生 Windows 最小真实功能已通过
 
 协议 ID：`tabsyn-native-parity-v2`
 
@@ -10,7 +10,7 @@
 
 本协议验证标准化 TabSyn 适配器是否在不修改仓库中已跟踪的 VAE、潜空间扩散、解码和 EDM 采样器源码的情况下，调用固定版本的作者官方实现。覆盖范围包括失败即终止的源码完整性检查、真实混合类型 VAE 与扩散训练、采样、三个确定性随机种子、产物完整性，以及原生路径与适配器路径的精确对照。
 
-验证通过后，适配器可以从 `smoke-validated` 提升到 `native-parity-validated`。但这不等于 TabSyn 已达到 `benchmark-eligible`、可以进入 Official Results track，或已经 `release-supported`。完整数据集上的质量、中央评测协议、隐私与公平性审查、运行资源阈值、更广泛任务覆盖、依赖维护和发布责任仍是相互独立的门槛。
+验证通过后，适配器可以从 `smoke-validated` 提升到 `native-parity-validated`。但这不等于 TabSyn 已达到 `benchmark-eligible`、可以进入 Official Results track，或已经 `release-supported`。完整数据集上的质量、隐私与公平性审查、运行资源阈值、更广泛任务覆盖、依赖维护和发布责任仍是相互独立的门槛。
 
 ## 源码权威与补丁处理
 
@@ -91,4 +91,10 @@ python -m standardized_tabular_diffusion.validation.tabsyn \
 
 V2 协议已在 [GitHub Actions run 32055783087](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32055783087) 中通过，对应仓库提交 `4668853b5d0acf7bff779453fb1a6e67f5838384`。保留产物 ID 为 `9296369638`，摘要为 `sha256:1e5a8a6563a4ee05cbd77ad5567ff07f9dd50e5503d3d8198a4583705f6a8920`。证据的精确永久副本位于 `docs/evidence/tabsyn/native-parity-run-32055783087.json`，文件 SHA-256 为 `8cbfa66a57b99e5f9fdb0381b21b02eb9f5b062a4f8e4f1ef13de24be3862e48`。
 
-因此，TabSyn 当前状态为 `native-parity-validated`，但仍保持 `experimental` 与 `unsupported`；在数据集、中央评测、治理、运行资源和发布门槛分别通过之前，不得进入 Official Results。
+因此，TabSyn 当前状态为 `native-parity-validated`，但仍保持 `experimental` 与 `unsupported`；在数据集、治理、运行资源和发布门槛分别通过之前，不得进入 Official Results。
+
+## 原生 Windows 最小真实证据
+
+独立的 `pipeline-v2-native-windows-v1` 运行基于仓库提交 `6b3f2bca50d79d5e59bb22b798eb8cb0a6a9f8f7`，在确定性的 256 行 Adult 衍生测试数据上执行校验和完全匹配的官方 VAE、潜空间扩散、采样与解码链。它使用源码的原生训练日程，仅在适配器的 Windows 边界把数据加载 worker 数设为 0。实际环境为原生 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080。
+
+种子 17 与 29 各生成 32 行结构合规且无缺失值的数据；两份输出不同，训练产物保持不变，独立锁定的中央环境成功最终化并校验了 `p3-validity`。环境保留此前已审阅的 `libzero==0.0.8` 过期 `torch<2` 元数据豁免，且没有修改任何官方源码。该证据只证明受限 Windows 功能，不证明代表性规模质量或 Official Results 资格。永久记录为 `docs/evidence/tabsyn/windows-v2-real-function-6b3f2bc.json`，SHA-256 为 `8f2c21d38c64484b019d43995d79c7a5d9cc837a1ae3c22d061db3b361758ccf`。

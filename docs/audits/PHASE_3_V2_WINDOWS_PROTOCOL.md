@@ -5,7 +5,7 @@ Chinese translation: [PHASE_3_V2_WINDOWS_PROTOCOL.zh-CN.md](PHASE_3_V2_WINDOWS_P
 - Protocol: `pipeline-v2-native-windows-v1`
 - Plan: [`pipeline-v2-windows-v1.json`](../../configs/validation/pipeline-v2-windows-v1.json)
 - Primary environment: native Windows 11 x86-64 and Python 3.11
-- Status: execution protocol implemented; retained model execution evidence is produced only by passing probes
+- Status: complete; all 18 scheduled adapters passed and the sole external block remains explicit
 
 ## 1. Purpose and claim boundary
 
@@ -60,3 +60,7 @@ A failed attempt is retained and diagnosed; it is never silently deleted or repl
 An adapter becomes `minimal-real-passed` only when its fit, both seed-specific generations, structural checks, immutable-checkpoint check, central evaluation, and Result Bundle validation all pass on the same committed adapter revision. A model-specific V2 result may verify an applicable Phase 2 finding, but it does not automatically promote the registry lifecycle level.
 
 The phase is complete only when all 18 scheduled adapters pass, the two prior representative-real records remain valid, TabEBM's external block remains independently actionable, all 21 identities appear exactly once in the aggregate evidence, and the English/Chinese audit documents agree.
+
+## 6. Completion record
+
+All 18 scheduled adapters now have retained `minimal-real-passed` evidence. The earlier representative-real TabDDPM and TabDiff records remain valid, and TabEBM remains the single externally blocked identity. The aggregate audit contains all 21 registered identities exactly once, with zero scheduled entries pending. Retained first failures, model-specific limitations, and registry lifecycle boundaries remain unchanged. See the [aggregate audit](PIPELINE_REAL_FUNCTION_AUDIT.md) and its [machine-readable snapshot](../../configs/validation/pipeline-real-function-audit-v1.json).
