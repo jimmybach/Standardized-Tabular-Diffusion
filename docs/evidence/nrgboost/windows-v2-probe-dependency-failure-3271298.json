@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "finding_id": "RF-CORE-008",
+  "protocol_id": "pipeline-v2-native-windows-v1",
+  "status": "fail",
+  "model_id": "nrgboost",
+  "stage": "model-probe-environment-validation",
+  "repository_commit": "3271298d3b85963baff6c858d171cf71bab1482d",
+  "probe_record_sha256": "9f1ad2713481b07e184b2388da3ce579660e3e3d89270c44686609c8d6115aca",
+  "model_execution_started": false,
+  "error": {
+    "type": "ModuleNotFoundError",
+    "message": "No module named 'packaging'"
+  },
+  "root_cause": "The clean NRGBoost Windows verification environment satisfied the model's frozen dependencies, but that lock omitted the packaging library used by Pipeline V2 itself to canonicalize and validate installed requirements.",
+  "resolution": {
+    "repository_commit": "8fb0afe1857487fd1bdc7cbe25781974ef66af5d",
+    "dependency_added": "packaging==26.3",
+    "environment_lock": "requirements-nrgboost-validation.txt",
+    "environment_lock_sha256": "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4",
+    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
+    "passing_evidence_sha256": "e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420"
+  },
+  "claim_boundary": "This record preserves an explicit validation-harness dependency failure before NRGBoost training began. It is not model-quality evidence and does not invalidate the later clean rerun bound to the resolution commit."
+}
