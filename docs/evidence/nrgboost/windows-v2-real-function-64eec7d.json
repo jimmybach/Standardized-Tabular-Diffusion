@@ -13,6 +13,9 @@
       "docs/UPSTREAM_SOURCE_AUDIT.md",
       "docs/NRGBOOST_VALIDATION.md",
       "docs/evidence/nrgboost/native-parity-run-30922326384.json",
+      "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
+      "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
+      "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
       "standardized_tabular_diffusion/resources/upstream/source-lock.json",
       ".github/workflows/nrgboost-validation.yml"
     ],
@@ -38,9 +41,9 @@
   },
   "attempts": [],
   "central_evaluation": {
-    "bundle_id": "run-3184f2752a3b4765a929a6ef270736b2",
-    "bundle_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-17\\evaluation-result",
-    "elapsed_seconds": 2.3909999999996217,
+    "bundle_id": "run-da71556fe7b345d9b14b958c7b661653",
+    "bundle_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-17\\evaluation-result",
+    "elapsed_seconds": 2.04700000000048,
     "environment": {
       "hardware": {
         "cuda_available": false,
@@ -153,16 +156,16 @@
     "protocol": "p3-validity",
     "status": "pass",
     "validation": {
-      "bundle_id": "run-3184f2752a3b4765a929a6ef270736b2",
+      "bundle_id": "run-da71556fe7b345d9b14b958c7b661653",
       "finalization_status": "finalized",
       "not_applicable_files": 2,
       "pending_files": 0,
       "present_files": 18,
-      "root": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-17\\evaluation-result"
+      "root": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-17\\evaluation-result"
     }
   },
   "claim_boundary": "Minimal real authoritative train/sample functionality on a deterministic Adult-derived validation fixture under native Windows 11 and Python 3.11. This is not full-data quality, native parity, benchmark eligibility, Official Results admission, or release support.",
-  "completed_at": "2026-08-20T16:09:01.375372+00:00",
+  "completed_at": "2026-08-20T16:19:35.693262+00:00",
   "configuration": {
     "path": "configs/smoke/nrgboost-adult-smoke.json",
     "sha256": "ac80843798965f6085152c1b0ac8445e166508e08a66a6fc49bd3faab4da8d30"
@@ -273,7 +276,7 @@
         }
       }
     },
-    "metadata_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\info.json",
+    "metadata_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\info.json",
     "name": "pipeline-v2-adult-256-v1",
     "numerical_columns": [
       "age",
@@ -284,22 +287,22 @@
       "hours.per.week"
     ],
     "provenance": [
-      "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\fixture-manifest.json"
+      "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\fixture-manifest.json"
     ],
     "target_columns": [
       "income"
     ],
     "task_type": "classification",
-    "test_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\test.csv",
-    "train_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\train.csv",
+    "test_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\test.csv",
+    "train_data_path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\shared-fixture\\pipeline-v2-adult-256-v1\\train.csv",
     "val_data_path": null
   },
-  "elapsed_seconds": 13.063000000000102,
+  "elapsed_seconds": 12.765999999999622,
   "entry": {
     "batch": "fast-cpu",
     "config_path": "configs/smoke/nrgboost-adult-smoke.json",
     "device": "cpu",
-    "environment_lock": "requirements-nrgboost-validation.txt",
+    "environment_lock": "requirements-nrgboost-windows-v2.txt",
     "model_id": "nrgboost",
     "required_packages": {
       "nrgboost": "0.0.3"
@@ -413,11 +416,11 @@
         "required": "==2026.3"
       }
     },
-    "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\requirements-nrgboost-validation.txt",
-    "sha256": "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4",
+    "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\requirements-nrgboost-windows-v2.txt",
+    "sha256": "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e",
     "status": "pass"
   },
-  "finalized_at": "2026-08-20T16:09:11.913552+00:00",
+  "finalized_at": "2026-08-20T16:19:43.873751+00:00",
   "fixture_manifest": {
     "files": {
       "X_cat_test.npy": {
@@ -480,10 +483,10 @@
   "model_id": "nrgboost",
   "plan": {
     "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\configs\\validation\\pipeline-v2-windows-v1.json",
-    "sha256": "4975609bb0827269e2dbaa8b10c25ebfdfedb3f569311ec69ab687754749a614"
+    "sha256": "343e3c24770196c7c8632a34b156b6c7f29231c9476e934c51f7825d8172856a"
   },
   "protocol_id": "pipeline-v2-native-windows-v1",
-  "repository_commit": "8fb0afe1857487fd1bdc7cbe25781974ef66af5d",
+  "repository_commit": "64eec7d590f3610e74795036a1fb188e554741a0",
   "samples": [
     {
       "bytes": 2117,
@@ -504,11 +507,11 @@
         "native.country",
         "income"
       ],
-      "copied_training_manifest_sha256": "74b2bc5fe0ed4ce36f7e46adae401f2bcb61281ba9aec0bbdf63df7b236b6493",
+      "copied_training_manifest_sha256": "fbd40abe1102de21f4e886323c3f37eef7e9a5ce31fcb1830478aaae7005d2c5",
       "elapsed_seconds": 0.06199999999989814,
       "missing_cells": 0,
-      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-17",
-      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-17\\samples.csv",
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-17",
+      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-17\\samples.csv",
       "rows": 16,
       "schema_valid": true,
       "seed": 17,
@@ -534,11 +537,11 @@
         "native.country",
         "income"
       ],
-      "copied_training_manifest_sha256": "74b2bc5fe0ed4ce36f7e46adae401f2bcb61281ba9aec0bbdf63df7b236b6493",
-      "elapsed_seconds": 0.06300000000010186,
+      "copied_training_manifest_sha256": "fbd40abe1102de21f4e886323c3f37eef7e9a5ce31fcb1830478aaae7005d2c5",
+      "elapsed_seconds": 0.06199999999989814,
       "missing_cells": 0,
-      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-29",
-      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\sample-seed-29\\samples.csv",
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-29",
+      "path": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\sample-seed-29\\samples.csv",
       "rows": 16,
       "schema_valid": true,
       "seed": 29,
@@ -548,7 +551,7 @@
   ],
   "schema_version": "1.0.0",
   "seed_outputs_distinct": true,
-  "started_at": "2026-08-20T16:08:48.304402+00:00",
+  "started_at": "2026-08-20T16:19:22.938748+00:00",
   "status": "pass",
   "tracked_repository_unchanged": true,
   "train": {
@@ -559,25 +562,25 @@
       },
       "nrgboost_metadata.json": {
         "bytes": 1532,
-        "sha256": "2119658525bb1da128e25942dcc97d3121ef59a082234ab4c8cf407fc97d71d4"
+        "sha256": "1b46fc699df9b18969803becba3752d077a58605dd0c27e0730935820473c46a"
       }
     },
-    "artifact_manifest_sha256": "74b2bc5fe0ed4ce36f7e46adae401f2bcb61281ba9aec0bbdf63df7b236b6493",
+    "artifact_manifest_sha256": "fbd40abe1102de21f4e886323c3f37eef7e9a5ce31fcb1830478aaae7005d2c5",
     "bundle": {
       "dataset": "pipeline-v2-adult-256-v1",
       "evaluation_bundle_path": null,
       "generated_sample_path": null,
       "model": "nrgboost",
       "notes": [
-        "Saved NRGBoost model to C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\train\\model.nrgboost."
+        "Saved NRGBoost model to C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\train\\model.nrgboost."
       ],
-      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\train",
+      "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\train",
       "standardized_summary_path": null,
       "upstream_metrics_path": null,
       "upstream_workdir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库"
     },
-    "elapsed_seconds": 3.9680000000007567,
-    "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\8fb0afe\\nrgboost\\nrgboost\\train",
+    "elapsed_seconds": 3.563000000000102,
+    "output_dir": "C:\\Users\\zhili\\Documents\\表格数据合成benchmark仓库\\tmp\\pipeline-v2-runs\\64eec7d\\nrgboost\\nrgboost\\train",
     "status": "pass"
   }
 }

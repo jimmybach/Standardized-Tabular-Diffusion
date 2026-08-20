@@ -14,12 +14,12 @@
   },
   "root_cause": "The clean NRGBoost Windows verification environment satisfied the model's frozen dependencies, but that lock omitted the packaging library used by Pipeline V2 itself to canonicalize and validate installed requirements.",
   "resolution": {
-    "repository_commit": "8fb0afe1857487fd1bdc7cbe25781974ef66af5d",
+    "repository_commit": "64eec7d590f3610e74795036a1fb188e554741a0",
     "dependency_added": "packaging==26.3",
-    "environment_lock": "requirements-nrgboost-validation.txt",
-    "environment_lock_sha256": "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4",
-    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
-    "passing_evidence_sha256": "e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420"
+    "environment_lock": "requirements-nrgboost-windows-v2.txt",
+    "environment_lock_sha256": "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e",
+    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json",
+    "passing_evidence_sha256": "1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c"
   },
   "claim_boundary": "This record preserves an explicit validation-harness dependency failure before NRGBoost training began. It is not model-quality evidence and does not invalidate the later clean rerun bound to the resolution commit."
 }

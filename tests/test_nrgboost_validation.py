@@ -17,17 +17,17 @@ pytestmark = pytest.mark.adapter
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 WINDOWS_EVIDENCE_PATH = (
-    REPO_ROOT / "docs" / "evidence" / "nrgboost" / "windows-v2-real-function-8fb0afe.json"
+    REPO_ROOT / "docs" / "evidence" / "nrgboost" / "windows-v2-real-function-64eec7d.json"
 )
-WINDOWS_EVIDENCE_SHA256 = "e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420"
+WINDOWS_EVIDENCE_SHA256 = "1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c"
 WINDOWS_FAILURE_PATH = (
     REPO_ROOT / "docs" / "evidence" / "nrgboost" / "windows-v2-probe-dependency-failure-3271298.json"
 )
-WINDOWS_FAILURE_SHA256 = "e73e9348cc95d4591ef22fac5514be55389f040271c1071beddb9d7e39367ccf"
+WINDOWS_FAILURE_SHA256 = "5d95f7a752ea0747b4809b26d960b9b31688c0f537d7588aea4226bd864bf1ed"
 WINDOWS_PROVENANCE_PATH = (
     REPO_ROOT / "docs" / "evidence" / "nrgboost" / "windows-source-build-provenance-20260820.json"
 )
-WINDOWS_PROVENANCE_SHA256 = "65e4b597d76edf25cc603e96ca545b364feb7bed9216b775801bd6893cb70b0a"
+WINDOWS_PROVENANCE_SHA256 = "65b5e7b2a21ed39fe621207065fc3120d6bed6ee5a8a64f4575344be11e802f0"
 
 
 def test_nrgboost_protocol_constants_lock_the_official_release() -> None:
@@ -74,7 +74,7 @@ def test_nrgboost_retained_windows_v2_evidence_is_exact_complete_and_attempt_pre
 
     assert evidence["status"] == "pass"
     assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
-    assert evidence["repository_commit"] == "8fb0afe1857487fd1bdc7cbe25781974ef66af5d"
+    assert evidence["repository_commit"] == "64eec7d590f3610e74795036a1fb188e554741a0"
     assert evidence["train"]["status"] == "pass"
     assert evidence["environment"]["python"] == "3.11.15"
     assert evidence["environment"]["hardware"] == {
@@ -84,7 +84,7 @@ def test_nrgboost_retained_windows_v2_evidence_is_exact_complete_and_attempt_pre
         "torch": None,
     }
     assert evidence["environment_lock"]["sha256"] == (
-        "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4"
+        "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e"
     )
     assert evidence["environment_lock"]["packages"]["packaging"]["observed"] == "26.3"
     assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]

@@ -118,6 +118,6 @@ Windows 审计构建流程已从 SHA-256 为 `7b9e6a2a951755a75f34f1ec1185e82c40
 
 提交 `3271298` 上的第一次 Pipeline V2 尝试在模型执行前停止，因为干净模型环境暴露出一项验证器依赖漏项：Pipeline V2 使用了 `packaging`，但 NRGBoost 锁文件未声明它。问题 `RF-CORE-008` 已在安装 extra 和独立 Windows V2 锁中精确加入 `packaging==26.3`，Linux 权威等价环境锁保持不变。失败尝试保留在 `docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json`。
 
-仓库提交 `8fb0afe1857487fd1bdc7cbe25781974ef66af5d` 上的干净重跑在原生 Windows 11、Python 3.11.15 和 CPU 上通过 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生夹具完成一次有界五树拟合，并复用于种子 `17` 和 `29` 的生成；每份结果包含 16 行规范、无缺失数据，两份结构均有效、结果彼此不同，训练产物保持不变。随后种子 17 的结果完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。通过证据保留在 `docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json`，SHA-256 为 `e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420`。
+仓库提交 `64eec7d590f3610e74795036a1fb188e554741a0` 上的干净重跑在原生 Windows 11、Python 3.11.15 和 CPU 上，使用独立 `requirements-nrgboost-windows-v2.txt` 锁通过 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生夹具完成一次有界五树拟合，并复用于种子 `17` 和 `29` 的生成；每份结果包含 16 行规范、无缺失数据，两份结构均有效、结果彼此不同，训练产物保持不变。随后种子 17 的结果完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。通过证据保留在 `docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json`，SHA-256 为 `1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c`。
 
 该结论只证明所记录诊断构建和有界配置下的 Windows 最小真实功能。它不会把本地 wheel 变成官方发行版，也不会替代 Linux 官方 wheel 的原生等价权威；同时不证明代表性规模质量、榜单资格、Official Results 准入或发布支持。

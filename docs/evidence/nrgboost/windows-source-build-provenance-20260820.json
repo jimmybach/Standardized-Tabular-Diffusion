@@ -30,11 +30,11 @@
     "compiled_extension_smoke_check": "pass"
   },
   "v2_runtime": {
-    "environment_lock": "requirements-nrgboost-validation.txt",
-    "environment_lock_sha256": "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4",
-    "repository_commit": "8fb0afe1857487fd1bdc7cbe25781974ef66af5d",
-    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
-    "passing_evidence_sha256": "e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420"
+    "environment_lock": "requirements-nrgboost-windows-v2.txt",
+    "environment_lock_sha256": "d27ceee1ed87e1eb9d7a70b5ed0c1171c81c4f430425806f20b037aca547a11e",
+    "repository_commit": "64eec7d590f3610e74795036a1fb188e554741a0",
+    "passing_evidence": "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json",
+    "passing_evidence_sha256": "1c258f7b05775d252aa4c2a960cdfcc71f715be15755261551dd464cff95631c"
   },
   "authoritative_parity_evidence": "docs/evidence/nrgboost/native-parity-run-30922326384.json",
   "claim_boundary": "The local wheel is a non-redistributed diagnostic build from unmodified official source. It supports Windows functional testing only; retained Linux official-wheel evidence remains the sole native-parity authority."

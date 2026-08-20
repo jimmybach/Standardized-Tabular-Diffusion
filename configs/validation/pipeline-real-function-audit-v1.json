@@ -94,7 +94,7 @@
       "evidence": [
         "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
         "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
-        "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json"
+        "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json"
       ]
     },
     {"model_id": "realtabformer", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},

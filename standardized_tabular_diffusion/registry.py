@@ -295,7 +295,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
             "docs/evidence/nrgboost/native-parity-run-30922326384.json",
             "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
             "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
-            "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
+            "docs/evidence/nrgboost/windows-v2-real-function-64eec7d.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/nrgboost-validation.yml",
         ),
