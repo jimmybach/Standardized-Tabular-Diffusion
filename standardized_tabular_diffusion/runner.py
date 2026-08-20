@@ -8,7 +8,7 @@ from typing import Any
 from standardized_tabular_diffusion.config import ExperimentConfig
 from standardized_tabular_diffusion.datasets import get_dataset_spec
 from standardized_tabular_diffusion.evaluation.serialization import atomic_write_json
-from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec, RunSpec
 from standardized_tabular_diffusion.registry import get_adapter, get_adapter_spec
 from standardized_tabular_diffusion.runtime_contracts import (
     claim_output_identity,
@@ -91,19 +91,44 @@ def _claim_action_output(config: ExperimentConfig, action: str, dataset_spec: Da
     )
 
 
+def _declared_upstream_root(model: str, repo_root: Path | None) -> Path:
+    """Resolve provenance metadata without importing a model runtime."""
+
+    resolved_root = (repo_root or Path(__file__).resolve().parents[1]).resolve()
+    source_root = get_adapter_spec(model).source_root
+    return resolved_root if source_root is None else resolved_root / source_root
+
+
+def _build_run_spec(config: ExperimentConfig, dataset_spec: DatasetSpec) -> RunSpec:
+    """Build the shared public RunSpec without loading optional model dependencies."""
+
+    spec = config.to_run_spec()
+    spec.extra.setdefault("dataset_spec", dataset_spec.to_dict())
+    spec.extra.setdefault("dataset_identity", dataset_content_identity(dataset_spec))
+    spec.extra.setdefault("config", config.to_dict())
+    return spec
+
+
+def _write_artifact_bundle(bundle: ArtifactBundle) -> ArtifactBundle:
+    """Persist a central-evaluation bundle without constructing a model adapter."""
+
+    bundle.output_dir.mkdir(parents=True, exist_ok=True)
+    atomic_write_json(bundle.output_dir / "artifacts.json", bundle.to_dict())
+    return bundle
+
+
 def build_run_context(
     config: ExperimentConfig,
     repo_root: Path | None = None,
     *,
     dataset_spec: DatasetSpec | None = None,
 ) -> dict[str, Any]:
-    adapter = get_adapter(config.model, repo_root=repo_root)
     dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
     if dataset_spec.name != config.dataset:
         raise ValueError(
             f"Explicit DatasetSpec name {dataset_spec.name!r} does not match config dataset {config.dataset!r}."
         )
-    run_spec = adapter.build_run_spec(config, dataset_spec=dataset_spec)
+    run_spec = _build_run_spec(config, dataset_spec)
     return {
         "config": config.to_dict(),
         "dataset_spec": dataset_spec.to_dict(),
@@ -115,8 +140,8 @@ def build_run_context(
         },
         "run_spec": run_spec.to_dict(),
         "adapter": {
-            "model_name": adapter.model_name,
-            "upstream_root": str(adapter.upstream_root),
+            "model_name": config.model,
+            "upstream_root": str(_declared_upstream_root(config.model, repo_root)),
         },
     }
 
@@ -158,7 +183,6 @@ def run_action(
     *,
     dataset_spec: DatasetSpec | None = None,
 ):
-    adapter = get_adapter(config.model, repo_root=repo_root)
     dataset_spec = dataset_spec or get_dataset_spec(config.dataset, repo_root=repo_root)
     if dataset_spec.name != config.dataset:
         raise ValueError(
@@ -172,12 +196,14 @@ def run_action(
         )
     _claim_action_output(config, action, dataset_spec)
 
+    if action == "evaluate":
+        return run_central_evaluation(config, dataset_spec=dataset_spec, repo_root=repo_root)
+
+    adapter = get_adapter(config.model, repo_root=repo_root)
     if action == "train":
         return adapter.train_from_config(config, dataset_spec=dataset_spec)
     if action == "sample":
         return adapter.sample_from_config(config, dataset_spec=dataset_spec)
-    if action == "evaluate":
-        return run_central_evaluation(config, dataset_spec=dataset_spec, repo_root=repo_root)
 
     raise ValueError(f"Unsupported action: {action}")
 
@@ -226,12 +252,11 @@ def run_central_evaluation(
         ),
         expected_rows=config.sample.num_samples,
     )
-    adapter = get_adapter(config.model, repo_root=repo_root)
     result = ArtifactBundle(
         model=config.model,
         dataset=config.dataset,
         output_dir=Path(config.output_dir),
-        upstream_workdir=adapter.upstream_root,
+        upstream_workdir=_declared_upstream_root(config.model, repo_root),
         generated_sample_path=Path(sample_value),
         evaluation_bundle_path=bundle_root,
         notes=[
@@ -240,15 +265,19 @@ def run_central_evaluation(
             "Legacy standardized_summary.json generation is disabled.",
         ],
     )
-    return adapter._write_bundle(result)
+    return _write_artifact_bundle(result)
 
 
 def run_pipeline(
     config: ExperimentConfig,
     repo_root: Path | None = None,
 ) -> dict[str, Any]:
-    adapter = get_adapter(config.model, repo_root=repo_root)
     dataset_spec = get_dataset_spec(config.dataset, repo_root=repo_root)
+    adapter = (
+        get_adapter(config.model, repo_root=repo_root)
+        if config.train.enabled or config.sample.enabled
+        else None
+    )
 
     context = build_run_context(config, repo_root=repo_root)
     phase_results: dict[str, Any] = {"context": context, "phases": {}}
@@ -256,6 +285,8 @@ def run_pipeline(
     sample_path: str | None = config.evaluation.extra.get("sample_path")
 
     if config.train.enabled:
+        if adapter is None:  # pragma: no cover - guarded by adapter construction above
+            raise RuntimeError("Training requires a model adapter")
         readiness = validate_action_inputs(config, "train", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
@@ -267,6 +298,8 @@ def run_pipeline(
         phase_results["phases"]["train"] = bundle.to_dict()
 
     if config.sample.enabled:
+        if adapter is None:  # pragma: no cover - guarded by adapter construction above
+            raise RuntimeError("Sampling requires a model adapter")
         readiness = validate_action_inputs(config, "sample", dataset_spec=dataset_spec, repo_root=repo_root)
         if not readiness["ready"]:
             raise FileNotFoundError(
