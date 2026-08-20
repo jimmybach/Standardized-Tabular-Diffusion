@@ -1,10 +1,10 @@
 # SMOTE Validation Protocol
 
-Status: passed on Linux/Python 3.11; adapter is `native-parity-validated`
+Status: passed; retained Linux native-parity and native-Windows minimal-real evidence
 
 Protocol ID: `smote-native-parity-v1`
 
-Supported validation platform: Linux, Python 3.11
+Authoritative parity platform: Linux, Python 3.11; minimal-real runtime also validated on native Windows
 
 ## Scope and claim boundary
 
@@ -107,3 +107,9 @@ python -m standardized_tabular_diffusion.validation.smote \
 ```
 
 `.github/workflows/smote-validation.yml` runs this command and retains the evidence artifact for 90 days. Any package, dependency, adapter, fixture, or protocol change requires a new run. The inspected passing evidence promotes the adapter to `native-parity-validated`; it remains `experimental`, `unsupported`, excluded from Official Results, and excluded from joint generative-model ranking pending the separate gates described above.
+
+## Native-Windows minimal-real result
+
+Repository commit `2ae7aa37221870aa9546a84a33cd226ead64eb07` passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU with official `imbalanced-learn==0.14.2`. The bounded Adult-derived classification fixture was resampled independently with seeds `17` and `29`; each output contained 32 canonical, missing-free rows, both schemas were valid, the output hashes differed, and the first action's recorded artifacts remained unchanged. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files. Evidence is retained at `docs/evidence/smote/windows-v2-real-function-2ae7aa3.json` with SHA-256 `8852c287035b45d2178f35270199f5cc77ea6d97545b34a42d24ee5ec01bde5a`.
+
+This functionality result does not change SMOTE's benchmark role: it remains a classification-only classical oversampling reference, excluded from joint generative-model ranking and Official Results unless separately admitted to a classical-reference track.

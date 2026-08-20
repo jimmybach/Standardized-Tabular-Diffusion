@@ -1,6 +1,6 @@
 # NRGBoost 验证协议
 
-状态：已通过并永久保留
+状态：已通过；已保留 Linux 原生等价证据与原生 Windows 最小真实运行证据
 
 协议：`nrgboost-native-parity-v1`
 
@@ -111,3 +111,13 @@ Windows 是本仓库的主要用户平台，因此项目另设一个证据强度
 [GitHub Actions 运行 `30922326384`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384) 在 Linux、Python 3.11.15 上通过全部 6 个任务/种子用例。它将 22 个带哈希的已安装文件与锁定 wheel 逐一核对，使用种子 0、19 和 73 执行分类与回归固件，并在每个用例中生成字节级一致的原生/适配器检查点和样本 CSV。
 
 永久证据记录为 `docs/evidence/nrgboost/native-parity-run-30922326384.json`，SHA-256 为 `5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c`。运行绑定到仓库提交 `4cd32c8beedd116c6385463d41cf9cba8b1d5438`；下载的 GitHub 制品 ID 和摘要也已写入来源锁。因此 NRGBoost 现为 `native-parity-validated`，但基准准入与发布支持仍待完成。
+
+## 已保留的原生 Windows 最小真实运行结果
+
+Windows 审计构建流程已从 SHA-256 为 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0` 的官方源码发行包重新执行。流程使用校验和锁定的 MinGW-w64/OpenMP 工具链，没有修改任何源码，生成 SHA-256 为 `24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739` 的诊断 wheel，并通过全新环境安装、`pip check`、导入和编译后 64 位采样器检查。该 wheel 不提交、不再分发；经审阅的来源记录保留在 `docs/evidence/nrgboost/windows-source-build-provenance-20260820.json`。
+
+提交 `3271298` 上的第一次 Pipeline V2 尝试在模型执行前停止，因为干净模型环境暴露出一项验证器依赖漏项：Pipeline V2 使用了 `packaging`，但 NRGBoost 锁文件未声明它。问题 `RF-CORE-008` 已在安装 extra 和独立 Windows V2 锁中精确加入 `packaging==26.3`，Linux 权威等价环境锁保持不变。失败尝试保留在 `docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json`。
+
+仓库提交 `8fb0afe1857487fd1bdc7cbe25781974ef66af5d` 上的干净重跑在原生 Windows 11、Python 3.11.15 和 CPU 上通过 `pipeline-v2-native-windows-v1`。确定性的 256 行 Adult 派生夹具完成一次有界五树拟合，并复用于种子 `17` 和 `29` 的生成；每份结果包含 16 行规范、无缺失数据，两份结构均有效、结果彼此不同，训练产物保持不变。随后种子 17 的结果完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。通过证据保留在 `docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json`，SHA-256 为 `e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420`。
+
+该结论只证明所记录诊断构建和有界配置下的 Windows 最小真实功能。它不会把本地 wheel 变成官方发行版，也不会替代 Linux 官方 wheel 的原生等价权威；同时不证明代表性规模质量、榜单资格、Official Results 准入或发布支持。

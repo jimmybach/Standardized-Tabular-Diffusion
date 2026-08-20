@@ -14,6 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
 EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "smote" / "native-parity-run-30918785254.json"
 EVIDENCE_SHA256 = "1b375b93c332327dd2118c2aad9420497008be1390078e1e48e79f8270f74863"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "smote" / "windows-v2-real-function-2ae7aa3.json"
+WINDOWS_EVIDENCE_SHA256 = "8852c287035b45d2178f35270199f5cc77ea6d97545b34a42d24ee5ec01bde5a"
 
 
 def _write_test_wheel(path: Path, *, unsafe_member: str | None = None) -> tuple[str, str, int]:
@@ -79,6 +81,37 @@ def test_retained_smote_evidence_is_immutable_and_complete() -> None:
         case["adapter_artifacts"]["sample_sha256"] == case["native_artifacts"]["sample_sha256"]
         for case in evidence["cases"]
     )
+
+
+def test_retained_smote_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "2ae7aa37221870aa9546a84a33cd226ead64eb07"
+    assert evidence["train"]["status"] == "pass"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["torch"] is None
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [32, 32]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    source_lock = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["smote"]
+    windows = source_lock["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["benchmark_role"].startswith("classification-only-classical-reference")
+
+    spec = get_adapter_spec("smote")
+    assert WINDOWS_EVIDENCE_PATH.relative_to(REPO_ROOT).as_posix() in spec.evidence_records
 
 
 def test_smote_wheel_validation_checks_identity_and_license(tmp_path: Path, monkeypatch) -> None:

@@ -304,6 +304,25 @@
         ],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298/job/92185376267",
         "workflow_run_id": 30967779298
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "22b7f857c1e296e442c9383d5c08a6546a4f2f33f162eb84131a5739cac601a7",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/bn/windows-v2-real-function-ae3cb50.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "ae3cb5037eb9afb2af62e0a7c1fdb580c1b42af9",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
       }
     },
     "codi": {
@@ -1116,6 +1135,37 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384/job/92035794936",
         "workflow_run_id": 30922326384,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384"
+      },
+      "windows_real_function": {
+        "attempt_chain": [
+          "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
+          "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
+          "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json"
+        ],
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "diagnostic_windows_wheel_sha256": "24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739",
+        "environment_lock": "requirements-nrgboost-validation.txt",
+        "environment_lock_sha256": "71cb669759c2a3c4b3470b06c02518f8584a1aaa86b08c72c83fa90f389cd2f4",
+        "evidence_file_sha256": "e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420",
+        "failure_evidence_file_sha256": "e73e9348cc95d4591ef22fac5514be55389f040271c1071beddb9d7e39367ccf",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "provenance_evidence_file_sha256": "65e4b597d76edf25cc603e96ca545b364feb7bed9216b775801bd6893cb70b0a",
+        "python": "3.11.15",
+        "repository_commit": "8fb0afe1857487fd1bdc7cbe25781974ef66af5d",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": null,
+        "windows_distribution_claim": "diagnostic-local-build-not-official-distribution-not-native-parity"
       }
     },
     "realtabformer": {
@@ -1333,6 +1383,26 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254/job/92023627287",
         "workflow_run_id": 30918785254,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30918785254"
+      },
+      "windows_real_function": {
+        "benchmark_role": "classification-only-classical-reference-excluded-from-joint-generative-ranking",
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "evidence_file_sha256": "8852c287035b45d2178f35270199f5cc77ea6d97545b34a42d24ee5ec01bde5a",
+        "generation_seeds": [
+          17,
+          29
+        ],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/smote/windows-v2-real-function-2ae7aa3.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "2ae7aa37221870aa9546a84a33cd226ead64eb07",
+        "seed_outputs_distinct": true,
+        "status": "pass",
+        "torch": null
       },
       "upstream_commit": "8504e95f0160f61d1b617ca66f779646d2ee609e",
       "upstream_tree": "af452de62e0f5c3d7e65fdc44a32dc97078152f2"

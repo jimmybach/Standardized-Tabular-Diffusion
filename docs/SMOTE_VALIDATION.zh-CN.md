@@ -1,10 +1,10 @@
 # SMOTE 验证协议
 
-状态：已在 Linux/Python 3.11 上通过；适配器为 `native-parity-validated`
+状态：已通过；已保留 Linux 原生等价证据与原生 Windows 最小真实运行证据
 
 协议 ID：`smote-native-parity-v1`
 
-支持的验证平台：Linux、Python 3.11
+权威等价性验证平台：Linux、Python 3.11；原生 Windows 最小真实运行也已通过
 
 ## 范围与声明边界
 
@@ -107,3 +107,9 @@ python -m standardized_tabular_diffusion.validation.smote \
 ```
 
 `.github/workflows/smote-validation.yml` 执行该命令，并保留证据产物 90 天。包、依赖、适配器、用例或协议发生任何变化，都必须重新运行。经审阅的通过证据将适配器提升为 `native-parity-validated`；在上述独立门槛全部满足前，它仍为 `experimental`、`unsupported`，不能进入 Official Results，也不能进入联合生成模型排名。
+
+## 原生 Windows 最小真实运行结果
+
+仓库提交 `2ae7aa37221870aa9546a84a33cd226ead64eb07` 在原生 Windows 11、Python 3.11.15 和 CPU 上，使用官方 `imbalanced-learn==0.14.2` 通过了 `pipeline-v2-native-windows-v1`。有界 Adult 派生分类夹具分别以种子 `17` 和 `29` 独立重采样；每份结果包含 32 行规范、无缺失数据，两份结构都有效、输出哈希不同，且第一次动作记录的产物未被后续动作改变。随后种子 17 的结果完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。证据保留在 `docs/evidence/smote/windows-v2-real-function-2ae7aa3.json`，SHA-256 为 `8852c287035b45d2178f35270199f5cc77ea6d97545b34a42d24ee5ec01bde5a`。
+
+该功能结果不会改变 SMOTE 的榜单角色：它仍是仅支持分类的传统过采样参考方法，默认排除在联合生成模型排名和 Official Results 之外；只有单独批准传统参考赛道后才可改变这一边界。

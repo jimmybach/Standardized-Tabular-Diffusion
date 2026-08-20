@@ -1,10 +1,10 @@
 # BN 验证协议
 
-状态：已通过；已保留 Linux/Python 3.11 官方包方案等价性证据
+状态：已通过；已保留 Linux 方案等价性证据与原生 Windows 最小真实运行证据
 
 协议 ID：`pgmpy-bn-recipe-parity-v1`
 
-支持的验证平台：Linux、Python 3.11、CPU
+权威等价性验证平台：Linux、Python 3.11、CPU；原生 Windows 最小真实运行也已通过
 
 ## 范围与声明边界
 
@@ -96,5 +96,11 @@ python -m standardized_tabular_diffusion.validation.bn \
 GitHub Actions 运行 [`30967779298`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30967779298) 已在 Linux 和 Python 3.11.15 环境通过。二分类、多分类、回归及随机种子组合形成的全部九个案例都通过了所有精确比较，包括预处理和离散训练帧、学习到的图边、全部 CPD、JSON 恢复后的官方模型、原始离散样本、最终 DataFrame 和 CSV 字节、产物元数据、安全状态声明以及调用方 NumPy 状态恢复。
 
 经审查的证据已逐字节保留在 `docs/evidence/bn/native-parity-run-30967779298.json`，SHA-256 为 `6463f178fb4d30a4dc0925db207a814cf1d7d0ab85ed75b26e619ec4b26d9ad8`。GitHub artifact ID 为 `8915417956`，归档摘要为 `sha256:6dbedd1970b51ab5243e8da35b052d8d8df780cd2c2e81ac2adf756b4cae5654`，source lock 已同时交叉引用这两项记录。
+
+## 原生 Windows 最小真实运行结果
+
+仓库提交 `ae3cb5037eb9afb2af62e0a7c1fdb580c1b42af9` 在原生 Windows 11、Python 3.11.15 和 CPU 上，使用官方 `pgmpy==1.1.2` 通过了 `pipeline-v2-native-windows-v1`。该运行在确定性的 256 行 Adult 派生夹具上完成一次有界拟合并生成安全 JSON 图/CPD checkpoint。种子 `17` 与 `29` 分别生成 16 行规范、无缺失数据；两份结构均有效、结果彼此不同，且采样没有改变训练产物。随后种子 17 的结果在独立评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。证据保留在 `docs/evidence/bn/windows-v2-real-function-ae3cb50.json`，SHA-256 为 `22b7f857c1e296e442c9383d5c08a6546a4f2f33f162eb84131a5739cac601a7`。
+
+该结果只证明声明的“官方包 + 仓库方案”身份具备有界真实功能；不证明代表性规模质量、不覆盖其他 BN 方案，也不意味着已获得榜单资格、Official Results 准入或发布支持。
 
 因此，BN 针对“精确官方 pgmpy 包 + 本仓库声明方案”晋级为 `native-parity-validated`。在中央评测、数据集准入、运行资源、治理和发布门槛分别通过前，它仍是 `experimental`、`unsupported`，并排除在 Official Results 之外。本结论不声称论文原生等价性，也不覆盖其他 BN 方案。

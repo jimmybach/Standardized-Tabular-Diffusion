@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 4,
-    "minimal_real_pending": 14,
+    "minimal_real_passed": 7,
+    "minimal_real_pending": 11,
     "externally_blocked": 1
   },
   "baselines": [
@@ -67,7 +67,12 @@
         "docs/evidence/arf/windows-v2-real-function-eb37290.json"
       ]
     },
-    {"model_id": "bn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "bn",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/bn/windows-v2-real-function-ae3cb50.json"]
+    },
     {"model_id": "codi", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "ctab-gan-plus", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
@@ -82,9 +87,23 @@
     },
     {"model_id": "great", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {"model_id": "nflow", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "nrgboost", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "nrgboost",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": [
+        "docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json",
+        "docs/evidence/nrgboost/windows-source-build-provenance-20260820.json",
+        "docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json"
+      ]
+    },
     {"model_id": "realtabformer", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "smote", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "smote",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/smote/windows-v2-real-function-2ae7aa3.json"]
+    },
     {"model_id": "stasy", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {
       "model_id": "tabddpm",

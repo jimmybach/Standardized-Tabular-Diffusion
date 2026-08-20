@@ -2,7 +2,7 @@
 
 英文原文：[TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md](TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md)
 
-- 状态：计划覆盖全部 21 个适配器
+- 状态：进行中；已保留 7 个原生 Windows V2 通过证据，其中包含 NRGBoost 诊断源码构建路径
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 - 风险类型：仅特定平台发生的失败，或设备/运行时无声漂移
 

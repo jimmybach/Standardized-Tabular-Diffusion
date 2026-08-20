@@ -2,7 +2,7 @@
 
 Chinese translation: [TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.zh-CN.md](TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.zh-CN.md)
 
-- Status: planned across all 21 adapters
+- Status: in progress; seven native-Windows V2 passes retained, including the NRGBoost diagnostic source-build path
 - Parent plan: [Cross-Baseline Pipeline Real-Function Audit](PIPELINE_REAL_FUNCTION_AUDIT.md)
 - Risk class: platform-only failure or unintended device/runtime drift
 

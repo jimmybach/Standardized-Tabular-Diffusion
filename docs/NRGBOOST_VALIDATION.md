@@ -1,6 +1,6 @@
 # NRGBoost Validation Protocol
 
-Status: passed and permanently retained
+Status: passed; retained Linux native-parity and native-Windows minimal-real evidence
 
 Protocol: `nrgboost-native-parity-v1`
 
@@ -111,3 +111,13 @@ Any mismatch, missing artifact, wrong platform, dependency drift, unsafe wheel p
 [GitHub Actions run `30922326384`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30922326384) passed all six task/seed cases on Linux with Python 3.11.15. It verified all 22 hash-bearing installed files against the locked wheel, ran classification and regression fixtures with seeds 0, 19, and 73, and produced byte-exact native/adapter checkpoints and sample CSV files in every case.
 
 The permanent evidence record is `docs/evidence/nrgboost/native-parity-run-30922326384.json`, SHA-256 `5958c67261e8c25e60d58891efd5d27f8e8bb6439852862064e831f630cbe56c`. The run is bound to repository commit `4cd32c8beedd116c6385463d41cf9cba8b1d5438`; the downloaded GitHub artifact is additionally recorded by artifact ID and digest in the source lock. NRGBoost is therefore `native-parity-validated`, while benchmark eligibility and release support remain pending.
+
+## Retained native-Windows minimal-real result
+
+The audited Windows build procedure was rerun from the official source distribution with SHA-256 `7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda0`. It used the checksum-locked MinGW-w64/OpenMP toolchain, changed no source file, produced diagnostic wheel SHA-256 `24d852ebad1687bb4598ac0c739922f1f4cc4a1496ce37b06630c4439622f739`, and passed clean-environment installation, `pip check`, import, and compiled 64-bit sampler checks. The wheel is not committed or redistributed. Reviewed provenance is retained at `docs/evidence/nrgboost/windows-source-build-provenance-20260820.json`.
+
+The first Pipeline V2 attempt at commit `3271298` stopped before model execution because the clean model runtime exposed a missing validation-harness dependency: `packaging` was used by Pipeline V2 but absent from the NRGBoost lock. Finding `RF-CORE-008` added exact `packaging==26.3` declarations to the install extra and a separate Windows V2 lock, keeping the Linux authoritative parity lock unchanged. The failed attempt is retained at `docs/evidence/nrgboost/windows-v2-probe-dependency-failure-3271298.json`.
+
+The clean rerun at repository commit `8fb0afe1857487fd1bdc7cbe25781974ef66af5d` passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU. One bounded five-tree fit on the deterministic 256-row Adult-derived fixture was reused for generation seeds `17` and `29`; each output contained 16 canonical, missing-free rows, both schemas were valid, the outputs differed, and training artifacts remained unchanged. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files. Passing evidence is retained at `docs/evidence/nrgboost/windows-v2-real-function-8fb0afe.json` with SHA-256 `e1ee8c473a19950cc66bb933911bf4e5aa507f295519ad936ffa6d21dd518420`.
+
+This establishes Windows minimal-real functionality only for the recorded diagnostic build and bounded configuration. It neither turns the local wheel into an official distribution nor replaces the Linux official-wheel native-parity authority, and it does not establish representative-scale quality, benchmark eligibility, Official Results admission, or release support.
