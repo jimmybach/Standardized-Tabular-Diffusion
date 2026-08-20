@@ -1,12 +1,12 @@
 # TabSDS 验证协议
 
-状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`
+状态：已由保留证据的 Linux 权威运行提升为 `native-parity-validated`；原生 Windows V2 最小真实功能已通过
 
 协议：`tabsds-official-source-parity-v1`
 
 目标：方法作者 Python `simple` shuffle 路径
 
-支持的验证环境：Linux、Python 3.11
+支持的验证环境：Linux/Python 3.11 用于权威等价验证；原生 Windows/Python 3.11 CPU 用于有界 V2 功能验证
 
 ## 声明边界
 
@@ -31,8 +31,10 @@
 - 仅验证 Python simple-shuffle 路径，不对 R 代码或其他 shuffle 模式作声明。
 - 精确等价不代表质量或隐私结论。
 - 上游未声明许可证；源码仅获取到忽略的缓存中，本仓库不再分发。
-- Official Results、发布支持、中央评测和数据集准入仍是独立且未完成的门槛。
+- 有界 Windows 夹具已通过中央 P3 最终化；Official Results、发布支持、代表性质量和数据集准入仍是独立且未完成的门槛。
 
 ## 证据
 
 GitHub Actions 运行 [`30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) 已在 Linux、Python 3.11.15 环境通过。二分类、多分类、回归与三个种子组成的 9 个用例，在官方直接路径和适配器路径间获得完全一致的 DataFrame 与 CSV 字节，并实际覆盖从 37 行训练表请求 53 行的重复/截断边界。经审阅的 JSON 已逐字节保留在 `docs/evidence/tabsds/native-parity-run-30974574593.json`，SHA-256 为 `11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66`，并已从 source lock 交叉引用。上游许可证缺失仍然阻止再分发与发布。
+
+仓库提交 `a5f83ae4b7035ebe87bff0230160a77d80a21252` 还在原生 Windows 11、Python 3.11.15 和 CPU 上独立通过了 `pipeline-v2-native-windows-v1`。运行从仓库现有非 ASCII 路径调用校验和锁定且未修改的方法作者源码，并使用确定性的 256 行 Adult 派生无缺失夹具。一份安全配方状态供种子 `17` 与 `29` 分别生成数据；每份结果均包含 32 行规范数据、无缺失单元、结构有效且训练产物保持不变，两份 CSV 哈希按要求不同。随后，种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。证据保留在 `docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json`，SHA-256 为 `b5288ff5f0d0ea5556028ed9b859e8f666abe570e2e61cc0e69df8343370f4a3`。这只是有界运行功能结论，不代表质量、隐私、再分发或发布结论。

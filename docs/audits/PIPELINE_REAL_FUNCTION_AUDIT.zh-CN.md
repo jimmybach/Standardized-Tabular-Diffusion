@@ -2,7 +2,7 @@
 
 英文原文：[PIPELINE_REAL_FUNCTION_AUDIT.md](PIPELINE_REAL_FUNCTION_AUDIT.md)
 
-- 状态：第二阶段修复已完成；V2 真实执行进行中（已保留 7 个最小真实通过证据）
+- 状态：第二阶段修复已完成；V2 真实执行进行中（已保留 8 个最小真实通过证据）
 - 方案版本：1.0
 - 快照日期：2026-08-20
 - 主要目标环境：原生 Windows 11 x86-64、Python 3.11，以及用户指定的 CUDA 设备
@@ -27,11 +27,11 @@
 - TabEBM 为 `smoke-validated`；完整生成依赖受外部访问限制的 TabPFN-v2。
 - TabDDPM 已完成原生 Windows 上 Adult 数据集的代表性真实训练/生成，包含 3 个生成种子和最终化的 P5 bundle。
 - TabDiff 已完成原生 Windows 上 Adult 数据集的代表性真实训练/生成，包含 3 个生成种子和最终化的中央 P2/P3 bundle。
-- Goggle、TabuLa、TabularARGN、ARF、BN、SMOTE 和 NRGBoost 已分别通过原生 Windows V2 最小真实协议：两个不同生成种子、训练产物不变、解码表严格验收，以及最终化的中央 `p3-validity` bundle。ARF 与 BN 使用声明的 CPU 路径；SMOTE 仍是仅支持分类的传统参考方法。由于作者没有发布 Windows 轮子，NRGBoost 使用未经源码修改且不再分发的本地诊断轮子；其 Linux 官方轮子证据仍是唯一原生等价依据。所有首次失败均已保留。
-- 另外 11 个计划内 baseline 尚未通过本次新增的原生 Windows 横向真实功能审计。`pending` 只表示尚未按本方案测试，不表示失败。
+- Goggle、TabuLa、TabularARGN、ARF、BN、SMOTE、NRGBoost 和 TabSDS 已分别通过原生 Windows V2 最小真实协议：两个不同生成种子、训练产物不变、解码表严格验收，以及最终化的中央 `p3-validity` bundle。ARF、BN 与 TabSDS 使用声明的 CPU 路径；SMOTE 仍是仅支持分类的传统参考方法。由于作者没有发布 Windows 轮子，NRGBoost 使用未经源码修改且不再分发的本地诊断轮子；其 Linux 官方轮子证据仍是唯一原生等价依据。TabSDS 执行校验和锁定的方法作者 simple-shuffle 源码且没有修改源码；上游缺少许可证仍是独立发布阻塞项。所有首次失败均已保留。
+- 另外 10 个计划内 baseline 尚未通过本次新增的原生 Windows 横向真实功能审计。`pending` 只表示尚未按本方案测试，不表示失败。
 - SMOTE 是仅支持分类的传统参考方法，不参与生成模型排名，但它的适配器仍要接受同一套流水线契约审计。
 
-第一阶段已完成全部 84 个 T01-T04 V0/V1 任务/模型审计单元，并确认了 10 个问题：9 个 S1 和 1 个 S2。第二阶段已修复这 10 个问题的根因，并通过全部轻依赖回归测试。V2 现在正逐模型推进；已保留 7 个最小真实通过证据。TabularARGN 与 ARF 又分别暴露出一个 T05 S2 环境边界问题，NRGBoost 暴露出一个 T04 S2 验证依赖漏项；三者均已加入回归测试并由干净重跑验证。覆盖更多模型的问题在全部适用真实探针通过前仍保持 `fixed`。注册表生命周期等级未改变。
+第一阶段已完成全部 84 个 T01-T04 V0/V1 任务/模型审计单元，并确认了 10 个问题：9 个 S1 和 1 个 S2。第二阶段已修复这 10 个问题的根因，并通过全部轻依赖回归测试。V2 现在正逐模型推进；已保留 8 个最小真实通过证据。TabularARGN 与 ARF 又分别暴露出一个 T05 S2 环境边界问题，NRGBoost 暴露出一个 T04 S2 验证依赖漏项；三者均已加入回归测试并由干净重跑验证。覆盖更多模型的问题在全部适用真实探针通过前仍保持 `fixed`。注册表生命周期等级未改变。
 
 ## 3. 验证层级与结论边界
 

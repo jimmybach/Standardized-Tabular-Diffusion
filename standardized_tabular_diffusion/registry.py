@@ -410,6 +410,7 @@ _ADAPTER_SPECS: dict[str, AdapterSpec] = {
             "docs/UPSTREAM_SOURCE_AUDIT.md",
             "docs/TABSDS_VALIDATION.md",
             "docs/evidence/tabsds/native-parity-run-30974574593.json",
+            "docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json",
             "standardized_tabular_diffusion/resources/upstream/tabsds-source-manifest.json",
             "standardized_tabular_diffusion/resources/upstream/source-lock.json",
             ".github/workflows/tabsds-validation.yml",

@@ -1,12 +1,12 @@
 # TabSDS Validation Protocol
 
-Status: `native-parity-validated` by a retained authoritative Linux run
+Status: `native-parity-validated` by a retained authoritative Linux run; native-Windows V2 minimal-real functionality passed
 
 Protocol: `tabsds-official-source-parity-v1`
 
 Target: method-author Python `simple` shuffle path
 
-Supported validation environment: Linux, Python 3.11
+Supported validation environments: Linux/Python 3.11 for authoritative parity; native Windows/Python 3.11 CPU for bounded V2 functionality
 
 ## Claim Boundary
 
@@ -31,8 +31,10 @@ Binary classification, multiclass classification, and regression fixtures are ea
 - Only the Python simple-shuffle path is validated; no claim is made for R code or other shuffle modes.
 - Exact parity is not a quality or privacy result.
 - The upstream repository has no declared license. Source is fetched into an ignored cache and is not redistributed here.
-- Official Results, release support, central evaluation, and dataset admission remain blocked or pending independently.
+- The bounded Windows fixture passed central P3 finalization. Official Results, release support, representative quality, and dataset admission remain blocked or pending independently.
 
 ## Evidence
 
 GitHub Actions run [`30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) passed on Linux with Python 3.11.15. All nine binary, multiclass, regression, and seed cases produced identical DataFrames and CSV bytes across direct-source and adapter paths while exercising the 53-from-37 repeat/truncate boundary. The inspected JSON is retained byte-for-byte at `docs/evidence/tabsds/native-parity-run-30974574593.json` with SHA-256 `11cfa96a3221944ebb6d423fdddf8660f278e7f6b108dff500fe39a1f9b07b66` and is cross-linked from the source lock. The absent upstream license still blocks redistribution and release.
+
+Repository commit `a5f83ae4b7035ebe87bff0230160a77d80a21252` separately passed `pipeline-v2-native-windows-v1` on native Windows 11, Python 3.11.15, and CPU. The checksum-locked, unchanged method-author source was exercised from the repository's non-ASCII path on the deterministic 256-row Adult-derived missing-free fixture. One safe recipe-state training action was reused for generation seeds `17` and `29`; each output contained 32 canonical rows, no missing cells, a valid schema, and unchanged training artifacts, while the two CSV hashes differed. The seed-17 output then finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment. Evidence is retained at `docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json` with SHA-256 `b5288ff5f0d0ea5556028ed9b859e8f666abe570e2e61cc0e69df8343370f4a3`. This is a bounded runtime result, not a quality, privacy, redistribution, or release claim.

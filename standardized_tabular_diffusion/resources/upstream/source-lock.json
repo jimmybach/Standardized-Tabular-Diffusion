@@ -2371,6 +2371,26 @@
         "variants": ["binary", "multiclass", "regression"],
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593/job/92205832345",
         "workflow_run_id": 30974574593
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-tabsds-validation.txt",
+        "environment_lock_sha256": "d03d355188ff0037407241a8b4573d368d25b27ee1f82d1d85fe6252a0f524d9",
+        "evidence_file_sha256": "b5288ff5f0d0ea5556028ed9b859e8f666abe570e2e61cc0e69df8343370f4a3",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "a5f83ae4b7035ebe87bff0230160a77d80a21252",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": null,
+        "validated_scope": "method-author Python simple-shuffle path on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tabebm": {

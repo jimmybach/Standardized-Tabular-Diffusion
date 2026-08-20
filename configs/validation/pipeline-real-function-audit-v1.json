@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 7,
-    "minimal_real_pending": 11,
+    "minimal_real_passed": 8,
+    "minimal_real_pending": 10,
     "externally_blocked": 1
   },
   "baselines": [
@@ -132,7 +132,12 @@
         "docs/evidence/tabebm/smoke-validation-run-30974574544.json"
       ]
     },
-    {"model_id": "tabsds", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "tabsds",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/tabsds/windows-v2-real-function-a5f83ae.json"]
+    },
     {"model_id": "tabsyn", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
     {
       "model_id": "tabula",
