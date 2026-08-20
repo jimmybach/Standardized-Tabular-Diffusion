@@ -79,4 +79,12 @@ All nine cases passed in GitHub Actions [run `32043925805`](https://github.com/j
 
 ## Remaining Gates
 
-Snapshot parity alone will not make CoDi `benchmark-eligible` or `release-supported`. Remaining gates include central metric execution, dataset-profile admission, full-scale runtime characterization, approved benchmark configurations, license/governance review, and release review. Any original-method claim additionally requires a licensable method-author source and a separate equivalence decision.
+Snapshot parity alone will not make CoDi `benchmark-eligible` or `release-supported`. Remaining gates include dataset-profile admission, representative-scale runtime and quality characterization, approved benchmark configurations, license/governance review, and release review. Any original-method claim additionally requires a licensable method-author source and a separate equivalence decision.
+
+## Native-Windows V2 result
+
+Repository commit `17fc74e2f9be8a507ec1f921bb3b509881937154` passed `pipeline-v2-native-windows-v1` with the checksum-exact TabSyn benchmark snapshot on Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and NVIDIA GeForce RTX 5080. One bounded real fit of both diffusion components on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 16 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling did not change the copied training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+The run explicitly recorded the sole `pip check` conflict: `libzero==0.0.8` has stale metadata requiring `torch<2`, while the frozen compatibility path uses PyTorch 2.8.0. This exact conflict was reviewed and matched the plan-declared waiver; no other dependency conflict was accepted. Evidence is retained at `docs/evidence/codi/windows-v2-real-function-17fc74e.json` with SHA-256 `6530e7b20740267bcb993687fae47d08e3f606ca368ac7ce6c581cd35d55ffe1`.
+
+This bounded functionality result does not establish representative quality, privacy, original-method equivalence, Official Results admission, or release support. The validated identity remains the unmodified TabSyn benchmark snapshot, not the differently licensed method-author source.

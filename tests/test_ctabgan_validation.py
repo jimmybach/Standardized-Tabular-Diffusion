@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 from standardized_tabular_diffusion.registry import AdapterValidationLevel, get_adapter_spec
 from standardized_tabular_diffusion.validation import ctabgan
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "ctabgan" / "windows-v2-real-function-17fc74e.json"
+WINDOWS_EVIDENCE_SHA256 = "22144b71cf3eea455ba77631553377fe769b5fd543a125073977fa2f778898fa"
 
 
 def test_protocol_identity_and_cases_are_frozen() -> None:
@@ -52,3 +57,41 @@ def test_registry_pins_classification_only_official_source_with_retained_linux_e
     assert "docs/evidence/ctabgan/native-parity-run-30930939961.json" in spec.evidence_records
     assert spec.benchmark_track == "experimental"
     assert spec.support_level == "unsupported"
+
+
+def test_retained_ctabgan_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "17fc74e2f9be8a507ec1f921bb3b509881937154"
+    assert evidence["entry"]["device"] == "cpu"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["torch"] == "2.3.0+cpu"
+    assert evidence["environment"]["hardware"]["cuda_available"] is False
+    assert evidence["environment"]["pip_check"]["status"] == "pass"
+    assert evidence["environment_lock"]["sha256"] == (
+        "d89bb9ceec70c0de16d38b5652a57dbff58f097925a524d67deb0cb2677b60fb"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [16, 16]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["ctab-gan"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json" in get_adapter_spec(
+        "ctab-gan"
+    ).evidence_records

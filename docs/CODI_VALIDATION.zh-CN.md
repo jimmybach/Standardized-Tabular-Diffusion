@@ -79,4 +79,12 @@ Linux/Python 3.11 协议运行九个真实案例：
 
 ## 尚未完成的门槛
 
-快照一致性通过不会自动使 CoDi 成为 `benchmark-eligible` 或 `release-supported`。剩余门槛包括中央指标执行、数据集 Profile 准入、全规模运行特征评估、正式 benchmark 配置审批、许可证与治理审查，以及发布审查。若要声明论文原始实现一致性，还必须获得可合法使用的论文作者源码，并单独完成等价性判断。
+快照一致性通过不会自动使 CoDi 成为 `benchmark-eligible` 或 `release-supported`。剩余门槛包括数据集 Profile 准入、代表性规模的运行与质量验证、正式 benchmark 配置审批、许可证与治理审查，以及发布审查。若要声明论文原始实现一致性，还必须获得可合法使用的论文作者源码，并单独完成等价性判断。
+
+## 原生 Windows V2 结果
+
+仓库提交 `17fc74e2f9be8a507ec1f921bb3b509881937154` 使用校验和完全一致的 TabSyn benchmark 快照，在 Windows 11、Python 3.11.15、PyTorch 2.8.0+cu128、CUDA 12.8 和 NVIDIA GeForce RTX 5080 上通过了 `pipeline-v2-native-windows-v1`。连续与离散两个扩散组件在确定性的 256 行 Adult 派生无缺失夹具上完成一次有界真实训练，并复用于种子 `17` 与 `29` 的生成。每份结果均包含 16 行规范、无缺失数据；两份结构有效、哈希不同，且采样未改变复制的训练产物。随后种子 17 的结果在独立锁定的评测环境中完成中央 `p3-validity` Result Bundle 最终化与校验，待定文件数为零。
+
+运行记录了唯一一项 `pip check` 冲突：`libzero==0.0.8` 的旧元数据要求 `torch<2`，而冻结的兼容路径使用 PyTorch 2.8.0。该精确冲突与方案中预先审阅的白名单完全匹配；其他依赖冲突均不会被接受。证据保留在 `docs/evidence/codi/windows-v2-real-function-17fc74e.json`，SHA-256 为 `6530e7b20740267bcb993687fae47d08e3f606ca368ac7ce6c581cd35d55ffe1`。
+
+这项有界功能结论不代表代表性质量、隐私、论文原始实现等价、Official Results 准入或发布支持。被验证的身份仍是未经修改的 TabSyn benchmark 快照，而不是许可状态不同的方法作者源码。

@@ -53,8 +53,8 @@
     "registry_native_parity_validated": 20,
     "registry_smoke_validated": 1,
     "representative_real_passed": 2,
-    "minimal_real_passed": 11,
-    "minimal_real_pending": 7,
+    "minimal_real_passed": 15,
+    "minimal_real_pending": 3,
     "externally_blocked": 1
   },
   "baselines": [
@@ -73,9 +73,24 @@
       "windows_real_function_state": "minimal-real-passed",
       "evidence": ["docs/evidence/bn/windows-v2-real-function-ae3cb50.json"]
     },
-    {"model_id": "codi", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "ctab-gan", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
-    {"model_id": "ctab-gan-plus", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "codi",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/codi/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "ctab-gan",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json"]
+    },
+    {
+      "model_id": "ctab-gan-plus",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/ctabgan-plus/windows-v2-real-function-17fc74e.json"]
+    },
     {
       "model_id": "ctgan",
       "registry_validation_level": "native-parity-validated",
@@ -114,7 +129,12 @@
       "windows_real_function_state": "minimal-real-passed",
       "evidence": ["docs/evidence/smote/windows-v2-real-function-2ae7aa3.json"]
     },
-    {"model_id": "stasy", "registry_validation_level": "native-parity-validated", "windows_real_function_state": "minimal-real-pending", "evidence": []},
+    {
+      "model_id": "stasy",
+      "registry_validation_level": "native-parity-validated",
+      "windows_real_function_state": "minimal-real-passed",
+      "evidence": ["docs/evidence/stasy/windows-v2-real-function-17fc74e.json"]
+    },
     {
       "model_id": "tabddpm",
       "registry_validation_level": "native-parity-validated",

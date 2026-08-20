@@ -103,4 +103,12 @@ All nine cases passed. For every case, model, optimizer, EMA, step, and epoch st
 
 ## Remaining Gates
 
-Successful snapshot parity will not make STaSy benchmark-eligible or release-supported. Remaining gates include central metric execution, dataset-profile admission, full-scale runtime characterization, configuration approval, and release review. Original-method claims additionally require a licensed method-author source and a separate equivalence decision.
+Successful snapshot parity will not make STaSy benchmark-eligible or release-supported. Remaining gates include dataset-profile admission, representative-scale runtime and quality characterization, configuration approval, and release review. Original-method claims additionally require a licensed method-author source and a separate equivalence decision.
+
+## Native-Windows V2 result
+
+Repository commit `17fc74e2f9be8a507ec1f921bb3b509881937154` passed `pipeline-v2-native-windows-v1` with the checksum-exact TabSyn benchmark snapshot on Windows 11, Python 3.11.15, PyTorch 2.8.0+cu128, CUDA 12.8, and NVIDIA GeForce RTX 5080. One bounded real epoch on the deterministic 256-row Adult-derived missing-free fixture was reused for generation seeds `17` and `29`. Each output contained 16 canonical, missing-free rows; both schemas were valid, their hashes differed, and sampling did not change the copied training artifacts. The seed-17 output finalized and validated a central `p3-validity` Result Bundle with zero pending files in the independently locked evaluation environment.
+
+The run explicitly recorded the sole `pip check` conflict: `libzero==0.0.8` has stale metadata requiring `torch<2`, while the frozen compatibility path uses PyTorch 2.8.0. This exact conflict was reviewed and matched the plan-declared waiver; no other dependency conflict was accepted. Evidence is retained at `docs/evidence/stasy/windows-v2-real-function-17fc74e.json` with SHA-256 `7c6b31f09ea9f4ea58b1e4b194f62d13e0145c53d991810eb69124ae783d8ec6`.
+
+This bounded functionality result does not establish representative quality, privacy, original-method equivalence, Official Results admission, or release support. The validated identity remains the unmodified TabSyn benchmark snapshot, not the differently licensed method-author source.

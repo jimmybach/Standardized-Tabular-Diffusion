@@ -2,7 +2,7 @@
 
 英文原文：[TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md](TASK_04_WINDOWS_GPU_AND_DEPENDENCIES.md)
 
-- 状态：进行中；已保留 11 个原生 Windows V2 通过证据，其中包含 RTX 5080 上的 CTGAN/TVAE、CPU 上的 NFlow、NRGBoost 诊断源码构建路径和未修改的 TabSDS 方法作者源码路径
+- 状态：进行中；已保留 15 个原生 Windows V2 通过证据，其中包含 RTX 5080 上的 CTGAN/TVAE/CoDi/STaSy、CPU 上的 NFlow/CTAB-GAN/CTAB-GAN+、NRGBoost 诊断源码构建路径和未修改的 TabSDS 方法作者源码路径
 - 上级方案：[跨 Baseline 流水线真实功能审计](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 - 风险类型：仅特定平台发生的失败，或设备/运行时无声漂移
 

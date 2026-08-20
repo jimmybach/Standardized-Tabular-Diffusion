@@ -383,7 +383,7 @@
         "tree": "6b41bd82ada37535d2405bb0cb14285e92858a21"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "reproduction_target": "tabsyn-benchmark-snapshot",
       "selected_runtime_files": 24,
@@ -446,6 +446,28 @@
           "variants": ["binary", "multiclass", "regression"],
           "workflow_event": "push",
           "workflow_run_id": 32043925805
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-codi-validation.txt",
+        "environment_lock_sha256": "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149",
+        "evidence_file_sha256": "6530e7b20740267bcb993687fae47d08e3f606ca368ac7ce6c581cd35d55ffe1",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/codi/windows-v2-real-function-17fc74e.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact TabSyn benchmark CoDi snapshot on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "ctab-gan": {
@@ -486,7 +508,7 @@
       "license_notice_path": "TabDDPM-main/CTAB-GAN/License.txt",
       "local_path": "TabDDPM-main/CTAB-GAN",
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-pending-central-evaluation-dataset-admission-runtime-and-release-gates",
+      "official_eligibility": "blocked-pending-dataset-admission-runtime-and-release-gates",
       "patch_sets": [],
       "selected_files": 7,
       "source_hash_normalization": "lf-one-final-newline",
@@ -546,6 +568,25 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961/job/92065163118",
         "workflow_run_id": 30930939961,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30930939961"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-ctabgan-validation.txt",
+        "environment_lock_sha256": "d89bb9ceec70c0de16d38b5652a57dbff58f097925a524d67deb0cb2677b60fb",
+        "evidence_file_sha256": "22144b71cf3eea455ba77631553377fe769b5fd543a125073977fa2f778898fa",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/ctabgan/windows-v2-real-function-17fc74e.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu"
       }
     },
     "ctab-gan-plus": {
@@ -577,7 +618,7 @@
         "status": "upstream-public-no-license-declared"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-no-upstream-license-central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-no-upstream-license-dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "source_manifest": "standardized_tabular_diffusion/resources/upstream/ctabgan-plus-source-manifest.json",
       "source_treatment": "download-five-byte-exact-runtime-files-to-ignored-local-cache",
@@ -633,6 +674,25 @@
         "workflow_job_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432/job/92049288002",
         "workflow_run_id": 30926267432,
         "workflow_run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30926267432"
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "environment_lock": "requirements-ctabgan-plus-validation.txt",
+        "environment_lock_sha256": "5eca4d5b6f590ab4916a3cbb829a8fc5aa25dc4b24834e6120c74a4815f52949",
+        "evidence_file_sha256": "ce7834d0abab284f026230fdcd64bb91f9738b3d65fc77ed01c01fbe1e534127",
+        "generation_seeds": [17, 29],
+        "hardware": "CPU",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/ctabgan-plus/windows-v2-real-function-17fc74e.json",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.3.0+cpu"
       }
     },
     "ctgan": {
@@ -1492,7 +1552,7 @@
         "tree": "6a1307d4a0bf0819e70b15a13fb3a0a65fbbee57"
       },
       "modification_status": "adapter-only",
-      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; central-evaluation-dataset-runtime-and-release-gates-pending",
+      "official_eligibility": "blocked-benchmark-snapshot-not-method-author-original; dataset-runtime-and-release-gates-pending",
       "patch_sets": [],
       "reproduction_target": "tabsyn-benchmark-snapshot",
       "selected_runtime_files": 30,
@@ -1553,6 +1613,28 @@
         "run_url": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30936275831",
         "status": "pass",
         "workflow_run_id": 30936275831
+      },
+      "windows_real_function": {
+        "central_evaluation": "p3-validity-finalized",
+        "central_evaluation_environment_lock": "requirements-pipeline-v2-evaluation.txt",
+        "central_evaluation_environment_lock_sha256": "df78903678a6a8de185bfbc1bf7e1cca74ba01f8f5229f35ee2c495ebf6a02ca",
+        "cuda_runtime": "12.8",
+        "environment_lock": "requirements-stasy-validation.txt",
+        "environment_lock_sha256": "1af4bb8eae6781a55c0b7fa355a43ad330c06b6556ab43f5360efc964dc9ebca",
+        "evidence_file_sha256": "7c6b31f09ea9f4ea58b1e4b194f62d13e0145c53d991810eb69124ae783d8ec6",
+        "generation_seeds": [17, 29],
+        "hardware": "NVIDIA GeForce RTX 5080",
+        "level": "minimal-real-passed",
+        "permanent_evidence_path": "docs/evidence/stasy/windows-v2-real-function-17fc74e.json",
+        "pip_check_status": "pass-with-reviewed-waiver",
+        "protocol_id": "pipeline-v2-native-windows-v1",
+        "python": "3.11.15",
+        "repository_commit": "17fc74e2f9be8a507ec1f921bb3b509881937154",
+        "seed_outputs_distinct": true,
+        "source_code_modified": false,
+        "status": "pass",
+        "torch": "2.8.0+cu128",
+        "validated_scope": "checksum-exact TabSyn benchmark STaSy snapshot on the deterministic 256-row Adult-derived missing-free fixture"
       }
     },
     "tvae": {

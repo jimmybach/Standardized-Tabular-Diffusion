@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -11,11 +12,15 @@ import standardized_tabular_diffusion.models.vendored_baselines as vendored_base
 from standardized_tabular_diffusion.compat.codi_launcher import _TorchProxy
 from standardized_tabular_diffusion.interfaces import DatasetSpec, RunSpec
 from standardized_tabular_diffusion.models.vendored_baselines import CoDiAdapter
+from standardized_tabular_diffusion.registry import get_adapter_spec
 from standardized_tabular_diffusion.upstream_sources import UpstreamSourceIntegrityError, validate_upstream_source
 
 pytestmark = pytest.mark.adapter
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SOURCE_LOCK = REPO_ROOT / "standardized_tabular_diffusion" / "resources" / "upstream" / "source-lock.json"
+WINDOWS_EVIDENCE_PATH = REPO_ROOT / "docs" / "evidence" / "codi" / "windows-v2-real-function-17fc74e.json"
+WINDOWS_EVIDENCE_SHA256 = "6530e7b20740267bcb993687fae47d08e3f606ca368ac7ce6c581cd35d55ffe1"
 
 
 def _write_dataset(root: Path, *, missing: bool = False, numerical_features: bool = True) -> None:
@@ -95,6 +100,47 @@ def test_codi_distributed_execution_scope_is_checksum_locked() -> None:
 
     assert result["runtime_files_verified"] == 24
     assert result["upstream_model_tree"] == "85c16ccfb76fbf00db6b30450ca47e9928efa8d3"
+
+
+def test_retained_codi_windows_v2_evidence_is_exact_and_complete() -> None:
+    evidence_bytes = WINDOWS_EVIDENCE_PATH.read_bytes()
+    assert hashlib.sha256(evidence_bytes).hexdigest() == WINDOWS_EVIDENCE_SHA256
+    assert evidence_bytes.endswith(b"\n")
+    evidence = json.loads(evidence_bytes)
+
+    assert evidence["status"] == "pass"
+    assert evidence["protocol_id"] == "pipeline-v2-native-windows-v1"
+    assert evidence["repository_commit"] == "17fc74e2f9be8a507ec1f921bb3b509881937154"
+    assert evidence["entry"]["device"] == "cuda"
+    assert evidence["environment"]["python"] == "3.11.15"
+    assert evidence["environment"]["hardware"]["gpu"] == "NVIDIA GeForce RTX 5080"
+    assert evidence["environment"]["hardware"]["torch"] == "2.8.0+cu128"
+    assert evidence["environment"]["hardware"]["cuda_runtime"] == "12.8"
+    assert evidence["environment"]["pip_check"]["status"] == "pass-with-reviewed-waiver"
+    assert len(evidence["environment"]["pip_check"]["reviewed_waivers"]) == 1
+    assert evidence["environment"]["packages"]["libzero"] == "0.0.8"
+    assert evidence["environment_lock"]["sha256"] == (
+        "7303b77fcfdca25fbb011956a40aa47859788364da3c40ee506d930f0c6c0149"
+    )
+    assert [sample["seed"] for sample in evidence["samples"]] == [17, 29]
+    assert [sample["rows"] for sample in evidence["samples"]] == [16, 16]
+    assert all(sample["schema_valid"] for sample in evidence["samples"])
+    assert all(sample["missing_cells"] == 0 for sample in evidence["samples"])
+    assert all(sample["training_artifacts_unchanged"] for sample in evidence["samples"])
+    assert evidence["seed_outputs_distinct"] is True
+    assert evidence["tracked_repository_unchanged"] is True
+    assert evidence["central_evaluation"]["status"] == "pass"
+    assert evidence["central_evaluation"]["validation"]["pending_files"] == 0
+
+    component = json.loads(SOURCE_LOCK.read_text(encoding="utf-8"))["components"]["codi"]
+    windows = component["windows_real_function"]
+    assert windows["level"] == "minimal-real-passed"
+    assert windows["evidence_file_sha256"] == WINDOWS_EVIDENCE_SHA256
+    assert windows["repository_commit"] == evidence["repository_commit"]
+    assert windows["source_code_modified"] is False
+    assert "docs/evidence/codi/windows-v2-real-function-17fc74e.json" in get_adapter_spec(
+        "codi"
+    ).evidence_records
 
 
 def test_codi_cpu_proxy_exposes_one_logical_loader_device_without_global_patch() -> None:
