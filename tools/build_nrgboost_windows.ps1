@@ -24,7 +24,7 @@ $SourceSha256 = "7b9e6a2a951755a75f34f1ec1185e82c4038938de6d126b046d46ce0624bbda
 $ExpectedWheelName = "nrgboost-0.0.3-cp311-cp311-win_amd64.whl"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $ToolchainLock = Join-Path $PSScriptRoot "nrgboost-windows-toolchain.explicit.txt"
-$RuntimeRequirements = Join-Path $RepoRoot "requirements-nrgboost-validation.txt"
+$RuntimeRequirements = Join-Path $RepoRoot "requirements-nrgboost-windows-v2.txt"
 
 function Invoke-Checked {
     param(
