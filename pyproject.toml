@@ -221,6 +221,7 @@ nrgboost = [
   "nrgboost==0.0.3",
   "numpy==1.26.4; python_version < '3.13'",
   "numpy>=2.1,<2.2; python_version >= '3.13'",
+  "packaging==26.3",
   "pandas==2.2.3",
   "pycparser==2.22",
   "scipy==1.13.1; python_version < '3.13'",

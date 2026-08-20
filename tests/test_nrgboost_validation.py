@@ -3,12 +3,15 @@ from __future__ import annotations
 import platform
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
 from standardized_tabular_diffusion.validation import nrgboost as nrgboost_validation
 
 pytestmark = pytest.mark.adapter
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_nrgboost_protocol_constants_lock_the_official_release() -> None:
@@ -34,6 +37,15 @@ def test_nrgboost_validation_runtime_is_bounded_and_deterministic() -> None:
     extras = nrgboost_validation._adapter_extra()
     assert extras["training_temperature"] == nrgboost_validation.TRAINING_PARAMS["temperature"]
     assert extras["num_steps"] == nrgboost_validation.SAMPLING_PARAMS["num_steps"]
+
+
+def test_nrgboost_windows_runtime_lock_declares_pipeline_packaging_dependency() -> None:
+    lock_lines = {
+        line.strip()
+        for line in (REPO_ROOT / "requirements-nrgboost-validation.txt").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    assert "packaging==26.3" in lock_lines
 
 
 def test_nrgboost_case_gate_fails_closed() -> None:
