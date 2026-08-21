@@ -4,7 +4,7 @@ Status date: 2026-08-21
 
 Scope: the single source of truth for whole-project phase status
 
-Current working focus: **Phase 9 — Internal usable-version closure (`🟡 Integration pending`)**
+Current working focus: **Phase 7 — V3 representative scientific validation (`⬜ Pending`; discussion required before execution)**
 
 ## 1. Purpose
 
@@ -48,7 +48,7 @@ Whole-project phases are gates, not a strict calendar. Engineering work from Pha
 | 6. V2 audit closure | ✅ Complete | All 84 Phase-1 logic-audit cells completed, ten cross-cutting findings were repaired and regression-tested, all accessible runtime evidence was consolidated, and the repository-wide regression gate passed. |
 | 7. V3 representative scientific validation | ⬜ Pending | The representative model set, datasets, full-scale configurations, scientific decision criteria, and three-seed matrix remain pending discussion and have not been approved as one V3 campaign. Existing protocol pilots do not automatically satisfy this phase. |
 | 8. Formal benchmark experiments | ⬜ Pending | The complete admitted model-by-dataset-by-seed experiment matrix, quality interpretation, and formal leaderboard have not been executed. |
-| 9. Internal usable-version closure | 🟡 Integration pending | Clean wheel and source installs, official Adult acquisition, preprocessing, CLI journey, spaces/Chinese paths, representative CPU/GPU pipelines, and distribution hygiene passed locally. Exact-branch hosted Windows/Linux validation and merge remain pending. |
+| 9. Internal usable-version closure | ✅ Complete | Clean wheel and source installs, official Adult acquisition, preprocessing, CLI journey, spaces/Chinese paths, representative CPU/GPU pipelines, and distribution hygiene passed locally. PR #34 was merged, and all 13 exact-merge-commit workflows passed on `main`, including Windows/Linux Core and P8 release gates. |
 | 10. Formal public release | ⏸ Deferred/optional | A final version, GitHub Release, laboratory Organization transfer, public site, and paper/submission package are postponed until they are needed. |
 
 ## 4. Phase definitions and exit evidence
@@ -115,7 +115,7 @@ Current result: infrastructure exists, but formal experiment execution and a ran
 
 Exit condition: for the exact integrated candidate, independently install wheel and source archive in clean Python 3.11 environments; follow the documented path from acquisition through Result Bundle; validate representative CPU/GPU workflows; test spaces and non-ASCII paths; audit CLI/error/output behavior; and prove that distribution archives contain no datasets, run outputs, credentials, retained machine evidence, or developer-local paths.
 
-Current result: all local acceptance actions passed, including the recorded 646-test acceptance environment, repository-wide Ruff and Mypy, separate wheel/source installations, Adult download and preprocessing, CPU SMOTE, and RTX 5080 CTGAN. A subsequent Python 3.11/3.13 integration review and fresh distribution inspection also passed. The work remains at `integration pending` until the exact branch passes the applicable hosted Windows/Linux release CI, is reviewed, and is merged. See the [clean-install acceptance report](audits/CLEAN_INSTALL_USER_ACCEPTANCE.md).
+Current result: all local acceptance actions passed, including the recorded 646-test acceptance environment, repository-wide Ruff and Mypy, separate wheel/source installations, Adult download and preprocessing, CPU SMOTE, and RTX 5080 CTGAN. A subsequent Python 3.11/3.13 integration review and fresh distribution inspection also passed. [PR #34](https://github.com/jimmybach/Standardized-Tabular-Diffusion/pull/34) merged as [`1d500e1`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/commit/1d500e18c00dcb866b1d3c1e7e81931a025baf98); all 13 workflows for that exact `main` commit passed, including [Core CI](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293539) and the [Windows/Linux P8 release gate](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293507). See the [clean-install acceptance report](audits/CLEAN_INSTALL_USER_ACCEPTANCE.md).
 
 ### Phase 10: Formal public release
 
@@ -139,11 +139,9 @@ Current result: deliberately deferred. See the [release checklist](../RELEASE_CH
 
 ## 6. Immediate next actions
 
-1. Review the Phase 9 integration pull request and its exact diff.
-2. Pass the hosted Windows/Linux core and release gates for the exact branch commit.
-3. Merge only after review and required CI pass.
-4. Record the merged commit and CI evidence, then mark Phase 9 `✅ Complete` in this document and its Chinese translation.
-5. Decide whether to begin Phase 7 now or keep the repository at an internally usable, non-Official state.
+1. Decide whether to begin Phase 7 now or keep the repository at an internally usable, non-Official state.
+2. If Phase 7 begins, approve the representative model set, datasets, configurations, compute limits, three-seed matrix, and scientific decision rules before running experiments.
+3. Keep Phase 8 and Official Results closed until the Phase 7 evidence and all independent admission gates justify formal benchmark execution.
 
 ## 7. Update rules
 

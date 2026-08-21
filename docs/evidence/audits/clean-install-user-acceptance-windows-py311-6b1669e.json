@@ -71,7 +71,20 @@
       "ruff": "pass",
       "mypy_checked_source_files": 36
     },
-    "exact_commit_clean_install": "pending-hosted-windows-and-linux-ci"
+    "exact_commit_clean_install": "passed-on-main-merge-commit"
+  },
+  "integration_closure": {
+    "status": "pass",
+    "pull_request": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/pull/34",
+    "merge_commit": "1d500e18c00dcb866b1d3c1e7e81931a025baf98",
+    "merged_at": "2026-08-21T18:02:32Z",
+    "exact_main_commit_workflows": {
+      "passed": 13,
+      "failed": 0,
+      "core_ci": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293539",
+      "p8_windows_linux_release_gate": "https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293507"
+    },
+    "whole_project_phase_9": "complete"
   },
   "distribution_artifacts": {
     "wheel": {

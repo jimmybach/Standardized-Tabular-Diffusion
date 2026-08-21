@@ -2,13 +2,13 @@
 
 Status: passed locally on 2026-08-20 for an uncommitted candidate based on repository commit `6b1669e415e7b6589e5fb04ba880405efbd5a788`.
 
-Whole-project placement: this is local acceptance evidence for [Project Roadmap Phase 9](../PROJECT_ROADMAP.md). Phase 9 remains integration-pending until the exact candidate is committed, reviewed, merged, and revalidated by the applicable hosted gates.
+Whole-project placement: this is the local acceptance evidence for [Project Roadmap Phase 9](../PROJECT_ROADMAP.md). Phase 9 completed after [PR #34](https://github.com/jimmybach/Standardized-Tabular-Diffusion/pull/34) merged and the exact `main` merge commit passed all hosted workflows, including the Windows/Linux P8 release gate.
 
 ## Claim boundary
 
 This acceptance establishes that the candidate can be built, installed, and used from outside a source checkout on the primary native Windows/Python 3.11 target. It covers distribution hygiene, user-owned workspaces, official dataset acquisition and preprocessing, representative CPU/GPU pipelines, central evaluation, and Result Bundle validation.
 
-It does not admit a dataset, model, run, metric, or result to Official Results. It does not promote an adapter to `release-supported`, assess generator quality, generalize the recorded GPU result to other hardware, or replace the per-model upstream-parity evidence. The candidate contains uncommitted changes, so the release checklist remains open until these gates are repeated for the exact committed release candidate.
+It does not admit a dataset, model, run, metric, or result to Official Results. It does not promote an adapter to `release-supported`, assess generator quality, generalize the recorded GPU result to other hardware, or replace the per-model upstream-parity evidence. The locally accepted candidate initially contained uncommitted changes; the later merged commit passed the hosted Windows/Linux integration gates. This closes whole-project Phase 9 but does not close the separate tagged-release checklist.
 
 ## Accepted environment
 
@@ -62,4 +62,4 @@ The 2026-08-21 integration review then passed the full available suite on Python
 
 The portable machine-readable acceptance record is [clean-install-user-acceptance-windows-py311-6b1669e.json](../evidence/audits/clean-install-user-acceptance-windows-py311-6b1669e.json). Distribution archives deliberately exclude `docs/evidence/`; evidence remains in repository history and is not shipped as package payload.
 
-Before a tagged release, repeat the same acceptance against the exact committed candidate, pass hosted Windows-family and Linux/Python 3.11 release CI, re-run the security/history review, and install the published artifacts by checksum. Those steps are release gates, not corrections to this local engineering result.
+The exact merged commit subsequently passed hosted Windows-family and Linux/Python 3.11 Core and P8 release CI, including fresh wheel/source builds, archive inspection, and independent clean installation. Before a tagged release, repeat the applicable security/history and legal review on the selected tag candidate, publish artifact checksums, and independently install the published artifacts. Those remain Phase 10 release gates, not corrections to this engineering result.
