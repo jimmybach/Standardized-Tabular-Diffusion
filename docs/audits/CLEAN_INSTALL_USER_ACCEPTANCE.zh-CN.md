@@ -2,13 +2,13 @@
 
 状态：2026-08-20 已在本地通过。验收对象是以仓库 commit `6b1669e415e7b6589e5fb04ba880405efbd5a788` 为基础、包含未提交修改的候选版本。
 
-项目总路线定位：这是[项目总路线阶段 9](../PROJECT_ROADMAP.zh-CN.md)的本地验收证据。在精确候选版本被提交、审阅、合并，并由适用的托管门重新验证之前，阶段 9 保持“待集成”。
+项目总路线定位：这是[项目总路线阶段 9](../PROJECT_ROADMAP.zh-CN.md)的本地验收证据。[PR #34](https://github.com/jimmybach/Standardized-Tabular-Diffusion/pull/34) 合并后，精确 `main` merge commit 通过包括 Windows/Linux P8 发布门在内的所有托管工作流，阶段 9 因此完成。
 
 ## 声明边界
 
 本次验收证明，该候选版本能在原生 Windows/Python 3.11 主要目标上完成构建、安装，并且能在源码 checkout 之外使用。范围包括发行包清洁性、用户工作区、官方数据集获取与预处理、代表性 CPU/GPU 流程、中央评测和 Result Bundle 校验。
 
-它不会将任何数据集、模型、运行、指标或结果准入 Official Results，不会把适配器提升为 `release-supported`，不评价生成质量，不会把记录的 GPU 结果推广到其他硬件，也不替代每个模型的上游等价证据。当前候选版本尚未提交，所以发布 checklist 必须等同一批门禁在精确的已提交发布候选上重复通过后才能关闭。
+它不会将任何数据集、模型、运行、指标或结果准入 Official Results，不会把适配器提升为 `release-supported`，不评价生成质量，不会把记录的 GPU 结果推广到其他硬件，也不替代每个模型的上游等价证据。本地验收候选最初包含未提交修改；后续已合并 commit 通过了托管 Windows/Linux 集成门。这会关闭项目总阶段 9，但不会关闭独立的正式 tag 发布 checklist。
 
 ## 已验收环境
 
@@ -62,4 +62,4 @@
 
 可移植的机器可读验收记录为 [clean-install-user-acceptance-windows-py311-6b1669e.json](../evidence/audits/clean-install-user-acceptance-windows-py311-6b1669e.json)。发行包会故意排除 `docs/evidence/`；证据保留在仓库历史中，不作为包 payload 分发。
 
-在创建正式 tag 前，还必须针对精确已提交候选版本重复本次验收，通过托管 Windows 平台家族与 Linux/Python 3.11 发布 CI，重新执行安全/历史审查，并按校验和安装已发布产物。这些是发布门，不会否定当前本地工程验收结果。
+随后，精确已合并 commit 已通过托管 Windows 平台家族与 Linux/Python 3.11 Core、P8 发布 CI，其中包括重新构建 wheel/源码包、检查归档和分别进行干净安装。在创建正式 tag 前，仍须针对所选 tag 候选重复适用的安全/历史与法务检查，发布产物校验和，并独立安装已发布产物。这些属于阶段 10 发布门，不会否定当前工程结果。

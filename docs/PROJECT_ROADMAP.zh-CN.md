@@ -4,7 +4,7 @@
 
 范围：整个项目阶段状态的唯一权威来源
 
-当前工作焦点：**阶段 9——内部可用版本收尾（`🟡 待集成`）**
+当前工作焦点：**阶段 7——V3 代表性科学验证（`⬜ 待完成`；执行前需要讨论）**
 
 ## 1. 文档目的
 
@@ -48,7 +48,7 @@ P8 完成不代表项目总阶段 7-10 也已完成。同样，本地安装验�
 | 6. V2 总审计收尾 | ✅ 完成 | 84 个第一阶段逻辑审计单元全部完成，10 个共性问题已修复并回归测试，所有可访问运行证据已汇总，全仓库回归门已通过。 |
 | 7. V3 代表性科学验证 | ⬜ 待完成 | 代表性模型集、数据集、完整规模配置、科学判定标准和三种子矩阵仍待讨论，尚未审批为一个统一 V3 计划。已有单项协议 pilot 不会自动完成这一阶段。 |
 | 8. 正式 benchmark 实验 | ⬜ 待完成 | 尚未执行完整准入的模型×数据集×种子实验矩阵、科学结果解读和正式榜单。 |
-| 9. 内部可用版本收尾 | 🟡 待集成 | 干净 wheel/源码包安装、Adult 官方获取、预处理、CLI 用户流程、空格/中文路径、代表性 CPU/GPU 流程和发行包清洁性已在本地通过。精确分支的托管 Windows/Linux 验证与合并仍待完成。 |
+| 9. 内部可用版本收尾 | ✅ 完成 | 干净 wheel/源码包安装、Adult 官方获取、预处理、CLI 用户流程、空格/中文路径、代表性 CPU/GPU 流程和发行包清洁性已在本地通过。PR #34 已合并，精确 merge commit 在 `main` 上触发的 13 个工作流全部通过，包括 Windows/Linux Core 和 P8 发布门。 |
 | 10. 正式公开发布 | ⏸ 延期/可选 | 最终版本、GitHub Release、实验室 Organization 转移、公开网站和论文/投稿材料延后到实际需要时再完成。 |
 
 ## 4. 各阶段定义与退出证据
@@ -115,7 +115,7 @@ P8 完成不代表项目总阶段 7-10 也已完成。同样，本地安装验�
 
 退出条件：针对精确已集成候选，在干净 Python 3.11 环境中分别安装 wheel 和源码包；按文档执行从数据获取到 Result Bundle 的流程；验证代表性 CPU/GPU 流程；测试空格和非 ASCII 路径；审计 CLI/错误/输出行为；并证明发行归档不含数据集、运行产物、凭证、保留机器证据或开发机本地路径。
 
-当前结果：所有本地验收动作已通过，包括记录中的 646 项测试验收环境、全仓库 Ruff 与 Mypy、独立 wheel/源码包安装、Adult 下载与预处理、CPU SMOTE 和 RTX 5080 CTGAN。后续 Python 3.11/3.13 集成审阅与新发行包检查也已通过。在精确分支通过适用的托管 Windows/Linux 发布 CI、完成审阅并合并之前，状态保持“待集成”。见[干净安装验收报告](audits/CLEAN_INSTALL_USER_ACCEPTANCE.zh-CN.md)。
+当前结果：所有本地验收动作已通过，包括记录中的 646 项测试验收环境、全仓库 Ruff 与 Mypy、独立 wheel/源码包安装、Adult 下载与预处理、CPU SMOTE 和 RTX 5080 CTGAN。后续 Python 3.11/3.13 集成审阅与新发行包检查也已通过。[PR #34](https://github.com/jimmybach/Standardized-Tabular-Diffusion/pull/34) 已合并为 [`1d500e1`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/commit/1d500e18c00dcb866b1d3c1e7e81931a025baf98)；该精确 `main` commit 的 13 个工作流全部通过，包括 [Core CI](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293539) 和 [Windows/Linux P8 发布门](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/32511293507)。见[干净安装验收报告](audits/CLEAN_INSTALL_USER_ACCEPTANCE.zh-CN.md)。
 
 ### 阶段 10：正式公开发布
 
@@ -139,11 +139,9 @@ P8 完成不代表项目总阶段 7-10 也已完成。同样，本地安装验�
 
 ## 6. 立即下一步
 
-1. 审阅阶段 9 集成 PR 及其精确 diff。
-2. 让精确分支 commit 通过托管 Windows/Linux 核心门与发布门。
-3. 仅在审阅和必需 CI 通过后合并。
-4. 记录已合并 commit 与 CI 证据，然后在本文档及英文主文档中将阶段 9 改为 `✅ 完成`。
-5. 决定现在是否开始阶段 7，或让仓库暂时保持为内部可用、非 Official 状态。
+1. 决定现在是否启动阶段 7，或让仓库暂时保持为内部可用、非 Official 状态。
+2. 如果启动阶段 7，必须先审批代表性模型集、数据集、配置、计算限制、三种子矩阵和科学判定规则，再运行实验。
+3. 在阶段 7 证据和所有独立准入门足以支持正式 benchmark 之前，阶段 8 与 Official Results 必须保持关闭。
 
 ## 7. 更新规则
 
