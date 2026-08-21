@@ -2,6 +2,8 @@
 
 This checklist governs a software release. “Pass” here never admits a metric, dataset, model, run, or result to Official Results.
 
+The local [clean-install and user-journey acceptance report](docs/audits/CLEAN_INSTALL_USER_ACCEPTANCE.md) records pre-release candidate testing. Its passes do not check the items below until the same gates are repeated for the committed release candidate on every required platform.
+
 ## Identity and legal
 
 - [x] Root project license is Apache-2.0 and scoped by `NOTICE`.

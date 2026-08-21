@@ -12,6 +12,7 @@ from standardized_tabular_diffusion.validation.core_ci import (
     REQUIRED_WHEEL_FILES,
     inspect_sdist_contents,
     inspect_wheel_contents,
+    verify_clean_distribution_install,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -60,6 +61,23 @@ def test_sdist_inspection_rejects_materialized_upstream_tree(tmp_path: Path) -> 
         inspect_sdist_contents(tmp_path)
 
 
+def test_sdist_inspection_rejects_local_machine_paths(tmp_path: Path) -> None:
+    names = REQUIRED_SDIST_FILES | {"docs/private.json"}
+    _write_sdist(tmp_path / "fixture.tar.gz", names)
+    private = tmp_path / "fixture-0.1.0" / "docs" / "private.json"
+    private.write_text(r'{"path":"C:\\Users\\alice\\private\\run.json"}', encoding="utf-8")
+    with tarfile.open(tmp_path / "fixture.tar.gz", "w:gz") as archive:
+        archive.add(tmp_path / "fixture-0.1.0", arcname="fixture-0.1.0")
+    with pytest.raises(RuntimeError, match="developer-local"):
+        inspect_sdist_contents(tmp_path)
+
+
+def test_sdist_inspection_rejects_credential_like_members(tmp_path: Path) -> None:
+    _write_sdist(tmp_path / "fixture.tar.gz", REQUIRED_SDIST_FILES | {"config/private.pem"})
+    with pytest.raises(RuntimeError, match="credential-like"):
+        inspect_sdist_contents(tmp_path)
+
+
 def test_psutil_profiles_preserve_p6_exactness_and_p4_compatibility() -> None:
     with (REPO_ROOT / "pyproject.toml").open("rb") as stream:
         extras = tomllib.load(stream)["project"]["optional-dependencies"]
@@ -73,3 +91,35 @@ def test_wheel_inspection_rejects_reference_tree_files(tmp_path: Path) -> None:
     _write_wheel(tmp_path / "fixture.whl", REQUIRED_WHEEL_FILES | {"TabSyn-main/forbidden.py"})
     with pytest.raises(RuntimeError, match="excluded reference-tree"):
         inspect_wheel_contents(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "member, message",
+    [
+        ("C:/Users/alice/private.txt", "unsafe path"),
+        ("docs/CON.txt", "non-portable path"),
+    ],
+)
+def test_wheel_inspection_rejects_cross_platform_unsafe_member_names(
+    tmp_path: Path, member: str, message: str
+) -> None:
+    _write_wheel(tmp_path / "fixture.whl", REQUIRED_WHEEL_FILES | {member})
+    with pytest.raises(RuntimeError, match=message):
+        inspect_wheel_contents(tmp_path)
+
+
+def test_wheel_inspection_rejects_case_insensitive_member_collisions(tmp_path: Path) -> None:
+    _write_wheel(tmp_path / "fixture.whl", REQUIRED_WHEEL_FILES | {"docs/Guide.md", "docs/guide.md"})
+    with pytest.raises(RuntimeError, match="non-portable-colliding"):
+        inspect_wheel_contents(tmp_path)
+
+
+def test_clean_install_rejects_unknown_artifact_kind(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="Unsupported artifact kind"):
+        verify_clean_distribution_install(tmp_path, "archive")
+
+
+@pytest.mark.parametrize("artifact_kind", ["wheel", "sdist"])
+def test_clean_install_requires_exactly_one_artifact(tmp_path: Path, artifact_kind: str) -> None:
+    with pytest.raises(RuntimeError, match="Expected exactly one"):
+        verify_clean_distribution_install(tmp_path, artifact_kind)

@@ -214,10 +214,12 @@ def discover_dataset_specs(repo_root: Path | None = None) -> dict[str, DatasetSp
             if not isinstance(manifest, dict):
                 raise ValueError(f"Materialization manifest must be a JSON object: {manifest_path}")
             dataset_name = validate_dataset_name(manifest["dataset"])
-            if dataset_name not in dataset_specs:
-                continue
-            spec = dataset_specs[dataset_name]
             metadata_path = _resolve_repository_reference(repo_root, manifest.get("metadata_path"))
+            if dataset_name not in dataset_specs:
+                if metadata_path is None or not metadata_path.is_file():
+                    continue
+                dataset_specs[dataset_name] = _spec_from_info_json(repo_root, metadata_path)
+            spec = dataset_specs[dataset_name]
             train_data_path = _resolve_repository_reference(repo_root, manifest.get("train_data_path"))
             val_data_path = _resolve_repository_reference(repo_root, manifest.get("val_data_path"))
             test_data_path = _resolve_repository_reference(repo_root, manifest.get("test_data_path"))

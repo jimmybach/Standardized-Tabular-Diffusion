@@ -113,10 +113,8 @@ jobs:
           python -m build
           python -m standardized_tabular_diffusion.validation.core_ci inspect-wheel --dist-directory dist
           python -m standardized_tabular_diffusion.validation.core_ci inspect-sdist --dist-directory dist
-          python -m standardized_tabular_diffusion.validation.core_ci install-wheel --dist-directory dist
-          python -m standardized_tabular_diffusion.validation.core_ci installed-quickstart
-          python -m standardized_tabular_diffusion.validation.core_ci install-sdist --dist-directory dist
-          python -m standardized_tabular_diffusion.validation.core_ci installed-quickstart
+          python -m standardized_tabular_diffusion.validation.core_ci clean-install --artifact wheel --dist-directory dist
+          python -m standardized_tabular_diffusion.validation.core_ci clean-install --artifact sdist --dist-directory dist
 
       - name: Preserve pre-protocol failure evidence
         if: ${{ failure() }}

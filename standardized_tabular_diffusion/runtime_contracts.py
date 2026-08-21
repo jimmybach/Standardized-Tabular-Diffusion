@@ -410,6 +410,7 @@ _ACTION_CONTROLS: dict[str, dict[str, set[str]]] = {
             "conditional_col",
             "epochs",
             "llm",
+            "max_length",
             "max_train_rows",
             "num_threads",
             "source_dir",

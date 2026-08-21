@@ -2,6 +2,8 @@
 
 英文原文：[PIPELINE_REAL_FUNCTION_AUDIT.md](PIPELINE_REAL_FUNCTION_AUDIT.md)
 
+项目总路线定位：本审计为[项目总路线的阶段 5 和阶段 6](../PROJECT_ROADMAP.zh-CN.md)提供运行证据；审计内部阶段不是新增的项目总阶段。
+
 - 状态：第二阶段修复已完成；计划内未阻塞 V2 执行已完成（保留 18 个最小真实通过证据和 1 个外部阻塞）
 - 方案版本：1.0
 - 快照日期：2026-08-20

@@ -28,11 +28,18 @@ For either canonical official model view, acquisition, schema validation, fixed-
 
 ```bash
 pip install "standardized-tabular-diffusion[data]"
-python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult
-python -m standardized_tabular_diffusion.cli materialize-dataset --dataset sick
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult --workspace user-workspace
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset sick --workspace user-workspace
 ```
 
-The downloader writes to the user cache by default. Set `STD_TABULAR_DIFFUSION_CACHE` or pass `--cache-dir` to choose a different local cache. A cached archive is reused only when its SHA-256 still matches the registry. Downloads use HTTPS, enforce a byte limit, write through a temporary file, and become visible only after checksum verification.
+The downloader writes archives to the user cache by default. Set `STD_TABULAR_DIFFUSION_CACHE` or pass `--cache-dir` to choose a different local cache. `materialize-dataset` writes canonical data and its manifest under the explicit `--workspace`, never into the installed Python package. Reuse the same workspace for `list-datasets`, `show-dataset`, profile creation, configuration resolution, and pipeline execution. A cached archive is reused only when its SHA-256 still matches the registry. Downloads use HTTPS, enforce a byte limit, write through a temporary file, and become visible only after checksum verification.
+
+Confirm that the installed CLI discovers the materialized data:
+
+```bash
+python -m standardized_tabular_diffusion.cli list-datasets --workspace user-workspace
+python -m standardized_tabular_diffusion.cli materialization-status --dataset adult --workspace user-workspace
+```
 
 ZIP extraction rejects absolute paths, parent traversal, duplicate members, symbolic links, undeclared expansion, and modified content-addressed caches. Only registry-approved members are extracted. Raw archives and extracted data are not Python package contents.
 
@@ -96,12 +103,23 @@ The registry initially locks the UCI Adult archive and the UCI Thyroid Disease a
 
 Adult now uses only the official UCI files. Its build contract freezes the 32,561 rows in `adult.data`, 16,281 rows in `adult.test`, exact ASCII comma-space syntax, the test header and target suffix normalization, member and ordered canonical-row checksums, class counts, raw missing counts, categorical domains, integer source ranges, and duplicate-row audits. Only `workclass`, `occupation`, and `native.country` contain `?`; their modes are fitted on `adult.data` as `Private`, `Prof-specialty`, and `United-States`, then applied unchanged to the official test split. No row is dropped.
 
-The fixed Adult split contains 23 unique raw rows on both sides, covering 25 training rows and 23 test rows. Train-fitted imputation increases this to 24 unique processed rows, covering 26 training rows and 24 test rows. These are disclosed properties of the official source split, not silently removed leakage corrections. The reviewed Dataset Profile is `configs/datasets/adult-uci-2-v1.json`.
+The fixed Adult split contains 23 unique raw rows on both sides, covering 25 training rows and 23 test rows. Train-fitted imputation increases this to 24 unique processed rows, covering 26 training rows and 24 test rows. These are disclosed properties of the official source split, not silently removed leakage corrections. The repository's reviewed, diagnostic-only Dataset Profile and build contract is `configs/datasets/adult-uci-2-v1.json`.
 
 Sick also uses only the official UCI files. The build contract freezes 2,800 training rows from `sick.data`, 972 test rows from `sick.test`, class counts, ordered record-ID hashes, zero cross-split record-ID overlap, member checksums, raw missing counts, categorical domains, and duplicate-row audits before and after preprocessing. The source field `TBG` is present in the raw audit schema but is missing in every official row. It is therefore explicitly excluded from the 29-column model view instead of inventing an undefined mean. Record IDs are audit-only and never enter model inputs.
 
 Record-ID disjointness does not imply row disjointness after identifiers are removed. The official split contains 11 unique model rows on both sides of the split, covering 20 training rows and 13 test rows. The canonical builder preserves this official split and reports the overlap; it does not silently drop records or invent a replacement split. Formal leaderboard treatment remains a Dataset Profile and protocol decision.
 
-The reviewed Sick Dataset Profile is `configs/datasets/sick-uci-102-v1.json`. Both reviewed profiles deliberately remain non-eligible for Official Results until their person-level-data privacy roles, threat models, domain constraints, metric applicability, ethical considerations, and suite admission receive the required review. "Official source" does not automatically mean "release-supported benchmark dataset."
+The reviewed Sick Dataset Profile and build contract is `configs/datasets/sick-uci-102-v1.json`. Both reviewed profiles deliberately remain non-eligible for Official Results until all remaining person-level-data privacy, domain-constraint, metric-applicability, ethical, and suite-admission gates pass. "Official source" and "reviewed diagnostic profile" do not automatically mean "release-supported benchmark dataset."
+
+The repository-level reviewed profiles are available in a source checkout and source archive. For an installed-wheel P3 functionality check, create a deliberately narrower, non-Official profile from an already materialized view:
+
+```bash
+python -m standardized_tabular_diffusion.cli create-diagnostic-dataset-profile \
+  --dataset adult \
+  --workspace user-workspace \
+  --output user-workspace/adult-diagnostic-profile.json
+```
+
+This command makes only the repository's no-missing-model-input rule executable. It records all unresolved domain, cross-column, privacy, rights, and admission reviews and keeps `official_eligible` false. `import-legacy-dataset-profile` is a provenance-preserving migration tool; its output is intentionally not a P3-ready reviewed profile.
 
 The vendored `TabDiff-main/download_dataset.py` and dataset-specific branches in `TabDiff-main/process_dataset.py` are legacy upstream behavior. They do not provide this source-lock, safe-extraction, or centralized imputation contract and are not evidence for official dataset admission.

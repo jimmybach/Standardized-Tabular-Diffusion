@@ -106,7 +106,7 @@ def _input_fingerprints(
     return fingerprints
 
 
-def _worker_command(operation: str, config_path: Path, run_root: Path) -> tuple[str, ...]:
+def _worker_command(operation: str, config_path: Path, run_root: Path, repo_root: Path) -> tuple[str, ...]:
     return (
         sys.executable,
         "-m",
@@ -117,6 +117,8 @@ def _worker_command(operation: str, config_path: Path, run_root: Path) -> tuple[
         str(config_path),
         "--run-root",
         str(run_root),
+        "--workspace",
+        str(repo_root),
     )
 
 
@@ -157,7 +159,7 @@ def build_benchmark_plan(
     ) -> StageSpec:
         return StageSpec(
             name=name,
-            command=_worker_command(name, config_path, root),
+            command=_worker_command(name, config_path, root, repo_root),
             action={
                 "prepare": "resolve configuration, adapter, dataset, and immutable inputs",
                 "train": "execute the selected official adapter training action",

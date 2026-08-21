@@ -22,6 +22,7 @@ EVOLVING_SHARED_SURFACES = {
     "standardized_tabular_diffusion/orchestration/worker.py",
     "standardized_tabular_diffusion/validation/core_ci.py",
     "tests/evaluation/test_contracts_and_schemas.py",
+    "tests/orchestration/test_pipeline.py",
     "tests/test_cli.py",
     "tests/test_core_ci.py",
 }

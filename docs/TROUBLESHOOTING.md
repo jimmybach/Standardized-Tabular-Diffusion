@@ -12,6 +12,12 @@ Install the narrow extra named by the error, such as `.[quickstart]`, `.[evaluat
 
 Adapter evaluation requires a decoded synthetic table, a reviewed `dataset_profile_path`, and a real training reference. P4/P5 also require a held-out real test table. Paths may be explicit in `evaluation` config or resolved from a materialized DatasetSpec.
 
+`import-legacy-dataset-profile` preserves legacy metadata and is intentionally not P3-ready. For a non-Official functionality check of a materialized complete-data view, use `create-diagnostic-dataset-profile`. A scientifically admitted run still needs a fully reviewed Dataset Profile.
+
+## A materialized dataset is reported as unknown
+
+Materialized datasets belong to a user workspace, not the installed package. Pass the same `--workspace` to `materialize-dataset`, `list-datasets`, profile creation, `run`, and `benchmark run`. If the command was launched from another directory, do not rely on the default `.` workspace.
+
 ## Structural validation fails
 
 Do not repair generated output inside the evaluator. Check exact column names/order, supported CSV/Parquet format, row count, missing values, types, and the selected dataset view. If real inputs contain missing values, run the centralized train-only mean/mode preprocessor before training and regenerate the sample.
@@ -31,6 +37,17 @@ Pickle and many PyTorch formats can execute code. Move a checkpoint produced by 
 ## CUDA unavailable or out of memory
 
 Confirm that the configured adapter supports Windows/CUDA, that PyTorch sees the GPU, and that the selected official dependency environment matches its validation record. Reduce only parameters that are declared tunable; such a change may move the result to `standardized-tuning`. Never silently fall back to CPU in evidence intended for a declared GPU profile.
+
+The default Python package index may select a CPU-only PyTorch build. A model extra cannot by itself guarantee a compatible NVIDIA build. For the currently accepted Windows CTGAN/RTX 5080 profile, install the narrow extras, replace PyTorch from the official CUDA 12.8 index, and verify the resolved environment before training:
+
+```powershell
+python -m pip install ".[ctgan,validity]"
+python -m pip install --force-reinstall "torch==2.8.0" --index-url https://download.pytorch.org/whl/cu128
+python -m pip check
+python -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'NO CUDA DEVICE')"
+```
+
+Stop if CUDA is false, the device is not the intended device, or `pip check` fails. Other adapters may require a different pinned environment; use that adapter's validation document rather than applying this CTGAN profile universally.
 
 ## A diagnostic snapshot has no rank
 
