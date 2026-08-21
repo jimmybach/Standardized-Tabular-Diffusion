@@ -15,7 +15,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from standardized_tabular_diffusion import cli
 from standardized_tabular_diffusion.config import ExperimentConfig
-from standardized_tabular_diffusion.interfaces import ArtifactBundle
+from standardized_tabular_diffusion.interfaces import ArtifactBundle, DatasetSpec
 
 
 def test_cli_list_model_inventory_filters_by_benchmark(monkeypatch, capsys) -> None:
@@ -355,6 +355,48 @@ def test_cli_download_dataset_dispatches_safe_fetch(monkeypatch, capsys, tmp_pat
     assert payload["download"]["cached"] is False
 
 
+def test_cli_creates_a_non_official_p3_diagnostic_profile(monkeypatch, capsys, tmp_path: Path) -> None:
+    metadata = tmp_path / "metadata.json"
+    train = tmp_path / "train.csv"
+    metadata.write_text("{}\n", encoding="utf-8")
+    train.write_text("value,target\n1,a\n2,b\n", encoding="utf-8")
+    spec = DatasetSpec(
+        name="fixture",
+        task_type="classification",
+        column_names=["value", "target"],
+        numerical_columns=["value"],
+        categorical_columns=[],
+        target_columns=["target"],
+        metadata_path=metadata,
+        train_data_path=train,
+    )
+    monkeypatch.setattr(cli, "get_dataset_spec", lambda dataset, *, repo_root: spec)
+    output = tmp_path / "diagnostic-profile.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "std-cli",
+            "create-diagnostic-dataset-profile",
+            "--dataset",
+            "fixture",
+            "--output",
+            str(output),
+            "--workspace",
+            str(tmp_path),
+        ],
+    )
+
+    cli.main()
+    result = json.loads(capsys.readouterr().out)
+    profile = json.loads(output.read_text(encoding="utf-8"))
+
+    assert result["official_eligible"] is False
+    assert result["validity_status"] == "reviewed-diagnostic"
+    assert profile["validity"]["hard_column_rules"][0]["rule_type"] == "not_null"
+    assert profile["validity"]["unresolved_reviews"]
+
+
 def test_cli_materialize_model_source_dispatches_locked_acquisition(monkeypatch, capsys, tmp_path: Path) -> None:
     observed: dict[str, object] = {}
 
@@ -404,12 +446,14 @@ def test_cli_materialize_dataset_forwards_official_source_controls(monkeypatch, 
     def fake_materialize(
         dataset: str,
         *,
+        repo_root: Path,
         cache_root: str | None,
         refresh: bool,
         timeout_seconds: float,
     ) -> dict[str, object]:
         observed.update(
             dataset=dataset,
+            repo_root=repo_root,
             cache_root=cache_root,
             refresh=refresh,
             timeout_seconds=timeout_seconds,
@@ -438,6 +482,7 @@ def test_cli_materialize_dataset_forwards_official_source_controls(monkeypatch, 
 
     assert observed == {
         "dataset": "sick",
+        "repo_root": Path.cwd().resolve(),
         "cache_root": str(tmp_path),
         "refresh": True,
         "timeout_seconds": 15.0,
@@ -498,6 +543,10 @@ def test_cli_example_config_can_save_to_file(tmp_path: Path, monkeypatch, capsys
             "adult",
             "--output-dir",
             str(tmp_path / "artifacts" / "tabsyn"),
+            "--num-samples",
+            "32",
+            "--generation-seed",
+            "23",
             "--save-config",
             str(config_path),
         ],
@@ -512,6 +561,9 @@ def test_cli_example_config_can_save_to_file(tmp_path: Path, monkeypatch, capsys
     assert payload == saved_payload
     assert saved_payload["model"] == "tabsyn"
     assert saved_payload["dataset"] == "adult"
+    assert saved_payload["sample"]["num_samples"] == 32
+    assert saved_payload["sample"]["seed"] == 23
+    assert saved_payload["evaluation"]["enabled"] is False
 
 
 def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -532,8 +584,9 @@ def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, mo
 
     observed: dict[str, object] = {}
 
-    def fake_run_pipeline(config: ExperimentConfig):
+    def fake_run_pipeline(config: ExperimentConfig, *, repo_root: Path):
         observed["run_pipeline_model"] = config.model
+        observed["repo_root"] = repo_root
         return {"context": {"dataset": config.dataset}, "phases": {"train": {"model": config.model}}}
 
     def fake_save_pipeline_result(result: dict, out_dir: str | Path):
@@ -550,6 +603,7 @@ def test_cli_run_command_dispatches_pipeline_and_saves_result(tmp_path: Path, mo
     payload = json.loads(captured.out)
 
     assert observed["run_pipeline_model"] == "tabsyn"
+    assert observed["repo_root"] == Path.cwd().resolve()
     assert observed["saved_output_dir"] == str(output_dir)
     assert payload["phases"]["train"]["model"] == "tabsyn"
 
@@ -665,8 +719,9 @@ def test_cli_run_action_builds_context_saves_it_and_prints_bundle(tmp_path: Path
         notes=["ok"],
     )
 
-    def fake_build_run_context(config: ExperimentConfig):
+    def fake_build_run_context(config: ExperimentConfig, *, repo_root: Path):
         observed["context_model"] = config.model
+        observed["context_repo_root"] = repo_root
         return {"config": {"model": config.model}, "action_readiness": {"evaluate": {"ready": True}}}
 
     def fake_save_run_context(context: dict, out_dir: str | Path):
@@ -674,8 +729,9 @@ def test_cli_run_action_builds_context_saves_it_and_prints_bundle(tmp_path: Path
         observed["saved_context_dir"] = str(out_dir)
         return Path(out_dir) / "run_context.json"
 
-    def fake_run_action(config: ExperimentConfig, action: str):
+    def fake_run_action(config: ExperimentConfig, action: str, *, repo_root: Path):
         observed["action"] = action
+        observed["action_repo_root"] = repo_root
         return bundle
 
     monkeypatch.setattr(cli, "build_run_context", fake_build_run_context)
@@ -689,6 +745,8 @@ def test_cli_run_action_builds_context_saves_it_and_prints_bundle(tmp_path: Path
 
     assert observed["context_model"] == "tabddpm"
     assert observed["action"] == "evaluate"
+    assert observed["context_repo_root"] == Path.cwd().resolve()
+    assert observed["action_repo_root"] == Path.cwd().resolve()
     assert observed["saved_context_dir"] == str(output_dir)
     assert payload["model"] == "tabddpm"
     assert payload["notes"] == ["ok"]

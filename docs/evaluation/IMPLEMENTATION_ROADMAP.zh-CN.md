@@ -2,6 +2,8 @@
 
 英文原文：[IMPLEMENTATION_ROADMAP.md](IMPLEMENTATION_ROADMAP.md)
 
+范围说明：本文件只管理 P0-P8 评测与发布工程子系统。项目总阶段 1-10 及其当前状态统一由[项目总路线](../PROJECT_ROADMAP.zh-CN.md)维护。
+
 - 状态：P1-P8 工程退出门均已通过；Official Results 以及每个模型、数据集、指标、运行和发布支持准入仍相互独立
 - 路线图版本：0.4.0
 - 最后更新：2026-08-13

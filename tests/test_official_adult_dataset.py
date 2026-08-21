@@ -261,3 +261,6 @@ def test_materialize_official_adult_builds_train_fitted_compatible_outputs(
     assert (repo_root / "TabSyn-main" / "data" / "adult" / "train.csv").is_file()
     assert (repo_root / "TabDiff-main" / "synthetic" / "adult" / "real.csv").is_file()
     assert (repo_root / "materialized_datasets" / "adult" / "manifest.json").is_file()
+    discovered = get_dataset_spec("adult", repo_root=repo_root)
+    assert discovered.train_data_path == primary / "train.csv"
+    assert discovered.test_data_path == primary / "test.csv"

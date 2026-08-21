@@ -140,7 +140,7 @@ def _bundle_result(operation: str, config: ExperimentConfig, root: Path, repo_ro
                 sample_path = str(root / sample_result["generated_sample_path"])
                 action_config.evaluation.extra["sample_path"] = sample_path
                 action_config.sample.extra["sample_path"] = sample_path
-    bundle = run_action(action_config, operation)
+    bundle = run_action(action_config, operation, repo_root=repo_root)
     generated = _relative_output(root, bundle.generated_sample_path, required=operation == "sample")
     upstream_metrics = _relative_output(root, bundle.upstream_metrics_path)
     evaluation_bundle = _relative_bundle(root, bundle.evaluation_bundle_path)
@@ -201,7 +201,7 @@ def _sample_path(config: ExperimentConfig, root: Path) -> tuple[Path, bool]:
 
 def _execute(operation: str, config: ExperimentConfig, root: Path, repo_root: Path) -> tuple[str, int | None, bool]:
     if operation == "prepare":
-        context = _portable(build_run_context(config), run_root=root, repo_root=repo_root)
+        context = _portable(build_run_context(config, repo_root=repo_root), run_root=root, repo_root=repo_root)
         relative = _write_stage_result(
             root,
             operation,
@@ -270,13 +270,20 @@ def _execute(operation: str, config: ExperimentConfig, root: Path, repo_root: Pa
     raise WorkerError(f"Unsupported orchestration worker operation: {operation}")
 
 
-def run_worker(*, operation: str, config_path: Path, run_root: Path, result_path: Path) -> dict[str, Any]:
+def run_worker(
+    *,
+    operation: str,
+    config_path: Path,
+    run_root: Path,
+    result_path: Path,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
     root = run_root.resolve()
     root.mkdir(parents=True, exist_ok=True)
     config = load_experiment_config(config_path)
     if Path(config.output_dir).resolve() != root:
         raise WorkerError("The configuration output_dir must equal the orchestration run root")
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = (repo_root or Path(__file__).resolve().parents[2]).resolve()
     before = _snapshot(root)
     _, synchronization = _synchronize_accelerator(config, reset=True)
     started = time.perf_counter()
@@ -335,6 +342,7 @@ def main() -> None:
     )
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--run-root", required=True, type=Path)
+    parser.add_argument("--workspace", required=True, type=Path)
     args = parser.parse_args()
     result_value = os.environ.get("STD_ORCHESTRATION_WORKER_RESULT")
     if not result_value:
@@ -346,6 +354,7 @@ def main() -> None:
             config_path=args.config,
             run_root=args.run_root,
             result_path=result_path,
+            repo_root=args.workspace,
         )
     except MemoryError as exc:
         atomic_write_json(

@@ -37,6 +37,7 @@ def test_pipeline_plan_has_seven_ordered_stages_and_terminal_partial_tolerance(t
     assert plan[-2].allow_failed_dependencies is True
     assert plan[-1].allow_failed_dependencies is True
     assert plan[1].max_retries == 1
+    assert plan[0].command[-2:] == ("--workspace", str(Path(__file__).resolve().parents[2]))
 
 
 def test_pipeline_configuration_rejects_embedded_secrets(tmp_path: Path) -> None:

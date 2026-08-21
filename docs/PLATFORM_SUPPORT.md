@@ -27,6 +27,10 @@ GPU-dependent runs use separate hardware profiles. A result produced under one G
 
 This pilot does not make an RTX 5080 a mandatory dependency of the repository. It qualifies one hardware-specific Global Utility execution profile.
 
+PyTorch GPU builds are resolved from the official PyTorch package index, not inferred from the presence of a repository model extra. Some narrow extras retain `torch==2.3.0` for their declared compatibility or parity environment; the accepted native Windows RTX 5080 profile instead records PyTorch 2.8.0 with CUDA 12.8. A GPU run MUST install the adapter-specific dependency set, install the declared official CUDA build explicitly, pass `pip check`, and record `torch.__version__`, `torch.version.cuda`, `torch.cuda.is_available()`, and the selected device name. A CPU-only resolution or a silent CPU fallback cannot satisfy a GPU claim.
+
+This hardware-specific override is not permission to change an upstream algorithm or to generalize one dependency set to every adapter. Each model's validation document remains authoritative for its exact package/source and runtime boundary.
+
 ## 3. Evidence interpretation
 
 Historical Linux/Python 3.11 evidence remains immutable and valid for the claim it originally established. It can support source or adapter parity when the declared upstream runtime is Linux-specific. It does not establish Windows release support.

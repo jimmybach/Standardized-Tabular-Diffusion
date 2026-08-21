@@ -27,6 +27,10 @@ macOS 目前不在支持范围内。这是对已测试发布支持范围的声�
 
 该 pilot 不会使 RTX 5080 成为整个仓库的强制依赖；它只用于准入一个硬件特定的 Global Utility 执行 profile。
 
+PyTorch GPU build 必须从 PyTorch 官方包索引显式解析，不能因为安装了仓库的模型 extra 就假定 GPU 已可用。部分最小 extra 为其声明的兼容或等价环境保留 `torch==2.3.0`；已验收的原生 Windows RTX 5080 profile 则记录 PyTorch 2.8.0 与 CUDA 12.8。GPU 运行必须安装适配器专属依赖、显式安装声明的官方 CUDA build、通过 `pip check`，并记录 `torch.__version__`、`torch.version.cuda`、`torch.cuda.is_available()` 和选中的设备名称。只解析到 CPU 的环境或静默回退 CPU 都不能支持 GPU 声明。
+
+这个硬件特定 override 不代表可以修改上游算法，也不代表同一套依赖可推广到所有适配器。每个模型的验证文档仍然是其精确包/源码和运行时边界的权威记录。
+
 ## 3. 证据解释
 
 历史 Linux/Python 3.11 证据保持不可变，并继续支持其原本建立的声明。当声明的上游运行时只适用于 Linux 时，这些证据可以支持来源或适配器等价，但不能证明 Windows 发布支持。

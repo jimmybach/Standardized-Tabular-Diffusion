@@ -2,6 +2,8 @@
 
 Chinese translation: [IMPLEMENTATION_ROADMAP.zh-CN.md](IMPLEMENTATION_ROADMAP.zh-CN.md)
 
+Scope note: this document governs only the P0-P8 evaluation and release-engineering subsystem. Whole-project Phases 1-10 and their current status are maintained in the [Project Roadmap](../PROJECT_ROADMAP.md).
+
 - Status: P1-P8 engineering exit gates passed; Official Results and every model/dataset/metric/run/release-support admission remain independent
 - Roadmap version: 0.4.0
 - Last updated: 2026-08-13

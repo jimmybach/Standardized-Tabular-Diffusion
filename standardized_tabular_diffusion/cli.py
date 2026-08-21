@@ -134,16 +134,67 @@ def _list_dataset_profiles(profile_dir: str) -> list[dict[str, Any]]:
     ]
 
 
-def _import_legacy_dataset_profile(dataset: str, output: str) -> dict[str, Any]:
+def _import_legacy_dataset_profile(dataset: str, output: str, *, repo_root: Path | None = None) -> dict[str, Any]:
     from standardized_tabular_diffusion.evaluation.profiles import import_legacy_dataset_spec, write_dataset_profile
 
-    profile = import_legacy_dataset_spec(get_dataset_spec(dataset))
+    profile = import_legacy_dataset_spec(get_dataset_spec(dataset, repo_root=repo_root))
     write_dataset_profile(profile, output)
     return {
         "dataset_id": profile.dataset_id,
         "dataset_profile_version": profile.dataset_profile_version,
         "sha256": profile.fingerprint,
         "official_eligible": False,
+        "output": str(Path(output)),
+    }
+
+
+def _create_diagnostic_dataset_profile(dataset: str, output: str, *, repo_root: Path) -> dict[str, Any]:
+    from standardized_tabular_diffusion.evaluation.profiles import import_legacy_dataset_spec, write_dataset_profile
+    from standardized_tabular_diffusion.evaluation.validity import validate_validity_profile
+
+    profile = import_legacy_dataset_spec(get_dataset_spec(dataset, repo_root=repo_root))
+    profile.payload["dataset_profile_version"] = "0.2.0-diagnostic"
+    profile.payload["change_log"].append(
+        {
+            "version": "0.2.0-diagnostic",
+            "change": "Added the repository model-input no-missing-values rule for diagnostic P3 evaluation.",
+        }
+    )
+    profile.payload["validity"] = {
+        "contract_schema_version": "1.0.0",
+        "status": "reviewed-diagnostic",
+        "hard_column_rules": [
+            {
+                "rule_id": "diagnostic-model-input-not-null",
+                "rule_type": "not_null",
+                "selector": {"nullable_model_input": False},
+                "parameters": {},
+                "evidence": {
+                    "source_type": "dataset-documentation",
+                    "reference": (
+                        "Repository data contract: decoded model inputs must be complete; raw missing values require "
+                        "explicit train-fitted preprocessing before materialization."
+                    ),
+                },
+                "severity": "hard",
+                "version": "1.0.0",
+            }
+        ],
+        "cross_column_constraints": [],
+        "soft_diagnostics": [],
+        "unresolved_reviews": [
+            "Column domains, cross-column constraints, privacy roles, source rights, and Official admission remain "
+            "unreviewed."
+        ],
+    }
+    validate_validity_profile(profile.payload)
+    write_dataset_profile(profile, output)
+    return {
+        "dataset_id": profile.dataset_id,
+        "dataset_profile_version": profile.dataset_profile_version,
+        "sha256": profile.fingerprint,
+        "official_eligible": False,
+        "validity_status": "reviewed-diagnostic",
         "output": str(Path(output)),
     }
 
@@ -246,7 +297,23 @@ def _run_benchmark(args: argparse.Namespace) -> dict[str, Any]:
         memory_limit_bytes=memory_limit,
         max_retries=args.max_retries,
         hardware_profile_id=args.hardware_profile_id,
+        repo_root=_workspace_root(args),
     )
+
+
+def _add_workspace_argument(command: argparse.ArgumentParser) -> None:
+    command.add_argument(
+        "--workspace",
+        default=".",
+        help=(
+            "Mutable project workspace containing materialized datasets and optional audited model sources; "
+            "defaults to the current directory"
+        ),
+    )
+
+
+def _workspace_root(args: argparse.Namespace) -> Path:
+    return Path(args.workspace).expanduser().resolve()
 
 
 def _benchmark_status(output_dir: str) -> dict[str, Any]:
@@ -310,7 +377,10 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optionally filter the inventory by cumulative adapter validation level",
     )
-    subparsers.add_parser("list-datasets", help="List canonical datasets from the root registry")
+    list_datasets_parser = subparsers.add_parser(
+        "list-datasets", help="List datasets materialized or registered in a workspace"
+    )
+    _add_workspace_argument(list_datasets_parser)
     subparsers.add_parser("list-dataset-sources", help="List checksum-pinned public dataset sources")
     subparsers.add_parser(
         "describe-metrics",
@@ -354,6 +424,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     import_dataset_profile_parser.add_argument("--dataset", required=True, help="Legacy dataset name")
     import_dataset_profile_parser.add_argument("--output", required=True, help="Output JSON path")
+    _add_workspace_argument(import_dataset_profile_parser)
+    diagnostic_profile_parser = subparsers.add_parser(
+        "create-diagnostic-dataset-profile",
+        help="Create a non-Official P3 profile for a materialized complete-data model view",
+    )
+    diagnostic_profile_parser.add_argument("--dataset", required=True, help="Materialized dataset name")
+    diagnostic_profile_parser.add_argument("--output", required=True, help="New Dataset Profile JSON path")
+    _add_workspace_argument(diagnostic_profile_parser)
 
     validate_result_parser = subparsers.add_parser(
         "validate-result", help="Validate an incomplete or finalized result bundle"
@@ -437,11 +515,26 @@ def build_parser() -> argparse.ArgumentParser:
 
     dataset_parser = subparsers.add_parser("show-dataset", help="Show one canonical dataset spec")
     dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
+    _add_workspace_argument(dataset_parser)
 
     example_parser = subparsers.add_parser("example-config", help="Generate an example experiment config")
     example_parser.add_argument("--model", required=True, help="Model name")
     example_parser.add_argument("--dataset", required=True, help="Dataset name")
     example_parser.add_argument("--output-dir", required=True, help="Output directory for artifacts")
+    example_parser.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
+    example_parser.add_argument("--training-seed", type=int, default=0)
+    example_parser.add_argument("--generation-seed", type=int, default=17)
+    example_parser.add_argument("--num-samples", type=int, default=1000)
+    example_parser.add_argument(
+        "--dataset-profile",
+        default=None,
+        help="Enable central evaluation with this reviewed Dataset Profile; omitted means generation only",
+    )
+    example_parser.add_argument(
+        "--protocol",
+        choices=["p2-shape-trend", "p3-validity", "p4-utility", "p5-high-order-privacy"],
+        default="p3-validity",
+    )
     example_parser.add_argument(
         "--save-config",
         default=None,
@@ -452,13 +545,16 @@ def build_parser() -> argparse.ArgumentParser:
         "build-context", help="Resolve a config into canonical dataset and run context"
     )
     context_parser.add_argument("--config", required=True, help="Path to experiment config JSON")
+    _add_workspace_argument(context_parser)
 
     run_parser = subparsers.add_parser("run-action", help="Run one standardized adapter action from a shared config")
     run_parser.add_argument("--config", required=True, help="Path to experiment config JSON")
     run_parser.add_argument("--action", choices=["train", "sample", "evaluate"], required=True, help="Action to run")
+    _add_workspace_argument(run_parser)
 
     pipeline_parser = subparsers.add_parser("run", help="Run the full standardized pipeline for one config")
     pipeline_parser.add_argument("--config", required=True, help="Path to experiment config JSON")
+    _add_workspace_argument(pipeline_parser)
 
     benchmark_parser = subparsers.add_parser(
         "benchmark",
@@ -501,6 +597,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional portable label for the observed hardware; it does not grant Official eligibility",
     )
+    _add_workspace_argument(benchmark_run)
     benchmark_status = benchmark_subparsers.add_parser("status", help="Read the latest P6 run manifest")
     benchmark_status.add_argument("--output-dir", required=True, help="Benchmark run output directory")
     benchmark_validate = benchmark_subparsers.add_parser(
@@ -517,6 +614,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     materialize_parser.add_argument("--dataset", required=True, help="Dataset name")
     materialize_parser.add_argument("--cache-dir", default=None, help="Optional local dataset cache root")
+    _add_workspace_argument(materialize_parser)
     materialize_parser.add_argument(
         "--refresh",
         action="store_true",
@@ -533,6 +631,7 @@ def build_parser() -> argparse.ArgumentParser:
         "materialization-status", help="Show materialization status for one dataset"
     )
     materialize_status_parser.add_argument("--dataset", required=True, help="Dataset name")
+    _add_workspace_argument(materialize_status_parser)
 
     materialize_model_source_parser = subparsers.add_parser(
         "materialize-model-source",
@@ -663,11 +762,13 @@ def build_parser() -> argparse.ArgumentParser:
         default="true",
         help="Whether the CSV includes a header row",
     )
+    _add_workspace_argument(register_dataset_parser)
 
     process_dataset_parser = subparsers.add_parser(
         "process-dataset", help="Process a registered dataset into the canonical materialized layout"
     )
     process_dataset_parser.add_argument("--dataset", required=True, help="Dataset name")
+    _add_workspace_argument(process_dataset_parser)
 
     import_legacy_parser = subparsers.add_parser(
         "import-legacy-summary",
@@ -746,7 +847,7 @@ def main() -> None:
         return
 
     if args.command == "list-datasets":
-        print(json.dumps({"datasets": list_datasets()}, indent=2))
+        print(json.dumps({"datasets": list_datasets(repo_root=_workspace_root(args))}, indent=2))
         return
 
     if args.command == "list-dataset-sources":
@@ -783,7 +884,21 @@ def main() -> None:
         return
 
     if args.command == "import-legacy-dataset-profile":
-        print(json.dumps(_import_legacy_dataset_profile(args.dataset, args.output), indent=2))
+        print(
+            json.dumps(
+                _import_legacy_dataset_profile(args.dataset, args.output, repo_root=_workspace_root(args)),
+                indent=2,
+            )
+        )
+        return
+
+    if args.command == "create-diagnostic-dataset-profile":
+        print(
+            json.dumps(
+                _create_diagnostic_dataset_profile(args.dataset, args.output, repo_root=_workspace_root(args)),
+                indent=2,
+            )
+        )
         return
 
     if args.command == "validate-result":
@@ -832,7 +947,7 @@ def main() -> None:
         return
 
     if args.command == "show-dataset":
-        print(json.dumps(get_dataset_spec(args.dataset).to_dict(), indent=2))
+        print(json.dumps(get_dataset_spec(args.dataset, repo_root=_workspace_root(args)).to_dict(), indent=2))
         return
 
     if args.command == "show-model-inventory":
@@ -840,11 +955,22 @@ def main() -> None:
         return
 
     if args.command == "example-config":
+        if args.training_seed < 0 or args.generation_seed < 0:
+            parser.error("example-config seeds must be non-negative")
+        if args.num_samples <= 0:
+            parser.error("--num-samples must be positive")
         config = build_example_config(
             model=args.model,
             dataset=args.dataset,
             output_dir=args.output_dir,
         )
+        config.train.device = args.device
+        config.train.seed = args.training_seed
+        config.sample.seed = args.generation_seed
+        config.sample.num_samples = args.num_samples
+        config.evaluation.enabled = args.dataset_profile is not None
+        config.evaluation.dataset_profile_path = args.dataset_profile
+        config.evaluation.protocol = args.protocol
         payload = config.to_dict()
         if args.save_config:
             save_experiment_config(config, args.save_config)
@@ -853,22 +979,23 @@ def main() -> None:
 
     if args.command == "build-context":
         config = load_experiment_config(args.config)
-        context = build_run_context(config)
+        context = build_run_context(config, repo_root=_workspace_root(args))
         save_run_context(context, config.output_dir)
         print(json.dumps(context, indent=2))
         return
 
     if args.command == "run-action":
         config = load_experiment_config(args.config)
-        context = build_run_context(config)
-        bundle = run_action(config, action=args.action)
+        workspace = _workspace_root(args)
+        context = build_run_context(config, repo_root=workspace)
+        bundle = run_action(config, action=args.action, repo_root=workspace)
         save_run_context(context, config.output_dir)
         print(json.dumps(bundle.to_dict(), indent=2))
         return
 
     if args.command == "run":
         config = load_experiment_config(args.config)
-        result = run_pipeline(config)
+        result = run_pipeline(config, repo_root=_workspace_root(args))
         save_pipeline_result(result, config.output_dir)
         print(json.dumps(result, indent=2))
         return
@@ -876,6 +1003,7 @@ def main() -> None:
     if args.command == "materialize-dataset":
         manifest = materialize_dataset(
             args.dataset,
+            repo_root=_workspace_root(args),
             cache_root=args.cache_dir,
             refresh=args.refresh,
             timeout_seconds=args.timeout_seconds,
@@ -884,7 +1012,7 @@ def main() -> None:
         return
 
     if args.command == "materialization-status":
-        print(json.dumps(materialization_status(args.dataset), indent=2))
+        print(json.dumps(materialization_status(args.dataset, repo_root=_workspace_root(args)), indent=2))
         return
 
     if args.command == "materialize-model-source":
@@ -958,12 +1086,13 @@ def main() -> None:
             numerical_columns=args.numerical_columns,
             categorical_columns=args.categorical_columns,
             has_header=args.has_header == "true",
+            repo_root=_workspace_root(args),
         )
         print(json.dumps(payload, indent=2))
         return
 
     if args.command == "process-dataset":
-        manifest = process_registered_dataset(args.dataset)
+        manifest = process_registered_dataset(args.dataset, repo_root=_workspace_root(args))
         print(json.dumps(manifest, indent=2))
         return
 

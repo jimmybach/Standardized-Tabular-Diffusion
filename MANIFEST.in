@@ -15,6 +15,7 @@ recursive-include docs *.json *.md
 recursive-include standardized_tabular_diffusion *.csv *.json *.py
 recursive-include tests *.py
 prune research_inputs
+prune docs/evidence
 prune TabDDPM-main
 prune TabDiff-main
 prune TabSyn-main

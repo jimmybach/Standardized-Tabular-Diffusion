@@ -2,7 +2,11 @@
 
 > **Release status:** `0.1.0rc1` is a software release candidate, not an Official Results release. P1-P8 engineering surfaces are implemented, while model support, benchmark eligibility, dataset/metric/run admission, and Official publication remain independent gates. See the [quickstart](docs/QUICKSTART.md), [P8 migration/release contract](docs/evaluation/P8_MIGRATION_AND_RELEASE.md), and [repository quality standard](docs/QUALITY_STANDARD.md).
 
+Whole-project progress is maintained only in the [Project Roadmap](docs/PROJECT_ROADMAP.md), with a corresponding [Chinese translation](docs/PROJECT_ROADMAP.zh-CN.md). Its Phases 1-10 are the project-level schedule; P0-P8 and V0-V3 are subsystem labels, not competing overall roadmaps.
+
 The primary release family is **Windows x86-64 with Python 3.11**, and the exact release target is native **Windows 11 x86-64 with Python 3.11**. GitHub-hosted Windows CI establishes Windows-family compatibility but is not, by itself, Windows 11 qualification. Linux/Python 3.11 remains a required secondary compatibility and upstream-parity environment; see the [platform policy](docs/PLATFORM_SUPPORT.md) and its [Chinese translation](docs/PLATFORM_SUPPORT.zh-CN.md).
+
+The latest local installed-package acceptance covers clean wheel/source installs, spaces and Chinese paths, official Adult acquisition and preprocessing, a complete CPU SMOTE journey, and a real RTX 5080 CTGAN journey. See the [English report](docs/audits/CLEAN_INSTALL_USER_ACCEPTANCE.md) and [Chinese translation](docs/audits/CLEAN_INSTALL_USER_ACCEPTANCE.zh-CN.md). It is pre-release engineering evidence, not an Official Results or release-support claim.
 
 This repository now includes a shared benchmarking layer on top of the upstream model code in:
 
@@ -19,9 +23,9 @@ The goal is to preserve authoritative implementations whenever possible, record 
 
 The standardized layer is the preferred integration boundary. The vendored source trees are not assumed to be pristine until their revisions and local diffs have been audited.
 
-Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. All 21 registered adapters have retained Linux/Python 3.11 validation evidence: 20 are `native-parity-validated`, while TabEBM is deliberately limited to `smoke-validated` because real generation requires externally gated TabPFN-v2 access. These records preserve upstream parity claims in their declared environments; they do not yet establish native Windows release compatibility. Every adapter remains experimental, unsupported, and outside Official Results until the separate evaluation, dataset, Windows runtime, governance, and release gates pass.
+Adapter presence is not a release claim. Run `python -m standardized_tabular_diffusion.cli list-models --details` to inspect source authority, modification status, validation level, benchmark track, and support level separately. All 21 registered adapters have retained Linux/Python 3.11 validation evidence: 20 are `native-parity-validated`, while TabEBM is deliberately limited to `smoke-validated` because real generation requires externally gated TabPFN-v2 access. Native Windows/Python 3.11 real-function coverage is now complete for every adapter whose required upstream resources are publicly accessible. This does not promote any adapter to `release-supported` or admit it to Official Results; every adapter remains experimental and independently gated by source rights, dataset and metric admission, representative-scale validation, governance, and release policy.
 
-Native-Windows real-function coverage is tracked separately in the [cross-baseline pipeline audit](docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.md) and its [Chinese translation](docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md). Phase 1 completed 84/84 T01-T04 V0/V1 audit cells across all 21 adapters and retained a bilingual [logic-audit report](docs/audits/PHASE_1_LOGIC_AUDIT_REPORT.md) plus machine-readable evidence; it confirmed ten issues for Phase 2 without running expensive training. The remaining plan requires a minimal authoritative-algorithm run for every non-blocked adapter; full representative three-seed runs remain targeted rather than universal.
+Native-Windows real-function coverage is tracked separately in the [cross-baseline pipeline audit](docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.md) and its [Chinese translation](docs/audits/PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md). Phase 1 completed 84/84 T01-T04 V0/V1 audit cells across all 21 adapters and identified ten cross-cutting issues; Phase 2 repaired and regression-tested all ten. The Windows V2 campaign then retained 18/18 planned minimal-real passes, in addition to the earlier representative-real TabDDPM and TabDiff runs. TabEBM is the sole external block because full generation requires gated TabPFN-v2 access; it is not counted as a runtime failure. Expensive representative three-seed experiments remain targeted rather than universal.
 
 The final validation wave promoted GReaT in [run `30974574472`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574472), TabuLa in [run `30974574505`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574505), and TabSDS in [run `30974574593`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574593) after exact official-package/source comparisons. TabEBM [run `30974574544`](https://github.com/jimmybach/Standardized-Tabular-Diffusion/actions/runs/30974574544) verified the locked official package, deterministic core, safe state, and delegation boundary but explicitly records that full TabPFN generation did not run. TabuLa and TabSDS remain release-blocked because their public upstream repositories declare no license.
 
@@ -191,7 +195,8 @@ The broad historical convenience stack is recorded in:
 
 Important current caveats:
 
-- `torch==2.3.0` is the current pinned benchmark runtime.
+- There is no single PyTorch build that represents every retained environment. Several narrow model extras pin the PyTorch 2.3 compatibility baseline used by their declared parity environment. Native Windows CUDA records use their separately documented official PyTorch build; installing a model extra from the default Python package index alone does not prove that CUDA is enabled.
+- For a declared Windows GPU run, install the official CUDA-enabled PyTorch build from the [PyTorch package index](https://pytorch.org/get-started/locally/), verify `torch.cuda.is_available()` and the device name, and only then install the narrow model/evaluation extras. The currently accepted RTX 5080 profile uses PyTorch 2.8.0 with CUDA 12.8; it is a hardware-specific acceptance profile, not a universal dependency replacement.
 - `transformers==4.46.3` is intentionally pinned in the separate GReaT and TabuLa validation environments used for their retained official-package/source parity evidence.
 - `realtabformer` uses the checksum-pinned official 0.2.4 package. Its recorded adapter boundary disables unused torchvision probing during import, isolates official output paths, constrains state-dict loading, and works around the official `full_save_dir` JSON serialization defect without changing model state.
 - `tabula` acquires six checksum-locked method-author files on demand and calls them unchanged; the standardized adapter supplies typed input, bounded/exact-row sampling, scoped randomness, and safe persistence boundaries.
@@ -220,8 +225,8 @@ Build Adult or Sick exclusively from the official checksum-pinned UCI train/test
 
 ```bash
 pip install "standardized-tabular-diffusion[data]"
-python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult
-python -m standardized_tabular_diffusion.cli materialize-dataset --dataset sick
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset adult --workspace user-workspace
+python -m standardized_tabular_diffusion.cli materialize-dataset --dataset sick --workspace user-workspace
 ```
 
 The Adult builder validates the official 32,561/16,281 split, exact source syntax, member and ordered-row hashes, class and missing counts, declared domains, and duplicate-row audits. It removes the test-only period from `income` labels and fits categorical modes on `adult.data` only. The official split's repeated and cross-split-identical rows are preserved and disclosed; old unbound tracked derivatives and unverified checkpoints have been removed.

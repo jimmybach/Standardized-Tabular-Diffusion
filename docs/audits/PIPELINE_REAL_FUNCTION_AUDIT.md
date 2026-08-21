@@ -2,6 +2,8 @@
 
 Chinese translation: [PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md](PIPELINE_REAL_FUNCTION_AUDIT.zh-CN.md)
 
+Whole-project placement: this audit supplies the operational evidence for [Project Roadmap Phases 5 and 6](../PROJECT_ROADMAP.md); its internal audit phases are not additional whole-project phases.
+
 - Status: Phase 2 remediation complete; planned non-blocked V2 execution complete (18 minimal-real passes retained; one external block retained)
 - Plan version: 1.0
 - Snapshot date: 2026-08-20

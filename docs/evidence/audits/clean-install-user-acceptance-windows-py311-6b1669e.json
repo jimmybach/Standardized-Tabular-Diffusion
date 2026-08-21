@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0.0",
+  "protocol_id": "clean-install-user-acceptance-windows-py311-v1",
+  "phase": "post-P8-clean-install-user-acceptance",
+  "status": "pass",
+  "completed_date": "2026-08-20",
+  "repository_base_commit": "6b1669e415e7b6589e5fb04ba880405efbd5a788",
+  "working_tree_changes_included": true,
+  "candidate_state": "uncommitted-local-acceptance-candidate",
+  "release_checklist_satisfied": false,
+  "claim_boundary": "Local software-engineering acceptance for build, distribution hygiene, independent clean installation, installed-package user workflows, one representative CPU pipeline, and one representative CUDA pipeline. This does not establish Official Results admission, generator quality, benchmark eligibility, release support, or portability beyond the recorded environment.",
+  "environment": {
+    "platform": "Windows / AMD64",
+    "native_windows_release": {
+      "product_name_registry_value": "Windows 10 Pro",
+      "product_type": "WinNT",
+      "display_version": "25H2",
+      "build": "26200",
+      "update_build_revision": "9168",
+      "qualified_target": "native Windows 11 x86-64"
+    },
+    "python": "3.11.15",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 5080",
+      "memory_mib": 16303,
+      "driver": "610.47",
+      "pytorch": "2.8.0+cu128",
+      "cuda_runtime": "12.8",
+      "cuda_available": true
+    }
+  },
+  "quality_gates": {
+    "pytest": {
+      "status": "pass",
+      "passed": 646,
+      "skipped": 6,
+      "failed": 0
+    },
+    "ruff": {
+      "status": "pass",
+      "scope": "standardized_tabular_diffusion and tests"
+    },
+    "mypy": {
+      "status": "pass",
+      "checked_source_files": 36
+    }
+  },
+  "post_acceptance_review": {
+    "completed_date": "2026-08-21",
+    "python_3_11": {
+      "version": "3.11.15",
+      "pytest": {
+        "status": "pass",
+        "passed": 638,
+        "skipped_optional": 11,
+        "failed": 0
+      },
+      "ruff": "pass",
+      "mypy_checked_source_files": 36,
+      "distribution_rebuild": "pass",
+      "wheel_and_sdist_content_inspection": "pass"
+    },
+    "additional_python_3_13": {
+      "version": "3.13.5",
+      "pytest": {
+        "status": "pass",
+        "passed": 640,
+        "skipped_optional": 9,
+        "failed": 0
+      },
+      "ruff": "pass",
+      "mypy_checked_source_files": 36
+    },
+    "exact_commit_clean_install": "pending-hosted-windows-and-linux-ci"
+  },
+  "distribution_artifacts": {
+    "wheel": {
+      "name": "standardized_tabular_diffusion-0.1.0rc1-py3-none-any.whl",
+      "bytes": 740967,
+      "sha256": "e21376b4ee7b9e9d0fbb2269dbf77cd4133c199fd2c7fa77fc8732dcf2c9d8b4",
+      "archive_members": 194,
+      "content_inspection": "pass",
+      "clean_install": "pass",
+      "pip_check": "pass",
+      "installed_quickstart_bundle_id": "run-afd57a9d307941e097a3b256f8786176",
+      "installed_quickstart_snapshot_id": "leaderboard-92ab98eae74639e99bb7"
+    },
+    "sdist": {
+      "name": "standardized_tabular_diffusion-0.1.0rc1.tar.gz",
+      "bytes": 1221993,
+      "sha256": "5cb181558796578349ab3da65248200953ae48bebcb5b32877ddf6e7f5a56b91",
+      "regular_files": 476,
+      "retained_evidence_files_distributed": 0,
+      "content_inspection": "pass",
+      "clean_install": "pass",
+      "pip_check": "pass",
+      "installed_quickstart_bundle_id": "run-c7f2424cefe442d2aebdac41f18791db",
+      "installed_quickstart_snapshot_id": "leaderboard-c1be615789a075fb91d2"
+    },
+    "rejected_content_classes": [
+      "unsafe or traversal archive paths",
+      "duplicate archive members",
+      "symbolic links, hard links, or device members",
+      "runtime and development output directories",
+      "credential-like filenames and extensions",
+      "retained evidence in the source distribution",
+      "developer-local absolute paths in portable text artifacts"
+    ]
+  },
+  "user_journey": {
+    "installed_outside_source_checkout": true,
+    "space_and_chinese_path": "pass",
+    "official_adult_download": {
+      "status": "pass",
+      "archive_sha256": "7537312dd56c2b98035880805ce99e68183a30ee468aa5329d6df0fbb3cc21bb",
+      "train_rows": 32561,
+      "test_rows": 16281
+    },
+    "workspace_materialization_and_rediscovery": "pass",
+    "diagnostic_dataset_profile": {
+      "status": "pass",
+      "dataset_profile_version": "0.2.0-diagnostic",
+      "sha256": "b51f70ec713166456eaa214579f536802dd0e017fd2bb98a8398e2ba5fbff39e",
+      "official_eligible": false
+    },
+    "train_only_missing_value_preprocessing": {
+      "status": "pass",
+      "fixture_numerical_mean": 20.0,
+      "fixture_categorical_mode": "NY",
+      "test_refit_performed": false
+    },
+    "cpu_pipeline": {
+      "status": "pass",
+      "model": "smote",
+      "upstream_package": "imbalanced-learn==0.14.2",
+      "generation_seed": 17,
+      "generated_rows": 128,
+      "protocol": "p3-validity",
+      "result_bundle_id": "run-c2a5d562b1b542e4ba73a3897d23f50a",
+      "present_files": 18,
+      "pending_files": 0,
+      "not_applicable_files": 2
+    },
+    "gpu_pipeline": {
+      "status": "pass",
+      "model": "ctgan",
+      "upstream_package": "ctgan==0.12.1",
+      "training_seed": 13,
+      "generation_seed": 17,
+      "training_epochs": 1,
+      "generated_rows": 32,
+      "protocol": "p3-validity",
+      "result_bundle_id": "run-c72ffaa7091c40d4b891a747e59942a1",
+      "present_files": 18,
+      "pending_files": 0,
+      "not_applicable_files": 2
+    }
+  },
+  "corrected_findings": [
+    "CA-01 installed commands lacked an explicit user-workspace boundary",
+    "CA-02 installed materialization manifests could not create a dataset spec without an upstream checkout",
+    "CA-03 top-level and subprocess orchestration lost the selected workspace",
+    "CA-04 generated example configurations were not directly runnable for central evaluation",
+    "CA-05 installed workflows lacked a clearly non-Official P3 diagnostic profile generator",
+    "CA-06 distribution inspection did not reject all sensitive or non-portable content classes",
+    "CA-07 release CI reused one environment for wheel and source installs",
+    "CA-08 model extras could be mistaken for a guarantee of CUDA-enabled PyTorch",
+    "CA-09 the TabuLa public training-control allowlist omitted its implemented max_length control",
+    "CA-10 archive member validation depended on host path semantics and did not reject all Windows-portability collisions"
+  ],
+  "remaining_release_gates": [
+    "commit the accepted implementation and repeat candidate-bound gates",
+    "pass hosted Windows-family and Linux/Python 3.11 release CI",
+    "repeat repository-history secret and restricted-data review before tagging",
+    "install and verify published artifacts by checksum"
+  ]
+}
